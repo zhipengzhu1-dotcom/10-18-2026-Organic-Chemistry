@@ -1,0 +1,863 @@
+<!doctype html>
+<!--
+  PROTOTYPE, throwaway. Wayfinder ticket "Decide the Arcade Cosmos design system" (#18).
+  One file, four views, switchable via ?variant= and the floating bar (← / → keys):
+    S  Style sheet   – tokens (dark + light) with live contrast + colour-blind checks, type ladder,
+                       pixel-font minimums, core components, motion language + reduced-motion fallback.
+    A  Stories       – phone flow: homepage = tap-through story cards (tap right = next, left = back,
+                       no ▲/▼ buttons); last card IS the swipeable map; tile → Unit page → Step player.
+    B  Scroll deck   – phone flow: one vertical page; story cards are full-height scroll-snap sections
+                       with an edge rail, then the page relaxes into a scrolling map; sticky thumb CTA.
+    C  Hub           – phone flow: stories once (first visit, thumb-band nav under the content), then a
+                       Hub home: Continue card + streak + map strip; "replay intro" link.
+  Unit page (Level select, from #29) and the single-focus Step player are shared by A/B/C, built from S.
+  Bar toggles: theme, reduced motion, colour-blind simulation, phone frame, first/returning visitor.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Arcade Cosmos Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Pixelify+Sans:wght@500;700&family=Silkscreen&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   TOKENS. This block is the spec: agents copy it into tailwind as CSS vars.
+   Fill colours are identical in both themes (dark ink sits on them);
+   "ink" colours are the text-safe versions, tuned per theme.
+   ===================================================================== */
+:root{
+  /* colour: surfaces */
+  --at-space:#0d0626; --at-surface:#1a0f3d; --at-raised:#241552; --at-line:#6a4bd1;
+  /* colour: ink (text-safe on space + surface) */
+  --at-ink:#ffffff; --at-ink-muted:#b9a8e8;
+  --at-electron:#3ee8ff;  /* cyan ink: electrons, bonds, correct, active toggle */
+  --at-ignite:#ff9a1f;    /* orange ink: wordmark, second highlight */
+  --at-boss:#ff5fd8;      /* magenta ink: capstone, "not quite" */
+  --at-shadow:#b44dff;    /* violet: hard offset shadows, never text */
+  /* colour: fills (same in both themes) + the ink that sits on them */
+  --at-electron-fill:#3ee8ff; --at-ignite-fill:#ff9a1f; --at-boss-fill:#ff5fd8; --at-on-fill:#1a0d3d;
+  /* nebula (decoration only) */
+  --at-neb-1:#ff4fd8; --at-neb-2:#b44dff; --at-neb-3:#2340ff;
+  /* shape */
+  --at-border:2px; --at-border-strong:3px; --at-radius:0;
+  --at-drop-sm:3px 3px 0 var(--at-shadow); --at-drop:5px 5px 0 var(--at-shadow);
+  --at-fill-edge:transparent; /* light mode gives fills a dark edge */
+  /* type */
+  --at-font-pixel:"Pixelify Sans",ui-monospace,monospace;   /* wordmark + big numbers ≥32px */
+  --at-font-label:"Silkscreen",ui-monospace,monospace;      /* short fixed UI labels, 16px */
+  --at-font-text:"Space Grotesk",system-ui,sans-serif;      /* headlines, body, molecule names */
+  --at-font-data:"JetBrains Mono",ui-monospace,monospace;   /* element symbols, formulas, numbers, sources */
+  --at-label-size:16px;
+  /* spacing (4px grid) */
+  --at-gutter:16px;
+  /* motion */
+  --at-dur-press:90ms; --at-dur-ui:180ms; --at-dur-card:420ms; --at-dur-celebrate:700ms;
+  --at-ease-snap:cubic-bezier(.2,.8,0,1); --at-ease-pixel:steps(4,end);
+  color-scheme:dark;
+}
+[data-theme=light]{
+  --at-space:#f3edff; --at-surface:#ffffff; --at-raised:#e8deff; --at-line:#8a6fd8;
+  --at-ink:#1a0d3d; --at-ink-muted:#4f3f85;
+  --at-electron:#00718a; --at-ignite:#a84d00; --at-boss:#b0127f; --at-shadow:#7a1fd1;
+  --at-neb-1:#ffb3ef; --at-neb-2:#d6b3ff; --at-neb-3:#b3c2ff;
+  --at-fill-edge:#1a0d3d;
+  color-scheme:light;
+}
+[data-label=grotesk]{--at-font-label:"Space Grotesk",system-ui,sans-serif}
+[data-label=pixelify]{--at-font-label:"Pixelify Sans",ui-monospace,monospace}
+[data-label=silk12]{--at-label-size:12px}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--at-space);color:var(--at-ink)}
+body{font:400 17px/1.5 var(--at-font-text);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+:focus-visible{outline:3px solid var(--at-electron);outline-offset:3px}
+.data{font-family:var(--at-font-data)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- prototype switcher (deliberately NOT on-brand) ---------- */
+#switcher{position:fixed;left:50%;bottom:10px;translate:-50% 0;z-index:100;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px;
+  background:#fffbe6;color:#111;border:2px solid #111;border-radius:18px;padding:4px 6px;font:600 12px/1 system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.35);max-width:calc(100vw - 16px)}
+#switcher button,#switcher select{font:600 12px system-ui;border:1px solid #111;border-radius:999px;padding:6px 9px;background:#fff;color:#111}
+#switcher .tag{font-size:10px;letter-spacing:.08em;background:#111;color:#fffbe6;border-radius:999px;padding:5px 7px}
+#switcher .lbl{min-width:118px;text-align:center}
+#statebar{position:fixed;left:50%;bottom:var(--sw-h,58px);translate:-50% 0;z-index:100;font:500 11px/1.3 ui-monospace,monospace;background:#111;color:#fffbe6;padding:4px 8px;border-radius:8px;max-width:calc(100vw - 16px);opacity:.85;pointer-events:none}
+#switcher.min > :not(.keep){display:none}
+body.swmin #statebar{display:none}
+#app{min-height:100vh}
+
+/* =====================================================================
+   COMPONENTS (shared by the style sheet and the flows)
+   ===================================================================== */
+/* wordmark */
+.wordmark{font:700 22px/1 var(--at-font-pixel);letter-spacing:.04em;color:var(--at-ignite);text-shadow:2px 2px 0 var(--at-shadow);display:inline-flex;align-items:center;gap:8px}
+.wordmark i{width:10px;height:10px;border-radius:50%;background:var(--at-electron-fill);box-shadow:0 0 10px var(--at-electron-fill)}
+/* buttons: the arcade press = shadow collapses into the button */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:12px 20px;font:400 var(--at-label-size)/1 var(--at-font-label);letter-spacing:.04em;text-transform:uppercase;
+  border:var(--at-border) solid var(--at-fill-edge);box-shadow:var(--at-drop);transition:transform var(--at-dur-press) linear,box-shadow var(--at-dur-press) linear}
+.btn:active:not(:disabled){transform:translate(5px,5px);box-shadow:0 0 0 var(--at-shadow)}
+.btn-primary{background:var(--at-ignite-fill);color:var(--at-on-fill)}
+.btn-electron{background:var(--at-electron-fill);color:var(--at-on-fill)}
+.btn-boss{background:var(--at-boss-fill);color:var(--at-on-fill)}
+.btn-secondary{background:transparent;color:var(--at-ink);border-color:var(--at-ink);box-shadow:5px 5px 0 var(--at-line)}
+.btn-ghost{background:transparent;color:var(--at-ink);box-shadow:none;border-color:transparent;text-decoration:underline;text-underline-offset:4px}
+.btn:disabled{background:var(--at-raised);color:var(--at-ink-muted);box-shadow:none;border:var(--at-border) dashed var(--at-line);cursor:not-allowed}
+.btn-block{width:100%}
+/* toggles: segmented (pick one of few) + switch (on/off) */
+.seg{display:inline-flex;border:var(--at-border) solid var(--at-line);padding:2px;gap:2px}
+.seg button{font:400 13px/1 var(--at-font-label);text-transform:uppercase;padding:9px 12px;min-height:40px;color:var(--at-ink-muted)}
+.seg button[aria-pressed=true]{background:var(--at-electron-fill);color:var(--at-on-fill)}
+.switch{display:inline-flex;align-items:center;gap:10px;font-size:15px}
+.switch button{width:52px;height:28px;border:var(--at-border) solid var(--at-line);background:var(--at-surface);position:relative}
+.switch button::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;background:var(--at-ink-muted);transition:left var(--at-dur-ui) var(--at-ease-pixel)}
+.switch button[aria-checked=true]{border-color:var(--at-electron)}
+.switch button[aria-checked=true]::after{left:27px;background:var(--at-electron-fill);box-shadow:0 0 8px var(--at-electron-fill)}
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:6px;font:500 12px/1 var(--at-font-text);text-transform:uppercase;letter-spacing:.06em;padding:5px 8px;border:var(--at-border) solid currentColor;color:var(--at-ink-muted)}
+.chip.e{color:var(--at-electron)}.chip.o{color:var(--at-ignite)}.chip.b{color:var(--at-boss)}
+.streak{display:inline-flex;align-items:center;gap:8px;font:600 14px var(--at-font-text)}
+.streak b{font:700 20px var(--at-font-data);color:var(--at-ignite)}
+/* story bars (shared by story cards AND the Step player: one motif) */
+.bars{display:flex;gap:4px}
+.bars i{flex:1;height:5px;background:color-mix(in srgb,var(--at-ink) 22%,transparent)}
+.bars i.done{background:var(--at-ink)}
+.bars i.cur{background:var(--at-ignite-fill)}
+/* Unit tile */
+.tile{flex:0 0 min(58vw,200px);aspect-ratio:3/4;scroll-snap-align:start;padding:14px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;
+  border:var(--at-border-strong) solid var(--at-line);background:var(--at-surface);box-shadow:5px 5px 0 var(--at-line);position:relative}
+.tile .num{font:700 64px/1 var(--at-font-pixel);color:color-mix(in srgb,var(--at-ink) 25%,transparent)}
+.tile .tt{font:700 19px/1.15 var(--at-font-text);letter-spacing:-.01em}
+.tile .meta{font:500 12px var(--at-font-text);text-transform:uppercase;letter-spacing:.06em;color:var(--at-ink-muted)}
+.tile.open{border-color:var(--at-ignite-fill);box-shadow:var(--at-drop);background:linear-gradient(160deg,color-mix(in srgb,var(--at-ignite-fill) 28%,var(--at-surface)),color-mix(in srgb,var(--at-boss-fill) 22%,var(--at-surface)))}
+.tile.open .num{color:var(--at-ignite);text-shadow:3px 3px 0 var(--at-shadow)}
+.tile.soon{border-style:dashed;box-shadow:none}
+.tile .pbar{height:6px;background:var(--at-raised);border:1px solid var(--at-line)}
+.tile .pbar i{display:block;height:100%;background:var(--at-electron-fill)}
+.strip{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px var(--at-gutter) 16px;margin:0 calc(-1 * var(--at-gutter));scroll-padding:0 var(--at-gutter);scrollbar-width:none}
+.course-h{display:flex;align-items:baseline;justify-content:space-between;margin:18px 0 8px}
+.course-h b{font:700 18px var(--at-font-text)}
+.course-h span{font:500 12px var(--at-font-text);text-transform:uppercase;letter-spacing:.06em;color:var(--at-ink-muted)}
+/* nebula + grid + stars backgrounds */
+.nebula{background:
+   radial-gradient(ellipse 70% 40% at 25% 65%,color-mix(in srgb,var(--at-neb-1) 50%,transparent),transparent 70%),
+   radial-gradient(ellipse 60% 40% at 80% 30%,color-mix(in srgb,var(--at-neb-2) 65%,transparent),transparent 70%),
+   radial-gradient(ellipse 50% 35% at 60% 90%,color-mix(in srgb,var(--at-neb-3) 45%,transparent),transparent 70%),var(--at-space)}
+.gridfloor{position:absolute;left:-20%;right:-20%;bottom:-4%;height:34%;pointer-events:none;
+   background:linear-gradient(var(--at-line) 2px,transparent 2px) 0 0/100% 26px,linear-gradient(90deg,var(--at-line) 2px,transparent 2px) 0 0/44px 100%;
+   transform:perspective(300px) rotateX(58deg);transform-origin:bottom;opacity:.5;-webkit-mask-image:linear-gradient(transparent,#000);mask-image:linear-gradient(transparent,#000)}
+.stars{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.stars i{position:absolute;width:2px;height:2px;background:var(--at-ink);opacity:.7;animation:twinkle 3s var(--at-ease-pixel) infinite}
+@keyframes twinkle{50%{opacity:.15}}
+.cursor{display:inline-block;width:.5em;height:.9em;background:var(--at-ignite-fill);vertical-align:-.08em;margin-left:4px;animation:blink 1.1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+/* story card */
+.story{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;padding:84px var(--at-gutter) 96px}
+.story .kick{font:400 13px var(--at-font-label);color:var(--at-electron);letter-spacing:.06em;margin-bottom:18px;position:relative;text-transform:uppercase}
+.story .big{font:700 clamp(34px,9vw,64px)/1.02 var(--at-font-text);letter-spacing:-.035em;margin:0;position:relative;max-width:14ch}
+.story .big .o{color:var(--at-ignite);text-shadow:3px 3px 0 var(--at-shadow)}
+.story .big .c{color:var(--at-electron)}
+.story-in{animation:cardin var(--at-dur-card) var(--at-ease-snap)}
+@keyframes cardin{from{opacity:0;transform:scale(1.04)}to{opacity:1;transform:none}}
+/* Lesson row (Level select, from #29) */
+.act{margin:22px 0 8px;display:flex;align-items:center;gap:10px;font:600 12px var(--at-font-text);text-transform:uppercase;letter-spacing:.08em;color:var(--at-electron)}
+.act::after{content:"";flex:1;height:2px;background:var(--at-line)}
+.lvl{display:grid;grid-template-columns:44px 1fr;gap:12px;width:100%;text-align:left;padding:12px;border:var(--at-border) solid var(--at-line);background:var(--at-surface);margin-bottom:10px;box-shadow:3px 3px 0 var(--at-line)}
+.lvl .no{font:700 30px/1 var(--at-font-pixel);color:var(--at-ink-muted)}
+.lvl h3{margin:0 0 3px;font:700 17px/1.2 var(--at-font-text)}
+.lvl p{margin:0 0 8px;font-size:14px;line-height:1.4;color:var(--at-ink-muted)}
+.lvl .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.lvl.first{border-color:var(--at-ignite-fill);box-shadow:var(--at-drop-sm)}.lvl.first .no{color:var(--at-ignite)}
+.lvl.boss{border-color:var(--at-boss-fill);box-shadow:3px 3px 0 var(--at-boss-fill)}.lvl.boss .no{color:var(--at-boss)}
+.lvl.opt{border-style:dashed;box-shadow:none;background:transparent}
+.lvl.lock{opacity:.55;box-shadow:none}
+.lvl.done .no::after{content:" ✓";font:700 16px var(--at-font-text);color:var(--at-electron)}
+.hbcw{display:flex;gap:2px;height:6px;margin-top:8px}
+.hbcw i{display:block;height:100%}
+.hbcw .h{background:var(--at-ignite-fill)}.hbcw .b{background:var(--at-electron-fill)}.hbcw .c{background:var(--at-boss-fill)}.hbcw .w{background:var(--at-ink-muted)}
+/* Step player chrome */
+.player{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--at-space);z-index:20}
+.player-top{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:12px var(--at-gutter)}
+.player-top .x{width:44px;height:44px;font:700 22px var(--at-font-text);border:var(--at-border) solid var(--at-line)}
+.player-top .cnt{font:600 13px var(--at-font-data);color:var(--at-ink-muted)}
+.player-body{flex:1;overflow:auto;padding:12px var(--at-gutter) 24px;display:flex;flex-direction:column;gap:16px;max-width:640px;width:100%;margin:0 auto}
+.player-body .q{font:700 22px/1.25 var(--at-font-text);margin:0}
+.player-body .lead{color:var(--at-ink-muted);margin:0}
+.player-foot{position:relative;padding:12px var(--at-gutter) calc(16px + env(safe-area-inset-bottom));border-top:var(--at-border) solid var(--at-line);background:var(--at-space)}
+.player-foot .inner{max-width:640px;margin:0 auto}
+/* answer options */
+.opts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.opt{min-height:56px;font:600 22px var(--at-font-data);border:var(--at-border) solid var(--at-line);background:var(--at-surface);box-shadow:3px 3px 0 var(--at-line)}
+.opt[aria-pressed=true]{border-color:var(--at-ignite-fill);box-shadow:var(--at-drop-sm);outline:2px solid var(--at-ignite-fill);outline-offset:-6px}
+.opt.right{background:var(--at-electron-fill);color:var(--at-on-fill);border-color:var(--at-electron-fill)}
+.opt.wrong{border-style:dashed;border-color:var(--at-boss);color:var(--at-ink-muted);text-decoration:line-through}
+/* two-try feedback panel: slides up over the foot */
+.fb{border:var(--at-border-strong) solid;padding:12px 14px;margin-bottom:12px;display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:start;animation:fbin var(--at-dur-ui) var(--at-ease-snap)}
+@keyframes fbin{from{transform:translateY(16px);opacity:0}}
+.fb .ic{width:32px;height:32px;display:grid;place-items:center;font:700 18px var(--at-font-text)}
+.fb h4{margin:0 0 2px;font:700 17px var(--at-font-text)}
+.fb p{margin:0;font-size:15px;line-height:1.4}
+.fb.ok{border-color:var(--at-electron);background:color-mix(in srgb,var(--at-electron-fill) 12%,var(--at-space))}
+.fb.ok .ic{background:var(--at-electron-fill);color:var(--at-on-fill)}
+.fb.ok h4{color:var(--at-electron)}
+.fb.retry{border-color:var(--at-boss);border-style:dashed;background:color-mix(in srgb,var(--at-boss-fill) 10%,var(--at-space))}
+.fb.retry .ic{border:var(--at-border) solid var(--at-boss);color:var(--at-boss)}
+.fb.retry h4{color:var(--at-boss)}
+.fb.reveal{border-color:var(--at-ink-muted);background:var(--at-surface)}
+.fb.reveal .ic{background:var(--at-ink-muted);color:var(--at-space)}
+/* source note: one tap away */
+.src{font:400 12px/1.55 var(--at-font-data);color:var(--at-ink-muted)}
+.src summary{cursor:pointer;list-style:none;display:inline-flex;gap:6px;align-items:center;font:500 12px var(--at-font-text);text-transform:uppercase;letter-spacing:.06em;padding:6px 8px;border:var(--at-border) dashed var(--at-line);min-height:32px}
+.src summary::-webkit-details-marker{display:none}
+.src[open] summary{border-style:solid;color:var(--at-ink)}
+.src .body{border:var(--at-border) dashed var(--at-line);border-top:0;padding:8px 10px}
+.src b{color:var(--at-ink);font-weight:600}
+/* Scene frame */
+.scene{border:var(--at-border-strong) solid var(--at-line);box-shadow:6px 6px 0 var(--at-shadow);background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--at-shadow) 30%,transparent),transparent 70%),var(--at-surface);aspect-ratio:4/3;position:relative}
+.scene svg{width:100%;height:100%;display:block}
+.stat{font:700 44px/1 var(--at-font-pixel);color:var(--at-electron);text-shadow:3px 3px 0 var(--at-shadow)}
+.stat-l{font:500 12px var(--at-font-text);text-transform:uppercase;letter-spacing:.06em;color:var(--at-ink-muted)}
+/* the electron (character) */
+.electron{width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 10px 3px var(--at-electron-fill),0 0 26px 8px color-mix(in srgb,var(--at-electron-fill) 45%,transparent)}
+.spark{position:absolute;pointer-events:none;z-index:40;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#fff;box-shadow:0 0 10px 3px var(--at-electron-fill)}
+
+/* =====================================================================
+   REDUCED MOTION: no transforms, no loops, no flight; ≤120ms crossfades only.
+   Prefers-reduced-motion OR the prototype toggle.
+   ===================================================================== */
+[data-motion=reduced] *,[data-motion=reduced] *::before,[data-motion=reduced] *::after{animation:none!important;transition:opacity 120ms linear!important;scroll-behavior:auto!important}
+[data-motion=reduced] .btn:active:not(:disabled){transform:none;box-shadow:0 0 0 3px var(--at-electron)}
+[data-motion=reduced] .spark{display:none}
+
+/* =====================================================================
+   STYLE SHEET VIEW (S)
+   ===================================================================== */
+.ss{max-width:1080px;margin:0 auto;padding:28px var(--at-gutter) 160px}
+.ss h1{font:700 clamp(30px,6vw,52px)/1.05 var(--at-font-text);letter-spacing:-.03em;margin:14px 0 8px}
+.ss h2{font:700 24px var(--at-font-text);margin:56px 0 6px;display:flex;gap:10px;align-items:baseline}
+.ss h2 .n{font:700 28px var(--at-font-pixel);color:var(--at-ignite);text-shadow:2px 2px 0 var(--at-shadow)}
+.ss .intro{color:var(--at-ink-muted);max-width:62ch;margin:0}
+.ss .why{color:var(--at-ink-muted);font-size:15px;max-width:70ch;margin:0 0 16px}
+.ss .decide{border-left:4px solid var(--at-ignite-fill);padding:8px 12px;background:var(--at-surface);font-size:15px;margin:14px 0;max-width:80ch}
+.ss .decide b{color:var(--at-ignite)}
+.panel{border:var(--at-border) solid var(--at-line);background:var(--at-surface);padding:16px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.sw{border:var(--at-border) solid var(--at-line);background:var(--at-surface)}
+.sw .c{height:56px;border-bottom:var(--at-border) solid var(--at-line)}
+.sw .m{padding:8px;font:400 11px/1.5 var(--at-font-data)}
+.sw .m b{font:600 12px var(--at-font-text);display:block}
+table.cr{border-collapse:collapse;width:100%;font:400 13px var(--at-font-data)}
+table.cr th,table.cr td{padding:7px 8px;border-bottom:1px solid var(--at-line);text-align:left;vertical-align:middle}
+table.cr th{font:600 12px var(--at-font-text);text-transform:uppercase;letter-spacing:.05em;color:var(--at-ink-muted)}
+.pass{color:var(--at-electron);font-weight:600}.fail{color:var(--at-boss);font-weight:600}
+.sample{display:inline-block;padding:3px 8px;font:600 14px var(--at-font-text)}
+.cvd{display:grid;grid-template-columns:110px repeat(4,1fr);gap:8px;align-items:center;font-size:13px}
+.cvd .h{font:600 11px var(--at-font-text);text-transform:uppercase;letter-spacing:.05em;color:var(--at-ink-muted)}
+.cvd .cell{display:flex;gap:4px;padding:6px;background:var(--at-space);border:1px solid var(--at-line)}
+.cvd .cell i{flex:1;height:30px;display:grid;place-items:center;font:700 13px var(--at-font-text);color:var(--at-on-fill);font-style:normal}
+.ladder{display:grid;gap:10px}
+.ladder .r{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:baseline;border-bottom:1px dashed var(--at-line);padding-bottom:10px}
+.ladder .r .k{font:400 12px/1.4 var(--at-font-data);color:var(--at-ink-muted)}
+.pxgrid{display:grid;grid-template-columns:90px repeat(4,1fr);gap:8px;align-items:center}
+.pxgrid .k{font:400 12px var(--at-font-data);color:var(--at-ink-muted)}
+.pxgrid .bad{outline:2px dashed var(--at-boss);outline-offset:2px}
+.demo-row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.mo{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.mo .panel{min-height:170px;position:relative;overflow:hidden}
+.mo h4{margin:0 0 4px;font:700 16px var(--at-font-text)}
+.mo p{margin:0 0 10px;font-size:13px;color:var(--at-ink-muted)}
+.mo .rm{font:400 12px var(--at-font-data);color:var(--at-electron);margin-top:8px}
+.mini-phone .story .big{font-size:28px}
+.mini-phone{width:240px;height:420px;border:3px solid var(--at-line);position:relative;overflow:hidden;background:var(--at-space);flex:none}
+
+/* =====================================================================
+   FLOW VIEWS (A/B/C): a stage that is a phone frame or the full viewport
+   ===================================================================== */
+.stage-wrap{min-height:100vh;display:grid;place-items:center;padding:20px 0 120px}
+.stage{position:relative;overflow:hidden;background:var(--at-space)}
+.framed .stage{width:390px;height:min(844px,calc(100vh - 150px));border:10px solid #000;border-radius:36px;box-shadow:0 0 0 2px #444,0 30px 60px rgba(0,0,0,.5)}
+.full .stage-wrap{display:block;padding:0}
+.full .stage{position:fixed;inset:0;bottom:var(--sw-h,58px)}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
+.screen > .story{min-height:100%}
+.topbar{position:absolute;top:0;left:0;right:0;z-index:6;display:flex;justify-content:space-between;align-items:center;padding:20px var(--at-gutter) 8px}
+.topbar .don{font:400 13px var(--at-font-label);text-transform:uppercase;background:var(--at-ignite-fill);color:var(--at-on-fill);padding:8px 10px;box-shadow:var(--at-drop-sm);border:var(--at-border) solid var(--at-fill-edge);min-height:36px}
+/* A: tap zones */
+.tapzones{position:absolute;inset:60px 0 0 0;display:grid;grid-template-columns:1fr 2fr;z-index:3}
+.tapzones button{height:100%}
+.storybars{position:absolute;top:8px;left:var(--at-gutter);right:var(--at-gutter);z-index:7}
+.taphint{position:absolute;bottom:28px;left:0;right:0;text-align:center;font:500 12px var(--at-font-text);text-transform:uppercase;letter-spacing:.08em;color:var(--at-ink-muted);z-index:4;pointer-events:none}
+.mapcard{position:absolute;inset:0;display:flex;flex-direction:column;padding:70px var(--at-gutter) 24px;overflow-y:auto;z-index:5}
+.mapcard h2{font:700 30px/1.05 var(--at-font-text);letter-spacing:-.03em;margin:6px 0 2px}
+/* B: scroll deck */
+.deck{scroll-snap-type:y mandatory}
+.deck .story{min-height:100%;scroll-snap-align:start}
+.deck .rail{position:sticky;top:0;height:0;z-index:6}
+.deck .rail div{position:absolute;right:6px;top:120px;display:flex;flex-direction:column;gap:6px}
+.deck .rail i{width:5px;height:22px;background:color-mix(in srgb,var(--at-ink) 22%,transparent)}
+.deck .rail i.cur{background:var(--at-ignite-fill)}
+.deck .rest{scroll-snap-align:start;padding:24px var(--at-gutter) 120px;min-height:100%}
+.thumbcta{position:absolute;left:var(--at-gutter);right:var(--at-gutter);bottom:16px;z-index:8;transition:opacity var(--at-dur-ui),transform var(--at-dur-ui) var(--at-ease-snap)}
+.thumbcta.hide{opacity:0;transform:translateY(20px);pointer-events:none}
+/* C: thumb band */
+.band{position:absolute;left:0;right:0;bottom:0;height:76px;display:grid;grid-template-columns:56px 1fr 56px;align-items:center;gap:8px;padding:0 var(--at-gutter);border-top:var(--at-border) solid var(--at-line);background:var(--at-space);z-index:7}
+.band button.nav{height:48px;border:var(--at-border) solid var(--at-ink);box-shadow:3px 3px 0 var(--at-line);font:700 18px var(--at-font-text)}
+.band button.nav:disabled{opacity:.3}
+.band .dots{display:flex;justify-content:center;gap:6px}
+.band .dots i{width:10px;height:10px;background:color-mix(in srgb,var(--at-ink) 25%,transparent)}
+.band .dots i.cur{background:var(--at-ignite-fill)}
+.c-story .story{position:absolute;inset:0 0 76px 0}
+.hub{padding:70px var(--at-gutter) 40px}
+.cont{border:var(--at-border-strong) solid var(--at-ignite-fill);box-shadow:var(--at-drop);padding:16px;background:linear-gradient(160deg,color-mix(in srgb,var(--at-ignite-fill) 22%,var(--at-surface)),var(--at-surface));margin:10px 0 18px}
+.cont .k{font:500 12px var(--at-font-text);text-transform:uppercase;letter-spacing:.08em;color:var(--at-ignite)}
+.cont h3{font:700 22px/1.15 var(--at-font-text);margin:6px 0 4px}
+.cont p{margin:0 0 14px;color:var(--at-ink-muted);font-size:15px}
+/* Unit page */
+.unitpage{padding:0 var(--at-gutter) 40px}
+.unit-head{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:14px 0 10px;background:var(--at-space);border-bottom:var(--at-border) solid var(--at-line)}
+.back{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 10px;font:600 15px var(--at-font-text);border:var(--at-border) solid var(--at-line)}
+.unit-hero{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:end;margin:18px 0 6px}
+.unit-hero .bign{font:700 72px/0.85 var(--at-font-pixel);color:var(--at-ignite);text-shadow:4px 4px 0 var(--at-shadow)}
+.unit-hero h2{font:700 26px/1.05 var(--at-font-text);letter-spacing:-.02em;margin:0}
+.unit-hero .meta{font:500 12px var(--at-font-text);text-transform:uppercase;letter-spacing:.06em;color:var(--at-ink-muted);margin-top:6px}
+.zoomin{animation:zoomin var(--at-dur-card) var(--at-ease-snap)}
+@keyframes zoomin{from{opacity:0;transform:scale(.92) translateY(30px)}}
+.slideup{animation:slideup var(--at-dur-card) var(--at-ease-snap)}
+@keyframes slideup{from{transform:translateY(100%)}}
+.pushin{animation:pushin var(--at-dur-card) var(--at-ease-snap)}
+@keyframes pushin{from{transform:translateX(40%);opacity:0}}
+
+@media (max-width:520px){
+  .framed .stage{width:100vw;height:calc(100vh - var(--sw-h,58px));border:0;border-radius:0;box-shadow:none}
+  .framed .stage-wrap{padding:0;display:block}
+  .cvd{grid-template-columns:70px repeat(4,1fr);gap:4px}
+  .pxgrid{grid-template-columns:60px repeat(4,1fr)}
+  .ladder .r{grid-template-columns:1fr}
+  .opts{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- Machado, Oliveira & Fernandes (2009), severity 1.0; applied in linearRGB (the SVG default) -->
+  <filter id="cvd-protan" color-interpolation-filters="linearRGB"><feColorMatrix type="matrix" values="0.152286 1.052583 -0.204868 0 0  0.114503 0.786281 0.099216 0 0  -0.003882 -0.048116 1.051998 0 0  0 0 0 1 0"/></filter>
+  <filter id="cvd-deutan" color-interpolation-filters="linearRGB"><feColorMatrix type="matrix" values="0.367322 0.860646 -0.227968 0 0  0.280085 0.672501 0.047413 0 0  -0.011820 0.042940 0.968881 0 0  0 0 0 1 0"/></filter>
+  <filter id="cvd-tritan" color-interpolation-filters="linearRGB"><feColorMatrix type="matrix" values="1.255528 -0.076749 -0.178779 0 0  -0.078411 0.930809 0.147602 0 0  0.004733 0.691367 0.303900 0 0  0 0 0 1 0"/></filter>
+</svg>
+<div id="app"></div>
+<div id="statebar" aria-hidden="true"></div>
+<div id="switcher" role="toolbar" aria-label="Prototype controls">
+  <span class="tag keep">PROTOTYPE</span>
+  <button id="sw-prev" class="keep" aria-label="Previous view">←</button>
+  <span class="lbl keep" id="sw-label"></span>
+  <button id="sw-next" class="keep" aria-label="Next view">→</button>
+  <button id="sw-min" class="keep" aria-label="Show or hide prototype controls">⚙</button>
+  <button id="sw-theme"></button>
+  <button id="sw-motion"></button>
+  <select id="sw-cvd" aria-label="Colour-blind simulation">
+    <option value="">CVD: none</option><option value="protan">Protanopia</option><option value="deutan">Deuteranopia</option><option value="tritan">Tritanopia</option>
+  </select>
+  <button id="sw-frame"></button>
+  <button id="sw-visitor"></button>
+</div>
+
+<script>
+/* ---------------- data ---------------- */
+const MANIFESTO = [
+  ['Hello, future chemist', 'Chemistry is how the universe builds things. <span class="o">Come build.</span>'],
+  ['Origin story', 'Every carbon atom in you was forged in a <span class="c">star</span>.'],
+  ['Level 2', 'Organic chemistry is what that carbon learned to do <span class="o">next</span>.'],
+  ['The trick', 'It isn’t memorizing. It’s watching <span class="c">electrons</span> move, and knowing why.'],
+  ['Controls', 'Here you push them yourself: draw the arrows, turn the molecules, break the bonds.'],
+  ['Free, for everyone', 'Move <span class="c">electrons</span>. Move the <span class="o">world</span>.'],
+];
+const ORGO_I  = ['Structure & Bonding','Acids & Bases','Alkanes & Conformations','Stereochemistry','How Reactions Work','Alkenes: Addition Reactions','Alkynes','Substitution & Elimination','Aromaticity & EAS','Alcohols, Ethers & Epoxides'];
+const ORGO_II = ['Spectroscopy','Conjugation & Diels–Alder','Pericyclic Reactions','Aldehydes & Ketones','Carboxylic Acids & Derivatives','Enols & Enolates','Amines','Biomolecules'];
+// Unit 1 lineup from "Choose the first Unit to build" (#17) + its prototype (#29); Step counts from the unit-1-path prototype
+const LESSONS = [
+  {n:0, t:'Why Carbon?', g:'Carbon sits mid-row and shares electrons; the octet explains why atoms bond.', sig:'Manipulate a Scene', steps:9, act:'Warm-up', opt:true},
+  {n:1, t:'Bonds, Polarity & Formal Charge', g:'Electronegativity, δ+/δ−, bond dipoles; formal charge; impossible structures.', sig:'Tap-to-identify', steps:15, act:'Atoms & bonds', first:true},
+  {n:2, t:'Drawing Molecules', g:'Convert between Lewis, Kekulé and line-angle; implied H’s and lone pairs.', sig:'Multiple choice', steps:12, act:'Atoms & bonds'},
+  {n:3, t:'Molecules in 3D', g:'VSEPR shapes; reading wedge/dash.', sig:'Rotate-and-identify 3D', steps:11, act:'Shape'},
+  {n:4, t:'Hybridization & Orbitals', g:'sp³/sp²/sp with bond angles; σ vs π.', sig:'Rotate-and-identify 3D', steps:13, act:'Shape'},
+  {n:5, t:'Functional Groups', g:'Recognize the core groups inside real molecules.', sig:'Tap-to-identify', steps:10, act:'Reading molecules'},
+  {n:6, t:'Resonance: Pushing Electrons', g:'Curved arrows source → sink; the σ framework never moves.', sig:'Draw arrows', steps:14, act:'Moving electrons'},
+  {n:7, t:'Resonance: Which Contributor Wins', g:'Rank contributors; find reactive sites.', sig:'Rank / order', steps:12, act:'Moving electrons'},
+  {n:8, t:'Molecular Orbitals: Why Electrons Flow', g:'σ/σ*, bond order, HOMO/LUMO; a curved arrow = HOMO → LUMO.', sig:'Manipulate a Scene', steps:15, act:'Capstone', boss:true},
+];
+// Demo Steps (every Lesson plays these three in the prototype)
+const STEPS = ['scene','check','wrap'];
+
+/* ---------------- state ---------------- */
+const qs = new URLSearchParams(location.search);
+const VARIANTS = {S:'Style sheet', A:'Stories', B:'Scroll deck', C:'Hub'};
+const KEYS = Object.keys(VARIANTS);
+const reducedPref = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const st = {
+  variant: KEYS.includes(qs.get('variant')) ? qs.get('variant') : 'S',
+  theme: qs.get('theme') || 'dark',
+  motion: qs.get('motion') || (reducedPref ? 'reduced' : 'full'),
+  cvd: qs.get('cvd') || '',
+  frame: qs.get('frame') || (innerWidth > 700 ? 'framed' : 'full'),
+  visitor: qs.get('visitor') || 'first',
+  label: 'silk', // style-sheet label-font trial
+  screen: 'home', card: 0, introSeen: false,
+  lesson: null, step: 0, tries: 0, picked: null, result: null, // result: null|ok|retry|reveal
+  done: new Set(), lastLesson: 1, lastStep: 0,
+  anim: '',
+  swmin: innerWidth < 520,
+};
+const $ = s => document.querySelector(s);
+const app = $('#app');
+
+function setParam(k, v){ const p = new URLSearchParams(location.search); p.set(k, v); history.replaceState(null, '', '?' + p); }
+function applyGlobals(){
+  const r = document.documentElement;
+  r.dataset.theme = st.theme; r.dataset.motion = st.motion; r.dataset.label = st.label;
+  app.style.filter = st.cvd ? `url(#cvd-${st.cvd})` : '';
+  document.body.className = (st.variant === 'S' ? '' : st.frame) + (st.swmin ? ' swmin' : '');
+  $('#switcher').classList.toggle('min', st.swmin);
+  $('#sw-label').textContent = `${st.variant} (${VARIANTS[st.variant]})`;
+  $('#sw-theme').textContent = st.theme === 'dark' ? '☾ Dark' : '☀ Light';
+  $('#sw-motion').textContent = st.motion === 'full' ? 'Motion: full' : 'Motion: reduced';
+  $('#sw-cvd').value = st.cvd;
+  $('#sw-frame').textContent = st.frame === 'framed' ? 'Phone frame' : 'Full screen';
+  $('#sw-visitor').textContent = st.visitor === 'first' ? 'Visitor: first' : 'Visitor: returning';
+  $('#sw-frame').style.display = $('#sw-visitor').style.display = st.variant === 'S' ? 'none' : '';
+  document.documentElement.style.setProperty('--sw-h', ($('#switcher').offsetHeight + 16) + 'px');
+}
+function stateLine(){
+  if (st.variant === 'S') return `view: style sheet · theme: ${st.theme} · motion: ${st.motion} · cvd: ${st.cvd || 'none'} · label font: ${st.label}`;
+  let s = `screen: ${st.screen}`;
+  if (st.screen === 'home') s += ` · card ${st.card + 1}/${st.variant === 'C' && (st.visitor === 'returning' || st.introSeen) ? '–' : MANIFESTO.length + (st.variant === 'A' ? 1 : 0)}`;
+  if (st.screen === 'player') s += ` · Lesson ${st.lesson} · step ${st.step + 1}/${STEPS.length} · tries ${st.tries} · result ${st.result || '–'}`;
+  s += ` · done: [${[...st.done].join(',')}] · visitor: ${st.visitor}`;
+  return s;
+}
+function render(){
+  applyGlobals();
+  app.innerHTML = st.variant === 'S' ? styleSheet() : flow();
+  afterRender();
+  $('#statebar').textContent = stateLine();
+  st.anim = '';
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------------- shared pieces ---------------- */
+function stars(n = 40, seed = 7){
+  let x = seed, o = '';
+  const rnd = () => (x = (x * 9301 + 49297) % 233280) / 233280;
+  for (let i = 0; i < n; i++) o += `<i style="left:${(rnd()*100).toFixed(1)}%;top:${(rnd()*70).toFixed(1)}%;animation-delay:${(rnd()*3).toFixed(2)}s"></i>`;
+  return `<div class="stars">${o}</div>`;
+}
+function storyCard(i, cls = ''){
+  const [k, line] = MANIFESTO[i];
+  const last = i === MANIFESTO.length - 1;
+  return `<section class="story nebula ${cls}" aria-label="Story card ${i+1} of ${MANIFESTO.length}">${stars(36, i+3)}<div class="gridfloor"></div>
+    <div class="kick">${esc(k)}${i === 0 ? '<span class="cursor"></span>' : ''}</div>
+    <p class="big">${line}</p>
+    ${last ? `<div style="margin-top:28px;position:relative;display:flex;gap:12px;flex-wrap:wrap"><button class="btn btn-primary" data-act="openUnit">Start Unit 1</button></div>` : ''}
+  </section>`;
+}
+function tile(title, n, opts = {}){
+  const open = n === 1;
+  const lessonsDone = [...st.done].filter(x => x >= 1).length;
+  const pct = Math.round(lessonsDone / 8 * 100);
+  return `<button class="tile ${open ? 'open' : 'soon'}" ${open ? 'data-act="openUnit"' : 'aria-disabled="true"'} aria-label="Unit ${n}: ${esc(title)}${open ? '' : ', coming soon'}">
+    <span class="num">${String(n).padStart(2, '0')}</span>
+    <span><span class="tt">${esc(title)}</span><br>
+    ${open ? `<span class="meta" style="color:var(--at-ink)">${lessonsDone}/8 Lessons</span><span class="pbar" style="display:block;margin-top:6px"><i style="width:${pct}%"></i></span>` : `<span class="meta">Coming soon</span>`}</span>
+  </button>`;
+}
+function courseStrips(){
+  return `<div class="course-h"><b>Orgo I</b><span>10 Units</span></div>
+    <div class="strip" role="list">${ORGO_I.map((t, i) => tile(t, i + 1)).join('')}</div>
+    <div class="course-h"><b>Orgo II</b><span>8 Units</span></div>
+    <div class="strip" role="list">${ORGO_II.map((t, i) => tile(t, i + 11)).join('')}</div>`;
+}
+function hbcw(steps){
+  const h = 2, c = 3, w = 1, b = steps - h - c - w;
+  return `<div class="hbcw" aria-label="Hook ${h}, Build ${b}, Check ${c}, Wrap ${w} Steps"><i class="h" style="flex:${h}"></i><i class="b" style="flex:${b}"></i><i class="c" style="flex:${c}"></i><i class="w" style="flex:${w}"></i></div>`;
+}
+function lessonRow(l){
+  const cls = [l.first && 'first', l.boss && 'boss', l.opt && 'opt', st.done.has(l.n) && 'done'].filter(Boolean).join(' ');
+  return `<button class="lvl ${cls}" data-act="openLesson" data-n="${l.n}">
+    <span class="no">${String(l.n).padStart(2, '0')}</span>
+    <span><h3>${esc(l.t)}</h3><p>${esc(l.g)}</p>
+    <span class="row"><span class="chip e">${esc(l.sig)}</span><span class="chip">${l.steps} Steps</span>${l.opt ? '<span class="chip">Optional on-ramp</span>' : ''}${l.boss ? '<span class="chip b">Boss level</span>' : ''}</span>
+    ${hbcw(l.steps)}</span></button>`;
+}
+function unitPage(backLabel){
+  let o = '', act = null;
+  for (const l of LESSONS){ if (l.act !== act){ o += `<div class="act">${esc(l.act)}</div>`; act = l.act; } o += lessonRow(l); }
+  o += `<div class="act">Final round</div><button class="lvl" data-act="openLesson" data-n="1"><span class="no">✦</span><span><h3>Practice Set</h3><p>10 Problems from the Unit’s Bank, easy to hard.</p><span class="row"><span class="chip o">Mixed</span><span class="chip">10 Problems</span></span></span></button>`;
+  o += `<div class="act">Next Unit</div><div class="lvl lock"><span class="no">02</span><span><h3>Acids &amp; Bases</h3><p>Coming soon.</p></span></div>`;
+  const doneN = [...st.done].filter(x => x >= 1).length;
+  return `<div class="screen ${st.anim}" id="unitScreen"><div class="unitpage">
+    <div class="unit-head"><button class="back" data-act="back">‹ ${esc(backLabel)}</button><span class="streak">🔥<b>3</b> day streak</span></div>
+    <div class="unit-hero"><span class="bign">01</span><div><h2>Structure &amp; Bonding</h2><div class="meta">Orgo I · ${doneN}/8 Lessons · 1 Practice Set</div></div></div>
+    ${o}</div></div>`;
+}
+/* the methane Scene: stepped shading, dark outlines, cyan bonds, data-font letters */
+function methaneSVG(){
+  const C = [160, 120], H = [[160, 38], [92, 160], [228, 160], [176, 178]];
+  const atom = (x, y, r, fill, shade, label) => `<g><circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="#0b0420" stroke-width="3"/>
+     <path d="M${x - r * .7},${y + r * .1} A${r},${r} 0 0 0 ${x + r * .6},${y + r * .75}" stroke="${shade}" stroke-width="${r * .35}" fill="none" opacity=".55"/>
+     <rect x="${x - r * .45}" y="${y - r * .55}" width="${r * .25}" height="${r * .25}" fill="#fff" opacity=".8"/>
+     <text x="${x}" y="${y + 6}" text-anchor="middle" font-family="JetBrains Mono" font-weight="600" font-size="${r > 20 ? 18 : 13}" fill="#0b0420">${label}</text></g>`;
+  const bonds = H.map(([x, y]) => `<line x1="${C[0]}" y1="${C[1]}" x2="${x}" y2="${y}" stroke="var(--at-electron-fill)" stroke-width="6" style="filter:drop-shadow(0 0 4px var(--at-electron-fill))"/>`).join('');
+  return `<svg viewBox="0 0 320 240" role="img" aria-label="Methane, CH4: one carbon bonded to four hydrogens in a tetrahedron. C–H bond 1.087 ångström, H–C–H angle 109.47 degrees.">
+    ${bonds}${H.slice(0, 3).map(([x, y]) => atom(x, y, 16, '#ffffff', '#8c8c8c', 'H')).join('')}${atom(C[0], C[1], 26, '#909090', '#3a3a3a', 'C')}${atom(H[3][0], H[3][1], 16, '#ffffff', '#8c8c8c', 'H')}
+    <text x="12" y="228" font-family="JetBrains Mono" font-size="13" fill="var(--at-ink-muted)">CH₄ · methane</text></svg>`;
+}
+function sourceNote(open = false){
+  return `<details class="src" ${open ? 'open' : ''}><summary>ⓘ Source</summary><div class="body">
+    <b>C–H 1.087 Å</b>, <b>H–C–H 109.47°</b>: NIST CCCBDB, experimental geometry.<br>
+    Radii (true-scale view): <b>C 1.70 Å, H 1.20 Å</b>, Bondi (1964).<br>Colours: Jmol, with letter labels.</div></details>`;
+}
+
+/* ---------------- Step player (shared) ---------------- */
+function player(){
+  const l = LESSONS.find(x => x.n === st.lesson) || LESSONS[1];
+  const total = l.steps, at = Math.min(st.step, STEPS.length - 1);
+  // map the 3 demo Steps onto the Lesson's real Step count for the bars
+  const pos = [0, Math.floor(total / 2), total - 1][at];
+  const bars = Array.from({length: total}, (_, i) => `<i class="${i < pos ? 'done' : i === pos ? 'cur' : ''}"></i>`).join('');
+  const kind = STEPS[at];
+  let body = '', foot = '';
+  if (kind === 'scene'){
+    body = `<p class="q">This is methane. Every H sits as far from the others as it can.</p>
+      <div class="scene">${methaneSVG()}</div>
+      <div style="display:flex;gap:22px;align-items:end"><div><div class="stat">109.47°</div><div class="stat-l">H–C–H angle</div></div><div><div class="stat" style="color:var(--at-ignite)">1.087 Å</div><div class="stat-l">C–H bond</div></div></div>
+      ${sourceNote(false)}`;
+    foot = `<button class="btn btn-primary btn-block" data-act="next">Continue</button>`;
+  } else if (kind === 'check'){
+    const opts = [0, 1, 2, 3].map(v => {
+      let cls = '';
+      if (st.result === 'ok' && v === 2) cls = 'right';
+      if (st.result === 'reveal' && v === 2) cls = 'right';
+      if ((st.result === 'retry' || st.result === 'reveal') && st.wrongs && st.wrongs.includes(v)) cls = 'wrong';
+      const locked = st.result === 'ok' || st.result === 'reveal';
+      return `<button class="opt ${cls}" data-act="pick" data-v="${v}" aria-pressed="${st.picked === v}" ${locked || cls === 'wrong' ? 'disabled' : ''}>${v}</button>`;
+    }).join('');
+    body = `<p class="lead">Check · Try ${Math.min(st.tries + 1, 2)} of 2</p>
+      <p class="q">How many lone pairs sit on the oxygen in water, H₂O?</p>
+      <div class="opts" role="group" aria-label="Number of lone pairs">${opts}</div>`;
+    let fb = '';
+    if (st.result === 'ok') fb = `<div class="fb ok" role="status"><span class="ic">✓</span><div><h4>Nice. 2 lone pairs.</h4><p>O brings 6 valence electrons; 2 go into the O–H bonds, so 4 are left: 2 pairs.</p></div></div>`;
+    if (st.result === 'retry') fb = `<div class="fb retry" role="status"><span class="ic">✗</span><div><h4>Not quite. Hint:</h4><p>Oxygen has 6 valence electrons. How many of them are already used in the two O–H bonds?</p></div></div>`;
+    if (st.result === 'reveal') fb = `<div class="fb reveal" role="status"><span class="ic">→</span><div><h4>Here’s how: 2 lone pairs.</h4><p>6 valence electrons − 2 in the O–H bonds = 4 non-bonding electrons = 2 lone pairs.</p></div></div>`;
+    const btn = st.result === 'ok' ? `<button class="btn btn-electron btn-block" data-act="next">Continue</button>`
+      : st.result === 'reveal' ? `<button class="btn btn-secondary btn-block" data-act="next">Got it</button>`
+      : st.result === 'retry' ? `<button class="btn btn-primary btn-block" data-act="check" ${st.picked == null ? 'disabled' : ''}>Check again</button>`
+      : `<button class="btn btn-primary btn-block" data-act="check" ${st.picked == null ? 'disabled' : ''}>Check</button>`;
+    foot = fb + btn;
+  } else {
+    body = `<p class="lead">Wrap</p><p class="q">Lesson ${l.n} complete.</p>
+      <div style="display:flex;gap:22px"><div><div class="stat">${total}</div><div class="stat-l">Steps</div></div><div><div class="stat" style="color:var(--at-ignite)">4</div><div class="stat-l">day streak</div></div></div>
+      <p class="lead">Lone pairs and bond angles: you now have both halves of VSEPR.</p>`;
+    foot = `<button class="btn btn-primary btn-block" data-act="finish">Back to Unit 1</button>`;
+  }
+  return `<div class="player ${st.anim}" role="dialog" aria-label="Lesson ${l.n}: ${esc(l.t)}">
+    <div class="player-top"><button class="x" data-act="exit" aria-label="Exit Lesson">✕</button><div class="bars" aria-hidden="true">${bars}</div><span class="cnt">${pos + 1}/${total}</span></div>
+    <div class="player-body">${body}</div>
+    <div class="player-foot"><div class="inner">${foot}</div></div></div>`;
+}
+
+/* ---------------- flows ---------------- */
+function flow(){
+  let inner = '';
+  if (st.screen === 'unit' || st.screen === 'player') inner = unitPage(st.variant === 'C' ? 'Home' : 'Map');
+  else inner = st.variant === 'A' ? homeA() : st.variant === 'B' ? homeB() : homeC();
+  if (st.screen === 'player') inner += player();
+  return `<div class="stage-wrap"><div class="stage" id="stage">${inner}</div></div>`;
+}
+// A: Stories. The map is the last card. Tap zones, no buttons on top of content.
+function homeA(){
+  const N = MANIFESTO.length + 1;
+  if (st.visitor === 'returning' && !st.introSeen) st.card = N - 1;
+  const bars = Array.from({length: N}, (_, i) => `<i class="${i < st.card ? 'done' : i === st.card ? 'cur' : ''}"></i>`).join('');
+  const isMap = st.card === N - 1;
+  const card = isMap
+    ? `<div class="mapcard nebula ${st.anim}">${stars(24, 99)}<div class="kick" style="font:400 13px var(--at-font-label);color:var(--at-electron);text-transform:uppercase;position:relative">Choose your Unit</div>
+        <h2 style="position:relative">The course map</h2><p style="margin:0;color:var(--at-ink-muted);position:relative">Swipe sideways. Unit 1 is live; the rest are on the way.</p>
+        <div style="position:relative">${courseStrips()}</div>
+        <button class="btn btn-ghost" data-act="replay" style="align-self:flex-start;position:relative">↺ Replay intro</button></div>`
+    : `<div class="screen">${storyCard(st.card, st.anim)}</div>
+       <div class="tapzones"><button data-act="prev" aria-label="Previous card"></button><button data-act="next-card" aria-label="Next card"></button></div>
+       ${st.card === 0 ? '<div class="taphint">Tap to continue ›</div>' : ''}`;
+  return `<div class="storybars"><div class="bars">${bars}</div></div>
+    <div class="topbar" style="top:6px"><span class="wordmark"><i></i>AstraTron</span><button class="don" data-act="donate">Donate</button></div>
+    ${card}`;
+}
+// B: Scroll deck. Story cards are full-height snap sections, then the page relaxes into the map.
+function homeB(){
+  const rail = MANIFESTO.map((_, i) => `<i class="${i === st.card ? 'cur' : ''}"></i>`).join('');
+  return `<div class="screen deck" id="deck">
+    <div class="topbar" style="position:sticky;top:0;background:linear-gradient(var(--at-space),transparent)"><span class="wordmark"><i></i>AstraTron</span><button class="don" data-act="donate">Donate</button></div>
+    <div class="rail"><div aria-hidden="true">${rail}</div></div>
+    ${MANIFESTO.map((_, i) => storyCard(i).replace('<section class="story', `<section data-card="${i}" class="story`)).join('')}
+    <section class="rest" data-card="map">
+      <div style="font:400 13px var(--at-font-label);color:var(--at-electron);text-transform:uppercase">Choose your Unit</div>
+      <h2 style="font:700 30px/1.05 var(--at-font-text);margin:6px 0 2px">The course map</h2>
+      <p style="margin:0;color:var(--at-ink-muted)">Swipe sideways along each Course.</p>
+      ${courseStrips()}
+      <div class="panel" style="margin-top:20px"><b>Free, for everyone.</b><p style="margin:6px 0 12px;color:var(--at-ink-muted);font-size:15px">No ads, no accounts. If it helps you, keep it running.</p><button class="btn btn-secondary" data-act="donate">Donate on Ko-fi</button></div>
+    </section></div>
+    <div class="thumbcta ${st.card === 0 ? 'hide' : ''}" id="thumbcta"><button class="btn btn-primary btn-block" data-act="openUnit">${st.done.size ? 'Continue Unit 1' : 'Start Unit 1'} ▸</button></div>`;
+}
+// C: Hub. Stories once (thumb band below the content), then a Hub home.
+function homeC(){
+  if (st.visitor === 'first' && !st.introSeen){
+    const N = MANIFESTO.length, last = st.card === N - 1;
+    const dots = Array.from({length: N}, (_, i) => `<i class="${i === st.card ? 'cur' : ''}"></i>`).join('');
+    return `<div class="c-story">${storyCard(st.card, st.anim)}</div>
+      <div class="topbar"><span class="wordmark"><i></i>AstraTron</span><button class="btn-ghost" style="font:600 14px var(--at-font-text);text-decoration:underline;min-height:44px;color:var(--at-ink)" data-act="skip">Skip</button></div>
+      <div class="band"><button class="nav" data-act="prev" aria-label="Previous card" ${st.card === 0 ? 'disabled' : ''}>‹</button>
+        <div class="dots" aria-label="Card ${st.card + 1} of ${N}">${dots}</div>
+        <button class="nav" data-act="${last ? 'skip' : 'next-card'}" aria-label="${last ? 'Go to home' : 'Next card'}" style="${last ? 'background:var(--at-ignite-fill);color:var(--at-on-fill);border-color:var(--at-fill-edge)' : ''}">›</button></div>`;
+  }
+  const l = LESSONS.find(x => x.n === st.lastLesson);
+  const started = st.done.size > 0 || st.visitor === 'returning';
+  return `<div class="screen ${st.anim}"><div class="topbar" style="position:sticky;background:var(--at-space)"><span class="wordmark"><i></i>AstraTron</span><button class="don" data-act="donate">Donate</button></div>
+    <div class="hub" style="padding-top:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:700 24px var(--at-font-text)">${started ? 'Welcome back' : 'Ready, player one'}</span><span class="streak">🔥<b>${started ? 3 : 0}</b></span></div>
+      <div class="cont"><div class="k">${started ? 'Continue' : 'Start here'}</div>
+        <h3>${started ? `Lesson ${l.n}: ${esc(l.t)}` : 'Unit 1: Structure & Bonding'}</h3>
+        <p>${started ? `Unit 1 · Step 4 of ${l.steps}` : 'Why carbon builds everything, in 9 Lessons.'}</p>
+        <button class="btn btn-primary btn-block" data-act="${started ? 'resume' : 'openUnit'}">${started ? 'Resume ▸' : 'Start Unit 1 ▸'}</button></div>
+      ${courseStrips()}
+      <button class="btn btn-ghost" data-act="replay">↺ Replay the intro</button>
+    </div></div>`;
+}
+
+/* ---------------- style sheet ---------------- */
+const TOKENS = [
+  ['--at-space', 'Background', 'page canvas'],
+  ['--at-surface', 'Surface', 'cards, panels'],
+  ['--at-raised', 'Raised', 'disabled, tracks'],
+  ['--at-line', 'Line', 'borders (≥3:1)'],
+  ['--at-ink', 'Ink', 'body text'],
+  ['--at-ink-muted', 'Ink muted', 'secondary text'],
+  ['--at-electron', 'Electron ink', 'electrons, correct, links'],
+  ['--at-ignite', 'Ignite ink', 'wordmark, highlights'],
+  ['--at-boss', 'Boss ink', 'capstone, “not quite”'],
+  ['--at-shadow', 'Shadow violet', 'hard drop shadows only'],
+  ['--at-electron-fill', 'Electron fill', 'correct, active toggle'],
+  ['--at-ignite-fill', 'Ignite fill', 'primary button'],
+  ['--at-boss-fill', 'Boss fill', 'boss chips'],
+  ['--at-on-fill', 'On-fill ink', 'text on any fill'],
+];
+// pairs to check: [fg, bg, kind] kind: text (4.5) | large (3) | ui (3)
+const PAIRS = [
+  ['--at-ink', '--at-space', 'text'], ['--at-ink-muted', '--at-space', 'text'], ['--at-ink-muted', '--at-surface', 'text'],
+  ['--at-electron', '--at-space', 'text'], ['--at-electron', '--at-surface', 'text'],
+  ['--at-ignite', '--at-space', 'text'], ['--at-boss', '--at-space', 'text'], ['--at-boss', '--at-surface', 'text'],
+  ['--at-on-fill', '--at-ignite-fill', 'text'], ['--at-on-fill', '--at-electron-fill', 'text'], ['--at-on-fill', '--at-boss-fill', 'text'],
+  ['--at-line', '--at-space', 'ui'], ['--at-line', '--at-surface', 'ui'], ['--at-shadow', '--at-space', 'ui'],
+  ['--at-ignite-fill', '--at-space', 'ui'], ['--at-electron-fill', '--at-space', 'ui'],
+];
+const cssv = k => getComputedStyle(document.documentElement).getPropertyValue(k).trim();
+function lum(hex){ const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(v => v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; }
+function ratio(a, b){ const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); }
+
+function styleSheet(){
+  return `<div class="ss">
+  <span class="wordmark"><i></i>AstraTron</span>
+  <h1>Arcade Cosmos, as a system<span class="cursor"></span></h1>
+  <p class="intro">A living style sheet for the owner to react to. Every value below is a CSS variable that will sit under Tailwind. Flip theme, motion and colour-blind simulation in the bar. Views A, B and C show three ways the phone flow can fit together.</p>
+
+  <h2><span class="n">01</span>Colour tokens</h2>
+  <p class="why">Each accent comes in two forms. The <b>fill</b> is the same in both themes and always carries dark ink on it. The <b>ink</b> is the text-safe version, retuned for light mode. Violet is only for shadows, never text.</p>
+  <div class="swatches">${TOKENS.map(([k, n, u]) => `<div class="sw"><div class="c" style="background:var(${k})"></div><div class="m"><b>${n}</b>${k}<br><span data-hex="${k}"></span><br><span style="color:var(--at-ink-muted)">${u}</span></div></div>`).join('')}</div>
+
+  <h2><span class="n">02</span>Contrast check (live, this theme)</h2>
+  <p class="why">WCAG 2.2: body text needs 4.5:1. Borders and button edges that carry meaning need 3:1. The ratios are computed from the tokens on screen, so switching theme re-runs them.</p>
+  <div class="panel" style="overflow-x:auto"><table class="cr"><thead><tr><th>Sample</th><th>Foreground</th><th>Background</th><th>Ratio</th><th>Needs</th><th></th></tr></thead><tbody id="crBody"></tbody></table></div>
+  <div class="decide"><b>Light mode needs one fix.</b> The orange and cyan fills are too pale against the light background (about 1.9:1 and 1.3:1), so in light mode every fill gets a 2px dark ink edge (<span class="data">--at-fill-edge</span>). Text on the fills stays the same dark ink in both themes.</div>
+
+  <h2><span class="n">03</span>Colour-blind check</h2>
+  <p class="why">The four meanings that sit side by side, simulated with Machado et al. (2009) at full severity. Colour is never the only signal: each state also has its own icon, word and border style (solid, dashed or plain).</p>
+  <div class="panel"><div class="cvd" id="cvdGrid"></div></div>
+  <div class="decide"><b>Result:</b> orange and cyan stay apart under all three types, because they sit on the blue–yellow axis that red-green colour blindness keeps. Magenta (“not quite”) moves toward blue under protanopia and deuteranopia and gets close to cyan. That's why “not quite” also uses a dashed border, a ✗ and its own words. Use the bar's <i>CVD</i> menu to see whole screens simulated.</div>
+
+  <h2><span class="n">04</span>Type scale and pixel-font limits</h2>
+  <p class="why">Rule from the 3D viewer prototype: <b>pixel fonts never carry chemistry.</b> Element symbols, formulas and every number use JetBrains Mono. Molecule names use Space Grotesk.</p>
+  <div class="panel ladder">
+    <div class="r"><span class="k">pixel-display<br>Pixelify 700 · 32–104px<br>wordmark, Unit numbers</span><span style="font:700 64px/1 var(--at-font-pixel);color:var(--at-ignite);text-shadow:4px 4px 0 var(--at-shadow)">01 AstraTron</span></div>
+    <div class="r"><span class="k">display<br>Grotesk 700 · clamp 34–64px</span><span style="font:700 44px/1.02 var(--at-font-text);letter-spacing:-.035em">Move electrons.</span></div>
+    <div class="r"><span class="k">h1 · 28px / h2 · 22px<br>Grotesk 700</span><span><span style="font:700 28px var(--at-font-text)">Structure &amp; Bonding</span><br><span style="font:700 22px var(--at-font-text)">How many lone pairs?</span></span></div>
+    <div class="r"><span class="k">body · 17px/1.5<br>Grotesk 400 · min 16px</span><span>Oxygen brings six valence electrons; two go into the O–H bonds.</span></div>
+    <div class="r"><span class="k">small · 14px<br>Grotesk 400/600</span><span style="font-size:14px;color:var(--at-ink-muted)">Unit 1 · 3/8 Lessons · 1 Practice Set</span></div>
+    <div class="r"><span class="k">label · 16px<br>Silkscreen, UPPERCASE<br>buttons, kickers only</span><span style="font:400 var(--at-label-size) var(--at-font-label);text-transform:uppercase">Continue · Start Unit 1</span></div>
+    <div class="r"><span class="k">caption · 12px<br>Grotesk 500 caps</span><span style="font:500 12px var(--at-font-text);text-transform:uppercase;letter-spacing:.06em;color:var(--at-ink-muted)">Coming soon · 15 Steps</span></div>
+    <div class="r"><span class="k">data · 15px / 12px<br>JetBrains Mono</span><span class="data">CH₄ · C–H 1.087 Å · 109.47° · pKa 15.7</span></div>
+  </div>
+
+  <h3 style="margin:26px 0 6px">Silkscreen and the letter C, at each size</h3>
+  <p class="why">Silkscreen is drawn on an 8px grid, so it only renders crisply at whole multiples of 8 (8, 16, 24 px). At in-between sizes the pixels blur, and C starts to read as O. Rows with a dashed outline are the sizes I'd ban.</p>
+  <div class="panel pxgrid" id="pxgrid"></div>
+  <div class="decide"><b>Proposal:</b> Silkscreen only at <b>16px</b>, only in uppercase, and only for fixed UI words (CHECK, CONTINUE, START, DONATE), where you know the word, so a C can't be misread. Anything smaller than 16px, like chips, captions and “Coming soon”, uses Space Grotesk 500 caps instead. Pixelify Sans stays at 32px and up. Try the label font live:
+    <div class="seg" style="margin-top:10px" role="group" aria-label="Label font trial">
+      <button data-act="label" data-v="silk" aria-pressed="${st.label === 'silk'}">Silk 16</button><button data-act="label" data-v="silk12" aria-pressed="${st.label === 'silk12'}">Silk 12</button><button data-act="label" data-v="pixelify" aria-pressed="${st.label === 'pixelify'}">Pixelify</button><button data-act="label" data-v="grotesk" aria-pressed="${st.label === 'grotesk'}">Grotesk</button></div></div>
+
+  <h2><span class="n">05</span>Components</h2>
+  <p class="why">Square corners, 2–3px borders, hard violet offset shadows. Press a button: its shadow collapses into it (the arcade press).</p>
+  <div class="cols">
+    <div class="panel"><h4 style="margin:0 0 12px">Buttons</h4><div class="demo-row">
+      <button class="btn btn-primary">Check</button><button class="btn btn-electron">Continue</button><button class="btn btn-secondary">Got it</button><button class="btn btn-primary" disabled>Check</button><button class="btn btn-ghost">↺ Replay intro</button></div>
+      <p class="why" style="margin:12px 0 0">Orange = the one main action on a screen. Cyan = “you got it, go on”. Outline = secondary. Minimum tap target: 48px.</p></div>
+    <div class="panel"><h4 style="margin:0 0 12px">Toggles</h4>
+      <div class="seg" role="group" aria-label="View"><button aria-pressed="true" data-act="segdemo">Ball &amp; stick</button><button aria-pressed="false" data-act="segdemo">True scale</button></div>
+      <div style="margin-top:14px" class="switch"><button role="switch" aria-checked="true" data-act="switchdemo" aria-label="Reduced motion"></button>Reduced motion</div>
+      <div style="margin-top:14px" class="demo-row"><span class="chip e">Draw arrows</span><span class="chip">12 Steps</span><span class="chip b">Boss level</span><span class="chip o">Mixed</span><span class="streak">🔥<b>3</b> day streak</span></div></div>
+    <div class="panel"><h4 style="margin:0 0 12px">Unit tiles</h4><div class="strip" style="margin:0;padding-left:0">${tile('Structure & Bonding', 1)}${tile('Acids & Bases', 2)}</div></div>
+    <div class="panel"><h4 style="margin:0 0 12px">Lesson rows (Level select)</h4>${lessonRow(LESSONS[1])}${lessonRow(LESSONS[8])}${lessonRow(LESSONS[0])}</div>
+  </div>
+  <div class="cols" style="margin-top:16px">
+    <div><h4 style="margin:0 0 8px">Story card</h4><div class="mini-phone"><div class="storybars" style="top:8px"><div class="bars"><i class="done"></i><i class="cur"></i><i></i><i></i><i></i><i></i></div></div><div style="position:absolute;inset:0;display:flex">${storyCard(1).replace('class="story', 'style="flex:1;padding:50px 16px" class="story')}</div></div></div>
+    <div><h4 style="margin:0 0 8px">Step player chrome</h4><div class="mini-phone"><div class="player" style="position:absolute"><div class="player-top" style="grid-template-columns:36px 1fr auto"><button class="x" style="width:36px;height:36px">✕</button><div class="bars"><i class="done"></i><i class="done"></i><i class="done"></i><i class="cur"></i><i></i><i></i><i></i><i></i></div><span class="cnt">4/8</span></div><div class="player-body"><p class="q" style="font-size:17px">One question, nothing else on screen.</p><p class="lead" style="font-size:14px">The bars match the story-card bars: one progress motif across the whole site.</p></div><div class="player-foot"><button class="btn btn-primary btn-block">Check</button></div></div></div></div>
+    <div class="panel"><h4 style="margin:0 0 12px">Two-try feedback</h4>
+      <div class="fb ok"><span class="ic">✓</span><div><h4>Nice. 2 lone pairs.</h4><p>Solid cyan border, ✓, a short reason why.</p></div></div>
+      <div class="fb retry"><span class="ic">✗</span><div><h4>Not quite. Hint:</h4><p>Try 1 wrong: dashed magenta border, ✗, a targeted Hint. The wrong option is struck out.</p></div></div>
+      <div class="fb reveal"><span class="ic">→</span><div><h4>Here’s how: 2 lone pairs.</h4><p>Try 2 wrong: plain border, →, the full answer. No red anywhere: wrong is never punished.</p></div></div></div>
+    <div class="panel"><h4 style="margin:0 0 12px">Source note + Scene frame</h4><div class="scene" style="margin-bottom:12px">${methaneSVG()}</div>${sourceNote(true)}
+      <p class="why" style="margin:10px 0 0">The note is collapsed by default, one tap away. It's dashed when closed and solid when open, and all its numbers are in the data font.</p></div>
+  </div>
+
+  <h2><span class="n">06</span>Motion language</h2>
+  <p class="why">The energy lives in the motion. All motion is quick and snappy, and pixel-ish loops move in hard steps instead of smooth eases. Each card below has a Play button and its reduced-motion fallback. Switch <i>Motion: reduced</i> in the bar to see the fallbacks.</p>
+  <div class="mo">
+    <div class="panel"><h4>Arcade press</h4><p>Button shadow collapses in ${'<span class="data">90ms</span>'}, linear.</p><button class="btn btn-primary">Press me</button><div class="rm">reduced → no movement; a 3px cyan ring shows the press</div></div>
+    <div class="panel"><h4>Card in</h4><p>Story cards and screens: scale 1.04 → 1 with a fade, <span class="data">420ms</span>, snap ease.</p><button class="btn btn-secondary" data-act="replayDemo" data-t="cardDemo">Play</button><div id="cardDemo" style="margin-top:10px;font:700 22px var(--at-font-text)">Come build.</div><div class="rm">reduced → 120ms crossfade</div></div>
+    <div class="panel"><h4>Electron spark</h4><p>On a correct answer, the electron flies from the answer into the Continue button and bursts. <span class="data">700ms</span>.</p><button class="btn btn-electron" data-act="sparkDemo">Correct!</button><div class="rm">reduced → no flight; the button glows cyan</div></div>
+    <div class="panel"><h4>Pixel count-up</h4><p>Big numbers count up in 4 hard steps.</p><button class="btn btn-secondary" data-act="countDemo">Play</button><div class="stat" id="countDemo" style="margin-top:8px">109.47°</div><div class="rm">reduced → shows the final value at once</div></div>
+    <div class="panel"><h4>Ambient loops</h4><p>Star twinkle (3s, stepped) and the blinking cursor. Only on story cards and headers, never inside a Step.</p><div style="position:relative;height:48px;background:var(--at-space)">${stars(18, 5)}</div><span class="cursor"></span><div class="rm">reduced → static stars, a solid cursor</div></div>
+    <div class="panel"><h4>Scenes</h4><p>Scenes play on their own clock. Under reduced motion they open paused on the key frame, with Play and a scrubber, so the same Scene still renders to video.</p><div class="rm">reduced → poster frame + ▶ Play</div></div>
+  </div>
+  <div class="decide"><b>Rules:</b> no animation loops inside the Step player. Nothing moves the layout once a Step is on screen. The site follows <span class="data">prefers-reduced-motion</span>, and there's also a manual switch in settings. Sound stays off by default.</div>
+
+  <h2><span class="n">07</span>How the pieces connect (see views A, B, C)</h2>
+  <p class="why">All three keep the same Unit page (Level select) and the same full-screen Step player. They differ in how the homepage story cards hand you on to the map, and how you move between cards on a phone. The old ▲/▼ buttons that covered content are gone in all three.</p>
+  <div class="cols">
+    <div class="panel"><h4 style="margin:0 0 6px">A · Stories</h4><p class="why" style="margin:0">Tap the right of the screen for the next card, the left to go back. The last card <i>is</i> the swipeable map. Returning visitors open straight on the map.</p></div>
+    <div class="panel"><h4 style="margin:0 0 6px">B · Scroll deck</h4><p class="why" style="margin:0">Swipe up through full-height cards, then the page turns into a normal scrolling map. A sticky “Start Unit 1” button sits in thumb reach.</p></div>
+    <div class="panel"><h4 style="margin:0 0 6px">C · Hub</h4><p class="why" style="margin:0">The intro plays once, with ‹ › buttons in their own band under the card. After that, home is a Hub: a Continue card, your streak and the map.</p></div>
+  </div>
+</div>`;
+}
+
+function fillStyleSheet(){
+  document.querySelectorAll('[data-hex]').forEach(el => el.textContent = cssv(el.dataset.hex));
+  $('#crBody').innerHTML = PAIRS.map(([f, b, kind]) => {
+    const r = ratio(cssv(f), cssv(b)), need = kind === 'text' ? 4.5 : 3, ok = r >= need;
+    return `<tr><td><span class="sample" style="color:var(${f});background:var(${b});border:1px solid var(--at-line)">${kind === 'text' ? 'Aa 1.087' : '■ ■ ■'}</span></td><td>${f}</td><td>${b}</td><td>${r.toFixed(2)}:1</td><td>${kind === 'text' ? 'text 4.5' : 'UI 3.0'}</td><td class="${ok ? 'pass' : 'fail'}">${ok ? 'PASS' : 'FAIL'}</td></tr>`;
+  }).join('');
+  const cells = filt => `<div class="cell" style="${filt ? `filter:url(#cvd-${filt})` : ''}"><i style="background:var(--at-ignite-fill)">CTA</i><i style="background:var(--at-electron-fill)">✓</i><i style="background:var(--at-boss-fill)">✗</i><i style="background:var(--at-ink-muted)">→</i></div>`;
+  $('#cvdGrid').innerHTML = `<span></span><span class="h">Normal</span><span class="h">Protanopia</span><span class="h">Deuteranopia</span><span class="h">Tritanopia</span>
+    <span class="h">fills</span>${cells('')}${cells('protan')}${cells('deutan')}${cells('tritan')}
+    <span class="h">on space</span>${['', 'protan', 'deutan', 'tritan'].map(f => `<div class="cell" style="${f ? `filter:url(#cvd-${f})` : ''};font:600 13px var(--at-font-text)"><span style="color:var(--at-ignite)">Go</span>&nbsp;<span style="color:var(--at-electron)">✓ok</span>&nbsp;<span style="color:var(--at-boss)">✗no</span></div>`).join('')}`;
+  const words = ['CHECK', 'CONTINUE', 'COMING SOON', 'PRACTICE'];
+  $('#pxgrid').innerHTML = [10, 12, 13, 16, 24].map(px => `<span class="k">${px}px</span>${words.map(w => `<span class="${px % 8 ? 'bad' : ''}" style="font:400 ${px}px Silkscreen">${w}</span>`).join('')}`).join('');
+}
+
+/* ---------------- interactions ---------------- */
+function go(screen, anim){ st.screen = screen; st.anim = st.motion === 'full' ? anim : ''; render(); }
+function startLesson(n, step = 0){ Object.assign(st, {lesson: n, step, tries: 0, picked: null, result: null, wrongs: []}); go('player', 'slideup'); }
+function spark(fromEl, toEl){
+  if (st.motion !== 'full' || !fromEl || !toEl) return;
+  const stage = $('#stage') || document.body, sr = stage.getBoundingClientRect();
+  const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+  const s = document.createElement('div'); s.className = 'spark'; stage.appendChild(s);
+  const p = (r) => [r.left - sr.left + r.width / 2, r.top - sr.top + r.height / 2];
+  const [x1, y1] = p(a), [x2, y2] = p(b);
+  s.animate([{left: x1 + 'px', top: y1 + 'px', transform: 'scale(1)'}, {left: (x1 + x2) / 2 + 30 + 'px', top: Math.min(y1, y2) - 40 + 'px', transform: 'scale(1.4)', offset: .5}, {left: x2 + 'px', top: y2 + 'px', transform: 'scale(3)', opacity: 0}],
+    {duration: 700, easing: 'cubic-bezier(.2,.8,0,1)'}).onfinish = () => s.remove();
+}
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]'); if (!t) return;
+  const a = t.dataset.act;
+  const N = MANIFESTO.length + (st.variant === 'A' ? 1 : 0);
+  switch (a){
+    case 'next-card': if (st.card < N - 1){ st.card++; st.anim = st.motion === 'full' ? 'story-in' : ''; render(); } break;
+    case 'prev': if (st.card > 0){ st.card--; st.anim = st.motion === 'full' ? 'story-in' : ''; render(); } break;
+    case 'skip': st.introSeen = true; st.card = 0; go('home', 'zoomin'); break;
+    case 'replay': st.introSeen = false; st.visitor = 'first'; st.card = 0; setParam('visitor', 'first'); go('home', 'story-in'); break;
+    case 'openUnit': go('unit', st.variant === 'A' ? 'zoomin' : 'pushin'); break;
+    case 'back': st.introSeen = true; if (st.variant === 'A') st.card = MANIFESTO.length; go('home', 'pushin'); break;
+    case 'openLesson': startLesson(+t.dataset.n); break;
+    case 'resume': go('unit', ''); startLesson(st.lastLesson, 1); break;
+    case 'exit': case 'finish':
+      if (a === 'finish') { st.done.add(st.lesson); st.lastLesson = Math.min(st.lesson + 1, 8); }
+      go('unit', ''); break;
+    case 'next': st.step++; Object.assign(st, {tries: 0, picked: null, result: null, wrongs: []}); st.anim = ''; render(); break;
+    case 'pick': st.picked = +t.dataset.v; render(); break;
+    case 'check': {
+      st.tries++;
+      if (st.picked === 2){ st.result = 'ok'; render(); spark(document.querySelector('.opt.right'), document.querySelector('.player-foot .btn')); }
+      else { st.wrongs = [...(st.wrongs || []), st.picked]; st.result = st.tries >= 2 ? 'reveal' : 'retry'; st.picked = null; render(); }
+      break; }
+    case 'donate': t.textContent = 'Ko-fi (stub)'; break;
+    case 'label': st.label = t.dataset.v; render(); break;
+    case 'segdemo': t.parentElement.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b === t)); break;
+    case 'switchdemo': t.setAttribute('aria-checked', t.getAttribute('aria-checked') !== 'true'); break;
+    case 'replayDemo': { const el = $('#' + t.dataset.t); el.classList.remove('story-in'); void el.offsetWidth; el.classList.add('story-in'); break; }
+    case 'sparkDemo': { if (st.motion === 'full'){ const r = t.getBoundingClientRect(); const s = document.createElement('div'); s.className = 'spark'; s.style.position = 'fixed'; document.body.appendChild(s);
+        s.animate([{left: r.left - 60 + 'px', top: r.top - 50 + 'px'}, {left: r.left + r.width / 2 + 'px', top: r.top + r.height / 2 + 'px', transform: 'scale(3)', opacity: 0}], {duration: 700, easing: 'cubic-bezier(.2,.8,0,1)'}).onfinish = () => s.remove(); }
+      else { t.style.boxShadow = '0 0 0 4px var(--at-electron-fill)'; setTimeout(() => t.style.boxShadow = '', 600); } break; }
+    case 'countDemo': { const el = $('#countDemo'); if (st.motion !== 'full'){ el.textContent = '109.47°'; break; }
+      const vals = ['0°', '27.37°', '54.74°', '82.10°', '109.47°']; let i = 0; const iv = setInterval(() => { el.textContent = vals[i++]; if (i >= vals.length) clearInterval(iv); }, 110); break; }
+  }
+});
+
+function afterRender(){
+  if (st.variant === 'S') fillStyleSheet();
+  const deck = $('#deck');
+  if (deck){
+    const io = new IntersectionObserver(es => es.forEach(en => {
+      if (!en.isIntersecting) return;
+      const c = en.target.dataset.card;
+      st.card = c === 'map' ? MANIFESTO.length : +c;
+      deck.querySelectorAll('.rail i').forEach((r, i) => r.classList.toggle('cur', i === st.card));
+      $('#thumbcta')?.classList.toggle('hide', st.card === 0);
+      $('#statebar').textContent = stateLine();
+    }), {root: deck, threshold: .6});
+    deck.querySelectorAll('[data-card]').forEach(s => io.observe(s));
+  }
+  // swipe on A/C story cards
+  const stage = $('#stage');
+  if (stage && st.screen === 'home' && st.variant !== 'B'){
+    let x0 = null;
+    stage.onpointerdown = e => { x0 = e.clientX; };
+    stage.onpointerup = e => { if (x0 == null) return; const dx = e.clientX - x0; x0 = null;
+      if (Math.abs(dx) > 60 && !e.target.closest('.strip')){ document.querySelector(`[data-act="${dx < 0 ? 'next-card' : 'prev'}"]`)?.click(); } };
+  }
+}
+
+/* ---------------- switcher ---------------- */
+function setVariant(v){ st.variant = v; setParam('variant', v); st.screen = 'home'; st.card = 0; st.introSeen = false; render(); }
+function cycle(d){ const i = KEYS.indexOf(st.variant); setVariant(KEYS[(i + d + KEYS.length) % KEYS.length]); }
+$('#sw-min').onclick = () => { st.swmin = !st.swmin; applyGlobals(); };
+$('#sw-prev').onclick = () => cycle(-1);
+$('#sw-next').onclick = () => cycle(1);
+$('#sw-theme').onclick = () => { st.theme = st.theme === 'dark' ? 'light' : 'dark'; setParam('theme', st.theme); render(); };
+$('#sw-motion').onclick = () => { st.motion = st.motion === 'full' ? 'reduced' : 'full'; setParam('motion', st.motion); render(); };
+$('#sw-cvd').onchange = e => { st.cvd = e.target.value; setParam('cvd', st.cvd); render(); };
+$('#sw-frame').onclick = () => { st.frame = st.frame === 'framed' ? 'full' : 'framed'; setParam('frame', st.frame); render(); };
+$('#sw-visitor').onclick = () => { st.visitor = st.visitor === 'first' ? 'returning' : 'first'; setParam('visitor', st.visitor); st.screen = 'home'; st.card = 0; st.introSeen = false; render(); };
+addEventListener('keydown', e => {
+  if (e.target.closest('input,textarea,select,[contenteditable]')) return;
+  if (e.key === 'ArrowLeft') cycle(-1);
+  else if (e.key === 'ArrowRight') cycle(1);
+  else if (st.variant !== 'S' && st.screen === 'home' && (e.key === 'ArrowDown' || e.key === ' ')){ e.preventDefault(); document.querySelector('[data-act="next-card"]')?.click(); }
+  else if (st.variant !== 'S' && st.screen === 'home' && e.key === 'ArrowUp'){ document.querySelector('[data-act="prev"]')?.click(); }
+});
+addEventListener('resize', () => applyGlobals());
+render();
+</script>
+</body>
+</html>
