@@ -1,0 +1,67 @@
+# Research: animation engines that render to both web and video
+
+Ticket: #5 (map #1). Researched 2026-10-18 against official docs, licence texts, GitHub and npm metadata.
+
+**Question.** Which animation tooling lets one **Scene** run interactively in a React site *and* render to video for YouTube? We compare Remotion, Motion Canvas (plus its fork Revideo), Theatre.js, GSAP, Motion (Framer Motion), Rive, Lottie and Manim on six things: interactivity, deterministic frame rendering, authoring ergonomics for agents, performance on phones, licence and cost, and fit with 3D.
+
+## TL;DR
+
+- **Only Remotion is built for "a React component is both the interactive thing and the video."** The rule that makes this work is that every animation is a pure function of the frame number. Remotion's own docs ask you to "think of your component as a function that transforms a frame number into an image" ([flickering](https://www.remotion.dev/docs/flickering)). Its `@remotion/three` bridges React Three Fiber, and that package is MIT ([three](https://www.remotion.dev/docs/three)).
+- **Remotion is not open source.** It is under the proprietary "Remotion License". It is free for **an individual**, for **teams of up to 3 people**, and for **qualifying non-profits** ([LICENSE.md](https://github.com/remotion-dev/remotion/blob/main/LICENSE.md), [Terms v5](https://www.remotion.dev/docs/terms)). This project qualifies today as an individual's project. It does *not* qualify via the "non-profit" route until there is a real non-profit with evidence, such as 501(c)(3) status (see §Licence).
+- **Recommendation: make the Scene contract engine-agnostic and use Remotion only as the video renderer.** A Scene is a pure React component `(t, interactionState) → view`. On the site, a small in-repo clock drives `t` and user input drives the state, so the site bundle ships no Remotion code. A separate `video/` workspace wraps each Scene in a Remotion composition (`t = useCurrentFrame()/fps`) to render MP4s. Remotion then stays a replaceable rendering tool. If its licence ever bites, the same pure Scenes can be rendered by Revideo (MIT) or by a Playwright frame-capture plus ffmpeg harness. Use Motion (MIT) for non-Scene UI micro-interactions.
+
+## Comparison
+
+| Tool | Interactive in React site | Deterministic frame render to video | Agent authoring | Phones | Licence / cost | 3D fit |
+|---|---|---|---|---|---|---|
+| **Remotion** 4.0.536 | `<Player>` embeds compositions in any React app, with runtime `inputProps` ([player](https://www.remotion.dev/docs/player/player)). Interactivity inside the composition is plain React. | **Yes, by design.** Frame-driven (`useCurrentFrame`). Renders headless via CLI or `renderMedia()`, or in-browser via `@remotion/web-renderer` (WebCodecs, stable since 4.0.491, with CSS/tag limitations) ([web-renderer](https://www.remotion.dev/docs/web-renderer)). | Excellent: plain TSX, huge docs, explicit agent support. | DOM/SVG/WebGL, so the cost is whatever the Scene costs. No extra runtime when Scenes are pure components. | Proprietary, free for individuals / ≤3 people / qualifying non-profits. Company licence otherwise ($25/seat/mo, or $100/mo minimum for "Automators", which includes embedding `<Player>`) ([licence FAQ](https://www.remotion.dev/docs/license/faq)). | **Best.** `@remotion/three` (MIT) puts R3F under the frame clock: `<ThreeCanvas>` and `<ThreeWebGPUCanvas>` ([three](https://www.remotion.dev/docs/three)). |
+| **Motion Canvas** 3.17.2 | MIT web player (`@motion-canvas/player`), but the model is a linear generator timeline, not interactive state. | Yes. Editor "RENDER" writes an image sequence, and an `@motion-canvas/ffmpeg` exporter exists ([rendering](https://motioncanvas.io/docs/rendering)). Editor-driven, no first-class headless CLI. | Good (TS generators), but its own scene graph (not React DOM). | Canvas2D, light. | MIT. **Last release Dec 2024; last push Jul 2026** (slow). | Weak: 2D canvas only. |
+| **Revideo** 0.11.0 (MIT fork of Motion Canvas) | React `<Player/>` "accepts dynamic inputs, so the same project drives both preview and final render" ([README](https://github.com/midrender/revideo)). | Yes. Headless `renderVideo()`, parallel workers, Cloud Run examples. | Good, and pitches itself to Claude/Codex. Still a non-React scene graph. | Canvas2D. | MIT, $0. Small project (≈4k stars), last push Jul 2026. | Weak: its 3D demo is hand-projected 2D. |
+| **Theatre.js** 0.7.2 | Yes. Core plus `@theatre/r3f`; sequences are seekable. | No exporter; you would build frame capture yourself. | Visual studio-centric; keyframes live in JSON state. | Fine. | Core Apache-2.0, **studio AGPL-3.0**. **Dormant:** last public commit Apr 2024, with "1.0 … temporarily moved to a private repo" ([README](https://github.com/theatre-js/theatre)). | Good via r3f, but unmaintained. |
+| **GSAP** 3.15.0 | Excellent (timelines, ScrollTrigger, all plugins now free). | Paused timelines are seekable. Remotion ships `@remotion/gsap` to sync them ([third-party](https://www.remotion.dev/docs/third-party)). The ticker is rAF-driven with lag smoothing by default ([ticker](https://gsap.com/docs/v3/GSAP/gsap.ticker/)), so render needs manual seeking. | Very good; models know it well. | Very good. | **Not OSI.** Webflow's "Standard 'no charge' license": free, including commercial use, but it bans tools that "allow users to build visual animations without code" competing with Webflow, and Webflow may revise or terminate it ([standard-license](https://gsap.com/standard-license)). Awkward beside an MIT codebase. | Can tween three.js values imperatively. |
+| **Motion** 14.3.0 | Excellent React integration (gestures, layout, springs). | Partial. `animate()` controls have a settable `time` and are "stateless and scrubbable" ([animate](https://motion.dev/docs/animate)). But React `motion.*` components run on real time/WAAPI, and Remotion has no integration (discussion only, [#399](https://github.com/remotion-dev/remotion/issues/399)). | Very good. | Very good ("hardware-accelerated where supported"). | MIT, $0. | Via r3f values; there is no frame-clock bridge. |
+| **Rive** (react-canvas 4.36.0) | Excellent: state machines driven by inputs. | Video export exists in the **editor only, and only on paid plans**: "Exporting video and images is available on paid plans" ([export docs](https://rive.app/docs/editor/exporting/exporting-for-video-and-static-design)). | **Poor**: assets are authored in a GUI editor into binary `.riv` files. | Excellent (own renderer). | Runtimes MIT. Free editor plan: 3 collaborative files, and `.riv` exports carry a splash screen ([pricing](https://rive.app/pricing)). | None (2D). |
+| **Lottie** (lottie-web 5.13.0, dotlottie-react 0.20.0) | Playback, segments and dotLottie state machines; limited real interactivity. | Yes (`goToAndStop(frame, true)`), and `@remotion/lottie` exists. | **Poor**: authored in After Effects or a Lottie editor. Hand-writing JSON is impractical. | Good for small files; heavy files lag. | MIT. lottie-web's last push was Sep 2025. | None. |
+| **Manim** CE 0.22.0 (reference) | None (video only). | Yes, gold standard for math/science video (Python CLI → MP4). | Good: Python code, agent-friendly. | n/a | MIT, $0. | Has a 3D scene camera, but it is not reusable on the web. |
+
+Versions, licences and activity come from `npm view` and the GitHub API on 2026-10-18.
+
+## Licence: Remotion in detail
+
+Primary sources: [LICENSE.md](https://github.com/remotion-dev/remotion/blob/main/LICENSE.md) (v4, current), the v5 licence in [PR #3750](https://github.com/remotion-dev/remotion/pull/3750) (open, ships with 5.0), [Terms and Conditions v5](https://www.remotion.dev/docs/terms) (upcoming, take effect with 5.0), and the [License FAQ](https://www.remotion.dev/docs/license/faq).
+
+- **Free-licence eligibility (v4):** "an individual"; "a for-profit organization with up to 3 employees"; "a non-profit or not-for-profit organization"; or evaluating before commercial use. **v5** changes the second item to "an organization or team of individuals with up to 3 people", and contractors count toward the total.
+- **Allowed use:** "to use the software non-commercially or commercially for the purpose of creating videos and images" (v5: "media assets"), and to modify it for your own use case.
+- **Disallowed:** selling or relicensing a derivative of Remotion. v5 adds a ban on running a rendering service where end users upload their own Remotion code.
+- **Not open source:** "Remotion is not open-source software according to the [OSI] definition … it operates under a proprietary license" (Terms v5, Licensing).
+- **"Non-profit" is narrow in v5.** It means an organisation "formed and operated primarily for charitable, educational … purposes" that distributes no profits. "Remotion may request evidence," for example 501(c)(3) status, Candid.org registration, or equivalent. "An organization does not qualify merely because it describes itself as non-profit." Educational institutions do not qualify without written permission. **This project is not incorporated (map #1 puts incorporation out of scope), so it should rely on the individual / ≤3-person route, not the non-profit route.**
+- **Team size (v5 §TeamSize):** a company licence is needed when the "combined total headcount of all involved parties" is 4 or more. "Involved parties" are those who "own, control, or directly use the Remotion codebase". People who merely receive the rendered media don't count. **Inference (not stated in the terms):** AI agents writing the code are not "people"; an owner plus agents is one person. Open-source contributors to an MIT repo are an undefined edge case. The FAQ says to email hi@remotion.dev for confirmation.
+- **Player:** for company licensees, embedding `<Player>` on a website counts as "automation" ($100/mo minimum). "Free License Users may embed the Remotion Player without purchasing Renders." Previews in the Player are not renders.
+- **Telemetry:** client-side renders (`@remotion/web-renderer`) include telemetry (Terms v5, §ClientSideRenders).
+- **Package licences:** `remotion`, `@remotion/player` and `@remotion/web-renderer` are "SEE LICENSE IN LICENSE.md" (proprietary). `@remotion/three` is MIT (npm metadata).
+
+**Consequence for an MIT codebase.** Our code can stay MIT while depending on Remotion, but anyone who forks it inherits Remotion's terms for the Remotion parts. A ≥4-person company forking the site would need a company licence. That is a second reason to keep Remotion out of the site bundle and confined to `video/`.
+
+## Recommendation and the shape it implies
+
+1. **Scene contract (engine-agnostic):** a Scene is a React component with props `{ t: seconds, state: SceneState, onInput?, reducedMotion }`. All motion is computed from `t` and `state`: no `useFrame`, no `setTimeout`, no CSS transitions, no `Math.random()` (use a seeded RNG). This is exactly Remotion's determinism rule ([flickering](https://www.remotion.dev/docs/flickering)), applied to our own code.
+2. **Site runtime:** an in-repo `useSceneClock()` (rAF-driven `t`, play/pause/scrub, reduced-motion = jump to the key frames). Interactions update `state`, and the Scene re-renders. No Remotion is shipped to Students.
+3. **Video runtime:** `video/` workspace. Each Scene gets a Remotion `<Composition>` wrapper that maps `useCurrentFrame()/fps → t` and replays a scripted `state` timeline (the "video script" of user inputs). Render with `npx remotion render` locally for $0 ([third-party](https://www.remotion.dev/docs/third-party)). 3D Scenes use R3F; in video they sit inside `<ThreeCanvas>` (MIT) ([three](https://www.remotion.dev/docs/three)).
+4. **Tweening helpers:** pure functions of `t` (an in-repo easing/interpolate module, or Motion's MIT utilities). Avoid importing `remotion`'s `interpolate`/`spring` into Scene code, so Scenes stay licence-clean.
+5. **Motion (MIT)** for site chrome and Step transitions, which never go to video.
+6. **Fallback renderer:** if Remotion's terms become a problem (team ≥4, a fork, a licence change), render the same pure Scenes with a Playwright loop: set `t`, screenshot, then run ffmpeg. Or port to Revideo (MIT). The Scene contract makes this a wrapper swap, not a rewrite.
+
+**Rejected as the core engine:**
+
+- **Rive and Lottie:** GUI or After Effects authoring that agents can't do; Rive's video export is paid.
+- **Theatre.js:** dormant, and its studio is AGPL.
+- **GSAP:** non-OSI licence with a revocation clause, which fits poorly with MIT.
+- **Motion Canvas / Revideo:** 2D canvas only, a non-React model, a weak 3D story, and Motion Canvas is slowing down. Revideo remains the best MIT *fallback* renderer.
+- **Manim:** video only. It is a useful reference for the look of explanatory chemistry video, not for Scenes.
+
+## Open points / not verified
+
+- No primary source gives phone frame-rate benchmarks for these engines. Phone performance depends on how heavy each Scene is (SVG vs WebGL), not on the engine. This needs a prototype measurement on a mid-range Android.
+- Whether open-source contributors count toward Remotion's "involved parties" headcount is not addressed by the terms. Ask hi@remotion.dev before the contributor count could reach 4.
+- Remotion 5.0's release date is unknown; PR #3750 is still open. The v5 terms above are the ones that will apply.
+- `@remotion/web-renderer` CSS/tag limitations were not reviewed in detail. They are only relevant if the site ever offers in-browser "download this Scene as video".
