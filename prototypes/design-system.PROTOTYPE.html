@@ -4,12 +4,10 @@
   One file, four views, switchable via ?variant= and the floating bar (← / → keys):
     S  Style sheet   – tokens (dark + light) with live contrast + colour-blind checks, type ladder,
                        pixel-font minimums, core components, motion language + reduced-motion fallback.
-    A  Stories       – phone flow: homepage = tap-through story cards (tap right = next, left = back,
-                       no ▲/▼ buttons); last card IS the swipeable map; tile → Unit page → Step player.
-    B  Scroll deck   – phone flow: one vertical page; story cards are full-height scroll-snap sections
-                       with an edge rail, then the page relaxes into a scrolling map; sticky thumb CTA.
-    C  Hub           – phone flow: stories once (first visit, thumb-band nav under the content), then a
-                       Hub home: Continue card + streak + map strip; "replay intro" link.
+    A  Push hero     – one screen: headline + a live electron push (OH⁻ + H⁺ → water) + one button; map below.
+    B  Map first     – short banner, then the course map is the homepage; the push hides behind "What's a Lesson like?".
+    C  Straight in   – the homepage IS Lesson 0, Step 1 in the Step player chrome; map revealed after 3 Steps.
+  No intro cards (owner: six is too long). Manifesto spread: headline, Lesson 0 Hook, footer. Returning = Hub in all.
   Unit page (Level select, from #29) and the single-focus Step player are shared by A/B/C, built from S.
   Bar toggles: theme, reduced motion, colour-blind simulation, phone frame, first/returning visitor.
 -->
@@ -315,6 +313,23 @@ table.cr th{font:600 12px var(--at-font-text);text-transform:uppercase;letter-sp
 .cont .k{font:500 12px var(--at-font-text);text-transform:uppercase;letter-spacing:.08em;color:var(--at-ignite)}
 .cont h3{font:700 22px/1.15 var(--at-font-text);margin:6px 0 4px}
 .cont p{margin:0 0 14px;color:var(--at-ink-muted);font-size:15px}
+/* first-visit home */
+.hero{position:relative;overflow:hidden;padding:12px var(--at-gutter) 20px;display:flex;flex-direction:column;gap:14px}
+.hero > *{position:relative}
+.kicker{font:400 13px var(--at-font-label);text-transform:uppercase;letter-spacing:.06em;color:var(--at-electron)}
+.herotitle{font:700 clamp(30px,8.4vw,52px)/1.03 var(--at-font-text);letter-spacing:-.035em;margin:0;max-width:16ch}
+.herotitle .o,.big .o{color:var(--at-ignite);text-shadow:3px 3px 0 var(--at-shadow)}
+.herotitle .c,.big .c{color:var(--at-electron)}
+.pushcard .scene{box-shadow:5px 5px 0 var(--at-shadow)}
+.pushmsg{margin:10px 0 0;font-size:15px;line-height:1.4;min-height:42px}
+.lp{cursor:grab}.lp:focus-visible{outline:none}.lp:focus-visible rect{stroke:var(--at-ignite-fill);stroke-width:2}
+.scrollcue{text-align:center;font:500 12px var(--at-font-text);text-transform:uppercase;letter-spacing:.08em;color:var(--at-ink-muted)}
+.pad{padding:8px var(--at-gutter) 8px}
+.h2{font:700 28px/1.05 var(--at-font-text);letter-spacing:-.03em;margin:6px 0 4px}
+.banner{padding:8px var(--at-gutter) 8px}
+.sitefoot{padding:28px var(--at-gutter) 40px;border-top:var(--at-border) solid var(--at-line);margin-top:20px}
+.sitefoot .big{margin:0;font-weight:700;letter-spacing:-.03em;line-height:1.05}
+.skipmap{font:600 13px var(--at-font-text);text-decoration:underline;text-underline-offset:3px;min-height:44px;color:var(--at-ink-muted)}
 /* Unit page */
 .unitpage{padding:0 var(--at-gutter) 40px}
 .unit-head{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:14px 0 10px;background:var(--at-space);border-bottom:var(--at-border) solid var(--at-line)}
@@ -393,7 +408,7 @@ const STEPS = ['scene','check','wrap'];
 
 /* ---------------- state ---------------- */
 const qs = new URLSearchParams(location.search);
-const VARIANTS = {S:'Style sheet', A:'Stories', B:'Scroll deck', C:'Hub'};
+const VARIANTS = {S:'Style sheet', A:'Push hero', B:'Map first', C:'Straight in'};
 const KEYS = Object.keys(VARIANTS);
 const reducedPref = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const st = {
@@ -407,7 +422,7 @@ const st = {
   screen: 'home', card: 0, introSeen: false,
   lesson: null, step: 0, tries: 0, picked: null, result: null, // result: null|ok|retry|reveal
   done: new Set(), lastLesson: 1, lastStep: 0,
-  anim: '',
+  anim: '', pushed: false, cStep: 0, peek: false,
   swmin: innerWidth < 520,
 };
 const $ = s => document.querySelector(s);
@@ -432,7 +447,7 @@ function applyGlobals(){
 function stateLine(){
   if (st.variant === 'S') return `view: style sheet · theme: ${st.theme} · motion: ${st.motion} · cvd: ${st.cvd || 'none'} · label font: ${st.label}`;
   let s = `screen: ${st.screen}`;
-  if (st.screen === 'home') s += ` · card ${st.card + 1}/${st.variant === 'C' && (st.visitor === 'returning' || st.introSeen) ? '–' : MANIFESTO.length + (st.variant === 'A' ? 1 : 0)}`;
+  if (st.screen === 'home') s += ` · pushed: ${st.pushed}${st.variant === 'C' ? ` · lesson-0 step ${st.cStep + 1}` : ''}${st.variant === 'B' ? ` · peek: ${st.peek}` : ''}`;
   if (st.screen === 'player') s += ` · Lesson ${st.lesson} · step ${st.step + 1}/${STEPS.length} · tries ${st.tries} · result ${st.result || '–'}`;
   s += ` · done: [${[...st.done].join(',')}] · visitor: ${st.visitor}`;
   return s;
@@ -570,68 +585,126 @@ function player(){
 /* ---------------- flows ---------------- */
 function flow(){
   let inner = '';
-  if (st.screen === 'unit' || st.screen === 'player') inner = unitPage(st.variant === 'C' ? 'Home' : 'Map');
+  if (st.screen === 'unit' || st.screen === 'player') inner = unitPage('Home');
   else inner = st.variant === 'A' ? homeA() : st.variant === 'B' ? homeB() : homeC();
   if (st.screen === 'player') inner += player();
   return `<div class="stage-wrap"><div class="stage" id="stage">${inner}</div></div>`;
 }
-// A: Stories. The map is the last card. Tap zones, no buttons on top of content.
-function homeA(){
-  const N = MANIFESTO.length + 1;
-  if (st.visitor === 'returning' && !st.introSeen) st.card = N - 1;
-  const bars = Array.from({length: N}, (_, i) => `<i class="${i < st.card ? 'done' : i === st.card ? 'cur' : ''}"></i>`).join('');
-  const isMap = st.card === N - 1;
-  const card = isMap
-    ? `<div class="mapcard nebula ${st.anim}">${stars(24, 99)}<div class="kick" style="font:400 13px var(--at-font-label);color:var(--at-electron);text-transform:uppercase;position:relative">Choose your Unit</div>
-        <h2 style="position:relative">The course map</h2><p style="margin:0;color:var(--at-ink-muted);position:relative">Swipe sideways. Unit 1 is live; the rest are on the way.</p>
-        <div style="position:relative">${courseStrips()}</div>
-        <button class="btn btn-ghost" data-act="replay" style="align-self:flex-start;position:relative">↺ Replay intro</button></div>`
-    : `<div class="screen">${storyCard(st.card, st.anim)}</div>
-       <div class="tapzones"><button data-act="prev" aria-label="Previous card"></button><button data-act="next-card" aria-label="Next card"></button></div>
-       ${st.card === 0 ? '<div class="taphint">Tap to continue ›</div>' : ''}`;
-  return `<div class="storybars"><div class="bars">${bars}</div></div>
-    <div class="topbar" style="top:6px"><span class="wordmark"><i></i>AstraTron</span><button class="don" data-act="donate">Donate</button></div>
-    ${card}`;
+// The first-visit push: OH⁻ gives a lone pair to H⁺ and makes water. A schematic Lewis drawing, not geometry.
+function pushScene(){
+  const done = st.pushed, O = [120, 108], H1 = [58, 146], HP = [232, 160];
+  const pair = (x, y, i, rot) => `<g class="lp" data-pair="${i}" tabindex="${done ? -1 : 0}" role="button" aria-label="Lone pair ${i + 1} on oxygen. Press Enter to push it onto H plus." transform="translate(${x} ${y}) rotate(${rot})">
+      <rect x="-16" y="-16" width="32" height="32" fill="transparent"/><circle cx="-6" r="4.5"/><circle cx="6" r="4.5"/></g>`;
+  const pairs = done ? [[110, 76, -15], [150, 90, 50]] : [[110, 76, -15], [150, 90, 50], [150, 130, -30]];
+  return `<svg viewBox="0 0 320 200" id="pushsvg" role="group" aria-label="${done ? 'Water, H2O: oxygen bonded to two hydrogens, two lone pairs left.' : 'Hydroxide, OH minus, next to a proton, H plus.'}" style="touch-action:none">
+    <line x1="${O[0]}" y1="${O[1]}" x2="${H1[0]}" y2="${H1[1]}" stroke="var(--at-electron-fill)" stroke-width="6"/>
+    ${done ? `<line class="newbond" x1="${O[0]}" y1="${O[1]}" x2="${HP[0]}" y2="${HP[1]}" stroke="var(--at-electron-fill)" stroke-width="6" style="filter:drop-shadow(0 0 6px var(--at-electron-fill))"/>` : ''}
+    <path id="pusharrow" d="" fill="none" stroke="var(--at-ignite-fill)" stroke-width="4" stroke-linecap="square" marker-end="url(#ah)"/>
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--at-ignite-fill)"/></marker></defs>
+    <circle cx="${O[0]}" cy="${O[1]}" r="24" fill="#ff0d0d" stroke="#0b0420" stroke-width="3"/>
+    <text x="${O[0]}" y="${O[1] + 7}" text-anchor="middle" font-family="JetBrains Mono" font-weight="600" font-size="20" fill="#fff">O</text>
+    ${done ? '' : `<text x="${O[0] + 22}" y="${O[1] - 18}" font-family="JetBrains Mono" font-weight="600" font-size="18" fill="var(--at-ink)">−</text>`}
+    <circle cx="${H1[0]}" cy="${H1[1]}" r="16" fill="#fff" stroke="#0b0420" stroke-width="3"/><text x="${H1[0]}" y="${H1[1] + 5}" text-anchor="middle" font-family="JetBrains Mono" font-weight="600" font-size="14" fill="#0b0420">H</text>
+    <circle id="hplus" cx="${HP[0]}" cy="${HP[1]}" r="16" fill="#fff" stroke="${done ? '#0b0420' : 'var(--at-ignite-fill)'}" stroke-width="3" ${done ? '' : 'stroke-dasharray="5 4"'}/><text x="${HP[0]}" y="${HP[1] + 5}" text-anchor="middle" font-family="JetBrains Mono" font-weight="600" font-size="14" fill="#0b0420">H</text>
+    ${done ? '' : `<text x="${HP[0] + 16}" y="${HP[1] - 14}" font-family="JetBrains Mono" font-weight="600" font-size="16" fill="var(--at-ink)">+</text>`}
+    <g fill="var(--at-electron-fill)" style="filter:drop-shadow(0 0 4px var(--at-electron-fill))">${pairs.map(([x, y, r], i) => pair(x, y, i, r)).join('')}</g>
+    <text x="12" y="190" font-family="JetBrains Mono" font-size="13" fill="var(--at-ink-muted)">${done ? 'H₂O · water' : 'OH⁻ + H⁺'}</text>
+  </svg>`;
 }
-// B: Scroll deck. Story cards are full-height snap sections, then the page relaxes into the map.
-function homeB(){
-  const rail = MANIFESTO.map((_, i) => `<i class="${i === st.card ? 'cur' : ''}"></i>`).join('');
-  return `<div class="screen deck" id="deck">
-    <div class="topbar" style="position:sticky;top:0;background:linear-gradient(var(--at-space),transparent)"><span class="wordmark"><i></i>AstraTron</span><button class="don" data-act="donate">Donate</button></div>
-    <div class="rail"><div aria-hidden="true">${rail}</div></div>
-    ${MANIFESTO.map((_, i) => storyCard(i).replace('<section class="story', `<section data-card="${i}" class="story`)).join('')}
-    <section class="rest" data-card="map">
-      <div style="font:400 13px var(--at-font-label);color:var(--at-electron);text-transform:uppercase">Choose your Unit</div>
-      <h2 style="font:700 30px/1.05 var(--at-font-text);margin:6px 0 2px">The course map</h2>
-      <p style="margin:0;color:var(--at-ink-muted)">Swipe sideways along each Course.</p>
-      ${courseStrips()}
-      <div class="panel" style="margin-top:20px"><b>Free, for everyone.</b><p style="margin:6px 0 12px;color:var(--at-ink-muted);font-size:15px">No ads, no accounts. If it helps you, keep it running.</p><button class="btn btn-secondary" data-act="donate">Donate on Ko-fi</button></div>
-    </section></div>
-    <div class="thumbcta ${st.card === 0 ? 'hide' : ''}" id="thumbcta"><button class="btn btn-primary btn-block" data-act="openUnit">${st.done.size ? 'Continue Unit 1' : 'Start Unit 1'} ▸</button></div>`;
+function pushCard(){
+  return `<div class="pushcard">
+    <div class="scene" style="aspect-ratio:16/10">${pushScene()}</div>
+    <p class="pushmsg" role="status">${st.pushed
+      ? '<b style="color:var(--at-electron)">✓ You just made water.</b> That drag was a curved arrow. All of organic chemistry is built from moves like it.'
+      : '<b>Try it:</b> drag a cyan electron pair from <span class="data">O</span> onto <span class="data">H⁺</span>.'}</p></div>`;
 }
-// C: Hub. Stories once (thumb band below the content), then a Hub home.
-function homeC(){
-  if (st.visitor === 'first' && !st.introSeen){
-    const N = MANIFESTO.length, last = st.card === N - 1;
-    const dots = Array.from({length: N}, (_, i) => `<i class="${i === st.card ? 'cur' : ''}"></i>`).join('');
-    return `<div class="c-story">${storyCard(st.card, st.anim)}</div>
-      <div class="topbar"><span class="wordmark"><i></i>AstraTron</span><button class="btn-ghost" style="font:600 14px var(--at-font-text);text-decoration:underline;min-height:44px;color:var(--at-ink)" data-act="skip">Skip</button></div>
-      <div class="band"><button class="nav" data-act="prev" aria-label="Previous card" ${st.card === 0 ? 'disabled' : ''}>‹</button>
-        <div class="dots" aria-label="Card ${st.card + 1} of ${N}">${dots}</div>
-        <button class="nav" data-act="${last ? 'skip' : 'next-card'}" aria-label="${last ? 'Go to home' : 'Next card'}" style="${last ? 'background:var(--at-ignite-fill);color:var(--at-on-fill);border-color:var(--at-fill-edge)' : ''}">›</button></div>`;
-  }
+function footerLine(){
+  return `<footer class="sitefoot"><p class="big" style="font-size:28px">Move <span class="c">electrons</span>. Move the <span class="o">world</span>.</p>
+    <p style="color:var(--at-ink-muted);font-size:15px;margin:8px 0 14px">Free, for everyone. No ads, no accounts. If it helps you, keep it running.</p>
+    <button class="btn btn-secondary" data-act="donate">Donate on Ko-fi</button></footer>`;
+}
+function mapBlock(title = 'The course map'){
+  return `<section class="mapblock"><div class="kicker">Choose your Unit</div><h2 class="h2">${title}</h2>
+    <p style="margin:0;color:var(--at-ink-muted)">Swipe sideways along each Course. Unit 1 is live; the rest are on the way.</p>${courseStrips()}</section>`;
+}
+function topbar(){ return `<div class="topbar" style="position:sticky;background:var(--at-space)"><span class="wordmark"><i></i>AstraTron</span><button class="don" data-act="donate">Donate</button></div>`; }
+// Returning visitors: same Hub in every variant
+function hub(){
   const l = LESSONS.find(x => x.n === st.lastLesson);
-  const started = st.done.size > 0 || st.visitor === 'returning';
-  return `<div class="screen ${st.anim}"><div class="topbar" style="position:sticky;background:var(--at-space)"><span class="wordmark"><i></i>AstraTron</span><button class="don" data-act="donate">Donate</button></div>
-    <div class="hub" style="padding-top:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:700 24px var(--at-font-text)">${started ? 'Welcome back' : 'Ready, player one'}</span><span class="streak">🔥<b>${started ? 3 : 0}</b></span></div>
-      <div class="cont"><div class="k">${started ? 'Continue' : 'Start here'}</div>
-        <h3>${started ? `Lesson ${l.n}: ${esc(l.t)}` : 'Unit 1: Structure & Bonding'}</h3>
-        <p>${started ? `Unit 1 · Step 4 of ${l.steps}` : 'Why carbon builds everything, in 9 Lessons.'}</p>
-        <button class="btn btn-primary btn-block" data-act="${started ? 'resume' : 'openUnit'}">${started ? 'Resume ▸' : 'Start Unit 1 ▸'}</button></div>
-      ${courseStrips()}
-      <button class="btn btn-ghost" data-act="replay">↺ Replay the intro</button>
-    </div></div>`;
+  return `<div class="screen ${st.anim}">${topbar()}<div class="hub" style="padding-top:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:700 24px var(--at-font-text)">Welcome back</span><span class="streak">🔥<b>3</b></span></div>
+      <div class="cont"><div class="k">Continue</div><h3>Lesson ${l.n}: ${esc(l.t)}</h3><p>Unit 1 · Step 4 of ${l.steps}</p>
+        <button class="btn btn-primary btn-block" data-act="resume">Resume ▸</button></div>
+      ${courseStrips()}</div>${footerLine()}</div>`;
+}
+// A: Push hero. One screen: headline + a live push + one button; the map sits right under it.
+function homeA(){
+  if (st.visitor === 'returning') return hub();
+  return `<div class="screen ${st.anim}">${topbar()}
+    <section class="hero nebula">${stars(30, 4)}
+      <div class="kicker">Free · interactive · no sign-up</div>
+      <h1 class="herotitle">Chemistry is how the universe builds things. <span class="o">Come build.</span></h1>
+      ${pushCard()}
+      <button class="btn ${st.pushed ? 'btn-electron' : 'btn-primary'} btn-block" data-act="openUnit">Start Unit 1 ▸</button>
+      <div class="scrollcue">The course map ↓</div>
+    </section>
+    <div class="pad">${mapBlock()}</div>${footerLine()}</div>`;
+}
+// B: Map first. A short banner; the map is the homepage. No interaction until you pick a Unit.
+function homeB(){
+  if (st.visitor === 'returning') return hub();
+  return `<div class="screen ${st.anim}">${topbar()}
+    <section class="banner">
+      <h1 class="herotitle" style="font-size:clamp(30px,8vw,44px)">Organic chemistry you <span class="c">play</span>, not memorize.</h1>
+      <p style="margin:8px 0 14px;color:var(--at-ink-muted)">Push electrons, turn molecules, break bonds. Orgo I and II, free, no sign-up.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" data-act="openUnit">Start Unit 1 ▸</button><button class="btn btn-secondary" data-act="peek">What's a Lesson like?</button></div>
+      ${st.peek ? `<div style="margin-top:16px">${pushCard()}</div>` : ''}
+    </section>
+    <div class="pad">${mapBlock('18 Units, Orgo I + II')}</div>${footerLine()}</div>`;
+}
+// C: Straight in. The homepage IS Lesson 0, Step 1, in the Step player chrome. The map is revealed after.
+function homeC(){
+  if (st.visitor === 'returning') return hub();
+  if (st.cStep >= 3) return `<div class="screen ${st.anim}">${topbar()}<div class="pad" style="padding-top:8px">
+      <div class="cont"><div class="k">You've started</div><h3>Lesson 0: Why Carbon?</h3><p>Step 3 of 9 · keep going, or pick any Unit below.</p>
+      <button class="btn btn-primary btn-block" data-act="openUnit">Keep going ▸</button></div>${mapBlock()}</div>${footerLine()}</div>`;
+  const bars = Array.from({length: 9}, (_, i) => `<i class="${i < st.cStep ? 'done' : i === st.cStep ? 'cur' : ''}"></i>`).join('');
+  let body, foot;
+  if (st.cStep === 0){
+    body = `<p class="lead">AstraTron · Lesson 0 · Why Carbon?</p><p class="q">Chemistry is moving electrons. Move one.</p>${pushCard()}`;
+    foot = st.pushed ? `<button class="btn btn-electron btn-block" data-act="cnext">Continue</button>` : `<button class="btn btn-primary btn-block" disabled>Push the electrons first</button>`;
+  } else if (st.cStep === 1){
+    body = `<div class="nebula" style="position:relative;padding:28px 16px;border:var(--at-border-strong) solid var(--at-line)">${stars(20, 9)}<p class="big" style="position:relative;font:700 32px/1.05 var(--at-font-text);margin:0">Every carbon atom in you was forged in a <span class="c">star</span>.</p></div>
+      <p class="lead">Organic chemistry is what that carbon learned to do next. You'll push its electrons the same way you just pushed oxygen's.</p>`;
+    foot = `<button class="btn btn-primary btn-block" data-act="cnext">Continue</button>`;
+  } else {
+    body = `<p class="q">That's how every Lesson works.</p><p class="lead">Short Steps, one idea each, two tries with a hint. 18 Units cover Orgo I and II, and Unit 1 is live.</p>`;
+    foot = `<button class="btn btn-primary btn-block" data-act="cnext">See the course ▸</button>`;
+  }
+  return `<div class="player" style="z-index:1">
+    <div class="player-top"><span class="wordmark" style="font-size:16px"><i></i></span><div class="bars" aria-hidden="true">${bars}</div><button class="skipmap" data-act="cskip">Course map</button></div>
+    <div class="player-body">${body}</div><div class="player-foot"><div class="inner">${foot}</div></div></div>`;
+}
+function attachPush(){
+  const svg = $('#pushsvg'); if (!svg || st.pushed) return;
+  const arrow = $('#pusharrow'), hp = svg.querySelector('#hplus');
+  const pt = e => { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); };
+  const hit = q => Math.hypot(q.x - 232, q.y - 160) < 34;
+  const succeed = () => { st.pushed = true; render(); const b = document.querySelector('.newbond');
+    if (b && st.motion === 'full'){ const len = 150; b.style.strokeDasharray = len; b.animate([{strokeDashoffset: len}, {strokeDashoffset: 0}], {duration: 420, easing: 'cubic-bezier(.2,.8,0,1)'}); spark(b, document.querySelector('[data-act=openUnit],[data-act=cnext]')); } };
+  svg.querySelectorAll('.lp').forEach(g => {
+    const [sx, sy] = g.getAttribute('transform').match(/translate\(([\d.]+) ([\d.]+)/).slice(1).map(Number);
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); succeed(); } });
+    g.addEventListener('pointerdown', e => {
+      e.preventDefault(); e.stopPropagation(); g.setPointerCapture(e.pointerId);
+      const move = ev => { const q = pt(ev); const mx = (sx + q.x) / 2, my = Math.min(sy, q.y) - 40;
+        arrow.setAttribute('d', `M${sx},${sy} Q${mx},${my} ${q.x},${q.y}`); hp.setAttribute('stroke-width', hit(q) ? 6 : 3); };
+      const up = ev => { g.removeEventListener('pointermove', move); g.removeEventListener('pointerup', up);
+        if (hit(pt(ev))) succeed(); else { arrow.setAttribute('d', ''); hp.setAttribute('stroke-width', 3);
+          const m = document.querySelector('.pushmsg'); if (m) m.innerHTML = '<b>Almost:</b> let go on top of <span class="data">H⁺</span>, the dashed circle.'; } };
+      g.addEventListener('pointermove', move); g.addEventListener('pointerup', up);
+    });
+  });
 }
 
 /* ---------------- style sheet ---------------- */
@@ -718,7 +791,7 @@ function styleSheet(){
     <div class="panel"><h4 style="margin:0 0 12px">Lesson rows (Level select)</h4>${lessonRow(LESSONS[1])}${lessonRow(LESSONS[8])}${lessonRow(LESSONS[0])}</div>
   </div>
   <div class="cols" style="margin-top:16px">
-    <div><h4 style="margin:0 0 8px">Story card</h4><div class="mini-phone"><div class="storybars" style="top:8px"><div class="bars"><i class="done"></i><i class="cur"></i><i></i><i></i><i></i><i></i></div></div><div style="position:absolute;inset:0;display:flex">${storyCard(1).replace('class="story', 'style="flex:1;padding:50px 16px" class="story')}</div></div></div>
+    <div><h4 style="margin:0 0 8px">Big-statement card (Hooks, Wraps, video frames)</h4><div class="mini-phone"><div class="storybars" style="top:8px"><div class="bars"><i class="done"></i><i class="cur"></i><i></i><i></i><i></i><i></i></div></div><div style="position:absolute;inset:0;display:flex">${storyCard(1).replace('class="story', 'style="flex:1;padding:50px 16px" class="story')}</div></div></div>
     <div><h4 style="margin:0 0 8px">Step player chrome</h4><div class="mini-phone"><div class="player" style="position:absolute"><div class="player-top" style="grid-template-columns:36px 1fr auto"><button class="x" style="width:36px;height:36px">✕</button><div class="bars"><i class="done"></i><i class="done"></i><i class="done"></i><i class="cur"></i><i></i><i></i><i></i><i></i></div><span class="cnt">4/8</span></div><div class="player-body"><p class="q" style="font-size:17px">One question, nothing else on screen.</p><p class="lead" style="font-size:14px">The bars match the story-card bars: one progress motif across the whole site.</p></div><div class="player-foot"><button class="btn btn-primary btn-block">Check</button></div></div></div></div>
     <div class="panel"><h4 style="margin:0 0 12px">Two-try feedback</h4>
       <div class="fb ok"><span class="ic">✓</span><div><h4>Nice. 2 lone pairs.</h4><p>Solid cyan border, ✓, a short reason why.</p></div></div>
@@ -740,12 +813,12 @@ function styleSheet(){
   </div>
   <div class="decide"><b>Rules:</b> no animation loops inside the Step player. Nothing moves the layout once a Step is on screen. The site follows <span class="data">prefers-reduced-motion</span>, and there's also a manual switch in settings. Sound stays off by default.</div>
 
-  <h2><span class="n">07</span>How the pieces connect (see views A, B, C)</h2>
-  <p class="why">All three keep the same Unit page (Level select) and the same full-screen Step player. They differ in how the homepage story cards hand you on to the map, and how you move between cards on a phone. The old ▲/▼ buttons that covered content are gone in all three.</p>
+  <h2><span class="n">07</span>First visit (see views A, B, C)</h2>
+  <p class="why">No intro cards. The manifesto is spread out: “Come build.” is the headline, the star line is Lesson 0's Hook, and “Move electrons. Move the world.” sits in the footer next to Donate. All three share the Unit page, the Step player and the returning-visitor Hub (Continue card, streak, map). Flip <i>Visitor</i> in the bar to see it.</p>
   <div class="cols">
-    <div class="panel"><h4 style="margin:0 0 6px">A · Stories</h4><p class="why" style="margin:0">Tap the right of the screen for the next card, the left to go back. The last card <i>is</i> the swipeable map. Returning visitors open straight on the map.</p></div>
-    <div class="panel"><h4 style="margin:0 0 6px">B · Scroll deck</h4><p class="why" style="margin:0">Swipe up through full-height cards, then the page turns into a normal scrolling map. A sticky “Start Unit 1” button sits in thumb reach.</p></div>
-    <div class="panel"><h4 style="margin:0 0 6px">C · Hub</h4><p class="why" style="margin:0">The intro plays once, with ‹ › buttons in their own band under the card. After that, home is a Hub: a Continue card, your streak and the map.</p></div>
+    <div class="panel"><h4 style="margin:0 0 6px">A · Push hero</h4><p class="why" style="margin:0">One screen: headline, a live OH⁻ + H⁺ push, and one button. The course map is right below.</p></div>
+    <div class="panel"><h4 style="margin:0 0 6px">B · Map first</h4><p class="why" style="margin:0">A short banner, then the course map is the homepage. The push only shows if you tap “What's a Lesson like?”.</p></div>
+    <div class="panel"><h4 style="margin:0 0 6px">C · Straight in</h4><p class="why" style="margin:0">The homepage is Lesson 0, Step 1. Push an electron, read the star line, then the map opens. A “Course map” link skips it at any time.</p></div>
   </div>
 </div>`;
 }
@@ -781,14 +854,12 @@ function spark(fromEl, toEl){
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-act]'); if (!t) return;
   const a = t.dataset.act;
-  const N = MANIFESTO.length + (st.variant === 'A' ? 1 : 0);
   switch (a){
-    case 'next-card': if (st.card < N - 1){ st.card++; st.anim = st.motion === 'full' ? 'story-in' : ''; render(); } break;
-    case 'prev': if (st.card > 0){ st.card--; st.anim = st.motion === 'full' ? 'story-in' : ''; render(); } break;
-    case 'skip': st.introSeen = true; st.card = 0; go('home', 'zoomin'); break;
-    case 'replay': st.introSeen = false; st.visitor = 'first'; st.card = 0; setParam('visitor', 'first'); go('home', 'story-in'); break;
+    case 'cnext': st.cStep++; st.anim = st.motion === 'full' ? 'story-in' : ''; render(); break;
+    case 'cskip': st.cStep = 3; go('home', 'zoomin'); break;
+    case 'peek': st.peek = !st.peek; render(); break;
     case 'openUnit': go('unit', st.variant === 'A' ? 'zoomin' : 'pushin'); break;
-    case 'back': st.introSeen = true; if (st.variant === 'A') st.card = MANIFESTO.length; go('home', 'pushin'); break;
+    case 'back': if (st.variant === 'C') st.cStep = 3; go('home', 'pushin'); break;
     case 'openLesson': startLesson(+t.dataset.n); break;
     case 'resume': go('unit', ''); startLesson(st.lastLesson, 1); break;
     case 'exit': case 'finish':
@@ -816,30 +887,11 @@ document.addEventListener('click', e => {
 
 function afterRender(){
   if (st.variant === 'S') fillStyleSheet();
-  const deck = $('#deck');
-  if (deck){
-    const io = new IntersectionObserver(es => es.forEach(en => {
-      if (!en.isIntersecting) return;
-      const c = en.target.dataset.card;
-      st.card = c === 'map' ? MANIFESTO.length : +c;
-      deck.querySelectorAll('.rail i').forEach((r, i) => r.classList.toggle('cur', i === st.card));
-      $('#thumbcta')?.classList.toggle('hide', st.card === 0);
-      $('#statebar').textContent = stateLine();
-    }), {root: deck, threshold: .6});
-    deck.querySelectorAll('[data-card]').forEach(s => io.observe(s));
-  }
-  // swipe on A/C story cards
-  const stage = $('#stage');
-  if (stage && st.screen === 'home' && st.variant !== 'B'){
-    let x0 = null;
-    stage.onpointerdown = e => { x0 = e.clientX; };
-    stage.onpointerup = e => { if (x0 == null) return; const dx = e.clientX - x0; x0 = null;
-      if (Math.abs(dx) > 60 && !e.target.closest('.strip')){ document.querySelector(`[data-act="${dx < 0 ? 'next-card' : 'prev'}"]`)?.click(); } };
-  }
+  attachPush();
 }
 
 /* ---------------- switcher ---------------- */
-function setVariant(v){ st.variant = v; setParam('variant', v); st.screen = 'home'; st.card = 0; st.introSeen = false; render(); }
+function setVariant(v){ st.variant = v; setParam('variant', v); st.screen = 'home'; st.pushed = false; st.cStep = 0; st.peek = false; render(); }
 function cycle(d){ const i = KEYS.indexOf(st.variant); setVariant(KEYS[(i + d + KEYS.length) % KEYS.length]); }
 $('#sw-min').onclick = () => { st.swmin = !st.swmin; applyGlobals(); };
 $('#sw-prev').onclick = () => cycle(-1);
@@ -848,13 +900,11 @@ $('#sw-theme').onclick = () => { st.theme = st.theme === 'dark' ? 'light' : 'dar
 $('#sw-motion').onclick = () => { st.motion = st.motion === 'full' ? 'reduced' : 'full'; setParam('motion', st.motion); render(); };
 $('#sw-cvd').onchange = e => { st.cvd = e.target.value; setParam('cvd', st.cvd); render(); };
 $('#sw-frame').onclick = () => { st.frame = st.frame === 'framed' ? 'full' : 'framed'; setParam('frame', st.frame); render(); };
-$('#sw-visitor').onclick = () => { st.visitor = st.visitor === 'first' ? 'returning' : 'first'; setParam('visitor', st.visitor); st.screen = 'home'; st.card = 0; st.introSeen = false; render(); };
+$('#sw-visitor').onclick = () => { st.visitor = st.visitor === 'first' ? 'returning' : 'first'; setParam('visitor', st.visitor); st.screen = 'home'; st.pushed = false; st.cStep = 0; render(); };
 addEventListener('keydown', e => {
   if (e.target.closest('input,textarea,select,[contenteditable]')) return;
   if (e.key === 'ArrowLeft') cycle(-1);
   else if (e.key === 'ArrowRight') cycle(1);
-  else if (st.variant !== 'S' && st.screen === 'home' && (e.key === 'ArrowDown' || e.key === ' ')){ e.preventDefault(); document.querySelector('[data-act="next-card"]')?.click(); }
-  else if (st.variant !== 'S' && st.screen === 'home' && e.key === 'ArrowUp'){ document.querySelector('[data-act="prev"]')?.click(); }
 });
 addEventListener('resize', () => applyGlobals());
 render();
