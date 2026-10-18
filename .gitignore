@@ -1,0 +1,4 @@
+# machine-local Claude Code permissions
+.claude/settings.local.json
+# Office lock files
+~$*
