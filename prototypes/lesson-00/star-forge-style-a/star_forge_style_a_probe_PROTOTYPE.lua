@@ -1,0 +1,236 @@
+-- PROTOTYPE (throwaway): star-forge Style A "Calm Explainer", edited and finished in DaVinci Resolve free 21.1.1.
+-- GENERATED from star_forge_style_a.lua.in by make_lua_a.py (beat frames come from the Manim beat log).
+-- One continuous Manim render per aspect, cut ONCE on the fusion contact frame so the only editorial
+-- transition (a short Fusion flash) sits exactly on the contact. Everything else is continuous Manim.
+-- Finish per clip (native Fusion only): SoftGlow -> FilmGrain (MasterStrength) -> BrightnessContrast
+-- masked by an inverted EllipseMask (vignette). 1 s fade-up from black via SetFades. 3 CC0 stems on A1-A3.
+-- Free 21.1 Lua has no io library: the report is raised as an error at the end (lands in ResolveDebug.txt).
+
+local MODE = "probe"   -- "probe" (short test renders of the candidates) or "final"
+local ROOT = [[/Users/maracchi/Desktop/Claude/10. October 2026/10-18-2026 Organic Chemistry/wt-lesson00/prototypes/lesson-00/star-forge-style-a]]
+local OUT = ROOT .. "/out"
+local PROBE_OUT = ROOT .. "/out/probe"
+local SIZE = { ["16x9"] = {1920, 1080}, ["9x16"] = {1080, 1920} }
+local CONTACT, TOTAL, FPS = 188, 749, 30
+local FADE_IN = 30
+local LOOK = { glowThreshold = 0.62, glowGain = 0.38, glowSize = 8, grain = 0.02, grainSize = 0.8,
+    vigSoft = 0.45, vigGain = 0.72, vig = { ["16x9"] = {1.25, 0.8}, ["9x16"] = {0.95, 1.6} } }
+local FLASH = { type = "Glow", category = "fusion", dur = 10 }   -- final: { type=..., dur=... }
+local MARKER, ENDM = "STYLE_A_PROBE_REPORT", "STYLE_A_PROBE_END"
+
+local lines = {}
+local function p(s) s = tostring(s); print(s); table.insert(lines, s) end
+local function try(label, f, ...)
+  local ok, r = pcall(f, ...)
+  if not ok then p("  ! " .. label .. ": " .. tostring(r)); return nil end
+  return r
+end
+local function wait(s) if bmd and bmd.wait then bmd.wait(s) end end
+local function inputNames(tool)
+  local names = {}
+  pcall(function() for _, inp in pairs(tool:GetInputList()) do table.insert(names, inp:GetAttrs().INPS_ID) end end)
+  table.sort(names); return table.concat(names, ",")
+end
+local logged = {}
+
+-- ------------------------------------------------------------------ Fusion finish on one clip
+local function finish(item, tag, aspect, look)
+  local comp = item:AddFusionComp()
+  if not comp then p("  ! " .. tag .. ": AddFusionComp failed"); return end
+  local mi, mo = comp:FindTool("MediaIn1"), comp:FindTool("MediaOut1")
+  if not (mi and mo) then p("  ! " .. tag .. ": no MediaIn1/MediaOut1"); return end
+  comp:Lock()   -- structure only under the lock; every value write happens unlocked (Composition.Lock trap)
+  local glow = comp:AddTool("SoftGlow")
+  local grain = comp:AddTool("FilmGrain")
+  local bc = comp:AddTool("BrightnessContrast")
+  local ell = comp:AddTool("EllipseMask")
+  comp:Unlock()
+  local msg = tag
+  local last = mi
+  if glow then
+    glow.Input = last.Output
+    glow:SetInput("Threshold", look.glowThreshold); glow:SetInput("Gain", look.glowGain)
+    if look.glowSize then glow:SetInput("XGlowSize", look.glowSize) end
+    last = glow; msg = msg .. " SoftGlow ok"
+    if not logged.glow then logged.glow = true; p("  SoftGlow inputs: " .. inputNames(glow)) end
+  else p("  ! " .. tag .. ": AddTool SoftGlow nil") end
+  if grain then
+    grain.Input = last.Output
+    grain:SetInput("MasterStrength", look.grain)
+    if look.grainSize then grain:SetInput("MasterXSize", look.grainSize) end
+    grain:SetInput("Monochrome", 1)
+    last = grain; msg = msg .. " FilmGrain ok"
+  else p("  ! " .. tag .. ": AddTool FilmGrain nil") end
+  if bc and ell then
+    bc.Input = last.Output
+    local w, h = look.vig[aspect][1], look.vig[aspect][2]
+    ell:SetInput("Width", w); ell:SetInput("Height", h)
+    ell:SetInput("SoftEdge", look.vigSoft); ell:SetInput("Invert", 1)
+    bc:SetInput("Gain", look.vigGain)
+    bc.EffectMask = ell.Mask
+    last = bc; msg = msg .. " vignette ok"
+    if not logged.ell then logged.ell = true; p("  EllipseMask inputs: " .. inputNames(ell)) end
+  else p("  ! " .. tag .. ": vignette tools nil") end
+  mo.Input = last.Output
+  p("  " .. msg)
+end
+
+-- ------------------------------------------------------------------ main
+local APP = resolve or (Resolve and Resolve()) or (bmd and bmd.scriptapp and bmd.scriptapp("Resolve"))
+local resolve, pm, proj, mp
+local results = {}
+
+local ok, err = pcall(function()
+  resolve = APP
+  assert(resolve, "no Resolve scripting handle")
+  p("Resolve: " .. resolve:GetProductName() .. " " .. resolve:GetVersionString() .. "  MODE=" .. MODE)
+  pm = resolve:GetProjectManager()
+  math.randomseed(os.time())
+  local name = "star-forge-STYLE-A-" .. tostring(math.random(100000, 999999))
+  proj = pm:CreateProject(name)
+  assert(proj, "could not create project " .. name)
+  p("project: " .. name)
+  p("settings: fps=" .. tostring(proj:SetSetting("timelineFrameRate", "30")) ..
+    " w=" .. tostring(proj:SetSetting("timelineResolutionWidth", "1920")) ..
+    " h=" .. tostring(proj:SetSetting("timelineResolutionHeight", "1080")))
+  mp = proj:GetMediaPool()
+
+  local pool = {}
+  local function import(k, path)
+    local clips = mp:ImportMedia({ path })
+    local c = clips and clips[1]
+    if not c then p("  ! import FAILED: " .. path); return end
+    pool[k] = c
+    p("  imported " .. k .. ": frames=" .. tostring(c:GetClipProperty("Frames")) .. " fps=" .. tostring(c:GetClipProperty("FPS")) ..
+      " res=" .. tostring(c:GetClipProperty("Resolution")))
+  end
+  p("import:")
+  for _, a in ipairs({ "16x9", "9x16" }) do import("manim-" .. a, ROOT .. "/out/manim/star-forge-style-a-manim-" .. a .. ".mp4") end
+  for _, s in ipairs({ "amb", "fx", "ui" }) do import(s, ROOT .. "/audio/" .. s .. ".wav") end
+
+  -- build one timeline: clip A [0, CONTACT) + clip B [CONTACT, TOTAL), one flash transition on the cut
+  local function build(tname, aspect, flash, withAudio)
+    local w, h = SIZE[aspect][1], SIZE[aspect][2]
+    p("== build " .. tname)
+    local tl = mp:CreateEmptyTimeline(tname)
+    assert(tl, "CreateEmptyTimeline failed: " .. tname)
+    proj:SetCurrentTimeline(tl)
+    try("start tc", function() tl:SetStartTimecode("00:00:00:00") end)
+    p("  custom=" .. tostring(tl:SetSetting("useCustomSettings", "1")) ..
+      " w=" .. tostring(tl:SetSetting("timelineResolutionWidth", tostring(w))) ..
+      " h=" .. tostring(tl:SetSetting("timelineResolutionHeight", tostring(h))))
+    local t0 = tl:GetStartFrame()
+    local mpi = pool["manim-" .. aspect]
+    local items = {}
+    for i, seg in ipairs({ { 0, CONTACT }, { CONTACT, TOTAL } }) do
+      local got = mp:AppendToTimeline({ { mediaPoolItem = mpi, startFrame = seg[1], endFrame = seg[2],
+        mediaType = 1, trackIndex = 1, recordFrame = t0 + seg[1] } })
+      items[i] = got and got[1]
+      if items[i] then
+        local st, du = items[i]:GetStart() - t0, items[i]:GetDuration()
+        p("  V1 clip " .. i .. ": rec " .. st .. " dur " .. du .. ((st == seg[1] and du == seg[2] - seg[1]) and "" or "  ! expected " .. seg[1] .. "+" .. (seg[2] - seg[1])))
+      else p("  ! V1 clip " .. i .. ": AppendToTimeline returned nothing") end
+    end
+    local R = { tl = tl, flash = "none" }
+    if flash and items[1] then
+      local tr = try("AddTransition " .. flash.type, function()
+        return items[1]:AddTransition({ type = flash.type, category = flash.category or "fusion", position = "end",
+          alignment = "center", duration = flash.dur })
+      end)
+      if tr then
+        R.flash = flash.type
+        p("  T " .. flash.type .. " (" .. (flash.category or "fusion") .. "): name=" .. tostring(try("tname", function() return tr:GetName() end)) ..
+          " @" .. tostring(try("tstart", function() return tr:GetStart() - t0 end)) .. " dur " .. tostring(try("tdur", function() return tr:GetDuration() end)))
+      else p("  ! T " .. flash.type .. ": AddTransition returned nil") end
+    end
+    -- re-query the track: a transition shifts item indexes (MCP doc)
+    local vids = {}
+    for _, x in ipairs(tl:GetItemListInTrack("video", 1) or {}) do
+      local n = tostring(x:GetName())
+      if n:find("star%-forge%-style%-a%-manim") then table.insert(vids, x) end
+    end
+    p("  fade-in: " .. tostring(vids[1] and try("SetFades", function() return vids[1]:SetFades({ FadeIn = FADE_IN }) end)))
+    for i, it in ipairs(vids) do try("finish " .. i, finish, it, "  F clip" .. i, aspect, LOOK) end
+    if withAudio then
+      while tl:GetTrackCount("audio") < 3 do if not try("AddTrack", function() return tl:AddTrack("audio", "stereo") end) then break end end
+      for k, s in ipairs({ "amb", "fx", "ui" }) do
+        local got = pool[s] and mp:AppendToTimeline({ { mediaPoolItem = pool[s], startFrame = 0, endFrame = TOTAL,
+          mediaType = 2, trackIndex = k, recordFrame = t0 } })
+        local it = got and got[1]
+        p("  A" .. k .. " " .. s .. ": " .. (it and ("rec " .. (it:GetStart() - t0) .. " dur " .. it:GetDuration()) or "! AppendToTimeline returned nothing"))
+      end
+    end
+    for _, kind in ipairs({ "video", "audio" }) do
+      for k = 1, tl:GetTrackCount(kind) do
+        local names = {}
+        for _, x in ipairs(tl:GetItemListInTrack(kind, k) or {}) do
+          table.insert(names, tostring(x:GetName()) .. "@" .. tostring(x:GetStart() - t0) .. "+" .. tostring(x:GetDuration()))
+        end
+        p("  readback " .. kind .. k .. ": " .. table.concat(names, " | "))
+      end
+    end
+    p("  timeline end: " .. tostring(tl:GetEndFrame() - t0))
+    return R
+  end
+
+  local function render(aspect, tl, dir, base, markIn, markOut)
+    local w, h = SIZE[aspect][1], SIZE[aspect][2]
+    proj:SetCurrentTimeline(tl)
+    p("  format/codec: " .. tostring(proj:SetCurrentRenderFormatAndCodec("mp4", "H264")))
+    local s = { TargetDir = dir, CustomName = base, FormatWidth = w, FormatHeight = h, FrameRate = 30,
+      ExportVideo = true, ExportAudio = (markIn == nil), AudioCodec = "aac", AudioSampleRate = 48000 }
+    if markIn then s.SelectAllFrames = false; s.MarkIn = markIn; s.MarkOut = markOut else s.SelectAllFrames = true end
+    local set = proj:SetRenderSettings(s)
+    p("  settings: " .. tostring(set))
+    local q = try("VideoQuality", function() return proj:SetRenderSettings({ VideoQuality = "Best" }) end)
+    p("  VideoQuality=Best: " .. tostring(q))
+    local job = proj:AddRenderJob()
+    if not job then p("  ! AddRenderJob failed: " .. base); return end
+    proj:StartRendering(job)
+    local guard = 0
+    while proj:IsRenderingInProgress() and guard < 1200 do wait(1); guard = guard + 1 end
+    local st = proj:GetRenderJobStatus(job) or {}
+    p("  render " .. base .. ": " .. tostring(st.JobStatus) .. " " .. tostring(st.CompletionPercentage) .. "% " .. tostring(st.Error or "") .. " (" .. guard .. " s)")
+    results[base] = st.JobStatus
+  end
+
+  if MODE == "probe" then
+    local cands = {
+      { "probe-16x9-brightflash", "16x9", { type = "Brightness Flash", dur = 10 } },
+      { "probe-16x9-glow", "16x9", { type = "Glow", dur = 12 } },
+      { "probe-9x16-glow", "9x16", { type = "Glow", dur = 12 } },
+    }
+    local built = {}
+    for _, c in ipairs(cands) do built[c[1]] = try("build " .. c[1], build, c[1], c[2], c[3], false) end
+    pm:SaveProject()
+    p("== probe renders")
+    for _, c in ipairs(cands) do
+      local R = built[c[1]]
+      if R then results[c[1] .. " transition"] = R.flash; try("render " .. c[1], render, c[2], R.tl, PROBE_OUT, c[1], CONTACT - 20, CONTACT + 25) end
+    end
+    -- a still-frame check of the whole look late in the film (grain + vignette on the dark poster area)
+    local R = built["probe-16x9-glow"]
+    if R then try("render poster probe", render, "16x9", R.tl, PROBE_OUT, "probe-16x9-poster", TOTAL - 10, TOTAL - 1) end
+    local R9 = built["probe-9x16-glow"]
+    if R9 then try("render poster probe 9", render, "9x16", R9.tl, PROBE_OUT, "probe-9x16-poster", TOTAL - 10, TOTAL - 1) end
+  else
+    local built = {}
+    for _, a in ipairs({ "16x9", "9x16" }) do
+      built[a] = try("build " .. a, build, "star-forge STYLE A " .. a, a, FLASH, true)
+      if built[a] then results[a .. " transition"] = built[a].flash end
+    end
+    pm:SaveProject()
+    p("== render")
+    for _, a in ipairs({ "16x9", "9x16" }) do
+      if built[a] then try("render " .. a, render, a, built[a].tl, OUT, "star-forge-style-a-" .. a) end
+    end
+  end
+  pm:SaveProject()
+  p("done")
+end)
+if not ok then p("ERROR: " .. tostring(err)) end
+local summary = {}
+for k, v in pairs(results) do table.insert(summary, k .. "=" .. tostring(v)) end
+table.sort(summary)
+p("SUMMARY: " .. table.concat(summary, "; "))
+error(MARKER .. "\n" .. table.concat(lines, "\n") .. "\n" .. ENDM, 0)

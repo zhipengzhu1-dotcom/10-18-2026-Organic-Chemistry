@@ -1,0 +1,665 @@
+Manim Community v0.22.0
+
+[10/18/26 13:38:32] INFO     Caching disabled.              cairo_renderer.py:89
+Animation 0: FadeIn(VGroup of 2 submobjects), etc.:   0%|          | 0/66 [00:00<?, ?it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:   5%|▍         | 3/66 [00:00<00:02, 24.76it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:   9%|▉         | 6/66 [00:00<00:02, 24.10it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  14%|█▎        | 9/66 [00:00<00:02, 24.33it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  18%|█▊        | 12/66 [00:00<00:02, 24.54it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  23%|██▎       | 15/66 [00:00<00:02, 24.72it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  27%|██▋       | 18/66 [00:00<00:01, 24.37it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  32%|███▏      | 21/66 [00:00<00:01, 24.55it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  36%|███▋      | 24/66 [00:00<00:01, 24.61it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  41%|████      | 27/66 [00:01<00:01, 24.72it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  45%|████▌     | 30/66 [00:01<00:01, 24.65it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  50%|█████     | 33/66 [00:01<00:01, 24.65it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  55%|█████▍    | 36/66 [00:01<00:01, 24.68it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  59%|█████▉    | 39/66 [00:01<00:01, 24.62it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  64%|██████▎   | 42/66 [00:01<00:00, 24.53it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  68%|██████▊   | 45/66 [00:01<00:00, 24.05it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  73%|███████▎  | 48/66 [00:01<00:00, 24.02it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  77%|███████▋  | 51/66 [00:02<00:00, 24.03it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  82%|████████▏ | 54/66 [00:02<00:00, 23.92it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  86%|████████▋ | 57/66 [00:02<00:00, 23.92it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  91%|█████████ | 60/66 [00:02<00:00, 23.78it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  95%|█████████▌| 63/66 [00:02<00:00, 23.84it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.: 100%|██████████| 66/66 [00:02<00:00, 23.69it/s]                                                                                                   [10/18/26 13:38:35] INFO     Animation 0 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00000.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 1: LaggedStart(Group):   0%|          | 0/39 [00:00<?, ?it/s]Animation 1: LaggedStart(Group):   8%|▊         | 3/39 [00:00<00:01, 24.70it/s]Animation 1: LaggedStart(Group):  15%|█▌        | 6/39 [00:00<00:01, 24.92it/s]Animation 1: LaggedStart(Group):  23%|██▎       | 9/39 [00:00<00:01, 25.00it/s]Animation 1: LaggedStart(Group):  31%|███       | 12/39 [00:00<00:01, 24.59it/s]Animation 1: LaggedStart(Group):  38%|███▊      | 15/39 [00:00<00:00, 24.48it/s]Animation 1: LaggedStart(Group):  46%|████▌     | 18/39 [00:00<00:00, 24.11it/s]Animation 1: LaggedStart(Group):  54%|█████▍    | 21/39 [00:00<00:00, 24.02it/s]Animation 1: LaggedStart(Group):  62%|██████▏   | 24/39 [00:00<00:00, 23.99it/s]Animation 1: LaggedStart(Group):  69%|██████▉   | 27/39 [00:01<00:00, 23.97it/s]Animation 1: LaggedStart(Group):  77%|███████▋  | 30/39 [00:01<00:00, 23.92it/s]Animation 1: LaggedStart(Group):  85%|████████▍ | 33/39 [00:01<00:00, 23.87it/s]Animation 1: LaggedStart(Group):  92%|█████████▏| 36/39 [00:01<00:00, 23.63it/s]Animation 1: LaggedStart(Group): 100%|██████████| 39/39 [00:01<00:00, 23.80it/s]                                                                                [10/18/26 13:38:37] INFO     Animation 1 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00001.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:   0%|          | 0/60 [00:00<?, ?it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:   5%|▌         | 3/60 [00:00<00:02, 23.32it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  10%|█         | 6/60 [00:00<00:02, 23.29it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  15%|█▌        | 9/60 [00:00<00:02, 23.17it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  20%|██        | 12/60 [00:00<00:02, 23.39it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  25%|██▌       | 15/60 [00:00<00:01, 23.58it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  30%|███       | 18/60 [00:00<00:01, 23.43it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  35%|███▌      | 21/60 [00:00<00:01, 23.47it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  40%|████      | 24/60 [00:01<00:01, 23.37it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  45%|████▌     | 27/60 [00:01<00:01, 23.34it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  50%|█████     | 30/60 [00:01<00:01, 23.17it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  55%|█████▌    | 33/60 [00:01<00:01, 23.10it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  60%|██████    | 36/60 [00:01<00:01, 23.06it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  65%|██████▌   | 39/60 [00:01<00:00, 22.58it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  70%|███████   | 42/60 [00:01<00:00, 22.51it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  75%|███████▌  | 45/60 [00:01<00:00, 22.35it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  80%|████████  | 48/60 [00:02<00:00, 22.40it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  85%|████████▌ | 51/60 [00:02<00:00, 22.53it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  90%|█████████ | 54/60 [00:02<00:00, 22.63it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  95%|█████████▌| 57/60 [00:02<00:00, 22.82it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.: 100%|██████████| 60/60 [00:02<00:00, 23.01it/s]                                                                                                             [10/18/26 13:38:40] INFO     Animation 2 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00002.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 3:   0%|          | 0/11 [00:00<?, ?it/s]Waiting 3:  27%|██▋       | 3/11 [00:00<00:00, 23.65it/s]Waiting 3:  55%|█████▍    | 6/11 [00:00<00:00, 24.01it/s]Waiting 3:  82%|████████▏ | 9/11 [00:00<00:00, 24.12it/s]                                                                             INFO     Animation 3 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00003.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 4: _MethodAnimation(VGroup of 2 submobjects), etc.:   0%|          | 0/12 [00:00<?, ?it/s]Animation 4: _MethodAnimation(VGroup of 2 submobjects), etc.:  25%|██▌       | 3/12 [00:00<00:00, 24.02it/s]Animation 4: _MethodAnimation(VGroup of 2 submobjects), etc.:  50%|█████     | 6/12 [00:00<00:00, 24.15it/s]Animation 4: _MethodAnimation(VGroup of 2 submobjects), etc.:  75%|███████▌  | 9/12 [00:00<00:00, 24.30it/s]Animation 4: _MethodAnimation(VGroup of 2 submobjects), etc.: 100%|██████████| 12/12 [00:00<00:00, 24.28it/s]                                                                                                             [10/18/26 13:38:41] INFO     Animation 4 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00004.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:   0%|          | 0/30 [00:00<?, ?it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  10%|█         | 3/30 [00:00<00:01, 23.18it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  20%|██        | 6/30 [00:00<00:01, 23.10it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  30%|███       | 9/30 [00:00<00:00, 22.55it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  40%|████      | 12/30 [00:00<00:00, 22.22it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  50%|█████     | 15/30 [00:00<00:00, 22.25it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  60%|██████    | 18/30 [00:00<00:00, 22.04it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  70%|███████   | 21/30 [00:00<00:00, 21.78it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  80%|████████  | 24/30 [00:01<00:00, 22.12it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  90%|█████████ | 27/30 [00:01<00:00, 22.41it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.: 100%|██████████| 30/30 [00:01<00:00, 22.77it/s]                                                                                                              [10/18/26 13:38:42] INFO     Animation 5 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00005.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 6: Write(VGroup of 3 submobjects):   0%|          | 0/36 [00:00<?, ?it/s]Animation 6: Write(VGroup of 3 submobjects):   8%|▊         | 3/36 [00:00<00:01, 24.05it/s]Animation 6: Write(VGroup of 3 submobjects):  17%|█▋        | 6/36 [00:00<00:01, 23.27it/s]Animation 6: Write(VGroup of 3 submobjects):  25%|██▌       | 9/36 [00:00<00:01, 23.65it/s]Animation 6: Write(VGroup of 3 submobjects):  33%|███▎      | 12/36 [00:00<00:01, 23.75it/s]Animation 6: Write(VGroup of 3 submobjects):  42%|████▏     | 15/36 [00:00<00:00, 23.94it/s]Animation 6: Write(VGroup of 3 submobjects):  50%|█████     | 18/36 [00:00<00:00, 24.10it/s]Animation 6: Write(VGroup of 3 submobjects):  58%|█████▊    | 21/36 [00:00<00:00, 24.18it/s]Animation 6: Write(VGroup of 3 submobjects):  67%|██████▋   | 24/36 [00:00<00:00, 24.34it/s]Animation 6: Write(VGroup of 3 submobjects):  75%|███████▌  | 27/36 [00:01<00:00, 24.52it/s]Animation 6: Write(VGroup of 3 submobjects):  83%|████████▎ | 30/36 [00:01<00:00, 24.67it/s]Animation 6: Write(VGroup of 3 submobjects):  92%|█████████▏| 33/36 [00:01<00:00, 24.71it/s]Animation 6: Write(VGroup of 3 submobjects): 100%|██████████| 36/36 [00:01<00:00, 24.67it/s]                                                                                            [10/18/26 13:38:44] INFO     Animation 6 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00006.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 7: TransformFromCopy(VGroup of 2 submobjects):   0%|          | 0/24 [00:00<?, ?it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects):  12%|█▎        | 3/24 [00:00<00:00, 22.15it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects):  25%|██▌       | 6/24 [00:00<00:00, 22.51it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects):  38%|███▊      | 9/24 [00:00<00:00, 22.81it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects):  50%|█████     | 12/24 [00:00<00:00, 22.88it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects):  62%|██████▎   | 15/24 [00:00<00:00, 22.50it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects):  75%|███████▌  | 18/24 [00:00<00:00, 22.72it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects):  88%|████████▊ | 21/24 [00:00<00:00, 23.11it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects): 100%|██████████| 24/24 [00:01<00:00, 23.39it/s]                                                                                                        [10/18/26 13:38:45] INFO     Animation 7 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00007.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 8:   0%|          | 0/60 [00:00<?, ?it/s]Waiting 8:   5%|▌         | 3/60 [00:00<00:02, 24.28it/s]Waiting 8:  10%|█         | 6/60 [00:00<00:02, 24.23it/s]Waiting 8:  15%|█▌        | 9/60 [00:00<00:02, 24.04it/s]Waiting 8:  20%|██        | 12/60 [00:00<00:01, 24.07it/s]Waiting 8:  25%|██▌       | 15/60 [00:00<00:01, 24.07it/s]Waiting 8:  30%|███       | 18/60 [00:00<00:01, 24.03it/s]Waiting 8:  35%|███▌      | 21/60 [00:00<00:01, 23.85it/s]Waiting 8:  40%|████      | 24/60 [00:01<00:01, 23.59it/s]Waiting 8:  45%|████▌     | 27/60 [00:01<00:01, 23.57it/s]Waiting 8:  50%|█████     | 30/60 [00:01<00:01, 23.66it/s]Waiting 8:  55%|█████▌    | 33/60 [00:01<00:01, 23.90it/s]Waiting 8:  60%|██████    | 36/60 [00:01<00:00, 24.02it/s]Waiting 8:  65%|██████▌   | 39/60 [00:01<00:00, 24.22it/s]Waiting 8:  70%|███████   | 42/60 [00:01<00:00, 24.21it/s]Waiting 8:  75%|███████▌  | 45/60 [00:01<00:00, 24.08it/s]Waiting 8:  80%|████████  | 48/60 [00:02<00:00, 24.06it/s]Waiting 8:  85%|████████▌ | 51/60 [00:02<00:00, 24.12it/s]Waiting 8:  90%|█████████ | 54/60 [00:02<00:00, 24.13it/s]Waiting 8:  95%|█████████▌| 57/60 [00:02<00:00, 24.23it/s]Waiting 8: 100%|██████████| 60/60 [00:02<00:00, 24.34it/s]                                                          [10/18/26 13:38:47] INFO     Animation 8 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00008.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 9: _MethodAnimation(ScreenRectangle), etc.:   0%|          | 0/72 [00:00<?, ?it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:   4%|▍         | 3/72 [00:00<00:02, 25.37it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:   8%|▊         | 6/72 [00:00<00:02, 24.77it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  12%|█▎        | 9/72 [00:00<00:02, 24.41it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  17%|█▋        | 12/72 [00:00<00:02, 24.74it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  21%|██        | 15/72 [00:00<00:02, 24.89it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  25%|██▌       | 18/72 [00:00<00:02, 25.25it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  29%|██▉       | 21/72 [00:00<00:01, 25.51it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  33%|███▎      | 24/72 [00:00<00:01, 25.77it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  38%|███▊      | 27/72 [00:01<00:01, 26.12it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  42%|████▏     | 30/72 [00:01<00:01, 26.51it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  46%|████▌     | 33/72 [00:01<00:01, 27.14it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  50%|█████     | 36/72 [00:01<00:01, 27.56it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  54%|█████▍    | 39/72 [00:01<00:01, 28.01it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  58%|█████▊    | 42/72 [00:01<00:01, 28.50it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  62%|██████▎   | 45/72 [00:01<00:00, 28.39it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  67%|██████▋   | 48/72 [00:01<00:00, 28.72it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  71%|███████   | 51/72 [00:01<00:00, 29.09it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  76%|███████▋  | 55/72 [00:02<00:00, 29.84it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  82%|████████▏ | 59/72 [00:02<00:00, 30.50it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  88%|████████▊ | 63/72 [00:02<00:00, 30.92it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  93%|█████████▎| 67/72 [00:02<00:00, 31.30it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  99%|█████████▊| 71/72 [00:02<00:00, 31.22it/s]                                                                                                     [10/18/26 13:38:50] INFO     Animation 9 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00009.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 10: Create(ParametricFunction), etc.:   0%|          | 0/24 [00:00<?, ?it/s]Animation 10: Create(ParametricFunction), etc.:  17%|█▋        | 4/24 [00:00<00:00, 32.36it/s]Animation 10: Create(ParametricFunction), etc.:  33%|███▎      | 8/24 [00:00<00:00, 31.47it/s]Animation 10: Create(ParametricFunction), etc.:  50%|█████     | 12/24 [00:00<00:00, 31.49it/s]Animation 10: Create(ParametricFunction), etc.:  67%|██████▋   | 16/24 [00:00<00:00, 31.53it/s]Animation 10: Create(ParametricFunction), etc.:  83%|████████▎ | 20/24 [00:00<00:00, 31.35it/s]Animation 10: Create(ParametricFunction), etc.: 100%|██████████| 24/24 [00:00<00:00, 31.24it/s]                                                                                               [10/18/26 13:38:51] INFO     Animation 10 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00010.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 11: FadeTransform(Group), etc.:   0%|          | 0/36 [00:00<?, ?it/s]Animation 11: FadeTransform(Group), etc.:  11%|█         | 4/36 [00:00<00:01, 31.45it/s]Animation 11: FadeTransform(Group), etc.:  22%|██▏       | 8/36 [00:00<00:00, 31.21it/s]Animation 11: FadeTransform(Group), etc.:  33%|███▎      | 12/36 [00:00<00:00, 30.95it/s]Animation 11: FadeTransform(Group), etc.:  44%|████▍     | 16/36 [00:00<00:00, 30.99it/s]Animation 11: FadeTransform(Group), etc.:  56%|█████▌    | 20/36 [00:00<00:00, 30.91it/s]Animation 11: FadeTransform(Group), etc.:  67%|██████▋   | 24/36 [00:00<00:00, 30.81it/s]Animation 11: FadeTransform(Group), etc.:  78%|███████▊  | 28/36 [00:00<00:00, 30.91it/s]Animation 11: FadeTransform(Group), etc.:  89%|████████▉ | 32/36 [00:01<00:00, 31.09it/s]Animation 11: FadeTransform(Group), etc.: 100%|██████████| 36/36 [00:01<00:00, 31.37it/s]                                                                                         [10/18/26 13:38:52] INFO     Animation 11 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00011.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 12:   0%|          | 0/6 [00:00<?, ?it/s]Waiting 12:  67%|██████▋   | 4/6 [00:00<00:00, 29.88it/s]                                                         [10/18/26 13:38:53] INFO     Animation 12 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00012.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 13: GrowFromCenter(VGroup of 2 submobjects):   0%|          | 0/8 [00:00<?, ?it/s]Animation 13: GrowFromCenter(VGroup of 2 submobjects):  50%|█████     | 4/8 [00:00<00:00, 33.57it/s]Animation 13: GrowFromCenter(VGroup of 2 submobjects): 100%|██████████| 8/8 [00:00<00:00, 32.56it/s]                                                                                                                        INFO     Animation 13 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00013.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 14:   0%|          | 0/4 [00:00<?, ?it/s]Waiting 14: 100%|██████████| 4/4 [00:00<00:00, 31.52it/s]                                                                             INFO     Animation 14 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00014.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 15: GrowFromCenter(VGroup of 2 submobjects):   0%|          | 0/8 [00:00<?, ?it/s]Animation 15: GrowFromCenter(VGroup of 2 submobjects):  50%|█████     | 4/8 [00:00<00:00, 32.53it/s]Animation 15: GrowFromCenter(VGroup of 2 submobjects): 100%|██████████| 8/8 [00:00<00:00, 31.83it/s]                                                                                                                        INFO     Animation 15 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00015.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 16:   0%|          | 0/4 [00:00<?, ?it/s]Waiting 16: 100%|██████████| 4/4 [00:00<00:00, 32.43it/s]                                                                             INFO     Animation 16 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00016.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 17: GrowFromCenter(VGroup of 2 submobjects):   0%|          | 0/8 [00:00<?, ?it/s]Animation 17: GrowFromCenter(VGroup of 2 submobjects):  50%|█████     | 4/8 [00:00<00:00, 31.80it/s]Animation 17: GrowFromCenter(VGroup of 2 submobjects): 100%|██████████| 8/8 [00:00<00:00, 32.74it/s]                                                                                                    [10/18/26 13:38:54] INFO     Animation 17 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00017.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 18:   0%|          | 0/4 [00:00<?, ?it/s]Waiting 18: 100%|██████████| 4/4 [00:00<00:00, 32.47it/s]                                                                             INFO     Animation 18 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00018.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 19: GrowFromCenter(VGroup of 2 submobjects):   0%|          | 0/8 [00:00<?, ?it/s]Animation 19: GrowFromCenter(VGroup of 2 submobjects):  50%|█████     | 4/8 [00:00<00:00, 31.95it/s]Animation 19: GrowFromCenter(VGroup of 2 submobjects): 100%|██████████| 8/8 [00:00<00:00, 31.92it/s]                                                                                                                        INFO     Animation 19 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00019.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 20:   0%|          | 0/4 [00:00<?, ?it/s]Waiting 20: 100%|██████████| 4/4 [00:00<00:00, 32.19it/s]                                                                             INFO     Animation 20 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00020.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 21:   0%|          | 0/21 [00:00<?, ?it/s]Waiting 21:  19%|█▉        | 4/21 [00:00<00:00, 33.11it/s]Waiting 21:  38%|███▊      | 8/21 [00:00<00:00, 32.75it/s]Waiting 21:  57%|█████▋    | 12/21 [00:00<00:00, 32.62it/s]Waiting 21:  76%|███████▌  | 16/21 [00:00<00:00, 32.81it/s]Waiting 21:  95%|█████████▌| 20/21 [00:00<00:00, 32.77it/s]                                                           [10/18/26 13:38:55] INFO     Animation 21 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00021.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 22: _MethodAnimation(VGroup of 2 submobjects), etc.:   0%|          | 0/27 [00:00<?, ?it/s]Animation 22: _MethodAnimation(VGroup of 2 submobjects), etc.:  15%|█▍        | 4/27 [00:00<00:00, 31.11it/s]Animation 22: _MethodAnimation(VGroup of 2 submobjects), etc.:  30%|██▉       | 8/27 [00:00<00:00, 31.29it/s]Animation 22: _MethodAnimation(VGroup of 2 submobjects), etc.:  44%|████▍     | 12/27 [00:00<00:00, 31.33it/s]Animation 22: _MethodAnimation(VGroup of 2 submobjects), etc.:  59%|█████▉    | 16/27 [00:00<00:00, 31.24it/s]Animation 22: _MethodAnimation(VGroup of 2 submobjects), etc.:  74%|███████▍  | 20/27 [00:00<00:00, 30.82it/s]Animation 22: _MethodAnimation(VGroup of 2 submobjects), etc.:  89%|████████▉ | 24/27 [00:00<00:00, 31.06it/s]                                                                                                              [10/18/26 13:38:56] INFO     Animation 22 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00022.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 23: Write(VGroup of 1 submobject):   0%|          | 0/60 [00:00<?, ?it/s]Animation 23: Write(VGroup of 1 submobject):   7%|▋         | 4/60 [00:00<00:01, 33.77it/s]Animation 23: Write(VGroup of 1 submobject):  13%|█▎        | 8/60 [00:00<00:01, 33.41it/s]Animation 23: Write(VGroup of 1 submobject):  20%|██        | 12/60 [00:00<00:01, 33.49it/s]Animation 23: Write(VGroup of 1 submobject):  27%|██▋       | 16/60 [00:00<00:01, 33.64it/s]Animation 23: Write(VGroup of 1 submobject):  33%|███▎      | 20/60 [00:00<00:01, 33.51it/s]Animation 23: Write(VGroup of 1 submobject):  40%|████      | 24/60 [00:00<00:01, 33.39it/s]Animation 23: Write(VGroup of 1 submobject):  47%|████▋     | 28/60 [00:00<00:00, 33.40it/s]Animation 23: Write(VGroup of 1 submobject):  53%|█████▎    | 32/60 [00:00<00:00, 33.49it/s]Animation 23: Write(VGroup of 1 submobject):  60%|██████    | 36/60 [00:01<00:00, 33.65it/s]Animation 23: Write(VGroup of 1 submobject):  67%|██████▋   | 40/60 [00:01<00:00, 33.83it/s]Animation 23: Write(VGroup of 1 submobject):  73%|███████▎  | 44/60 [00:01<00:00, 33.76it/s]Animation 23: Write(VGroup of 1 submobject):  80%|████████  | 48/60 [00:01<00:00, 33.53it/s]Animation 23: Write(VGroup of 1 submobject):  87%|████████▋ | 52/60 [00:01<00:00, 33.46it/s]Animation 23: Write(VGroup of 1 submobject):  93%|█████████▎| 56/60 [00:01<00:00, 33.02it/s]Animation 23: Write(VGroup of 1 submobject): 100%|██████████| 60/60 [00:01<00:00, 33.20it/s]                                                                                            [10/18/26 13:38:58] INFO     Animation 23 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00023.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 24: FadeIn(VGroup of 1 submobject):   0%|          | 0/21 [00:00<?, ?it/s]Animation 24: FadeIn(VGroup of 1 submobject):  19%|█▉        | 4/21 [00:00<00:00, 31.81it/s]Animation 24: FadeIn(VGroup of 1 submobject):  38%|███▊      | 8/21 [00:00<00:00, 31.58it/s]Animation 24: FadeIn(VGroup of 1 submobject):  57%|█████▋    | 12/21 [00:00<00:00, 31.46it/s]Animation 24: FadeIn(VGroup of 1 submobject):  76%|███████▌  | 16/21 [00:00<00:00, 31.09it/s]Animation 24: FadeIn(VGroup of 1 submobject):  95%|█████████▌| 20/21 [00:00<00:00, 31.63it/s]                                                                                             [10/18/26 13:38:59] INFO     Animation 24 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00024.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 25:   0%|          | 0/96 [00:00<?, ?it/s]Waiting 25:   4%|▍         | 4/96 [00:00<00:02, 32.46it/s]Waiting 25:   8%|▊         | 8/96 [00:00<00:02, 31.51it/s]Waiting 25:  12%|█▎        | 12/96 [00:00<00:02, 31.29it/s]Waiting 25:  17%|█▋        | 16/96 [00:00<00:02, 30.86it/s]Waiting 25:  21%|██        | 20/96 [00:00<00:02, 31.47it/s]Waiting 25:  25%|██▌       | 24/96 [00:00<00:02, 31.47it/s]Waiting 25:  29%|██▉       | 28/96 [00:00<00:02, 31.69it/s]Waiting 25:  33%|███▎      | 32/96 [00:01<00:01, 32.04it/s]Waiting 25:  38%|███▊      | 36/96 [00:01<00:01, 32.27it/s]Waiting 25:  42%|████▏     | 40/96 [00:01<00:01, 31.22it/s]Waiting 25:  46%|████▌     | 44/96 [00:01<00:01, 28.79it/s]Waiting 25:  49%|████▉     | 47/96 [00:01<00:01, 28.33it/s]Waiting 25:  52%|█████▏    | 50/96 [00:01<00:01, 27.99it/s]Waiting 25:  55%|█████▌    | 53/96 [00:01<00:01, 27.86it/s]Waiting 25:  58%|█████▊    | 56/96 [00:01<00:01, 28.17it/s]Waiting 25:  62%|██████▎   | 60/96 [00:01<00:01, 28.97it/s]Waiting 25:  67%|██████▋   | 64/96 [00:02<00:01, 29.46it/s]Waiting 25:  71%|███████   | 68/96 [00:02<00:00, 29.92it/s]Waiting 25:  74%|███████▍  | 71/96 [00:02<00:00, 29.90it/s]Waiting 25:  78%|███████▊  | 75/96 [00:02<00:00, 30.12it/s]Waiting 25:  82%|████████▏ | 79/96 [00:02<00:00, 30.45it/s]Waiting 25:  86%|████████▋ | 83/96 [00:02<00:00, 30.52it/s]Waiting 25:  91%|█████████ | 87/96 [00:02<00:00, 30.70it/s]Waiting 25:  95%|█████████▍| 91/96 [00:03<00:00, 30.88it/s]Waiting 25:  99%|█████████▉| 95/96 [00:03<00:00, 30.75it/s]                                                           [10/18/26 13:39:02] INFO     Animation 25 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00025.mp4'                             
+                    INFO     Combining to Movie file.   scene_file_writer.py:877
+                    INFO                                scene_file_writer.py:999
+                             File ready at                                      
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1080p30/st                         
+                             ar-forge-style-a-manim-16x                         
+                             9.mp4'                                             
+                                                                                
+                    INFO     Rendered StarForgeA                  manager.py:226
+                             Played 26 animations                               
+Manim Community v0.22.0
+
+[10/18/26 13:39:03] INFO     Caching disabled.              cairo_renderer.py:89
+Animation 0: FadeIn(VGroup of 2 submobjects), etc.:   0%|          | 0/66 [00:00<?, ?it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:   5%|▍         | 3/66 [00:00<00:02, 23.78it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:   9%|▉         | 6/66 [00:00<00:02, 24.10it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  14%|█▎        | 9/66 [00:00<00:02, 24.32it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  18%|█▊        | 12/66 [00:00<00:02, 24.45it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  23%|██▎       | 15/66 [00:00<00:02, 24.27it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  27%|██▋       | 18/66 [00:00<00:01, 24.23it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  32%|███▏      | 21/66 [00:00<00:01, 24.19it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  36%|███▋      | 24/66 [00:00<00:01, 24.32it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  41%|████      | 27/66 [00:01<00:01, 24.13it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  45%|████▌     | 30/66 [00:01<00:01, 24.31it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  50%|█████     | 33/66 [00:01<00:01, 24.26it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  55%|█████▍    | 36/66 [00:01<00:01, 24.33it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  59%|█████▉    | 39/66 [00:01<00:01, 24.37it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  64%|██████▎   | 42/66 [00:01<00:00, 24.37it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  68%|██████▊   | 45/66 [00:01<00:00, 23.90it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  73%|███████▎  | 48/66 [00:01<00:00, 23.90it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  77%|███████▋  | 51/66 [00:02<00:00, 23.72it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  82%|████████▏ | 54/66 [00:02<00:00, 23.80it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  86%|████████▋ | 57/66 [00:02<00:00, 23.94it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  91%|█████████ | 60/66 [00:02<00:00, 24.09it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.:  95%|█████████▌| 63/66 [00:02<00:00, 24.26it/s]Animation 0: FadeIn(VGroup of 2 submobjects), etc.: 100%|██████████| 66/66 [00:02<00:00, 24.31it/s]                                                                                                   [10/18/26 13:39:05] INFO     Animation 0 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00000.mp4'                             
+[10/18/26 13:39:06] INFO     Caching disabled.              cairo_renderer.py:89
+Animation 1: LaggedStart(Group):   0%|          | 0/39 [00:00<?, ?it/s]Animation 1: LaggedStart(Group):   8%|▊         | 3/39 [00:00<00:01, 24.67it/s]Animation 1: LaggedStart(Group):  15%|█▌        | 6/39 [00:00<00:01, 24.82it/s]Animation 1: LaggedStart(Group):  23%|██▎       | 9/39 [00:00<00:01, 24.90it/s]Animation 1: LaggedStart(Group):  31%|███       | 12/39 [00:00<00:01, 24.99it/s]Animation 1: LaggedStart(Group):  38%|███▊      | 15/39 [00:00<00:00, 24.88it/s]Animation 1: LaggedStart(Group):  46%|████▌     | 18/39 [00:00<00:00, 24.68it/s]Animation 1: LaggedStart(Group):  54%|█████▍    | 21/39 [00:00<00:00, 24.64it/s]Animation 1: LaggedStart(Group):  62%|██████▏   | 24/39 [00:00<00:00, 24.67it/s]Animation 1: LaggedStart(Group):  69%|██████▉   | 27/39 [00:01<00:00, 24.52it/s]Animation 1: LaggedStart(Group):  77%|███████▋  | 30/39 [00:01<00:00, 24.54it/s]Animation 1: LaggedStart(Group):  85%|████████▍ | 33/39 [00:01<00:00, 24.54it/s]Animation 1: LaggedStart(Group):  92%|█████████▏| 36/39 [00:01<00:00, 24.42it/s]Animation 1: LaggedStart(Group): 100%|██████████| 39/39 [00:01<00:00, 24.26it/s]                                                                                [10/18/26 13:39:07] INFO     Animation 1 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00001.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:   0%|          | 0/60 [00:00<?, ?it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:   5%|▌         | 3/60 [00:00<00:02, 23.09it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  10%|█         | 6/60 [00:00<00:02, 23.24it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  15%|█▌        | 9/60 [00:00<00:02, 23.24it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  20%|██        | 12/60 [00:00<00:02, 23.30it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  25%|██▌       | 15/60 [00:00<00:01, 23.21it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  30%|███       | 18/60 [00:00<00:01, 22.78it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  35%|███▌      | 21/60 [00:00<00:01, 22.82it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  40%|████      | 24/60 [00:01<00:01, 22.90it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  45%|████▌     | 27/60 [00:01<00:01, 23.06it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  50%|█████     | 30/60 [00:01<00:01, 23.08it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  55%|█████▌    | 33/60 [00:01<00:01, 23.18it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  60%|██████    | 36/60 [00:01<00:01, 23.37it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  65%|██████▌   | 39/60 [00:01<00:00, 23.00it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  70%|███████   | 42/60 [00:01<00:00, 23.15it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  75%|███████▌  | 45/60 [00:01<00:00, 22.76it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  80%|████████  | 48/60 [00:02<00:00, 22.94it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  85%|████████▌ | 51/60 [00:02<00:00, 22.93it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  90%|█████████ | 54/60 [00:02<00:00, 22.92it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.:  95%|█████████▌| 57/60 [00:02<00:00, 22.98it/s]Animation 2: _MethodAnimation(VGroup of 2 submobjects), etc.: 100%|██████████| 60/60 [00:02<00:00, 23.13it/s]                                                                                                             [10/18/26 13:39:10] INFO     Animation 2 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00002.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 3:   0%|          | 0/11 [00:00<?, ?it/s]Waiting 3:  27%|██▋       | 3/11 [00:00<00:00, 24.42it/s]Waiting 3:  55%|█████▍    | 6/11 [00:00<00:00, 24.74it/s]Waiting 3:  82%|████████▏ | 9/11 [00:00<00:00, 24.86it/s]                                                         [10/18/26 13:39:11] INFO     Animation 3 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00003.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 4: _MethodAnimation(VGroup of 2 submobjects), etc.:   0%|          | 0/12 [00:00<?, ?it/s]Animation 4: _MethodAnimation(VGroup of 2 submobjects), etc.:  25%|██▌       | 3/12 [00:00<00:00, 24.11it/s]Animation 4: _MethodAnimation(VGroup of 2 submobjects), etc.:  50%|█████     | 6/12 [00:00<00:00, 24.17it/s]Animation 4: _MethodAnimation(VGroup of 2 submobjects), etc.:  75%|███████▌  | 9/12 [00:00<00:00, 24.34it/s]Animation 4: _MethodAnimation(VGroup of 2 submobjects), etc.: 100%|██████████| 12/12 [00:00<00:00, 24.09it/s]                                                                                                                                 INFO     Animation 4 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00004.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:   0%|          | 0/30 [00:00<?, ?it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  10%|█         | 3/30 [00:00<00:01, 22.16it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  20%|██        | 6/30 [00:00<00:01, 22.39it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  30%|███       | 9/30 [00:00<00:00, 22.53it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  40%|████      | 12/30 [00:00<00:00, 22.74it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  50%|█████     | 15/30 [00:00<00:00, 22.71it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  60%|██████    | 18/30 [00:00<00:00, 22.46it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  70%|███████   | 21/30 [00:00<00:00, 22.45it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  80%|████████  | 24/30 [00:01<00:00, 22.68it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.:  90%|█████████ | 27/30 [00:01<00:00, 23.05it/s]Animation 5: _MethodAnimation(VGroup of 20 submobjects), etc.: 100%|██████████| 30/30 [00:01<00:00, 23.27it/s]                                                                                                              [10/18/26 13:39:13] INFO     Animation 5 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00005.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 6: Write(VGroup of 3 submobjects):   0%|          | 0/36 [00:00<?, ?it/s]Animation 6: Write(VGroup of 3 submobjects):   8%|▊         | 3/36 [00:00<00:01, 24.59it/s]Animation 6: Write(VGroup of 3 submobjects):  17%|█▋        | 6/36 [00:00<00:01, 24.40it/s]Animation 6: Write(VGroup of 3 submobjects):  25%|██▌       | 9/36 [00:00<00:01, 24.50it/s]Animation 6: Write(VGroup of 3 submobjects):  33%|███▎      | 12/36 [00:00<00:00, 24.44it/s]Animation 6: Write(VGroup of 3 submobjects):  42%|████▏     | 15/36 [00:00<00:00, 24.51it/s]Animation 6: Write(VGroup of 3 submobjects):  50%|█████     | 18/36 [00:00<00:00, 24.50it/s]Animation 6: Write(VGroup of 3 submobjects):  58%|█████▊    | 21/36 [00:00<00:00, 24.55it/s]Animation 6: Write(VGroup of 3 submobjects):  67%|██████▋   | 24/36 [00:00<00:00, 24.64it/s]Animation 6: Write(VGroup of 3 submobjects):  75%|███████▌  | 27/36 [00:01<00:00, 24.79it/s]Animation 6: Write(VGroup of 3 submobjects):  83%|████████▎ | 30/36 [00:01<00:00, 24.86it/s]Animation 6: Write(VGroup of 3 submobjects):  92%|█████████▏| 33/36 [00:01<00:00, 24.87it/s]Animation 6: Write(VGroup of 3 submobjects): 100%|██████████| 36/36 [00:01<00:00, 24.90it/s]                                                                                            [10/18/26 13:39:14] INFO     Animation 6 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00006.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 7: TransformFromCopy(VGroup of 2 submobjects):   0%|          | 0/24 [00:00<?, ?it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects):  12%|█▎        | 3/24 [00:00<00:00, 24.29it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects):  25%|██▌       | 6/24 [00:00<00:00, 24.53it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects):  38%|███▊      | 9/24 [00:00<00:00, 24.72it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects):  50%|█████     | 12/24 [00:00<00:00, 24.57it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects):  62%|██████▎   | 15/24 [00:00<00:00, 24.16it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects):  75%|███████▌  | 18/24 [00:00<00:00, 24.11it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects):  88%|████████▊ | 21/24 [00:00<00:00, 24.14it/s]Animation 7: TransformFromCopy(VGroup of 2 submobjects): 100%|██████████| 24/24 [00:00<00:00, 24.21it/s]                                                                                                        [10/18/26 13:39:15] INFO     Animation 7 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00007.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 8:   0%|          | 0/60 [00:00<?, ?it/s]Waiting 8:   5%|▌         | 3/60 [00:00<00:02, 24.50it/s]Waiting 8:  10%|█         | 6/60 [00:00<00:02, 24.66it/s]Waiting 8:  15%|█▌        | 9/60 [00:00<00:02, 24.68it/s]Waiting 8:  20%|██        | 12/60 [00:00<00:01, 24.66it/s]Waiting 8:  25%|██▌       | 15/60 [00:00<00:01, 24.41it/s]Waiting 8:  30%|███       | 18/60 [00:00<00:01, 24.35it/s]Waiting 8:  35%|███▌      | 21/60 [00:00<00:01, 24.42it/s]Waiting 8:  40%|████      | 24/60 [00:00<00:01, 24.47it/s]Waiting 8:  45%|████▌     | 27/60 [00:01<00:01, 24.50it/s]Waiting 8:  50%|█████     | 30/60 [00:01<00:01, 24.37it/s]Waiting 8:  55%|█████▌    | 33/60 [00:01<00:01, 24.43it/s]Waiting 8:  60%|██████    | 36/60 [00:01<00:00, 24.53it/s]Waiting 8:  65%|██████▌   | 39/60 [00:01<00:00, 24.61it/s]Waiting 8:  70%|███████   | 42/60 [00:01<00:00, 24.53it/s]Waiting 8:  75%|███████▌  | 45/60 [00:01<00:00, 24.30it/s]Waiting 8:  80%|████████  | 48/60 [00:01<00:00, 24.41it/s]Waiting 8:  85%|████████▌ | 51/60 [00:02<00:00, 24.46it/s]Waiting 8:  90%|█████████ | 54/60 [00:02<00:00, 24.54it/s]Waiting 8:  95%|█████████▌| 57/60 [00:02<00:00, 24.66it/s]Waiting 8: 100%|██████████| 60/60 [00:02<00:00, 24.83it/s]                                                          [10/18/26 13:39:18] INFO     Animation 8 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00008.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 9: _MethodAnimation(ScreenRectangle), etc.:   0%|          | 0/72 [00:00<?, ?it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:   4%|▍         | 3/72 [00:00<00:02, 25.33it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:   8%|▊         | 6/72 [00:00<00:02, 25.22it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  12%|█▎        | 9/72 [00:00<00:02, 25.39it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  17%|█▋        | 12/72 [00:00<00:02, 25.19it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  21%|██        | 15/72 [00:00<00:02, 25.36it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  25%|██▌       | 18/72 [00:00<00:02, 25.62it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  29%|██▉       | 21/72 [00:00<00:01, 26.00it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  33%|███▎      | 24/72 [00:00<00:01, 26.39it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  38%|███▊      | 27/72 [00:01<00:01, 26.48it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  42%|████▏     | 30/72 [00:01<00:01, 26.73it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  46%|████▌     | 33/72 [00:01<00:01, 27.14it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  50%|█████     | 36/72 [00:01<00:01, 27.48it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  54%|█████▍    | 39/72 [00:01<00:01, 27.78it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  58%|█████▊    | 42/72 [00:01<00:01, 28.29it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  62%|██████▎   | 45/72 [00:01<00:00, 28.14it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  67%|██████▋   | 48/72 [00:01<00:00, 28.60it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  72%|███████▏  | 52/72 [00:01<00:00, 29.02it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  78%|███████▊  | 56/72 [00:02<00:00, 29.42it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  83%|████████▎ | 60/72 [00:02<00:00, 30.05it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  89%|████████▉ | 64/72 [00:02<00:00, 30.48it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.:  94%|█████████▍| 68/72 [00:02<00:00, 30.92it/s]Animation 9: _MethodAnimation(ScreenRectangle), etc.: 100%|██████████| 72/72 [00:02<00:00, 30.62it/s]                                                                                                     [10/18/26 13:39:20] INFO     Animation 9 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00009.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 10: Create(ParametricFunction), etc.:   0%|          | 0/24 [00:00<?, ?it/s]Animation 10: Create(ParametricFunction), etc.:  17%|█▋        | 4/24 [00:00<00:00, 31.69it/s]Animation 10: Create(ParametricFunction), etc.:  33%|███▎      | 8/24 [00:00<00:00, 31.19it/s]Animation 10: Create(ParametricFunction), etc.:  50%|█████     | 12/24 [00:00<00:00, 31.03it/s]Animation 10: Create(ParametricFunction), etc.:  67%|██████▋   | 16/24 [00:00<00:00, 30.87it/s]Animation 10: Create(ParametricFunction), etc.:  83%|████████▎ | 20/24 [00:00<00:00, 30.43it/s]Animation 10: Create(ParametricFunction), etc.: 100%|██████████| 24/24 [00:00<00:00, 30.53it/s]                                                                                               [10/18/26 13:39:21] INFO     Animation 10 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00010.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 11: FadeTransform(Group), etc.:   0%|          | 0/36 [00:00<?, ?it/s]Animation 11: FadeTransform(Group), etc.:   8%|▊         | 3/36 [00:00<00:01, 29.66it/s]Animation 11: FadeTransform(Group), etc.:  17%|█▋        | 6/36 [00:00<00:01, 29.77it/s]Animation 11: FadeTransform(Group), etc.:  28%|██▊       | 10/36 [00:00<00:00, 30.01it/s]Animation 11: FadeTransform(Group), etc.:  36%|███▌      | 13/36 [00:00<00:00, 29.83it/s]Animation 11: FadeTransform(Group), etc.:  44%|████▍     | 16/36 [00:00<00:00, 29.17it/s]Animation 11: FadeTransform(Group), etc.:  56%|█████▌    | 20/36 [00:00<00:00, 29.58it/s]Animation 11: FadeTransform(Group), etc.:  67%|██████▋   | 24/36 [00:00<00:00, 30.14it/s]Animation 11: FadeTransform(Group), etc.:  78%|███████▊  | 28/36 [00:00<00:00, 30.78it/s]Animation 11: FadeTransform(Group), etc.:  89%|████████▉ | 32/36 [00:01<00:00, 31.24it/s]Animation 11: FadeTransform(Group), etc.: 100%|██████████| 36/36 [00:01<00:00, 31.60it/s]                                                                                         [10/18/26 13:39:23] INFO     Animation 11 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00011.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 12:   0%|          | 0/6 [00:00<?, ?it/s]Waiting 12:  67%|██████▋   | 4/6 [00:00<00:00, 32.55it/s]                                                                             INFO     Animation 12 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00012.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 13: GrowFromCenter(VGroup of 2 submobjects):   0%|          | 0/8 [00:00<?, ?it/s]Animation 13: GrowFromCenter(VGroup of 2 submobjects):  50%|█████     | 4/8 [00:00<00:00, 32.57it/s]Animation 13: GrowFromCenter(VGroup of 2 submobjects): 100%|██████████| 8/8 [00:00<00:00, 32.58it/s]                                                                                                                        INFO     Animation 13 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00013.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 14:   0%|          | 0/4 [00:00<?, ?it/s]Waiting 14: 100%|██████████| 4/4 [00:00<00:00, 33.34it/s]                                                                             INFO     Animation 14 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00014.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 15: GrowFromCenter(VGroup of 2 submobjects):   0%|          | 0/8 [00:00<?, ?it/s]Animation 15: GrowFromCenter(VGroup of 2 submobjects):  50%|█████     | 4/8 [00:00<00:00, 32.58it/s]Animation 15: GrowFromCenter(VGroup of 2 submobjects): 100%|██████████| 8/8 [00:00<00:00, 32.91it/s]                                                                                                                        INFO     Animation 15 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00015.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 16:   0%|          | 0/4 [00:00<?, ?it/s]Waiting 16: 100%|██████████| 4/4 [00:00<00:00, 32.03it/s]                                                         [10/18/26 13:39:24] INFO     Animation 16 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00016.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 17: GrowFromCenter(VGroup of 2 submobjects):   0%|          | 0/8 [00:00<?, ?it/s]Animation 17: GrowFromCenter(VGroup of 2 submobjects):  50%|█████     | 4/8 [00:00<00:00, 32.28it/s]Animation 17: GrowFromCenter(VGroup of 2 submobjects): 100%|██████████| 8/8 [00:00<00:00, 32.35it/s]                                                                                                                        INFO     Animation 17 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00017.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 18:   0%|          | 0/4 [00:00<?, ?it/s]Waiting 18: 100%|██████████| 4/4 [00:00<00:00, 33.12it/s]                                                                             INFO     Animation 18 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00018.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 19: GrowFromCenter(VGroup of 2 submobjects):   0%|          | 0/8 [00:00<?, ?it/s]Animation 19: GrowFromCenter(VGroup of 2 submobjects):  50%|█████     | 4/8 [00:00<00:00, 31.91it/s]Animation 19: GrowFromCenter(VGroup of 2 submobjects): 100%|██████████| 8/8 [00:00<00:00, 32.45it/s]                                                                                                                        INFO     Animation 19 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00019.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 20:   0%|          | 0/4 [00:00<?, ?it/s]Waiting 20: 100%|██████████| 4/4 [00:00<00:00, 31.67it/s]                                                                             INFO     Animation 20 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00020.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 21:   0%|          | 0/21 [00:00<?, ?it/s]Waiting 21:  19%|█▉        | 4/21 [00:00<00:00, 28.71it/s]Waiting 21:  33%|███▎      | 7/21 [00:00<00:00, 28.97it/s]Waiting 21:  52%|█████▏    | 11/21 [00:00<00:00, 29.94it/s]Waiting 21:  71%|███████▏  | 15/21 [00:00<00:00, 30.75it/s]Waiting 21:  90%|█████████ | 19/21 [00:00<00:00, 31.34it/s]                                                           [10/18/26 13:39:25] INFO     Animation 21 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00021.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 22: _MethodAnimation(VGroup of 2 submobjects), etc.:   0%|          | 0/27 [00:00<?, ?it/s]Animation 22: _MethodAnimation(VGroup of 2 submobjects), etc.:  15%|█▍        | 4/27 [00:00<00:00, 32.10it/s]Animation 22: _MethodAnimation(VGroup of 2 submobjects), etc.:  30%|██▉       | 8/27 [00:00<00:00, 32.01it/s]Animation 22: _MethodAnimation(VGroup of 2 submobjects), etc.:  44%|████▍     | 12/27 [00:00<00:00, 32.14it/s]Animation 22: _MethodAnimation(VGroup of 2 submobjects), etc.:  59%|█████▉    | 16/27 [00:00<00:00, 32.14it/s]Animation 22: _MethodAnimation(VGroup of 2 submobjects), etc.:  74%|███████▍  | 20/27 [00:00<00:00, 32.03it/s]Animation 22: _MethodAnimation(VGroup of 2 submobjects), etc.:  89%|████████▉ | 24/27 [00:00<00:00, 32.42it/s]                                                                                                              [10/18/26 13:39:26] INFO     Animation 22 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00022.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 23: Write(VGroup of 3 submobjects):   0%|          | 0/60 [00:00<?, ?it/s]Animation 23: Write(VGroup of 3 submobjects):   7%|▋         | 4/60 [00:00<00:01, 33.08it/s]Animation 23: Write(VGroup of 3 submobjects):  13%|█▎        | 8/60 [00:00<00:01, 33.26it/s]Animation 23: Write(VGroup of 3 submobjects):  20%|██        | 12/60 [00:00<00:01, 33.60it/s]Animation 23: Write(VGroup of 3 submobjects):  27%|██▋       | 16/60 [00:00<00:01, 33.53it/s]Animation 23: Write(VGroup of 3 submobjects):  33%|███▎      | 20/60 [00:00<00:01, 33.62it/s]Animation 23: Write(VGroup of 3 submobjects):  40%|████      | 24/60 [00:00<00:01, 33.65it/s]Animation 23: Write(VGroup of 3 submobjects):  47%|████▋     | 28/60 [00:00<00:00, 33.52it/s]Animation 23: Write(VGroup of 3 submobjects):  53%|█████▎    | 32/60 [00:00<00:00, 33.67it/s]Animation 23: Write(VGroup of 3 submobjects):  60%|██████    | 36/60 [00:01<00:00, 33.89it/s]Animation 23: Write(VGroup of 3 submobjects):  67%|██████▋   | 40/60 [00:01<00:00, 33.85it/s]Animation 23: Write(VGroup of 3 submobjects):  73%|███████▎  | 44/60 [00:01<00:00, 33.25it/s]Animation 23: Write(VGroup of 3 submobjects):  80%|████████  | 48/60 [00:01<00:00, 33.00it/s]Animation 23: Write(VGroup of 3 submobjects):  87%|████████▋ | 52/60 [00:01<00:00, 32.93it/s]Animation 23: Write(VGroup of 3 submobjects):  93%|█████████▎| 56/60 [00:01<00:00, 32.90it/s]Animation 23: Write(VGroup of 3 submobjects): 100%|██████████| 60/60 [00:01<00:00, 33.04it/s]                                                                                             [10/18/26 13:39:28] INFO     Animation 23 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00023.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 24: FadeIn(VGroup of 2 submobjects):   0%|          | 0/21 [00:00<?, ?it/s]Animation 24: FadeIn(VGroup of 2 submobjects):  19%|█▉        | 4/21 [00:00<00:00, 31.58it/s]Animation 24: FadeIn(VGroup of 2 submobjects):  38%|███▊      | 8/21 [00:00<00:00, 31.57it/s]Animation 24: FadeIn(VGroup of 2 submobjects):  57%|█████▋    | 12/21 [00:00<00:00, 31.09it/s]Animation 24: FadeIn(VGroup of 2 submobjects):  76%|███████▌  | 16/21 [00:00<00:00, 30.91it/s]Animation 24: FadeIn(VGroup of 2 submobjects):  95%|█████████▌| 20/21 [00:00<00:00, 30.37it/s]                                                                                              [10/18/26 13:39:29] INFO     Animation 24 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00024.mp4'                             
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Waiting 25:   0%|          | 0/96 [00:00<?, ?it/s]Waiting 25:   3%|▎         | 3/96 [00:00<00:03, 29.89it/s]Waiting 25:   6%|▋         | 6/96 [00:00<00:03, 29.93it/s]Waiting 25:  10%|█         | 10/96 [00:00<00:02, 30.38it/s]Waiting 25:  15%|█▍        | 14/96 [00:00<00:02, 30.50it/s]Waiting 25:  19%|█▉        | 18/96 [00:00<00:02, 30.46it/s]Waiting 25:  23%|██▎       | 22/96 [00:00<00:02, 30.28it/s]Waiting 25:  27%|██▋       | 26/96 [00:00<00:02, 30.20it/s]Waiting 25:  31%|███▏      | 30/96 [00:00<00:02, 30.44it/s]Waiting 25:  35%|███▌      | 34/96 [00:01<00:02, 30.89it/s]Waiting 25:  40%|███▉      | 38/96 [00:01<00:01, 30.58it/s]Waiting 25:  44%|████▍     | 42/96 [00:01<00:01, 30.22it/s]Waiting 25:  48%|████▊     | 46/96 [00:01<00:01, 29.48it/s]Waiting 25:  52%|█████▏    | 50/96 [00:01<00:01, 29.89it/s]Waiting 25:  56%|█████▋    | 54/96 [00:01<00:01, 30.11it/s]Waiting 25:  60%|██████    | 58/96 [00:01<00:01, 30.39it/s]Waiting 25:  65%|██████▍   | 62/96 [00:02<00:01, 30.44it/s]Waiting 25:  69%|██████▉   | 66/96 [00:02<00:00, 30.72it/s]Waiting 25:  73%|███████▎  | 70/96 [00:02<00:00, 31.16it/s]Waiting 25:  77%|███████▋  | 74/96 [00:02<00:00, 30.81it/s]Waiting 25:  81%|████████▏ | 78/96 [00:02<00:00, 30.75it/s]Waiting 25:  85%|████████▌ | 82/96 [00:02<00:00, 30.94it/s]Waiting 25:  90%|████████▉ | 86/96 [00:02<00:00, 31.00it/s]Waiting 25:  94%|█████████▍| 90/96 [00:02<00:00, 31.08it/s]Waiting 25:  98%|█████████▊| 94/96 [00:03<00:00, 31.12it/s]                                                           [10/18/26 13:39:32] INFO     Animation 25 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/pa                         
+                             rtial_movie_files/StarForg                         
+                             eA/uncached_00025.mp4'                             
+                    INFO     Combining to Movie file.   scene_file_writer.py:877
+                    INFO                                scene_file_writer.py:999
+                             File ready at                                      
+                             '/Users/maracchi/Desktop/C                         
+                             laude/10. October                                  
+                             2026/10-18-2026 Organic                            
+                             Chemistry/wt-lesson00/prot                         
+                             otypes/lesson-00/star-forg                         
+                             e-style-a/manim/media/vide                         
+                             os/star_forge_a/1920p30/st                         
+                             ar-forge-style-a-manim-9x1                         
+                             6.mp4'                                             
+                                                                                
+                    INFO     Rendered StarForgeA                  manager.py:226
+                             Played 26 animations                               
+total 7752
+drwxr-xr-x@ 6 maracchi  staff      192 Oct 18 13:38 .
+drwxr-xr-x@ 3 maracchi  staff       96 Oct 18 13:36 ..
+-rw-r--r--@ 1 maracchi  staff      410 Oct 18 13:39 beats-16x9.json
+-rw-r--r--@ 1 maracchi  staff      410 Oct 18 13:39 beats-9x16.json
+-rw-r--r--@ 1 maracchi  staff  2035574 Oct 18 13:39 star-forge-style-a-manim-16x9.mp4
+-rw-r--r--@ 1 maracchi  staff  1922173 Oct 18 13:39 star-forge-style-a-manim-9x16.mp4

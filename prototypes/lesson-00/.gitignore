@@ -5,3 +5,14 @@ star-forge-edit/out/preview-ffmpeg-*.mp4
 **/media/videos/
 **/__pycache__/
 .DS_Store
+# style cuts: intermediates stay local
+star-forge-style-*/frames/
+star-forge-style-*/work/
+star-forge-style-*/probe/
+star-forge-style-*/media/
+star-forge-style-*/manim/media/
+star-forge-style-*/manim/out/
+star-forge-style-*/audio/*.wav
+star-forge-style-*/out/preview-*
+star-forge-style-*/timeline/*.mp4
+star-forge-style-*/out/*-ORIGINAL.mp4

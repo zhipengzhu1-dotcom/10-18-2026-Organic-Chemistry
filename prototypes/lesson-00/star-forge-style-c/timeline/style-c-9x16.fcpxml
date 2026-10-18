@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE fcpxml>
+<fcpxml version="1.10">
+  <resources>
+    <format id="r1" name="FFVideoFormat1920p30" frameDuration="1/30s" width="1080" height="1920" colorSpace="1-1-1 (Rec. 709)"/>
+    <asset id="rv" name="star-forge-c-9x16" uid="rv-c-9x16" start="0s" duration="489/30s" hasVideo="1" format="r1" videoSources="1">
+      <media-rep kind="original-media" src="file:///Users/maracchi/Desktop/Claude/10.%20October%202026/10-18-2026%20Organic%20Chemistry/wt-lesson00/prototypes/lesson-00/star-forge-style-c/work/manim/star-forge-c-9x16.mp4"/>
+    </asset>
+    <asset id="ra0" name="music" uid="ra0-c-9x16" start="0s" duration="510/30s" hasAudio="1" audioSources="1" audioChannels="2" audioRate="48000">
+      <media-rep kind="original-media" src="file:///Users/maracchi/Desktop/Claude/10.%20October%202026/10-18-2026%20Organic%20Chemistry/wt-lesson00/prototypes/lesson-00/star-forge-style-c/audio/music.wav"/>
+    </asset>
+    <asset id="ra1" name="sfx" uid="ra1-c-9x16" start="0s" duration="510/30s" hasAudio="1" audioSources="1" audioChannels="2" audioRate="48000">
+      <media-rep kind="original-media" src="file:///Users/maracchi/Desktop/Claude/10.%20October%202026/10-18-2026%20Organic%20Chemistry/wt-lesson00/prototypes/lesson-00/star-forge-style-c/audio/sfx.wav"/>
+    </asset>
+    <asset id="ra2" name="amb" uid="ra2-c-9x16" start="0s" duration="510/30s" hasAudio="1" audioSources="1" audioChannels="2" audioRate="48000">
+      <media-rep kind="original-media" src="file:///Users/maracchi/Desktop/Claude/10.%20October%202026/10-18-2026%20Organic%20Chemistry/wt-lesson00/prototypes/lesson-00/star-forge-style-c/audio/amb.wav"/>
+    </asset>
+  </resources>
+  <library>
+    <event name="star-forge style C">
+      <project name="star-forge STYLE-C 9x16">
+        <sequence format="r1" duration="510/30s" tcStart="0s" tcFormat="NDF" audioLayout="stereo" audioRate="48k">
+          <spine>
+      <gap name="head" offset="0s" start="0s" duration="21/30s">
+        <asset-clip ref="ra0" lane="-1" offset="0s" name="music" start="0s" duration="510/30s" audioRole="effects"/>
+        <asset-clip ref="ra1" lane="-2" offset="0s" name="sfx" start="0s" duration="510/30s" audioRole="effects"/>
+        <asset-clip ref="ra2" lane="-3" offset="0s" name="amb" start="0s" duration="510/30s" audioRole="effects"/>
+      </gap>
+      <asset-clip ref="rv" offset="21/30s" name="s1-star" start="0s" duration="60/30s" format="r1" tcFormat="NDF"/>
+      <asset-clip ref="rv" offset="81/30s" name="s2-approach" start="60/30s" duration="96/30s" format="r1" tcFormat="NDF"/>
+      <asset-clip ref="rv" offset="177/30s" name="s3-fuse" start="156/30s" duration="75/30s" format="r1" tcFormat="NDF"/>
+      <asset-clip ref="rv" offset="252/30s" name="s4-pullback" start="231/30s" duration="93/30s" format="r1" tcFormat="NDF"/>
+      <asset-clip ref="rv" offset="345/30s" name="s5-morph" start="324/30s" duration="51/30s" format="r1" tcFormat="NDF"/>
+      <asset-clip ref="rv" offset="396/30s" name="s6-exit" start="375/30s" duration="6/30s" format="r1" tcFormat="NDF"/>
+      <asset-clip ref="rv" offset="402/30s" name="s7-card" start="381/30s" duration="108/30s" format="r1" tcFormat="NDF"/>
+          </spine>
+        </sequence>
+      </project>
+    </event>
+  </library>
+</fcpxml>

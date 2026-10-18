@@ -1,0 +1,69 @@
+{
+ "duration_s": 24.966666666666665,
+ "integrated_lufs": -16.0,
+ "true_peak_dbtp": -2.5,
+ "master_gain_db": 19.5,
+ "cues": [
+  {
+   "stem": "amb",
+   "hit_s": 0.0,
+   "what": "space-wind bed + sub hum; fade in 1.0 s, fade out over the last 1.0 s"
+  },
+  {
+   "stem": "fx",
+   "hit_s": 6.2667,
+   "hit_frame": 188.0,
+   "file_start_s": 5.7667,
+   "gain_db": -8.0,
+   "what": "soft impact on the fusion contact frame (+ the Resolve flash)"
+  },
+  {
+   "stem": "fx",
+   "hit_s": 14.9333,
+   "hit_frame": 448.0,
+   "file_start_s": 14.9333,
+   "gain_db": -20.0,
+   "what": "glass shimmer as the nucleus becomes the letter C"
+  },
+  {
+   "stem": "ui",
+   "hit_s": 15.9333,
+   "hit_frame": 478.0,
+   "file_start_s": 15.9332,
+   "gain_db": -32.0,
+   "what": "valence dot 1: sine ting 880 Hz (self-synthesised)"
+  },
+  {
+   "stem": "ui",
+   "hit_s": 16.3333,
+   "hit_frame": 490.0,
+   "file_start_s": 16.3332,
+   "gain_db": -32.0,
+   "what": "valence dot 2: sine ting 988 Hz (self-synthesised)"
+  },
+  {
+   "stem": "ui",
+   "hit_s": 16.7333,
+   "hit_frame": 502.0,
+   "file_start_s": 16.7332,
+   "gain_db": -32.0,
+   "what": "valence dot 3: sine ting 1109 Hz (self-synthesised)"
+  },
+  {
+   "stem": "ui",
+   "hit_s": 17.1333,
+   "hit_frame": 514.0,
+   "file_start_s": 17.1332,
+   "gain_db": -32.0,
+   "what": "valence dot 4: sine ting 1318 Hz (self-synthesised)"
+  },
+  {
+   "stem": "ui",
+   "hit_s": 19.0667,
+   "hit_frame": 572.0,
+   "file_start_s": 19.0666,
+   "gain_db": -21.0,
+   "what": "soft confirmation chime as the card writes on"
+  }
+ ]
+}

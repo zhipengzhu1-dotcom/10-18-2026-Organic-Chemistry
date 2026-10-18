@@ -1,0 +1,156 @@
+{
+ "integrated_lufs": -14.0,
+ "true_peak_dbtp": -2.1,
+ "cues": [
+  {
+   "stem": "fx",
+   "file_start": 1.2,
+   "hit": 1.55,
+   "anchor": "peak",
+   "visual_frame": 45.0,
+   "visual_t": 1.5,
+   "gain_db": -16,
+   "what": "whoosh 1 (rate 1.08) peaks as nucleus 1 snaps in (expo-out: fastest at its start)"
+  },
+  {
+   "stem": "fx",
+   "file_start": 1.294,
+   "hit": 1.639,
+   "anchor": "peak",
+   "visual_frame": 47.7,
+   "visual_t": 1.59,
+   "gain_db": -18,
+   "what": "whoosh 2 (rate 0.95) peaks as nucleus 2 snaps in (expo-out: fastest at its start)"
+  },
+  {
+   "stem": "fx",
+   "file_start": 1.376,
+   "hit": 1.727,
+   "anchor": "peak",
+   "visual_frame": 50.3,
+   "visual_t": 1.677,
+   "gain_db": -18,
+   "what": "whoosh 3 (rate 1.02) peaks as nucleus 3 snaps in (expo-out: fastest at its start)"
+  },
+  {
+   "stem": "fx",
+   "file_start": -0.082,
+   "hit": 0.0,
+   "anchor": "onset",
+   "visual_frame": 0,
+   "visual_t": 0.0,
+   "gain_db": -13,
+   "what": "low bloom on frame 0 / the loop seam (boom at 0.8x, low-passed 400 Hz)"
+  },
+  {
+   "stem": "ui",
+   "file_start": -0.0,
+   "hit": 0.0,
+   "anchor": "onset",
+   "visual_frame": 0,
+   "visual_t": 0.0,
+   "gain_db": -22,
+   "what": "shimmer on frame 0 / the loop seam (glass at 0.7x + reverb)"
+  },
+  {
+   "stem": "fx",
+   "file_start": 2.92,
+   "hit": 2.92,
+   "anchor": "onset",
+   "visual_frame": 90,
+   "visual_t": 3.0,
+   "gain_db": -9,
+   "what": "soft heavy impact, transient 80 ms before the flash"
+  },
+  {
+   "stem": "fx",
+   "file_start": 2.929,
+   "hit": 3.0,
+   "anchor": "onset",
+   "visual_frame": 90,
+   "visual_t": 3.0,
+   "gain_db": -6,
+   "what": "low-frequency boom on the flash frame"
+  },
+  {
+   "stem": "fx",
+   "file_start": 6.006,
+   "hit": 6.5,
+   "anchor": "peak",
+   "visual_frame": 180,
+   "visual_t": 6.0,
+   "gain_db": -15,
+   "what": "low whoosh, peak at the pull-back's mid-point"
+  },
+  {
+   "stem": "ui",
+   "file_start": 7.2,
+   "hit": 7.2,
+   "anchor": "onset",
+   "visual_frame": 216,
+   "visual_t": 7.2,
+   "gain_db": -15,
+   "what": "glass ping as the disc becomes the C"
+  },
+  {
+   "stem": "ui",
+   "file_start": 7.533,
+   "hit": 7.533,
+   "anchor": "onset",
+   "visual_frame": 226,
+   "visual_t": 7.533,
+   "gain_db": -20,
+   "what": "valence-dot tick 1 (rate 0.92)"
+  },
+  {
+   "stem": "ui",
+   "file_start": 7.667,
+   "hit": 7.667,
+   "anchor": "onset",
+   "visual_frame": 230,
+   "visual_t": 7.667,
+   "gain_db": -20,
+   "what": "valence-dot tick 2 (rate 0.98)"
+  },
+  {
+   "stem": "ui",
+   "file_start": 7.8,
+   "hit": 7.8,
+   "anchor": "onset",
+   "visual_frame": 234,
+   "visual_t": 7.8,
+   "gain_db": -20,
+   "what": "valence-dot tick 3 (rate 1.04)"
+  },
+  {
+   "stem": "ui",
+   "file_start": 7.933,
+   "hit": 7.933,
+   "anchor": "onset",
+   "visual_frame": 238,
+   "visual_t": 7.933,
+   "gain_db": -20,
+   "what": "valence-dot tick 4 (rate 1.1)"
+  },
+  {
+   "stem": "ui",
+   "file_start": 8.333,
+   "hit": 8.333,
+   "anchor": "onset",
+   "visual_frame": 250,
+   "visual_t": 8.333,
+   "gain_db": -19,
+   "what": "confirmation chime as the first card line lands"
+  },
+  {
+   "stem": "fx",
+   "file_start": 11.1,
+   "hit": 12.0,
+   "anchor": "end",
+   "visual_frame": 360,
+   "visual_t": 12.0,
+   "gain_db": -14,
+   "what": "reversed whoosh + reversed shimmer, swelling into the loop seam"
+  }
+ ]
+}

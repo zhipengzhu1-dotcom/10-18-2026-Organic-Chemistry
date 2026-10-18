@@ -1,0 +1,87 @@
+{
+ "integrated_lufs": -16.2,
+ "true_peak_dbtp": -2.6,
+ "lra": 7.2,
+ "cues": [
+  {
+   "stem": "amb",
+   "t": 0.0,
+   "what": "J-cut: low rumble (brown noise lp 90 Hz + D1 sine) rises from black, 0.7 s before the picture"
+  },
+  {
+   "stem": "music",
+   "t": 1.5,
+   "what": "build: D-minor saw drone, filter 140->1500 Hz + 7 accelerating heartbeat pulses"
+  },
+  {
+   "stem": "sfx",
+   "t": 2.7,
+   "what": "riser (pink noise sweep + 110->440 Hz glide), stops dead at 5.60 s"
+  },
+  {
+   "stem": "sfx",
+   "t": 5.862,
+   "what": "Kenney low-frequency explosion, attack 38 ms aligned to the contact frame"
+  },
+  {
+   "stem": "music",
+   "t": 5.9,
+   "what": "DROP: braam (detuned saws D1-F3), filter 3.2 kHz -> 380 Hz"
+  },
+  {
+   "stem": "sfx",
+   "t": 5.9,
+   "what": "Kenney soft heavy impact (lp 1.6 kHz)"
+  },
+  {
+   "stem": "sfx",
+   "t": 5.9,
+   "what": "synth sub drop 75 -> 30 Hz + noise crack into a 2.8 s hall"
+  },
+  {
+   "stem": "music",
+   "t": 6.5,
+   "what": "pad Dm(add9) under the pull-back"
+  },
+  {
+   "stem": "amb",
+   "t": 6.7,
+   "what": "space-wind texture under the pull-back (CC0, OpenGameArt)"
+  },
+  {
+   "stem": "sfx",
+   "t": 8.4,
+   "what": "velocity-envelope whoosh under the pull-back, peaks 9.65 s"
+  },
+  {
+   "stem": "music",
+   "t": 12.0,
+   "what": "swell: pad opens and rises into the card"
+  },
+  {
+   "stem": "sfx",
+   "t": 12.2,
+   "what": "single soft shimmer as the C forms (Kenney glass, 0.84x, hall)"
+  },
+  {
+   "stem": "sfx",
+   "t": 12.2,
+   "what": "reversed hall swell into the zoom seam"
+  },
+  {
+   "stem": "music",
+   "t": 13.4,
+   "what": "card chord D major add9 (the lift), shimmer on top"
+  },
+  {
+   "stem": "sfx",
+   "t": 13.4,
+   "what": "sub thump: the card lands (lighter than the fusion hit)"
+  },
+  {
+   "stem": "music",
+   "t": 15.2,
+   "what": "music fades 1.3 s, silent from 16.50 s (0.5 s before the end)"
+  }
+ ]
+}
