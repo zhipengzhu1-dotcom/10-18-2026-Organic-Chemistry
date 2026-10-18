@@ -1,0 +1,6 @@
+node_modules/
+out/*
+!out/star-forge-native-9x16.mp4
+!out/star-forge-native-16x9.mp4
+!out/star-forge-native-poster.png
+frames/

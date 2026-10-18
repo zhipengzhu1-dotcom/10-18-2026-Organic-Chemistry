@@ -1,0 +1,7 @@
+# PROTOTYPE: bulky or regenerable
+star-forge-edit/out/preview-ffmpeg-*.mp4
+**/node_modules/
+**/.venv/
+**/media/videos/
+**/__pycache__/
+.DS_Store

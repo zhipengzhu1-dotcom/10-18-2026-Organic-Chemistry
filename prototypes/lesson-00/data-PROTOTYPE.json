@@ -1,0 +1,21 @@
+{
+  "_note": "PROTOTYPE stand-in for the pipeline outputs data/atoms/*.json and data/abundance/carbon.json. Values typed from the cited sources for review; the real pipeline must fetch and re-check them.",
+  "ionization_eV": {
+    "_source": "NIST Atomic Spectra Database, Ground levels and ionization energies (Kramida, Ralchenko, Reader & NIST ASD Team). Successive ionization energies, eV.",
+    "Li": [5.391715, 75.6400, 122.45429],
+    "Be": [9.322699, 18.21115, 153.8961, 217.7186],
+    "B": [8.298019, 25.1548, 37.93059, 259.3715, 340.226],
+    "C": [11.260288, 24.383154, 47.88778, 64.49352, 392.0905, 489.99320],
+    "N": [14.53413, 29.60125, 47.4453, 77.4735, 97.8901, 552.0673, 667.046],
+    "O": [13.618055, 35.12112, 54.93554, 77.41350, 113.8990, 138.1189, 739.3268, 871.4098],
+    "F": [17.42282, 34.97081, 62.70800, 87.175, 114.249, 157.1631, 185.1824, 953.8986, 1103.1176]
+  },
+  "electron_affinity_eV": {
+    "_source": "T. Andersen, H. K. Haugen & H. Hotop, J. Phys. Chem. Ref. Data 28, 1511 (1999). null = anion not bound.",
+    "Li": 0.618049, "Be": null, "B": 0.279723, "C": 1.262119, "N": null, "O": 1.4611103, "F": 3.4011898
+  },
+  "abundance": {
+    "crust_C": { "value": "0.02%", "_source": "CRC Handbook of Chemistry and Physics, 'Abundance of Elements in the Earth's Crust and in the Sea' (C: 2.00×10² mg/kg). PROTOTYPE: licence to be checked; spec fallback applies if not usable." },
+    "body_C": { "value": "23%", "_source": "ICRP Publication 23, Reference Man (1975): carbon 16 kg of a 70 kg body. PROTOTYPE: licence to be checked; spec fallback applies if not usable." }
+  }
+}

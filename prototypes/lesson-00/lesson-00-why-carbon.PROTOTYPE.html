@@ -1,0 +1,1007 @@
+<!doctype html>
+<!--
+  PROTOTYPE, throwaway. Plays all 9 Steps of the Lesson 0 spec (docs/specs/unit-1/lesson-00-why-carbon.md):
+  Hook → 5 Build Steps → 2 Check Problems → Wrap → Lesson-end screen.
+  Shell (Step player, two-try feedback, tokens, ?step=N, scrubber, reduced motion, dot/arrow drawing, lazy RDKit.js)
+  is reused from the accepted Lesson 6 prototype (REFERENCE-lesson-06.html).
+  Every chemistry number comes from the inline DATA block, a copy of data-PROTOTYPE.json. Nothing is typed into the copy.
+  URL params: ?step=1..9 (10 = Lesson end) · ?motion=reduced · ?fast=1 (s05 idle hints after 3 s, not 30 s) · ?debug=1
+  s06 needs internet for RDKit.js (like the fonts); offline it falls back to a stored RDKit.js layout of the same SMILES.
+  Double-click to open. Never merged.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 0 Run-through</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Pixelify+Sans:wght@500;700&family=Silkscreen&display=swap" rel="stylesheet">
+<style>
+:root{
+  --at-space:#0d0626; --at-surface:#1a0f3d; --at-raised:#241552; --at-line:#6a4bd1;
+  --at-ink:#ffffff; --at-ink-muted:#b9a8e8;
+  --at-electron:#3ee8ff; --at-ignite:#ff9a1f; --at-boss:#ff5fd8; --at-shadow:#b44dff; --at-on-fill:#1a0d3d;
+  --at-font-pixel:"Pixelify Sans",ui-monospace,monospace;
+  --at-font-label:"Silkscreen",ui-monospace,monospace;
+  --at-font-text:"Space Grotesk",system-ui,sans-serif;
+  --at-font-data:"JetBrains Mono",ui-monospace,monospace;
+  --el-O:#ff8a8a; --el-N:#9db4ff; --el-F:#b8f5a0; --el-C:#ffffff; --el-H:#d9d0f5; --el-Ne:#ffd27a;
+  --el-Li:#d9d0f5; --el-Be:#d9d0f5; --el-B:#ffd6a8;
+  --banner-h:32px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--at-space);color:var(--at-ink)}
+body{font:400 17px/1.5 var(--at-font-text);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+:focus-visible{outline:3px solid var(--at-electron);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.data{font-family:var(--at-font-data)}
+[data-motion=reduced] *{animation:none!important;transition:none!important}
+
+/* ---------- prototype banner (deliberately NOT on-brand) ---------- */
+#proto{position:fixed;left:0;right:0;top:0;height:var(--banner-h);z-index:100;display:flex;align-items:center;gap:6px;padding:0 8px;
+  background:repeating-linear-gradient(45deg,#fff36b,#fff36b 12px,#ffe600 12px,#ffe600 24px);color:#000;border-bottom:2px solid #000;
+  font:700 11px/1 "Times New Roman",Times,serif;white-space:nowrap;overflow-x:auto}
+#proto .t{font-style:italic}
+#proto select,#proto button{font:600 11px Arial,sans-serif;color:#000;background:#fff;border:1px solid #000;border-radius:2px;padding:3px 5px}
+#proto button[aria-pressed=true]{background:#000;color:#fff36b}
+#sanity{position:fixed;left:0;right:0;top:var(--banner-h);z-index:99;background:#d00000;color:#fff;font:700 13px/1.35 Arial,sans-serif;padding:8px 12px;display:none}
+#sanity.on{display:block}
+#debug{position:fixed;right:8px;top:calc(var(--banner-h) + 6px);z-index:90;width:min(390px,calc(100vw - 16px));max-height:calc(100vh - 110px);overflow:auto;
+  background:#f4f4f4;color:#111;border:2px dashed #111;padding:8px 10px;font:11.5px/1.45 Menlo,Consolas,monospace;display:none;white-space:pre-wrap;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+#debug.on{display:block}
+#debug b{font-family:Arial,sans-serif}
+#debug .ok{color:#0a7a00;font-weight:700} #debug .bad{color:#c00;font-weight:700} #debug .ns{background:#ffd;}
+
+/* ---------- Step player ---------- */
+/* the foot sits in the page flow under the scrolling Step, so feedback never covers the Step (owner bug, 12:40) */
+#app{height:100vh;height:100dvh;display:flex;flex-direction:column}
+.step{flex:1;min-height:0;width:100%;box-sizing:border-box;display:flex;flex-direction:column;max-width:640px;margin:0 auto;padding:calc(var(--banner-h) + 8px) 16px 16px;overflow-y:auto}
+#body{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column}
+#body>:not(.card){flex-shrink:0} /* only the Scene card shrinks; choices never get squashed */
+.top{display:flex;align-items:center;gap:12px}
+.top .x{font:700 20px var(--at-font-pixel);color:var(--at-ink-muted);padding:4px}
+.prog{flex:1;height:8px;background:color-mix(in srgb,var(--at-ink) 15%,transparent);display:flex;gap:2px}
+.prog i{flex:1;background:transparent}
+.prog i.done{background:var(--at-ignite)}
+.prog i.now{background:var(--at-electron)}
+.kick{font:400 12px var(--at-font-label);color:var(--at-electron);margin:8px 0 4px;letter-spacing:.04em;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.kick .chk{color:var(--at-boss)}
+.kick .diff{color:var(--at-ignite)}
+.prompt{margin:0 0 8px;font-size:clamp(15px,4vw,16.5px);line-height:1.42}
+.prompt p{margin:0 0 6px}
+.prompt b{color:var(--at-electron);font-weight:600}
+.card{flex:1;min-height:150px;display:flex;flex-direction:column;border:3px solid var(--at-line);box-shadow:6px 6px 0 var(--at-shadow);background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--at-shadow) 22%,transparent),transparent 70%),color-mix(in srgb,var(--at-space) 85%,#000);position:relative}
+.card.flat{flex:none}
+.callout{min-height:26px;padding:5px 10px 0;font:600 13px/1.35 var(--at-font-data);color:var(--at-electron)}
+.callout.warn{color:var(--at-ignite)}
+.card svg.mol{display:block;width:100%;flex:1;min-height:0;touch-action:none;user-select:none;-webkit-user-select:none}
+svg .hit{fill:transparent;stroke:none;outline:none;cursor:pointer}
+svg .hit:focus-visible{stroke:var(--at-electron);stroke-width:2.5;stroke-dasharray:4 3}
+.tools{flex:none;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 8px;border-top:2px solid var(--at-line);min-height:44px}
+.ibtn{background:var(--at-space);border:2px solid var(--at-ink);font:400 12px var(--at-font-label);padding:7px 10px;box-shadow:3px 3px 0 var(--at-shadow);min-height:36px}
+.ibtn:disabled{opacity:.35;cursor:default}
+.scrub{display:flex;align-items:center;gap:8px;flex:1;min-width:200px}
+.scrub input{flex:1;accent-color:var(--at-ignite);height:28px}
+.cap{flex:none;font:500 13px/1.4 var(--at-font-text);padding:6px 10px;border-top:2px dashed var(--at-line)}
+.muted{color:var(--at-ink-muted);font-size:13px;font-family:var(--at-font-data)}
+
+/* choices */
+.choices{display:grid;gap:8px}
+.choice{display:block;width:100%;text-align:left;border:3px solid var(--at-line);background:var(--at-surface);padding:9px 12px;box-shadow:4px 4px 0 var(--at-shadow);position:relative;font-size:15.5px;line-height:1.35;min-height:48px}
+.choice[aria-pressed=true]{border-color:var(--at-electron);box-shadow:4px 4px 0 var(--at-electron)}
+.choice .lt{font:400 12px var(--at-font-label);color:var(--at-ink-muted);margin-right:8px}
+.choice.ok{border-color:var(--at-electron)}
+.choice.no{border-color:var(--at-boss);border-style:dashed}
+.choices.two{grid-template-columns:1fr 1fr}
+
+/* star-line strip (s01 while the choices are up) */
+.strip{flex:none;display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:10px;border:3px solid var(--at-line);box-shadow:4px 4px 0 var(--at-shadow);
+  background:radial-gradient(ellipse at 15% 40%,rgba(255,79,216,.28),transparent 60%),radial-gradient(ellipse at 85% 70%,rgba(35,64,255,.35),transparent 60%),var(--at-space)}
+.strip svg{width:54px;height:54px;flex:none}
+.strip p{margin:0;font:500 13.5px/1.35 var(--at-font-text)}
+.strip p b{font-weight:700}
+.strip .ibtn{flex:none;padding:5px 7px;font-size:11px;min-height:30px}
+
+/* give-or-take */
+.ladder{display:flex;justify-content:space-between;padding:0 4px;font:700 13px var(--at-font-data);color:var(--at-ink-muted)}
+.ladder span{width:2.2em;text-align:center}
+.ladder span.on{color:var(--at-electron)}
+.slider{flex:none;padding:6px 8px 4px;border-top:2px solid var(--at-line)}
+.slider input{width:100%;accent-color:var(--at-electron);height:30px;margin:0}
+.desc{font:500 13px/1.4 var(--at-font-text);color:var(--at-ink-muted);padding:4px 10px 6px}
+
+/* numeric pad */
+.pad{flex:none;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.pad button{min-height:44px;border:2px solid var(--at-line);background:var(--at-surface);font:700 18px var(--at-font-data);box-shadow:3px 3px 0 var(--at-shadow)}
+.pad button:active{transform:translate(3px,3px);box-shadow:none}
+.numout{flex:none;display:flex;align-items:center;gap:10px;margin-top:8px}
+.numout .box{flex:1;min-height:46px;border:3px solid var(--at-electron);background:var(--at-space);font:700 24px/40px var(--at-font-data);padding:0 12px}
+.numout .unit{font:600 15px var(--at-font-data);color:var(--at-ink-muted)}
+
+.fb{pointer-events:auto;width:min(608px,100%);margin-bottom:8px;background:var(--at-surface);border:3px solid var(--at-line);padding:8px 12px;display:none;max-height:30vh;overflow-y:auto}
+.fb.on{display:block}
+.fb h2{margin:0 0 3px;font:400 13px var(--at-font-label)}
+.fb p{margin:0;font-size:14.5px;line-height:1.38}
+.fb p b{color:var(--at-electron)}
+.fb.hint{border-color:var(--at-ignite)} .fb.hint h2{color:var(--at-ignite)}
+.fb.good{border-color:var(--at-electron)} .fb.good h2{color:var(--at-electron)}
+.fb.show{border-color:var(--at-ignite);border-style:dashed} .fb.show h2{color:var(--at-ignite)}
+.fb.pred{border-color:var(--at-boss)} .fb.pred h2{color:var(--at-boss)}
+details.src{flex:none;margin-top:6px}
+details.src[open]{max-height:30vh;overflow-y:auto}
+summary{font:400 11px var(--at-font-label);color:var(--at-electron);cursor:pointer}
+.srcnote{font:400 12px/1.5 var(--at-font-data);color:var(--at-ink-muted)}
+.foot{flex:none;padding-top:8px;padding-bottom:12px;display:flex;flex-direction:column;align-items:center;padding:0 16px;pointer-events:none}
+.foot button{pointer-events:auto;width:min(608px,100%);font:400 16px var(--at-font-label);padding:14px;background:var(--at-ignite);color:var(--at-on-fill);box-shadow:5px 5px 0 var(--at-shadow);transition:transform 90ms linear,box-shadow 90ms linear}
+.foot button:active:not(:disabled):not([aria-disabled=true]){transform:translate(5px,5px);box-shadow:0 0 0 var(--at-shadow)}
+.foot button:disabled,.foot button[aria-disabled=true]{background:color-mix(in srgb,var(--at-ink) 18%,transparent);color:var(--at-ink-muted);box-shadow:none;cursor:default}
+.foot button.skip{background:var(--at-space);color:var(--at-ink);border:2px solid var(--at-ink);box-shadow:5px 5px 0 var(--at-line)}
+
+/* big statement + end */
+.bigtxt{font:700 clamp(22px,6.2vw,32px)/1.15 var(--at-font-text);color:var(--at-ignite);text-shadow:3px 3px 0 var(--at-shadow);margin:6px 0 10px;letter-spacing:-.01em}
+.wraplist{margin:0 0 10px;padding-left:20px;font-size:15.5px}
+.big{font:700 clamp(28px,8vw,46px)/1.05 var(--at-font-pixel);color:var(--at-ignite);text-shadow:3px 3px 0 var(--at-shadow);margin:14px 0 12px}
+.end{text-align:center;padding-top:calc(var(--banner-h) + 24px)}
+.end .key{border:3px solid var(--at-electron);padding:16px;margin:18px 0;font-size:17px;box-shadow:5px 5px 0 var(--at-shadow);text-align:left}
+.end .streak{font:600 15px var(--at-font-text);margin:10px 0 20px}
+.end .streak b{font:700 22px var(--at-font-data);color:var(--at-electron)}
+.btn{display:inline-flex;justify-content:center;min-height:48px;padding:13px 20px;font:400 15px var(--at-font-label);box-shadow:5px 5px 0 var(--at-shadow);margin:6px}
+.btn-primary{background:var(--at-ignite);color:var(--at-on-fill)}
+.btn-secondary{border:2px solid var(--at-ink);box-shadow:5px 5px 0 var(--at-line)}
+
+/* intro */
+.intro{max-width:640px;margin:0 auto;padding:calc(var(--banner-h) + 20px) 16px 60px}
+.intro h1{font:700 30px var(--at-font-pixel);color:var(--at-ignite);text-shadow:3px 3px 0 var(--at-shadow)}
+.intro li{margin-bottom:8px}
+.intro .box{border:3px solid var(--at-line);padding:12px 16px;margin:16px 0;background:var(--at-surface)}
+
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.bounce{animation:shake .25s 2}
+</style>
+</head>
+<body>
+<div id="proto" role="toolbar" aria-label="Prototype controls">
+  <span class="t">PROTOTYPE — Lesson 0 run-through, throwaway</span>
+  <button id="b-prev" aria-label="Previous Step">◀</button>
+  <select id="b-step" aria-label="Jump to Step"></select>
+  <button id="b-next" aria-label="Next Step">▶</button>
+  <button id="b-debug" aria-pressed="false">debug</button>
+  <button id="b-motion" aria-pressed="false">reduced motion</button>
+  <button id="b-reset">redo Step</button>
+</div>
+<div id="sanity" role="alert"></div>
+<div id="app"></div>
+<pre id="debug" aria-label="Prototype debug: state of this Step"></pre>
+<div id="live" class="sr" aria-live="polite"></div>
+
+<script>
+// =====================================================================
+// DATA: copy of prototypes/lesson-00/data-PROTOTYPE.json (stand-in for the pipeline's data/atoms/*.json and
+// data/abundance/carbon.json). Pasted, never edited. Every chemistry number on screen is read from here.
+// =====================================================================
+const DATA=/*DATA*/{
+  "_note": "PROTOTYPE stand-in for the pipeline outputs data/atoms/*.json and data/abundance/carbon.json. Values typed from the cited sources for review; the real pipeline must fetch and re-check them.",
+  "ionization_eV": {
+    "_source": "NIST Atomic Spectra Database, Ground levels and ionization energies (Kramida, Ralchenko, Reader & NIST ASD Team). Successive ionization energies, eV.",
+    "Li": [5.391715, 75.6400, 122.45429],
+    "Be": [9.322699, 18.21115, 153.8961, 217.7186],
+    "B": [8.298019, 25.1548, 37.93059, 259.3715, 340.226],
+    "C": [11.260288, 24.383154, 47.88778, 64.49352, 392.0905, 489.99320],
+    "N": [14.53413, 29.60125, 47.4453, 77.4735, 97.8901, 552.0673, 667.046],
+    "O": [13.618055, 35.12112, 54.93554, 77.41350, 113.8990, 138.1189, 739.3268, 871.4098],
+    "F": [17.42282, 34.97081, 62.70800, 87.175, 114.249, 157.1631, 185.1824, 953.8986, 1103.1176]
+  },
+  "electron_affinity_eV": {
+    "_source": "T. Andersen, H. K. Haugen & H. Hotop, J. Phys. Chem. Ref. Data 28, 1511 (1999). null = anion not bound.",
+    "Li": 0.618049, "Be": null, "B": 0.279723, "C": 1.262119, "N": null, "O": 1.4611103, "F": 3.4011898
+  },
+  "abundance": {
+    "crust_C": { "value": "0.02%", "_source": "CRC Handbook of Chemistry and Physics, 'Abundance of Elements in the Earth's Crust and in the Sea' (C: 2.00×10² mg/kg). PROTOTYPE: licence to be checked; spec fallback applies if not usable." },
+    "body_C": { "value": "23%", "_source": "ICRP Publication 23, Reference Man (1975): carbon 16 kg of a 70 kg body. PROTOTYPE: licence to be checked; spec fallback applies if not usable." }
+  }
+}/*END*/;
+
+// ---------- derived values for give-or-take (spec Data note) ----------
+const ROW_ORDER=['Li','Be','B','C','N','O','F'];
+const VALENCE={Li:1,Be:2,B:3,C:4,N:5,O:6,F:7}; // group number = outer electrons; not a measured number
+const ELNAME={Li:'Lithium',Be:'Beryllium',B:'Boron',C:'Carbon',N:'Nitrogen',O:'Oxygen',F:'Fluorine'};
+const ROW=ROW_ORDER.map(el=>{
+  const v=VALENCE[el], ies=DATA.ionization_eV[el], ea=DATA.electron_affinity_eV[el];
+  const sum=ies.length>=v?ies.slice(0,v).reduce((a,b)=>a+b,0):NaN;
+  return {el,v,ies,sum,take:8-v,ea,bound:ea!==null&&ea>0,n:Math.min(v,8-v)};
+});
+const fmt2=x=>x.toFixed(2);
+// Build-time sanity check from the spec: counts 1,2,3,4,3,2,1 Li→F, carbon's 4 the largest.
+const SANITY=(()=>{
+  const want=[1,2,3,4,3,2,1], got=ROW.map(r=>r.n), errs=[];
+  if(got.join()!==want.join()) errs.push(`"electrons to move" counts read ${got.join(', ')}; the spec says ${want.join(', ')} (Li→F).`);
+  const c=ROW.find(r=>r.el==='C'); if(ROW.some(r=>r.el!=='C'&&r.n>=c.n)) errs.push('Carbon is not the unique largest "electrons to move".');
+  ROW.forEach(r=>{if(!isFinite(r.sum)) errs.push(`${r.el}: fewer than ${r.v} ionization energies in the data.`);});
+  return errs;
+})();
+if(SANITY.length){const b=document.getElementById('sanity');b.className='on';b.textContent='DATA SANITY CHECK FAILED: '+SANITY.join(' ');}
+// The spec's {curly} pipeline fields, filled from DATA
+const FIELDS={'crust.C':DATA.abundance.crust_C.value,'body.C':DATA.abundance.body_C.value,'ie.C.sum4':fmt2(ROW.find(r=>r.el==='C').sum)};
+const fill=s=>s.replace(/\{([a-zA-Z]+\.[a-zA-Z0-9.]+)\}/g,(m,k)=>FIELDS[k]??m);
+const strip=s=>s.replace(/<[^>]+>/g,'');
+
+// =====================================================================
+// Drawing helpers. Arrow + lone-pair code reused from the Lesson 6 prototype.
+// =====================================================================
+const dist=(p,q)=>Math.hypot(p.x-q.x,p.y-q.y);
+const lerp=(a,b,u)=>a+(b-a)*u;
+const clamp01=x=>x<0?0:x>1?1:x;
+const ease=x=>{x=clamp01(x);return x*x*(3-2*x);};
+const seg=(T,a,b)=>clamp01((T-a)/(b-a));
+const SIDE=[-Math.PI/2,0,Math.PI/2,Math.PI]; // top, right, bottom, left
+const DOT='var(--at-electron)';
+function dot(x,y,r=3.3,col=DOT,op=1){return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${col}" opacity="${op}"/>`;}
+// a pair of dots at distance r from (x,y) in direction ang
+function pairAt(x,y,ang,r,o={}){const px=-Math.sin(ang)*(o.sep||4.6),py=Math.cos(ang)*(o.sep||4.6),cx=x+Math.cos(ang)*r,cy=y+Math.sin(ang)*r;
+  return dot(cx+px,cy+py,o.dr||3.3,o.col||DOT,o.op??1)+dot(cx-px,cy-py,o.dr||3.3,o.col||DOT,o.op??1);}
+function label(x,y,txt,o={}){const fs=o.fs||20;
+  return `<text x="${x}" y="${y+fs*.36}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700" font-size="${fs}" fill="${o.col||`var(--el-${o.el||'C'})`}" opacity="${o.op??1}">${txt}</text>`;}
+// Lewis dot atom: singles fill the four sides first, then pair up (H: one dot)
+function dotSides(n){const s=[0,0,0,0];for(let i=0;i<n;i++)s[i%4]++;return s;}
+function dotAtom(x,y,el,n,o={}){
+  const r=o.r||21, fs=o.fs||20; let s=label(x,y,el,{el,fs,op:o.op});
+  dotSides(n).forEach((k,i)=>{const a=SIDE[i]; if(k===1) s+=dot(x+Math.cos(a)*r,y+Math.sin(a)*r,o.dr||3.3,DOT,o.op??1); if(k===2) s+=pairAt(x,y,a,r,{dr:o.dr,op:o.op});});
+  return s;
+}
+function chargeBadge(x,y,txt,op=1){return `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="8.5" fill="var(--at-space)" stroke="var(--at-ink-muted)" stroke-width="1.5"/><text x="${x}" y="${y+4.2}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700" font-size="13" fill="#fff">${txt}</text></g>`;}
+function eBadge(x,y,n,full,o={}){return `<text x="${x}" y="${y}" text-anchor="${o.anchor||'start'}" font-family="JetBrains Mono,monospace" font-weight="700" font-size="${o.fs||11}" fill="${full?'var(--at-electron)':'var(--at-ink-muted)'}" opacity="${o.op??1}">${n} e⁻</text>`;}
+// L6 curved arrow: quadratic Bézier
+function arrowSvg(g,color,o={}){
+  const {p0,p1,c}=g, d=dist(p1,c)||1, tx=(p1.x-c.x)/d, ty=(p1.y-c.y)/d;
+  const head=`${p1.x},${p1.y} ${p1.x-tx*11-ty*6},${p1.y-ty*11+tx*6} ${p1.x-tx*11+ty*6},${p1.y-ty*11-tx*6}`;
+  const len=o.draw!=null?`stroke-dasharray="400" stroke-dashoffset="${400*(1-o.draw)}"`:'';
+  return `<g opacity="${o.op??1}"><path d="M${p0.x},${p0.y} Q${c.x},${c.y} ${p1.x},${p1.y}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" ${len}${o.dashed?' stroke-dasharray="6 5"':''}/>`+
+    ((o.noHead||(o.draw!=null&&o.draw<.97))?'':`<polygon points="${head}" fill="${color}"/>`)+'</g>';
+}
+const bez=(g,u)=>({x:(1-u)*(1-u)*g.p0.x+2*(1-u)*u*g.c.x+u*u*g.p1.x,y:(1-u)*(1-u)*g.p0.y+2*(1-u)*u*g.c.y+u*u*g.p1.y});
+
+// =====================================================================
+// Scenes
+// =====================================================================
+// ---- star-forge (s01): rough in-page cut of star-forge-storyboard.md, 13 s. f(T seconds) → SVG ----
+const SF_DUR=13;
+const SF_STARS=(()=>{let s=7,out=[];const r=()=>(s=(s*16807)%2147483647)/2147483647;for(let i=0;i<60;i++)out.push([r()*360,r()*520,r()*1.2+.3,r()*.6+.25]);return out;})();
+function nucleus(x,y,n,rad,op=1){ // n nucleons, alternating cyan (p) / white (n), packed in rings
+  let s='';const pts=[[0,0]];let ring=1;while(pts.length<n){const k=ring*6;for(let i=0;i<k&&pts.length<n;i++){const a=i/k*2*Math.PI+ring;pts.push([Math.cos(a)*ring*rad*1.9,Math.sin(a)*ring*rad*1.9]);}ring++;}
+  if(n===4){pts.length=0;pts.push([-rad,-rad],[rad,-rad],[-rad,rad],[rad,rad]);}
+  pts.forEach(([dx,dy],i)=>{s+=`<circle cx="${x+dx}" cy="${y+dy}" r="${rad}" fill="${i%2?'#ffffff':'#3ee8ff'}" opacity="${op}"/>`;});
+  return `<g filter="url(#sfglow)">${s}</g>`;
+}
+function starForge(T){
+  const cx=180, cy=220;
+  let s=`<defs><radialGradient id="sfcore"><stop offset="0" stop-color="#fff"/><stop offset=".25" stop-color="#ffe2b0"/><stop offset=".6" stop-color="#ff9a1f" stop-opacity=".8"/><stop offset="1" stop-color="#ff9a1f" stop-opacity="0"/></radialGradient>
+    <radialGradient id="nebP"><stop offset="0" stop-color="#ff4fd8" stop-opacity=".55"/><stop offset="1" stop-color="#ff4fd8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="nebV"><stop offset="0" stop-color="#b44dff" stop-opacity=".55"/><stop offset="1" stop-color="#b44dff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="nebB"><stop offset="0" stop-color="#2340ff" stop-opacity=".6"/><stop offset="1" stop-color="#2340ff" stop-opacity="0"/></radialGradient>
+    <filter id="sfglow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <rect width="360" height="520" fill="#0d0626"/>`;
+  SF_STARS.forEach(([x,y,r,o])=>s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" opacity="${o*(.4+.6*seg(T,6.5,9))}"/>`);
+  // camera: push in 0–2 s, pull back 6.5–9 s
+  const cam=1+.12*ease(seg(T,0,2))-.12*ease(seg(T,6.5,9));
+  // nebula (beat 4 onward), drifting slowly
+  const neb=ease(seg(T,6.5,8.5)), pan=-24*ease(seg(T,6.5,13));
+  s+=`<g opacity="${neb}" transform="translate(${pan},0)"><ellipse cx="90" cy="300" rx="170" ry="120" fill="url(#nebP)"/><ellipse cx="290" cy="200" rx="160" ry="130" fill="url(#nebV)"/><ellipse cx="230" cy="420" rx="190" ry="120" fill="url(#nebB)"/></g>`;
+  s+=`<g transform="translate(${cx},${cy}) scale(${cam}) translate(${-cx},${-cy})">`;
+  // beat 1/4: the star core, breathing; shrinks to a point and moves off up-left
+  const shrink=ease(seg(T,6.5,9)), R=lerp(150*(1+.04*Math.sin(T*2.4)),5,shrink), sx=lerp(cx,62,shrink), sy=lerp(cy,78,shrink);
+  s+=`<circle cx="${sx}" cy="${sy}" r="${R}" fill="url(#sfcore)" opacity="${ease(seg(T,0,1.4))}"/>`;
+  // beat 2: three helium-4 nuclei drift in
+  if(T>=2&&T<4.75){const u=ease(seg(T,2,4.5)),op=seg(T,2,2.5);
+    [-90,30,150].forEach(d=>{const a=d*Math.PI/180,r=lerp(185,14,u),x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;
+      s+=nucleus(x,y,4,4.2,op)+`<text x="${x}" y="${y-15}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700" font-size="14" fill="#fff" opacity="${op*(1-seg(T,4.3,4.6))}">⁴He</text>`;});}
+  // beat 3: flash, one carbon-12 nucleus
+  if(T>=4.5&&T<5.4){const u=seg(T,4.5,5.3);s+=`<circle cx="${cx}" cy="${cy}" r="${10+70*u}" fill="#fff" opacity="${1-u}"/>`;}
+  // nucleus position: centre, then drifts out and down into the cell (beat 4), morphs into C (beat 5)
+  const drift=ease(seg(T,6.5,9)), nx=cx, ny=lerp(cy,330,drift);
+  const morph=ease(seg(T,9,9.7));
+  if(T>=4.6&&morph<1){const op=seg(T,4.6,5.0)*(1-morph);s+=nucleus(nx,ny,12,3.6,op)+
+    `<text x="${nx+30}" y="${ny-18}" font-family="JetBrains Mono,monospace" font-weight="700" font-size="15" fill="#fff" opacity="${op*(1-seg(T,8.6,9))}">¹²C</text>`;}
+  s+='</g>';
+  // equation writes on (stroke then fill), fades out in beat 4
+  if(T>=4.7&&T<8){const w=seg(T,4.7,6.0),f=seg(T,5.6,6.4),out=1-seg(T,7,7.8);
+    s+=`<text x="180" y="440" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700" font-size="30" fill="#fff" fill-opacity="${f*out}" stroke="#3ee8ff" stroke-width="1.2" stroke-opacity="${out}" stroke-dasharray="520" stroke-dashoffset="${520*(1-w)}">3 ⁴He → ¹²C</text>`;}
+  // the cell membrane fades in around the nucleus
+  const cell=ease(seg(T,7.8,9))*(1-ease(seg(T,10.6,11.6)));
+  if(cell>0) s+=`<g opacity="${cell}"><path d="M95,300 C95,235 265,235 270,300 C275,370 245,400 180,402 C110,404 95,360 95,300Z" fill="rgba(62,232,255,.06)" stroke="#3ee8ff" stroke-opacity=".55" stroke-width="3"/>
+    <path d="M106,301 C106,246 255,246 259,301 C263,362 238,390 180,391 C120,392 106,356 106,301Z" fill="none" stroke="#3ee8ff" stroke-opacity=".25" stroke-width="1.5"/></g>`;
+  // beat 5: letter C with four valence dots; beat 6: slides up
+  if(morph>0){const up=ease(seg(T,10.5,11.6)), y=lerp(330,150,up), sc=lerp(.6,1,morph)*lerp(1,1.15,up);
+    s+=`<g transform="translate(180,${y}) scale(${sc})" opacity="${morph}">${label(0,0,'C',{fs:44,col:'#fff'})}`;
+    [9.7,10.0,10.3,10.6].forEach((t0,i)=>{const o=ease(seg(T,t0,t0+.25));if(o>0){const a=SIDE[i];s+=`<circle cx="${Math.cos(a)*38}" cy="${Math.sin(a)*38}" r="${5*o+.01}" fill="#3ee8ff" filter="url(#sfglow)"/>`;}});
+    s+='</g>';}
+  // star-line card writes on
+  const L=(t0,y,txt,fs,wt)=>{const o=ease(seg(T,t0,t0+.7));return o?`<text x="180" y="${y+8*(1-o)}" text-anchor="middle" font-family="Space Grotesk,system-ui,sans-serif" font-weight="${wt}" font-size="${fs}" fill="#fff" opacity="${o}">${txt}</text>`:'';};
+  s+=L(10.9,280,'Every carbon atom in you',24,700)+L(11.2,311,'was forged in a star.',24,700)+L(11.8,362,'Organic chemistry is what that',17,400)+L(12.05,386,'carbon learned to do next.',17,400);
+  return s;
+}
+const SF_SR="A star's core. Three helium nuclei fuse into one carbon nucleus: three helium-4 make carbon-12. The carbon drifts out through a nebula and into a living cell, then becomes a letter C with four electrons around it. Text: Every carbon atom in you was forged in a star. Organic chemistry is what that carbon learned to do next.";
+function cWithDots(){return `<svg viewBox="-30 -30 60 60" aria-hidden="true">${label(0,0,'C',{fs:24,col:'#fff'})}${[0,1,2,3].map(i=>dot(Math.cos(SIDE[i])*20,Math.sin(SIDE[i])*20,3.2)).join('')}</svg>`;}
+
+// ---- crust-vs-body (s01 reveal): log axis 0.01 %–100 % so the crust bar is visible ----
+function crustVsBody(){
+  const crust=parseFloat(DATA.abundance.crust_C.value), body=parseFloat(DATA.abundance.body_C.value);
+  const X=v=>104+(Math.log10(v)+2)/4*226;
+  let s='';
+  [0.01,0.1,1,10,100].forEach(v=>{s+=`<line x1="${X(v)}" y1="22" x2="${X(v)}" y2="118" stroke="var(--at-line)" stroke-dasharray="2 3"/><text x="${X(v)}" y="134" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--at-ink-muted)">${v}%</text>`;});
+  const bar=(y,v,txt,lab,col)=>`<text x="96" y="${y+16}" text-anchor="end" font-family="Space Grotesk" font-size="13" font-weight="600" fill="#fff">${lab}</text><rect x="${X(.01)}" y="${y}" width="${X(v)-X(.01)}" height="24" fill="${col}"/><text x="${X(v)+6}" y="${y+17}" font-family="JetBrains Mono,monospace" font-weight="700" font-size="14" fill="${col}">${txt}</text>`;
+  s+=bar(32,crust,DATA.abundance.crust_C.value,"Earth's crust",'var(--at-ignite)')+bar(76,body,DATA.abundance.body_C.value,'your body','var(--at-electron)');
+  s+=`<text x="${X(.01)}" y="150" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--at-ink-muted)">carbon, share of mass · log scale</text>`;
+  s+=`<path d="M${X(.01)-6},116 l4,-6 l4,6 l4,-6" fill="none" stroke="var(--at-ink-muted)" stroke-width="1.5"/>`;
+  return s;
+}
+
+// ---- atoms-row (s02): H C N O F, then neon ----
+function atomsRow(){
+  let s=''; [['H',1],['C',4],['N',5],['O',6],['F',7]].forEach(([el,n],i)=>{const x=40+i*70;s+=dotAtom(x,70,el,n)+`<text x="${x}" y="122" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--at-ink-muted)">${n}</text>`;});
+  s+=`<text x="12" y="20" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--at-ink-muted)">outer electrons</text>`;
+  s+=`<line x1="20" y1="148" x2="340" y2="148" stroke="var(--at-line)" stroke-dasharray="4 4"/>`;
+  s+=dotAtom(70,198,'Ne',8,{fs:20,r:25})+`<text x="112" y="194" font-family="Space Grotesk" font-weight="700" font-size="15" fill="var(--el-Ne)">already full:</text><text x="112" y="214" font-family="Space Grotesk" font-size="14" fill="#fff">neon reacts with almost nothing</text>`;
+  return s;
+}
+
+// ---- water-push (s04): OH⁻ lone pair swings onto H⁺ → water. t ∈ [0,1] ----
+function waterPush(t){
+  const O={x:150,y:105}, Ha={x:86,y:105}, H0={x:300,y:105}, Hend={x:214,y:105};
+  const aDraw=ease(seg(t,0,.25)), mv=ease(seg(t,.28,.75)), fin=ease(seg(t,.75,.95));
+  const Hb={x:lerp(H0.x,Hend.x,mv),y:H0.y};
+  let s='';
+  // O–Ha shared pair
+  s+=pairAt(O.x,O.y,Math.PI,32,{});
+  s+=label(Ha.x,Ha.y,'H',{el:'H'})+label(O.x,O.y,'O',{el:'O'})+label(Hb.x,Hb.y,'H',{el:'H'});
+  // lone pairs top & bottom stay; the right one moves
+  s+=pairAt(O.x,O.y,-Math.PI/2,22)+pairAt(O.x,O.y,Math.PI/2,22);
+  const lp0={x:O.x+22,y:O.y}, lpEnd={x:(O.x+Hend.x)/2,y:O.y};
+  const g={p0:lp0,p1:{x:H0.x-14,y:H0.y-8},c:{x:(lp0.x+H0.x)/2,y:O.y-62}};
+  const lp={x:lerp(lp0.x,lpEnd.x,mv),y:O.y-28*Math.sin(Math.PI*mv)};
+  s+=dot(lp.x,lp.y-4.6)+dot(lp.x,lp.y+4.6);
+  if(fin>0) s+=`<circle cx="${lpEnd.x}" cy="${lpEnd.y}" r="13" fill="none" stroke="var(--at-ignite)" stroke-width="2.5" opacity="${fin}"/>`;
+  if(t<.75) s+=arrowSvg(g,'var(--at-electron)',{draw:aDraw,op:1-seg(t,.45,.7)});
+  // charges fade out as they cancel
+  s+=chargeBadge(O.x+19,O.y-22,'−',1-fin)+chargeBadge(Hb.x+15,Hb.y-17,'+',1-fin);
+  // labels
+  s+=`<text x="118" y="170" text-anchor="middle" font-family="Space Grotesk" font-size="14" fill="#fff" opacity="${1-fin}">hydroxide, OH⁻</text><text x="300" y="170" text-anchor="middle" font-family="Space Grotesk" font-size="14" fill="#fff" opacity="${1-fin}">H⁺</text>`;
+  s+=`<text x="150" y="170" text-anchor="middle" font-family="Space Grotesk" font-size="14" font-weight="700" fill="#fff" opacity="${fin}" transform="translate(0,14)">water, H₂O</text>`;
+  s+=`<g opacity="${fin}">${eBadge(O.x,O.y+46,8,true,{anchor:'middle'})}${eBadge(Ha.x,Ha.y+30,2,true,{anchor:'middle'})}${eBadge(Hend.x,Hend.y+30,2,true,{anchor:'middle'})}<text x="${lpEnd.x+6}" y="${O.y-34}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--at-ignite)">new O–H bond</text></g>`;
+  return s;
+}
+const WATER_SR='Hydroxide, an oxygen with three lone pairs and one bond to hydrogen, and a hydrogen ion. One lone pair on oxygen swings over to the hydrogen ion and becomes a bond. The result is water: oxygen shares two pairs and keeps two lone pairs, so its shell holds 8. Each hydrogen holds 2.';
+
+// ---- build-by-sharing (s05, s08, s09) ----
+const BC={x:200,y:118}, BH=60; // carbon centre, C–H distance
+const TRAY=[0,1,2,3,4,5].map(i=>({x:70+52*i,y:252}));
+// a CH_n drawing: C at (x,y); hs = sides holding an H; single = sides with a single dot
+function chPiece(x,y,hs,single,o={}){
+  let s='';
+  hs.forEach(i=>{const a=SIDE[i],hx=x+Math.cos(a)*BH,hy=y+Math.sin(a)*BH, lit=o.lit&&o.lit.includes(i);
+    s+=pairAt(x,y,a,BH/2,{col:lit?'var(--at-ignite)':DOT});
+    if(lit) s+=`<circle cx="${x+Math.cos(a)*BH/2}" cy="${y+Math.sin(a)*BH/2}" r="11" fill="none" stroke="var(--at-ignite)" stroke-width="2"/>`;
+    s+=label(hx,hy,'H',{el:'H'}); if(o.counts) s+=eBadge(hx+11,hy-12,2,true,{fs:10});});
+  single.forEach(i=>{const a=SIDE[i];s+=dot(x+Math.cos(a)*21,y+Math.sin(a)*21);});
+  s+=label(x,y,'C',{el:'C'});
+  if(o.counts){const n=2*hs.length+single.length+(o.extra||0);s+=eBadge(x+17,y-20,n,n===8);}
+  return s;
+}
+function ethaneSvg(cx=200,cy=118,o={}){
+  const L={x:cx-BH/2,y:cy},R={x:cx+BH/2,y:cy};
+  return pairAt(L.x,L.y,0,BH/2,{col:o.litCC?'var(--at-ignite)':DOT})+chPiece(L.x,L.y,[0,3,2],[],{counts:o.counts,extra:2})+chPiece(R.x,R.y,[0,1,2],[],{counts:o.counts,extra:2});
+}
+
+// =====================================================================
+// RDKit.js (lazy, from the CDN) for the s06 steroid pair: parse + 2D layout only. Our renderer draws.
+// =====================================================================
+let RD=null, rdLoading=null, rdSource='';
+function loadRDKit(){
+  if(rdLoading) return rdLoading;
+  rdLoading=new Promise(res=>{
+    const sc=document.createElement('script'); sc.src='https://cdn.jsdelivr.net/npm/@rdkit/rdkit@2024.3.5-1.0.0/dist/RDKit_minimal.js';
+    sc.onload=()=>window.initRDKitModule({locateFile:()=>'https://cdn.jsdelivr.net/npm/@rdkit/rdkit@2024.3.5-1.0.0/dist/RDKit_minimal.wasm'}).then(m=>{RD=m;res(m);}).catch(()=>res(null));
+    sc.onerror=()=>res(null); document.head.appendChild(sc);
+    setTimeout(()=>res(null),15000);
+  });
+  return rdLoading;
+}
+const SMI={E:'C[C@]12CC[C@H]3[C@@H](CCc4cc(O)ccc34)[C@@H]1CC[C@@H]2O',T:'C[C@]12CC[C@H]3[C@@H](CCC4=CC(=O)CC[C@]34C)[C@@H]1CC[C@@H]2O'};
+// RDKit atom index (SMILES order) → steroid numbering. Verified: estradiol 0–14 and testosterone 0–14 are the same atoms;
+// testosterone 15 is C19 (only on C10); testosterone 16–20 = estradiol 15–19.
+const NUM_T=['C18','C13','C12','C11','C9','C8','C7','C6','C5','C4','C3','O3','C2','C1','C10','C19','C14','C15','C16','C17','O17'];
+const NUM_E=['C18','C13','C12','C11','C9','C8','C7','C6','C5','C4','C3','O3','C2','C1','C10','C14','C15','C16','C17','O17'];
+const T_IDX=Object.fromEntries(NUM_T.map((n,i)=>[n,i]));
+const GROUP_A=new Set(['O3','C1','C2','C3','C4','C5'].map(n=>T_IDX[n])), GROUP_B=new Set([T_IDX.C19]);
+const A_RING=['C1','C2','C3','C4','C5','C10']; // drawn in cyan on reveal (with O3)
+let STER=null;
+function rdLayout(){
+  // estradiol: RDKit's own 2D coordinates. testosterone: aligned onto estradiol's skeleton (any-bond template, same atoms).
+  const e=RD.get_mol(SMI.E); e.set_new_coords();
+  const mbE0=e.get_molblock();
+  const tmpl=RD.get_mol(mbE0.replace(/^(\s*\d+\s+\d+\s+)[124](\s)/gm,(m,a,b)=>a+'8'+b)); // bond type 8 = any
+  const t=RD.get_mol(SMI.T); const al=t.generate_aligned_coords(tmpl,JSON.stringify({acceptFailure:false}));
+  const out={E:e.get_molblock(JSON.stringify({addChiralHs:true})),T:t.get_molblock(JSON.stringify({addChiralHs:true})),align:al};
+  [e,t,tmpl].forEach(m=>m.delete()); return out;
+}
+// Stored output of rdLayout() (same RDKit.js version) for offline use only.
+const RD_FALLBACK=/*RDFB*/{"E": "\n     RDKit          2D\n\n 23 26  0  0  0  0  0  0  0  0999 V2000\n   -4.4918   -5.3529    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.0000   -5.1962    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.7500   -3.8971    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.0000   -2.5981    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.5000   -2.5981    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.7500   -3.8971    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.7500   -3.8971    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.5000   -2.5981    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.7500   -1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.5000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.7500    1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.5000    2.5981    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.7500    1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.5000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.7500   -1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.5000   -5.1962    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.0365   -6.6227    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -2.2500   -7.5044    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.4635   -6.6227    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -4.8901   -7.0863    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.5000   -2.5981    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.2500   -4.7631    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.5055   -5.3007    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0\n  2  1  1  6\n  2  3  1  0\n  3  4  1  0\n  4  5  1  0\n  5  6  1  0\n  6  7  1  0\n  7  8  1  0\n  8  9  1  0\n  9 10  2  0\n 10 11  1  0\n 11 12  1  0\n 11 13  2  0\n 13 14  1  0\n 14 15  2  0\n  6 16  1  0\n 16 17  1  0\n 17 18  1  0\n 18 19  1  0\n 19 20  1  6\n 16  2  1  0\n 19  2  1  0\n 15  5  1  0\n 15  9  1  0\n  5 21  1  1\n  6 22  1  6\n 16 23  1  1\nM  END\n", "T": "\n     RDKit          2D\n\n 24 27  0  0  0  0  0  0  0  0999 V2000\n   -4.4918   -5.3529    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.0000   -5.1962    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.7500   -3.8971    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.0000   -2.5981    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.5000   -2.5981    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.7500   -3.8971    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.7500   -3.8971    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.5000   -2.5981    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.7500   -1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.5000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.7500    1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.5000    2.5981    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.7500    1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.5000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.7500   -1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -2.2501   -1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.5000   -5.1962    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.0365   -6.6227    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -2.2500   -7.5044    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.4635   -6.6227    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -4.8901   -7.0863    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n   -2.0000   -3.4641    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.2500   -3.0311    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.5055   -5.3007    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0\n  2  1  1  6\n  2  3  1  0\n  3  4  1  0\n  4  5  1  0\n  5  6  1  0\n  6  7  1  0\n  7  8  1  0\n  8  9  1  0\n  9 10  2  0\n 10 11  1  0\n 11 12  2  0\n 11 13  1  0\n 13 14  1  0\n 14 15  1  0\n 15 16  1  6\n  6 17  1  0\n 17 18  1  0\n 18 19  1  0\n 19 20  1  0\n 20 21  1  6\n 17  2  1  0\n 20  2  1  0\n 15  5  1  0\n 15  9  1  0\n  5 22  1  1\n  6 23  1  6\n 17 24  1  1\nM  END\n"}/*END*/;
+function parseMB(mb){
+  const L=mb.split('\n'), [na,nb]=[+L[3].slice(0,3),+L[3].slice(3,6)], atoms=[], bonds=[];
+  for(let i=0;i<na;i++){const l=L[4+i];atoms.push({x:+l.slice(0,10),y:+l.slice(10,20),el:l.slice(31,34).trim()});}
+  for(let i=0;i<nb;i++){const l=L[4+na+i];bonds.push({a:+l.slice(0,3)-1,b:+l.slice(3,6)-1,o:+l.slice(6,9),s:+l.slice(9,12)});}
+  return {atoms,bonds};
+}
+function buildSteroids(src){
+  const E=parseMB(src.E), T=parseMB(src.T);
+  // RDKit places the stereo H's (C8, C9, C14) differently on the two molecules, which reads as a "difference".
+  // Copy estradiol's H position and wedge onto testosterone (same frame, same configuration at those carbons).
+  const hOf=(m,i)=>m.bonds.find(b=>(b.a===i&&m.atoms[b.b].el==='H')||(b.b===i&&m.atoms[b.a].el==='H'));
+  T.bonds.filter(b=>T.atoms[b.b].el==='H').forEach(bt=>{
+    const ei=NUM_E.indexOf(NUM_T[bt.a]), be=ei>=0&&hOf(E,ei); if(!be||be.a!==ei) return;
+    Object.assign(T.atoms[bt.b],{x:E.atoms[be.b].x,y:E.atoms[be.b].y}); bt.s=be.s;});
+  // RDKit lays these out as seen from the α face (C18 hashed). Mirror and invert every wedge: same molecules,
+  // now seen from the β face, so C18, C19, 17-OH and 8-H are solid wedges as in the standard drawing.
+  // Then rotate so C3 → C17 points up-right (A ring lower left, D ring upper right).
+  const k=24;
+  const flip=m=>{m.atoms.forEach(a=>{a.x=-a.x*k;a.y=-a.y*k;}); m.bonds.forEach(b=>{if(b.s===1)b.s=6;else if(b.s===6)b.s=1;});};
+  flip(E); flip(T);
+  const c3=E.atoms[T_IDX.C3], c17=E.atoms[NUM_E.indexOf('C17')];
+  // screen coords so far: x mirrored, y down
+  const ang=Math.atan2(c17.y-c3.y,c17.x-c3.x), th=(-22*Math.PI/180)-ang, cs=Math.cos(th), sn=Math.sin(th);
+  [E,T].forEach(m=>m.atoms.forEach(a=>{const x=a.x,y=a.y;a.x=x*cs-y*sn;a.y=x*sn+y*cs;}));
+  const all=[...E.atoms,...T.atoms], pad=22;
+  const x0=Math.min(...all.map(a=>a.x))-pad, y0=Math.min(...all.map(a=>a.y))-pad, x1=Math.max(...all.map(a=>a.x))+pad, y1=Math.max(...all.map(a=>a.y))+pad;
+  STER={E,T,vb:`${x0.toFixed(1)} ${y0.toFixed(1)} ${(x1-x0).toFixed(1)} ${(y1-y0).toFixed(1)}`,src:src.from};
+}
+function steroidSvg(m,which,o={}){
+  const A=m.atoms, nb=i=>m.bonds.filter(b=>b.a===i||b.b===i).map(b=>b.a===i?b.b:b.a);
+  const names=which==='T'?NUM_T:NUM_E, ringIdx=new Set(A_RING.map(n=>names.indexOf(n))), o3=names.indexOf('O3');
+  const lit=i=>o.reveal&&(ringIdx.has(i)||i===o3||(which==='T'&&i===T_IDX.C19));
+  const hasLbl=i=>A[i].el!=='C';
+  let s='';
+  for(const b of m.bonds){
+    let p=A[b.a],q=A[b.b]; const d=dist(p,q)||1, ux=(q.x-p.x)/d, uy=(q.y-p.y)/d, nx=-uy, ny=ux;
+    const ra=hasLbl(b.a)?9:0, rb=hasLbl(b.b)?9:0;
+    const P={x:p.x+ux*ra,y:p.y+uy*ra}, Q={x:q.x-ux*rb,y:q.y-uy*rb};
+    const col=(lit(b.a)&&lit(b.b))?'var(--at-electron)':'#fff';
+    if(b.s===1){s+=`<polygon points="${P.x},${P.y} ${Q.x+nx*4},${Q.y+ny*4} ${Q.x-nx*4},${Q.y-ny*4}" fill="${col}"/>`;continue;}
+    if(b.s===6){for(let i=1;i<=6;i++){const u=i/6.4,w=4*u,cx=lerp(P.x,Q.x,u),cy=lerp(P.y,Q.y,u);s+=`<line x1="${cx+nx*w}" y1="${cy+ny*w}" x2="${cx-nx*w}" y2="${cy-ny*w}" stroke="${col}" stroke-width="1.6"/>`;}continue;}
+    s+=`<line x1="${P.x}" y1="${P.y}" x2="${Q.x}" y2="${Q.y}" stroke="${col}" stroke-width="${col==='#fff'?2.2:3.6}" stroke-linecap="round"/>`;
+    if(b.o===2){
+      const terminal=nb(b.a).length===1||nb(b.b).length===1;
+      if(terminal){ // C=O: second line offset to one side
+        s+=`<line x1="${P.x+nx*4.5}" y1="${P.y+ny*4.5}" x2="${Q.x+nx*4.5}" y2="${Q.y+ny*4.5}" stroke="${col}" stroke-width="2.2" stroke-linecap="round"/>`;
+      }else{ // ring double bond: inner line toward the ring
+        const others=[...nb(b.a).filter(x=>x!==b.b),...nb(b.b).filter(x=>x!==b.a)].map(i=>A[i]);
+        const mx=(p.x+q.x)/2,my=(p.y+q.y)/2, side=others.reduce((acc,a)=>acc+((a.x-mx)*nx+(a.y-my)*ny),0)>0?1:-1, off=5*side;
+        s+=`<line x1="${lerp(p.x,q.x,.15)+nx*off}" y1="${lerp(p.y,q.y,.15)+ny*off}" x2="${lerp(p.x,q.x,.85)+nx*off}" y2="${lerp(p.y,q.y,.85)+ny*off}" stroke="${col}" stroke-width="2.2" stroke-linecap="round"/>`;
+      }
+    }
+  }
+  A.forEach((a,i)=>{
+    if(a.el==='C') return;
+    if(a.el==='H'){s+=`<text x="${a.x}" y="${a.y+4.5}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700" font-size="13" fill="var(--el-H)">H</text>`;return;}
+    const n=nb(i), single=m.bonds.find(b=>(b.a===i||b.b===i)).o===1, col=lit(i)?'var(--at-electron)':'var(--el-O)';
+    s+=`<text x="${a.x}" y="${a.y+5.5}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700" font-size="16" fill="${col}">O</text>`;
+    if(n.length===1&&single){const left=A[n[0]].x>a.x; s+=`<text x="${a.x+(left?-11:11)}" y="${a.y+5.5}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700" font-size="16" fill="${col}">H</text>`;}
+  });
+  if(o.reveal&&which==='T'){const c=A[T_IDX.C19];s+=`<circle cx="${c.x}" cy="${c.y}" r="11" fill="none" stroke="var(--at-electron)" stroke-width="2.5"/>`;}
+  if(o.reveal&&which==='E'){const c=STER.T.atoms[T_IDX.C19];s+=`<circle cx="${c.x}" cy="${c.y}" r="11" fill="none" stroke="var(--at-electron)" stroke-width="2" stroke-dasharray="3 3"/><text x="${c.x+14}" y="${c.y-6}" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--at-electron)">no CH₃</text>`;}
+  if(o.sel) for(const i of o.sel){const a=A[i];s+=`<circle cx="${a.x}" cy="${a.y}" r="11" fill="color-mix(in srgb,var(--at-electron) 25%,transparent)" stroke="var(--at-electron)" stroke-width="2.5"/>`;}
+  if(o.hits) A.forEach((a,i)=>{if(a.el==='H') return; s+=`<circle class="hit" tabindex="0" role="button" aria-pressed="${o.sel.has(i)}" aria-label="${a.el==='O'?'oxygen':'carbon'} ${names[i]}" data-a="${i}" cx="${a.x}" cy="${a.y}" r="15"/>`;});
+  return s;
+}
+
+// =====================================================================
+// The Lesson, transcribed from the spec. Wording is the spec's; {fields} filled from DATA.
+// =====================================================================
+const SRC_CHECK="Based on MIT OCW 5.12, Lecture 1 pp. 4 and 8, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Wording ours.";
+const STEPS=[
+ {id:'u1-l00-s01',phase:'Hook',type:'hook',label:'Forged in a star',
+  prompt:"<p>Carbon is only <b>{crust.C}</b> of Earth's crust. Roughly how much of <i>your</i> body's mass is carbon?</p>",
+  choices:[{id:'a',text:'less than 1%'},{id:'b',text:'about 5%'},{id:'c',text:'about 20%'},{id:'d',text:'about 50%'}],
+  reveal:'About <b>{body.C}</b> of you is carbon, hundreds of times more than the rock under your feet. Life is built from carbon, and this Lesson is about why.',
+  sr:SF_SR, srReveal:"Two bars. Carbon is {crust.C} of Earth's crust and {body.C} of the human body.",
+  src:"Carbon is made in stars by the triple-alpha process: OpenStax <i>Astronomy 2e</i> §22.4, CC BY 4.0. Abundances: see <span class=data>data/abundance/carbon.json</span> (prototype: "+DATA.abundance.crust_C._source+' / '+DATA.abundance.body_C._source+')'},
+ {id:'u1-l00-s02',phase:'Build',type:'explain',label:'Outer electrons, full shell',scene:'atoms-row',
+  prompt:"<p>Atoms trade and share their <b>outer electrons</b>, the ones farthest out. An atom is most stable when its outer shell is <b>full</b>: <b>8 electrons</b> for carbon, nitrogen, oxygen and their neighbours (the <b>octet</b>), <b>2</b> for hydrogen.</p><p>Carbon has <b>4</b> outer electrons. It needs 4 more, or 4 fewer, or another way.</p>",
+  sr:'Hydrogen has 1 outer electron, carbon 4, nitrogen 5, oxygen 6, fluorine 7. Neon has 8, a full shell, and reacts with almost nothing.',
+  src:'Filled-shell idea adapted from MIT OCW 5.12, Lecture 1 p. 8, Berkowski, Spring 2005, CC BY-NC-SA 4.0.'},
+ {id:'u1-l00-s03',phase:'Build',type:'give',label:'Give or take? (signature)',
+  prompt:"<p>Give or take? Slide through the row from Li to F. Each atom can fill its shell by giving away its outer electrons or by taking extra ones. Find the atom that has to move the <b>most</b> electrons, even the cheaper way, then press Check.</p>",
+  answer:'C',
+  correct:"Carbon sits right in the middle: 4 to give or 4 to take. Giving 4 costs a huge amount of energy, and a lone atom won't hold 4 extra. Neither route works.",
+  hints:[[el=>el==='B'||el==='N','Close. B gives 3 and N takes 3. Its neighbour in the middle has it worse.'],
+    [el=>el==='Li'||el==='F',"Look at the counter: this one moves just one electron. That's the easy end."],
+    [el=>el==='Be'||el==='O','This one moves two. Keep sliding toward the middle.']],
+  fallback:"Watch the 'electrons to move' counter. Which atom has the biggest number?",
+  revealText:"4 to give: <b>{ie.C.sum4} eV</b>. 4 to take: a lone atom won't hold them.",
+  src:"Ionization energies: NIST Atomic Spectra Database. Electron affinities: Andersen, Haugen &amp; Hotop, <i>J. Phys. Chem. Ref. Data</i> 28, 1511 (1999). 'Middle of the second row' after MIT OCW 5.12, Lecture 1 p. 4, CC BY-NC-SA 4.0."},
+ {id:'u1-l00-s04',phase:'Build',type:'explain',label:'A shared pair is a bond',scene:'water-push',
+  prompt:"<p>So carbon does the third thing: it <b>shares</b>. Two atoms each count a shared pair of electrons toward their own shell. <b>A shared pair is a bond.</b></p><p>Here's a pair becoming a bond: hydroxide's electron pair swings onto H⁺, and now oxygen and hydrogen share it. (If you tried the push on the homepage, this is the same one.)</p><p>Carbon, with 4 outer electrons, makes <b>4 shared pairs, 4 bonds</b>, and its shell is full.</p>",
+  sr:WATER_SR, src:'Sharing as carbon\'s route: MIT OCW 5.12, Lecture 1 p. 4, CC BY-NC-SA 4.0.'},
+ {id:'u1-l00-s05',phase:'Build',type:'build',label:'Build by sharing',
+  prompt:'<p>Give carbon a full shell. Drag H atoms onto it.</p>', prompt2:'<p>Carbon can share with carbon too. Join these two pieces.</p>',
+  correct1:'CH₄, methane: 8 around carbon, 2 around each H.', correct2:'C₂H₆, ethane: a carbon–carbon bond. Chain enough of these and you get fuels, plastics, you.',
+  refuse5:"Carbon already holds 8, and there's no single dot left. It's full.", refuseH:"That H holds 2 already. It's full.",
+  hintEarly:'Count the dots around carbon. A full shell is 8; each H you add brings one more.', hintIdle:"Drop each H on one of carbon's single dots.",
+  src:'n/a (our example).'},
+ {id:'u1-l00-s06',phase:'Build',type:'steroid',label:'Same atoms, different life',
+  prompt:"<p>Same atoms, different life. Estradiol (an estrogen) and testosterone are built from the same carbon skeleton. Every corner is a carbon; you'll learn to read these drawings in Lesson 2. Tap the <b>two</b> places on testosterone that differ from estradiol, then press Check.</p>",
+  correct:'Two small changes, the left ring and one extra CH₃, turn one hormone into the other. Carbon frameworks are that sensitive.',
+  hints:[[s=>[T_IDX.O17,T_IDX.C17,T_IDX.C18].some(i=>s.has(i)),'Both hormones have that one, top right. Look at the left side.'],
+    [s=>s.has(T_IDX.C10)&&!s.has(T_IDX.C19),"Close: it's what hangs off this carbon."],
+    [s=>[...s].every(i=>GROUP_A.has(i)),"That's one. There's a small CH₃ that only testosterone has."],
+    [s=>[...s].every(i=>GROUP_B.has(i)),"That's one. Compare the left-hand rings."]],
+  fallback:'Cover one drawing, then the other. Two spots change.',
+  revealText:'The two spots, in cyan on both drawings: ring with OH ↔ ring with C=O, and no CH₃ ↔ CH₃.',
+  src:"Pair from MIT OCW 5.12, Lecture 1 p. 5 ('Subtleties in Structure'), CC BY-NC-SA 4.0. Structures: PubChem CIDs 5757 and 6013."},
+ {id:'u1-onramp-why-share',phase:'Check',type:'mc',diff:1,label:'Why share?',
+  prompt:'<p>Why does carbon share electrons instead of gaining or losing them?</p>',
+  choices:[{id:'a',text:'Gaining or losing 4 electrons is too hard, so sharing is the cheaper way to fill its shell.'},{id:'b',text:'Carbon has no outer electrons to give.'},{id:'c',text:"Carbon's outer shell is already full."},{id:'d',text:"Shared electrons don't count for either atom."}],
+  answer:'a', correct:'Right: 4 is the most electrons any atom in the row has to move. Sharing fills the shell without moving any.',
+  hints:[[x=>x==='b',"Carbon has 4 outer electrons. Giving them all away is possible on paper. Why doesn't it?"],[x=>x==='c','A full shell is 8. Carbon has 4, so it still needs more.'],[x=>x==='d',"Shared electrons count for both atoms. That's what makes sharing work."]],
+  fallback:'Think back to Give or take: how many electrons would carbon have to move?',
+  revealText:'Moving 4 electrons either way is too costly. Sharing 4 pairs gets carbon to 8.', src:SRC_CHECK},
+ {id:'u1-onramp-octet-count',phase:'Check',type:'num',diff:1,label:'Count the octet',
+  prompt:'<p>Methane, CH₄. How many electrons surround the carbon, counting both electrons of every shared pair?</p>',
+  answer:8, tol:0, unit:'electrons', correct:'4 shared pairs × 2 = 8. A full shell.',
+  hints:[[v=>v===4,"Those are carbon's own 4. Each H added one more to its pair. Count both dots in every pair."],[v=>v===2,"That's the count around one H. Count around the carbon."],[v=>v===16,'Count each pair once: two dots per bond, four bonds.']],
+  fallback:'Count the dots touching carbon: two per bond.', revealText:'The four pairs, counted: 2, 4, 6, 8.', src:SRC_CHECK},
+ {id:'u1-l00-s09',phase:'Wrap',type:'wrap',label:'Wrap',
+  big:"Carbon can't easily win electrons or give them up, so it shares, and sharing builds everything.",
+  prompt:'<ul class="wraplist"><li>Full shell: 8 (2 for H).</li><li>A shared pair is a bond; carbon makes 4.</li><li>Carbon bonds to carbon, so its frameworks can grow endlessly.</li></ul>',
+  sr:'Ethane, two carbons sharing a pair, each with three hydrogens.', src:'n/a.'},
+];
+const KEY_IDEA='Carbon sits in the middle of its row: gaining or losing four electrons costs too much, so it shares. Four shared pairs fill its shell, and carbon sharing with carbon builds endless molecules.';
+const CHECKS=STEPS.filter(s=>s.phase==='Check');
+const KICK={hook:'MULTIPLE CHOICE · PREDICTION',explain:'EXPLAIN',give:'MANIPULATE A SCENE',build:'MANIPULATE A SCENE',steroid:'TAP TO IDENTIFY',mc:'MULTIPLE CHOICE',num:'NUMERIC INPUT',wrap:'EXPLAIN'};
+
+// =====================================================================
+// Player state
+// =====================================================================
+const P=new URLSearchParams(location.search);
+let idx=P.get('step')?Math.max(0,Math.min(STEPS.length,+P.get('step')-1)):-1; // -1 intro, STEPS.length = Lesson end
+let reduced=P.get('motion')==='reduced'||(!P.get('motion')&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+let showDebug=P.get('debug')==='1';
+const FAST=P.get('fast')==='1', IDLE_MS=FAST?3000:30000;
+let st={}, raf=0, timers=[], completed=new Set(), streakEarned=true;
+const $=s=>document.querySelector(s);
+function fresh(){
+  cancelAnimationFrame(raf); timers.forEach(clearInterval); timers=[];
+  const S=STEPS[idx];
+  st={phase:'answer',tries:0,sel:new Set(),msg:null,lastHint:null,graded:null,t:0,playing:false};
+  if(!S) return;
+  if(S.type==='hook'){st.hp=reduced?'ask':'scene';st.t=reduced?1:0;}
+  if(S.type==='give'){st.atom=0;st.picked=null;st.describe=false;}
+  if(S.type==='build'){st.b={stage:1,bond:[null,null,null,null],tray:[true,true,true,true,true,true],drag:null,armed:null,back:null,call:'',callWarn:false,idle:0,ghost:false,last:performance.now(),L:{x:120,y:118},R:{x:280,y:118},joined:false};}
+  if(S.type==='num'){st.val='';st.lit=0;}
+  if(S.type==='explain'&&S.scene==='water-push'){st.t=reduced?1:0;}
+}
+const cur=()=>STEPS[idx];
+
+// ---------- top-level render ----------
+function render(){
+  document.body.dataset.motion=reduced?'reduced':'';
+  syncBar();
+  if(idx<0) return renderIntro();
+  if(idx>=STEPS.length) return renderEnd();
+  const S=cur(), nCheck=CHECKS.indexOf(S);
+  const kick=S.phase==='Check'?`<span class="chk">CHECK · PROBLEM ${nCheck+1} OF ${CHECKS.length}</span><span class="diff">${'●'.repeat(S.diff)}${'○'.repeat(3-S.diff)}</span>`
+    :`<span>${S.phase.toUpperCase()} · ${KICK[S.type]}</span>`;
+  $('#app').innerHTML=`<main class="step">
+    <div class="top"><button class="x" aria-label="Leave Lesson" onclick="go(-1)">✕</button>
+      <div class="prog" aria-label="Step ${idx+1} of ${STEPS.length}">${STEPS.map((_,i)=>`<i class="${i<idx?'done':i===idx?'now':''}"></i>`).join('')}</div></div>
+    <div class="kick">${kick}<span style="color:var(--at-ink-muted)">STEP ${idx+1}/${STEPS.length}</span></div>
+    ${S.big?`<div class="bigtxt">${S.big}</div>`:''}
+    <div id="pre"></div>
+    <div class="prompt" id="prompt">${fill(S.prompt)}</div>
+    <div id="body"></div>
+    <details class="src"><summary>ⓘ Where this comes from</summary><p class="srcnote">${S.src}</p></details>
+  </main><div class="foot" id="foot"><div class="fb" id="fb" role="status"></div><button id="main"></button></div>`;
+  $('#main').onclick=mainBtn;
+  BODY[S.type]();
+  drawFb(); drawMain(); renderDebug();
+}
+function drawFb(){
+  const fb=$('#fb'); if(!fb) return;
+  if(st.msg){fb.className='fb on '+st.msg.kind;fb.innerHTML=`<h2>${st.msg.title}</h2><p>${fill(st.msg.text)}</p>`;}else{fb.className='fb';fb.innerHTML='';}
+  document.documentElement.style.setProperty('--foot-h',($('#foot').offsetHeight+36)+'px');
+}
+function drawMain(){
+  const b=$('#main'), S=cur(); if(!b) return;
+  b.className=''; b.removeAttribute('aria-disabled'); b.disabled=false;
+  if(S.type==='explain'){b.textContent='CONTINUE';return;}
+  if(S.type==='wrap'){b.textContent='FINISH LESSON';return;}
+  if(st.phase==='done'){b.textContent='CONTINUE';return;}
+  if(S.type==='hook'&&st.hp==='scene'){b.textContent='SKIP INTRO';b.className='skip';return;}
+  if(S.type==='build'){b.textContent='CONTINUE';b.setAttribute('aria-disabled','true');return;}
+  b.textContent='CHECK';
+  if(S.type==='give') return;
+  if(S.type==='num'){b.disabled=st.val==='';return;}
+  b.disabled=!st.sel.size;
+}
+function mainBtn(){
+  const S=cur();
+  if(S.type==='explain'||S.type==='wrap'||st.phase==='done'){completed.add(idx);return go(idx+1);}
+  if(S.type==='hook'&&st.hp==='scene'){cancelAnimationFrame(raf);st.playing=false;st.t=1;st.hp='ask';return render();}
+  if(S.type==='build') return buildContinueTapped();
+  ({hook:checkHook,give:checkGive,steroid:checkSteroid,mc:checkMC,num:checkNum})[S.type]();
+}
+function go(i){idx=Math.max(-1,Math.min(STEPS.length,i));setParam('step',idx<0?null:String(idx+1));fresh();render();window.scrollTo(0,0);
+  if(idx>=0&&idx<STEPS.length) say(`Step ${idx+1} of ${STEPS.length}.`);}
+// shared two-try grading: first wrong → targeted Hint, second wrong → reveal
+function grade(ok,hint,onReveal){
+  const S=cur();
+  if(ok){st.phase='done';st.graded='correct';st.msg={kind:'good',title:'CORRECT',text:S.correct};say('Correct. '+strip(fill(S.correct)));return render();}
+  st.tries++; st.lastHint=hint;
+  if(st.tries<2){st.graded='wrong → Hint';st.msg={kind:'hint',title:'NOT QUITE',text:hint};say('Not quite. '+strip(hint));}
+  else{st.phase='done';st.graded='wrong twice → reveal';if(onReveal)onReveal();st.msg={kind:'show',title:'HERE IS THE ANSWER',text:S.revealText};say('Here is the answer. '+strip(fill(S.revealText)));}
+  render();
+}
+const pickHint=(S,x)=>(S.hints.find(([t])=>t(x))||[null,S.fallback])[1];
+
+// ---------- scrubber (L6) ----------
+function scrubber(){return `<div class="scrub"><button class="ibtn" id="play" aria-label="${st.playing?'Pause':'Play'} the Scene">${st.playing?'❚❚':(st.t>=1?'↺':'▶')}</button><input type="range" id="t" min="0" max="1000" value="${Math.round(st.t*1000)}" aria-label="Scene time"></div>`;}
+function wireScrub(redraw,dur,onEnd){
+  const pb=$('#play'), r=$('#t'); if(!pb) return;
+  pb.onclick=()=>{if(st.playing){st.playing=false;cancelAnimationFrame(raf);redraw();}else{if(st.t>=1)st.t=0;play(redraw,dur,onEnd);}};
+  r.oninput=e=>{st.playing=false;cancelAnimationFrame(raf);st.t=e.target.value/1000;redraw();};
+}
+function play(redraw,dur,onEnd){
+  st.playing=true; const t0=performance.now()-st.t*dur;
+  const tick=now=>{st.t=Math.min(1,(now-t0)/dur);if(st.t>=1)st.playing=false;redraw();if(st.playing)raf=requestAnimationFrame(tick);else if(onEnd)onEnd();};
+  cancelAnimationFrame(raf); raf=requestAnimationFrame(tick);
+}
+
+// ---------- s01 Hook ----------
+function bodyHook(){
+  const S=cur();
+  if(st.hp==='scene'){
+    $('#prompt').innerHTML=''; $('#pre').innerHTML='';
+    $('#body').innerHTML=`<div class="card"><svg class="mol" id="sf" viewBox="0 0 360 520" role="img" aria-label="${SF_SR}">${starForge(st.t*SF_DUR)}</svg><div class="tools" id="tools">${scrubber()}</div><div class="cap">Scene <span class="data">star-forge</span> · 13 s · rough in-page cut</div></div>`;
+    const redraw=()=>{const s=$('#sf');if(!s)return;s.innerHTML=starForge(st.t*SF_DUR);const pb=$('#play');if(pb)pb.textContent=st.playing?'❚❚':(st.t>=1?'↺':'▶');const r=$('#t');if(r)r.value=Math.round(st.t*1000);};
+    const toAsk=()=>{timers.push(setTimeout(()=>{if(cur()===S&&st.hp==='scene'&&!st.playing&&st.t>=1){st.hp='ask';render();}},900));};
+    wireScrub(redraw,SF_DUR*1000,toAsk);
+    if(!st.started){st.started=true;play(redraw,SF_DUR*1000,toAsk);}
+    return;
+  }
+  const done=st.phase==='done';
+  $('#pre').innerHTML=done?'':`<div class="strip">${cWithDots()}<p><b>Every carbon atom in you was forged in a star.</b> Organic chemistry is what that carbon learned to do next.</p><button class="ibtn" id="replaySF" aria-label="Play the star-forge Scene">${reduced?'▶ PLAY':'↺'}</button></div>`;
+  let h=done?`<div class="card" style="margin-bottom:10px;min-height:120px;max-height:330px"><svg class="mol" viewBox="0 0 360 158" role="img" aria-label="${fill(S.srReveal)}">${crustVsBody()}</svg><div class="cap">Scene <span class="data">crust-vs-body</span></div></div>`:'';
+  h+=`<div class="choices" role="group" aria-label="Choices">`+S.choices.map(c=>`<button class="choice" aria-pressed="${st.sel.has(c.id)}" data-c="${c.id}" ${done?'disabled':''}><span class="lt">${c.id.toUpperCase()}</span>${c.text}</button>`).join('')+'</div>';
+  $('#body').innerHTML=h;
+  if($('#replaySF')) $('#replaySF').onclick=()=>{st.hp='scene';st.t=0;st.started=false;render();};
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{st.sel=new Set([b.dataset.c]);bodyHook();drawMain();renderDebug();});
+}
+function checkHook(){const S=cur();st.phase='done';st.graded='prediction (every choice accepted)';st.msg={kind:'pred',title:"HERE'S WHAT HAPPENS",text:S.reveal};say(strip(fill(S.reveal))+' '+fill(S.srReveal));render();}
+
+// ---------- Explain (s02, s04) ----------
+function bodyExplain(){
+  const S=cur();
+  if(S.scene==='atoms-row'){$('#body').innerHTML=`<div class="card"><svg class="mol" viewBox="0 0 360 240" role="img" aria-label="${S.sr}">${atomsRow()}</svg><div class="cap">Static · every outer electron a cyan dot</div></div>`;return;}
+  if(S.scene==='water-push'){
+    $('#body').innerHTML=`<div class="card"><svg class="mol" id="wp" viewBox="40 30 300 175" role="img" aria-label="${S.sr}">${waterPush(st.t)}</svg><div class="tools">${scrubber()}</div><div class="cap">Scene <span class="data">water-push</span> · interactive: false · plays once${reduced?' (reduced motion: poster frame, press Play)':''}</div></div>`;
+    const redraw=()=>{const s=$('#wp');if(!s)return;s.innerHTML=waterPush(st.t);const pb=$('#play');if(pb)pb.textContent=st.playing?'❚❚':(st.t>=1?'↺':'▶');const r=$('#t');if(r)r.value=Math.round(st.t*1000);};
+    wireScrub(redraw,3200);
+    if(!st.started&&!reduced){st.started=true;timers.push(setTimeout(()=>{if(cur()===S)play(redraw,3200);},500));}
+  }
+}
+
+// ---------- s03 give-or-take ----------
+function eaLine(r){
+  if(!r.bound) return "a lone atom won't hold them";
+  if(r.take===1) return `the electron releases ${fmt2(r.ea)} electron-volts`;
+  return `the first releases ${fmt2(r.ea)} electron-volts, and a lone atom won't hold the other ${r.take-1}`;
+}
+const giveSr=r=>`${ELNAME[r.el]}: ${r.v} outer electron${r.v>1?'s':''}. Give ${r.v}, costing ${fmt2(r.sum)} electron-volts, or take ${r.take}: ${eaLine(r)}. Electrons to move, cheaper way: ${r.n}.`;
+function giveSvg(r,lit){
+  const X=v=>40+(Math.log10(v)+1)/4*292; // log axis 0.1 → 1000 eV
+  let s='';
+  s+=dotAtom(52,58,r.el,r.v,{fs:30,r:31,dr:4});
+  s+=`<text x="102" y="40" font-family="Space Grotesk" font-weight="700" font-size="17" fill="#fff">${ELNAME[r.el]}</text><text x="102" y="60" font-family="JetBrains Mono,monospace" font-size="12" fill="var(--at-ink-muted)">${r.v} outer e⁻</text><text x="102" y="84" font-family="Space Grotesk" font-size="12" font-style="italic" fill="var(--at-ink-muted)">one atom, alone</text><text x="102" y="99" font-family="Space Grotesk" font-size="12" font-style="italic" fill="var(--at-ink-muted)">in empty space</text>`;
+  // counter
+  s+=`<rect x="250" y="12" width="104" height="80" fill="var(--at-space)" stroke="${lit?'var(--at-electron)':'var(--at-line)'}" stroke-width="2"/>
+    <text x="302" y="28" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="var(--at-ink-muted)">electrons to move,</text><text x="302" y="39" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="var(--at-ink-muted)">cheaper way:</text>
+    <text x="302" y="80" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700" font-size="38" fill="var(--at-electron)">${r.n}</text>`;
+  // axis
+  const y0=112;
+  [0.1,1,10,100,1000].forEach(v=>{s+=`<line x1="${X(v)}" y1="${y0}" x2="${X(v)}" y2="${y0+128}" stroke="var(--at-line)" stroke-dasharray="2 3"/><text x="${X(v)}" y="${y0+140}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9.5" fill="var(--at-ink-muted)">${v}</text>`;});
+  s+=`<text x="${X(1000)}" y="${y0+154}" text-anchor="end" font-family="JetBrains Mono,monospace" font-size="9.5" fill="var(--at-ink-muted)">eV · log scale (each line ×10)</text>`;
+  // GIVE
+  const glow=lit?` stroke="#fff" stroke-width="2"`:'';
+  s+=`<text x="40" y="${y0+6}" font-family="Silkscreen,monospace" font-size="11" fill="var(--at-ignite)">GIVE</text><text x="78" y="${y0+6}" font-family="JetBrains Mono,monospace" font-size="11" fill="#fff">${r.v} e⁻ away · cost</text>`;
+  s+=`<rect x="${X(.1)}" y="${y0+12}" width="${X(r.sum)-X(.1)}" height="20" fill="var(--at-ignite)"${glow}/>`;
+  const sumTxt=`${fmt2(r.sum)} eV`, inside=X(r.sum)>270;
+  s+=`<text x="${inside?X(r.sum)-6:X(r.sum)+6}" y="${y0+27}" text-anchor="${inside?'end':'start'}" font-family="JetBrains Mono,monospace" font-weight="700" font-size="13" fill="${inside?'var(--at-on-fill)':'var(--at-ignite)'}">${sumTxt}</text>`;
+  // TAKE
+  const ty=y0+56;
+  s+=`<text x="40" y="${ty}" font-family="Silkscreen,monospace" font-size="11" fill="var(--at-electron)">TAKE</text><text x="78" y="${ty}" font-family="JetBrains Mono,monospace" font-size="11" fill="#fff">${r.take} e⁻ extra</text>`;
+  // one slot per extra electron
+  for(let i=0;i<r.take;i++){const cx=X(.1)+8+i*20, ok=i===0&&r.bound;
+    s+=ok?`<circle cx="${cx}" cy="${ty+16}" r="6" fill="var(--at-electron)"/>`:`<circle cx="${cx}" cy="${ty+16}" r="6" fill="none" stroke="var(--at-boss)" stroke-dasharray="2 2" stroke-width="1.5"/><text x="${cx}" y="${ty+20}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="var(--at-boss)">✕</text>`;}
+  if(r.bound){ // first electron: EA, energy released (not a cost)
+    s+=`<rect x="${X(.1)}" y="${ty+30}" width="${X(r.ea)-X(.1)}" height="14" fill="none" stroke="var(--at-electron)" stroke-width="2" stroke-dasharray="4 2"${lit?' stroke-opacity="1"':''}/><text x="${X(r.ea)+6}" y="${ty+41}" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--at-electron)">1st e⁻: ${fmt2(r.ea)} eV released</text>`;}
+  const nFlag=r.bound?r.take-1:r.take;
+  if(nFlag>0){const which=r.bound?(nFlag===1?'2nd e⁻':`2nd–${ord(r.take)} e⁻`):(r.take===1?'the e⁻':`every e⁻ (1st–${ord(r.take)})`);
+    s+=`<text x="${X(.1)}" y="${ty+(r.bound?60:42)}" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="var(--at-boss)">✕ ${which}: a lone atom won't hold this one</text>`;}
+  return s;
+}
+const ord=n=>n+(n===1?'st':n===2?'nd':n===3?'rd':'th');
+function bodyGive(){
+  const S=cur(), r=ROW[st.atom], lit=st.phase==='done';
+  $('#body').innerHTML=`<div class="card"><svg class="mol" viewBox="0 0 360 272" role="img" aria-label="${giveSr(r)}">${giveSvg(r,lit)}</svg>
+    <div class="slider"><input type="range" id="atom" min="0" max="6" step="1" value="${st.atom}" aria-label="Atom, from lithium to fluorine" aria-valuetext="${ELNAME[r.el]}" ${lit?'disabled':''}>
+    <div class="ladder" aria-hidden="true">${ROW.map((x,i)=>`<span class="${i===st.atom?'on':''}">${x.el}</span>`).join('')}</div></div>
+    <div class="tools"><span class="muted">try ${Math.min(st.tries+1,2)} of 2 · on ${r.el}</span><button class="ibtn" id="desc" aria-expanded="${st.describe}">DESCRIBE</button></div>
+    ${st.describe?`<div class="desc">${giveSr(r)}</div>`:''}</div>`;
+  const sl=$('#atom');
+  sl.oninput=e=>{st.atom=+e.target.value;bodyGive();renderDebug();$('#atom').focus();say(giveSr(ROW[st.atom]));};
+  $('#desc').onclick=()=>{st.describe=!st.describe;bodyGive();};
+}
+function checkGive(){const S=cur(),el=ROW[st.atom].el;st.picked=el;grade(el===S.answer,pickHint(S,el),()=>{st.atom=ROW_ORDER.indexOf('C');});}
+
+// ---------- s05 build-by-sharing ----------
+function buildState(){const b=st.b;return {nb:b.bond.filter(x=>x!==null).length,free:[0,1,2,3].filter(i=>b.bond[i]===null)};}
+function buildSvg(){
+  const b=st.b, S=cur(); let s='';
+  const drag=b.drag;
+  if(b.stage===1){
+    const {nb,free}=buildState();
+    s+=`<rect x="40" y="222" width="320" height="62" fill="none" stroke="var(--at-line)" stroke-dasharray="4 4"/><text x="200" y="298" text-anchor="middle" font-family="Silkscreen,monospace" font-size="10" fill="var(--at-ink-muted)">TRAY: 6 H ATOMS</text>`;
+    // bonded H's: shared pair + H
+    s+=chPiece(BC.x,BC.y,[0,1,2,3].filter(i=>b.bond[i]!==null),free,{counts:true,lit:b.litPairs});
+    // drop spots while dragging / armed
+    if((drag||b.armed!=null)&&free.length) free.forEach(i=>{const a=SIDE[i],x=BC.x+Math.cos(a)*21,y=BC.y+Math.sin(a)*21,snap=drag&&drag.snap===i;
+      s+=`<circle cx="${x}" cy="${y}" r="11" fill="${snap?'color-mix(in srgb,var(--at-electron) 30%,transparent)':'none'}" stroke="var(--at-electron)" stroke-width="${snap?3:1.8}" stroke-dasharray="${snap?'0':'3 3'}"/>`;});
+    // ghost nudge (second idle): the next correct drop
+    if(b.ghost&&free.length&&!drag){const h=b.tray.indexOf(true), a=SIDE[free[0]], gx=BC.x+Math.cos(a)*BH, gy=BC.y+Math.sin(a)*BH;
+      if(h>=0) s+=`<g opacity=".45"><line x1="${TRAY[h].x}" y1="${TRAY[h].y}" x2="${gx}" y2="${gy}" stroke="var(--at-electron)" stroke-dasharray="5 5" stroke-width="2"/>${label(gx,gy,'H',{el:'H'})}<circle cx="${gx}" cy="${gy}" r="15" fill="none" stroke="var(--at-electron)" stroke-dasharray="3 3"/></g>`;}
+    // tray
+    b.tray.forEach((on,i)=>{ if(!on) return; let p=TRAY[i];
+      if(drag&&drag.h===i) p=drag.p; else if(b.back&&b.back.h===i) p=b.back.p;
+      const armed=b.armed===i;
+      s+=`<g${drag&&drag.h===i?' style="pointer-events:none"':''}>${label(p.x,p.y,'H',{el:'H'})}${dot(p.x,p.y-19)}${eBadge(p.x,p.y+24,1,false,{fs:10,anchor:'middle'})}${armed?`<circle cx="${p.x}" cy="${p.y}" r="17" fill="none" stroke="var(--at-ignite)" stroke-width="2.5"/>`:''}</g>`;});
+    // keyboard / pointer hit targets
+    if(st.phase!=='done'&&b.stage===1){
+      if(b.armed==null) b.tray.forEach((on,i)=>{if(on) s+=`<circle class="hit" tabindex="0" role="button" data-k="tray${i}" aria-label="H atom ${i+1} in the tray, one electron. Press Enter to pick it up." cx="${TRAY[i].x}" cy="${TRAY[i].y-6}" r="22"/>`;});
+      else{
+        free.forEach(i=>{const a=SIDE[i];s+=`<circle class="hit" tabindex="0" role="button" data-k="dot${i}" aria-label="carbon's ${['top','right','bottom','left'][i]} single dot" cx="${BC.x+Math.cos(a)*21}" cy="${BC.y+Math.sin(a)*21}" r="13"/>`;});
+        [0,1,2,3].filter(i=>b.bond[i]!==null).forEach(i=>{const a=SIDE[i];s+=`<circle class="hit" tabindex="0" role="button" data-k="h${i}" aria-label="bonded H, ${['top','right','bottom','left'][i]}" cx="${BC.x+Math.cos(a)*BH}" cy="${BC.y+Math.sin(a)*BH}" r="15"/>`;});
+        if(!free.length) s+=`<circle class="hit" tabindex="0" role="button" data-k="carbon" aria-label="carbon" cx="${BC.x}" cy="${BC.y}" r="13"/>`;
+      }
+    }
+  }else{
+    if(b.joined){s+=ethaneSvg(200,BC.y,{counts:true});}
+    else{
+      const pos=k=>drag&&drag.piece===k?{x:b[k].x+drag.p.x-drag.p0.x,y:b[k].y+drag.p.y-drag.p0.y}:(b.back&&b.back.piece===k?b.back.p:b[k]);
+      const L=pos('L'),R=pos('R');
+      s+=chPiece(L.x,L.y,[0,3,2],[1],{counts:true})+chPiece(R.x,R.y,[0,1,2],[3],{counts:true});
+      if(drag||b.armed){const other=(drag?drag.piece:b.armed)==='L'?R:L, i=(drag?drag.piece:b.armed)==='L'?3:1, a=SIDE[i];
+        s+=`<circle cx="${other.x+Math.cos(a)*21}" cy="${other.y+Math.sin(a)*21}" r="11" fill="${drag&&drag.snap?'color-mix(in srgb,var(--at-electron) 30%,transparent)':'none'}" stroke="var(--at-electron)" stroke-width="${drag&&drag.snap?3:1.8}" stroke-dasharray="${drag&&drag.snap?0:'3 3'}"/>`;}
+      if(b.armed) {const p=b[b.armed];s+=`<circle cx="${p.x}" cy="${p.y}" r="20" fill="none" stroke="var(--at-ignite)" stroke-width="2.5"/>`;}
+      if(b.ghost&&!drag){s+=`<g opacity=".4"><line x1="${b.L.x+21}" y1="${b.L.y}" x2="${b.R.x-21}" y2="${b.R.y}" stroke="var(--at-electron)" stroke-dasharray="5 5" stroke-width="2"/>${chPiece(b.R.x-BH,b.R.y,[0,3,2],[],{})}</g>`;}
+      if(!b.armed) ['L','R'].forEach(k=>{s+=`<circle class="hit" tabindex="0" role="button" data-k="piece${k}" aria-label="${k==='L'?'left':'right'} CH₃ piece, one single dot. Press Enter to pick it up." cx="${b[k].x}" cy="${b[k].y}" r="34"/>`;});
+      else{const k=b.armed==='L'?'R':'L', i=k==='R'?3:1, a=SIDE[i];s+=`<circle class="hit" tabindex="0" role="button" data-k="cdot${k}" aria-label="the ${k==='L'?'left':'right'} piece's single dot" cx="${b[k].x+Math.cos(a)*21}" cy="${b[k].y+Math.sin(a)*21}" r="14"/>`;}
+    }
+  }
+  return s;
+}
+function bodyBuild(){
+  const S=cur(), b=st.b;
+  $('#prompt').innerHTML=fill(b.stage===1?S.prompt:S.prompt2);
+  const call=b.drag?(b.drag.snap!=null?'drop to share a pair':'drag onto a single dot'):b.armed!=null?'Tab to a single dot and press Enter (Escape cancels)':b.call;
+  $('#body').innerHTML=`<div class="card"><div class="callout${b.callWarn&&!b.drag?' warn':''}" id="bcall">${call||''}</div>
+    <svg class="mol" id="bsvg" viewBox="${b.stage===1?'30 30 340 275':'20 30 360 180'}" role="group" aria-label="${b.stage===1?'Carbon with single dots and a tray of H atoms. Tab to an H, Enter, then Tab to a single dot, Enter.':'Two CH3 pieces, each carbon with one single dot. Tab to a piece, Enter, then Tab to the other single dot, Enter.'}">${buildSvg()}</svg>
+    <div class="cap">Scene <span class="data">build-by-sharing</span> · stage ${b.stage} of 2${FAST?' · fast idle (3 s)':''}</div></div>`;
+  const svg=$('#bsvg');
+  svg.addEventListener('pointerdown',bDown); svg.addEventListener('pointermove',bMove); svg.addEventListener('pointerup',bUp);
+  svg.addEventListener('pointercancel',()=>{b.drag=null;redrawBuild();});
+  svg.addEventListener('keydown',bKey);
+  if(!timers.idle){const t=setInterval(idleTick,500);timers.push(t);timers.idle=t;}
+}
+function redrawBuild(){const s=$('#bsvg');if(!s)return bodyBuild();const f=document.activeElement&&document.activeElement.dataset?document.activeElement.dataset.k:null;
+  s.innerHTML=buildSvg();const b=st.b, call=b.drag?(b.drag.snap!=null?'drop to share a pair':'drag onto a single dot'):b.armed!=null?'Tab to a single dot and press Enter (Escape cancels)':b.call;
+  const c=$('#bcall');c.textContent=call||'';c.className='callout'+(b.callWarn&&!b.drag?' warn':'');
+  if(f){const el=s.querySelector(`[data-k="${f}"]`)||s.querySelector('.hit');el&&el.focus();}renderDebug();}
+function bpt(e){const svg=$('#bsvg'),p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(svg.getScreenCTM().inverse());return {x:q.x,y:q.y};}
+function touch(){st.b.last=performance.now();}
+function bDown(e){
+  const b=st.b; touch(); if(b.joined) return; const p=bpt(e);
+  if(b.stage===1){const i=b.tray.findIndex((on,i)=>on&&dist(p,TRAY[i])<26); if(i<0) return;
+    b.drag={h:i,p,snap:null}; b.call=''; b.armed=null;}
+  else{const k=['L','R'].find(k=>dist(p,b[k])<40); if(!k) return; b.drag={piece:k,p0:p,p,snap:null}; b.call=''; b.armed=null;}
+  $('#bsvg').setPointerCapture(e.pointerId); e.preventDefault(); redrawBuild();
+}
+function bMove(e){const b=st.b;if(!b.drag)return;const p=bpt(e);b.drag.p=p;
+  if(b.stage===1){const {free}=buildState();let best=null,bd=34;free.forEach(i=>{const a=SIDE[i],d=dist(p,{x:BC.x+Math.cos(a)*21,y:BC.y+Math.sin(a)*21});if(d<bd){bd=d;best=i;}});
+    if(best==null&&free.length&&dist(p,BC)<46){best=free.slice().sort((x,y)=>dist(p,{x:BC.x+Math.cos(SIDE[x])*40,y:BC.y+Math.sin(SIDE[x])*40})-dist(p,{x:BC.x+Math.cos(SIDE[y])*40,y:BC.y+Math.sin(SIDE[y])*40}))[0];}
+    b.drag.snap=best;}
+  else{b.drag.snap=pieceSnap(b.drag)?true:null;}
+  redrawBuild();}
+function pieceSnap(d){const b=st.b,k=d.piece,o=k==='L'?'R':'L',dx=d.p.x-d.p0.x,dy=d.p.y-d.p0.y;
+  const myDot={x:b[k].x+dx+(k==='L'?21:-21),y:b[k].y+dy}, myC={x:b[k].x+dx,y:b[k].y+dy}, otherDot={x:b[o].x+(o==='L'?21:-21),y:b[o].y};
+  return dist(myDot,otherDot)<42||dist(myC,otherDot)<48;}
+function bUp(){const b=st.b;if(!b.drag)return;const d=b.drag;b.drag=null;touch();
+  if(b.stage===1) dropH(d.h,d.snap,d.p); else dropPiece(d.piece,!!d.snap,d.p);
+}
+function dropH(h,side,p){
+  const b=st.b, {free}=buildState();
+  if(side!=null&&b.bond[side]===null){bondH(h,side);return;}
+  // refusals (shown at once, no try count)
+  const onH=p&&[0,1,2,3].find(i=>b.bond[i]!==null&&dist(p,{x:BC.x+Math.cos(SIDE[i])*BH,y:BC.y+Math.sin(SIDE[i])*BH})<24);
+  if(p&&onH!=null){b.call=cur().refuseH;b.callWarn=true;say(b.call);slideBack(h,p);return;}
+  if(p&&!free.length&&dist(p,BC)<52){b.call=cur().refuse5;b.callWarn=true;say(b.call);slideBack(h,p);return;}
+  b.call='';b.callWarn=false; slideBack(h,p);
+}
+function bondH(h,side){
+  const b=st.b,S=cur(); b.bond[side]=h; b.tray[h]=false; b.call='';b.callWarn=false; b.ghost=false;
+  const {nb}=buildState(); say(`H bonded to carbon. Carbon holds ${4+nb} electrons.`);
+  if(nb===4){st.msg={kind:'good',title:'FULL SHELL',text:S.correct1};st.s1=true;redrawBuild();drawFb();renderDebug();
+    timers.push(setTimeout(()=>{if(cur()!==S)return;b.stage=2;b.idle=0;b.ghost=false;b.call='';touch();bodyBuild();drawFb();renderDebug();say(strip(S.prompt2));},reduced?1200:1800));
+    return;}
+  redrawBuild();
+}
+function slideBack(h,p){const b=st.b;if(!p||reduced){b.back=null;redrawBuild();return;}
+  const to=TRAY[h],t0=performance.now();const tick=now=>{const u=ease((now-t0)/220);b.back={h,p:{x:lerp(p.x,to.x,u),y:lerp(p.y,to.y,u)}};redrawBuild();if(u<1)raf=requestAnimationFrame(tick);else{b.back=null;redrawBuild();}};raf=requestAnimationFrame(tick);}
+function dropPiece(k,ok,p){
+  const b=st.b,S=cur();
+  if(ok){b.joined=true;b.armed=null;b.call='';b.ghost=false;st.phase='done';st.graded='state reached: C₂H₆';st.msg={kind:'good',title:'CORRECT',text:S.correct2};say('The two carbons share a pair. Each carbon holds 8. '+S.correct2);render();return;}
+  b.call='';redrawBuild();
+}
+function bKey(e){
+  const b=st.b, el=e.target, k=el.dataset&&el.dataset.k; touch();
+  if(e.key==='Escape'&&b.armed!=null){b.armed=null;redrawBuild();return;}
+  if((e.key!=='Enter'&&e.key!==' ')||!k) return; e.preventDefault();
+  if(k.startsWith('tray')){b.armed=+k.slice(4);b.call='';say('Picked up an H. Tab to one of carbon\'s single dots and press Enter.');redrawBuild();$('#bsvg').querySelector('[data-k^="dot"],[data-k^="h"],[data-k="carbon"]')?.focus();return;}
+  if(k.startsWith('dot')){const h=b.armed;b.armed=null;bondH(h,+k.slice(3));$('#bsvg')?.querySelector('.hit')?.focus();return;}
+  if(k.startsWith('h')){b.armed=null;b.call=cur().refuseH;b.callWarn=true;say(b.call);redrawBuild();return;}
+  if(k==='carbon'){b.armed=null;b.call=cur().refuse5;b.callWarn=true;say(b.call);redrawBuild();return;}
+  if(k.startsWith('piece')){b.armed=k.slice(5);say('Picked up a CH3 piece. Tab to the other piece\'s single dot and press Enter.');redrawBuild();$('#bsvg').querySelector('[data-k^="cdot"]')?.focus();return;}
+  if(k.startsWith('cdot')){dropPiece(b.armed,true);return;}
+}
+function idleTick(){
+  const S=cur(); if(!S||S.type!=='build'||st.phase==='done') return; const b=st.b;
+  if(b.drag||performance.now()-b.last<IDLE_MS) return;
+  b.last=performance.now(); b.idle++;
+  if(b.idle===1){const t=b.stage===1?S.hintIdle:'[not in spec] Drag one CH₃ onto the other\'s single dot.';st.lastHint=t;st.msg={kind:'hint',title:'HINT',text:t};say(strip(t));drawFb();}
+  else if(b.idle===2){b.ghost=true;say('A faded H shows the next drop.');redrawBuild();}
+  renderDebug();
+}
+function buildContinueTapped(){
+  const S=cur(), b=st.b; touch();
+  const t=b.stage===1?S.hintEarly:'[not in spec] Join the two pieces first.';
+  st.lastHint=t; st.msg={kind:'hint',title:'NOT YET',text:t}; say(strip(t)); drawFb(); renderDebug();
+}
+
+// ---------- s06 tap-to-identify (steroids) ----------
+function bodySteroid(){
+  const S=cur();
+  if(!STER){
+    $('#body').innerHTML=`<div class="card"><div class="callout">Loading RDKit.js to lay out the two structures…</div></div>`;
+    loadRDKit().then(m=>{
+      if(cur()!==S) return;
+      try{ if(m){const l=rdLayout();l.from=`RDKit.js ${m.version()} live: set_new_coords (estradiol), generate_aligned_coords (testosterone, ${JSON.parse(l.align).atoms.length} atoms matched)`;buildSteroids(l);} }catch(err){console.error(err);}
+      if(!STER&&RD_FALLBACK){buildSteroids({...RD_FALLBACK,from:'stored RDKit.js layout (offline fallback)'});}
+      if(!STER){$('#body').innerHTML=`<div class="card"><div class="callout warn">Couldn't load RDKit.js (offline?). SMILES: ${SMI.T}</div></div>`;return;}
+      bodySteroid(); renderDebug();
+    });
+    return;
+  }
+  const rev=st.phase==='done';
+  const call=st.tapCall||(st.phase==='done'?'':st.sel.size?`${st.sel.size} picked · tap to unpick`:'just tap an atom');
+  $('#body').innerHTML=`<div class="card" style="flex:1 1 0">
+      <div class="callout" style="color:var(--at-ink-muted)">estradiol${rev?' · <span style="color:var(--at-electron)">ring with OH · no CH₃</span>':''}</div>
+      <svg class="mol" viewBox="${STER.vb}" role="img" aria-label="Estradiol, line-angle drawing: four fused rings, the left ring flat with an OH, an OH top right.">${steroidSvg(STER.E,'E',{reveal:rev})}</svg></div>
+    <div class="card" style="flex:1 1 0;margin-top:12px">
+      <div class="callout${st.tapCall?' warn':''}">testosterone${rev?' · <span>ring with C=O · CH₃</span>':''} <span style="float:right;color:var(--at-ink-muted)">${call}</span></div>
+      <svg class="mol" id="tsvg" viewBox="${STER.vb}" role="group" aria-label="Testosterone, line-angle drawing. Every atom can be tapped.">${steroidSvg(STER.T,'T',{reveal:rev,sel:st.sel,hits:st.phase!=='done'})}</svg></div>`;
+  const pick=el=>{const i=+el.dataset.a;st.sel.has(i)?st.sel.delete(i):st.sel.add(i);st.tapCall='';bodySteroid();drawMain();renderDebug();$(`#tsvg [data-a="${i}"]`)?.focus();};
+  document.querySelectorAll('#tsvg [data-a]').forEach(el=>{el.onclick=()=>pick(el);el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(el);}};});
+  const svg=$('#tsvg'); let p0=null;
+  svg.onpointerdown=e=>{p0=[e.clientX,e.clientY];};
+  svg.onpointerup=e=>{if(p0&&Math.hypot(e.clientX-p0[0],e.clientY-p0[1])>12){st.tapCall='No dragging: just tap.';bodySteroid();}p0=null;};
+}
+function checkSteroid(){
+  const S=cur(), s=st.sel, a=[...s].filter(i=>GROUP_A.has(i)).length, bb=[...s].filter(i=>GROUP_B.has(i)).length;
+  st.picked=[...s].map(i=>NUM_T[i]);
+  grade(s.size===2&&a===1&&bb===1,pickHint(S,s),()=>{st.sel=new Set();});
+}
+
+// ---------- Multiple choice (s07) ----------
+function bodyMC(){
+  const S=cur(), done=st.phase==='done';
+  $('#body').innerHTML=`<div class="choices" role="group">`+S.choices.map(c=>{const on=st.sel.has(c.id),right=c.id===S.answer,cls=done?(right?'ok':on?'no':''):'';
+    return `<button class="choice ${cls}" aria-pressed="${on}" data-c="${c.id}" ${done?'disabled':''}><span class="lt">${c.id.toUpperCase()}</span>${c.text}</button>`;}).join('')+'</div>';
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{st.sel=new Set([b.dataset.c]);bodyMC();drawMain();renderDebug();});
+}
+function checkMC(){const S=cur(),x=[...st.sel][0];st.picked=x;grade(x===S.answer,pickHint(S,x),()=>{st.sel=new Set([S.answer]);});}
+
+// ---------- Numeric input (s08) ----------
+function ch4Svg(lit){
+  let s=chPiece(BC.x,BC.y,[0,1,2,3],[],{lit:[0,1,2,3].slice(0,lit)});
+  if(lit) s+=`<text x="${BC.x+44}" y="${BC.y-36}" font-family="JetBrains Mono,monospace" font-weight="700" font-size="20" fill="var(--at-ignite)">${lit*2}</text>`;
+  return s;
+}
+function bodyNum(){
+  const S=cur(), done=st.phase==='done';
+  $('#body').innerHTML=`<div class="card" style="min-height:120px"><svg class="mol" id="nsvg" viewBox="120 40 160 156" role="img" aria-label="Methane: carbon in the centre with four hydrogens; each shared pair drawn as two cyan dots.">${ch4Svg(st.lit)}</svg></div>
+    <div class="numout"><div class="box" id="nbox" aria-live="polite">${st.val||'<span class="muted">?</span>'}</div><span class="unit">${S.unit}</span></div>
+    <div class="pad" role="group" aria-label="Number pad">${['1','2','3','4','5','6','7','8','9','⌫','0','C'].map(k=>`<button data-k="${k}" ${done?'disabled':''} aria-label="${k==='⌫'?'delete':k==='C'?'clear':k}">${k}</button>`).join('')}</div>`;
+  document.querySelectorAll('.pad button').forEach(b=>b.onclick=()=>numKey(b.dataset.k));
+}
+function numKey(k){if(st.phase==='done')return;if(k==='⌫')st.val=st.val.slice(0,-1);else if(k==='C')st.val='';else if(st.val.length<3)st.val=(st.val==='0'?'':st.val)+k;
+  $('#nbox').innerHTML=st.val||'<span class="muted">?</span>';drawMain();renderDebug();}
+function checkNum(){const S=cur(),v=+st.val;st.picked=v;grade(Math.abs(v-S.answer)<=S.tol,pickHint(S,v),()=>{st.val=String(S.answer);
+  // reveal: the four pairs light up one by one, counting 2, 4, 6, 8
+  if(reduced){st.lit=4;return;} st.lit=0; let n=0; const t=setInterval(()=>{if(cur()!==S){clearInterval(t);return;}n++;st.lit=n;const s=$('#nsvg');if(s)s.innerHTML=ch4Svg(n);say(String(n*2));if(n>=4)clearInterval(t);},650);timers.push(t);});}
+document.addEventListener('keydown',e=>{const S=cur();if(!S||S.type!=='num'||st.phase==='done'||idx<0)return;if(e.target.tagName==='SELECT')return;
+  if(/^[0-9]$/.test(e.key))numKey(e.key);else if(e.key==='Backspace')numKey('⌫');else if(e.key==='Enter'&&st.val&&document.activeElement===document.body)checkNum();});
+
+// ---------- Wrap (s09) ----------
+function bodyWrap(){const S=cur();$('#body').innerHTML=`<div class="card"><svg class="mol" viewBox="80 40 240 156" role="img" aria-label="${S.sr}">${ethaneSvg(200,BC.y)}</svg><div class="cap">Scene <span class="data">build-by-sharing</span> (final frame)</div></div>`;}
+
+const BODY={hook:bodyHook,explain:bodyExplain,give:bodyGive,build:bodyBuild,steroid:bodySteroid,mc:bodyMC,num:bodyNum,wrap:bodyWrap};
+
+// ---------- intro + Lesson end ----------
+function renderIntro(){
+  $('#app').innerHTML=`<main class="intro"><h1>Lesson 0, playable</h1>
+  <p>A rough run-through of <b>all 9 Steps</b> of the Lesson 0 spec (<i>Why Carbon?</i>, the On-ramp): the Hook, five Build Steps, two Check Problems and the Wrap. Prompts, answers, Hints and reveals are copied from the spec; the numbers come from the cited data file. Anything that reads wrong here reads wrong in the spec.</p>
+  <div class="box"><b>Please look for</b><ol>
+    <li><b>The Hook.</b> Does the rough star-forge intro (13 s) set up the question? Is "about 20%" fair as the closest choice to the real figure?</li>
+    <li><b>Give or take (Step 3).</b> Do the bars make the argument? The Give bar is an energy cost; carbon's first Take electron <i>releases</i> energy. Does showing both on one axis read right?</li>
+    <li><b>Build by sharing (Step 5).</b> Drag H atoms onto carbon, then join two CH₃. Try a 5th H, and an H on an H.</li>
+    <li><b>Same atoms, different life (Step 6).</b> Are the steroid drawings readable at phone size, and are the atoms big enough to tap?</li>
+    <li><b>Hints.</b> Make deliberate mistakes. Is each Hint the one a Student needs?</li>
+    <li><b>Fit.</b> Does every Step fit one phone screen?</li>
+  </ol></div>
+  <p class="muted">The striped yellow banner is not part of the design: jump to any Step, open the debug panel, toggle reduced motion, or redo a Step. Add ?fast=1 to the URL for 3 s idle hints on Step 5.</p>
+  <button class="btn btn-primary" onclick="go(0)">START THE LESSON</button></main>`;
+}
+function renderEnd(){
+  $('#app').innerHTML=`<main class="step end"><div class="big" style="margin-top:10px">LESSON COMPLETE</div>
+    <div class="key"><span class="muted">KEY IDEA</span><br>${KEY_IDEA}</div>
+    <div class="streak">${streakEarned?'<b>✓</b> streak +1 <span class="muted">(both Check Problems count toward it)</span>':''}</div>
+    <button class="btn btn-primary" disabled title="Not built in this prototype">NEXT LESSON: BONDS, POLARITY &amp; FORMAL CHARGE</button>
+    <button class="btn btn-secondary" onclick="go(-1)">BACK TO UNIT</button></main>`;
+}
+
+// ---------- debug panel (prototype chrome) ----------
+function renderDebug(){
+  const d=$('#debug'); d.className=showDebug?'on':''; if(!showDebug){return;}
+  let t=`<b>sanity</b> ${SANITY.length?`<span class="bad">FAILED</span> ${SANITY.join(' ')}`:`<span class="ok">ok</span> counts ${ROW.map(r=>r.el+':'+r.n).join(' ')}`}\n`;
+  if(idx<0||idx>=STEPS.length){d.innerHTML=t+(idx<0?'intro screen':'Lesson-end screen');return;}
+  const S=cur();
+  t+=`<b>id</b> ${S.id}  <b>phase</b> ${S.phase}  <b>type</b> ${S.type}\n<b>tries</b> ${st.tries}  <b>state</b> ${st.phase}  <b>graded</b> ${st.graded||'–'}\n`;
+  if(S.type==='hook') t+=`<b>sub-phase</b> ${st.hp}  <b>scene t</b> ${(st.t*SF_DUR).toFixed(1)} s  <b>picked</b> ${[...st.sel].join()||'–'}\n<b>fields</b> crust.C=${FIELDS['crust.C']} body.C=${FIELDS['body.C']} (body/crust = ${(parseFloat(FIELDS['body.C'])/parseFloat(FIELDS['crust.C'])).toFixed(0)}×)\n`;
+  if(S.type==='give'){const r=ROW[st.atom];t+=`<b>on</b> ${r.el}  v=${r.v}  give sum(IE1..${r.v})=${r.sum.toFixed(4)} eV  take=${r.take}  EA=${r.ea===null?'null (unbound)':r.ea}  n=${r.n}\n<b>last checked</b> ${st.picked||'–'}  <b>answer</b> C\n<b>ie.C.sum4</b> ${FIELDS['ie.C.sum4']} eV\n<b>all</b>\n${ROW.map(r=>`  ${r.el.padEnd(2)} v${r.v} give ${r.sum.toFixed(2).padStart(7)} eV  take ${r.take}  EA ${r.ea===null?'  —  ':r.ea.toFixed(2)}  n=${r.n}`).join('\n')}\n`;}
+  if(S.type==='build'){const b=st.b,{nb}=buildState();t+=`<b>stage</b> ${b.stage}  <b>H on C</b> ${nb}  <b>C e⁻</b> ${b.stage===1?4+nb:(b.joined?8:7)}  <b>joined</b> ${b.joined}\n<b>bond sides</b> ${JSON.stringify(b.bond)}  <b>tray</b> ${b.tray.map(x=>x?'H':'·').join('')}\n<b>idle</b> count ${b.idle} · threshold ${IDLE_MS/1000} s · ${((performance.now()-b.last)/1000).toFixed(0)} s since last action · ghost ${b.ghost}\n<b>callout</b> ${b.call||'–'}\n<span class="ns">[not in spec] = placeholder copy the spec doesn't give (stage 2 idle / early Continue)</span>\n`;}
+  if(S.type==='steroid'){const sel=[...st.sel];t+=`<b>selection</b> ${sel.map(i=>`${NUM_T[i]}(#${i}${GROUP_A.has(i)?' A':GROUP_B.has(i)?' B':''})`).join(', ')||'–'}\n<b>group A</b> ${[...GROUP_A].map(i=>NUM_T[i]+'#'+i).join(' ')}  <b>group B</b> C19#${T_IDX.C19}\n<b>layout</b> ${STER?STER.src:'loading'}\n<b>RDKit index → steroid no.</b>\n  T ${NUM_T.map((n,i)=>i+':'+n).join(' ')}\n  E ${NUM_E.map((n,i)=>i+':'+n).join(' ')}\n`;}
+  if(S.type==='mc'||S.type==='num') t+=`<b>picked</b> ${S.type==='num'?(st.val||'–'):([...st.sel].join()||'–')}  <b>answer</b> ${S.answer}${S.type==='num'?' ±'+S.tol+' '+S.unit:''}\n`;
+  if(S.hints) t+=`<b>Hints</b> (first match wins)\n${S.hints.map(([,h])=>'  · '+h).join('\n')}\n  · (fallback) ${S.fallback}\n`;
+  if(st.lastHint) t+=`<b>last Hint shown</b> ${st.lastHint}\n`;
+  if(S.sr) t+=`<b>screen reader</b> ${fill(S.sr)}\n`;
+  if(S.type==='give') t+=`<b>screen reader (this stop)</b> ${giveSr(ROW[st.atom])}\n`;
+  d.innerHTML=t;
+}
+
+// ---------- banner ----------
+function setParam(k,v){const u=new URL(location);if(v===null)u.searchParams.delete(k);else u.searchParams.set(k,v);history.replaceState(null,'',u);}
+function syncBar(){
+  const sel=$('#b-step'); if(!sel.options.length){sel.innerHTML=`<option value="-1">intro</option>`+STEPS.map((s,i)=>`<option value="${i}">${i+1} · ${s.phase} · ${s.label}</option>`).join('')+`<option value="${STEPS.length}">Lesson end</option>`;}
+  sel.value=String(idx); $('#b-debug').setAttribute('aria-pressed',showDebug); $('#b-motion').setAttribute('aria-pressed',reduced);
+}
+$('#b-step').onchange=e=>go(+e.target.value);
+$('#b-prev').onclick=()=>go(idx-1); $('#b-next').onclick=()=>go(idx+1);
+$('#b-debug').onclick=()=>{showDebug=!showDebug;setParam('debug',showDebug?'1':null);syncBar();renderDebug();};
+$('#b-motion').onclick=()=>{reduced=!reduced;setParam('motion',reduced?'reduced':null);fresh();render();};
+$('#b-reset').onclick=()=>{fresh();render();};
+setInterval(()=>{if(showDebug&&cur()&&cur().type==='build')renderDebug();},1000);
+function say(t){const l=$('#live');l.textContent='';setTimeout(()=>l.textContent=t,30);}
+fresh(); render();
+if(idx>=0&&idx<5) setTimeout(()=>loadRDKit(),4000); // warm RDKit.js before Step 6
+</script>
+</body>
+</html>

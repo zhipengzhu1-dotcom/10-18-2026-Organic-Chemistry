@@ -1,0 +1,28 @@
+{
+  "name": "star-forge-remotion",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "glyph": "node scripts/extract-glyph.mjs",
+    "render": "pnpm render:9x16 && pnpm render:16x9 && pnpm render:poster",
+    "render:9x16": "remotion render src/index.ts StarForge9x16 out/star-forge-native-9x16.mp4 --codec=h264 --crf=20",
+    "render:16x9": "remotion render src/index.ts StarForge16x9 out/star-forge-native-16x9.mp4 --codec=h264 --crf=20",
+    "render:poster": "remotion still src/index.ts StarForge16x9 out/star-forge-native-poster.png --frame=389"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.531",
+    "@remotion/google-fonts": "4.0.531",
+    "flubber": "0.4.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "remotion": "4.0.531"
+  },
+  "devDependencies": {
+    "@fontsource/jetbrains-mono": "5.2.8",
+    "@types/react": "19.2.2",
+    "opentype.js": "1.3.4",
+    "typescript": "5.9.3"
+  }
+}

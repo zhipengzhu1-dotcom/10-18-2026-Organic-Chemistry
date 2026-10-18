@@ -1,0 +1,71 @@
+{
+ "integrated_lufs": -16.0,
+ "true_peak_dbtp": -2.5,
+ "cues": [
+  {
+   "stem": "amb",
+   "t": 0.0,
+   "what": "space-wind bed + engine hum, fade in 1.8 s / out 1.6 s"
+  },
+  {
+   "stem": "fx",
+   "t": 2.54,
+   "what": "whoosh (rate 1.0, pan -0.7) peaks 4.55 s"
+  },
+  {
+   "stem": "fx",
+   "t": 2.54,
+   "what": "whoosh (rate 0.92, pan +0.7) peaks 4.72 s"
+  },
+  {
+   "stem": "fx",
+   "t": 2.98,
+   "what": "whoosh (rate 1.07, pan -0.2) peaks 4.86 s"
+  },
+  {
+   "stem": "fx",
+   "t": 4.95,
+   "what": "low-frequency boom (onset ~4.99 s)"
+  },
+  {
+   "stem": "fx",
+   "t": 5.0,
+   "what": "soft punch transient"
+  },
+  {
+   "stem": "fx",
+   "t": 5.03,
+   "what": "glass shimmer x2 with reverb tail"
+  },
+  {
+   "stem": "fx",
+   "t": 6.45,
+   "what": "reversed whoosh, receding (pull-back)"
+  },
+  {
+   "stem": "ui",
+   "t": 9.8,
+   "what": "valence-dot blip 1 (pluck rate 1.0)"
+  },
+  {
+   "stem": "ui",
+   "t": 10.0,
+   "what": "valence-dot blip 2 (pluck rate 1.125)"
+  },
+  {
+   "stem": "ui",
+   "t": 10.2,
+   "what": "valence-dot blip 3 (pluck rate 1.25)"
+  },
+  {
+   "stem": "ui",
+   "t": 10.4,
+   "what": "valence-dot blip 4 (pluck rate 1.5)"
+  },
+  {
+   "stem": "ui",
+   "t": 11.3,
+   "what": "card chime"
+  }
+ ]
+}

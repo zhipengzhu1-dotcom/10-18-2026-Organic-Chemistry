@@ -1,0 +1,74 @@
+[
+    {
+        "name": "s1-star",
+        "type": "default.normal",
+        "video": "star-forge-manim-cut4-16x9_0000_s1-star.mp4",
+        "width": 1920,
+        "height": 1080,
+        "nb_frames": "60",
+        "duration": "2.000000",
+        "avg_frame_rate": "30/1",
+        "codec_name": "h264",
+        "pix_fmt": "yuv420p"
+    },
+    {
+        "name": "s2-approach",
+        "type": "default.normal",
+        "video": "star-forge-manim-cut4-16x9_0001_s2-approach.mp4",
+        "width": 1920,
+        "height": 1080,
+        "nb_frames": "90",
+        "duration": "3.000000",
+        "avg_frame_rate": "30/1",
+        "codec_name": "h264",
+        "pix_fmt": "yuv420p"
+    },
+    {
+        "name": "s3-fuse",
+        "type": "default.normal",
+        "video": "star-forge-manim-cut4-16x9_0002_s3-fuse.mp4",
+        "width": 1920,
+        "height": 1080,
+        "nb_frames": "45",
+        "duration": "1.500000",
+        "avg_frame_rate": "30/1",
+        "codec_name": "h264",
+        "pix_fmt": "yuv420p"
+    },
+    {
+        "name": "s4-pullback",
+        "type": "default.normal",
+        "video": "star-forge-manim-cut4-16x9_0003_s4-pullback.mp4",
+        "width": 1920,
+        "height": 1080,
+        "nb_frames": "75",
+        "duration": "2.500000",
+        "avg_frame_rate": "30/1",
+        "codec_name": "h264",
+        "pix_fmt": "yuv420p"
+    },
+    {
+        "name": "s5-morph",
+        "type": "default.normal",
+        "video": "star-forge-manim-cut4-16x9_0004_s5-morph.mp4",
+        "width": 1920,
+        "height": 1080,
+        "nb_frames": "45",
+        "duration": "1.500000",
+        "avg_frame_rate": "30/1",
+        "codec_name": "h264",
+        "pix_fmt": "yuv420p"
+    },
+    {
+        "name": "s6-card",
+        "type": "default.normal",
+        "video": "star-forge-manim-cut4-16x9_0005_s6-card.mp4",
+        "width": 1920,
+        "height": 1080,
+        "nb_frames": "105",
+        "duration": "3.500000",
+        "avg_frame_rate": "30/1",
+        "codec_name": "h264",
+        "pix_fmt": "yuv420p"
+    }
+]
