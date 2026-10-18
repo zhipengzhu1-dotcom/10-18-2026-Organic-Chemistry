@@ -12,6 +12,8 @@ Rules it encodes: [Decide the lesson anatomy and Step types](https://github.com/
 - [ ] Every interactive Step has a generic fallback Hint
 - [ ] Every Scene has screen-reader text and a reduced-motion poster frame
 - [ ] Every chemistry number points at pipeline output with a Source note; none typed into the spec
+- [ ] Every computed number is shown to the precision the chemistry supports (bond lengths: 2 decimals in Å), with the full values in the Source note
+- [ ] A Tap-to-identify Step that sits among Draw-arrows Steps says in its prompt that it is tap-only
 - [ ] Nothing reused from material excluded by the source's licence (e.g. "used with permission" figures)
 
 ---
@@ -27,7 +29,7 @@ Rules it encodes: [Decide the lesson anatomy and Step types](https://github.com/
 | Key idea | the one line on the Lesson-end screen |
 | Check Problems | Bank ids, in order |
 | Sources | each source with exact pages, and its licence |
-| Structure drawing | line-angle / full Lewis, and which atoms and lone pairs are drawn explicitly |
+| Structure drawing | line-angle / full Lewis, and which atoms and lone pairs are drawn explicitly. Every structure, structure cards in choices included, is drawn by the site's own renderer (every lone pair, every charged atom as a letter); RDKit.js parses and lays out, it never supplies the final drawing. |
 
 ### New Scenes
 
@@ -68,6 +70,9 @@ One block per Step, in order.
 - **Pushes:** each correct push as `source → drop atom` (source = lone pair on atom n, or bond n–m), and whether pushes may come in any order.
 - **In-between flags:** the copy shown for each live in-between state (over-octet, sextet), saying plainly that it is not a real structure.
 - Hints are matched on the push, but grading is by result: a push is accepted when it is a step toward an accepted result.
+- Two tries count **per push** (Hint, then that push is shown), so a three-push Step can show up to three Hints.
+- **Drop targets** sit where the push's arrowhead is drawn, never only on atom centres: on the bond for lone pair → bond and bond → next bond, beside the atom for bond → atom. While dragging, every target is shown as a dashed spot. (The prototype found that atom-centre-only drops made most correct pushes fail or land on the wrong atom.)
+- **Layout:** the target sits in a strip above the start on narrow screens, side by side on wide ones; the Step fits one phone screen without scrolling.
 
 ---
 
