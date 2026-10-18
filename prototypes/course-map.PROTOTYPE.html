@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Course Map Prototype</title>
+<style>
+  :root {
+    --bg: #0b0f14; --panel: #121821; --card: #18212c; --line: #263241;
+    --text: #e6edf3; --muted: #8b98a8; --accent: #22d3ee; --warn: #fbbf24;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 24px 16px 64px; }
+  .proto { display: inline-block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    border: 1px solid var(--warn); color: var(--warn); padding: 2px 8px; border-radius: 99px; }
+  h1 { margin: 10px 0 4px; font-size: 26px; }
+  h2 { font-size: 15px; margin: 0; }
+  p.lede { color: var(--muted); max-width: 820px; margin: 0 0 18px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 18px; }
+  .bar .label { color: var(--muted); font-size: 13px; margin-right: 4px; }
+  button { font: inherit; color: var(--text); background: var(--card); border: 1px solid var(--line);
+    border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  button:hover, button:focus-visible { border-color: var(--accent); outline: none; }
+  button.on { border-color: var(--accent); color: var(--accent); }
+  .preset-note { color: var(--muted); font-size: 13px; margin: -8px 0 18px; min-height: 1.4em; }
+  .board { display: grid; grid-template-columns: 1fr 1fr 0.85fr; gap: 14px; align-items: start; }
+  @media (max-width: 900px) { .board { grid-template-columns: 1fr; } }
+  .col { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+  .col header { display: flex; justify-content: space-between; align-items: baseline; margin: 2px 4px 10px; }
+  .col header .count { color: var(--muted); font-size: 13px; }
+  .col.bench { border-style: dashed; }
+  .list { min-height: 80px; display: flex; flex-direction: column; gap: 8px; }
+  .list.over { outline: 2px dashed var(--accent); outline-offset: 4px; border-radius: 8px; }
+  .unit { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 10px 8px;
+    cursor: grab; position: relative; }
+  .unit.dragging { opacity: .35; }
+  .unit.drop-before { box-shadow: 0 -3px 0 var(--accent); }
+  .unit.opener { border-color: var(--accent); }
+  .unit .top { display: flex; gap: 8px; align-items: baseline; }
+  .unit .num { color: var(--accent); font-weight: 600; font-size: 13px; min-width: 52px; }
+  .bench .unit .num { color: var(--muted); }
+  .unit .title { font-weight: 600; flex: 1; outline: none; }
+  .unit .scope { color: var(--muted); font-size: 13px; margin: 3px 0 6px; outline: none; }
+  .unit [contenteditable]:focus { background: #0f1620; border-radius: 4px; box-shadow: 0 0 0 1px var(--line); }
+  .unit .meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); }
+  .tag { border: 1px solid var(--line); border-radius: 99px; padding: 0 7px; }
+  .tag.moved { border-color: var(--warn); color: var(--warn); }
+  .tag.first { border-color: var(--accent); color: var(--accent); }
+  .unit .tools { margin-left: auto; display: flex; gap: 4px; }
+  .unit .tools button { padding: 1px 7px; font-size: 12px; border-radius: 6px; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 4px; font-style: italic; }
+  .state { margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 900px) { .state { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .panel h2 { margin-bottom: 8px; }
+  .panel ul { margin: 0; padding-left: 18px; }
+  .panel li { margin: 2px 0; }
+  pre { white-space: pre-wrap; margin: 0; font: 13px/1.5 ui-monospace, Consolas, monospace; color: var(--text);
+    background: #0f1620; padding: 10px; border-radius: 8px; max-height: 420px; overflow: auto; }
+  .muted { color: var(--muted); }
+  .flash { color: var(--accent); font-size: 13px; margin-left: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="proto">Throwaway prototype · not the site</span>
+  <h1>PrimoTon: Orgo I &amp; II Course Map</h1>
+  <p class="lede">
+    <strong>The question:</strong> what are the Units of Organic Chemistry I and II, in what order, and where does
+    the I/II split fall? The board starts on the <em>recommended</em> sequence (the five-university consensus, which
+    matches the OpenStax chapter order). Drag Units to reorder them, move one across the split, or park it on the
+    bench. Click a title or scope line to edit it. The bordered card at the top of each course is the Unit that
+    opens it. Use ★ to mark the one Unit to build first for v1. When you're happy, copy the result below and paste it back to Claude.
+  </p>
+
+  <div class="bar">
+    <span class="label">Start from:</span>
+    <button data-preset="consensus">Recommended (consensus)</button>
+    <button data-preset="mechanismFirst">Berkeley / UMich: SN/E before alkenes</button>
+    <button data-preset="mitSplit">MIT: aromaticity + alcohols in Orgo I</button>
+    <button data-preset="spectroEarly">Spectroscopy early in Orgo I</button>
+  </div>
+  <div class="preset-note" id="presetNote"></div>
+
+  <div class="board" id="board"></div>
+
+  <div class="state">
+    <div class="panel">
+      <h2>What differs from the recommended map</h2>
+      <div id="diff"></div>
+    </div>
+    <div class="panel">
+      <h2>Your course map <button id="copy" style="margin-left:8px;padding:2px 10px">Copy</button><span class="flash" id="flash"></span></h2>
+      <pre id="out"></pre>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- Portable module: pure, no DOM ---------- */
+const CourseMap = (() => {
+  // OpenStax Organic Chemistry (McMurry 10e, 2023) chapter refs, from research/orgo-sequence.
+  const UNITS = {
+    structure:  { title: "Structure & Bonding", scope: "Atoms, Lewis structures, formal charge, hybridization, polarity and resonance.", ref: "OS Ch 1–2" },
+    acidbase:   { title: "Acids & Bases", scope: "pKa, what stabilizes a conjugate base, and predicting which way an acid–base equilibrium lies.", ref: "OS Ch 2" },
+    alkanes:    { title: "Alkanes & Conformations", scope: "Naming, Newman projections, ring strain and cyclohexane chairs.", ref: "OS Ch 3–4" },
+    stereo:     { title: "Stereochemistry", scope: "Chirality, R/S, enantiomers vs diastereomers, meso compounds, optical activity.", ref: "OS Ch 5" },
+    reactions:  { title: "How Reactions Work", scope: "Curved arrows, nucleophiles and electrophiles, energy diagrams, kinetics vs thermodynamics.", ref: "OS Ch 6" },
+    alkenes:    { title: "Alkenes: Addition Reactions", scope: "Markovnikov addition, carbocation rearrangements, hydroboration, halogenation, oxidation.", ref: "OS Ch 7–8" },
+    alkynes:    { title: "Alkynes", scope: "Terminal-alkyne acidity, additions to triple bonds, and building chains with acetylides.", ref: "OS Ch 9" },
+    snE:        { title: "Substitution & Elimination", scope: "SN1, SN2, E1, E2, and how to predict which one wins.", ref: "OS Ch 10–11" },
+    spectro:    { title: "Spectroscopy", scope: "Mass spec, IR, ¹H and ¹³C NMR: working out a structure from its spectra.", ref: "OS Ch 12–13" },
+    alcohols:   { title: "Alcohols, Ethers & Epoxides", scope: "Making and oxidizing alcohols, Grignard and other organometallics, epoxide ring-opening.", ref: "OS Ch 17–18" },
+    conjugation:{ title: "Conjugation & Diels–Alder", scope: "Conjugated dienes, 1,2- vs 1,4-addition, UV-vis, the Diels–Alder reaction.", ref: "OS Ch 14" },
+    aromatic:   { title: "Aromaticity & EAS", scope: "Hückel's rule, benzene's stability, electrophilic aromatic substitution and directing effects.", ref: "OS Ch 15–16" },
+    carbonyl:   { title: "Aldehydes & Ketones", scope: "Nucleophilic addition: hydrides, Grignards, acetals, imines and enamines, Wittig.", ref: "OS Ch 19" },
+    acyl:       { title: "Carboxylic Acids & Derivatives", scope: "Acidity, then acyl substitution across the reactivity ladder (acid chloride → amide).", ref: "OS Ch 20–21" },
+    enolates:   { title: "Enols & Enolates", scope: "Alpha substitution, aldol, Claisen, Michael and Robinson reactions.", ref: "OS Ch 22–23" },
+    amines:     { title: "Amines", scope: "Basicity, making amines, reductive amination, an intro to heterocycles.", ref: "OS Ch 24" },
+    bio:        { title: "Biomolecules", scope: "Carbohydrates, amino acids and proteins, lipids: organic chemistry inside cells.", ref: "OS Ch 25–27" },
+    // Bench: topics that vary between schools
+    orient:     { title: "Orientation: Why Organic?", scope: "A pre-Unit on-ramp: what carbon does that nothing else can, and how to use the site.", ref: "—", note: "Not a standard Unit; an option if on-ramps shouldn't live inside each Unit." },
+    radicals:   { title: "Radical Reactions", scope: "Radical halogenation, selectivity, radical chain mechanisms.", ref: "OS §10.2–10.4", note: "Orgo I at UCLA 30A; Orgo II at MIT and Berkeley." },
+    pericyclic: { title: "Pericyclic Reactions", scope: "Electrocyclic reactions, cycloadditions, sigmatropic shifts, orbital-symmetry rules.", ref: "OS Ch 30", note: "Heavy at MIT 5.13; also in Berkeley 12B and UCLA 30C; optional at UMich." },
+    synthesis:  { title: "Multistep Synthesis", scope: "Retrosynthesis and planning routes, using everything learned so far.", ref: "woven in", note: "A separate Unit at MIT 5.12 and Berkeley 12A; elsewhere spread through the course." },
+    coupling:   { title: "Cross-Coupling & Protecting Groups", scope: "Suzuki, Heck, Sonogashira; protecting a group while another reacts.", ref: "OS §10.7 (partial)", note: "Only Berkeley 12B." },
+    nucleic:    { title: "Nucleic Acids", scope: "Nucleotides, DNA and RNA structure, base pairing.", ref: "OS Ch 28", note: "Rare in the five syllabi." },
+    polymers:   { title: "Synthetic Polymers", scope: "Chain-growth and step-growth polymers, plastics.", ref: "OS Ch 31", note: "Rare in the five syllabi." },
+    drugs:      { title: "Drug Chemistry", scope: "How drugs bind targets; the organic chemistry of pharmaceuticals.", ref: "—", note: "Only UCLA 14D." },
+  };
+
+  const CONSENSUS = {
+    I:  ["structure","acidbase","alkanes","stereo","reactions","alkenes","alkynes","snE"],
+    II: ["spectro","alcohols","conjugation","aromatic","carbonyl","acyl","enolates","amines","bio"],
+    bench: ["orient","radicals","pericyclic","synthesis","coupling","nucleic","polymers","drugs"],
+  };
+
+  const PRESETS = {
+    consensus: { note: "Five-school consensus; Units 1–8 are Orgo I everywhere, the carbonyl family is Orgo II everywhere.",
+      cols: CONSENSUS },
+    mechanismFirst: { note: "Berkeley 12A and UMich 210 teach substitution/elimination before alkene addition (organised by mechanism type).",
+      cols: { ...CONSENSUS, I: ["structure","acidbase","alkanes","stereo","reactions","snE","alkenes","alkynes"] } },
+    mitSplit: { note: "MIT 5.12 ends Orgo I with aromaticity/EAS and alcohols, so Orgo II starts with spectroscopy and goes heavy on pericyclic.",
+      cols: { I: [...CONSENSUS.I, "aromatic", "alcohols"],
+              II: ["spectro","conjugation","pericyclic","carbonyl","acyl","enolates","amines","bio"],
+              bench: CONSENSUS.bench.filter(u => u !== "pericyclic") } },
+    spectroEarly: { note: "Berkeley teaches NMR in lab from day one; this tries spectroscopy straight after stereochemistry.",
+      cols: { ...CONSENSUS, I: ["structure","acidbase","alkanes","stereo","spectro","reactions","alkenes","alkynes","snE"],
+              II: CONSENSUS.II.filter(u => u !== "spectro") } },
+  };
+
+  const clone = o => JSON.parse(JSON.stringify(o));
+
+  function initial(presetKey = "consensus") {
+    const units = {};
+    for (const [id, u] of Object.entries(UNITS)) units[id] = { title: u.title, scope: u.scope, ref: u.ref, note: u.note || "" };
+    return { preset: presetKey, cols: clone(PRESETS[presetKey].cols), units, firstBuild: null };
+  }
+
+  function move(state, id, toCol, toIndex) {
+    const s = clone(state);
+    for (const c of Object.keys(s.cols)) s.cols[c] = s.cols[c].filter(x => x !== id);
+    const list = s.cols[toCol];
+    list.splice(Math.max(0, Math.min(toIndex, list.length)), 0, id);
+    if (toCol === "bench" && s.firstBuild === id) s.firstBuild = null;
+    return s;
+  }
+
+  function locate(state, id) {
+    for (const [c, list] of Object.entries(state.cols)) { const i = list.indexOf(id); if (i >= 0) return { col: c, index: i }; }
+  }
+
+  function edit(state, id, field, value) {
+    const s = clone(state); s.units[id][field] = value.trim(); return s;
+  }
+
+  function toggleFirstBuild(state, id) {
+    const s = clone(state); s.firstBuild = s.firstBuild === id ? null : id; return s;
+  }
+
+  // Unit numbering runs continuously across Orgo I → Orgo II, the way the research numbered them.
+  function numbering(state) {
+    const n = {}; let k = 1;
+    for (const c of ["I","II"]) state.cols[c].forEach(id => { n[id] = k++; });
+    return n;
+  }
+
+  function diff(state) {
+    const base = initial("consensus");
+    const out = [];
+    const whereBase = id => locate(base, id), whereNow = id => locate(state, id);
+    const colName = { I: "Orgo I", II: "Orgo II", bench: "the bench" };
+    for (const id of Object.keys(UNITS)) {
+      const a = whereBase(id), b = whereNow(id);
+      if (a.col !== b.col) out.push(`${state.units[id].title}: moved from ${colName[a.col]} to ${colName[b.col]}`);
+    }
+    for (const c of ["I","II"]) {
+      const shared = state.cols[c].filter(id => base.cols[c].includes(id));
+      const baseOrder = base.cols[c].filter(id => shared.includes(id));
+      shared.forEach((id, i) => { if (baseOrder[i] !== id) out.push(`${state.units[id].title}: now position ${state.cols[c].indexOf(id)+1} in ${colName[c]} (recommended ${base.cols[c].indexOf(id)+1})`); });
+    }
+    for (const id of Object.keys(UNITS)) {
+      if (state.units[id].title !== UNITS[id].title) out.push(`Renamed "${UNITS[id].title}" → "${state.units[id].title}"`);
+      if (state.units[id].scope !== UNITS[id].scope) out.push(`Rewrote the scope of ${state.units[id].title}`);
+    }
+    return out;
+  }
+
+  function isMoved(state, id) {
+    const base = initial("consensus"); const a = locate(base, id), b = locate(state, id);
+    if (a.col !== b.col) return true;
+    if (b.col === "bench") return false;
+    const shared = state.cols[b.col].filter(x => base.cols[b.col].includes(x));
+    const baseOrder = base.cols[b.col].filter(x => shared.includes(x));
+    return shared.indexOf(id) !== baseOrder.indexOf(id);
+  }
+
+  function toText(state) {
+    const n = numbering(state); const L = [];
+    const line = id => { const u = state.units[id]; return `${n[id]}. ${u.title}${state.firstBuild === id ? "  ★ build first" : ""}\n   ${u.scope}  [${u.ref}]`; };
+    L.push("ORGANIC CHEMISTRY I"); state.cols.I.forEach(id => L.push(line(id)));
+    L.push("", "ORGANIC CHEMISTRY II"); state.cols.II.forEach(id => L.push(line(id)));
+    L.push("", "NOT IN THE COURSE MAP (bench)"); state.cols.bench.forEach(id => L.push(`- ${state.units[id].title}`));
+    L.push("", `Orgo I opens with: ${state.units[state.cols.I[0]]?.title ?? "—"}`);
+    L.push(`Orgo II opens with: ${state.units[state.cols.II[0]]?.title ?? "—"}`);
+    L.push(`First Unit to build for v1: ${state.firstBuild ? state.units[state.firstBuild].title : "not chosen"}`);
+    return L.join("\n");
+  }
+
+  return { PRESETS, initial, move, locate, edit, toggleFirstBuild, numbering, diff, isMoved, toText };
+})();
+
+/* ---------- Throwaway page shell ---------- */
+let state = CourseMap.initial("consensus");
+let dragId = null;
+const COLS = [["I","Organic Chemistry I"],["II","Organic Chemistry II"],["bench","Bench · not in the course map"]];
+
+function render() {
+  const n = CourseMap.numbering(state);
+  const board = document.getElementById("board");
+  board.innerHTML = "";
+  for (const [key, name] of COLS) {
+    const col = document.createElement("section");
+    col.className = "col" + (key === "bench" ? " bench" : "");
+    col.innerHTML = `<header><h2>${name}</h2><span class="count">${state.cols[key].length} Units</span></header>`;
+    const list = document.createElement("div");
+    list.className = "list"; list.dataset.col = key;
+    state.cols[key].forEach((id, i) => list.appendChild(card(id, key, i, n)));
+    wireList(list);
+    col.appendChild(list);
+    board.appendChild(col);
+  }
+  document.querySelectorAll("[data-preset]").forEach(b => b.classList.toggle("on", b.dataset.preset === state.preset));
+  document.getElementById("presetNote").textContent = CourseMap.PRESETS[state.preset].note;
+  const d = CourseMap.diff(state);
+  document.getElementById("diff").innerHTML = d.length
+    ? `<ul>${d.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`
+    : `<p class="muted">Same as the recommended map.</p>`;
+  document.getElementById("out").textContent = CourseMap.toText(state);
+}
+
+function card(id, col, i, n) {
+  const u = state.units[id];
+  const el = document.createElement("article");
+  el.className = "unit" + (col !== "bench" && i === 0 ? " opener" : "");
+  el.draggable = true; el.dataset.id = id;
+  const moved = CourseMap.isMoved(state, id);
+  el.innerHTML = `
+    <div class="top">
+      <span class="num">${col === "bench" ? "bench" : "Unit " + n[id]}</span>
+      <span class="title" contenteditable="true" spellcheck="false">${esc(u.title)}</span>
+    </div>
+    <div class="scope" contenteditable="true">${esc(u.scope)}</div>
+    <div class="meta">
+      <span class="tag">${esc(u.ref)}</span>
+      ${col !== "bench" && i === 0 ? `<span class="tag first">opens the course</span>` : ""}
+      ${moved ? `<span class="tag moved">moved</span>` : ""}
+      ${state.firstBuild === id ? `<span class="tag first">★ build first</span>` : ""}
+      <span class="tools">
+        <button title="Move up" data-act="up">↑</button>
+        <button title="Move down" data-act="down">↓</button>
+        <button title="Move to another column" data-act="hop">⇄</button>
+        ${col !== "bench" ? `<button title="Mark as the first Unit to build for v1" data-act="star">★</button>` : ""}
+      </span>
+    </div>
+    ${u.note ? `<div class="note">${esc(u.note)}</div>` : ""}`;
+
+  el.addEventListener("dragstart", e => { dragId = id; el.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", id); });
+  el.addEventListener("dragend", () => { dragId = null; el.classList.remove("dragging"); clearMarks(); });
+  // Editing text must not start a drag.
+  el.querySelectorAll("[contenteditable]").forEach(ed => {
+    ed.addEventListener("mousedown", () => { el.draggable = false; });
+    ed.addEventListener("blur", () => {
+      el.draggable = true;
+      const field = ed.classList.contains("title") ? "title" : "scope";
+      if (ed.textContent.trim() && ed.textContent.trim() !== state.units[id][field]) { state = CourseMap.edit(state, id, field, ed.textContent); render(); }
+    });
+    ed.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); ed.blur(); } });
+  });
+  el.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => act(id, b.dataset.act)));
+  return el;
+}
+
+function act(id, what) {
+  const { col, index } = CourseMap.locate(state, id);
+  if (what === "up") state = CourseMap.move(state, id, col, index - 1);
+  if (what === "down") state = CourseMap.move(state, id, col, index + 1);
+  if (what === "hop") { const order = ["I","II","bench"]; const to = order[(order.indexOf(col) + 1) % 3]; state = CourseMap.move(state, id, to, to === "II" ? 0 : state.cols[to].length); }
+  if (what === "star") state = CourseMap.toggleFirstBuild(state, id);
+  render();
+  const btn = document.querySelector(`.unit[data-id="${id}"] [data-act="${what}"]`); if (btn) btn.focus();
+}
+
+function wireList(list) {
+  list.addEventListener("dragover", e => {
+    if (!dragId) return; e.preventDefault(); clearMarks(); list.classList.add("over");
+    const before = targetCard(list, e.clientY); if (before) before.classList.add("drop-before");
+  });
+  list.addEventListener("dragleave", e => { if (!list.contains(e.relatedTarget)) list.classList.remove("over"); });
+  list.addEventListener("drop", e => {
+    e.preventDefault(); if (!dragId) return;
+    const before = targetCard(list, e.clientY);
+    let idx = before ? state.cols[list.dataset.col].indexOf(before.dataset.id) : state.cols[list.dataset.col].length;
+    const from = CourseMap.locate(state, dragId);
+    if (from.col === list.dataset.col && from.index < idx) idx -= 1;
+    state = CourseMap.move(state, dragId, list.dataset.col, idx);
+    dragId = null; render();
+  });
+}
+
+function targetCard(list, y) {
+  return [...list.querySelectorAll(".unit:not(.dragging)")].find(c => { const r = c.getBoundingClientRect(); return y < r.top + r.height / 2; });
+}
+function clearMarks() { document.querySelectorAll(".over,.drop-before").forEach(x => x.classList.remove("over","drop-before")); }
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c])); }
+
+document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => { state = CourseMap.initial(b.dataset.preset); render(); }));
+document.getElementById("copy").addEventListener("click", async () => {
+  const f = document.getElementById("flash");
+  try { await navigator.clipboard.writeText(CourseMap.toText(state)); f.textContent = "Copied"; }
+  catch { f.textContent = "Select the text and copy it by hand"; }
+  setTimeout(() => f.textContent = "", 2000);
+});
+render();
+</script>
+</body>
+</html>
