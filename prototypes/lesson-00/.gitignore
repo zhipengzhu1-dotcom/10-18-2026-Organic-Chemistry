@@ -16,3 +16,7 @@ star-forge-style-*/audio/*.wav
 star-forge-style-*/out/preview-*
 star-forge-style-*/timeline/*.mp4
 star-forge-style-*/out/*-ORIGINAL.mp4
+star-forge-style-a/sound-v2/*.wav
+star-forge-style-a/sound-v2/stems/
+star-forge-style-a/sound-v2/*-9x16.mp4
+star-forge-style-a/sound-v2/v*-16x9.mp4

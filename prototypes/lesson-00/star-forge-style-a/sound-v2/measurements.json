@@ -1,0 +1,343 @@
+{
+ "v1-hush": {
+  "wav": {
+   "I": -23.0,
+   "TP": -12.5,
+   "M_max": -18.5,
+   "S_max": -20.4
+  },
+  "aac_16x9": {
+   "I": -23.0,
+   "TP": -12.5,
+   "M_max": -18.5,
+   "S_max": -20.4
+  },
+  "aac_9x16": {
+   "I": -23.0,
+   "TP": -12.5,
+   "M_max": -18.5,
+   "S_max": -20.4
+  },
+  "hf5k_I_literal": -70.0,
+  "hf5k_I_steep": -70.0,
+  "b2_5k_I_literal": -64.0,
+  "b2_5k_I_steep": -70.0,
+  "samples": 1198400,
+  "tones_above_1k2": {
+   "count": 0,
+   "worst_tonal_rel_db": -999.0,
+   "loudest_bin_rel_db": -81.51827825910509
+  },
+  "clicks": {
+   "max_step_dbfs": -44.940108675691846,
+   "hp8k_peak_dbfs": -139.29693969728345,
+   "first_sample": 0.0,
+   "last_sample": 0.0
+  },
+  "fades": {
+   "rms_0_0.1": -109.7302145611391,
+   "rms_1.2_2.2": -25.747011916125544,
+   "rms_last_0.1": -75.29961541751884,
+   "rms_T-3.3_T-1.8": -25.190349589447823
+  },
+  "cues": [
+   {
+    "name": "fusion swell (crest on contact)",
+    "frame": 188.0,
+    "kind": "crest",
+    "stem_offset_ms": -101.4,
+    "crest_1db_span_ms": [
+     -285,
+     172
+    ],
+    "mix_offset_ms": 92.0
+   },
+   {
+    "name": "card low tone D3",
+    "frame": 572.0,
+    "kind": "onset",
+    "stem_offset_ms": 6.2,
+    "crest_1db_span_ms": null,
+    "mix_offset_ms": 11.4
+   }
+  ],
+  "attack_selftest": {
+   "2ms": 2.0,
+   "4ms": 2.5,
+   "8ms": 4.75,
+   "16ms": 9.5
+  },
+  "events_stem_attacks": [
+   [
+    68.75,
+    19.016
+   ],
+   [
+    108.5,
+    4.996
+   ],
+   [
+    148.25,
+    5.345
+   ]
+  ],
+  "events_stem_attack_min_ms": 68.75,
+  "master_gain_db": -0.1
+ },
+ "v2-ambient-score": {
+  "wav": {
+   "I": -23.0,
+   "TP": -8.5,
+   "M_max": -18.1,
+   "S_max": -19.5
+  },
+  "aac_16x9": {
+   "I": -23.1,
+   "TP": -8.5,
+   "M_max": -18.1,
+   "S_max": -19.5
+  },
+  "aac_9x16": {
+   "I": -23.1,
+   "TP": -8.5,
+   "M_max": -18.1,
+   "S_max": -19.5
+  },
+  "hf5k_I_literal": -67.1,
+  "hf5k_I_steep": -70.0,
+  "b2_5k_I_literal": -56.0,
+  "b2_5k_I_steep": -70.0,
+  "samples": 1198400,
+  "tones_above_1k2": {
+   "count": 0,
+   "worst_tonal_rel_db": -999.0,
+   "loudest_bin_rel_db": -80.81066225510656
+  },
+  "clicks": {
+   "max_step_dbfs": -37.646181193395755,
+   "hp8k_peak_dbfs": -138.7800301201877,
+   "first_sample": 0.0,
+   "last_sample": 0.0
+  },
+  "fades": {
+   "rms_0_0.1": -112.5215509726006,
+   "rms_1.2_2.2": -31.636159884012727,
+   "rms_last_0.1": -75.9244585676064,
+   "rms_T-3.3_T-1.8": -26.270370421844817
+  },
+  "cues": [
+   {
+    "name": "fusion low swell (crest on contact)",
+    "frame": 188.0,
+    "kind": "crest",
+    "stem_offset_ms": -32.6,
+    "crest_1db_span_ms": [
+     -166,
+     188
+    ],
+    "mix_offset_ms": 37.8
+   },
+   {
+    "name": "dot 1 pluck 220 Hz",
+    "frame": 478.0,
+    "kind": "onset",
+    "stem_offset_ms": 1.9,
+    "crest_1db_span_ms": null,
+    "mix_offset_ms": 24.6
+   },
+   {
+    "name": "dot 2 pluck 294 Hz",
+    "frame": 490.0,
+    "kind": "onset",
+    "stem_offset_ms": 3.9,
+    "crest_1db_span_ms": null,
+    "mix_offset_ms": 18.1
+   },
+   {
+    "name": "dot 3 pluck 370 Hz",
+    "frame": 502.0,
+    "kind": "onset",
+    "stem_offset_ms": -10.0,
+    "crest_1db_span_ms": null,
+    "mix_offset_ms": 10.7
+   },
+   {
+    "name": "dot 4 pluck 440 Hz",
+    "frame": 514.0,
+    "kind": "onset",
+    "stem_offset_ms": -0.1,
+    "crest_1db_span_ms": null,
+    "mix_offset_ms": 12.7
+   }
+  ],
+  "attack_selftest": {
+   "2ms": 2.0,
+   "4ms": 2.5,
+   "8ms": 4.75,
+   "16ms": 9.5
+  },
+  "events_stem_attacks": [
+   [
+    5.25,
+    16.339
+   ],
+   [
+    42.0,
+    15.928
+   ],
+   [
+    148.0,
+    5.122
+   ]
+  ],
+  "events_stem_attack_min_ms": 5.25,
+  "master_gain_db": -3.2
+ },
+ "v3-soft-sfx": {
+  "wav": {
+   "I": -23.0,
+   "TP": -7.1,
+   "M_max": -15.7,
+   "S_max": -18.7
+  },
+  "aac_16x9": {
+   "I": -23.0,
+   "TP": -7.1,
+   "M_max": -15.7,
+   "S_max": -18.7
+  },
+  "aac_9x16": {
+   "I": -23.0,
+   "TP": -7.1,
+   "M_max": -15.7,
+   "S_max": -18.7
+  },
+  "hf5k_I_literal": -66.6,
+  "hf5k_I_steep": -70.0,
+  "b2_5k_I_literal": -53.8,
+  "b2_5k_I_steep": -70.0,
+  "samples": 1198400,
+  "tones_above_1k2": {
+   "count": 0,
+   "worst_tonal_rel_db": -999.0,
+   "loudest_bin_rel_db": -31.327025568109086
+  },
+  "clicks": {
+   "max_step_dbfs": -35.634899372356934,
+   "hp8k_peak_dbfs": -139.3240494521449,
+   "first_sample": 0.0,
+   "last_sample": 0.0
+  },
+  "fades": {
+   "rms_0_0.1": -69.41092087261126,
+   "rms_1.2_2.2": -27.371527526744934,
+   "rms_last_0.1": -74.60174225206661,
+   "rms_T-3.3_T-1.8": -26.479687885433712
+  },
+  "cues": [
+   {
+    "name": "contact thump",
+    "frame": 188.0,
+    "kind": "onset",
+    "stem_offset_ms": 2.5,
+    "crest_1db_span_ms": null,
+    "mix_offset_ms": 5.9
+   },
+   {
+    "name": "C swell (crest at C legible)",
+    "frame": 448.0,
+    "kind": "crest",
+    "stem_offset_ms": 18.8,
+    "crest_1db_span_ms": [
+     -78,
+     336
+    ],
+    "mix_offset_ms": -130.8
+   },
+   {
+    "name": "dot 1 pluck 220 Hz",
+    "frame": 478.0,
+    "kind": "onset",
+    "stem_offset_ms": 1.8,
+    "crest_1db_span_ms": null,
+    "mix_offset_ms": 20.3
+   },
+   {
+    "name": "dot 2 pluck 294 Hz",
+    "frame": 490.0,
+    "kind": "onset",
+    "stem_offset_ms": 2.6,
+    "crest_1db_span_ms": null,
+    "mix_offset_ms": 16.7
+   },
+   {
+    "name": "dot 3 pluck 370 Hz",
+    "frame": 502.0,
+    "kind": "onset",
+    "stem_offset_ms": -2.1,
+    "crest_1db_span_ms": null,
+    "mix_offset_ms": 16.2
+   },
+   {
+    "name": "dot 4 pluck 440 Hz",
+    "frame": 514.0,
+    "kind": "onset",
+    "stem_offset_ms": 2.7,
+    "crest_1db_span_ms": null,
+    "mix_offset_ms": 12.2
+   },
+   {
+    "name": "card bell D3",
+    "frame": 572.0,
+    "kind": "onset",
+    "stem_offset_ms": 7.5,
+    "crest_1db_span_ms": null,
+    "mix_offset_ms": 27.3
+   }
+  ],
+  "attack_selftest": {
+   "2ms": 2.0,
+   "4ms": 2.5,
+   "8ms": 4.75,
+   "16ms": 9.5
+  },
+  "events_stem_attacks": [
+   [
+    2.75,
+    17.138
+   ],
+   [
+    55.25,
+    19.061
+   ],
+   [
+    70.5,
+    6.664
+   ],
+   [
+    75.5,
+    15.932
+   ],
+   [
+    91.25,
+    6.261
+   ],
+   [
+    115.0,
+    14.548
+   ]
+  ],
+  "events_stem_attack_min_ms": 2.75,
+  "master_gain_db": 4.7
+ },
+ "_solo_event_attacks_ms": {
+  "pluck 220 Hz": 10.75,
+  "pluck 294 Hz": 9.75,
+  "pluck 370 Hz": 11.0,
+  "pluck 440 Hz": 11.0,
+  "thump (v3)": 14.75,
+  "bell D3 (v3)": 18.0,
+  "low tone D3 (v1)": 64.25,
+  "swell (v1/v2/v3 shapes)": 90.5
+ }
+}

@@ -1,0 +1,186 @@
+{
+ "target_lufs": -23.0,
+ "fade_in_s": 1.2,
+ "fade_out_s": 1.8,
+ "duration_s": 24.966666666666665,
+ "variants": {
+  "v1-hush": {
+   "master_gain_db": -0.1,
+   "master_lowpass_hz": 1500.0,
+   "sample_peak_dbfs": -12.48,
+   "limiter": "none",
+   "cues": [
+    {
+     "name": "fusion swell (crest on contact)",
+     "t_s": 6.2667,
+     "frame": 188.0,
+     "kind": "crest",
+     "band_hz": [
+      40,
+      250
+     ],
+     "gain_db": -13.0
+    },
+    {
+     "name": "card low tone D3",
+     "t_s": 19.0667,
+     "frame": 572.0,
+     "kind": "onset",
+     "band_hz": [
+      130,
+      165
+     ],
+     "gain_db": -19.0
+    }
+   ]
+  },
+  "v2-ambient-score": {
+   "master_gain_db": -3.2,
+   "master_lowpass_hz": 2500.0,
+   "sample_peak_dbfs": -8.48,
+   "limiter": "none",
+   "cues": [
+    {
+     "name": "fusion low swell (crest on contact)",
+     "t_s": 6.2667,
+     "frame": 188.0,
+     "kind": "crest",
+     "band_hz": [
+      40,
+      250
+     ],
+     "gain_db": -13.0
+    },
+    {
+     "name": "dot 1 pluck 220 Hz",
+     "t_s": 15.9333,
+     "frame": 478.0,
+     "kind": "onset",
+     "band_hz": [
+      198.0,
+      242.00000000000003
+     ],
+     "gain_db": -17.0
+    },
+    {
+     "name": "dot 2 pluck 294 Hz",
+     "t_s": 16.3333,
+     "frame": 490.0,
+     "kind": "onset",
+     "band_hz": [
+      264.29400000000004,
+      323.02600000000007
+     ],
+     "gain_db": -17.0
+    },
+    {
+     "name": "dot 3 pluck 370 Hz",
+     "t_s": 16.7333,
+     "frame": 502.0,
+     "kind": "onset",
+     "band_hz": [
+      332.99100000000004,
+      406.98900000000003
+     ],
+     "gain_db": -17.0
+    },
+    {
+     "name": "dot 4 pluck 440 Hz",
+     "t_s": 17.1333,
+     "frame": 514.0,
+     "kind": "onset",
+     "band_hz": [
+      396.0,
+      484.00000000000006
+     ],
+     "gain_db": -17.0
+    }
+   ]
+  },
+  "v3-soft-sfx": {
+   "master_gain_db": 4.7,
+   "master_lowpass_hz": 2000.0,
+   "sample_peak_dbfs": -7.05,
+   "limiter": "none",
+   "cues": [
+    {
+     "name": "contact thump",
+     "t_s": 6.2667,
+     "frame": 188.0,
+     "kind": "onset",
+     "band_hz": [
+      40,
+      160
+     ],
+     "gain_db": -17.0
+    },
+    {
+     "name": "C swell (crest at C legible)",
+     "t_s": 14.9333,
+     "frame": 448.0,
+     "kind": "crest",
+     "band_hz": [
+      130,
+      460
+     ],
+     "gain_db": -18.0
+    },
+    {
+     "name": "dot 1 pluck 220 Hz",
+     "t_s": 15.9333,
+     "frame": 478.0,
+     "kind": "onset",
+     "band_hz": [
+      198.0,
+      242.00000000000003
+     ],
+     "gain_db": -22.0
+    },
+    {
+     "name": "dot 2 pluck 294 Hz",
+     "t_s": 16.3333,
+     "frame": 490.0,
+     "kind": "onset",
+     "band_hz": [
+      264.29400000000004,
+      323.02600000000007
+     ],
+     "gain_db": -22.0
+    },
+    {
+     "name": "dot 3 pluck 370 Hz",
+     "t_s": 16.7333,
+     "frame": 502.0,
+     "kind": "onset",
+     "band_hz": [
+      332.99100000000004,
+      406.98900000000003
+     ],
+     "gain_db": -22.0
+    },
+    {
+     "name": "dot 4 pluck 440 Hz",
+     "t_s": 17.1333,
+     "frame": 514.0,
+     "kind": "onset",
+     "band_hz": [
+      396.0,
+      484.00000000000006
+     ],
+     "gain_db": -22.0
+    },
+    {
+     "name": "card bell D3",
+     "t_s": 19.0667,
+     "frame": 572.0,
+     "kind": "onset",
+     "band_hz": [
+      130,
+      165
+     ],
+     "gain_db": -17.0
+    }
+   ]
+  }
+ }
+}
