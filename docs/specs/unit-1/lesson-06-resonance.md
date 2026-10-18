@@ -1,6 +1,6 @@
 # Lesson 6: Resonance: Pushing Electrons
 
-Lesson spec, pilot for the [template](../lesson-spec-template.md). Decided in [Specify Lesson 6: Resonance: Pushing Electrons (pilot)](https://github.com/zhipengzhu1-dotcom/10-18-2026-Organic-Chemistry/issues/20).
+Lesson spec, pilot for the [template](../lesson-spec-template.md). Decided in [Specify Lesson 6: Resonance: Pushing Electrons (pilot)](https://github.com/zhipengzhu1-dotcom/10-18-2026-Organic-Chemistry/issues/20); changed after the owner played it in [Prototype: Specify Lesson 6: Resonance: Pushing Electrons (pilot)](https://github.com/zhipengzhu1-dotcom/10-18-2026-Organic-Chemistry/issues/30).
 
 ## Shape checks
 
@@ -9,6 +9,8 @@ Lesson spec, pilot for the [template](../lesson-spec-template.md). Decided in [S
 - [x] Every interactive Step has a generic fallback Hint
 - [x] Every Scene has screen-reader text and a poster frame
 - [x] Bond lengths come from pipeline output, none typed here
+- [x] Bond lengths shown to 2 decimals
+- [x] Step 3 (Tap to identify) says it is tap-only
 - [x] Nothing taken from the Moore-credited slides (Lecture 1 p. 18, Lecture 2 p. 2 "Mechanics", Lecture 2 pp. 3, 5)
 
 ---
@@ -24,7 +26,7 @@ Lesson spec, pilot for the [template](../lesson-spec-template.md). Decided in [S
 | Key idea | Curved arrows move only lone pairs and π bonds, from source to sink; atoms and σ bonds never move. The real molecule is the hybrid of its drawings. |
 | Check Problems | `u1-res-ozone`, `u1-res-not-resonance`, `u1-res-oxocarbenium`, `u1-res-thiodienyl` |
 | Sources | MIT OCW 5.12 *Organic Chemistry I*, Spring 2005, Kimberly Berkowski, CC BY-NC-SA 4.0: Lecture 1 p. 17 (nitromethane, the hybrid); Lecture 2 p. 1 (source/sink lists, formaldehyde), p. 2 "Rules for Resonance Structures" only; Problem Set 1 Q3 and Q6 with the key. All wording is ours. Lecture 2b is acid–base material for Unit 2 and is not used. |
-| Structure drawing | Line-angle, with every heteroatom, every charged atom and every carbon in a moving π bond drawn as an explicit letter, and every lone pair drawn as cyan dots. One-carbon molecules (formaldehyde, nitromethane) and ozone are full Lewis structures. Contributors sit in brackets joined by ↔. |
+| Structure drawing | Line-angle, with every heteroatom, every charged atom and every carbon in a moving π bond drawn as an explicit letter, and every lone pair drawn as cyan dots. One-carbon molecules (formaldehyde, nitromethane) and ozone are full Lewis structures. Contributors sit in brackets joined by ↔. Structure cards (s09, `u1-res-not-resonance`) follow the same rule and use the site's own renderer, not RDKit's drawing. |
 
 ### New Scenes
 
@@ -36,7 +38,7 @@ Lesson spec, pilot for the [template](../lesson-spec-template.md). Decided in [S
 | `acetate-hybrid` | s07, s15 | The two acetate contributors fade into one hybrid: dashed C–O bonds, δ− on each O, lone pairs hidden, equal lengths labelled | none | `geometry/acetate.json` | the hybrid with labels |
 | `push-replay` | every Draw-arrows success and reveal | Plays a list of pushes on an atom-mapped start: electrons ride each arrow, charges and bonds update, ends on the target | `start`, `pushes`, `target` (from the Step) | the Step's own fields | the target with arrows drawn on the start |
 
-**Geometry for `acetate-bond-lengths` and `acetate-hybrid`:** both acetic acid and acetate anion come from our own PySCF B3LYP/cc-pVTZ optimisation, labelled "computed". This is a deliberate exception to "experiment first": a side-by-side comparison of a few hundredths of an Å is only honest when both numbers come from the same method. The build agent records whether CCCBDB has acetic acid and notes the exception in the Source note. **Sanity check at build time** (not shown to Students): acetate's two C–O values agree within 0.005 Å; acetic acid's C=O is shorter than its C–O by more than 0.1 Å; acetate's value lies between the two.
+**Geometry for `acetate-bond-lengths` and `acetate-hybrid`:** both acetic acid and acetate anion come from our own PySCF B3LYP/cc-pVTZ optimisation, labelled "computed". This is a deliberate exception to "experiment first": a side-by-side comparison of a few hundredths of an Å is only honest when both numbers come from the same method. The build agent records whether CCCBDB has acetic acid and notes the exception in the Source note. **Conformers:** acetic acid is the syn conformer (O=C–O–H dihedral ≈ 0°). Acetate is optimised from the conformer with one methyl H in the carboxylate plane; the conformer with that H perpendicular to the plane is a methyl-rotation saddle (one imaginary mode), not a minimum. Each optimisation is followed by a frequency check. **Display:** lengths are shown to 2 decimals. The methyl rotates freely (barrier far below kT), which makes the two oxygens equivalent, so the 0.001 Å split at one frozen orientation is not shown. The full values go in the Source note. **Sanity check at build time** (not shown to Students): acetate's two C–O values agree within 0.005 Å; acetic acid's C=O is shorter than its C–O by more than 0.1 Å; acetate's value lies between the two; both structures are true minima (no imaginary frequencies). A prototype run on 2026-10-18 (PySCF 2.14.0) passed all four; its script and output are on `prototype/lesson-06-resonance` under `prototypes/lesson-06-geometry/`, and the build pipeline reruns it rather than copying numbers.
 
 Source note for both: "Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phase. Both molecules use the same method so they can be compared fairly."
 
@@ -66,6 +68,7 @@ Source note for both: "Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phas
 ### `u1-l06-s03` · Build · Tap-to-identify
 
 - **Prompt:** "Nitromethane. Tap every place electrons could flow **from**, then press Check."
+- **Tap-only cue** (Step 3 sits just before the first Draw-arrows Step): the idle callout reads "Just tap, no pushing on this Step." A drag shows "No pushing yet: this Step only asks where electrons could come from. Tap each lone pair or bond you think is a source." The lone pairs of a picked atom are ringed. Tapping a lone pair picks its atom.
 - **Visual:** CH₃–N⁺(=O)–O⁻, full Lewis, all lone pairs. Tappable: C, each H, N, O(=), O(⁻), each bond.
 - **Answer:** {O of N=O, O⁻, N=O bond} (the lone-pair-bearing oxygens and the π bond).
 - **Correct line:** "Lone pairs on both oxygens and the N=O π bond. Every other bond here is σ."
@@ -86,7 +89,7 @@ Source note for both: "Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phas
 ### `u1-l06-s04` · Build · Draw arrows
 
 - **Prompt:** "Push the electrons to turn formaldehyde into its other contributor."
-- **Visual:** start and target side by side, target dimmed.
+- **Visual:** start and target, target dimmed (a strip above the start on narrow screens, per the template).
 - **Start:** `[CH2:1]=[O:2]` · **Target:** `[CH2+:1]-[O-:2]`
 - **Pushes:** π bond 1–2 → drop on O2 (move 2, bond → atom).
 - **Correct line:** "The π pair is now a lone pair on O: O⁻ and C⁺. Same atoms, same σ bonds. Only the π electrons moved."
