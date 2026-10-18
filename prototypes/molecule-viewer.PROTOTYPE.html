@@ -1,0 +1,512 @@
+<!doctype html>
+<!--
+  PROTOTYPE, throwaway. Wayfinder ticket "Prototype: 3D molecule viewer at true scale" (#13).
+  Three ways a Student meets a 3D molecule, switchable via ?variant=A|B|C and the floating bar (← / → keys):
+    A  Step card     – the viewer inside a Lesson Step; tap 2 atoms = distance, 3 atoms = angle.
+    B  Explorer HUD  – full-screen molecule; tap one atom = every bond and angle around it.
+    C  Lab bench     – continuous ball-and-stick ⟷ true-scale slider beside a data table; tap a row to light it up.
+  All three run on the chosen approach (three.js; R3F in the real build) and real PubChem 3D geometry.
+  Bar also toggles reduced motion (?motion=reduced) and a pixelated render (?pixel=1). ?mol=<CID> picks the molecule.
+  Pixel fonts never carry chemistry: in Pixelify/Silkscreen, C reads as O and 5 as 9, so symbols, formulas and numbers are JetBrains Mono.
+  Needs internet for three.js + fonts. Double-click to open. Never merged.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AstraTron · 3D molecule viewer (prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600;700&family=Pixelify+Sans:wght@500;700&family=Silkscreen&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  :root{--bg:#0d0626;--fg:#fff;--muted:#b9a8e8;--cyan:#3ee8ff;--uv:#b44dff;--mag:#ff4fd8;--orange:#ff9a1f;--line:#5b3bb3;--ink:#0d0626}
+  body{background:var(--bg);color:var(--fg);font-family:"Space Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  button,input{font:inherit;color:inherit}
+  button{cursor:pointer}
+  :focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .pix{font-family:"Pixelify Sans",monospace}
+  .silk{font-family:Silkscreen,monospace}
+  [data-motion=reduced] *{animation:none!important;transition:none!important}
+  .nebula{background:
+     radial-gradient(ellipse 60% 45% at 30% 60%,color-mix(in srgb,var(--mag) 40%,transparent),transparent 70%),
+     radial-gradient(ellipse 50% 40% at 75% 35%,color-mix(in srgb,var(--uv) 55%,transparent),transparent 70%),
+     radial-gradient(ellipse 40% 35% at 60% 80%,color-mix(in srgb,#2340ff 35%,transparent),transparent 70%),var(--bg)}
+
+  /* ---------- prototype switcher (deliberately NOT on-brand) ---------- */
+  #switcher{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:100;display:flex;align-items:center;gap:4px;
+    background:#fffbe6;color:#111;border:2px solid #111;border-radius:999px;padding:4px;font:600 13px/1 system-ui,sans-serif;
+    box-shadow:0 6px 24px rgba(0,0,0,.45);white-space:nowrap;max-width:calc(100vw - 16px);overflow-x:auto}
+  #switcher button{background:none;border:0;border-radius:999px;padding:8px 10px;color:#111}
+  #switcher button:hover{background:#111;color:#fffbe6}
+  #switcher .lbl{padding:0 6px;min-width:130px;text-align:center}
+  #switcher .tag{font-size:10px;letter-spacing:.08em;background:#111;color:#fffbe6;border-radius:999px;padding:4px 7px}
+  #switcher .sep{width:1px;height:20px;background:#111;opacity:.25;flex:none}
+
+  /* ---------- the viewer (shared engine; each variant lays it out its own way) ---------- */
+  .mv{position:relative;overflow:hidden;touch-action:none;cursor:grab;user-select:none}
+  .mv canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
+  .mv.pixel canvas{image-rendering:pixelated}
+  .mv svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+  .mv .lab{position:absolute;left:0;top:0;pointer-events:none;font:700 12px "JetBrains Mono",monospace;color:#111;transform:translate(-50%,-50%);line-height:1}
+  .mv .lab.light{color:#fff}
+  .mv .tagbox{font:600 12px "JetBrains Mono",monospace}
+  .mv .scalebar{position:absolute;left:12px;bottom:10px;font:400 9px Silkscreen;color:var(--muted);pointer-events:none}
+  .mv .scalebar i{display:block;height:4px;background:var(--muted);margin-bottom:4px}
+  .mv:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px}
+
+  .seg{display:inline-flex;border:2px solid var(--line);padding:2px;gap:2px}
+  .seg button{background:none;border:0;font:400 11px Silkscreen;color:var(--muted);padding:8px 10px}
+  .seg button[aria-pressed=true]{background:var(--cyan);color:var(--ink)}
+  .ibtn{background:var(--bg);border:2px solid var(--fg);font:400 13px Silkscreen;padding:7px 10px;box-shadow:3px 3px 0 var(--uv)}
+  .chips{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:thin}
+  .chips button{flex:none;background:none;border:2px solid var(--line);font:600 12px "JetBrains Mono",monospace;color:var(--muted);padding:6px 9px}
+  .chips button[aria-pressed=true]{border-color:var(--orange);color:var(--orange);box-shadow:3px 3px 0 var(--uv)}
+  .srcnote{font:400 12px/1.5 "JetBrains Mono",monospace;color:var(--muted)}
+  .srcnote b{color:var(--fg)}
+
+  /* =================== A · STEP CARD =================== */
+  .va{min-height:100vh;display:flex;flex-direction:column;max-width:620px;margin:0 auto;padding:14px 16px 150px}
+  .va-top{display:flex;align-items:center;gap:12px}
+  .va-top .x{background:none;border:0;font:700 20px "Pixelify Sans";color:var(--muted);padding:4px}
+  .va-prog{flex:1;height:8px;background:color-mix(in srgb,var(--fg) 15%,transparent)}
+  .va-prog i{display:block;height:100%;width:42%;background:var(--orange);box-shadow:3px 3px 0 var(--uv)}
+  .va-kick{font:400 11px Silkscreen;color:var(--cyan);margin:22px 0 6px}
+  .va h1{font:700 clamp(22px,5vw,30px)/1.15 "Space Grotesk";letter-spacing:-.02em;margin:0 0 6px}
+  .va-lead{color:var(--muted);margin:0 0 14px;font-size:15px}
+  .va-card{border:3px solid var(--line);box-shadow:6px 6px 0 var(--uv);background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--uv) 30%,transparent),transparent 70%),color-mix(in srgb,var(--bg) 85%,#000)}
+  .va-card .mv{width:100%;aspect-ratio:1;max-height:56vh}
+  .va-tools{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:8px;border-top:2px solid var(--line)}
+  .va-read{display:flex;align-items:baseline;gap:12px;min-height:76px;margin-top:16px}
+  .va-read .big{font:700 clamp(36px,9vw,54px)/1 "JetBrains Mono",monospace;color:var(--cyan);text-shadow:4px 4px 0 var(--uv)}
+  .va-read .big.o{color:var(--orange)}
+  .va-read .what{font:600 13px/1.4 "JetBrains Mono",monospace;color:var(--muted)}
+  .va-read .hint{color:var(--muted);font-size:14px}
+  .va details{margin-top:14px;border-top:2px dashed var(--line);padding-top:10px}
+  .va summary{font:400 11px Silkscreen;color:var(--cyan);cursor:pointer}
+  .va-foot{position:fixed;left:0;right:0;bottom:64px;display:flex;justify-content:center;padding:0 16px;pointer-events:none}
+  .va-foot button{pointer-events:auto;width:min(588px,100%);font:400 15px Silkscreen;padding:15px;border:0;background:var(--orange);color:#1a0d3d;box-shadow:5px 5px 0 var(--uv)}
+
+  /* =================== B · EXPLORER HUD =================== */
+  .vb{position:fixed;inset:0}
+  .vb .mv{position:absolute;inset:0}
+  .vb-hud{position:absolute;pointer-events:none;z-index:2}
+  .vb-hud>*{pointer-events:auto}
+  .vb-tl{top:16px;left:16px}
+  .vb-tl .nm{font:700 clamp(30px,6vw,52px)/1 "Space Grotesk";letter-spacing:-.03em;color:var(--orange);text-shadow:4px 4px 0 var(--uv)}
+  .vb-tl .fm{font:600 13px "JetBrains Mono",monospace;color:var(--muted);margin-top:8px}
+  .vb-tr{top:16px;right:16px;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+  .vb-insp{left:16px;bottom:136px;max-height:34vh;overflow:auto;width:min(300px,calc(100vw - 32px));background:color-mix(in srgb,var(--bg) 88%,transparent);border:3px solid var(--cyan);box-shadow:5px 5px 0 var(--uv);padding:12px 14px;display:none}
+  .vb-insp.on{display:block}
+  .vb-insp h3{margin:0 0 8px;font:700 18px "JetBrains Mono",monospace;color:var(--cyan)}
+  .vb-insp table{border-collapse:collapse;width:100%;font:500 13px "JetBrains Mono",monospace}
+  .vb-insp td{padding:3px 0}.vb-insp td:last-child{text-align:right}
+  .vb-insp .sub{font:600 11px "JetBrains Mono",monospace;color:var(--muted);padding-top:8px}
+  .vb-bot{left:0;right:0;bottom:66px;padding:0 16px}
+  .vb-tip{font:400 10px Silkscreen;color:var(--muted);text-align:center;margin-bottom:6px}
+  .vb-drawer{position:absolute;left:0;right:0;bottom:0;z-index:3;background:var(--bg);border-top:3px solid var(--orange);padding:16px 16px 80px;transform:translateY(100%);transition:transform .3s}
+  .vb-drawer.on{transform:none}
+
+  /* =================== C · LAB BENCH =================== */
+  .vc{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(14px,3vw,36px);padding:20px clamp(16px,3vw,40px) 110px;max-width:1240px;margin:0 auto}
+  .vc-left{display:flex;flex-direction:column;gap:10px}
+  .vc-left .mv{width:100%;aspect-ratio:1;border:3px solid var(--line);box-shadow:6px 6px 0 var(--uv);background:color-mix(in srgb,var(--bg) 85%,#000)}
+  .vc-hdr .k{font:400 11px Silkscreen;color:var(--cyan)}
+  .vc-hdr h1{font:700 clamp(26px,4vw,40px)/1 "Space Grotesk";letter-spacing:-.03em;margin:6px 0 0;color:var(--orange);text-shadow:3px 3px 0 var(--uv)}
+  .vc-slide{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;font:400 10px Silkscreen;color:var(--muted)}
+  .vc-slide input{width:100%;accent-color:var(--orange);height:28px}
+  .vc-row2{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+  .vc-right h2{font:400 12px Silkscreen;color:var(--cyan);margin:4px 0 8px}
+  .vc-tbl{width:100%;border-collapse:collapse;margin-bottom:18px}
+  .vc-tbl th{font:400 9px Silkscreen;color:var(--muted);text-align:left;padding:4px 6px;border-bottom:2px solid var(--line)}
+  .vc-tbl td{font:500 13px "JetBrains Mono",monospace;padding:0;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
+  .vc-tbl td button{all:unset;display:block;width:100%;padding:9px 6px;cursor:pointer;box-sizing:border-box}
+  .vc-tbl tr:hover td{background:color-mix(in srgb,var(--uv) 18%,transparent)}
+  .vc-tbl tr.on td{background:color-mix(in srgb,var(--orange) 22%,transparent);color:var(--orange)}
+  .vc-tbl td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .vc-tbl td.src{font:400 9px Silkscreen;color:var(--muted);text-align:right}
+  @media (max-width:820px){.vc{grid-template-columns:1fr}.vc-left .mv{max-height:62vh}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div id="app"></div>
+<div id="switcher" role="toolbar" aria-label="Prototype variant switcher">
+  <span class="tag">PROTOTYPE</span>
+  <button id="sw-prev" aria-label="Previous variant">←</button>
+  <span class="lbl" id="sw-label"></span>
+  <button id="sw-next" aria-label="Next variant">→</button>
+  <span class="sep"></span>
+  <button id="sw-motion"></button>
+  <button id="sw-pixel"></button>
+</div>
+
+<script type="module">
+import * as THREE from "three";
+
+/* ======================= cited data =======================
+   Geometry: PubChem 3D conformers (fetched 2026-10-18 from PUG REST, record_type=3d), copied verbatim.
+   Atom rows are [element, x, y, z] in Å; bond rows are [i, j, order]. Nothing here is hand-tuned.      */
+const MOLS = {"297":{"name":"Methane","formula":"CH₄","conformer":"0000012900000001","atoms":[["C",0,0,0],["H",0.5541,0.7996,0.4965],["H",0.6833,-0.8134,-0.2536],["H",-0.7782,-0.3735,0.6692],["H",-0.4593,0.3874,-0.9121]],"bonds":[[0,1,1],[0,2,1],[0,3,1],[0,4,1]]},
+"702":{"name":"Ethanol","formula":"C₂H₆O","conformer":"000002BE00000001","atoms":[["O",-1.1712,0.2997,0],["C",-0.0463,-0.5665,0],["C",1.2175,0.2668,0],["H",-0.0958,-1.212,0.8819],["H",-0.0952,-1.1938,-0.8946],["H",2.105,-0.372,-0.0177],["H",1.2426,0.9307,-0.8704],["H",1.2616,0.9052,0.8886],["H",-1.1291,0.8364,0.8099]],"bonds":[[0,1,1],[0,8,1],[1,2,1],[1,3,1],[1,4,1],[2,5,1],[2,6,1],[2,7,1]]},
+"8078":{"name":"Cyclohexane","formula":"C₆H₁₂","conformer":"00001F8E00000001","atoms":[["C",-0.0435,-1.4573,-0.2258],["C",1.2404,-0.7663,0.2258],["C",-1.2838,-0.691,0.2258],["C",1.2838,0.6911,-0.2257],["C",-1.2404,0.7662,-0.2258],["C",0.0435,1.4573,0.2258],["H",-0.046,-1.5425,-1.3194],["H",-0.0739,-2.4771,0.1741],["H",1.3129,-0.8111,1.3194],["H",2.1083,-1.3026,-0.1742],["H",-2.1821,-1.1746,-0.1741],["H",-1.3588,-0.7314,1.3195],["H",2.1821,1.1746,0.1742],["H",1.359,0.7315,-1.3194],["H",-1.3129,0.811,-1.3195],["H",-2.1083,1.3025,0.1741],["H",0.0459,1.5425,1.3195],["H",0.0738,2.4771,-0.1742]],"bonds":[[0,1,1],[0,2,1],[0,6,1],[0,7,1],[1,3,1],[1,8,1],[1,9,1],[2,4,1],[2,10,1],[2,11,1],[3,5,1],[3,12,1],[3,13,1],[4,5,1],[4,14,1],[4,15,1],[5,16,1],[5,17,1]]},
+"241":{"name":"Benzene","formula":"C₆H₆","conformer":"000000F100000001","atoms":[["C",-1.2131,-0.6884,0],["C",-1.2028,0.7064,0.0001],["C",-0.0103,-1.3948,0],["C",0.0104,1.3948,-0.0001],["C",1.2028,-0.7063,0],["C",1.2131,0.6884,0],["H",-2.1577,-1.2244,0],["H",-2.1393,1.2564,0.0001],["H",-0.0184,-2.4809,-0.0001],["H",0.0184,2.4808,0],["H",2.1394,-1.2563,0.0001],["H",2.1577,1.2245,0]],"bonds":[[0,1,2],[0,2,1],[0,6,1],[1,3,1],[1,7,1],[2,4,2],[2,8,1],[3,5,2],[3,9,1],[4,5,1],[4,10,1],[5,11,1]]},
+"5950":{"name":"L-Alanine","formula":"C₃H₇NO₂","conformer":"0000173E00000001","atoms":[["O",1.4573,-1.0438,0.2682],["O",1.2492,1.1165,-0.4047],["N",-1.4105,1.1507,0.1821],["C",-0.7085,-0.1136,0.3937],["C",-1.3345,-1.2,-0.4702],["C",0.747,0.0903,0.0308],["H",-0.7666,-0.3737,1.4558],["H",-0.858,-2.1695,-0.2878],["H",-2.4023,-1.3127,-0.2521],["H",-1.2248,-0.9797,-1.5384],["H",-2.3916,1.042,0.4376],["H",-1.4071,1.3875,-0.8099],["H",2.4062,-0.9341,0.0447]],"bonds":[[0,5,1],[0,12,1],[1,5,2],[2,3,1],[2,10,1],[2,11,1],[3,4,1],[3,5,1],[3,6,1],[4,7,1],[4,8,1],[4,9,1]]}};
+const ORDER = ["297","702","8078","241","5950"];
+// Bondi 1964 van der Waals radii (Å). Ball-and-stick atoms are drawn at BALL × these: a display convention, stated in the Source note.
+const VDW = {H:1.20, C:1.70, N:1.55, O:1.52}, BALL = 0.3;
+// Jmol CPK colours; every atom also carries its letter so colour is never the only cue.
+const JMOL = {H:"#FFFFFF", C:"#909090", N:"#3050F8", O:"#FF0D0D"};
+const ELNAME = {H:"hydrogen", C:"carbon", N:"nitrogen", O:"oxygen"};
+// The one experimental value we hold for comparison (owner-confirmed on "Prototype: 2–3 visual design directions").
+const EXPERIMENT = {"297":"Experiment, for comparison: C–H 1.087 Å (NIST CCCBDB, methane)."};
+const sourceHTML = cid => { const m = MOLS[cid]; return `<b>Source note.</b> Geometry: PubChem 3D conformer ${m.conformer} of CID ${cid} (${m.name.toLowerCase()}), computed by PubChem with the MMFF94 force field, not measured. Every length and angle on screen is calculated from those coordinates.
+ ${EXPERIMENT[cid]||""}
+ True-scale radii: Bondi 1964 van der Waals (H 1.20, C 1.70, N 1.55, O 1.52 Å); ball-and-stick atoms drawn at 30% of those.
+ Colours: Jmol, plus letter labels. ${cid==="241"?"Bond orders as PubChem stores them (one Kekulé structure).":""}${cid==="5950"?"PubChem's conformer is the neutral form, not the zwitterion.":""}`; };
+
+/* ======================= geometry helpers ======================= */
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]], len=v=>Math.hypot(...v), dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const P = (m,i) => m.atoms[i].slice(1);
+const dist = (m,i,j) => len(sub(P(m,i),P(m,j)));
+const angle = (m,i,j,k) => { const u=sub(P(m,i),P(m,j)), v=sub(P(m,k),P(m,j)); return Math.acos(dot(u,v)/len(u)/len(v))*180/Math.PI; };
+const neighbours = (m,i) => m.bonds.filter(b=>b[0]===i||b[1]===i).map(b=>({j:b[0]===i?b[1]:b[0],o:b[2]}));
+const bondOf = (m,i,j) => m.bonds.find(b=>(b[0]===i&&b[1]===j)||(b[0]===j&&b[1]===i));
+const sym = o => o===2?"=":o===3?"≡":"–";
+// numbering per element, so "C2" means the second carbon in PubChem's atom order
+const atomNames = m => { const c={}; return m.atoms.map(a=>a[0]+(c[a[0]]=(c[a[0]]||0)+1)); };
+const fmtD = d => d.toFixed(3)+" Å", fmtA = a => a.toFixed(1)+"°";
+
+/* ======================= app state + URL ======================= */
+const qs = new URLSearchParams(location.search);
+const S = {
+  variant: (qs.get("variant")||"A").toUpperCase(),
+  motion: qs.get("motion") || (matchMedia("(prefers-reduced-motion: reduce)").matches?"reduced":"full"),
+  pixel: qs.get("pixel")==="1"?"1":"0",
+  mol: MOLS[qs.get("mol")] ? qs.get("mol") : "297",
+};
+const VARIANTS = {};
+const app = document.getElementById("app");
+let cleanup = [];
+const onCleanup = f => cleanup.push(f);
+const writeURL = () => history.replaceState(null,"","?"+new URLSearchParams(S));
+function render(){
+  cleanup.forEach(f=>f()); cleanup=[];
+  if(!VARIANTS[S.variant]) S.variant="A";
+  document.documentElement.dataset.motion=S.motion;
+  app.innerHTML=""; scrollTo(0,0);
+  VARIANTS[S.variant].render(app);
+  document.getElementById("sw-label").textContent=`${S.variant} · ${VARIANTS[S.variant].name}`;
+  document.getElementById("sw-motion").textContent=S.motion==="full"?"motion on":"reduced motion";
+  document.getElementById("sw-pixel").textContent=S.pixel==="1"?"pixel render":"smooth render";
+  writeURL();
+  console.log("[prototype] state",{...S});
+}
+const cycle = d => { const k=Object.keys(VARIANTS); S.variant=k[(k.indexOf(S.variant)+d+k.length)%k.length]; render(); };
+document.getElementById("sw-prev").onclick=()=>cycle(-1);
+document.getElementById("sw-next").onclick=()=>cycle(1);
+document.getElementById("sw-motion").onclick=()=>{S.motion=S.motion==="full"?"reduced":"full";render()};
+document.getElementById("sw-pixel").onclick=()=>{S.pixel=S.pixel==="1"?"0":"1";render()};
+addEventListener("keydown",e=>{
+  if(e.defaultPrevented) return;
+  if(e.target.closest&&e.target.closest("input,textarea,[contenteditable]")) return;
+  if(e.key==="ArrowLeft") cycle(-1); else if(e.key==="ArrowRight") cycle(1);
+});
+
+/* ======================= the viewer =======================
+   Scene contract (video-ready, per ADR 0001): frame(t, state) is a pure function of the site clock t and
+   state {cid, yaw, pitch, spinFrom, scaleFrom, scaleTo, scaleT0, sel, hl, focus, tags}. Nothing else moves the
+   molecule; a video renderer can call frame(t, state) for each frame.                                    */
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const toonMap = (() => { const d=new Uint8Array([70,70,70,255, 160,160,160,255, 255,255,255,255]); const t=new THREE.DataTexture(d,3,1); t.minFilter=t.magFilter=THREE.NearestFilter; t.needsUpdate=true; return t; })();
+// fixed world scale (variant B): fit the largest molecule, so 1 Å is the same on screen for all of them
+const WORLD_R = Math.max(...ORDER.map(c=>{const A=MOLS[c].atoms,m=[1,2,3].map(k=>A.reduce((s,a)=>s+a[k],0)/A.length);return Math.max(...A.map(a=>len(sub(a.slice(1),m))+VDW[a[0]]))}));
+const ease = x => x<0?0:x>1?1:1-Math.pow(1-x,3);
+
+function createViewer(host, {onPick, fixedScale=false, describe}={}){
+  const el=document.createElement("div"); el.className="mv"+(S.pixel==="1"?" pixel":""); host.appendChild(el);
+  el.tabIndex=0; el.setAttribute("role","img");
+  const live=document.createElement("div"); live.className="sr"; live.setAttribute("aria-live","polite"); host.appendChild(live);
+  const renderer=new THREE.WebGLRenderer({antialias:S.pixel!=="1",alpha:true});
+  el.appendChild(renderer.domElement);
+  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg"); el.appendChild(svg);
+  const labels=document.createElement("div"); el.appendChild(labels);
+  const bar=document.createElement("div"); bar.className="scalebar"; bar.innerHTML="<i></i>1 Å"; el.appendChild(bar);
+  const scene=new THREE.Scene(), camera=new THREE.PerspectiveCamera(28,1,.1,200);
+  scene.add(new THREE.AmbientLight(0xffffff,.55));
+  const sun=new THREE.DirectionalLight(0xffffff,2.2); sun.position.set(-3,4,6); scene.add(sun);
+  const group=new THREE.Group(); scene.add(group);
+  const sphere=new THREE.SphereGeometry(1,40,28), cyl=new THREE.CylinderGeometry(1,1,1,20);
+  const outlineMat=new THREE.MeshBasicMaterial({color:0x0d0626,side:THREE.BackSide});
+  const st={cid:S.mol,yaw:.5,pitch:-.3,spinFrom:0,auto:true,scaleFrom:0,scaleTo:0,scaleT0:0,sel:[],hl:[],focus:-1,tags:[]};
+  let atoms=[],bonds=[],mol,names,boundR=1;
+
+  function build(){
+    group.clear(); mol=MOLS[st.cid]; names=atomNames(mol);
+    const c=[0,1,2].map(k=>mol.atoms.reduce((s,a)=>s+a[k+1],0)/mol.atoms.length);
+    atoms=mol.atoms.map(([e,...p])=>{
+      const pos=sub(p,c), mat=new THREE.MeshToonMaterial({color:JMOL[e],gradientMap:toonMap,emissive:0x000000});
+      const m=new THREE.Mesh(sphere,mat), o=new THREE.Mesh(sphere,outlineMat);
+      m.position.set(...pos); o.position.set(...pos); group.add(o,m);
+      return {e,pos,m,o,mat};
+    });
+    const bondMat=new THREE.MeshToonMaterial({color:css("--cyan"),gradientMap:toonMap});
+    bonds=[];
+    mol.bonds.forEach(([i,j,o])=>{
+      const a=new THREE.Vector3(...atoms[i].pos), b=new THREE.Vector3(...atoms[j].pos), dir=b.clone().sub(a), L=dir.length();
+      // a double bond is two sticks, offset in the plane of a neighbouring atom so it reads flat, as drawn on paper
+      let off=new THREE.Vector3();
+      if(o>1){ const n=neighbours(mol,i).find(x=>x.j!==j)||neighbours(mol,j).find(x=>x.j!==i);
+        const ref=n?new THREE.Vector3(...atoms[n.j].pos).sub(a):new THREE.Vector3(0,0,1);
+        off=ref.sub(dir.clone().multiplyScalar(ref.dot(dir)/(L*L))).normalize(); }
+      const shifts=o===1?[0]:o===2?[-.5,.5]:[-1,0,1];
+      shifts.forEach(s=>{
+        const m=new THREE.Mesh(cyl,bondMat), ol=new THREE.Mesh(cyl,outlineMat);
+        const mid=a.clone().add(b).multiplyScalar(.5);
+        [m,ol].forEach(x=>{x.position.copy(mid);x.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.clone().normalize())});
+        group.add(ol,m); bonds.push({m,ol,L,s,off,mid,i,j,o});
+      });
+    });
+    boundR=Math.max(...atoms.map(a=>len(a.pos)+VDW[a.e]));
+    labels.innerHTML=atoms.map(a=>`<span class="lab${a.e==="O"||a.e==="N"?" light":""}">${a.e}</span>`).join("");
+    describeSelf();
+  }
+
+  const scaleAt = t => S.motion==="reduced" ? st.scaleTo : st.scaleFrom+(st.scaleTo-st.scaleFrom)*ease((t-st.scaleT0)/.45);
+  const yawAt = t => st.yaw + (st.auto&&S.motion==="full" ? (t-st.spinFrom)*.35 : 0);
+  let W=1,H=1;
+  const ray=new THREE.Raycaster(), v3=new THREE.Vector3();
+  const project = p => { v3.set(...p).applyMatrix4(group.matrixWorld).project(camera); return [(v3.x+1)/2*W,(1-v3.y)/2*H,v3.z]; };
+
+  function frame(t){
+    const s=scaleAt(t);
+    group.rotation.set(st.pitch,yawAt(t),0,"XYZ");
+    const camD=(fixedScale?WORLD_R:boundR)/Math.sin(THREE.MathUtils.degToRad(camera.fov/2))*1.08/Math.min(1,camera.aspect);
+    camera.position.set(0,0,camD); camera.lookAt(0,0,0);
+    const sel=new Set(st.sel), hl=new Set(st.hl), orange=new THREE.Color(css("--orange")), cyan=new THREE.Color(css("--cyan"));
+    atoms.forEach((a,i)=>{
+      const r=VDW[a.e]*(BALL+(1-BALL)*s);
+      a.m.scale.setScalar(r); a.o.scale.setScalar(r+.05);
+      a.mat.emissive.copy(sel.has(i)||hl.has(i)?orange:i===st.focus?cyan:new THREE.Color(0));
+      a.mat.emissiveIntensity=sel.has(i)||hl.has(i)?.75:.35;
+    });
+    const br=.11*(1-s*.6);
+    bonds.forEach(b=>{
+      const w=b.o>1?br*.6:br, shift=b.off.clone().multiplyScalar(b.s*w*2.6);
+      b.m.position.copy(b.mid).add(shift); b.ol.position.copy(b.m.position);
+      b.m.scale.set(w,b.L,w); b.ol.scale.set(w+.04,b.L,w+.04);
+      b.m.visible=b.ol.visible=s<.98;
+    });
+    renderer.render(scene,camera);
+    group.updateMatrixWorld();
+    // letter labels: only on atoms the camera can actually see
+    const spans=labels.children, meshes=atoms.map(a=>a.m);
+    atoms.forEach((a,i)=>{
+      const q=project(a.pos), sp=spans[i];
+      ray.setFromCamera(new THREE.Vector2(q[0]/W*2-1,1-q[1]/H*2),camera);
+      const hit=ray.intersectObjects(meshes,false)[0];
+      const vis=hit&&hit.object===a.m;
+      const px=VDW[a.e]*(BALL+(1-BALL)*s)*pxPerA(a.pos);
+      sp.style.display=vis&&px>7?"":"none";
+      sp.style.left=q[0]+"px"; sp.style.top=q[1]+"px"; sp.style.fontSize=Math.max(10,Math.min(22,px*.7))+"px";
+    });
+    bar.querySelector("i").style.width=pxPerA([0,0,0])+"px";
+    drawTags();
+  }
+  const pxPerA = p => { const a=project(p), b=project([p[0],p[1],p[2]]); v3.set(...p).applyMatrix4(group.matrixWorld); const d=camera.position.distanceTo(v3); return H/(2*d*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))); };
+
+  function drawTags(){
+    let out="";
+    const cy=css("--cyan"), or=css("--orange");
+    st.tags.forEach(tg=>{
+      const q=tg.atoms.map(i=>project(atoms[i].pos));
+      if(tg.atoms.length===2){
+        const [a,b]=q, mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2, dx=b[0]-a[0], dy=b[1]-a[1], l=Math.hypot(dx,dy)||1;
+        const tx=mx-dy/l*18, ty=my+dx/l*18;
+        out+=`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${cy}" stroke-width="2" stroke-dasharray="5 4"/>`+tagSVG(tg.text,tx,ty,cy);
+      }else{
+        const [a,j,b]=q, ua=norm2(a,j), ub=norm2(b,j), R=26, bis=norm2([ua[0]+ub[0]+j[0],ua[1]+ub[1]+j[1]],j);
+        const sweep=(ua[0]*ub[1]-ua[1]*ub[0])>0?1:0;
+        out+=`<path d="M${j[0]+ua[0]*R},${j[1]+ua[1]*R} A${R},${R} 0 0 ${sweep} ${j[0]+ub[0]*R},${j[1]+ub[1]*R}" fill="none" stroke="${or}" stroke-width="2.5"/>`
+           +`<line x1="${j[0]}" y1="${j[1]}" x2="${a[0]}" y2="${a[1]}" stroke="${or}" stroke-width="1.5" stroke-dasharray="3 4"/><line x1="${j[0]}" y1="${j[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${or}" stroke-width="1.5" stroke-dasharray="3 4"/>`
+           +tagSVG(tg.text,j[0]+bis[0]*(R+24),j[1]+bis[1]*(R+24),or);
+      }
+    });
+    svg.innerHTML=out;
+  }
+  const norm2=(p,o)=>{const dx=p[0]-o[0],dy=p[1]-o[1],l=Math.hypot(dx,dy)||1;return[dx/l,dy/l]};
+  const tagSVG=(t,x,y,c)=>{const w=t.length*8+12;return`<g class="tagbox"><rect x="${x-w/2}" y="${y-11}" width="${w}" height="22" fill="#0d0626" stroke="${c}" stroke-width="2"/><text x="${x}" y="${y+5}" text-anchor="middle" fill="${c}">${t}</text></g>`};
+
+  function describeSelf(){
+    const m=MOLS[st.cid], mode=st.scaleTo>.5?"space-filling at true van der Waals scale":st.scaleTo>0?"part-way between ball-and-stick and true scale":"ball-and-stick";
+    el.setAttribute("aria-label",`${m.name}, ${m.formula}, shown ${mode}. ${describe?describe(m):""} Arrow keys rotate. Square brackets move between atoms; Enter selects the highlighted atom.`);
+  }
+
+  /* --- input: drag to rotate (stops the idle spin), tap to pick, keys for everything --- */
+  let drag=null;
+  const stopSpin=()=>{ if(st.auto){ st.yaw=yawAt(performance.now()/1000); st.auto=false; } };
+  el.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY};el.setPointerCapture(e.pointerId);el.style.cursor="grabbing"});
+  el.addEventListener("pointermove",e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+    if(Math.hypot(e.clientX-drag.x0,e.clientY-drag.y0)>5){stopSpin();st.yaw+=dx*.01;st.pitch=Math.max(-1.5,Math.min(1.5,st.pitch+dy*.01))}
+    drag.x=e.clientX;drag.y=e.clientY});
+  el.addEventListener("pointerup",e=>{el.style.cursor="grab";if(!drag)return;
+    const tap=Math.hypot(e.clientX-drag.x0,e.clientY-drag.y0)<=5; drag=null; if(!tap||!onPick)return;
+    const r=el.getBoundingClientRect(); ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,1-(e.clientY-r.top)/r.height*2),camera);
+    const hit=ray.intersectObjects(atoms.map(a=>a.m),false)[0]; onPick(hit?atoms.findIndex(a=>a.m===hit.object):-1);});
+  el.addEventListener("keydown",e=>{
+    const k={ArrowLeft:[-.2,0],ArrowRight:[.2,0],ArrowUp:[0,-.2],ArrowDown:[0,.2]}[e.key];
+    if(k){stopSpin();st.yaw+=k[0];st.pitch+=k[1];e.preventDefault();return}
+    if(e.key==="]"||e.key==="["){const n=atoms.length;st.focus=((st.focus<0?(e.key==="]"?-1:0):st.focus)+(e.key==="]"?1:-1)+n)%n;say(`${names[st.focus]}, ${ELNAME[atoms[st.focus].e]}`);e.preventDefault()}
+    if((e.key==="Enter"||e.key===" ")&&st.focus>=0&&onPick){onPick(st.focus);e.preventDefault()}
+    if(e.key==="Escape"&&onPick){onPick(-1)}
+  });
+  const say=t=>{live.textContent=t};
+
+  const size=()=>{const r=el.getBoundingClientRect();W=r.width||1;H=r.height||1;camera.aspect=W/H;camera.updateProjectionMatrix();
+    renderer.setPixelRatio(S.pixel==="1"?.28:Math.min(2,devicePixelRatio||1));renderer.setSize(W,H,false)};
+  const ro=new ResizeObserver(size); ro.observe(el); size();
+  // the site's own clock: the only thing that advances t
+  let raf; const tick=()=>{frame(performance.now()/1000);raf=requestAnimationFrame(tick)}; build(); raf=requestAnimationFrame(tick);
+  onCleanup(()=>{cancelAnimationFrame(raf);ro.disconnect();renderer.dispose()});
+
+  return {
+    el, st, say, get mol(){return mol}, get names(){return names},
+    setMol(cid){st.cid=cid;st.sel=[];st.hl=[];st.tags=[];st.focus=-1;build()},
+    setScale(v,animate=true){const t=performance.now()/1000;st.scaleFrom=animate?scaleAt(t):v;st.scaleTo=v;st.scaleT0=t;describeSelf()},
+    nudge(dy,dp){stopSpin();st.yaw+=dy;st.pitch+=dp},
+    set(k,v){st[k]=v},
+  };
+}
+const molChips = (cur) => ORDER.map(c=>`<button data-mol="${c}" aria-pressed="${c===cur}">${MOLS[c].name}</button>`).join("");
+const wireChips = (root,fn) => root.querySelectorAll("[data-mol]").forEach(b=>b.onclick=()=>{S.mol=b.dataset.mol;writeURL();
+  root.querySelectorAll("[data-mol]").forEach(x=>x.setAttribute("aria-pressed",x===b));fn(S.mol)});
+const rotBtns = `<button class="ibtn" data-rot="-1" aria-label="Rotate left 15 degrees">↺</button><button class="ibtn" data-rot="1" aria-label="Rotate right 15 degrees">↻</button>`;
+const wireRot = (root,v) => root.querySelectorAll("[data-rot]").forEach(b=>b.onclick=()=>v.nudge(+b.dataset.rot*Math.PI/12,0));
+
+/* =================== A · STEP CARD ===================
+   The molecule lives inside a Lesson Step (single focus, fixed bottom button). Tap 2 atoms = a distance,
+   a 3rd = the angle at the middle atom. The Source note is one tap away.                            */
+VARIANTS.A={name:"Step card",render(root){
+  root.innerHTML=`<div class="va">
+    <div class="va-top"><button class="x" aria-label="Close Lesson">✕</button><div class="va-prog"><i></i></div></div>
+    <div class="va-kick">&gt; Unit 1 · Rotate &amp; measure</div>
+    <h1>How far apart are the atoms, really?</h1>
+    <p class="va-lead">Spin it. Tap two atoms for their distance, then a third for the angle.</p>
+    <div class="chips">${molChips(S.mol)}</div>
+    <div class="va-card"><div class="host"></div>
+      <div class="va-tools"><span class="seg"><button data-sc="0" aria-pressed="true">Ball &amp; stick</button><button data-sc="1" aria-pressed="false">True scale</button></span><span>${rotBtns}</span></div></div>
+    <div class="va-read" aria-hidden="true"></div>
+    <details><summary>ⓘ Where these numbers come from</summary><p class="srcnote"></p></details>
+  </div><div class="va-foot"><button>Continue</button></div>`;
+  const read=root.querySelector(".va-read"), src=root.querySelector(".srcnote");
+  let v;
+  const update=()=>{
+    const m=v.mol,n=v.names,s=v.st.sel;
+    if(s.length===2){const d=dist(m,s[0],s[1]),b=bondOf(m,s[0],s[1]);
+      v.set("tags",[{atoms:s,text:fmtD(d)}]);
+      read.innerHTML=`<span class="big">${fmtD(d)}</span><span class="what">${n[s[0]]}${b?sym(b[2]):"···"}${n[s[1]]}<br>${b?"bond length":"not bonded: straight-line distance"}</span>`;
+      v.say(`${n[s[0]]} to ${n[s[1]]}: ${d.toFixed(3)} ångström${b?", bond length":""}.`);}
+    else if(s.length===3){const a=angle(m,...s);
+      v.set("tags",[{atoms:s,text:fmtA(a)}]);
+      read.innerHTML=`<span class="big o">${fmtA(a)}</span><span class="what">${n[s[0]]}–${n[s[1]]}–${n[s[2]]}<br>angle at ${n[s[1]]}</span>`;
+      v.say(`Angle ${n[s[0]]}, ${n[s[1]]}, ${n[s[2]]}: ${a.toFixed(1)} degrees.`);}
+    else{v.set("tags",[]);read.innerHTML=s.length===1?`<span class="hint">${n[s[0]]} picked. Tap another atom.</span>`:`<span class="hint">Tap an atom to start measuring.</span>`;
+      if(s.length===1)v.say(`${n[s[0]]} selected. Pick another atom.`);}
+  };
+  v=createViewer(root.querySelector(".host"),{onPick(i){const s=v.st.sel;
+      v.set("sel", i<0?[]: s.includes(i)?s.filter(x=>x!==i): s.length>=3?[i]:[...s,i]); update();},
+    describe:m=>`${m.atoms.length} atoms. Pick two atoms for a distance or three for an angle.`});
+  root.querySelectorAll("[data-sc]").forEach(b=>b.onclick=()=>{v.setScale(+b.dataset.sc);root.querySelectorAll("[data-sc]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+  wireRot(root,v);
+  wireChips(root,cid=>{v.setMol(cid);src.innerHTML=sourceHTML(cid);update()});
+  src.innerHTML=sourceHTML(S.mol); update();
+}};
+
+/* =================== B · EXPLORER HUD ===================
+   Full-bleed molecule, game-HUD overlays. Fixed world scale (1 Å is the same on screen for every molecule),
+   so switching molecules shows true relative size. Tap one atom = all its bonds drawn in-scene + its angles listed. */
+VARIANTS.B={name:"Explorer HUD",render(root){
+  root.innerHTML=`<div class="vb nebula"><div class="host" style="position:absolute;inset:0"></div>
+    <div class="vb-hud vb-tl"><div class="nm"></div><div class="fm"></div></div>
+    <div class="vb-hud vb-tr"><button class="ibtn" data-mode aria-pressed="false">◐ True scale</button><span style="display:flex;gap:6px">${rotBtns}</span><button class="ibtn" data-src>SRC</button></div>
+    <div class="vb-hud vb-insp" aria-hidden="true"></div>
+    <div class="vb-hud vb-bot"><div class="vb-tip">tap an atom to inspect · drag to spin</div><div class="chips" style="justify-content:center">${molChips(S.mol)}</div></div>
+    <div class="vb-drawer" role="dialog" aria-label="Source note"><p class="srcnote"></p><button class="ibtn" data-close>Close</button></div></div>`;
+  const insp=root.querySelector(".vb-insp"), drawer=root.querySelector(".vb-drawer");
+  let v, scaleOn=false;
+  const head=()=>{root.querySelector(".nm").textContent=v.mol.name;root.querySelector(".fm").textContent=`${v.mol.formula} · PubChem CID ${v.st.cid}`;drawer.querySelector(".srcnote").innerHTML=sourceHTML(v.st.cid)};
+  const inspect=i=>{
+    const m=v.mol,n=v.names;
+    if(i<0){v.set("sel",[]);v.set("tags",[]);insp.classList.remove("on");return}
+    const nb=neighbours(m,i);
+    const angs=[];for(let a=0;a<nb.length;a++)for(let b=a+1;b<nb.length;b++)angs.push([nb[a].j,i,nb[b].j]);
+    v.set("sel",[i]);v.set("tags",nb.map(x=>({atoms:[i,x.j],text:dist(m,i,x.j).toFixed(3)})));
+    insp.innerHTML=`<h3>${n[i]} · ${ELNAME[m.atoms[i][0]]}</h3><table>
+      ${nb.map(x=>`<tr><td>${n[i]}${sym(x.o)}${n[x.j]}</td><td style="color:var(--cyan)">${fmtD(dist(m,i,x.j))}</td></tr>`).join("")}
+      ${angs.length?`<tr><td colspan="2" class="sub">ANGLES AT ${n[i]}</td></tr>`:""}
+      ${angs.map(([a,j,b])=>`<tr><td>${n[a]}–${n[j]}–${n[b]}</td><td style="color:var(--orange)">${fmtA(angle(m,a,j,b))}</td></tr>`).join("")}</table>`;
+    insp.classList.add("on");
+    v.say(`${n[i]}, ${ELNAME[m.atoms[i][0]]}. `+nb.map(x=>`Bond to ${n[x.j]} ${dist(m,i,x.j).toFixed(3)} ångström`).join(". ")+". "+angs.map(([a,j,b])=>`Angle ${n[a]} ${n[j]} ${n[b]} ${angle(m,a,j,b).toFixed(1)} degrees`).join(". "));
+  };
+  v=createViewer(root.querySelector(".host"),{fixedScale:true,onPick:inspect,describe:m=>`Drawn at a fixed scale shared by every molecule. Select an atom to hear its bonds and angles.`});
+  root.querySelector("[data-mode]").onclick=e=>{scaleOn=!scaleOn;v.setScale(scaleOn?1:0);e.currentTarget.setAttribute("aria-pressed",scaleOn);e.currentTarget.textContent=scaleOn?"◑ Ball & stick":"◐ True scale"};
+  root.querySelector("[data-src]").onclick=()=>drawer.classList.add("on");
+  root.querySelector("[data-close]").onclick=()=>drawer.classList.remove("on");
+  wireRot(root,v);
+  wireChips(root,cid=>{v.setMol(cid);inspect(-1);head()});
+  head();
+}};
+
+/* =================== C · LAB BENCH ===================
+   A continuous slider from ball-and-stick to true scale, beside a table of every bond and angle type
+   (count, mean, range). Tapping a row lights up every instance in the molecule.                     */
+VARIANTS.C={name:"Lab bench",render(root){
+  root.innerHTML=`<div class="vc">
+    <div class="vc-left">
+      <div class="vc-hdr"><div class="k">&gt; Scene: molecule lab</div><h1></h1></div>
+      <div class="chips">${molChips(S.mol)}</div>
+      <div class="host"></div>
+      <label class="vc-slide"><span>BALL &amp; STICK</span><input type="range" min="0" max="100" value="0" aria-label="Atom size, from ball-and-stick (0) to true van der Waals scale (100)"><span>TRUE SCALE</span></label>
+      <div class="vc-row2"><span class="silk" style="font-size:10px;color:var(--muted)" data-pct>atoms at 30% of van der Waals radius</span><span style="display:flex;gap:6px">${rotBtns}</span></div>
+    </div>
+    <div class="vc-right"><div class="tables"></div><p class="srcnote"></p></div></div>`;
+  const tables=root.querySelector(".tables"), pct=root.querySelector("[data-pct]");
+  let v, picked=null;
+  const groups=m=>{
+    const n=atomNames(m),B={},A={};
+    m.bonds.forEach(([i,j,o])=>{const [x,y]=[m.atoms[i][0],m.atoms[j][0]].sort();const k=x+sym(o)+y;(B[k]=B[k]||[]).push({atoms:[i,j],val:dist(m,i,j)})});
+    m.atoms.forEach((_,j)=>{const nb=neighbours(m,j);for(let a=0;a<nb.length;a++)for(let b=a+1;b<nb.length;b++){
+      const [x,y]=[m.atoms[nb[a].j][0],m.atoms[nb[b].j][0]].sort();const k=`${x}–${m.atoms[j][0]}–${y}`;(A[k]=A[k]||[]).push({atoms:[nb[a].j,j,nb[b].j],val:angle(m,nb[a].j,j,nb[b].j)})}});
+    return {B,A};
+  };
+  const table=(title,G,fmt,kind)=>`<h2>${title}</h2><table class="vc-tbl"><thead><tr><th>TYPE</th><th>N</th><th style="text-align:right">MEAN</th><th style="text-align:right">RANGE</th><th style="text-align:right">FROM</th></tr></thead><tbody>
+    ${Object.entries(G).map(([k,xs])=>{const vals=xs.map(x=>x.val),mean=vals.reduce((a,b)=>a+b)/vals.length,lo=Math.min(...vals),hi=Math.max(...vals);
+      return `<tr data-k="${kind}:${k}"><td><button aria-label="Show every ${k}, ${xs.length} in total">${k}</button></td><td>${xs.length}</td><td class="num">${fmt(mean)}</td><td class="num">${fmt(lo)!==fmt(hi)?(fmt(lo)+" – "+fmt(hi)).replace(/ Å(?= –)|°(?= –)/,""):"–"}</td><td class="src">PUBCHEM</td></tr>`}).join("")}</tbody></table>`;
+  const fill=()=>{const m=v.mol,{B,A}=groups(m);picked=null;
+    root.querySelector("h1").textContent=m.name;root.querySelector(".srcnote").innerHTML=sourceHTML(v.st.cid);
+    tables.innerHTML=table("Bond lengths",B,fmtD,"B")+table("Bond angles",A,fmtA,"A");
+    tables.querySelectorAll("tr[data-k]").forEach(tr=>tr.onclick=()=>{
+      const [kind,k]=[tr.dataset.k[0],tr.dataset.k.slice(2)],xs=(kind==="B"?B:A)[k];
+      if(picked===tr.dataset.k){picked=null;v.set("hl",[]);v.set("tags",[]);tr.classList.remove("on");return}
+      picked=tr.dataset.k;tables.querySelectorAll("tr").forEach(x=>x.classList.toggle("on",x===tr));
+      v.set("hl",[...new Set(xs.flatMap(x=>x.atoms))]);
+      // tag every instance unless there are too many to read; the table row already holds the summary
+      v.set("tags",xs.length<=6?xs.map(x=>({atoms:x.atoms,text:kind==="B"?x.val.toFixed(3):fmtA(x.val)})):[]);
+      v.say(`${k}: ${xs.length} in this molecule, highlighted.`);
+    });
+  };
+  v=createViewer(root.querySelector(".host"),{onPick(i){if(i<0){picked=null;v.set("hl",[]);v.set("tags",[]);tables.querySelectorAll("tr").forEach(x=>x.classList.remove("on"))}},
+    describe:m=>`The table beside it lists every bond length and angle.`});
+  const slider=root.querySelector("input");
+  slider.oninput=()=>{const f=slider.value/100;v.setScale(f,false);pct.textContent=`atoms at ${Math.round((BALL+(1-BALL)*f)*100)}% of van der Waals radius`};
+  wireRot(root,v);
+  wireChips(root,cid=>{v.setMol(cid);fill()});
+  fill();
+}};
+
+render();
+</script>
+</body>
+</html>
