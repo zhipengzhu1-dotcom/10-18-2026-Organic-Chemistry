@@ -1,0 +1,884 @@
+<!doctype html>
+<!--
+  PROTOTYPE, throwaway. Wayfinder ticket "Prototype: Specify Lesson 6: Resonance: Pushing Electrons (pilot)" (#30).
+  Plays every Step of the Lesson 6 spec (docs/specs/unit-1/lesson-06-resonance.md, PR #39) as one rough, clickable Lesson:
+  Hook → 9 Build Steps → 4 Check Problems → Wrap → Lesson-end screen.
+  Draw-arrows Steps use the push-live interaction that won "Prototype: curved-arrow mechanism interaction" (#14):
+  grab the electrons, drop them on an atom, each push graded on the spot by running it and comparing the product.
+  The floating bar jumps between Steps, shows the spec fields for the current Step (?spec=1), and toggles reduced motion.
+  No bond lengths are typed in: the acetate Scenes show "?.??? Å" until the PySCF pipeline exists, exactly as the spec says.
+  Structure cards in the "not resonance" Problem are drawn by RDKit.js from the spec's SMILES (needs internet, like the fonts).
+  Double-click to open. Never merged.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AstraTron · Lesson 6 run-through (prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Pixelify+Sans:wght@500;700&family=Silkscreen&display=swap" rel="stylesheet">
+<style>
+:root{
+  --at-space:#0d0626; --at-surface:#1a0f3d; --at-raised:#241552; --at-line:#6a4bd1;
+  --at-ink:#ffffff; --at-ink-muted:#b9a8e8;
+  --at-electron:#3ee8ff; --at-ignite:#ff9a1f; --at-boss:#ff5fd8; --at-shadow:#b44dff; --at-on-fill:#1a0d3d;
+  --at-font-pixel:"Pixelify Sans",ui-monospace,monospace;
+  --at-font-label:"Silkscreen",ui-monospace,monospace;
+  --at-font-text:"Space Grotesk",system-ui,sans-serif;
+  --at-font-data:"JetBrains Mono",ui-monospace,monospace;
+  --el-O:#ff8a8a; --el-N:#9db4ff; --el-S:#ffe066; --el-C:#ffffff; --el-H:#d9d0f5;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--at-space);color:var(--at-ink)}
+body{font:400 17px/1.5 var(--at-font-text);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+:focus-visible{outline:3px solid var(--at-electron);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.data{font-family:var(--at-font-data)}
+[data-motion=reduced] *{animation:none!important;transition:none!important}
+
+/* ---------- prototype bar (deliberately NOT on-brand) ---------- */
+#bar{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:100;display:flex;align-items:center;gap:4px;
+  background:#fffbe6;color:#111;border:2px solid #111;border-radius:999px;padding:4px;font:600 12px/1 system-ui,sans-serif;
+  box-shadow:0 6px 24px rgba(0,0,0,.45);white-space:nowrap;max-width:calc(100vw - 16px);overflow-x:auto}
+#bar button,#bar select{background:none;border:0;border-radius:999px;padding:7px 9px;color:#111;font:600 12px system-ui}
+#bar select{border:1px solid #111;max-width:190px}
+#bar button:hover{background:#111;color:#fffbe6}
+#bar button[aria-pressed=true]{background:#111;color:#fffbe6}
+#bar .tag{font-size:10px;letter-spacing:.08em;background:#111;color:#fffbe6;border-radius:999px;padding:4px 7px}
+#spec{position:fixed;right:10px;top:10px;z-index:90;width:min(400px,calc(100vw - 20px));max-height:calc(100vh - 80px);overflow:auto;
+  background:#fffbe6;color:#111;border:2px solid #111;border-radius:10px;padding:10px 12px;font:12px/1.45 ui-monospace,Consolas,monospace;display:none;white-space:pre-wrap}
+#spec.on{display:block}
+#spec b{font-family:system-ui,sans-serif}
+
+/* ---------- Step player ---------- */
+.step{min-height:100vh;display:flex;flex-direction:column;max-width:640px;margin:0 auto;padding:14px 16px 170px}
+.top{display:flex;align-items:center;gap:12px}
+.top .x{font:700 20px var(--at-font-pixel);color:var(--at-ink-muted);padding:4px}
+.prog{flex:1;height:8px;background:color-mix(in srgb,var(--at-ink) 15%,transparent);display:flex;gap:2px}
+.prog i{flex:1;background:transparent}
+.prog i.done{background:var(--at-ignite)}
+.prog i.now{background:var(--at-electron)}
+.kick{font:400 12px var(--at-font-label);color:var(--at-electron);margin:20px 0 6px;letter-spacing:.04em;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.kick .chk{color:var(--at-boss)}
+.kick .diff{color:var(--at-ignite)}
+h1{font:700 clamp(21px,4.6vw,28px)/1.2 var(--at-font-text);letter-spacing:-.015em;margin:0 0 10px}
+.prompt{margin:0 0 14px;font-size:16.5px}
+.prompt p{margin:0 0 10px}
+.prompt ul,.prompt ol{margin:0 0 10px;padding-left:22px}
+.prompt b{color:var(--at-electron);font-weight:600}
+.card{border:3px solid var(--at-line);box-shadow:6px 6px 0 var(--at-shadow);background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--at-shadow) 22%,transparent),transparent 70%),color-mix(in srgb,var(--at-space) 85%,#000);position:relative}
+.callout{min-height:36px;padding:8px 10px 0;font:600 13px/1.35 var(--at-font-data);color:var(--at-electron)}
+.callout.warn{color:var(--at-ignite)}
+.card svg.mol{display:block;width:100%;aspect-ratio:400/260;max-height:46vh;touch-action:none;user-select:none;-webkit-user-select:none}
+svg .hit{fill:transparent;stroke:none;outline:none}
+svg .hit:focus-visible{stroke:var(--at-electron);stroke-width:2.5;stroke-dasharray:4 3}
+.target{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:6px 10px;border:2px dashed var(--at-line);opacity:.8}
+.target span{font:400 11px var(--at-font-label);color:var(--at-ink-muted)}
+.target svg{width:min(210px,52vw);aspect-ratio:400/260;display:block}
+.target{justify-content:space-between}
+.tools{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:8px;border-top:2px solid var(--at-line);min-height:50px}
+.ibtn{background:var(--at-space);border:2px solid var(--at-ink);font:400 12px var(--at-font-label);padding:7px 10px;box-shadow:3px 3px 0 var(--at-shadow)}
+.ibtn:disabled{opacity:.35;cursor:default}
+.scrub{display:flex;align-items:center;gap:8px;flex:1;min-width:200px}
+.scrub input{flex:1;accent-color:var(--at-ignite);height:28px}
+.cap{font:500 14px/1.45 var(--at-font-text);padding:10px 10px 12px;border-top:2px dashed var(--at-line);min-height:44px}
+.muted{color:var(--at-ink-muted);font-size:13px;font-family:var(--at-font-data)}
+
+/* choices */
+.choices{display:grid;gap:12px}
+.choice{display:block;width:100%;text-align:left;border:3px solid var(--at-line);background:var(--at-surface);padding:12px 14px;box-shadow:4px 4px 0 var(--at-shadow);position:relative}
+.choice[aria-pressed=true]{border-color:var(--at-electron);box-shadow:4px 4px 0 var(--at-electron)}
+.choice .lt{font:400 12px var(--at-font-label);color:var(--at-ink-muted);margin-right:8px}
+.choice.ok{border-color:var(--at-electron)}
+.choice.no{border-color:var(--at-boss);border-style:dashed}
+.choice .why{display:block;margin-top:8px;font:600 13px var(--at-font-data);color:var(--at-ignite)}
+.choice .why.ok{color:var(--at-electron)}
+.pair{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pair .rd{background:#f6f2ff;border:2px solid var(--at-line);width:150px;height:105px;display:grid;place-items:center;overflow:hidden}
+.pair .rd svg{width:100%;height:100%}
+.pair .rd code{color:#1a0d3d;font:11px var(--at-font-data);padding:4px;word-break:break-all}
+.pair .op{font:700 18px var(--at-font-data);color:var(--at-ink-muted);padding:0 4px}
+.pair svg.mini{flex:1;min-width:0;width:auto;aspect-ratio:400/260;background:color-mix(in srgb,var(--at-space) 70%,#000);border:2px solid var(--at-line)}
+
+.fb{margin-top:16px;border:3px solid var(--at-line);padding:12px 14px;display:none}
+.fb.on{display:block}
+.fb h2{margin:0 0 4px;font:400 14px var(--at-font-label)}
+.fb p{margin:0;font-size:15px;line-height:1.45}
+.fb.hint{border-color:var(--at-ignite)} .fb.hint h2{color:var(--at-ignite)}
+.fb.good{border-color:var(--at-electron)} .fb.good h2{color:var(--at-electron)}
+.fb.show{border-color:var(--at-ignite);border-style:dashed} .fb.show h2{color:var(--at-ignite)}
+.fb.pred{border-color:var(--at-boss)} .fb.pred h2{color:var(--at-boss)}
+details{margin-top:14px;border-top:2px dashed var(--at-line);padding-top:10px}
+summary{font:400 11px var(--at-font-label);color:var(--at-electron);cursor:pointer}
+.srcnote{font:400 12px/1.5 var(--at-font-data);color:var(--at-ink-muted)}
+.foot{position:fixed;left:0;right:0;bottom:60px;display:flex;justify-content:center;padding:0 16px;pointer-events:none}
+.foot button{pointer-events:auto;width:min(608px,100%);font:400 16px var(--at-font-label);padding:15px;background:var(--at-ignite);color:var(--at-on-fill);box-shadow:5px 5px 0 var(--at-shadow);transition:transform 90ms linear,box-shadow 90ms linear}
+.foot button:active:not(:disabled){transform:translate(5px,5px);box-shadow:0 0 0 var(--at-shadow)}
+.foot button:disabled{background:color-mix(in srgb,var(--at-ink) 18%,transparent);color:var(--at-ink-muted);box-shadow:none;cursor:default}
+
+/* big statement + end */
+.big{font:700 clamp(30px,8vw,46px)/1.05 var(--at-font-pixel);color:var(--at-ignite);text-shadow:3px 3px 0 var(--at-shadow);margin:26px 0 18px}
+.end{text-align:center;padding-top:30px}
+.end .key{border:3px solid var(--at-electron);padding:16px;margin:18px 0;font-size:17px;box-shadow:5px 5px 0 var(--at-shadow);text-align:left}
+.end .streak{font:600 15px var(--at-font-text);margin:10px 0 20px}
+.end .streak b{font:700 22px var(--at-font-data);color:var(--at-ignite)}
+.btn{display:inline-flex;justify-content:center;min-height:48px;padding:13px 20px;font:400 15px var(--at-font-label);box-shadow:5px 5px 0 var(--at-shadow);margin:6px}
+.btn-primary{background:var(--at-ignite);color:var(--at-on-fill)}
+.btn-secondary{border:2px solid var(--at-ink);box-shadow:5px 5px 0 var(--at-line)}
+
+/* intro */
+.intro{max-width:640px;margin:0 auto;padding:22px 16px 140px}
+.intro h1{font:700 30px var(--at-font-pixel);color:var(--at-ignite);text-shadow:3px 3px 0 var(--at-shadow)}
+.intro li{margin-bottom:8px}
+.intro .box{border:3px solid var(--at-line);padding:12px 16px;margin:16px 0;background:var(--at-surface)}
+
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.bounce{animation:shake .25s 2}
+@keyframes pulse{50%{opacity:.35}}
+.pulse{animation:pulse 1s infinite}
+@keyframes lit{0%,30%{opacity:1}36%,100%{opacity:.25}}
+.panel{animation:lit 4.5s infinite}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="bar" role="toolbar" aria-label="Prototype controls">
+  <span class="tag">PROTOTYPE</span>
+  <button id="b-prev" aria-label="Previous Step">←</button>
+  <select id="b-step" aria-label="Jump to Step"></select>
+  <button id="b-next" aria-label="Next Step">→</button>
+  <button id="b-spec" aria-pressed="false">spec</button>
+  <button id="b-motion" aria-pressed="false">reduced motion</button>
+  <button id="b-reset">redo Step</button>
+  <button id="b-about">?</button>
+</div>
+<pre id="spec" aria-label="Spec fields for this Step"></pre>
+<div id="live" class="sr" aria-live="polite"></div>
+
+<script>
+// =====================================================================
+// Resonance push engine: pure functions over a plain molecule state.
+// state = {bonds:{'a-b':order}, lp:{atom:count}, ch:{atom:charge}}; atoms and σ bonds never change.
+// A push is {from:{lp:atom} | {bond:[a,b]}, to:atom}; its key is 'lp4>2' or 'b2-3>3'.
+// The three moves (spec, "How resonance works in push-live"):
+//   1 lone pair → neighbouring atom  = new π bond
+//   2 bond → one of its own atoms    = lone pair there
+//   3 bond → atom next to the bond   = the bond moves to sit between the shared atom and that atom
+// =====================================================================
+const bk=(a,b)=>a<b?`${a}-${b}`:`${b}-${a}`;
+const clone=o=>JSON.parse(JSON.stringify(o));
+const keyOf=p=>(p.from.lp?`lp${p.from.lp}`:`b${bk(...p.from.bond)}`)+'>'+p.to;
+function parseKey(k){
+  const m=k.match(/^(lp(\d+)|b(\d+)-(\d+))>(\d+)$/);
+  return m[2]?{from:{lp:+m[2]},to:+m[5]}:{from:{bond:[+m[3],+m[4]]},to:+m[5]};
+}
+function neighbours(s,a){
+  const out=[]; for(const k in s.bonds){const [x,y]=k.split('-').map(Number); if(x===a)out.push(y); else if(y===a)out.push(x);} return out;
+}
+function applyPush(s0,p){
+  const s=clone(s0), ch=(a,d)=>{s.ch[a]=(s.ch[a]||0)+d; if(!s.ch[a]) delete s.ch[a];};
+  const bump=(a,b,d)=>{s.bonds[bk(a,b)]=(s.bonds[bk(a,b)]||0)+d;};
+  const t=p.to;
+  if(p.from.lp){
+    const a=p.from.lp; s.lp[a]--; bump(a,t,1); ch(a,1); ch(t,-1);
+  }else{
+    const [a,b]=p.from.bond; bump(a,b,-1);
+    if(t===a||t===b){const o=t===a?b:a; s.lp[t]=(s.lp[t]||0)+1; ch(t,-1); ch(o,1);}
+    else{const n=neighbours(s0,a).includes(t)?a:b, o=n===a?b:a; bump(n,t,1); ch(o,1); ch(t,-1);}
+  }
+  return s;
+}
+const applyAll=(start,keys)=>keys.reduce((s,k)=>applyPush(s,parseKey(k)),start);
+// Is this push even a legal resonance move? (σ bonds can be grabbed, so their Hint can fire, but never move.)
+function legality(s,p){
+  if(p.from.lp){ if(!(s.lp[p.from.lp]>0)) return 'no lone pair'; if(!neighbours(s,p.from.lp).includes(p.to)) return 'not a neighbour'; return 'ok'; }
+  const [a,b]=p.from.bond, order=s.bonds[bk(a,b)];
+  if(order<2) return 'sigma';
+  if(p.to===a||p.to===b) return 'ok';
+  if(neighbours(s,a).includes(p.to)||neighbours(s,b).includes(p.to)) return 'ok';
+  return 'not a neighbour';
+}
+function electrons(mol,s,a){
+  let n=2*(mol.atoms[a].h||0); for(const k in s.bonds){const [x,y]=k.split('-').map(Number); if(x===a||y===a) n+=2*s.bonds[k];}
+  return n+2*(s.lp[a]||0);
+}
+const octet=(mol,a)=>mol.atoms[a].el==='H'?2:8;
+function canon(s){
+  const lp={},ch={}; for(const a in s.lp) if(s.lp[a]) lp[a]=s.lp[a]; for(const a in s.ch) if(s.ch[a]) ch[a]=s.ch[a];
+  return JSON.stringify([Object.entries(s.bonds).sort(),Object.entries(lp).sort(),Object.entries(ch).sort()]);
+}
+// Grade one push live: accepted if it belongs to a push set (any order) consistent with the pushes already made.
+function gradePush(step,doneKeys,key){
+  for(const path of step.paths) if(path.includes(key)&&!doneKeys.includes(key)&&doneKeys.every(k=>path.includes(k))) return true;
+  return false;
+}
+function pickHint(step,key,info){
+  for(const [test,text] of step.hints){
+    if(typeof test==='string'?test===key:test instanceof RegExp?test.test(key):test(key,info)) return text;
+  }
+  return step.fallback;
+}
+
+// =====================================================================
+// Molecules. 2D schematic positions in SVG units (no geometry shown to the Student, so nothing measured is used).
+// lbl: the letters drawn ('' = a line-angle vertex). h: implicit H's (counted for the octet, drawn inside lbl).
+// =====================================================================
+const MOLS={
+  formaldehyde:{atoms:{1:{el:'C',lbl:'C',x:175,y:130,name:'C'},2:{el:'O',lbl:'O',x:265,y:130,name:'O'},3:{el:'H',lbl:'H',x:122,y:84,name:'top H'},4:{el:'H',lbl:'H',x:122,y:176,name:'bottom H'}},
+    start:{bonds:{'1-2':2,'1-3':1,'1-4':1},lp:{2:2},ch:{}}},
+  nitromethane:{atoms:{1:{el:'C',lbl:'C',x:130,y:130,name:'C'},2:{el:'N',lbl:'N',x:215,y:130,name:'N'},3:{el:'O',lbl:'O',x:272,y:70,name:'top O'},4:{el:'O',lbl:'O',x:272,y:190,name:'bottom O'},
+    5:{el:'H',lbl:'H',x:130,y:70,name:'top H'},6:{el:'H',lbl:'H',x:72,y:130,name:'left H'},7:{el:'H',lbl:'H',x:130,y:190,name:'bottom H'}},
+    start:{bonds:{'1-2':1,'2-3':2,'2-4':1,'1-5':1,'1-6':1,'1-7':1},lp:{3:2,4:3},ch:{2:1,4:-1}}},
+  acetate:{atoms:{1:{el:'C',lbl:'H₃C',h:3,x:108,y:150,name:'CH₃'},2:{el:'C',lbl:'C',x:198,y:150,name:'C'},3:{el:'O',lbl:'O',x:256,y:84,name:'top O'},4:{el:'O',lbl:'O',x:256,y:216,name:'bottom O'}},
+    start:{bonds:{'1-2':1,'2-3':2,'2-4':1},lp:{3:2,4:3},ch:{4:-1}}},
+  aceticAcid:{atoms:{1:{el:'C',lbl:'H₃C',h:3,x:108,y:150,name:'CH₃'},2:{el:'C',lbl:'C',x:198,y:150,name:'C'},3:{el:'O',lbl:'O',x:256,y:84,name:'top O'},4:{el:'O',lbl:'OH',h:1,x:262,y:216,name:'OH'}},
+    start:{bonds:{'1-2':1,'2-3':2,'2-4':1},lp:{3:2,4:2},ch:{}}},
+  allyl:{atoms:{1:{el:'C',lbl:'H₂C',h:2,x:100,y:176,name:'C1'},2:{el:'C',lbl:'CH',h:1,x:200,y:112,name:'C2'},3:{el:'C',lbl:'CH₂',h:2,x:300,y:176,name:'C3'}},
+    start:{bonds:{'1-2':2,'2-3':1},lp:{},ch:{3:1}}},
+  ozone:{atoms:{1:{el:'O',lbl:'O',x:110,y:176,name:'left O'},2:{el:'O',lbl:'O',x:200,y:116,name:'central O'},3:{el:'O',lbl:'O',x:290,y:176,name:'right O'}},
+    start:{bonds:{'1-2':2,'2-3':1},lp:{1:2,2:1,3:3},ch:{2:1,3:-1}}},
+  methylNitrite:{atoms:{1:{el:'C',lbl:'H₃C',h:3,x:80,y:160,name:'CH₃'},2:{el:'O',lbl:'O',x:155,y:110,name:'O'},3:{el:'N',lbl:'N',x:235,y:160,name:'N'},4:{el:'O',lbl:'O',x:315,y:110,name:'O'}},
+    start:{bonds:{'1-2':1,'2-3':1,'3-4':2},lp:{2:2,3:1,4:2},ch:{}}},
+  oxo:{atoms:{6:{el:'O',lbl:'O',x:200,y:58,name:'O'},5:{el:'C',lbl:'CH',h:1,x:266,y:96,name:'C5'},4:{el:'C',lbl:'CH',h:1,x:266,y:172,name:'C4'},
+    3:{el:'C',lbl:'CH',h:1,x:200,y:210,name:'C3'},2:{el:'C',lbl:'',h:2,x:134,y:172,name:'C2'},1:{el:'C',lbl:'',h:2,x:134,y:96,name:'C1'}},
+    start:{bonds:{'1-2':1,'2-3':1,'3-4':1,'4-5':2,'5-6':1,'1-6':1},lp:{6:2},ch:{3:1}}},
+  thio:{atoms:{1:{el:'C',lbl:'',h:3,x:62,y:180,name:'C1'},2:{el:'C',lbl:'C',x:132,y:140,name:'C2'},3:{el:'S',lbl:'S',x:132,y:62,name:'S'},
+    4:{el:'C',lbl:'CH',h:1,x:204,y:180,name:'C4'},5:{el:'C',lbl:'CH',h:1,x:274,y:140,name:'C5'},6:{el:'C',lbl:'CH₂',h:2,x:346,y:180,name:'C6'}},
+    start:{bonds:{'1-2':1,'2-3':2,'2-4':1,'4-5':2,'5-6':1},lp:{3:2,6:1},ch:{6:-1}}},
+};
+
+// =====================================================================
+// Drawing (SVG strings)
+// =====================================================================
+const dist=(p,q)=>Math.hypot(p.x-q.x,p.y-q.y);
+const lerp=(a,b,u)=>a+(b-a)*u;
+const angDiff=(a,b)=>{let d=Math.abs(a-b)%(2*Math.PI);return d>Math.PI?2*Math.PI-d:d;};
+function atomR(at,ang){ if(!at.lbl) return 0; if(at.lbl.length===1) return at.el==='H'?9:12; return Math.abs(Math.cos(ang))*20+Math.abs(Math.sin(ang))*11; }
+// Place a charge and the lone pairs around an atom in the emptiest directions.
+function layout(mol,s,a){
+  const at=mol.atoms[a], occ=neighbours(s,a).map(b=>Math.atan2(mol.atoms[b].y-at.y,mol.atoms[b].x-at.x));
+  if(at.lbl&&at.lbl.length>1){occ.push(0,Math.PI);}
+  // spread the lone pairs evenly across the widest gap between bonds, then put the charge in the widest gap left
+  const gapOf=occ=>{const a=occ.map(x=>(x+2*Math.PI)%(2*Math.PI)).sort((x,y)=>x-y);if(!a.length)return [-Math.PI/2,2*Math.PI];
+    let best=[a[a.length-1],a[0]+2*Math.PI-a[a.length-1]];for(let i=1;i<a.length;i++)if(a[i]-a[i-1]>best[1])best=[a[i-1],a[i]-a[i-1]];return best;};
+  const out={charge:null,lps:[]}, n=s.lp[a]||0;
+  if(n){const [g0,g]=gapOf(occ);for(let i=0;i<n;i++)out.lps.push(g0+g*(i+1)/(n+1));occ.push(...out.lps);}
+  if(s.ch[a]){const [g0,g]=gapOf(occ);out.charge=g0+g/2;}
+  return out;
+}
+const lpPos=(at,ang,r=23)=>({x:at.x+Math.cos(ang)*r,y:at.y+Math.sin(ang)*r});
+function bondSvg(p,q,rp,rq,order,o={}){
+  const ang=Math.atan2(q.y-p.y,q.x-p.x), d=dist(p,q)||1, ux=(q.x-p.x)/d, uy=(q.y-p.y)/d;
+  const a={x:p.x+ux*rp,y:p.y+uy*rp}, b={x:q.x-ux*rq,y:q.y-uy*rq}, nx=-uy, ny=ux;
+  const col=o.color||'#fff', op=o.op??1;
+  if(o.partial){ // hybrid: one solid line plus one dashed
+    return `<g opacity="${op}"><line x1="${a.x-nx*3.5}" y1="${a.y-ny*3.5}" x2="${b.x-nx*3.5}" y2="${b.y-ny*3.5}" stroke="${col}" stroke-width="2.5" stroke-linecap="round"/>`+
+      `<line x1="${a.x+nx*3.5}" y1="${a.y+ny*3.5}" x2="${b.x+nx*3.5}" y2="${b.y+ny*3.5}" stroke="${col}" stroke-width="2.5" stroke-dasharray="5 5"/></g>`;
+  }
+  const offs=order===1?[0]:order===2?[-3.5,3.5]:[-6,0,6];
+  return offs.map(f=>`<line x1="${a.x+nx*f}" y1="${a.y+ny*f}" x2="${b.x+nx*f}" y2="${b.y+ny*f}" stroke="${col}" stroke-width="2.5" stroke-linecap="round" opacity="${op}"/>`).join('');
+}
+function labelSvg(at,o={}){
+  if(!at.lbl) return '';
+  const col=`var(--el-${at.el})`, w=at.lbl.length>1?at.lbl.length*10+4:22;
+  return `<rect x="${at.x-w/2}" y="${at.y-12}" width="${w}" height="24" fill="var(--at-space)" opacity="0"/>`+
+    `<text x="${at.x}" y="${at.y+6.5}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700" font-size="18" fill="${o.warn?'var(--at-ignite)':col}">${at.lbl}</text>`;
+}
+function chargeSvg(at,ang,txt,o={}){
+  const p=lpPos(at,ang,at.lbl&&at.lbl.length>1?24:21);
+  return `<g opacity="${o.op??1}"><circle cx="${p.x}" cy="${p.y}" r="8.5" fill="var(--at-space)" stroke="var(--at-ink-muted)" stroke-width="1.5"/>`+
+    `<text x="${p.x}" y="${p.y+4.2}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700" font-size="${txt.length>1?10:13}" fill="#fff">${txt}</text></g>`;
+}
+function lpSvg(at,ang,color='var(--at-electron)',op=1){
+  const p=lpPos(at,ang), px=-Math.sin(ang)*4.2, py=Math.cos(ang)*4.2;
+  return `<g opacity="${op}"><circle cx="${p.x+px}" cy="${p.y+py}" r="3.2" fill="${color}"/><circle cx="${p.x-px}" cy="${p.y-py}" r="3.2" fill="${color}"/></g>`;
+}
+function centroid(mol){const v=Object.values(mol.atoms);return {x:v.reduce((s,a)=>s+a.x,0)/v.length,y:v.reduce((s,a)=>s+a.y,0)/v.length};}
+// Curved arrow: quadratic Bézier, bowed away from the molecule's centre.
+function arrowGeom(mol,p0,p1){
+  const c0=centroid(mol), mx=(p0.x+p1.x)/2, my=(p0.y+p1.y)/2, d=dist(p0,p1)||1;
+  let nx=-(p1.y-p0.y)/d, ny=(p1.x-p0.x)/d;
+  if((mx+nx-c0.x)**2+(my+ny-c0.y)**2<(mx-nx-c0.x)**2+(my-ny-c0.y)**2){nx=-nx;ny=-ny;}
+  const h=Math.max(24,Math.min(55,d*.5)); return {p0,p1,c:{x:mx+nx*h,y:my+ny*h}};
+}
+function arrowSvg(g,color,o={}){
+  const {p0,p1,c}=g, d=dist(p1,c)||1, tx=(p1.x-c.x)/d, ty=(p1.y-c.y)/d;
+  const head=`${p1.x},${p1.y} ${p1.x-tx*11-ty*6},${p1.y-ty*11+tx*6} ${p1.x-tx*11+ty*6},${p1.y-ty*11-tx*6}`;
+  return `<g opacity="${o.op??1}"${o.cls?` class="${o.cls}"`:''}><path d="M${p0.x},${p0.y} Q${c.x},${c.y} ${p1.x},${p1.y}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"${o.dashed?' stroke-dasharray="6 5"':''}/>`+
+    (o.noHead?'':`<polygon points="${head}" fill="${color}"/>`)+'</g>';
+}
+const bez=(g,u)=>({x:(1-u)*(1-u)*g.p0.x+2*(1-u)*u*g.c.x+u*u*g.p1.x,y:(1-u)*(1-u)*g.p0.y+2*(1-u)*u*g.c.y+u*u*g.p1.y});
+// Where a push's arrow starts and ends, drawn on the state it is applied to.
+function pushGeom(mol,s,p){
+  const A=mol.atoms, mid=(a,b)=>({x:(A[a].x+A[b].x)/2,y:(A[a].y+A[b].y)/2});
+  let p0,p1;
+  if(p.from.lp){
+    const a=p.from.lp, L=layout(mol,s,a), toAng=Math.atan2(A[p.to].y-A[a].y,A[p.to].x-A[a].x);
+    const ang=L.lps.slice().sort((x,y)=>angDiff(x,toAng)-angDiff(y,toAng))[0]??toAng;
+    p0=lpPos(A[a],ang); p1=mid(a,p.to);
+  }else{
+    const [a,b]=p.from.bond; p0=mid(a,b);
+    if(p.to===a||p.to===b){const L=layout(mol,applyPush(s,p),p.to); p1=lpPos(A[p.to],L.lps[L.lps.length-1]??0,27);}
+    else{const n=neighbours(s,a).includes(p.to)?a:b; p1=mid(n,p.to);}
+  }
+  return arrowGeom(mol,p0,p1);
+}
+function molSvg(mol,s,o={}){
+  const A=mol.atoms; let out='';
+  for(const k in s.bonds){const [a,b]=k.split('-').map(Number), ang=Math.atan2(A[b].y-A[a].y,A[b].x-A[a].x);
+    const sel=o.sel&&o.sel.has('b'+k);
+    out+=bondSvg(A[a],A[b],atomR(A[a],ang),atomR(A[b],ang),s.bonds[k],{partial:o.partial&&o.partial.includes(k),color:sel?'var(--at-electron)':o.grab===k?'var(--at-ignite)':undefined,op:o.op});
+    if(sel) out+=`<circle cx="${(A[a].x+A[b].x)/2}" cy="${(A[a].y+A[b].y)/2}" r="13" fill="none" stroke="var(--at-electron)" stroke-width="2.5"/>`;
+  }
+  for(const a in A){
+    const n=+a, at=A[n], L=layout(mol,s,n), fl=o.flag&&o.flag.has(n), over=fl, under=false;
+    if(!at.lbl) { if(o.sel&&o.sel.has('a'+n)) out+=`<circle cx="${at.x}" cy="${at.y}" r="14" fill="none" stroke="var(--at-electron)" stroke-width="2.5"/>`; }
+    out+=`<g opacity="${o.op??1}">`+labelSvg(at,{warn:over||under});
+    if(o.sel&&o.sel.has('a'+n)&&at.lbl) out+=`<circle cx="${at.x}" cy="${at.y}" r="19" fill="none" stroke="var(--at-electron)" stroke-width="2.5"/>`;
+    if(fl) out+=`<circle class="pulse" cx="${at.x}" cy="${at.y}" r="22" fill="none" stroke="var(--at-ignite)" stroke-width="2.5"/>`;
+    L.lps.forEach((ang,i)=>{ if(o.hideLp===n&&i===L.lps.length-1&&!o.hideLpDone) return; if(o.lpHidden) return; out+=lpSvg(at,ang); });
+    if(L.charge!==null) out+=chargeSvg(at,L.charge,s.ch[n]<0?(s.ch[n]<-1?'2−':'−'):(s.ch[n]>1?'2+':'+'));
+    if(o.delta&&o.delta[n]) {const p=lpPos(at,-Math.PI/2+.0,30);out+=`<text x="${at.x+24}" y="${at.y-14}" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="var(--at-electron)">${o.delta[n]}</text>`;}
+    if(fl) out+=`<text x="${at.x+(at.x>300?-30:28)}" y="${at.y+(at.y<80?36:-26)}" text-anchor="${at.x>300?'end':'start'}" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="var(--at-ignite)">${electrons(mol,s,n)} e⁻</text>`;
+    out+='</g>';
+  }
+  return out;
+}
+
+// =====================================================================
+// RDKit.js for the five structure-card pairs (lazy, from the CDN; falls back to SMILES text)
+// =====================================================================
+let RD=null, rdLoading=null;
+function loadRDKit(){
+  if(rdLoading) return rdLoading;
+  rdLoading=new Promise(res=>{
+    const sc=document.createElement('script'); sc.src='https://cdn.jsdelivr.net/npm/@rdkit/rdkit@2024.3.5-1.0.0/dist/RDKit_minimal.js';
+    sc.onload=()=>window.initRDKitModule({locateFile:()=>'https://cdn.jsdelivr.net/npm/@rdkit/rdkit@2024.3.5-1.0.0/dist/RDKit_minimal.wasm'}).then(m=>{RD=m;res(m);}).catch(()=>res(null));
+    sc.onerror=()=>res(null); document.head.appendChild(sc);
+  });
+  return rdLoading;
+}
+function rdSvg(smi){
+  if(!RD) return `<code>${smi}</code>`;
+  const m=RD.get_mol(smi); if(!m) return `<code>${smi}</code>`;
+  const svg=m.get_svg_with_highlights(JSON.stringify({width:150,height:105,bondLineWidth:1.6,backgroundColour:[0.965,0.949,1,1]})); m.delete(); return svg;
+}
+
+// =====================================================================
+// The Lesson, transcribed from the spec. Wording is the spec's; nothing invented beyond layout.
+// =====================================================================
+const SRC={
+  geom:'Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phase. Both molecules use the same method so they can be compared fairly. [PROTOTYPE: the pipeline has not run yet, so every length shows ?.??? Å.]',
+  sink:'Source and sink lists adapted from MIT OCW 5.12, Lecture 2 p. 1, Berkowski, Spring 2005, CC BY-NC-SA 4.0.',
+  nitro:'Nitromethane from MIT OCW 5.12, Lecture 1 p. 17, CC BY-NC-SA 4.0.',
+  form:'Adapted from MIT OCW 5.12, Lecture 2 p. 1, CC BY-NC-SA 4.0.',
+  rules:"Rules adapted from MIT OCW 5.12, Lecture 2 p. 2, 'Rules for Resonance Structures', CC BY-NC-SA 4.0.",
+  acet:'Acetate from MIT OCW 5.12, Problem Set 1 Q3b, CC BY-NC-SA 4.0.',
+  hyb:'Bond lengths: see above. The hybrid idea follows MIT OCW 5.12, Lecture 1 p. 17, CC BY-NC-SA 4.0.',
+  ps:n=>`Adapted from MIT OCW 5.12, Problem Set 1 Q${n}, Berkowski, Spring 2005, CC BY-NC-SA 4.0.`,
+};
+const sigma=(k,i)=>i.sigma;
+const STEPS=[
+ {id:'u1-l06-s01',phase:'Hook',type:'mc',prediction:true,title:'Which one is longer?',
+  prompt:"<p>This is acetate, what's left of vinegar's acid after it gives away H⁺. One C–O bond is drawn double, the other single. Which one is longer?</p>",
+  visual:{mol:'acetate'},
+  choices:[{id:'a',text:'the C–O single bond'},{id:'b',text:'the C=O double bond'},{id:'c',text:"they're the same length"}],
+  reveal:"Measure them and they're <b>identical</b>. In acetic acid they really do differ. So the drawing of acetate is hiding something. By the end of this Lesson you'll know what.",
+  revealScene:'acetate-bond-lengths',
+  sr:"Acetic acid: one C–O bond is clearly shorter than the other. Acetate: both C–O bonds are the same length, and that length sits between acetic acid's two.",
+  src:SRC.geom},
+ {id:'u1-l06-s02',phase:'Build',type:'explain',title:'Electrons flow from a source to a sink',
+  prompt:"<p>A <b>curved arrow</b> tracks one pair of electrons. Its tail sits on the pair that moves, the <b>source</b>. Its head points to where the pair lands, the <b>sink</b>.</p><ul><li>Sources: a lone pair, or a π bond.</li><li>Sinks: an electronegative atom, an atom with room for more electrons, or a positive atom.</li></ul><p class=\"muted\">(A half-headed 'fishhook' arrow moves a single electron. You'll meet it much later.)</p>",
+  scene:{replay:'formaldehyde',pushes:['b1-2>2'],auto:true},
+  sr:'Formaldehyde, H₂C double-bonded to O. A curved arrow starts on the C=O π bond and ends on oxygen. The pair becomes a lone pair on O: oxygen is now negative, carbon positive. No atom moves.',
+  src:SRC.sink},
+ {id:'u1-l06-s03',phase:'Build',type:'tap',title:'Find the electron sources',mol:'nitromethane',
+  prompt:'<p>Nitromethane. Tap every place electrons could flow <b>from</b>, then press Check.</p>',
+  answer:['a3','a4','b2-3'],
+  correct:'Lone pairs on both oxygens and the N=O π bond. Every other bond here is σ.',
+  hints:[[s=>s.has('a2'),'N⁺ here has four bonds and no lone pair, so it has nothing to give.'],
+    [s=>['b1-2','b1-5','b1-6','b1-7','b2-4'].some(k=>s.has(k)),"That's a σ bond. In resonance only lone pairs and π bonds move; σ bonds stay put."],
+    [s=>['a1','a5','a6','a7'].some(k=>s.has(k)),'Look for lone pairs or π bonds. This carbon and its H\'s have neither.'],
+    [s=>!s.has('b2-3'),'A double bond is one σ plus one π, and the π pair is free to move.'],
+    [s=>!s.has('a3')||!s.has('a4'),'Both oxygens carry lone pairs. Check the other one.']],
+  fallback:'Sources are lone pairs and π bonds. Find every one.',
+  revealText:'The three sources: lone pairs on O, lone pairs on O⁻, the N=O π bond.',
+  src:SRC.nitro},
+ {id:'u1-l06-s04',phase:'Build',type:'arrows',title:'Push the electrons',mol:'formaldehyde',
+  prompt:'<p>Push the electrons to turn formaldehyde into its other contributor.</p>',
+  paths:[['b1-2>2']],showTarget:true,
+  correct:'The π pair is now a lone pair on O: O⁻ and C⁺. Same atoms, same σ bonds. Only the π electrons moved.',
+  hints:[['b1-2>1','Electrons flow to the sink. Oxygen is more electronegative, so it pulls the pair.'],
+    ['lp2>1','That pushes more electrons onto carbon, which already has a full octet. Move a pair away from carbon instead.'],
+    [/^b1-[34]>/,'σ bonds never move in resonance.']],
+  fallback:'Which atom is the sink? Move the pair that sits between C and O toward it.',
+  sr:'Arrow from the C=O π bond to oxygen. Result: H₂C⁺ single-bonded to O⁻.',
+  src:SRC.form},
+ {id:'u1-l06-s05',phase:'Build',type:'explain',title:'The three moves',
+  prompt:"<p>Every resonance arrow is one of <b>three moves</b>:</p><ol><li><b>Lone pair → bond.</b> A lone pair becomes a new π bond to the atom next door.</li><li><b>Bond → atom.</b> A π pair leaves its bond and becomes a lone pair on one of its own atoms.</li><li><b>Bond → next bond.</b> A π pair slides over by one position.</li></ol><p>The rules never change: <b>atoms don't move, σ bonds don't break</b>, and every drawing must be a real Lewis structure. If one push gives an atom too many electrons, a second push has to take some away. The arrows happen together.</p>",
+  scene:{three:true},
+  sr:"Move one: the negative oxygen of acetate sends a lone pair into the bond to carbon. Move two: formaldehyde's π pair lands on oxygen. Move three: in the allyl cation, the C=C π pair slides one position toward the positive carbon.",
+  src:SRC.rules},
+ {id:'u1-l06-s06',phase:'Build',type:'arrows',title:'Move the charge',mol:'acetate',
+  prompt:'<p>Back to acetate. Push electrons to move the negative charge to the other oxygen.</p>',
+  paths:[['lp4>2','b2-3>3']],showTarget:true,
+  between:{'lp4>2':["C has 10 e⁻: something has to leave. In resonance both arrows happen at once, so this halfway drawing isn't a real structure.",true],
+    'b2-3>3':["C has only 6 e⁻ and O3 has a charge. This halfway drawing isn't real either. Fill the gap.",true]},
+  correct:'The charge moved from one O to the other, and nothing else changed. Two drawings, one ion.',
+  hints:[['b2-3>2','Oxygen is the electronegative sink. Pull the π pair toward O, not C.'],
+    ['lp3>2','Start from the oxygen that carries the negative charge. It has the extra pair.'],
+    [sigma,'σ bonds stay put.']],
+  fallback:'One pair comes in from O⁻ and one pair leaves toward the other O.',
+  sr:'Arrow from a lone pair on the lower oxygen into the C–O bond; arrow from the C=O π bond onto the upper oxygen. The double bond and the negative charge have swapped oxygens.',
+  src:SRC.acet},
+ {id:'u1-l06-s07',phase:'Build',type:'explain',title:'So which drawing is acetate?',
+  prompt:"<p><b>Neither.</b> The real ion is the <b>resonance hybrid</b>: the − charge is shared by both oxygens (δ− each), and both C–O bonds sit between single and double. That's why they measured the same.</p><p>The ↔ arrow means 'two drawings of one thing'. It is <b>not</b> ⇌: acetate never flips back and forth. It is the blend, all the time.</p>",
+  scene:{hybrid:true},
+  sr:'The two acetate drawings merge into one: both C–O bonds dashed, each oxygen δ−, and both bonds labelled with the same length.',
+  src:SRC.hyb},
+ {id:'u1-l06-s08',phase:'Build',type:'arrows',title:'Slide the bond',mol:'allyl',
+  prompt:'<p>The allyl cation. Use move 3: slide the π bond toward the positive carbon.</p>',
+  paths:[['b1-2>3']],showTarget:true,
+  correct:'The double bond slid one position and the + charge jumped to the other end. The real allyl cation shares + between both ends.',
+  hints:[[/^b1-2>[12]$/,'That parks the pair on one carbon and leaves two C⁺. The empty spot is on C3, so slide the bond toward it.'],
+    [/^b2-3>/,"That's σ. Only the π bond moves."]],
+  fallback:'C3⁺ is the sink. Which π pair is next to it?',
+  sr:'Arrow from the C1=C2 π bond to the C2–C3 bond. Now C2=C3 is double and C1 is positive.',
+  src:'n/a (our example).'},
+ {id:'u1-l06-s09',phase:'Build',type:'mc',title:'Same atoms, same places?',
+  prompt:'<p>Same atoms, same places? Which pair shows two resonance contributors?</p>',
+  choices:[{id:'a',pair:[['nitromethane',null],'↔',['nitromethane',['lp4>2','b2-3>3']]],why:'same atoms, electrons moved'},
+    {id:'b',pair:[['nitromethane',null],'and',['methylNitrite',null]],why:'atom moved'},
+    {id:'c',pair:[['acetate',null],'and',['aceticAcid',null]],why:'H added'}],
+  answer:['a'],
+  correct:'Same atoms, same σ bonds; only electrons differ. That\'s resonance.',
+  hints:[[s=>s.has('b'),'Look at what carbon is bonded to: N in one, O in the other. An atom moved, so that\'s a different molecule, not a contributor.'],
+    [s=>s.has('c'),'Count the hydrogens. Adding H⁺ makes a different species. Resonance never adds or removes atoms.']],
+  fallback:'Resonance contributors differ only in where lone pairs and π bonds are.',
+  src:'n/a.'},
+ {id:'u1-l06-s10',phase:'Build',type:'arrows',title:'Swap the oxygens',mol:'nitromethane',
+  prompt:'<p>Nitromethane: push electrons to swap which oxygen carries the negative charge.</p>',
+  paths:[['lp4>2','b2-3>3']],showTarget:true,
+  between:{'lp4>2':["N would have 10 e⁻. A second-row atom can't, so another pair has to leave. This isn't a real structure.",true],
+    'b2-3>3':['N has only 6 e⁻ and a 2+ charge. Not a real structure. Finish the move.',true]},
+  correct:'Same as acetate: charge shared by two oxygens. The real nitromethane is their hybrid.',
+  hints:[['b2-3>2','Pull the π pair toward the electronegative oxygen.'],['lp3>2','Start from O⁻, the oxygen with the extra pair.'],[/^b1-2>/,'σ bonds stay put.']],
+  fallback:"It's the acetate pattern again: one pair in, one pair out.",
+  sr:'Arrow from a lone pair on O⁻ into the N–O bond; arrow from the N=O π bond onto the other oxygen. The charges have swapped oxygens.',
+  src:SRC.nitro},
+ {id:'u1-res-ozone',phase:'Check',type:'arrows',title:'Ozone',mol:'ozone',diff:1,problem:'PS1 Q3c',open:true,
+  prompt:'<p>Ozone, O₃. Push electrons to reach another resonance contributor. No atom may carry a charge beyond ±1.</p>',
+  paths:[['lp3>2','b1-2>1']],showTarget:false,
+  between:{'lp3>2':['Central O would have 10 e⁻. Something has to leave.',true],'b1-2>1':['Central O now has only 6 e⁻ and 2+. Not a real structure.',true]},
+  correct:'The double bond and the − charge swapped ends. The central O stays +.',
+  hints:[['b1-2>2','That leaves the end oxygen with only 6 electrons. Push the pair onto the end oxygen instead.'],['lp1>2','O1 has no extra pair to spare. Start from O⁻.']],
+  fallback:'Same pattern as acetate: one pair in from O⁻, one pair out to the far O.',
+  sr:'Both arrows played: −O–O⁺=O.',src:SRC.ps(3)},
+ {id:'u1-res-not-resonance',phase:'Check',type:'mc',multi:true,title:'Not resonance',diff:2,problem:'PS1 Q6',
+  prompt:'<p>Which pairs are <b>not</b> resonance contributors of each other? Pick all that apply.</p>',
+  choices:[{id:'a',rd:['C[N+](C)=C1C=C[CH-]C=C1','CN(C)c1ccccc1'],name:'N,N-dimethylaniline',why:'same atoms, electrons moved'},
+    {id:'b',rd:['C=C=C','CC#C'],name:'allene / propyne',why:'H moved'},
+    {id:'c',rd:['C1C[CH+]C=CO1','C1CC=CC=[O+]1'],why:'same atoms, electrons moved'},
+    {id:'d',rd:['CC(=S)C=C[CH2-]','CC([S-])=CC=C'],why:'same atoms, electrons moved'},
+    {id:'e',rd:['CC(C)=O','CC(O)=C'],name:'acetone / its enol',why:'H moved'}],
+  answer:['b','e'],
+  correct:'In both, a hydrogen moved. That makes different molecules (isomers), not drawings of one molecule.',
+  hints:[[s=>['a','c','d'].some(x=>s.has(x)),'Check that pair atom by atom: every atom stays where it was, and only lone pairs and π bonds shift. That is resonance.'],
+    [s=>!s.has('b'),'Look at the ends of allene and propyne. CH₂ and CH₂ vs CH₃ and CH: an H moved.'],
+    [s=>!s.has('e'),'Acetone and its enol differ in where one H sits. Those are tautomers, real different molecules.']],
+  fallback:'Resonance never moves an atom, hydrogens included.',
+  src:SRC.ps(6)},
+ {id:'u1-res-oxocarbenium',phase:'Check',type:'arrows',title:'Oxocarbenium',mol:'oxo',diff:2,problem:'PS1 Q6c',
+  prompt:'<p>Push electrons to turn this cation into its oxocarbenium contributor (shown).</p>',
+  paths:[['lp6>5','b4-5>3']],showTarget:true,
+  between:{'lp6>5':['C5 would have 10 e⁻. Something has to leave.',true],'b4-5>3':["C5⁺, next to O. That's a valid contributor too. Keep going to reach the target.",false]},
+  correct:"Oxygen's lone pair joined the π system: the + charge ends up on O, which still has a full octet.",
+  hints:[['lp6>1','C1 already has four bonds and is not in the π system. Push toward C5.'],
+    [/^b4-5>[45]$/,'That parks the pair as a lone pair and leaves two cations. Slide the bond toward C3⁺ instead.'],
+    [sigma,'σ bonds stay put, ring bonds included.']],
+  fallback:"Two moves: the π bond slides toward C⁺, and O's lone pair fills the gap it leaves.",
+  sr:'Both arrows played.',src:SRC.ps(6)},
+ {id:'u1-res-thiodienyl',phase:'Check',type:'arrows',title:'Down the chain',mol:'thio',diff:3,problem:'PS1 Q6d',
+  prompt:'<p>Push electrons to move the negative charge from carbon onto sulfur (target shown). It takes three arrows.</p>',
+  paths:[['lp6>5','b4-5>2','b2-3>3']],showTarget:true,
+  between:(mol,s)=>{for(const a in mol.atoms){const e=electrons(mol,s,+a);if(e>8) return [`${mol.atoms[a].name} would have ${e} e⁻. Something has to leave.`,true];}
+    for(const a in mol.atoms){if(mol.atoms[a].el==='C'&&electrons(mol,s,+a)<8) return [`${mol.atoms[a].name} has only 6 e⁻. Not a real structure, keep going.`,true];} return null;},
+  correct:'The charge travelled down the chain, three atoms over, to the electronegative sulfur.',
+  hints:[['b4-5>6','C6 already has a lone pair pushing toward C5. The π bond has to flow the other way, toward C2.'],
+    ['b2-3>2','Sulfur is the electronegative end. Push the C=S electrons onto S.'],
+    ['lp3>2','S has no charge to give yet. Start from the carbon with the − charge.']],
+  fallback:"Follow the chain: C6's lone pair → the next π bond → the C=S π bond → onto S.",
+  sr:'All three arrows played.',src:SRC.ps(6)},
+ {id:'u1-l06-s15',phase:'Wrap',type:'wrap',title:'Electrons move. Atoms don\'t.',
+  prompt:'<p>Arrows go source → sink: lone pairs and π bonds are sources; electronegative, positive or empty-handed atoms are sinks.</p><p>Three moves: lone pair → bond, bond → atom, bond → next bond.</p><p>The real molecule is the hybrid of its drawings.</p>',
+  scene:{hybrid:true,still:true},sr:"Acetate's hybrid: charge shared by both oxygens.",src:'n/a.'},
+];
+const KEY_IDEA='Curved arrows move only lone pairs and π bonds, from source to sink; atoms and σ bonds never move. The real molecule is the hybrid of its drawings.';
+const CHECKS=STEPS.filter(s=>s.phase==='Check');
+
+// =====================================================================
+// Player state (the page shell)
+// =====================================================================
+const P=new URLSearchParams(location.search);
+let idx=Math.max(0,Math.min(STEPS.length,+(P.get('step')||0)-1)); if(!P.get('step')) idx=-1; // -1 = intro, STEPS.length = Lesson end
+let reduced=P.get('motion')==='reduced', showSpec=P.get('spec')==='1';
+let st={}, raf=0, completed=new Set();
+const $=s=>document.querySelector(s);
+function fresh(){
+  cancelAnimationFrame(raf);
+  const S=STEPS[idx];
+  st={phase:'answer',tries:0,sel:new Set(),msg:null,lastHint:null,
+    done:[],shown:[],drag:null,armed:null,bounce:null,call:'',callWarn:false,t:0,playing:false,scene:false};
+  if(S&&S.type==='arrows'){const m=MOLS[S.mol]; st.target=applyAll(m.start,S.paths[0]);}
+}
+const cur=()=>STEPS[idx];
+const curState=()=>applyAll(MOLS[cur().mol].start,st.done);
+
+// ---------- top-level render ----------
+function render(){
+  document.body.dataset.motion=reduced?'reduced':'';
+  syncBar();
+  if(idx<0) return renderIntro();
+  if(idx>=STEPS.length) return renderEnd();
+  const S=cur(), nCheck=CHECKS.indexOf(S);
+  const kick=S.phase==='Check'?`<span class="chk">CHECK · PROBLEM ${nCheck+1} OF ${CHECKS.length}</span><span class="diff">${'●'.repeat(S.diff)}${'○'.repeat(3-S.diff)}</span>`
+    :`<span>${S.phase.toUpperCase()} · ${({mc:'MULTIPLE CHOICE',explain:'EXPLAIN',tap:'TAP TO IDENTIFY',arrows:'DRAW ARROWS',wrap:'EXPLAIN'})[S.type]}</span>`;
+  $('#app').innerHTML=`<main class="step">
+    <div class="top"><button class="x" aria-label="Leave Lesson" onclick="go(-1)">✕</button>
+      <div class="prog" aria-label="Step ${idx+1} of ${STEPS.length}">${STEPS.map((_,i)=>`<i class="${i<idx?'done':i===idx?'now':''}"></i>`).join('')}</div></div>
+    <div class="kick">${kick}<span style="color:var(--at-ink-muted)">STEP ${idx+1}/${STEPS.length}</span></div>
+    ${S.type==='wrap'?`<div class="big">${S.title}</div>`:`<h1>${S.title}</h1>`}
+    <div class="prompt">${S.prompt}</div>
+    <div id="body"></div>
+    <div class="fb" id="fb" role="status"></div>
+    <details><summary>ⓘ Where this comes from</summary><p class="srcnote">${S.src}</p></details>
+  </main><div class="foot"><button id="main"></button></div>`;
+  $('#main').onclick=mainBtn;
+  ({mc:bodyMC,explain:bodyExplain,tap:bodyTap,arrows:bodyArrows,wrap:bodyExplain})[S.type]();
+  drawFb(); drawMain(); renderSpec();
+}
+function drawFb(){
+  const fb=$('#fb'); if(!fb) return;
+  if(st.msg){fb.className='fb on '+st.msg.kind;fb.innerHTML=`<h2>${st.msg.title}</h2><p>${st.msg.text}</p>`;}else{fb.className='fb';fb.innerHTML='';}
+}
+function drawMain(){
+  const b=$('#main'), S=cur(); if(!b) return;
+  if(S.type==='explain'||S.type==='wrap'){b.textContent=S.type==='wrap'?'FINISH LESSON':'CONTINUE';b.disabled=false;return;}
+  if(st.phase==='done'){b.textContent='CONTINUE';b.disabled=false;return;}
+  if(S.type==='arrows'){b.textContent='PUSH THE ELECTRONS';b.disabled=true;return;}
+  b.textContent='CHECK'; b.disabled=!st.sel.size;
+}
+function mainBtn(){
+  const S=cur();
+  if(S.type==='explain'||S.type==='wrap'||st.phase==='done'){completed.add(idx);return go(idx+1);}
+  if(S.type==='mc'||S.type==='tap') check();
+}
+function go(i){idx=Math.max(-1,Math.min(STEPS.length,i));setParam('step',idx<0?null:String(idx+1));fresh();render();window.scrollTo(0,0);
+  if(idx>=0&&idx<STEPS.length) say(`Step ${idx+1}: ${cur().title}`);}
+
+// ---------- Multiple choice (incl. prediction and multi-correct) ----------
+function bodyMC(){
+  const S=cur(); let h='';
+  if(S.visual) h+=`<div class="card" style="margin-bottom:14px"><svg class="mol" viewBox="0 0 400 260" role="img" aria-label="Acetate, CH3–C(=O)–O⁻, with all lone pairs">${molSvg(MOLS[S.visual.mol],MOLS[S.visual.mol].start)}</svg></div>`;
+  if(st.phase==='done'&&S.revealScene) h+=`<div class="card" style="margin-bottom:14px"><svg class="mol" viewBox="0 0 400 260" role="img" aria-label="${S.sr}">${sceneBondLengths()}</svg><div class="cap">Scene <span class="data">acetate-bond-lengths</span> (both). Lengths pending the PySCF run.</div></div>`;
+  h+=`<div class="choices" role="group">`+S.choices.map(c=>{
+    const on=st.sel.has(c.id), right=S.answer&&S.answer.includes(c.id), rev=st.phase==='done'&&!S.prediction;
+    let inner=c.text?`<span class="lt">${c.id.toUpperCase()}</span>${c.text}`:`<span class="lt">${c.id.toUpperCase()}</span>${c.name?`<span class="muted">${c.name}</span>`:''}`;
+    if(c.pair) inner+=`<div class="pair">${c.pair.map(x=>typeof x==='string'?`<span class="op">${x}</span>`:`<svg class="mini" viewBox="0 0 400 260" aria-hidden="true">${molSvg(MOLS[x[0]],x[1]?applyAll(MOLS[x[0]].start,x[1]):MOLS[x[0]].start)}</svg>`).join('')}</div>`;
+    if(c.rd) inner+=`<div class="pair"><div class="rd">${rdSvg(c.rd[0])}</div><span class="op">?</span><div class="rd">${rdSvg(c.rd[1])}</div></div>`;
+    if(rev&&c.why) inner+=`<span class="why ${(S.multi?!right:right)?'ok':''}">${c.why}</span>`;
+    const cls=rev?(right?'ok':on?'no':''):'';
+    return `<button class="choice ${cls}" aria-pressed="${on}" data-c="${c.id}" ${st.phase==='done'?'disabled':''}>${inner}</button>`;}).join('')+`</div>`;
+  $('#body').innerHTML=h;
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.c; if(S.multi){st.sel.has(id)?st.sel.delete(id):st.sel.add(id);}else{st.sel=new Set([id]);}
+    if(st.msg&&st.msg.kind==='hint'){} bodyMC(); drawMain(); renderSpec();});
+  if(S.choices.some(c=>c.rd)&&!RD) loadRDKit().then(m=>{if(m&&cur()===S) bodyMC();});
+}
+function check(){
+  const S=cur();
+  if(S.prediction){st.phase='done';st.msg={kind:'pred',title:'HERE\'S WHAT HAPPENS',text:S.reveal};say(S.reveal.replace(/<[^>]+>/g,''));return render();}
+  const ok=S.answer.length===st.sel.size&&S.answer.every(a=>st.sel.has(a));
+  if(ok){st.phase='done';st.msg={kind:'good',title:'CORRECT',text:S.correct};say('Correct. '+S.correct);return render();}
+  st.tries++;
+  const hint=(S.hints.find(([t])=>t(st.sel))||[null,S.fallback])[1]; st.lastHint=hint;
+  if(st.tries<2){st.msg={kind:'hint',title:'NOT QUITE',text:hint};say('Not quite. '+hint);}
+  else{st.phase='done';st.sel=new Set(S.answer);st.msg={kind:'show',title:'HERE IS THE ANSWER',text:(S.revealText||S.correct)};say('Here is the answer. '+st.msg.text);}
+  render();
+}
+
+// ---------- Tap to identify ----------
+function bodyTap(){
+  const S=cur(), m=MOLS[S.mol], s=m.start, A=m.atoms;
+  let hits='';
+  if(st.phase!=='done'){
+    for(const a in A) hits+=`<circle class="hit" tabindex="0" role="button" aria-pressed="${st.sel.has('a'+a)}" aria-label="${A[a].name}${s.lp[a]?' and its lone pairs':''}" data-t="a${a}" cx="${A[a].x}" cy="${A[a].y}" r="${s.lp[a]?30:18}"/>`;
+    for(const k in s.bonds){const [a,b]=k.split('-').map(Number);hits+=`<circle class="hit" tabindex="0" role="button" aria-pressed="${st.sel.has('b'+k)}" aria-label="${A[a].name}–${A[b].name} ${s.bonds[k]>1?'double ':''}bond" data-t="b${k}" cx="${(A[a].x+A[b].x)/2}" cy="${(A[a].y+A[b].y)/2}" r="12"/>`;}
+  }
+  $('#body').innerHTML=`<div class="card"><div class="callout">${st.sel.size?`${st.sel.size} picked`:'Tap an atom (its lone pairs count) or a bond.'}</div>
+    <svg class="mol" viewBox="0 0 400 260" role="group" aria-label="Nitromethane, full Lewis structure">${molSvg(m,s,{sel:st.sel})}${hits}</svg></div>`;
+  const pick=el=>{const t=el.dataset.t;st.sel.has(t)?st.sel.delete(t):st.sel.add(t);bodyTap();drawMain();renderSpec();$(`[data-t="${t}"]`)?.focus();};
+  document.querySelectorAll('[data-t]').forEach(el=>{el.onclick=()=>pick(el);el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(el);}};});
+}
+
+// ---------- Explain (with Scenes) ----------
+function bodyExplain(){
+  const S=cur(); let svg='', cap='', tools='';
+  if(S.scene&&S.scene.replay){svg=replayFrame(MOLS[S.scene.replay],S.scene.pushes,st.t);cap='Scene <span class="data">formaldehyde-pi-shift</span>';tools=scrubber();}
+  else if(S.scene&&S.scene.three){svg=sceneThree();cap='Scene <span class="data">three-moves</span> (all), each panel lit in turn';}
+  else if(S.scene&&S.scene.hybrid){svg=sceneHybrid();cap=`Scene <span class="data">acetate-hybrid</span>${S.scene.still?' (final frame)':''}. Lengths pending the PySCF run.`;}
+  $('#body').innerHTML=`<div class="card"><svg class="mol" viewBox="0 0 400 260" role="img" aria-label="${S.sr}">${svg}</svg>${tools?`<div class="tools">${tools}</div>`:''}<div class="cap">${cap}</div></div>`;
+  wireScrub(()=>bodyExplain());
+  if(S.scene&&S.scene.replay&&S.scene.auto&&!st.autoPlayed){st.autoPlayed=true;if(reduced){st.t=1;bodyExplain();}else play(()=>bodyExplain(),S.scene.pushes.length);}
+}
+
+// ---------- Draw arrows (push live) ----------
+function bodyArrows(){
+  const S=cur(), m=MOLS[S.mol];
+  $('#body').innerHTML=`${S.showTarget?`<div class="target"><span>TARGET</span><svg viewBox="0 0 400 260" role="img" aria-label="Target contributor">${molSvg(m,st.target,{op:.85})}</svg></div>`:
+      `<div class="target"><span>OPEN PROBLEM · ANY VALID CONTRIBUTOR</span></div>`}
+    <div class="card"><div class="callout" id="call" aria-hidden="true"></div>
+    <svg class="mol" id="mol" viewBox="0 0 400 260" role="group" aria-label="Starting structure. Use Tab to pick electrons, Enter to select."></svg>
+    <div class="tools" id="tools"></div><div class="cap" id="cap" hidden></div></div>`;
+  const svg=$('#mol');
+  svg.addEventListener('pointerdown',down); svg.addEventListener('pointermove',move); svg.addEventListener('pointerup',up);
+  svg.addEventListener('pointercancel',()=>{st.drag=null;drawArrows();}); svg.addEventListener('keydown',key);
+  drawArrows();
+}
+function sources(mol,s){
+  const A=mol.atoms,out=[];
+  for(const a in A){const L=layout(mol,s,+a); if(L.lps.length){const ang=L.lps[L.lps.length-1],p=lpPos(A[a],ang);out.push({kind:'lp',atom:+a,x:p.x,y:p.y,label:`lone pair on ${A[a].name}`,lps:L.lps.map(t=>lpPos(A[a],t))});}}
+  for(const k in s.bonds){const [a,b]=k.split('-').map(Number);out.push({kind:'bond',a,b,k,x:(A[a].x+A[b].x)/2,y:(A[a].y+A[b].y)/2,label:`${A[a].name}–${A[b].name} ${s.bonds[k]>1?'π':'σ'} bond`});}
+  return out;
+}
+function sinks(mol,s,src){
+  if(src.kind==='lp') return neighbours(s,src.atom);
+  const set=new Set([src.a,src.b,...neighbours(s,src.a),...neighbours(s,src.b)]); return [...set];
+}
+function segDist(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,u=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy)));return Math.hypot(p.x-a.x-u*dx,p.y-a.y-u*dy);}
+function nearestSource(p){
+  const m=MOLS[cur().mol]; let best=null,bd=1e9;
+  for(const s of sources(m,curState())){
+    const d=s.kind==='lp'?Math.min(...s.lps.map(q=>dist(p,q))):segDist(p,m.atoms[s.a],m.atoms[s.b])+6;
+    if(d<(s.kind==='lp'?20:15)&&d<bd){bd=d;best=s;}
+  }
+  return best;
+}
+function nearestSink(p,src){const m=MOLS[cur().mol];let best=null,bd=34;for(const a of sinks(m,curState(),src)){const d=dist(p,m.atoms[a]);if(d<bd){bd=d;best=a;}}return best;}
+const pushFrom=(src,to)=>({from:src.kind==='lp'?{lp:src.atom}:{bond:[src.a,src.b]},to});
+function describe(p){const A=MOLS[cur().mol].atoms;return (p.from.lp?`lone pair on ${A[p.from.lp].name}`:`${A[p.from.bond[0]].name}–${A[p.from.bond[1]].name} bond`)+` → ${A[p.to].name}`;}
+
+function drawArrows(){
+  const S=cur(), m=MOLS[S.mol], svg=$('#mol'); if(!svg) return;
+  if(st.scene){svg.innerHTML=replayFrame(m,st.done,st.t);$('#tools').innerHTML=scrubber();wireScrub(drawArrows);
+    $('#cap').hidden=false;$('#cap').innerHTML=`Scene <span class="data">push-replay</span>. ${S.sr}`;drawFb();drawMain();renderSpec();return;}
+  const s=curState(), focusId=document.activeElement&&document.activeElement.dataset?(document.activeElement.dataset.src||document.activeElement.dataset.sink):null;
+  const grabbing=st.drag?st.drag.src:st.armed;
+  // in-between flags: only on a halfway state the spec calls not real; ring the atoms whose count is off
+  const f0=st.phase!=='done'&&st.done.length?(typeof S.between==='function'?S.between(m,s):S.between&&S.between[st.done[0]]):null;
+  const flag=new Set(f0&&f0[1]?Object.keys(m.atoms).map(Number).filter(a=>m.atoms[a].el!=='H'&&(electrons(m,s,a)>octet(m,a)||(electrons(m,s,a)<8&&electrons(m,s,a)!==electrons(m,m.start,a)))):[]);
+  let o=molSvg(m,s,{flag,grab:grabbing&&grabbing.kind==='bond'?grabbing.k:null,hideLp:st.drag&&st.drag.src.kind==='lp'?st.drag.src.atom:null});
+  // accepted pushes stay as a faint trail, drawn on the state each was applied to
+  st.done.forEach((k,i)=>{o+=arrowSvg(pushGeom(m,applyAll(m.start,st.done.slice(0,i)),parseKey(k)),st.shown.includes(k)?'var(--at-ignite)':'var(--at-electron)',{op:.4});});
+  if(st.bounce){const g=pushGeom(m,s,st.bounce);o+=arrowSvg(g,'var(--at-ignite)',{dashed:true,cls:'bounce'})+`<text x="${g.c.x}" y="${g.c.y-6}" text-anchor="middle" font-size="18" font-weight="700" fill="var(--at-ignite)" font-family="JetBrains Mono,monospace">✕</text>`;}
+  if(grabbing){
+    for(const a of sinks(m,s,grabbing)){const snap=st.drag&&st.drag.snap===a,A=m.atoms[a];
+      o+=`<circle cx="${A.x}" cy="${A.y}" r="24" fill="${snap?'color-mix(in srgb,var(--at-electron) 22%,transparent)':'none'}" stroke="var(--at-electron)" stroke-width="${snap?3:1.5}" stroke-dasharray="${snap?'0':'4 4'}" opacity="${snap?1:.65}"/>`;}
+    if(st.drag){
+      const end=st.drag.snap?pushGeom(m,s,pushFrom(grabbing,st.drag.snap)):arrowGeom(m,{x:grabbing.x,y:grabbing.y},st.drag.p);
+      o+=arrowSvg(end,'var(--at-electron)',{dashed:!st.drag.snap,noHead:!st.drag.snap});
+      const p=st.drag.p; o+=`<circle cx="${p.x-4}" cy="${p.y}" r="4" fill="var(--at-electron)"/><circle cx="${p.x+4}" cy="${p.y}" r="4" fill="var(--at-electron)"/>`;
+    }
+  }
+  if(st.phase!=='done'){
+    if(st.armed) for(const a of sinks(m,s,st.armed)) o+=`<circle class="hit" tabindex="0" role="button" data-sink="${a}" aria-label="Send the ${st.armed.label} to ${m.atoms[a].name}" cx="${m.atoms[a].x}" cy="${m.atoms[a].y}" r="24"/>`;
+    else for(const q of sources(m,s)) o+=`<circle class="hit" tabindex="0" role="button" data-src="${q.kind==='lp'?'lp'+q.atom:'b'+q.k}" aria-label="Grab the ${q.label}" cx="${q.x}" cy="${q.y}" r="${q.kind==='lp'?11:9}"/>`;
+  }
+  svg.innerHTML=o;
+  if(focusId){const el=svg.querySelector(`[data-src="${focusId}"],[data-sink="${focusId}"]`);(el||svg.querySelector('.hit'))?.focus();}
+  // callout: what the finger is doing, else the in-between flag
+  let txt=st.call,warn=st.callWarn;
+  if(st.drag) txt=st.drag.snap?`${st.drag.src.label} → ${m.atoms[st.drag.snap].name}`:`${st.drag.src.label} → …`;
+  else if(st.armed) txt=`${st.armed.label} → pick where it goes`;
+  else if(!txt&&st.done.length&&st.phase!=='done'){
+    if(f0){txt=f0[0];warn=f0[1];}
+  }
+  const c=$('#call'); c.textContent=txt||''; c.className='callout'+(warn?' warn':'');
+  const n=st.done.length, total=S.paths[0].length;
+  $('#tools').innerHTML=`<span class="muted">${n} of ${total} push${total>1?'es':''} · try ${Math.min(st.tries+1,2)} of 2 on this push</span>`+
+    (st.phase==='done'?`<button class="ibtn" id="replay">▶ REPLAY</button>`:'');
+  if($('#replay')) $('#replay').onclick=()=>startReplay();
+  $('#cap').hidden=true;
+  drawFb(); drawMain(); renderSpec();
+}
+function pt(e){const svg=$('#mol'),p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}
+function down(e){
+  if(st.phase==='done'||st.scene) return;
+  const p=pt(e); st.call=''; st.callWarn=false;
+  const s=nearestSource(p);
+  if(!s){const m=MOLS[cur().mol],near=Object.keys(m.atoms).find(a=>dist(p,m.atoms[a])<24);
+    if(near){st.call=`${m.atoms[near].name} itself isn't electrons. Start at a lone pair or a bond.`;st.callWarn=true;}
+    drawArrows();return;}
+  st.drag={src:s,p,snap:null,moved:false}; $('#mol').setPointerCapture(e.pointerId); drawArrows();
+}
+function move(e){if(!st.drag)return;const p=pt(e);st.drag.p=p;st.drag.moved=true;st.drag.snap=nearestSink(p,st.drag.src);drawArrows();}
+function up(){
+  if(!st.drag) return; const d=st.drag; st.drag=null;
+  if(d.snap) commit(pushFrom(d.src,d.snap));
+  else if(!d.moved){st.call=`Drag the ${d.src.label} onto an atom.`;}
+  drawArrows();
+}
+function key(e){
+  const el=e.target, m=MOLS[cur().mol];
+  if(e.key==='Escape'&&st.armed){st.armed=null;drawArrows();return;}
+  if(e.key!=='Enter'&&e.key!==' ') return; if(!el.dataset||st.phase==='done') return;
+  e.preventDefault();
+  if(el.dataset.src){const id=el.dataset.src;st.armed=sources(m,curState()).find(q=>(q.kind==='lp'?'lp'+q.atom:'b'+q.k)===id);say(`Grabbed the ${st.armed.label}. Tab to an atom and press Enter, or Escape to cancel.`);drawArrows();$('#mol').querySelector('[data-sink]')?.focus();}
+  else if(el.dataset.sink){const p=pushFrom(st.armed,+el.dataset.sink);st.armed=null;commit(p);drawArrows();$('#mol').querySelector('.hit')?.focus();}
+}
+function commit(p){
+  const S=cur(), s=curState(), k=keyOf(p), leg=legality(s,p);
+  if(leg==='ok'&&gradePush(S,st.done,k)){
+    st.done.push(k); st.tries=0; st.msg=null; st.call=''; say(`Push accepted: ${describe(p)}.`);
+    if(canon(curState())===canon(st.target)) succeed(false);
+    return;
+  }
+  st.tries++; st.lastHint=pickHint(S,k,{sigma:leg==='sigma'});
+  st.bounce=p; setTimeout(()=>{st.bounce=null;drawArrows();},reduced?900:650);
+  if(st.tries<2){st.msg={kind:'hint',title:'NOT QUITE',text:st.lastHint};say('Not quite. '+st.lastHint);return;}
+  // second miss on this push: show it in orange, apply it, carry on
+  const path=S.paths.find(pa=>st.done.every(x=>pa.includes(x))), next=path.find(x=>!st.done.includes(x));
+  st.done.push(next); st.shown.push(next); st.tries=0;
+  if(canon(curState())===canon(st.target)){succeed(true);return;}
+  st.msg={kind:'show',title:'HERE IS THAT PUSH',text:`${st.lastHint} The push is shown in orange: ${describe(parseKey(next))}. Now finish it.`}; say(st.msg.text);
+}
+function succeed(revealed){
+  const S=cur(); st.phase='done';
+  st.msg=revealed?{kind:'show',title:'HERE IS THE ANSWER',text:S.correct}:{kind:'good',title:'ELECTRONS PUSHED!',text:S.correct};
+  say((revealed?'Here is the answer. ':'Correct. ')+S.correct);
+  if(!reduced) setTimeout(()=>{if(st.phase==='done'&&cur()===S) startReplay();},800);
+}
+function startReplay(){st.scene=true;st.t=0;if(reduced){st.t=1;drawArrows();}else play(drawArrows,st.done.length);}
+
+// =====================================================================
+// Scenes: pure functions of t ∈ [0,1]
+// =====================================================================
+const ease=x=>x<0?0:x>1?1:x*x*(3-2*x);
+// push-replay: electrons ride each arrow in turn, then bonds and charges update.
+function replayFrame(mol,pushes,t){
+  const n=pushes.length; if(!n) return molSvg(mol,mol.start);
+  const seg=Math.min(n-1,Math.floor(t*n)), u=ease(t*n-seg);
+  const before=applyAll(mol.start,pushes.slice(0,seg)), landed=u>=.999||t>=1;
+  let o=molSvg(mol,landed&&seg===n-1?applyAll(mol.start,pushes):before);
+  pushes.forEach((k,i)=>{ if(i>seg) return; const g=pushGeom(mol,applyAll(mol.start,pushes.slice(0,i)),parseKey(k));
+    o+=arrowSvg(g,'var(--at-electron)',{op:i<seg?.35:1});
+    if(i===seg&&u>0&&u<.999){const p=bez(g,u),q=bez(g,Math.min(1,u+.04)),ang=Math.atan2(q.y-p.y,q.x-p.x);
+      o+=`<circle cx="${p.x-Math.sin(ang)*4}" cy="${p.y+Math.cos(ang)*4}" r="4" fill="var(--at-electron)"/><circle cx="${p.x+Math.sin(ang)*4}" cy="${p.y-Math.cos(ang)*4}" r="4" fill="var(--at-electron)"/>`;}
+  });
+  return o;
+}
+function scrubber(){return `<div class="scrub"><button class="ibtn" id="play" aria-label="${st.playing?'Pause':'Play'} the Scene">${st.playing?'❚❚':'▶'}</button><input type="range" id="t" min="0" max="1000" value="${Math.round(st.t*1000)}" aria-label="Scene time"></div>`;}
+let replayN=1;
+function wireScrub(redraw){
+  const pb=$('#play'), r=$('#t'); if(!pb) return;
+  pb.onclick=()=>{if(st.playing){st.playing=false;cancelAnimationFrame(raf);redraw();}else{if(st.t>=1)st.t=0;play(redraw,replayN);}};
+  r.oninput=e=>{st.playing=false;cancelAnimationFrame(raf);st.t=e.target.value/1000;redraw();};
+}
+function play(redraw,n){
+  replayN=n; st.playing=true; const D=1300*n, t0=performance.now()-st.t*D;
+  const tick=now=>{st.t=Math.min(1,(now-t0)/D);if(st.t>=1)st.playing=false;redraw();if(st.playing)raf=requestAnimationFrame(tick);};
+  cancelAnimationFrame(raf); raf=requestAnimationFrame(tick);
+}
+// acetate-bond-lengths: acetic acid vs acetate. No numbers until the pipeline runs.
+function sceneBondLengths(){
+  const sc=(mol,x0,lab)=>{const m=MOLS[mol];return `<g transform="translate(${x0},20) scale(.5)">${molSvg(m,m.start)}</g>`+lab;};
+  const L=(x,y,t,c='var(--at-ignite)')=>`<text x="${x}" y="${y}" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="${c}">${t}</text>`;
+  return `<text x="100" y="22" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="14" fill="#fff">acetic acid</text>`+
+    `<text x="300" y="22" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="14" fill="#fff">acetate</text>`+
+    sc('aceticAcid',0,L(138,62,'C=O ?.??? Å')+L(138,150,'C–O ?.??? Å')+L(30,200,'differ: C=O shorter',"var(--at-ink-muted)"))+
+    sc('acetate',200,L(338,62,'?.??? Å','var(--at-electron)')+L(338,150,'?.??? Å','var(--at-electron)')+L(230,200,'identical',"var(--at-electron)"))+
+    `<line x1="200" y1="36" x2="200" y2="215" stroke="var(--at-line)" stroke-dasharray="4 4"/>`+
+    `<text x="200" y="245" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--at-ink-muted)">computed · PySCF B3LYP/cc-pVTZ · pending</text>`;
+}
+// three-moves: one panel per move, lit in turn.
+function sceneThree(){
+  const panel=(mol,keys,i,label)=>{const m=MOLS[mol],s=m.start,g=pushGeom(m,s,parseKey(keys[0]));
+    return `<g class="panel" style="animation-delay:${i*1.5}s"><g transform="translate(${i*133},40) scale(.33)">${molSvg(m,s)}${arrowSvg(g,'var(--at-electron)')}</g>`+
+      `<text x="${i*133+66}" y="150" text-anchor="middle" font-family="Silkscreen" font-size="11" fill="var(--at-electron)">MOVE ${i+1}</text>`+
+      `<text x="${i*133+66}" y="168" text-anchor="middle" font-family="Space Grotesk" font-size="12" fill="#fff">${label}</text></g>`;};
+  return panel('acetate',['lp4>2'],0,'lone pair → bond')+panel('formaldehyde',['b1-2>2'],1,'bond → atom')+panel('allyl',['b1-2>3'],2,'bond → next bond')+
+    `<text x="200" y="215" text-anchor="middle" font-family="Space Grotesk" font-size="13" fill="var(--at-ink-muted)">atoms don't move · σ bonds don't break</text>`;
+}
+// acetate-hybrid: one drawing, dashed C–O bonds, δ− on each O, lone pairs hidden.
+function sceneHybrid(){
+  const m=MOLS.acetate, s={bonds:{'1-2':1,'2-3':1,'2-4':1},lp:{},ch:{}};
+  return molSvg(m,s,{partial:['2-3','2-4'],delta:{3:'δ−',4:'δ−'},lpHidden:true})+
+    `<text x="236" y="128" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="var(--at-electron)">?.??? Å</text>`+
+    `<text x="236" y="186" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="var(--at-electron)">?.??? Å</text>`+
+    `<text x="200" y="250" text-anchor="middle" font-family="Space Grotesk" font-size="13" fill="var(--at-ink-muted)">the hybrid: charge shared, both bonds the same</text>`;
+}
+
+// ---------- intro + Lesson end ----------
+function renderIntro(){
+  $('#app').innerHTML=`<main class="intro"><h1>Lesson 6, playable</h1>
+  <p>A rough run-through of <b>every Step</b> in the Lesson 6 spec (<i>Resonance: Pushing Electrons</i>): the Hook, nine Build Steps, four Check Problems and the Wrap. The wording, answers, Hints and in-between flags are copied from the spec, so anything that reads wrong here reads wrong in the spec.</p>
+  <div class="box"><b>Please look for</b><ol>
+    <li><b>Pace.</b> Does 15 Steps feel right? Do the Explain Steps (2, 5, 7) land where you need them?</li>
+    <li><b>Pushes.</b> On Steps 4, 6, 8 and 10, do the three moves feel natural to do with a finger, especially move 3 (drop a π bond on the next atom)?</li>
+    <li><b>In-between flags.</b> When you make the first of two pushes, is the orange "not a real structure" note clear, or does it read like you did something wrong?</li>
+    <li><b>Hints.</b> Make deliberate mistakes. Is each Hint the one a Student needs at that moment?</li>
+    <li><b>The Check Problems.</b> Is the difficulty ramp (ozone ● → thio-dienyl ●●●) right? Ozone is graded as an open Problem (no target shown).</li>
+    <li><b>The acetate story.</b> Does the Hook → Step 6 → Step 7 → Wrap arc pay off, even with the bond lengths shown as ?.??? Å?</li>
+  </ol></div>
+  <p class="muted">The yellow bar at the bottom is not part of the design: jump to any Step, open the spec fields, toggle reduced motion, or redo a Step.</p>
+  <button class="btn btn-primary" onclick="go(0)">START THE LESSON</button></main>`;
+}
+function renderEnd(){
+  $('#app').innerHTML=`<main class="step end"><div class="big" style="margin-top:10px">LESSON COMPLETE</div>
+    <div class="key"><span class="muted">KEY IDEA</span><br>${KEY_IDEA}</div>
+    <div class="streak">🔥 streak <b>+1</b> <span class="muted">(1 Lesson today)</span></div>
+    <button class="btn btn-primary" disabled title="Not built in this prototype">NEXT LESSON: RESONANCE: WHICH CONTRIBUTOR WINS</button>
+    <button class="btn btn-secondary" onclick="go(-1)">BACK TO UNIT</button></main>`;
+}
+
+// ---------- spec panel (prototype chrome) ----------
+function renderSpec(){
+  const d=$('#spec'); d.className=showSpec?'on':''; if(!showSpec||idx<0||idx>=STEPS.length){d.innerHTML='';return;}
+  const S=cur(); let t=`<b>id</b> ${S.id}   <b>phase</b> ${S.phase}   <b>type</b> ${S.type}${S.prediction?' (prediction: true)':''}${S.multi?' (multi-correct)':''}\n`;
+  if(S.diff) t+=`<b>difficulty</b> ${S.diff}   <b>source</b> ${S.problem}   <b>status</b> draft\n`;
+  if(S.answer) t+=`<b>answer</b> {${S.answer.join(', ')}}   <b>picked</b> {${[...st.sel].join(', ')}}\n`;
+  if(S.type==='arrows'){
+    const m=MOLS[S.mol], s=curState();
+    t+=`<b>accepted pushes</b> ${S.open?'(open: any valid contributor)':''}\n  ${S.paths.map(p=>p.join(' + ')).join('\n  ')}  (any order)\n`;
+    t+=`<b>pushes made</b> ${st.done.join(', ')||'–'}${st.shown.length?`  (revealed: ${st.shown.join(', ')})`:''}\n`;
+    t+=`<b>live state</b>\n  bonds   ${Object.entries(s.bonds).filter(([,v])=>v>1).map(([k,v])=>k.split('-').map(x=>m.atoms[x].name).join('=')).join(', ')||'no π bonds'}\n`;
+    t+=`  charges ${Object.entries(s.ch).map(([a,v])=>m.atoms[a].name+(v>0?'+':'−')).join(', ')||'none'}\n`;
+    t+=`  e⁻      ${Object.keys(m.atoms).filter(a=>m.atoms[a].el!=='H').map(a=>m.atoms[a].name+':'+electrons(m,s,+a)).join('  ')}\n`;
+    t+=`<b>matches target</b> ${canon(s)===canon(st.target)}\n`;
+  }
+  if(S.hints) t+=`<b>Hints</b> (first match wins)\n${S.hints.map(([x,h])=>'  · '+(typeof x==='string'?x:x instanceof RegExp?String(x):'(rule)')+' → '+h).join('\n')}\n  · (fallback) → ${S.fallback}\n`;
+  if(st.lastHint) t+=`<b>last Hint shown</b> ${st.lastHint}\n`;
+  if(S.sr) t+=`<b>screen reader</b> ${S.sr}\n`;
+  t+=`<b>tries</b> ${st.tries}   <b>phase</b> ${st.phase}`;
+  d.innerHTML=t;
+}
+
+// ---------- bar ----------
+function setParam(k,v){const u=new URL(location);if(v===null)u.searchParams.delete(k);else u.searchParams.set(k,v);history.replaceState(null,'',u);}
+function syncBar(){
+  const sel=$('#b-step'); if(!sel.options.length){sel.innerHTML=`<option value="-1">intro</option>`+STEPS.map((s,i)=>`<option value="${i}">${i+1} · ${s.phase} · ${s.title}</option>`).join('')+`<option value="${STEPS.length}">Lesson end</option>`;}
+  sel.value=String(idx); $('#b-spec').setAttribute('aria-pressed',showSpec); $('#b-motion').setAttribute('aria-pressed',reduced);
+}
+$('#b-step').onchange=e=>go(+e.target.value);
+$('#b-prev').onclick=()=>go(idx-1); $('#b-next').onclick=()=>go(idx+1);
+$('#b-spec').onclick=()=>{showSpec=!showSpec;setParam('spec',showSpec?'1':null);syncBar();renderSpec();};
+$('#b-motion').onclick=()=>{reduced=!reduced;setParam('motion',reduced?'reduced':null);render();};
+$('#b-reset').onclick=()=>{fresh();render();};
+$('#b-about').onclick=()=>go(-1);
+function say(t){const l=$('#live');l.textContent='';setTimeout(()=>l.textContent=t,30);}
+fresh(); render();
+</script>
+</body>
+</html>
