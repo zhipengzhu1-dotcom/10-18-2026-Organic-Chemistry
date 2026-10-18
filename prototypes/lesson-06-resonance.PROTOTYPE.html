@@ -346,7 +346,8 @@ function molSvg(mol,s,o={}){
     out+=`<g opacity="${o.op??1}">`+labelSvg(at,{warn:over||under});
     if(o.sel&&o.sel.has('a'+n)&&at.lbl) out+=`<circle cx="${at.x}" cy="${at.y}" r="19" fill="none" stroke="var(--at-electron)" stroke-width="2.5"/>`;
     if(fl) out+=`<circle class="pulse" cx="${at.x}" cy="${at.y}" r="22" fill="none" stroke="var(--at-ignite)" stroke-width="2.5"/>`;
-    L.lps.forEach((ang,i)=>{ if(o.hideLp===n&&i===L.lps.length-1&&!o.hideLpDone) return; if(o.lpHidden) return; out+=lpSvg(at,ang); });
+    L.lps.forEach((ang,i)=>{ if(o.hideLp===n&&i===L.lps.length-1&&!o.hideLpDone) return; if(o.lpHidden) return; out+=lpSvg(at,ang);
+      if(o.sel&&o.sel.has('a'+n)){const q=lpPos(at,ang);out+=`<circle cx="${q.x}" cy="${q.y}" r="9" fill="none" stroke="var(--at-electron)" stroke-width="2"/>`;} });
     if(L.charge!==null) out+=chargeSvg(at,L.charge,s.ch[n]<0?(s.ch[n]<-1?'2−':'−'):(s.ch[n]>1?'2+':'+'));
     if(o.delta&&o.delta[n]) {const p=lpPos(at,-Math.PI/2+.0,30);out+=`<text x="${at.x+24}" y="${at.y-14}" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="var(--at-electron)">${o.delta[n]}</text>`;}
     if(fl) out+=`<text x="${at.x+(at.x>300?-30:28)}" y="${at.y+(at.y<80?36:-26)}" text-anchor="${at.x>300?'end':'start'}" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="var(--at-ignite)">${electrons(mol,s,n)} e⁻</text>`;
@@ -627,10 +628,15 @@ function bodyTap(){
     for(const a in A) hits+=`<circle class="hit" tabindex="0" role="button" aria-pressed="${st.sel.has('a'+a)}" aria-label="${A[a].name}${s.lp[a]?' and its lone pairs':''}" data-t="a${a}" cx="${A[a].x}" cy="${A[a].y}" r="${s.lp[a]?30:18}"/>`;
     for(const k in s.bonds){const [a,b]=k.split('-').map(Number);hits+=`<circle class="hit" tabindex="0" role="button" aria-pressed="${st.sel.has('b'+k)}" aria-label="${A[a].name}–${A[b].name} ${s.bonds[k]>1?'double ':''}bond" data-t="b${k}" cx="${(A[a].x+A[b].x)/2}" cy="${(A[a].y+A[b].y)/2}" r="12"/>`;}
   }
-  $('#body').innerHTML=`<div class="card"><div class="callout">${st.sel.size?`${st.sel.size} picked`:'Tap an atom (its lone pairs count) or a bond.'}</div>
+  const call=st.tapCall||(st.sel.size?`${st.sel.size} picked · tap again to unpick`:'Just tap, no pushing on this Step. Tap a lone pair or a bond.');
+  $('#body').innerHTML=`<div class="card"><div class="callout${st.tapCall?' warn':''}">${call}</div>
     <svg class="mol" viewBox="${vb(m)}" role="group" aria-label="Nitromethane, full Lewis structure">${molSvg(m,s,{sel:st.sel})}${hits}</svg></div>`;
   const pick=el=>{const t=el.dataset.t;st.sel.has(t)?st.sel.delete(t):st.sel.add(t);bodyTap();drawMain();renderSpec();$(`[data-t="${t}"]`)?.focus();};
-  document.querySelectorAll('[data-t]').forEach(el=>{el.onclick=()=>pick(el);el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(el);}};});
+  document.querySelectorAll('[data-t]').forEach(el=>{el.onclick=()=>{st.tapCall='';pick(el);};el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(el);}};});
+  // a drag here would be a push; say so instead of silently doing nothing
+  const svg=$('#body svg.mol'); let p0=null;
+  svg.onpointerdown=e=>{p0=[e.clientX,e.clientY];};
+  svg.onpointerup=e=>{if(p0&&Math.hypot(e.clientX-p0[0],e.clientY-p0[1])>10){st.tapCall="No pushing yet: this Step only asks where electrons could come from. Tap each lone pair or bond you think is a source.";bodyTap();} p0=null;};
 }
 
 // ---------- Explain (with Scenes) ----------
