@@ -32,16 +32,16 @@ Lesson spec, following the [template](../lesson-spec-template.md) and the [Lesso
 
 | Scene id | Used in | What it shows | Parameters | Data it reads | Poster frame (reduced motion) |
 |---|---|---|---|---|---|
-| `star-forge` | s01 | ~10–15 s intro in 3Blue1Brown-style motion: a star's core, three helium nuclei fusing into one carbon nucleus with "3 ⁴He → ¹²C" writing itself on, the carbon drifting out through a nebula into a living cell, the nucleus morphing into a C with four valence dots, ending on the star-line card | `aspect: 9:16 \| 16:9 \| 1:1` (video renders) | none (no numbers on screen besides the mass numbers 4 and 12) | the star-line card over the nebula, with the C and its four dots |
+| `star-forge` | s01 | ~10–15 s watch-only intro, animated in Manim CE and finished in DaVinci Resolve (see the s01 Video note), in 3Blue1Brown-style motion: a star's core, three helium nuclei fusing into one carbon nucleus with "3 ⁴He → ¹²C" writing itself on, the carbon drifting out through a nebula into a living cell, the nucleus morphing into a C with four valence dots, ending on the star-line card | `aspect: 9:16 \| 16:9 \| 1:1` (video renders) | none (no numbers on screen besides the mass numbers 4 and 12) | the star-line card over the nebula, with the C and its four dots |
 | `crust-vs-body` | s01 reveal | Two bars, carbon's mass share of Earth's crust and of the human body, on the same axis with a log-scale break so the crust bar is visible | none | `data/abundance/carbon.json` | both bars labelled |
-| `give-or-take` | s03 | One atom at a time from Li to F, each with its valence dots. Two routes to a full shell: **Give** (lose every valence electron; bar = sum of the ionization energies, eV) and **Take** (gain 8 − valence; the first electron shows its electron affinity where the anion is bound, every further electron is flagged "a lone atom won't hold this one"). A counter shows "electrons to move, cheaper way: n". | `atom: Li \| Be \| B \| C \| N \| O \| F` (slider) | `data/atoms/ionization-li-f.json`, `data/atoms/electron-affinity-li-f.json` | carbon selected, both routes drawn |
+| `give-or-take` | s03 | One atom at a time from Li to F, each with its valence dots. Two routes to a full shell: **Give** (lose every valence electron; bar = sum of the ionization energies, eV) and **Take** (gain 8 − valence; the first electron shows its electron affinity where the anion is bound, drawn as a separate dashed bar labelled "released" because it is energy given off, not a cost, and never stacked against the Give bar; every further electron is flagged "a lone atom won't hold this one"). A counter shows "electrons to move, cheaper way: n". | `atom: Li \| Be \| B \| C \| N \| O \| F` (slider) | `data/atoms/ionization-li-f.json`, `data/atoms/electron-affinity-li-f.json` | carbon selected, both routes drawn |
 | `water-push` | s04; the homepage hero | OH⁻ (O with three lone pairs, one O–H bond) and H⁺. A lone pair on O swings over to H⁺ and becomes an O–H bond. Water, every shell full. Same Scene as the homepage hero, non-interactive here. | `interactive: false` here (`true` on the homepage) | none | water, with the new O–H bond highlighted |
 | `build-by-sharing` | s05 | A carbon with four single dots and a tray of H atoms. A dropped H snaps onto a single dot and the two electrons become a shared pair. Stage 2: two CH₃ pieces, each with one single dot, join into ethane. Live electron count around each atom. | `stage: 1 \| 2` | none | ethane with every shared pair drawn |
 
 **Data notes**
 
 - **Hook (`data/abundance/carbon.json`):** carbon's mass fraction of Earth's crust from the CRC Handbook table "Abundance of Elements in the Earth's Crust and in the Sea", and of the human body from ICRP Publication 23, *Reference Man* (1975), as carbon mass ÷ total body mass. Each value carries its source and licence. **Fallback** (decided): if either value can't be sourced at an acceptable licence, s01 drops the numbers and asks "Which element is the backbone of every living thing?" (`a` oxygen · `b` carbon · `c` iron · `d` silicon, all accepted as a prediction), and the `crust-vs-body` Scene is cut.
-- **`give-or-take`:** the Give bar for an atom with *v* valence electrons is the sum of its first *v* ionization energies (NIST ASD). The Take side shows the first electron affinity only where it is positive (the anion is bound). Where it is not (Be, N), and for every electron beyond the first, it shows the flag "a lone atom won't hold this one", **never an invented bar** (no multiply charged atomic anion is bound in the gas phase). The bars are labelled "one atom, alone in empty space". Real O²⁻ and N³⁻ exist only when surrounded by other ions, which is Unit 2 and beyond. **Sanity check at build time:** carbon's "electrons to move" is 4, the largest in the row; the counts read 1, 2, 3, 4, 3, 2, 1 from Li to F.
+- **`give-or-take`:** the Give bar for an atom with *v* valence electrons is the sum of its first *v* ionization energies (NIST ASD). The Take side shows the first electron affinity only where it is positive (the anion is bound), as a dashed "released" bar: energy given off, never drawn as a cost beside the Give bar. Where it is not (Be, N), and for every electron beyond the first, it shows the flag "a lone atom won't hold this one", **never an invented bar** (no multiply charged atomic anion is bound in the gas phase). The bars are labelled "one atom, alone in empty space". Real O²⁻ and N³⁻ exist only when surrounded by other ions, which is Unit 2 and beyond. **Sanity check at build time:** carbon's "electrons to move" is 4, the largest in the row; the counts read 1, 2, 3, 4, 3, 2, 1 from Li to F.
 
 ---
 
@@ -53,10 +53,10 @@ Lesson spec, following the [template](../lesson-spec-template.md) and the [Lesso
 - **Visual:** the star-line card, shrunk to the top of the screen while the choices are up.
 - **Interaction:** pick one. `a` less than 1% · `b` about 5% · `c` about 20% · `d` about 50%
 - **Answer:** every choice accepted; reveal follows.
-- **Reveal:** Scene `crust-vs-body`. "About **{body.C}** of you is carbon, hundreds of times more than the rock under your feet. Life is built from carbon, and this Lesson is about why."
+- **Reveal:** Scene `crust-vs-body`. "About **{body.C}** of you is carbon, over a thousand times more than the rock under your feet. Life is built from carbon, and this Lesson is about why."
 - **Scene:** `star-forge` autoplays on entry (reduced motion: poster frame + Play). Screen reader: "A star's core. Three helium nuclei fuse into one carbon nucleus: three helium-4 make carbon-12. The carbon drifts out through a nebula and into a living cell, then becomes a letter C with four electrons around it. Text: Every carbon atom in you was forged in a star. Organic chemistry is what that carbon learned to do next." `crust-vs-body` plays on reveal. Screen reader: "Two bars. Carbon is {crust.C} of Earth's crust and {body.C} of the human body."
 - **Source note:** "Carbon is made in stars by the triple-alpha process: OpenStax *Astronomy 2e* §22.4, CC BY 4.0. Abundances: see `data/abundance/carbon.json`."
-- **Video note:** the Prototype ticket makes three comparison cuts of `star-forge` (native React/Remotion, Manim CE, DaVinci Resolve). Only the React Scene ships.
+- **Video note:** decided in the Prototype ticket: `star-forge` is watch-only, so it is made with **Manim CE** and edited and finished in **DaVinci Resolve** (free edition, driven by Lua scripts), and the site plays the rendered video (16:9 and 9:16; sound off by default; the poster frame for reduced motion). Sound effects are CC0 / public domain only, each file's source logged. The edit style is chosen in that ticket.
 
 ### `u1-l00-s02` · Build · Explain
 
@@ -72,7 +72,8 @@ Lesson spec, following the [template](../lesson-spec-template.md) and the [Lesso
 - **Visual / Scene:** `give-or-take`, slider under it, starting on Li.
 - **Interaction:** drag the slider (keyboard: arrow keys) and press Check on the chosen atom.
 - **Answer:** C.
-- **Correct line:** "Carbon sits right in the middle: 4 to give or 4 to take. Giving 4 costs a huge amount of energy, and a lone atom won't hold 4 extra. Neither route works."
+- **Correct line:** "Carbon has to move 4 either way, the most in the row. That's too many, so it shares."
+- **Why the count, not the bars:** taking fails for N, O and F too (a lone atom holds at most one extra electron), so only the count singles carbon out. The bars show *why* moving many electrons is hard; the count is the argument.
 - **Hints:**
 
   | Wrong answer | Hint |
@@ -82,8 +83,8 @@ Lesson spec, following the [template](../lesson-spec-template.md) and the [Lesso
   | Be or O | "This one moves two. Keep sliding toward the middle." |
   | *(any other)* | "Watch the 'electrons to move' counter. Which atom has the biggest number?" |
 
-- **Reveal:** the slider jumps to C, both routes light up: "4 to give: {ie.C.sum4} eV. 4 to take: a lone atom won't hold them."
-- **Scene:** screen reader on each slider stop: "<atom>: <v> outer electrons. Give <v>, costing <sum> electron-volts, or take <8 − v>: <EA line>. Electrons to move, cheaper way: <n>." The "Describe" text reads the stop the Student is on.
+- **Reveal:** the slider jumps to C, both routes light up: "4 to give: {ie.C.sum4} eV. 4 to take: carbon holds 1 extra electron, but not 4."
+- **Scene:** screen reader on each slider stop: "<atom>: <v> outer electrons. Give <v>, costing <sum> electron-volts, or take <8 − v>: <EA line>. Electrons to move, cheaper way: <n>." where <EA line> is "the first one releases <EA> electron-volts, and a lone atom won't hold more" where the anion is bound, or "a lone atom won't hold even one" (Be, N). The "Describe" text reads the stop the Student is on.
 - **Source note:** "Ionization energies: NIST Atomic Spectra Database. Electron affinities: Andersen, Haugen & Hotop, *J. Phys. Chem. Ref. Data* 28, 1511 (1999). 'Middle of the second row' after MIT OCW 5.12, Lecture 1 p. 4, CC BY-NC-SA 4.0."
 
 ### `u1-l00-s04` · Build · Explain
@@ -110,6 +111,8 @@ Lesson spec, following the [template](../lesson-spec-template.md) and the [Lesso
   | Wrong answer | Hint |
   |---|---|
   | Continue tapped while disabled, before stage 1 is done | "Count the dots around carbon. A full shell is 8; each H you add brings one more." |
+  | Continue tapped while disabled, in stage 2 | "Join the two pieces first: each carbon still has one single dot." |
+  | 30 s idle in stage 2 | "Drag one CH₃ onto the other's single dot." |
   | *(any other)*: 30 s idle | "Drop each H on one of carbon's single dots." |
 
 - **Reveal:** n/a (no wrong submission is possible). After a second 30 s idle the next correct drop is ghosted as a nudge.
@@ -118,21 +121,21 @@ Lesson spec, following the [template](../lesson-spec-template.md) and the [Lesso
 
 ### `u1-l00-s06` · Build · Tap-to-identify
 
-- **Prompt:** "Same atoms, different life. Estradiol (an estrogen) and testosterone are built from the same carbon skeleton. Every corner is a carbon; you'll learn to read these drawings in Lesson 2. Tap the **two** places on testosterone that differ from estradiol, then press Check."
-- **Visual:** estradiol (`C[C@]12CC[C@H]3[C@@H](CCc4cc(O)ccc34)[C@@H]1CC[C@@H]2O`, PubChem CID 5757) above testosterone (`C[C@]12CC[C@H]3[C@@H](CCC4=CC(=O)CC[C@]34C)[C@@H]1CC[C@@H]2O`, CID 6013), same orientation. Tappable: every atom of testosterone.
-- **Answer:** one atom from each group, nothing else. Group A, the A ring: O3, C1, C2, C3, C4, C5 (estradiol has a flat ring with an OH, testosterone a C=O). Group B, the extra methyl: C19.
+- **Prompt:** "Same atoms, different life. Estradiol (an estrogen) and testosterone are built from the same carbon skeleton. Every corner is a carbon; you'll learn to read these drawings in Lesson 2. Tap the **two** parts of testosterone that differ from estradiol, then press Check."
+- **Visual:** estradiol (`C[C@]12CC[C@H]3[C@@H](CCc4cc(O)ccc34)[C@@H]1CC[C@@H]2O`, PubChem CID 5757) above testosterone (`C[C@]12CC[C@H]3[C@@H](CCC4=CC(=O)CC[C@]34C)[C@@H]1CC[C@@H]2O`, CID 6013), same orientation. Both drawn in the standard steroid view (not mirrored: flip RDKit's default and swap every wedge and hash), with the stereo H's at C8, C9 and C14 placed identically on both, so no drawing artefact reads as a difference. Tappable: seven **regions** of testosterone, each with a hit area of at least 48 px: the A ring (with its C=O), the B ring, the C ring, the D ring, the C19 methyl on C10, the C18 methyl, and the C17 OH. Stereo H's are not tappable.
+- **Answer:** exactly two regions, the A ring and the C19 methyl (estradiol has a flat ring with an OH where testosterone has a C=O, and no methyl on C10). Any other selection is wrong.
 - **Correct line:** "Two small changes, the left ring and one extra CH₃, turn one hormone into the other. Carbon frameworks are that sensitive."
 - **Hints:**
 
   | Wrong answer | Hint |
   |---|---|
-  | includes the C17 OH or C18 methyl | "Both hormones have that one, top right. Look at the left side." |
-  | includes C10 but not C19 | "Close: it's what hangs off this carbon." |
-  | only group A | "That's one. There's a small CH₃ that only testosterone has." |
-  | only group B | "That's one. Compare the left-hand rings." |
+  | includes the C17 OH or the C18 methyl | "Both hormones have that one, top. Look at the left side." |
+  | includes the B, C or D ring | "That ring is the same in both. Look at the far left." |
+  | only the A ring | "That's one. There's a small CH₃ that only testosterone has." |
+  | only the C19 methyl | "That's one. Compare the left-hand rings." |
   | *(any other)* | "Cover one drawing, then the other. Two spots change." |
 
-- **Reveal:** the A ring and C19 ring in cyan on testosterone, with the matching spots on estradiol: "ring with OH ↔ ring with C=O" and "no CH₃ ↔ CH₃".
+- **Reveal:** the A ring and the C19 methyl ringed in cyan on testosterone, with the matching spots on estradiol: "ring with OH ↔ ring with C=O" and "no CH₃ ↔ CH₃".
 - **Source note:** "Pair from MIT OCW 5.12, Lecture 1 p. 5 ('Subtleties in Structure'), CC BY-NC-SA 4.0. Structures: PubChem CIDs 5757 and 6013."
 
 ### `u1-l00-s07` … `s08` · Check
