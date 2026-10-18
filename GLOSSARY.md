@@ -25,7 +25,7 @@ The build-ready description of one Lesson, Step by Step, that agents build from;
 _Avoid_: Lesson plan, script, outline
 
 **On-ramp**:
-The optional first Lesson of a Unit (Lesson 0), intuitive and prerequisite-free for high-schoolers; skipping it does not count against Unit progress.
+The optional first Lesson of a Unit (Lesson 0), intuitive and prerequisite-free for high-schoolers; skipping it does not count against Unit progress, and its Check Problems are never drawn into the Practice Set.
 _Avoid_: Intro, primer, beginner mode
 
 **Course map**:
