@@ -1,0 +1,594 @@
+<!doctype html>
+<!--
+  PROTOTYPE, throwaway. Wayfinder ticket "Prototype: curved-arrow mechanism interaction" (#14).
+  One Draw-arrows Step (SN2: hydroxide + bromomethane) three ways, switchable via ?variant=A|B|C and the floating bar (← / → keys):
+    A  Drag to draw   – drag from electrons (lone pair or bond) to an atom; targets snap; draw both arrows, then Check.
+    B  Tap, then tap  – tap the electrons, every valid target lights up, tap one; draw both arrows, then Check.
+    C  Push live      – drag the electrons themselves; each push is checked the moment you make it and the structure updates live.
+  All three share the Step-card chrome that won the 3D molecule viewer prototype, the two-try rule (Hint, then reveal),
+  product-based grading (run the arrows, compare the result) and the same keyboard path (Tab to electrons, Enter, Tab to an atom, Enter).
+  After a correct answer the SN2 Scene plays: a pure function of t. ?frame=0.5 renders one frame with no chrome (video-ready).
+  Bar also toggles reduced motion (?motion=reduced) and the data panel (?data=1) showing arrows, MechSMILES and the derived result.
+  Pixel fonts never carry chemistry: symbols, formulas and numbers are JetBrains Mono.
+  Needs internet only for fonts. Double-click to open. Never merged.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AstraTron · mechanism arrows (prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600;700&family=Pixelify+Sans:wght@500;700&family=Silkscreen&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  :root{--bg:#0d0626;--fg:#fff;--muted:#b9a8e8;--cyan:#3ee8ff;--uv:#b44dff;--mag:#ff4fd8;--orange:#ff9a1f;--line:#5b3bb3;--ink:#0d0626}
+  body{background:var(--bg);color:var(--fg);font-family:"Space Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit;cursor:pointer}
+  :focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .mono{font-family:"JetBrains Mono",monospace}
+  [data-motion=reduced] *{animation:none!important;transition:none!important}
+
+  /* ---------- prototype switcher (deliberately NOT on-brand) ---------- */
+  #switcher{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:100;display:flex;align-items:center;gap:4px;
+    background:#fffbe6;color:#111;border:2px solid #111;border-radius:999px;padding:4px;font:600 13px/1 system-ui,sans-serif;
+    box-shadow:0 6px 24px rgba(0,0,0,.45);white-space:nowrap;max-width:calc(100vw - 16px);overflow-x:auto}
+  #switcher button{background:none;border:0;border-radius:999px;padding:8px 10px;color:#111}
+  #switcher button:hover{background:#111;color:#fffbe6}
+  #switcher button[aria-pressed=true]{background:#111;color:#fffbe6}
+  #switcher .lbl{padding:0 6px;min-width:130px;text-align:center}
+  #switcher .tag{font-size:10px;letter-spacing:.08em;background:#111;color:#fffbe6;border-radius:999px;padding:4px 7px}
+  #switcher .sep{width:1px;height:20px;background:#111;opacity:.25;flex:none}
+  #data{position:fixed;right:10px;top:10px;z-index:90;width:min(380px,calc(100vw - 20px));max-height:calc(100vh - 90px);overflow:auto;
+    background:#fffbe6;color:#111;border:2px solid #111;border-radius:10px;padding:10px 12px;font:12px/1.45 ui-monospace,Consolas,monospace;display:none;white-space:pre-wrap}
+  #data.on{display:block}
+  #data b{font-family:system-ui,sans-serif}
+
+  /* ---------- Step player ---------- */
+  .step{min-height:100vh;display:flex;flex-direction:column;max-width:620px;margin:0 auto;padding:14px 16px 160px}
+  .top{display:flex;align-items:center;gap:12px}
+  .top .x{background:none;border:0;font:700 20px "Pixelify Sans";color:var(--muted);padding:4px}
+  .prog{flex:1;height:8px;background:color-mix(in srgb,var(--fg) 15%,transparent)}
+  .prog i{display:block;height:100%;width:42%;background:var(--orange);box-shadow:3px 3px 0 var(--uv)}
+  .kick{font:400 11px Silkscreen;color:var(--cyan);margin:22px 0 6px}
+  h1{font:700 clamp(22px,5vw,30px)/1.15 "Space Grotesk";letter-spacing:-.02em;margin:0 0 6px}
+  .rxn{font:600 15px "JetBrains Mono",monospace;color:var(--fg);margin:2px 0 6px}
+  .lead{color:var(--muted);margin:0 0 14px;font-size:15px}
+  .card{border:3px solid var(--line);box-shadow:6px 6px 0 var(--uv);background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--uv) 26%,transparent),transparent 70%),color-mix(in srgb,var(--bg) 85%,#000)}
+  .callout{min-height:34px;padding:8px 10px 0;font:600 13px "JetBrains Mono",monospace;color:var(--cyan)}
+  .callout.warn{color:var(--orange)}
+  .card svg{display:block;width:100%;aspect-ratio:400/280;max-height:48vh;touch-action:none;user-select:none;-webkit-user-select:none}
+  .card svg .hit{fill:transparent;stroke:none;outline:none}
+  .card svg .hit:focus-visible{stroke:var(--cyan);stroke-width:2.5;stroke-dasharray:4 3}
+  .tools{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:8px;border-top:2px solid var(--line);min-height:52px}
+  .ibtn{background:var(--bg);border:2px solid var(--fg);font:400 12px Silkscreen;padding:7px 10px;box-shadow:3px 3px 0 var(--uv)}
+  .ibtn:disabled{opacity:.35;cursor:default}
+  .scrub{display:flex;align-items:center;gap:8px;flex:1;min-width:200px}
+  .scrub input{flex:1;accent-color:var(--orange);height:28px}
+  .cap{font:500 14px/1.45 "Space Grotesk";color:var(--fg);padding:10px 10px 12px;border-top:2px dashed var(--line);min-height:44px}
+  .fb{margin-top:16px;border:3px solid var(--line);padding:12px 14px;display:none}
+  .fb.on{display:block}
+  .fb h2{margin:0 0 4px;font:400 14px Silkscreen}
+  .fb p{margin:0;font-size:15px;line-height:1.45}
+  .fb.hint{border-color:var(--orange)} .fb.hint h2{color:var(--orange)}
+  .fb.good{border-color:var(--cyan)} .fb.good h2{color:var(--cyan)}
+  .fb.show{border-color:var(--orange);border-style:dashed} .fb.show h2{color:var(--orange)}
+  details{margin-top:14px;border-top:2px dashed var(--line);padding-top:10px}
+  summary{font:400 11px Silkscreen;color:var(--cyan);cursor:pointer}
+  .srcnote{font:400 12px/1.5 "JetBrains Mono",monospace;color:var(--muted)}
+  .foot{position:fixed;left:0;right:0;bottom:64px;display:flex;justify-content:center;padding:0 16px;pointer-events:none}
+  .foot button{pointer-events:auto;width:min(588px,100%);font:400 15px Silkscreen;padding:15px;border:0;background:var(--orange);color:#1a0d3d;box-shadow:5px 5px 0 var(--uv)}
+  .foot button:disabled{background:color-mix(in srgb,var(--fg) 18%,transparent);color:var(--muted);box-shadow:none;cursor:default}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .bounce{animation:shake .25s 2}
+  @keyframes pulse{50%{opacity:.35}}
+  .pulse{animation:pulse 1s infinite}
+
+  /* frame mode (?frame=t): one Scene frame, no chrome, for video capture */
+  .frame{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg)}
+  .frame svg{width:min(100vw,160vh);aspect-ratio:400/280}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="switcher" role="toolbar" aria-label="Prototype variant switcher">
+  <span class="tag">PROTOTYPE</span>
+  <button id="sw-prev" aria-label="Previous variant">←</button>
+  <span class="lbl" id="sw-label"></span>
+  <button id="sw-next" aria-label="Next variant">→</button>
+  <span class="sep"></span>
+  <button id="sw-motion" aria-pressed="false">reduced motion</button>
+  <button id="sw-data" aria-pressed="false">data</button>
+  <button id="sw-reset">reset</button>
+</div>
+<pre id="data" aria-label="Prototype state"></pre>
+<div id="live" class="sr" aria-live="polite"></div>
+<script>
+// ===================== settings =====================
+const P = new URLSearchParams(location.search);
+const VARIANTS = [['A','Drag to draw'],['B','Tap, then tap'],['C','Push live']];
+let variant = (P.get('variant')||'A').toUpperCase();
+if(!VARIANTS.some(v=>v[0]===variant)) variant='A';
+let reduced = P.get('motion')==='reduced';
+let showData = P.get('data')==='1';
+const FRAME = P.get('frame');
+
+// ===================== chemistry model =====================
+// Atom-map numbers as in the step's mapped SMILES: [H:2][O-:1].[H:4][C:3]([H:5])([H:6])[Br:7]
+// 2D schematic positions (SVG units), not measured geometry: no numbers are shown to the Student.
+const A = {
+  1:{el:'O', x:72, y:150,ring:'#ff0d0d',name:'O'},
+  2:{el:'H', x:32, y:150,ring:'#ffffff',name:'H on O'},
+  3:{el:'C', x:206,y:150,ring:'#909090',name:'C'},
+  4:{el:'H', x:184,y:80, ring:'#ffffff',name:'top H on C'},
+  5:{el:'H', x:158,y:204,ring:'#ffffff',name:'wedged H on C'},
+  6:{el:'H', x:224,y:218,ring:'#ffffff',name:'dashed H on C'},
+  7:{el:'Br',x:306,y:150,ring:'#a62929',name:'Br'},
+};
+const SLOT = {up:[0,-1],down:[0,1],right:[1,0],left:[-1,0]};
+const SLOT_ORDER = {1:['up','down','right','left'],3:['left','up','down','right'],7:['up','right','down','left']};
+const START = {bonds:{'1-2':1,'3-4':1,'3-5':1,'3-6':1,'3-7':1}, lp:{1:['up','down','right'],7:['up','right','down']}, ch:{1:-1}};
+const STYLE = {'3-5':'wedge','3-6':'hash'};
+const ANSWER = [{from:{lp:1,slot:'right'},to:{atom:3}}, {from:{bond:[3,7]},to:{atom:7}}];
+const ANSWER_KEYS = ['lp1>3','b3-7>7'];
+
+const bk=(a,b)=>a<b?`${a}-${b}`:`${b}-${a}`;
+const clone=o=>JSON.parse(JSON.stringify(o));
+const dist=(p,q)=>Math.hypot(p.x-q.x,p.y-q.y);
+const lerp=(a,b,u)=>a+(b-a)*u;
+const keyOf=ar=>(ar.from.lp?`lp${ar.from.lp}`:`b${bk(...ar.from.bond)}`)+'>'+ar.to.atom;
+
+// Run the arrows on the start structure (the grading engine: products, not pixels).
+function apply(arrows){
+  const s=clone(START);
+  const ch=(a,d)=>s.ch[a]=(s.ch[a]||0)+d;
+  const bump=(a,b,d)=>{const k=bk(a,b);s.bonds[k]=(s.bonds[k]||0)+d;if(s.bonds[k]<=0)delete s.bonds[k];};
+  for(const ar of arrows){
+    const f=ar.from, t=ar.to.atom;
+    if(f.lp){
+      s.lp[f.lp]=s.lp[f.lp].filter(x=>x!==f.slot);
+      bump(f.lp,t,1); ch(f.lp,1); ch(t,-1);
+    }else{
+      const [a,b]=f.bond; bump(a,b,-1);
+      if(t===a||t===b){
+        const o=t===a?b:a; s.lp[t]=s.lp[t]||[];
+        s.lp[t].push((SLOT_ORDER[t]||['left','up','down','right']).find(x=>!s.lp[t].includes(x)));
+        ch(t,-1); ch(o,1);
+      }else{ // bond attack: the bond end nearer the target bonds to it
+        const n=dist(A[a],A[t])<dist(A[b],A[t])?a:b, o=n===a?b:a;
+        bump(n,t,1); ch(o,1); ch(t,-1);
+      }
+    }
+  }
+  return s;
+}
+function electrons(s,a){
+  let n=0; for(const k in s.bonds){const [x,y]=k.split('-').map(Number); if(x===a||y===a) n+=2*s.bonds[k];}
+  return n+2*((s.lp[a]||[]).length);
+}
+const limit=a=>A[a].el==='H'?2:8;
+function canon(s){
+  const lp={},ch={}; for(const a in s.lp) if(s.lp[a].length) lp[a]=s.lp[a].length;
+  for(const a in s.ch) if(s.ch[a]) ch[a]=s.ch[a];
+  return JSON.stringify([Object.entries(s.bonds).sort(),Object.entries(lp).sort(),Object.entries(ch).sort()]);
+}
+const EXPECTED = canon(apply(ANSWER));
+
+// Ordered evaluators, first match wins (Pearson-style). Exact arrows only pick the Hint; correctness is the product.
+const RULES = [
+  [k=>k.some(x=>x.startsWith('lp7')), "Bromine's lone pairs stay put in this step. Start at the nucleophile: hydroxide."],
+  [k=>k.some(x=>x.startsWith('b1-2')), "The O–H bond stays intact. Hydroxide's reactive electrons are its lone pairs."],
+  [k=>k.some(x=>/^b3-[456]/.test(x)), "The C–H bonds don't change in this step. Which bond to carbon is weak and polar?"],
+  [k=>k.includes('lp1>7'), "Bromine is the electron-rich end (δ−) of the C–Br bond. A nucleophile goes after the electron-poor (δ+) atom."],
+  [k=>k.some(x=>/^lp1>[456]$/.test(x)), "Those C–H hydrogens aren't acidic, and there's no neighbouring carbon to eliminate toward. Aim at the electron-poor carbon."],
+  [k=>k.includes('lp1>2'), "That H is already bonded to O. Hydroxide's lone pair needs a new partner."],
+  [k=>k.includes('b3-7>3'), "Arrow points the wrong way. Bromine is more electronegative, so the C–Br electrons leave with bromine. Point that arrow at Br."],
+  [k=>k.includes('lp1>3')&&!k.includes('b3-7>7'), "Good attack, but now carbon has five bonds (10 electrons). One bond has to break at the same time. Which group can carry the electrons away?"],
+  [k=>k.includes('b3-7>7')&&!k.includes('lp1>3'), "Bromide can leave, but on its own that makes a methyl cation, far too unstable. In SN2 something pushes it out. What attacks carbon?"],
+];
+function evaluate(arrows){
+  if(!arrows.length) return {ok:false,msg:'Draw at least one arrow.'};
+  const s=apply(arrows);
+  if(canon(s)===EXPECTED) return {ok:true};
+  const keys=arrows.map(keyOf);
+  for(const [test,msg] of RULES) if(test(keys)) return {ok:false,msg};
+  for(const a in A) if(electrons(s,+a)>limit(+a)) return {ok:false,msg:`${A[a].el} would hold ${electrons(s,+a)} electrons, more than it can. Check where each arrow ends.`};
+  return {ok:false,msg:'Each arrow starts at electrons (a lone pair or a bond) and ends where they go. Check both ends.'};
+}
+const EXPLAIN = "Hydroxide's lone pair attacks carbon from the back, directly opposite bromine, while the C–Br electrons leave with bromide. Two arrows, one step: that's SN2.";
+
+// ===================== Step state =====================
+const st = {arrows:[],tries:0,phase:'draw',armed:null,drag:null,msg:null,call:'',callWarn:false,bounce:null,t:0,playing:false};
+function reset(){Object.assign(st,{arrows:[],tries:0,phase:'draw',armed:null,drag:null,msg:null,call:'',callWarn:false,bounce:null,t:0,playing:false});cancelAnimationFrame(raf);mount();}
+
+// What the Student sees: the start structure (A, B) or the live result of accepted pushes (C)
+const shown=()=>variant==='C'?apply(st.arrows):START;
+function sources(){
+  const s=shown(), used=new Set(st.arrows.map(a=>a.from.lp?`lp${a.from.lp}${a.from.slot}`:`b${bk(...a.from.bond)}`)), out=[];
+  for(const a in s.lp) for(const slot of s.lp[a]){
+    if(used.has(`lp${a}${slot}`)) continue;
+    const d=SLOT[slot]; out.push({id:`lp${a}${slot}`,kind:'lp',atom:+a,slot,x:A[a].x+d[0]*25,y:A[a].y+d[1]*25,label:`lone pair on ${A[a].el}`});
+  }
+  for(const k in s.bonds){
+    if(used.has('b'+k)) continue;
+    const [a,b]=k.split('-').map(Number);
+    out.push({id:'b'+k,kind:'bond',a,b,x:(A[a].x+A[b].x)/2,y:(A[a].y+A[b].y)/2,label:`${A[a].el}–${A[b].el} bond`+(A[a].el==='H'||A[b].el==='H'?` (${A[a].el==='H'?A[a].name:A[b].name})`:'')});
+  }
+  return out;
+}
+function sinks(src){ return Object.keys(A).map(Number).filter(a=>!(src.kind==='lp'&&a===src.atom)); }
+function segDist(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,u=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy)));return Math.hypot(p.x-a.x-u*dx,p.y-a.y-u*dy);}
+function nearestSource(p){
+  let best=null,bd=1e9;
+  for(const s of sources()){
+    const d=s.kind==='lp'?dist(p,s):segDist(p,A[s.a],A[s.b])+6; // lone pairs win ties
+    const r=s.kind==='lp'?22:16;
+    if(d<r&&d<bd){bd=d;best=s;}
+  }
+  return best;
+}
+function nearestSink(p,src){
+  let best=null,bd=30;
+  for(const a of sinks(src)){const d=dist(p,A[a]);if(d<bd){bd=d;best=a;}}
+  return best;
+}
+const arrowFrom=(src,atom)=>({from:src.kind==='lp'?{lp:src.atom,slot:src.slot}:{bond:[src.a,src.b]},to:{atom}});
+const describe=ar=>(ar.from.lp?`lone pair on ${A[ar.from.lp].el}`:`${A[ar.from.bond[0]].el}–${A[ar.from.bond[1]].el} bond`)+` → ${A[ar.to.atom].el}`;
+
+// ===================== drawing =====================
+const NS='http://www.w3.org/2000/svg';
+const R=a=>A[a].el==='Br'?19:17;
+function shorten(p,q,rp,rq){const d=dist(p,q)||1,ux=(q.x-p.x)/d,uy=(q.y-p.y)/d;return [{x:p.x+ux*rp,y:p.y+uy*rp},{x:q.x-ux*rq,y:q.y-uy*rq}];}
+function bondSvg(p,q,rp,rq,style,order=1,opts={}){
+  const [a,b]=shorten(p,q,rp,rq), op=opts.op??1, dash=opts.dashed?' stroke-dasharray="5 5"':'';
+  if(style==='wedge'){const d=dist(a,b),nx=-(b.y-a.y)/d*6,ny=(b.x-a.x)/d*6;return `<polygon points="${a.x},${a.y} ${b.x+nx},${b.y+ny} ${b.x-nx},${b.y-ny}" fill="#fff" opacity="${op}"/>`;}
+  if(style==='hash'){let s='';const d=dist(a,b);for(let i=1;i<=6;i++){const u=i/6,cx=lerp(a.x,b.x,u),cy=lerp(a.y,b.y,u),w=u*6,nx=-(b.y-a.y)/d*w,ny=(b.x-a.x)/d*w;s+=`<line x1="${cx+nx}" y1="${cy+ny}" x2="${cx-nx}" y2="${cy-ny}" stroke="#fff" stroke-width="2" opacity="${op}"/>`;}return s;}
+  let s=''; const d=dist(a,b),nx=-(b.y-a.y)/d,ny=(b.x-a.x)/d;
+  const offs=order===1?[0]:order===2?[-3.5,3.5]:[-6,0,6];
+  for(const o of offs) s+=`<line x1="${a.x+nx*o}" y1="${a.y+ny*o}" x2="${b.x+nx*o}" y2="${b.y+ny*o}" stroke="${opts.color||'#fff'}" stroke-width="2.5" stroke-linecap="round" opacity="${op}"${dash}/>`;
+  return s;
+}
+function atomSvg(x,y,a,opts={}){
+  const at=A[a], r=R(a), op=opts.op??1;
+  return `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="${r}" fill="#160b38" stroke="${opts.warn?'var(--orange)':at.ring}" stroke-width="${opts.warn?3:2}"${opts.warn?' class="pulse"':''}/>`+
+    `<text x="${x}" y="${y+6}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700" font-size="${at.el==='Br'?16:18}" fill="#fff">${at.el}</text></g>`;
+}
+function lpSvg(x,y,slot,op=1,color='var(--cyan)'){
+  const d=SLOT[slot],cx=x+d[0]*25,cy=y+d[1]*25,px=-d[1]*4,py=d[0]*4;
+  return `<g opacity="${op}"><circle cx="${cx+px}" cy="${cy+py}" r="3.3" fill="${color}"/><circle cx="${cx-px}" cy="${cy-py}" r="3.3" fill="${color}"/></g>`;
+}
+function chargeSvg(x,y,txt,op=1){
+  return `<g opacity="${op}"><circle cx="${x-21}" cy="${y-21}" r="8" fill="#160b38" stroke="var(--muted)" stroke-width="1.5"/><text x="${x-21}" y="${y-17}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700" font-size="12" fill="#fff">${txt}</text></g>`;
+}
+// Curved arrow: quadratic Bézier, lone-pair arrows bow up, bond arrows bow down.
+function arrowGeom(p0,p1,bowUp){
+  const mx=(p0.x+p1.x)/2,my=(p0.y+p1.y)/2,d=dist(p0,p1)||1;
+  let nx=-(p1.y-p0.y)/d,ny=(p1.x-p0.x)/d;
+  const vertical=Math.abs(p1.y-p0.y)>Math.abs(p1.x-p0.x);
+  if(vertical){ if(nx<0){nx=-nx;ny=-ny;} } else if((ny<0)!==bowUp){nx=-nx;ny=-ny;}
+  const h=Math.max(26,Math.min(60,d*.45)), c={x:mx+nx*h,y:my+ny*h};
+  return {p0,p1,c};
+}
+function arrowSvg(g,color,opts={}){
+  const {p0,p1,c}=g, d=dist(p1,c)||1, tx=(p1.x-c.x)/d, ty=(p1.y-c.y)/d;
+  const head=`${p1.x},${p1.y} ${p1.x-tx*11-ty*6},${p1.y-ty*11+tx*6} ${p1.x-tx*11+ty*6},${p1.y-ty*11-tx*6}`;
+  const dash=opts.dashed?' stroke-dasharray="6 5"':'';
+  return `<g opacity="${opts.op??1}"${opts.cls?` class="${opts.cls}"`:''}><path d="M${p0.x},${p0.y} Q${c.x},${c.y} ${p1.x},${p1.y}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"${dash}/>`+
+    (opts.noHead?'':`<polygon points="${head}" fill="${color}"/>`)+'</g>';
+}
+function endPoint(fromPt,src,atom){
+  const t=A[atom];
+  if(src.kind==='bond'&&(atom===src.a||atom===src.b)){
+    const o=A[atom===src.a?src.b:src.a], horiz=Math.abs(o.x-t.x)>Math.abs(o.y-t.y);
+    return horiz?{x:t.x-(t.x>o.x?17:-17),y:t.y+23}:{x:t.x+27,y:t.y};
+  }
+  const d=dist(fromPt,t)||1; return {x:t.x-(t.x-fromPt.x)/d*26,y:t.y-(t.y-fromPt.y)/d*26};
+}
+function srcOf(ar){
+  if(ar.from.lp){const d=SLOT[ar.from.slot],a=ar.from.lp;return {kind:'lp',atom:a,slot:ar.from.slot,x:A[a].x+d[0]*25,y:A[a].y+d[1]*25};}
+  const [a,b]=ar.from.bond; return {kind:'bond',a,b,x:(A[a].x+A[b].x)/2,y:(A[a].y+A[b].y)/2};
+}
+function geomOf(src,atom){return arrowGeom({x:src.x,y:src.y},endPoint(src,src,atom),src.kind==='lp');}
+
+function drawMolecule(){
+  const s=shown(); let o='';
+  for(const k in s.bonds){const [a,b]=k.split('-').map(Number);o+=bondSvg(A[a],A[b],R(a),R(b),STYLE[k],s.bonds[k]);}
+  const dragSrc=st.drag&&variant==='C'?st.drag.src:null;
+  for(const a in A){
+    const n=+a; o+=atomSvg(A[n].x,A[n].y,n,{warn:electrons(s,n)>limit(n)});
+    for(const slot of (s.lp[n]||[])){
+      if(dragSrc&&dragSrc.kind==='lp'&&dragSrc.atom===n&&dragSrc.slot===slot) continue; // C: the electrons are in your finger
+      const armed=st.armed&&st.armed.kind==='lp'&&st.armed.atom===n&&st.armed.slot===slot;
+      o+=lpSvg(A[n].x,A[n].y,slot,1,armed?'var(--orange)':'var(--cyan)');
+    }
+    if(s.ch[n]) o+=chargeSvg(A[n].x,A[n].y,s.ch[n]<0?'−':'+');
+    if(electrons(s,n)>limit(n)) o+=`<text x="${A[n].x+30}" y="${A[n].y-26}" text-anchor="start" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="var(--orange)">${electrons(s,n)} e⁻</text>`;
+  }
+  // committed arrows (A, B: as drawn; C: accepted pushes are already applied, so keep them faint as a trail)
+  for(const ar of st.arrows){
+    const g=geomOf(srcOf(ar),ar.to.atom);
+    o+=arrowSvg(g,ar.shown?'var(--orange)':'var(--cyan)',{op:variant==='C'?.45:1});
+  }
+  if(st.bounce){const g=geomOf(srcOf(st.bounce),st.bounce.to.atom);o+=arrowSvg(g,'var(--orange)',{dashed:true,cls:'bounce'})+`<text x="${g.c.x}" y="${g.c.y-6}" text-anchor="middle" font-size="18" font-weight="700" fill="var(--orange)" font-family="JetBrains Mono,monospace">✕</text>`;}
+  // armed source / drag ghost and the targets it can reach
+  const active=st.drag?st.drag.src:st.armed;
+  if(active){
+    if(active.kind==='bond') o+=bondSvg(A[active.a],A[active.b],R(active.a),R(active.b),null,1,{color:'var(--orange)'});
+    for(const a of sinks(active)){
+      const snap=(st.drag&&st.drag.snap===a);
+      o+=`<circle cx="${A[a].x}" cy="${A[a].y}" r="25" fill="${snap?'color-mix(in srgb,var(--cyan) 22%,transparent)':'none'}" stroke="var(--cyan)" stroke-width="${snap?3:1.5}" stroke-dasharray="${snap?'0':'4 4'}" opacity="${snap?1:.7}"/>`;
+    }
+    if(st.drag){
+      const end=st.drag.snap?endPoint(active,active,st.drag.snap):st.drag.p;
+      o+=arrowSvg(arrowGeom({x:active.x,y:active.y},end,active.kind==='lp'),'var(--cyan)',{dashed:!st.drag.snap,noHead:!st.drag.snap});
+      if(variant==='C'){const p=st.drag.snap?end:st.drag.p;o+=`<circle cx="${p.x-4}" cy="${p.y}" r="4" fill="var(--cyan)"/><circle cx="${p.x+4}" cy="${p.y}" r="4" fill="var(--cyan)"/>`;}
+    }
+  }
+  // keyboard / screen-reader hit targets
+  if(st.phase==='draw'||st.phase==='hint'){
+    if(st.armed) for(const a of sinks(st.armed)) o+=`<circle class="hit" tabindex="0" role="button" data-sink="${a}" aria-label="Send the ${st.armed.label} to ${A[a].name}" cx="${A[a].x}" cy="${A[a].y}" r="25"/>`;
+    else for(const s2 of sources()) o+=`<circle class="hit" tabindex="0" role="button" data-src="${s2.id}" aria-label="Start an arrow at the ${s2.label}" cx="${s2.x}" cy="${s2.y}" r="${s2.kind==='lp'?12:10}"/>`;
+  }
+  return o;
+}
+
+// ===================== the SN2 Scene: a pure function of t ∈ [0,1] =====================
+const ease=x=>x<0?0:x>1?1:x*x*(3-2*x);
+function scene(t){
+  const seg=(a,b)=>ease((t-a)/(b-a));
+  const C=A[3], push=seg(0,.22), approach=seg(.18,.5), leave=seg(.5,.85), inv=seg(.3,.82), settle=seg(.85,1);
+  const Ox=lerp(72,110,approach)+18*leave, Brx=lerp(306,322,approach)+52*leave;
+  const O={x:Ox,y:150}, Ho={x:Ox-40,y:150}, Br={x:Brx,y:150};
+  const H=[4,5,6].map((a,i)=>{const dx=A[a].x-C.x;return {x:C.x+dx*Math.cos(Math.PI*inv)+[0,-30,30][i]*Math.sin(Math.PI*inv),y:A[a].y};});
+  let o='';
+  // bonds
+  o+=bondSvg(Ho,O,14,14,null);
+  H.forEach((h,i)=>{o+=bondSvg(C,h,14,14,[null,'wedge','hash'][i]);});
+  if(approach>0) o+=bondSvg(O,C,14,14,null,1,{dashed:leave<.6,op:Math.min(1,approach*1.4)});
+  o+=bondSvg(C,Br,14,16,null,1,{dashed:approach>.05,op:1-leave});
+  // atoms, lone pairs, charges
+  o+=atomSvg(Ho.x,Ho.y,2); H.forEach((h,i)=>o+=atomSvg(h.x,h.y,4+i)); o+=atomSvg(C.x,C.y,3); o+=atomSvg(O.x,O.y,1); o+=atomSvg(Br.x,Br.y,7);
+  o+=lpSvg(O.x,O.y,'up')+lpSvg(O.x,O.y,'down');
+  if(push===0) o+=lpSvg(O.x,O.y,'right');
+  o+=lpSvg(Br.x,Br.y,'up')+lpSvg(Br.x,Br.y,'right')+lpSvg(Br.x,Br.y,'down');
+  if(leave>.6) o+=lpSvg(Br.x,Br.y,'left',seg(.6,.8));
+  o+=chargeSvg(O.x,O.y,'−',1-approach);
+  const ts=approach*(1-leave);
+  if(ts>.02){o+=`<text x="${O.x-6}" y="${O.y-38}" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="var(--muted)" opacity="${ts}">δ−</text><text x="${Br.x-6}" y="${Br.y-38}" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="var(--muted)" opacity="${ts}">δ−</text>`;
+    o+=`<text x="${C.x}" y="40" text-anchor="middle" font-family="Silkscreen" font-size="11" fill="var(--cyan)" opacity="${ts}">TRANSITION STATE</text>`;}
+  o+=chargeSvg(Br.x,Br.y,'−',leave);
+  // the two arrows, and the electrons riding them (the electron is the character)
+  const a1=arrowGeom({x:97,y:150},{x:180,y:150},true), a2=arrowGeom({x:256,y:150},{x:289,y:173},false);
+  const aop=1-seg(.2,.32);
+  if(aop>0){o+=arrowSvg(a1,'var(--cyan)',{op:aop})+arrowSvg(a2,'var(--cyan)',{op:aop});
+    for(const g of [a1,a2]){const u=push,x=(1-u)*(1-u)*g.p0.x+2*(1-u)*u*g.c.x+u*u*g.p1.x,y=(1-u)*(1-u)*g.p0.y+2*(1-u)*u*g.c.y+u*u*g.p1.y;
+      if(push>0&&push<1) o+=`<circle cx="${x-4}" cy="${y}" r="4" fill="var(--cyan)"/><circle cx="${x+4}" cy="${y}" r="4" fill="var(--cyan)"/>`;}}
+  if(settle>0) o+=`<text x="200" y="266" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="13" font-weight="600" fill="var(--orange)" opacity="${settle}">HO–CH₃ + Br⁻ · configuration inverted</text>`;
+  return o;
+}
+function caption(t){
+  if(t<.2) return "Hydroxide's lone pair heads for the back of carbon, opposite bromine.";
+  if(t<.55) return "Transition state: O and Br both half-bonded to carbon, the three H's flattened into a plane.";
+  if(t<.86) return "Bromide leaves with the C–Br electrons; the H's flip over like an umbrella in the wind.";
+  return "Methanol and bromide. Carbon's configuration is inverted: SN2 always attacks from the back.";
+}
+
+// ===================== UI =====================
+const $=s=>document.querySelector(s);
+const LEAD={
+  A:'Drag from the electrons that move (a lone pair or a bond) to the atom they go to. Draw every arrow, then Check.',
+  B:'Tap the electrons that move (a lone pair or a bond), then tap the atom they go to. Draw every arrow, then Check.',
+  C:'Grab the electrons themselves and push them where they go. Each push is checked as you make it.',
+};
+function mount(){
+  document.body.dataset.motion=reduced?'reduced':'';
+  if(FRAME!==null){ // video frame mode
+    $('#switcher').style.display='none';
+    $('#app').innerHTML=`<div class="frame"><svg viewBox="0 0 400 280" role="img" aria-label="SN2 Scene frame">${scene(+FRAME||0)}</svg></div>`;
+    return;
+  }
+  $('#app').innerHTML=`
+  <main class="step">
+    <div class="top"><button class="x" aria-label="Leave Lesson">✕</button><div class="prog" aria-label="Step 6 of 14"><i></i></div></div>
+    <div class="kick">DRAW ARROWS · STEP 6 OF 14</div>
+    <h1>Push the electrons</h1>
+    <div class="rxn" aria-label="Hydroxide plus bromomethane gives what?">HO⁻ + CH₃Br → ?</div>
+    <p class="lead">${LEAD[variant]}</p>
+    <div class="card">
+      <div class="callout" id="call" aria-hidden="true"></div>
+      <svg id="mol" viewBox="0 0 400 280" role="group" aria-label="Hydroxide ion and bromomethane. Use Tab to pick electrons, Enter to select."></svg>
+      <div class="tools" id="tools"></div>
+      <div class="cap" id="cap" hidden></div>
+    </div>
+    <div class="fb" id="fb" role="status"></div>
+    <details><summary>ⓘ Where this comes from</summary>
+      <p class="srcnote"><b>Mechanism:</b> concerted backside attack with inversion of configuration, OpenStax <i>Organic Chemistry</i>, §11.2 "The SN2 Reaction" (CC BY-NC-SA 4.0).<br>
+      <b>Drawing:</b> 2D schematic; no bond lengths or angles are shown, so no measured values are used. Atom rings use Jmol colours; every atom carries its letter.<br>
+      <b>Grading:</b> your arrows are run on the starting structure and the result is compared with the product; which arrows you drew only chooses the Hint.</p></details>
+  </main>
+  <div class="foot"><button id="main"></button></div>`;
+  const svg=$('#mol');
+  svg.addEventListener('pointerdown',down);
+  svg.addEventListener('pointermove',move);
+  svg.addEventListener('pointerup',up);
+  svg.addEventListener('pointercancel',()=>{st.drag=null;draw();});
+  svg.addEventListener('keydown',key);
+  $('#main').onclick=mainBtn;
+  draw();
+}
+function draw(){
+  if(FRAME!==null) return;
+  const focusId=document.activeElement&&document.activeElement.dataset?(document.activeElement.dataset.src||document.activeElement.dataset.sink):null;
+  const svg=$('#mol');
+  svg.innerHTML=st.phase==='scene'?scene(st.t):drawMolecule();
+  if(focusId){const el=svg.querySelector(`[data-src="${focusId}"],[data-sink="${focusId}"]`);if(el)el.focus();}
+  // callout above the card: what the finger is doing (it hides the target on a phone)
+  const c=$('#call');
+  let txt=st.call, warn=st.callWarn;
+  if(st.drag) txt=st.drag.snap?`${st.drag.src.label} → ${A[st.drag.snap].name}`:`${st.drag.src.label} → …`;
+  else if(st.armed) txt=`${st.armed.label} → tap where it goes`;
+  else if(variant==='C'&&st.phase!=='scene'&&!txt){const s=shown();const over=Object.keys(A).find(a=>electrons(s,+a)>limit(+a));
+    if(over){txt=`${A[over].el} now has ${electrons(s,+over)} electrons. Something has to leave.`;warn=true;}
+    else if(s.ch[3]>0){txt='C⁺: a methyl cation, 6 electrons. In SN2 the attack happens at the same moment.';warn=true;}}
+  c.textContent=txt||''; c.className='callout'+(warn?' warn':'');
+  // tools row
+  const tools=$('#tools'), cap=$('#cap');
+  if(st.phase==='scene'){
+    tools.innerHTML=`<div class="scrub"><button class="ibtn" id="play" aria-label="${st.playing?'Pause':'Play'} the Scene">${st.playing?'❚❚':'▶'}</button>
+      <input type="range" id="t" min="0" max="1000" value="${Math.round(st.t*1000)}" aria-label="Scene time"></div>`;
+    $('#play').onclick=()=>{if(st.playing){st.playing=false;cancelAnimationFrame(raf);draw();}else{if(st.t>=1)st.t=0;play();}};
+    $('#t').oninput=e=>{st.playing=false;cancelAnimationFrame(raf);st.t=e.target.value/1000;draw();};
+    cap.hidden=false; cap.textContent=caption(st.t);
+  }else{
+    const n=st.arrows.length, editable=st.phase==='draw'||st.phase==='hint';
+    tools.innerHTML=`<span class="srcnote">${n?`${n} arrow${n>1?'s':''}`:'no arrows yet'}</span>
+      <span style="display:flex;gap:8px"><button class="ibtn" id="undo" ${editable&&n?'':'disabled'}>↶ UNDO</button><button class="ibtn" id="clear" ${editable&&n?'':'disabled'}>CLEAR</button></span>`;
+    $('#undo').onclick=()=>{st.arrows.pop();st.call='';say('Removed the last arrow.');draw();};
+    $('#clear').onclick=()=>{st.arrows=[];st.call='';say('Cleared all arrows.');draw();};
+    cap.hidden=true;
+  }
+  // feedback
+  const fb=$('#fb');
+  if(st.msg&&st.phase!=="scene"){fb.className='fb on '+st.msg.kind;fb.innerHTML=`<h2>${st.msg.title}</h2><p>${st.msg.text}</p>`;}else{fb.className='fb';fb.innerHTML='';}
+  // fixed bottom button
+  const b=$('#main');
+  if(st.phase==='scene'){b.textContent='CONTINUE';b.disabled=false;}
+  else if(st.phase==='done'){b.textContent='▶ PLAY THE SCENE';b.disabled=false;}
+  else if(variant==='C'){b.textContent='PUSH THE ELECTRONS';b.disabled=true;}
+  else{b.textContent='CHECK';b.disabled=!st.arrows.length;}
+  renderData();
+}
+function renderData(){
+  const d=$('#data'); d.className=showData?'on':''; if(!showData) return;
+  const s=apply(st.arrows), r=evaluate(st.arrows);
+  const ms=st.arrows.map(a=>a.from.lp?`(${a.from.lp}, ${a.to.atom})`:(a.to.atom===a.from.bond[0]||a.to.atom===a.from.bond[1])?`((${a.from.bond.join(', ')}), ${a.to.atom})`:`((${a.from.bond.join(', ')}), ${a.to.atom})`).join(';');
+  d.innerHTML=`<b>variant</b> ${variant}   <b>phase</b> ${st.phase}   <b>tries</b> ${st.tries}
+<b>armed</b> ${st.armed?st.armed.label:'–'}   <b>dragging</b> ${st.drag?st.drag.src.label+(st.drag.snap?' → '+A[st.drag.snap].name:''):'–'}
+
+<b>MechanismStep.arrows</b> (what the Student drew)
+${JSON.stringify(st.arrows.map(a=>({from:a.from.lp?{atom:a.from.lp}:{bond:a.from.bond},to:{atom:a.to.atom},electrons:2})),null,1)}
+
+<b>MechSMILES</b>
+[H:2][O-:1].[H:4][C:3]([H:5])([H:6])[Br:7]|${ms}
+
+<b>derived result</b> (arrows run on start)
+bonds   ${Object.entries(s.bonds).map(([k,v])=>k.split('-').map(x=>A[x].el+x).join('–')+(v>1?'×'+v:'')).join(', ')}
+charges ${Object.entries(s.ch).filter(([,v])=>v).map(([k,v])=>A[k].el+k+(v>0?'+':'−')).join(', ')||'none'}
+electrons ${Object.keys(A).map(a=>A[a].el+a+':'+electrons(s,+a)).join(' ')}
+
+<b>grade</b> ${r.ok?'CORRECT (matches product)':'wrong → '+r.msg}`;
+}
+
+// ---------- interaction ----------
+function pt(e){const svg=$('#mol'),p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}
+const canEdit=()=>st.phase==='draw'||st.phase==='hint';
+function nudge(p){
+  const near=Object.keys(A).find(a=>dist(p,A[a])<26);
+  if(near){st.call=`${A[near].el} itself isn't electrons. Start at a lone pair (cyan dots) or a bond.`;st.callWarn=true;}
+  else st.call='';
+}
+function down(e){
+  if(!canEdit()) return;
+  const p=pt(e); st.call=''; st.callWarn=false;
+  if(variant==='B'){
+    if(st.armed){
+      const k=nearestSink(p,st.armed);
+      if(k){commit(arrowFrom(st.armed,k));st.armed=null;}
+      else{const s=nearestSource(p); st.armed=s&&s.id!==st.armed.id?s:null;}
+    }else{const s=nearestSource(p); if(s){st.armed=s;say(`Picked the ${s.label}. Now choose where the electrons go.`);} else nudge(p);}
+    draw(); return;
+  }
+  const s=nearestSource(p);
+  if(!s){nudge(p);draw();return;}
+  st.drag={src:s,p,snap:null,moved:false};
+  $('#mol').setPointerCapture(e.pointerId); draw();
+}
+function move(e){
+  if(!st.drag) return;
+  const p=pt(e); st.drag.p=p; st.drag.moved=true;
+  // snap to the nearest valid atom; on touch the finger covers the target, so the callout names it
+  st.drag.snap=nearestSink(p,st.drag.src); draw();
+}
+function up(){
+  if(!st.drag) return;
+  const d=st.drag; st.drag=null;
+  if(d.snap) commit(arrowFrom(d.src,d.snap));
+  else if(!d.moved){st.call=`Drag from the ${d.src.label} to an atom.`;st.callWarn=false;}
+  draw();
+}
+function key(e){
+  const el=e.target;
+  if(e.key==='Escape'&&st.armed){st.armed=null;draw();$('#mol').querySelector('.hit')?.focus();return;}
+  if(e.key!=='Enter'&&e.key!==' ') return;
+  if(!el.dataset||!canEdit()) return;
+  e.preventDefault();
+  if(el.dataset.src){st.armed=sources().find(s=>s.id===el.dataset.src);say(`Picked the ${st.armed.label}. Tab to an atom and press Enter, or Escape to cancel.`);draw();$('#mol').querySelector('[data-sink]')?.focus();}
+  else if(el.dataset.sink){const ar=arrowFrom(st.armed,+el.dataset.sink);st.armed=null;commit(ar);draw();$('#mol').querySelector('.hit')?.focus();}
+}
+function commit(ar){
+  if(variant!=='C'){
+    st.arrows.push(ar); say(`Arrow drawn: ${describe(ar)}.`); return;
+  }
+  // C: every push is graded on the spot
+  if(ANSWER_KEYS.includes(keyOf(ar))){
+    st.arrows.push(ar); st.msg=null; say(`Push accepted: ${describe(ar)}.`);
+    if(canon(apply(st.arrows))===EXPECTED) succeed();
+    return;
+  }
+  st.tries++;
+  st.bounce=ar; setTimeout(()=>{st.bounce=null;draw();},reduced?900:650);
+  const hint=evaluate([ar]).msg;
+  if(st.tries<2){st.msg={kind:'hint',title:'NOT QUITE',text:hint};say('Not quite. '+hint);}
+  else{
+    const next=ANSWER.find(a=>!st.arrows.some(x=>keyOf(x)===keyOf(a)));
+    st.arrows.push({...clone(next),shown:true});
+    const rest=ANSWER.find(a=>!st.arrows.some(x=>keyOf(x)===keyOf(a)));
+    if(rest){st.msg={kind:'show',title:'HERE IS THAT PUSH',text:`${hint} The push is shown in orange: ${describe(next)}. Now finish the step.`};st.tries=1;}
+    else{st.msg={kind:'show',title:'HERE IS THE ANSWER',text:EXPLAIN};st.phase='done';}
+    say(st.msg.text);
+    if(!rest) return;
+  }
+}
+function succeed(){
+  st.phase='done';
+  st.msg={kind:'good',title:'ELECTRONS PUSHED!',text:EXPLAIN}; say('Correct. '+EXPLAIN);
+  if(variant==='C'&&!reduced) setTimeout(()=>{if(st.phase==='done'){st.phase='scene';st.t=0;play();}},900);
+}
+function mainBtn(){
+  if(st.phase==='scene'){reset();say('Prototype restarted at the same Step.');return;}
+  if(st.phase==='done'){st.phase='scene';st.t=0;if(reduced){st.t=0;draw();}else play();return;}
+  if(variant==='C') return;
+  const r=evaluate(st.arrows);
+  if(r.ok){succeed();draw();return;}
+  st.tries++;
+  if(st.tries<2){st.phase='hint';st.msg={kind:'hint',title:'NOT QUITE',text:r.msg};say('Not quite. '+r.msg);}
+  else{st.arrows=clone(ANSWER).map(a=>({...a,shown:true}));st.phase='done';st.msg={kind:'show',title:'HERE IS THE ANSWER',text:`${r.msg} ${EXPLAIN}`};say('Here is the answer. '+EXPLAIN);}
+  draw();
+}
+let raf=0;
+function play(){
+  st.playing=true; const t0=performance.now()-st.t*4500;
+  const tick=now=>{st.t=Math.min(1,(now-t0)/4500);if(st.t>=1)st.playing=false;draw();if(st.playing)raf=requestAnimationFrame(tick);};
+  cancelAnimationFrame(raf); raf=requestAnimationFrame(tick);
+}
+function say(t){const l=$('#live');l.textContent='';setTimeout(()=>l.textContent=t,30);}
+
+// ---------- switcher ----------
+function setParam(k,v){const u=new URL(location);if(v===null)u.searchParams.delete(k);else u.searchParams.set(k,v);history.replaceState(null,'',u);}
+function cycle(d){const i=VARIANTS.findIndex(v=>v[0]===variant);variant=VARIANTS[(i+d+VARIANTS.length)%VARIANTS.length][0];setParam('variant',variant);label();reset();}
+function label(){$('#sw-label').textContent=`${variant} (${VARIANTS.find(v=>v[0]===variant)[1]})`;$('#sw-motion').setAttribute('aria-pressed',reduced);$('#sw-data').setAttribute('aria-pressed',showData);}
+$('#sw-prev').onclick=()=>cycle(-1);
+$('#sw-next').onclick=()=>cycle(1);
+$('#sw-motion').onclick=()=>{reduced=!reduced;setParam('motion',reduced?'reduced':null);label();document.body.dataset.motion=reduced?'reduced':'';};
+$('#sw-data').onclick=()=>{showData=!showData;setParam('data',showData?'1':null);label();renderData();};
+$('#sw-reset').onclick=reset;
+document.addEventListener('keydown',e=>{
+  if(e.target.closest&&e.target.closest('input,textarea,[contenteditable],#mol')) return;
+  if(e.key==='ArrowLeft')cycle(-1); if(e.key==='ArrowRight')cycle(1);
+});
+label(); mount();
+</script>
+</body>
+</html>
