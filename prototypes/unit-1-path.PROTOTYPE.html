@@ -1,0 +1,384 @@
+<!doctype html>
+<!--
+  PROTOTYPE, throwaway. Wayfinder ticket "Prototype: Choose the first Unit to build" (#29).
+  The question: does Unit 1's Lesson lineup (On-ramp, Lessons 1–8, Practice Set) hold up when you can see it?
+  Order, sizes and the Molecular Orbitals capstone, as decided on "Choose the first Unit to build" (#17).
+  One Unit page, three ways, switchable via ?variant=A|B|C and the floating bar (← / → keys):
+    A  Node path     – Brilliant-style winding path; node size = Step count; tap a node for its card.
+    B  Level select  – arcade rows grouped into acts, everything visible at once, Hook/Build/Check/Wrap bar per Lesson.
+    C  Prereq spine  – compact rows with arcs showing which earlier Lesson each one builds on; broken arcs turn orange.
+  Shared below every variant: the lineup editor (↑/↓ to reorder, split Polarity into its own Lesson),
+  the checks (prerequisites, 10–15 Step band, Unit size) and a copyable result.
+  Step counts are agent estimates, not decisions: each Lesson spec sets the real count.
+  Pixel fonts never carry chemistry or numbers: only the wordmark is pixel type.
+  Bar also toggles light/dark (?theme=light) and reduced motion (?motion=reduced).
+  Needs internet only for fonts. Double-click to open. Never merged.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AstraTron · Unit 1 path (prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600;700&family=Pixelify+Sans:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  :root{--bg:#0d0626;--fg:#fff;--muted:#b9a8e8;--cyan:#3ee8ff;--uv:#b44dff;--mag:#ff4fd8;--orange:#ff9a1f;--line:#5b3bb3;--ink:#0d0626;--raise:#160b3a}
+  :root[data-theme=light]{--bg:#f3edff;--fg:#1a0d3d;--muted:#5c4a91;--cyan:#0b8aa3;--uv:#7a1fd1;--mag:#b8148f;--orange:#c45f00;--line:#b9a2f0;--ink:#fff;--raise:#fff}
+  body{background:
+     radial-gradient(ellipse 70% 40% at 20% 10%,color-mix(in srgb,var(--mag) 22%,transparent),transparent 70%),
+     radial-gradient(ellipse 60% 40% at 85% 45%,color-mix(in srgb,var(--uv) 30%,transparent),transparent 70%),
+     radial-gradient(ellipse 50% 30% at 30% 90%,color-mix(in srgb,#2340ff 22%,transparent),transparent 70%),var(--bg);
+     background-attachment:fixed;color:var(--fg);font-family:"Space Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit;cursor:pointer}
+  :focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+  .mono{font-family:"JetBrains Mono",monospace}
+  .lab{font:600 10.5px "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  [data-motion=reduced] *{animation:none!important;transition:none!important}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  /* ---------- prototype switcher (deliberately NOT on-brand) ---------- */
+  #switcher{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:100;display:flex;align-items:center;gap:4px;
+    background:#fffbe6;color:#111;border:2px solid #111;border-radius:999px;padding:4px;font:600 13px/1 system-ui,sans-serif;
+    box-shadow:0 6px 24px rgba(0,0,0,.45);white-space:nowrap;max-width:calc(100vw - 16px);overflow-x:auto}
+  #switcher button{background:none;border:0;border-radius:999px;padding:8px 10px;color:#111}
+  #switcher button:hover{background:#111;color:#fffbe6}
+  #switcher button[aria-pressed=true]{background:#111;color:#fffbe6}
+  #switcher .lbl{padding:0 6px;min-width:130px;text-align:center}
+  #switcher .tag{font-size:10px;letter-spacing:.08em;background:#111;color:#fffbe6;border-radius:999px;padding:4px 7px}
+  #switcher .sep{width:1px;height:20px;background:#111;opacity:.25;flex:none}
+
+  /* ---------- shared Unit header ---------- */
+  .page{max-width:680px;margin:0 auto;padding:14px 16px 120px}
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .back{background:none;border:0;color:var(--muted);font:600 13px "Space Grotesk";padding:6px 0}
+  .logo{font:700 15px "Pixelify Sans";letter-spacing:.06em;color:var(--orange);text-shadow:2px 2px 0 var(--uv)}
+  .don{font:600 12px "Space Grotesk";background:var(--orange);color:#1a0d3d;border:0;padding:7px 10px;box-shadow:3px 3px 0 var(--uv)}
+  .uhead{margin:22px 0 18px}
+  .uhead .kick{font:600 12px "JetBrains Mono";color:var(--cyan);letter-spacing:.06em}
+  .uhead h1{font:700 clamp(30px,7vw,46px)/1 "Space Grotesk";letter-spacing:-.035em;margin:6px 0 8px}
+  .uhead p{color:var(--muted);margin:0;max-width:52ch}
+  .stats{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px}
+  .stats div{font:700 18px "JetBrains Mono"}.stats span{display:block;font:500 11px "Space Grotesk";color:var(--muted)}
+
+  .chip{display:inline-flex;align-items:center;gap:5px;font:600 10.5px "JetBrains Mono";letter-spacing:.04em;padding:3px 7px;border:2px solid var(--line);max-width:100%}
+  .chip.pilot{border-color:var(--orange);color:var(--orange)}
+  .chip.boss{border-color:var(--mag);color:var(--mag)}
+  .chip.opt{border-style:dashed;color:var(--muted)}
+  .chip.warn{border-color:var(--orange);color:var(--orange)}
+
+  /* ---------- A: node path ---------- */
+  .pathA{position:relative;margin:0 auto;width:min(100%,360px)}
+  .pathA svg{position:absolute;inset:0;pointer-events:none;overflow:visible}
+  .node{position:absolute;transform:translate(-50%,-50%);border-radius:50%;border:3px solid var(--line);
+     background:color-mix(in srgb,var(--bg) 70%,var(--uv));box-shadow:4px 4px 0 var(--uv);display:grid;place-items:center;padding:0}
+  .node b{font:700 17px "JetBrains Mono"}
+  .node.sel{border-color:var(--cyan);box-shadow:0 0 0 4px color-mix(in srgb,var(--cyan) 35%,transparent),4px 4px 0 var(--uv)}
+  .node.first{background:linear-gradient(160deg,color-mix(in srgb,var(--orange) 45%,var(--bg)),color-mix(in srgb,var(--mag) 35%,var(--bg)));border-color:var(--orange)}
+  .node.boss{border-color:var(--mag);border-width:4px}
+  .node.opt{border-style:dashed}
+  .node.prac{border-radius:0;transform:translate(-50%,-50%) rotate(45deg)}.node.prac b{transform:rotate(-45deg)}
+  .node.lock{opacity:.45;border-style:dotted;box-shadow:none}
+  .nlabel{position:absolute;transform:translateY(-50%);width:132px;font:600 13px/1.2 "Space Grotesk"}
+  .nlabel small{display:block;font:500 11px "JetBrains Mono";color:var(--muted);margin-top:2px}
+  .nlabel.l{text-align:right}
+  .sheet{position:sticky;bottom:70px;margin-top:10px;border:3px solid var(--cyan);background:var(--raise);box-shadow:6px 6px 0 var(--uv);padding:14px 16px;animation:up .25s ease-out}
+  @keyframes up{from{transform:translateY(14px);opacity:0}}
+  .sheet h3{font:700 20px/1.15 "Space Grotesk";margin:6px 0 6px;letter-spacing:-.02em}
+  .sheet p{margin:0 0 10px;color:var(--muted)}
+  .sheet .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .sheet .go{display:block;width:100%;margin-top:12px;border:0;background:var(--orange);color:#1a0d3d;font:700 15px "Space Grotesk";padding:12px;box-shadow:4px 4px 0 var(--uv)}
+
+  /* ---------- B: level select ---------- */
+  .act{margin:22px 0 8px;display:flex;align-items:center;gap:10px}
+  .act .lab{color:var(--cyan)}
+  .act::after{content:"";flex:1;height:2px;background:var(--line)}
+  .lvl{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;border:3px solid var(--line);background:color-mix(in srgb,var(--bg) 80%,var(--uv));box-shadow:5px 5px 0 var(--line);padding:12px;margin-bottom:12px}
+  .lvl .no{font:700 30px/1 "JetBrains Mono";color:color-mix(in srgb,var(--fg) 35%,transparent)}
+  .lvl h3{font:700 18px/1.15 "Space Grotesk";margin:0 0 4px;letter-spacing:-.015em}
+  .lvl p{margin:0 0 8px;color:var(--muted);font-size:14px}
+  .lvl .row{display:flex;gap:6px;flex-wrap:wrap}
+  .lvl.first{border-color:var(--orange);box-shadow:5px 5px 0 var(--uv)}.lvl.first .no{color:var(--orange)}
+  .lvl.boss{border-color:var(--mag);box-shadow:5px 5px 0 var(--mag);background:linear-gradient(160deg,color-mix(in srgb,var(--mag) 22%,var(--bg)),color-mix(in srgb,var(--uv) 25%,var(--bg)))}
+  .lvl.boss .no{color:var(--mag)}
+  .lvl.opt{border-style:dashed;box-shadow:none}
+  .lvl.lock{opacity:.5;box-shadow:none;border-style:dotted}
+  .hbcw{display:flex;gap:2px;margin:10px 0 2px;height:12px}
+  .hbcw i{flex:1;background:var(--line)}
+  .hbcw i.h{background:var(--orange)}.hbcw i.c{background:var(--cyan)}.hbcw i.w{background:var(--mag)}
+  .hbcw i.gap{background:transparent;border:1px dashed color-mix(in srgb,var(--fg) 25%,transparent)}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin:4px 0 0}.legend span{display:inline-flex;align-items:center;gap:5px}
+  .legend i{width:10px;height:10px;display:inline-block}
+
+  /* ---------- C: prereq spine ---------- */
+  .spine{position:relative}
+  .spine svg{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+  .srow{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;height:78px;margin-left:96px;border-bottom:2px solid color-mix(in srgb,var(--line) 55%,transparent);position:relative}
+  .srow .dot{width:18px;height:18px;border:3px solid var(--cyan);background:var(--bg);margin-left:-29px}
+  .srow.boss .dot{border-color:var(--mag);width:22px;height:22px}
+  .srow.opt .dot{border-style:dashed}
+  .srow h3{font:700 15.5px/1.15 "Space Grotesk";margin:0}
+  .srow p{margin:2px 0 0;color:var(--muted);font-size:12.5px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .srow .n{font:700 14px "JetBrains Mono";color:var(--muted)}
+  .srow .steps{font:700 15px "JetBrains Mono";text-align:right}.srow .steps small{display:block;font:500 10px "JetBrains Mono";color:var(--muted)}
+  .srow .steps.out{color:var(--orange)}
+  .srow.lock{opacity:.5}
+  .srow.hot{background:color-mix(in srgb,var(--cyan) 10%,transparent)}
+  .legendC{margin:10px 0 0 96px}
+
+  /* ---------- shared review panel ---------- */
+  .review{margin-top:40px;border:3px solid var(--fg);background:var(--raise);box-shadow:6px 6px 0 var(--line);padding:16px}
+  .review h2{font:700 20px "Space Grotesk";margin:0 0 4px}
+  .review > p{color:var(--muted);margin:0 0 12px;font-size:14px}
+  .ed{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:6px}
+  .ed li{display:flex;align-items:center;gap:8px;border:2px solid var(--line);padding:6px 8px}
+  .ed li.fixed{border-style:dashed;color:var(--muted)}
+  .ed .t{flex:1;font-weight:600;font-size:14px}
+  .ed .k{font:700 12px "JetBrains Mono";color:var(--muted);min-width:22px}
+  .ed .s{font:600 12px "JetBrains Mono";color:var(--muted)}
+  .ed button{background:transparent;border:2px solid var(--line);padding:2px 8px;font:700 13px "JetBrains Mono"}
+  .ed button:disabled{opacity:.3;cursor:default}
+  .tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .tools button{background:transparent;border:2px solid var(--fg);padding:7px 10px;font:600 13px "Space Grotesk";box-shadow:3px 3px 0 var(--line)}
+  .tools button[aria-pressed=true]{background:var(--cyan);color:#0d0626;border-color:var(--cyan)}
+  .checks{margin:0 0 14px;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:14px}
+  .checks li{padding-left:22px;position:relative}
+  .checks li::before{position:absolute;left:0;font:700 13px "JetBrains Mono"}
+  .checks li.ok::before{content:"✓";color:var(--cyan)}
+  .checks li.bad::before{content:"!";color:var(--orange)}
+  .checks li.info::before{content:"·";color:var(--muted)}
+  pre{white-space:pre-wrap;margin:0;font:12px/1.5 "JetBrains Mono",monospace;background:color-mix(in srgb,var(--bg) 80%,#000);color:var(--fg);padding:10px;max-height:300px;overflow:auto;border:2px solid var(--line)}
+  :root[data-theme=light] pre{background:#f7f3ff}
+  .flash{color:var(--cyan);font-size:13px;margin-left:8px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="switcher" role="toolbar" aria-label="Prototype variant switcher">
+  <span class="tag">PROTOTYPE</span>
+  <button id="sw-prev" aria-label="Previous variant">←</button>
+  <span class="lbl" id="sw-label"></span>
+  <button id="sw-next" aria-label="Next variant">→</button>
+  <span class="sep"></span>
+  <button id="sw-theme" aria-pressed="false">light</button>
+  <button id="sw-motion" aria-pressed="false">reduced motion</button>
+</div>
+<script>
+// ===================== settings =====================
+const P = new URLSearchParams(location.search);
+const VARIANTS = [['A','Node path'],['B','Level select'],['C','Prereq spine']];
+let variant = (P.get('variant')||'A').toUpperCase();
+if(!VARIANTS.some(v=>v[0]===variant)) variant='A';
+let light = P.get('theme')==='light';
+let reduced = P.get('motion')==='reduced';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+// ===================== Unit 1 lineup (from the resolution on "Choose the first Unit to build") =====================
+// steps: agent estimates inside the 10–15 band from "Decide the lesson anatomy"; each Lesson spec sets the real count.
+// teaches/uses: the concepts each Lesson introduces and leans on, used only for the prerequisite check.
+const L = {
+  onramp:  {title:'Why Carbon?', goal:'Carbon sits mid-row and shares electrons; the octet explains why atoms bond.', sig:'Manipulate a Scene', src:'MIT 5.12 L1 pp. 3–8', steps:9, act:'Warm-up',
+            teaches:['the octet','valence electrons'], uses:[], opt:true},
+  bonds:   {title:'Bonds, Polarity & Formal Charge', goal:'Electronegativity, δ+/δ−, bond dipoles; the bonding-pattern table; formal charge; impossible structures; boron.', sig:'Tap-to-identify', src:'L1 pp. 8–10; PS1 Q1', steps:15, act:'Atoms & bonds',
+            teaches:['electronegativity','bond polarity','formal charge','bonding patterns'], uses:[]},
+  polarity:{title:'Polarity & Bond Dipoles', goal:'Electronegativity, δ+/δ− and bond dipoles: where the electrons in a bond sit.', sig:'Tap-to-identify', src:'L1 (not in MIT); OpenStax §2.1–2.2', steps:7, act:'Atoms & bonds',
+            teaches:['electronegativity','bond polarity'], uses:[]},
+  fc:      {title:'Bonds & Formal Charge', goal:'The bonding-pattern table; formal charge; impossible structures; boron.', sig:'Tap-to-identify', src:'L1 pp. 8–10; PS1 Q1', steps:11, act:'Atoms & bonds',
+            teaches:['formal charge','bonding patterns'], uses:[]},
+  drawing: {title:'Drawing Molecules', goal:'Convert between Lewis, Kekulé and line-angle; implied H’s and lone pairs.', sig:'Multiple choice (structure cards)', src:'L1 pp. 11–12', steps:12, act:'Atoms & bonds',
+            teaches:['line-angle drawings','lone pairs'], uses:['bonding patterns','formal charge']},
+  shape:   {title:'Molecules in 3D', goal:'VSEPR shapes; reading wedge/dash.', sig:'Rotate-and-identify 3D', src:'L1 p. 13; PS1 Q2', steps:11, act:'Shape',
+            teaches:['VSEPR shapes','wedge/dash'], uses:['line-angle drawings','lone pairs']},
+  hybrid:  {title:'Hybridization & Orbitals', goal:'sp³/sp²/sp with bond angles; σ vs π.', sig:'Rotate-and-identify 3D', src:'L1 pp. 13–14; PS1 Q5', steps:13, act:'Shape',
+            teaches:['hybridization','σ vs π bonds'], uses:['VSEPR shapes']},
+  fg:      {title:'Functional Groups', goal:'Recognize the core groups inside real molecules (amoxicillin).', sig:'Tap-to-identify', src:'L1 p. 15; PS1 Q4', steps:10, act:'Reading molecules',
+            teaches:['functional groups'], uses:['line-angle drawings']},
+  res1:    {title:'Resonance: Pushing Electrons', goal:'Curved arrows source → sink, the three moves; the σ framework never moves.', sig:'Draw arrows', src:'L2 pp. 16–18, L2b pp. 1–2; PS1 Q3, Q6', steps:14, act:'Moving electrons', pilot:true,
+            teaches:['curved arrows','resonance'], uses:['lone pairs','formal charge','σ vs π bonds']},
+  res2:    {title:'Resonance: Which Contributor Wins', goal:'Rank contributors (octets, fewest charges, − on the more electronegative atom, least separation); find reactive sites.', sig:'Rank / order', src:'L2b pp. 3–4', steps:12, act:'Moving electrons',
+            teaches:['ranking contributors','reactive sites'], uses:['resonance','electronegativity','formal charge']},
+  mo:      {title:'Molecular Orbitals: Why Electrons Flow', goal:'H₂ σ/σ*, bond order, why no He₂; ethylene π/π*; HOMO/LUMO and the gap; BF₃ + NH₃; a curved arrow = HOMO → LUMO.', sig:'Manipulate a Scene / Rotate-and-identify 3D', src:'OpenStax §1.11; PySCF, labelled "computed"', steps:15, act:'Capstone', boss:true,
+            teaches:['bonding/antibonding','HOMO → LUMO'], uses:['σ vs π bonds','curved arrows','hybridization']},
+  practice:{title:'Practice Set', goal:'10 Problems drawn from the Unit’s Bank, easy to hard, covering every Lesson.', sig:'Mixed', src:'Problem Bank (≥20, seeded from MIT PS1 Q1–6)', steps:10, act:'Final round', prac:true, unit:'Problems',
+            teaches:[], uses:[]},
+};
+const SIG_ICON = {'Manipulate a Scene':'◎','Tap-to-identify':'☝','Multiple choice (structure cards)':'▤','Rotate-and-identify 3D':'⟲','Draw arrows':'↷','Rank / order':'☰','Manipulate a Scene / Rotate-and-identify 3D':'◎⟲','Mixed':'✦'};
+const DEFAULT_CORE = ['bonds','drawing','shape','hybrid','fg','res1','res2','mo'];
+
+// ===================== lineup model: pure =====================
+const initial = () => ({core:[...DEFAULT_CORE], split:false, sel:null});
+function lineup(st){
+  const core = st.core.flatMap(id => id==='bonds' && st.split ? ['polarity','fc'] : [id]);
+  return ['onramp', ...core, 'practice'];
+}
+function numbers(st){ const n={}; lineup(st).forEach((id,i)=>{ n[id] = id==='onramp'?0 : id==='practice'?'P' : i; }); return n; }
+function moveCore(st,id,d){
+  const core=[...st.core], i=core.indexOf(id), j=i+d;
+  if(i<0||j<0||j>=core.length) return st;
+  [core[i],core[j]]=[core[j],core[i]];
+  return {...st, core};
+}
+function checks(st){
+  const ids = lineup(st), out=[], taughtAt={};
+  ids.forEach((id,i)=>L[id].teaches.forEach(c=>{ taughtAt[c]=i; }));
+  let broken=0;
+  ids.forEach((id,i)=>L[id].uses.forEach(c=>{
+    if(taughtAt[c]>i){ broken++; out.push(['bad',`${L[id].title} uses ${c}, which isn't taught until ${L[ids[taughtAt[c]]].title}.`]); }
+  }));
+  if(!broken) out.unshift(['ok','Every Lesson only uses ideas taught before it.']);
+  const core = ids.filter(id=>id!=='onramp'&&id!=='practice');
+  core.forEach(id=>{ const s=L[id].steps;
+    if(s>15) out.push(['bad',`${L[id].title}: ~${s} Steps, over the 15-Step ceiling.`]);
+    else if(s<10) out.push(['bad',`${L[id].title}: ~${s} Steps, under the 10-Step floor (too thin to stand alone?).`]);
+    else if(s===15) out.push(['info',`${L[id].title}: ~${s} Steps, right at the ceiling.`]);
+  });
+  out.push(['info',`On-ramp ~${L.onramp.steps} Steps: it's optional, so it isn't held to the 10–15 band.`]);
+  out.push([core.length<=7?'ok':'info',`${core.length} core Lessons (the Unit norm is 5–7; Unit 1 is the agreed exception at 8, or 9 if Polarity splits).`]);
+  const total = ids.filter(id=>id!=='practice').reduce((a,id)=>a+L[id].steps,0);
+  out.push(['info',`~${total} Steps across the Lessons, plus 10 Practice Set Problems.`]);
+  if(st.core[st.core.length-1]!=='mo') out.push(['info','Molecular Orbitals is no longer the capstone.']);
+  return {list:out, broken};
+}
+function arcs(st){ // which earlier (or later) Lesson teaches each concept a Lesson uses
+  const ids=lineup(st), taughtAt={}, res=[];
+  ids.forEach((id,i)=>L[id].teaches.forEach(c=>{ taughtAt[c]=i; }));
+  ids.forEach((id,i)=>{ const seen=new Set();
+    L[id].uses.forEach(c=>{ const j=taughtAt[c]; if(j===undefined||seen.has(j)) return; seen.add(j); res.push({from:j,to:i,bad:j>i,c}); }); });
+  return res;
+}
+function toText(st){
+  const n=numbers(st), c=checks(st);
+  const lines=['UNIT 1 · STRUCTURE & BONDING (lineup as arranged)'];
+  lineup(st).forEach(id=>{ const l=L[id];
+    lines.push(`${n[id]==='P'?'—':n[id]}. ${l.title}${l.opt?' (On-ramp, optional)':''}${l.pilot?' [pilot]':''}  ~${l.steps} ${l.unit||'Steps'} · ${l.sig}`); });
+  lines.push('', `Polarity split into its own Lesson: ${st.split?'yes':'no'}`);
+  const moved = st.core.some((id,i)=>id!==DEFAULT_CORE[i]);
+  lines.push(`Order changed from the decided lineup: ${moved?'yes':'no'}`);
+  lines.push('', 'CHECKS'); c.list.forEach(([k,t])=>lines.push(`${k==='bad'?'!':k==='ok'?'✓':'·'} ${t}`));
+  return lines.join('\n');
+}
+
+// ===================== rendering =====================
+let st = initial();
+function header(){
+  const ids=lineup(st), core=ids.length-2, steps=ids.filter(i=>i!=='practice').reduce((a,i)=>a+L[i].steps,0);
+  return `<div class="bar"><button class="back">← Orgo I</button><span class="logo">ASTRATRON</span><button class="don">♥ Donate</button></div>
+  <div class="uhead"><div class="kick">UNIT 1 · ORGANIC CHEMISTRY I</div><h1>Structure &amp; Bonding</h1>
+  <p>Why carbon builds everything: bonds, shapes, and the electrons that move between them.</p>
+  <div class="stats"><div>${core}<span>core Lessons</span></div><div>~${steps}<span>Steps</span></div><div>10<span>Practice Problems</span></div><div>0/${ids.length}<span>done</span></div></div></div>`;
+}
+const chips = (id)=>{ const l=L[id];
+  return `<span class="chip">${SIG_ICON[l.sig]||''} ${esc(l.sig)}</span><span class="chip mono">~${l.steps} ${l.unit||'Steps'}</span>${l.pilot?'<span class="chip pilot">PILOT SPEC</span>':''}${l.boss?'<span class="chip boss">CAPSTONE</span>':''}${l.opt?'<span class="chip opt">OPTIONAL ON-RAMP</span>':''}${(!l.prac&&!l.opt&&(l.steps>15||l.steps<10))?'<span class="chip warn">OUTSIDE 10–15</span>':''}`; };
+const cls = id => [L[id].boss&&'boss',L[id].opt&&'opt',L[id].prac&&'prac'].filter(Boolean).join(' ');
+
+// ---------- A: node path ----------
+function viewA(){
+  const ids=lineup(st), n=numbers(st), ROW=104, X=[50,72,80,68,46,26,18,30];
+  const pts=ids.map((id,i)=>({id,x:X[i%X.length],y:60+i*ROW}));
+  const lockY=60+ids.length*ROW, H=lockY+70;
+  const size=id=>L[id].prac?46:Math.round(44+(L[id].steps-8)*3.2);
+  let d=''; pts.forEach((p,i)=>{ d+= i? ` S ${p.x} ${p.y-ROW/2} ${p.x} ${p.y}` : `M ${p.x} ${p.y}`; });
+  const nodes=pts.map((p,i)=>{ const s=size(p.id), lab=p.x>=50?'l':'r';
+    return `<button class="node ${cls(p.id)} ${i===1?'first':''} ${st.sel===p.id?'sel':''}" data-sel="${p.id}" style="left:${p.x}%;top:${p.y}px;width:${s}px;height:${s}px"
+       aria-label="${n[p.id]==='P'?'':'Lesson '+n[p.id]+': '}${esc(L[p.id].title)}, about ${L[p.id].steps} ${L[p.id].unit||'Steps'}"><b>${n[p.id]==='P'?'✦':n[p.id]}</b></button>
+     <div class="nlabel ${lab}" style="top:${p.y}px;${lab==='l'?`right:calc(${100-p.x}% + ${s/2+12}px)`:`left:calc(${p.x}% + ${s/2+12}px)`}">${esc(L[p.id].title)}<small>~${L[p.id].steps} ${L[p.id].unit||'Steps'}${L[p.id].boss?' · capstone':''}${L[p.id].pilot?' · pilot':''}</small></div>`; }).join('');
+  const sel = st.sel && L[st.sel] ? `<div class="sheet" role="region" aria-label="Lesson details"><div class="row"><span class="lab">${n[st.sel]==='P'?'Unit review':'Lesson '+n[st.sel]} · ${esc(L[st.sel].act)}</span></div>
+     <h3>${esc(L[st.sel].title)}</h3><p>${esc(L[st.sel].goal)}</p><div class="row">${chips(st.sel)}</div>
+     <div class="lab" style="margin-top:8px;text-transform:none">Source: ${esc(L[st.sel].src)}</div><button class="go">${L[st.sel].prac?'Start Practice Set':'Start Lesson'}</button></div>` : '';
+  return `<div class="lab" style="text-align:center;margin-bottom:6px">Tap a node · bigger node = more Steps</div>
+   <div class="pathA" style="height:${H}px"><svg width="100%" height="${H}" viewBox="0 0 100 ${H}" preserveAspectRatio="none">
+     <path d="${d} S ${X[ids.length%X.length]} ${lockY-ROW/2} 50 ${lockY}" fill="none" stroke="var(--line)" stroke-width="6" stroke-dasharray="2 10" stroke-linecap="square" vector-effect="non-scaling-stroke"/></svg>
+     ${nodes}
+     <button class="node lock" style="left:50%;top:${lockY}px;width:44px;height:44px" aria-label="Unit 2, Acids and Bases, coming soon"><b>2</b></button>
+     <div class="nlabel r" style="top:${lockY}px;left:calc(50% + 34px)">Unit 2 · Acids &amp; Bases<small>coming soon</small></div>
+   </div>${sel}`;
+}
+
+// ---------- B: level select ----------
+function hbcw(id){ const s=L[id].steps; if(L[id].prac) return '';
+  const check=s>=11?3:2, cells=[];
+  for(let i=0;i<15;i++) cells.push(i>=s?'gap': i===0?'h' : i===s-1?'w' : i>=s-1-check?'c':'');
+  return `<div class="hbcw" aria-hidden="true">${cells.map(c=>`<i class="${c}"></i>`).join('')}</div>`; }
+function viewB(){
+  const ids=lineup(st), n=numbers(st); let lastAct=null, o='';
+  ids.forEach((id,i)=>{ const l=L[id];
+    if(l.act!==lastAct){ o+=`<div class="act"><span class="lab">${esc(l.act)}</span></div>`; lastAct=l.act; }
+    o+=`<article class="lvl ${cls(id)} ${i===1?'first':''}"><div class="no">${n[id]==='P'?'✦':String(n[id]).padStart(2,'0')}</div><div>
+      <h3>${esc(l.title)}</h3><p>${esc(l.goal)}</p><div class="row">${chips(id)}</div>${hbcw(id)}
+      <div class="lab" style="margin-top:6px;text-transform:none">${esc(l.src)}</div></div></article>`; });
+  o+=`<div class="act"><span class="lab">Next Unit</span></div><article class="lvl lock"><div class="no">02</div><div><h3>Acids &amp; Bases</h3><p>pKa, charge stability, equilibria. Coming soon.</p></div></article>`;
+  return `<div class="legend lab"><span><i style="background:var(--orange)"></i>Hook</span><span><i style="background:var(--line)"></i>Build</span><span><i style="background:var(--cyan)"></i>Check</span><span><i style="background:var(--mag)"></i>Wrap</span><span><i style="border:1px dashed var(--muted)"></i>room to 15</span></div>${o}`;
+}
+
+// ---------- C: prereq spine ----------
+function viewC(){
+  const ids=lineup(st), n=numbers(st), ROW=78, A=arcs(st), hot=st.sel;
+  const y=i=>i*ROW+ROW/2;
+  const paths=A.map(a=>{ const dx=10+Math.abs(a.to-a.from)*10, x0=80;
+    const on = hot && (ids[a.to]===hot||ids[a.from]===hot);
+    return `<path d="M ${x0} ${y(a.from)} C ${x0-dx} ${y(a.from)}, ${x0-dx} ${y(a.to)}, ${x0} ${y(a.to)}" fill="none" stroke="${a.bad?'var(--orange)':on?'var(--cyan)':'var(--line)'}"
+      stroke-width="${a.bad||on?3:2}" ${a.bad?'stroke-dasharray="5 4"':''} opacity="${hot&&!on&&!a.bad?.35:1}"><title>${esc(L[ids[a.to]].title)} uses ${esc(a.c)}</title></path>`; }).join('');
+  const rows=ids.map(id=>{ const l=L[id], out=!l.prac&&!l.opt&&(l.steps>15||l.steps<10);
+    return `<div class="srow ${cls(id)} ${hot===id?'hot':''}" data-sel="${id}" tabindex="0" role="button" aria-label="${esc(l.title)}: show what it builds on"><span class="dot"></span>
+      <div><div class="n">${n[id]==='P'?'✦':n[id]}${l.pilot?' · pilot':''}${l.boss?' · capstone':''}${l.opt?' · optional':''}</div><h3>${esc(l.title)}</h3><p>${esc(l.goal)}</p></div>
+      <div class="steps ${out?'out':''}">~${l.steps}<small>${l.unit?'Problems':'Steps'}</small>${SIG_ICON[l.sig]?`<small title="${esc(l.sig)}">${SIG_ICON[l.sig]}</small>`:''}</div></div>`; }).join('');
+  return `<div class="lab">Tap a row to light up what it builds on · arcs on the left = "uses an idea from"</div>
+    <div class="spine" style="margin-top:8px"><svg width="96" height="${ids.length*ROW}">${paths}
+      ${ids.map((_,i)=>`<line x1="80" y1="${y(i)}" x2="96" y2="${y(i)}" stroke="var(--line)" stroke-width="2"/>`).join('')}</svg>${rows}
+      <div class="srow lock"><span class="dot"></span><div><div class="n">Unit 2</div><h3>Acids &amp; Bases</h3><p>Coming soon</p></div><div></div></div></div>
+    <div class="legendC lab">Orange dashed arc = a Lesson uses an idea taught after it</div>`;
+}
+
+// ---------- shared review panel ----------
+function review(){
+  const c=checks(st), ids=lineup(st), n=numbers(st);
+  const li=ids.map(id=>{ const fixed=id==='onramp'||id==='practice', core=(id==='polarity'||id==='fc')?'bonds':id, k=st.core.indexOf(core);
+    return `<li class="${fixed?'fixed':''}"><span class="k">${n[id]==='P'?'✦':n[id]}</span><span class="t">${esc(L[id].title)}</span><span class="s">~${L[id].steps}</span>
+      ${fixed?'<span class="s">fixed</span>':(id==='fc'?'':`<button data-mv="${core}" data-d="-1" ${k===0?'disabled':''} aria-label="Move ${esc(L[core].title)} up">↑</button><button data-mv="${core}" data-d="1" ${k===st.core.length-1?'disabled':''} aria-label="Move ${esc(L[core].title)} down">↓</button>`)}</li>`; }).join('');
+  return `<section class="review" aria-label="Lineup editor"><h2>Does the lineup hold up?</h2>
+    <p>Reorder the core Lessons, try splitting Polarity out, and watch the checks. Every view above redraws from this list. Step counts are estimates. When it looks right, copy the result and paste it back.</p>
+    <div class="tools"><button id="split" aria-pressed="${st.split}">Split Polarity into its own Lesson</button><button id="reset">Reset to decided lineup</button></div>
+    <ol class="ed">${li}</ol>
+    <ul class="checks">${c.list.map(([k,t])=>`<li class="${k}">${esc(t)}</li>`).join('')}</ul>
+    <div class="lab" style="margin-bottom:6px">Your lineup <button id="copy" class="mono" style="margin-left:6px;background:transparent;border:2px solid var(--line);padding:2px 8px;font-size:11px">Copy</button><span class="flash" id="flash"></span></div>
+    <pre id="out">${esc(toText(st))}</pre></section>`;
+}
+
+function render(){
+  const body = variant==='A'?viewA():variant==='B'?viewB():viewC();
+  $('#app').innerHTML = `<main class="page">${header()}${body}${review()}</main>`;
+}
+
+// ---------- events (delegated; survive re-renders) ----------
+document.addEventListener('click',async e=>{
+  const s=e.target.closest('[data-sel]'); if(s){ st={...st, sel: st.sel===s.dataset.sel?null:s.dataset.sel}; render(); const f=document.querySelector(`[data-sel="${s.dataset.sel}"]`); f&&f.focus(); return; }
+  const m=e.target.closest('[data-mv]'); if(m){ st=moveCore(st,m.dataset.mv,+m.dataset.d); render(); const b=document.querySelector(`[data-mv="${m.dataset.mv}"][data-d="${m.dataset.d}"]:not(:disabled)`); b&&b.focus(); return; }
+  if(e.target.closest('#split')){ st={...st, split:!st.split, sel:null}; render(); $('#split').focus(); return; }
+  if(e.target.closest('#reset')){ st=initial(); render(); return; }
+  if(e.target.closest('#copy')){ const f=$('#flash');
+    try{ await navigator.clipboard.writeText(toText(st)); f.textContent='Copied'; }catch{ f.textContent='Select the text and copy it by hand'; }
+    setTimeout(()=>{ const g=$('#flash'); if(g) g.textContent=''; },2000); }
+});
+document.addEventListener('keydown',e=>{
+  const r=e.target.closest&&e.target.closest('.srow[data-sel]');
+  if(r&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); r.click(); return; }
+  if(e.target.closest&&e.target.closest('input,textarea,[contenteditable]')) return;
+  if(e.key==='ArrowLeft')cycle(-1); if(e.key==='ArrowRight')cycle(1);
+});
+
+// ---------- switcher ----------
+function setParam(k,v){const u=new URL(location);if(v===null)u.searchParams.delete(k);else u.searchParams.set(k,v);history.replaceState(null,'',u);}
+function cycle(d){const i=VARIANTS.findIndex(v=>v[0]===variant);variant=VARIANTS[(i+d+VARIANTS.length)%VARIANTS.length][0];setParam('variant',variant);st={...st,sel:null};label();render();}
+function label(){$('#sw-label').textContent=`${variant} (${VARIANTS.find(v=>v[0]===variant)[1]})`;$('#sw-theme').setAttribute('aria-pressed',light);$('#sw-motion').setAttribute('aria-pressed',reduced);
+  document.documentElement.dataset.theme=light?'light':'';document.body.dataset.motion=reduced?'reduced':'';}
+$('#sw-prev').onclick=()=>cycle(-1);
+$('#sw-next').onclick=()=>cycle(1);
+$('#sw-theme').onclick=()=>{light=!light;setParam('theme',light?'light':null);label();};
+$('#sw-motion').onclick=()=>{reduced=!reduced;setParam('motion',reduced?'reduced':null);label();};
+label(); render();
+</script>
+</body>
+</html>
