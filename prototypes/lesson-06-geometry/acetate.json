@@ -1,0 +1,104 @@
+{
+  "molecule": "acetate",
+  "charge": -1,
+  "multiplicity": 1,
+  "method": {
+    "program": "PySCF",
+    "version": "2.14.0",
+    "xc": "b3lyp",
+    "pyscf_xc_definition": "((0, 0, 0), ((402, 1),))",
+    "basis": "cc-pvtz",
+    "phase": "gas",
+    "grid_level": 4,
+    "optimizer": "geomeTRIC 1.1.1, GAU_TIGHT"
+  },
+  "label": "computed",
+  "source_note": "Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phase. Both molecules use the same method so they can be compared fairly.",
+  "energy_hartree": -228.6070816303621,
+  "atoms": [
+    {
+      "el": "C",
+      "xyz_angstrom": [
+        -1.507444,
+        -0.000219,
+        -0.017143
+      ]
+    },
+    {
+      "el": "C",
+      "xyz_angstrom": [
+        0.059006,
+        -8e-05,
+        -0.007647
+      ]
+    },
+    {
+      "el": "O",
+      "xyz_angstrom": [
+        0.593287,
+        1.131978,
+        0.014014
+      ]
+    },
+    {
+      "el": "O",
+      "xyz_angstrom": [
+        0.59417,
+        -1.131845,
+        0.004475
+      ]
+    },
+    {
+      "el": "H",
+      "xyz_angstrom": [
+        -1.868435,
+        0.003734,
+        1.016829
+      ]
+    },
+    {
+      "el": "H",
+      "xyz_angstrom": [
+        -1.895967,
+        0.894636,
+        -0.50861
+      ]
+    },
+    {
+      "el": "H",
+      "xyz_angstrom": [
+        -1.896557,
+        -0.897914,
+        -0.50285
+      ]
+    }
+  ],
+  "bonds_angstrom": {
+    "C–O (a)": 1.252,
+    "C–O (b)": 1.252,
+    "C–C": 1.5665
+  },
+  "frequencies_cm1": [
+    "42.5i",
+    432.7,
+    596.8,
+    629.4,
+    861.0,
+    991.7,
+    1028.2,
+    1309.5,
+    1354.9,
+    1463.7,
+    1475.3,
+    1695.3,
+    2990.0,
+    3046.5,
+    3067.7
+  ],
+  "imaginary_modes": 1,
+  "run": {
+    "seconds": 136,
+    "host": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  }
+}

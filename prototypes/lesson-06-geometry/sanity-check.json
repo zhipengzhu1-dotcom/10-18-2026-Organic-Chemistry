@@ -1,0 +1,7 @@
+{
+  "acetate's two C–O agree within 0.005 Å": true,
+  "acetic acid's C=O shorter than its C–O by more than 0.1 Å": true,
+  "acetate's C–O lies between acetic acid's two": true,
+  "both are true minima (no imaginary frequencies)": true,
+  "_note": "acetate checked at its true minimum (acetate-eclipsed.json); acetate.json is the methyl-rotation saddle, kept for the record (barrier 0.026 kcal/mol)"
+}
