@@ -2,6 +2,10 @@
 // Lesson row states, the Streak in the header, the Hub, and export/import.
 import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
+import { buildContent, contentRoot } from "@astratron/content";
+
+/** Core Lessons in Unit 1 (the On-ramp doesn't count). */
+const UNIT_1_CORE = buildContent(contentRoot).model!.subjects[0].courses[0].units[0].lessons.filter((l) => !l.onRamp).length;
 
 const UNIT = "/organic/orgo-1/structure-bonding";
 const LESSON = `${UNIT}/sample-carbons-four-bonds`;
@@ -76,7 +80,7 @@ test("finishing a Lesson shows the key idea, a Streak tick, Next Lesson and Back
 
   await page.getByRole("link", { name: "Back to Unit" }).click();
   await expect(page).toHaveURL(UNIT);
-  await expect(page.getByText("1 of 2 Lessons")).toBeVisible();
+  await expect(page.getByText(`1 of ${UNIT_1_CORE} Lessons`)).toBeVisible();
   const row = (title: string) => page.getByRole("listitem").filter({ hasText: title });
   await expect(row("Sample: Carbon's Four Bonds")).toContainText("Done");
   await expect(row("Sample: Numbers and Order")).toContainText("Not started");
@@ -87,7 +91,7 @@ test("finishing a Lesson shows the key idea, a Streak tick, Next Lesson and Back
   await check(page);
   await page.goto(UNIT);
   await expect(row("Sample: Numbers and Order")).toContainText("In progress");
-  await expect(page.getByText("1 of 2 Lessons")).toBeVisible();
+  await expect(page.getByText(`1 of ${UNIT_1_CORE} Lessons`)).toBeVisible();
 });
 
 test("a first-time visitor gets no Hub; a returning one gets the Continue card, Streak and map", async ({ page }) => {
