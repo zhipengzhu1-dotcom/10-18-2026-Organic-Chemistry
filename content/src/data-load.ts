@@ -28,7 +28,7 @@ const source = z.strictObject({
 
 const value = z.strictObject({
   label: text,
-  quantity: z.enum(["bond-length", "angle", "dihedral", "radius", "colour", "energy", "pka", "count"]),
+  quantity: z.enum(["bond-length", "angle", "dihedral", "radius", "colour", "energy", "pka", "count", "fraction"]),
   value: z.union([z.number(), z.string().min(1)]),
   unit: text.optional(),
   source: key,
@@ -36,6 +36,8 @@ const value = z.strictObject({
   atoms: z.array(z.number().int().nonnegative()).min(2).max(4).optional(),
   /** The source's own remark on the value, e.g. "re", "from symmetry". */
   note: text.optional(),
+  /** Decimals a Student sees (the Source note keeps the full value); bond lengths and angles have fixed defaults. */
+  decimals: z.number().int().min(0).max(6).optional(),
 });
 
 const atom = z.tuple([z.string().regex(/^[A-Z][a-z]?$/, "must be an element symbol"), z.number(), z.number(), z.number()]);
@@ -64,6 +66,7 @@ const units: Partial<Record<DataFile["values"][string]["quantity"], string[]>> =
   angle: ["°"],
   dihedral: ["°"],
   energy: ["eV", "kJ/mol", "kcal/mol"],
+  fraction: ["%"],
 };
 
 /** Resolves one data file into a DataSet; `errors` lists every broken rule (messages without the file name). */
@@ -127,7 +130,7 @@ export function resolveDataFile(file: DataFile): { set: DataSet; errors: string[
       source: src,
       licence: src.licence,
       ...(file.geometry ? { tier: file.geometry } : {}),
-      ...format(v.quantity, v.value, v.unit),
+      ...format(v.quantity, v.value, v.unit, v.decimals),
     };
   }
 

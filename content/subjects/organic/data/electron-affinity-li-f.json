@@ -1,0 +1,58 @@
+{
+  "id": "electron-affinity-li-f",
+  "kind": "table",
+  "title": "Electron affinities, Li to F",
+  "sources": {
+    "andersen1999": {
+      "kind": "experimental",
+      "citation": "Andersen, Haugen & Hotop, \"Binding Energies in Atomic Negative Ions: III\", J. Phys. Chem. Ref. Data 28, 1511 (1999), Table 3, doi:10.1063/1.556047",
+      "licence": "Published values, cited (facts from the literature)"
+    }
+  },
+  "values": {
+    "Li": {
+      "label": "lithium electron affinity",
+      "quantity": "energy",
+      "value": 0.618049,
+      "unit": "eV",
+      "decimals": 2,
+      "source": "andersen1999"
+    },
+    "B": {
+      "label": "boron electron affinity",
+      "quantity": "energy",
+      "value": 0.279723,
+      "unit": "eV",
+      "decimals": 2,
+      "source": "andersen1999"
+    },
+    "C": {
+      "label": "carbon electron affinity",
+      "quantity": "energy",
+      "value": 1.262118,
+      "unit": "eV",
+      "decimals": 2,
+      "source": "andersen1999"
+    },
+    "O": {
+      "label": "oxygen electron affinity",
+      "quantity": "energy",
+      "value": 1.461112,
+      "unit": "eV",
+      "decimals": 2,
+      "source": "andersen1999"
+    },
+    "F": {
+      "label": "fluorine electron affinity",
+      "quantity": "energy",
+      "value": 3.4011887,
+      "unit": "eV",
+      "decimals": 2,
+      "source": "andersen1999"
+    }
+  },
+  "provenance": {
+    "unbound": "Be and N: no bound singly charged anion (Table 3 lists EA < 0)",
+    "script": "pipelines/atoms/build.py"
+  }
+}

@@ -3,7 +3,7 @@
 // states, cited data) that the scenes module hands it.
 import { describe, expect, it } from "vitest";
 import { buildContent, type SceneCatalog } from "../src/index.ts";
-import { elements, lesson, sampleSteps, validTree, writeTree } from "./tree.ts";
+import { elements, lesson, problem, sampleSteps, validTree, writeTree } from "./tree.ts";
 
 const L = "chem/lessons/l1.yaml";
 
@@ -134,6 +134,104 @@ describe("Manipulate a Scene Steps", () => {
     expect(build(manipulate({ hints: [{ match: [0], text: "Flat." }], correct: undefined })).errors).toEqual([
       `${L}: step s03: needs exactly one generic fallback Hint (no match), and it must come last`,
       `${L}: step s03: needs a Correct line`,
+    ]);
+  });
+});
+
+describe("goal-state Manipulate Steps (#78)", () => {
+  const goal = (extra: object = {}) => ({
+    type: "manipulate-goal",
+    scene: { id: "twist" },
+    idleSeconds: 30,
+    stages: [
+      {
+        prompt: "Twist it a quarter turn.",
+        goal: { twist: 90 },
+        correct: "A quarter turn.",
+        blocked: "Twist it first.",
+        idle: "Drag the end round.",
+      },
+      {
+        prompt: "Now look end-on.",
+        start: { twist: 0 },
+        goal: { view: "end" },
+        correct: "End-on.",
+        blocked: "Turn the view first.",
+        idle: "Pick the end-on view.",
+      },
+    ],
+    ...extra,
+  });
+
+  it("build with their stages; the Step's prompt is the first stage's", () => {
+    const result = build(goal());
+    expect(result.errors).toEqual([]);
+    expect(stepsOf(result)[2]).toMatchObject({
+      type: "manipulate-goal",
+      prompt: "Twist it a quarter turn.",
+      scene: { id: "twist", state: { twist: 0, view: "side" } },
+      idleSeconds: 30,
+      stages: [{ goal: { twist: 90 } }, { start: { twist: 0 }, goal: { view: "end" } }],
+    });
+  });
+
+  it("each stage's goal and start are states the Scene can take, and no stage opens already done", () => {
+    const stages = [
+      { prompt: "a", goal: { spin: 1, twist: 95 }, correct: "c", blocked: "b", idle: "i" },
+      { prompt: "b", start: { view: "end" }, goal: { view: "end" }, correct: "c", blocked: "b", idle: "i" },
+    ];
+    expect(build(goal({ stages })).errors).toEqual([
+      `${L}: step s03: stage 1 goal: Scene "twist" has no settable state "spin"`,
+      `${L}: step s03: stage 1 goal: Scene "twist" state "twist" must be a number from 0 to 180 in steps of 15`,
+      `${L}: step s03: stage 2 opens with its goal already reached`,
+    ]);
+  });
+
+  it("need a Scene and at least one stage", () => {
+    expect(build(goal({ scene: undefined, stages: [] })).errors).toEqual([
+      `${L}: steps.2.scene: Invalid input: expected object, received undefined`,
+      `${L}: steps.2.stages: Too small: expected array to have >=1 items`,
+    ]);
+  });
+});
+
+describe("Scenes on reveal and in Problems (#78)", () => {
+  /** The sample Lesson with its s03 Multiple choice Step and Check Problem p1 edited. */
+  function buildWith(s03: object, p1: object = {}, scenes = catalog) {
+    const steps: object[] = sampleSteps();
+    steps[2] = { ...(steps[2] as object), ...s03 };
+    const tree = validTree();
+    tree[L] = lesson({ steps });
+    tree["chem/problems/p1.yaml"] = problem("p1", p1);
+    tree["chem/data/elements.yaml"] = elements();
+    return buildContent(writeTree(tree), { scenes });
+  }
+
+  it("a graded Step may name a Scene shown once it is answered, resolved like its own Scene", () => {
+    const result = buildWith({ scene: "twist", revealScene: { id: "twist", state: { view: "end" } } });
+    expect(result.errors).toEqual([]);
+    const s03 = stepsOf(result)[2];
+    expect(s03.scene?.state).toEqual({ twist: 0, view: "side" });
+    expect(s03).toMatchObject({ revealScene: { id: "twist", state: { twist: 0, view: "end" } } });
+    expect(Object.keys((s03 as unknown as { revealScene: { cited: object } }).revealScene.cited)).toEqual(["elements/C.colour"]);
+  });
+
+  it("a Problem may show a Scene and a reveal Scene; its Check Step gets them resolved", () => {
+    const result = buildWith({}, { scene: { id: "twist", state: { twist: 30 } }, revealScene: "twist" });
+    expect(result.errors).toEqual([]);
+    const check = stepsOf(result)[7];
+    expect(check).toMatchObject({
+      problemId: "p1",
+      scene: { id: "twist", state: { twist: 30, view: "side" } },
+      revealScene: { id: "twist", state: { twist: 0, view: "side" } },
+    });
+    expect(check.citations?.map((c) => c.ref)).toEqual(["elements/C.colour"]);
+  });
+
+  it("checks reveal Scenes and Problem Scenes against the registry", () => {
+    expect(buildWith({ revealScene: "nope" }, { scene: { id: "twist", state: { spin: 1 } } }).errors).toEqual([
+      `${L}: step s03: Scene "nope" is not in the Scene registry`,
+      `chem/problems/p1.yaml: Scene "twist" has no settable state "spin"`,
     ]);
   });
 });

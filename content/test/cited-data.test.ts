@@ -81,6 +81,43 @@ describe("cited-data lookup", () => {
     expect(cite(dataOf(result), "nuclides/C-12.A")).toMatchObject({ quantity: "count", value: 12, display: "12", full: "12" });
   });
 
+  it("shows a mass fraction as a percentage, and an energy to the decimals the file asks for", () => {
+    const result = build(
+      (t) =>
+        (t["chem/data/atoms.yaml"] = [
+          "id: atoms",
+          "kind: table",
+          "title: Atoms",
+          "sources:",
+          "  crc: { kind: reference, citation: CRC Handbook, licence: Published values }",
+          "values:",
+          "  crust.C: { label: carbon in Earth's crust, quantity: fraction, value: 0.02, unit: '%', source: crc }",
+          "  C.ea: { label: carbon electron affinity, quantity: energy, value: 1.262118, unit: eV, decimals: 2, source: crc }",
+          "  C.ie: { label: carbon first ionization energy, quantity: energy, value: 11.260288, unit: eV, source: crc }",
+        ].join("\n")),
+    );
+    expect(result.errors).toEqual([]);
+    expect(cite(dataOf(result), "atoms/crust.C")).toMatchObject({ display: "0.02%", full: "0.02%" });
+    expect(cite(dataOf(result), "atoms/C.ea")).toMatchObject({ display: "1.26 eV", full: "1.262118 eV" });
+    expect(cite(dataOf(result), "atoms/C.ie")).toMatchObject({ display: "11.260288 eV" });
+  });
+
+  it("a fraction must be in percent", () => {
+    const result = build(
+      (t) =>
+        (t["chem/data/atoms.yaml"] = [
+          "id: atoms",
+          "kind: table",
+          "title: Atoms",
+          "sources:",
+          "  crc: { kind: reference, citation: CRC Handbook, licence: Published values }",
+          "values:",
+          "  crust.C: { label: carbon in Earth's crust, quantity: fraction, value: 0.0002, source: crc }",
+        ].join("\n")),
+    );
+    expect(result.errors).toEqual(["chem/data/atoms.yaml: values.crust.C.unit: a fraction needs one of %; found none"]);
+  });
+
   it("throws on a value that isn't in the data", () => {
     expect(() => cite(dataOf(build()), "methane/r.CC")).toThrow('No cited value "methane/r.CC"');
   });

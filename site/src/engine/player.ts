@@ -5,7 +5,7 @@
 // Navigation: back is allowed, answered Steps stay locked, Continue never passes
 // an unanswered Step, and the Lesson is done on reaching Wrap. Every Screen
 // carries the Lesson's progress (answers by Step id), from which it resumes.
-import type { DrawArrowsStep, GradedStep, HintRule, Lesson, Push, Step, Structure } from "@astratron/content";
+import type { DrawArrowsStep, GoalStep, GradedStep, HintRule, Lesson, Push, SceneValue, Step, Structure } from "@astratron/content";
 import { arrowsAct, arrowsStart, arrowsView, type ArrowsState, type Flag } from "@astratron/content/arrows";
 
 export type Feedback =
@@ -28,9 +28,12 @@ export type Answer =
   | { setting: number | string }
   /** Draw arrows: one curved arrow, graded the moment it is drawn, or undoing the last one. */
   | { push: Push }
-  | { undo: true };
+  | { undo: true }
+  /** Goal-state Manipulate: the Scene's state after a move its own rules accepted (the changed states). */
+  | { state: Record<string, SceneValue> };
 
-export type Action = ({ type: "answer" } & Answer) | { type: "continue" } | { type: "back" };
+/** `idle`: a goal-state Manipulate Step saw no move for its `idleSeconds` (the player's timer sends it). */
+export type Action = ({ type: "answer" } & Answer) | { type: "continue" } | { type: "back" } | { type: "idle" };
 
 /** A Lesson's saved progress, keyed by stable Step ids so it survives content edits (ADR 0003). */
 export interface LessonProgress {
@@ -58,6 +61,19 @@ export interface Screen {
   progress: LessonProgress;
   /** Draw-arrows Steps: the pushes so far, the drawing they give and its in-between flags. */
   arrows?: ArrowsScreen;
+  /** Goal-state Manipulate Steps: the stage on screen and the Scene's state. */
+  goal?: GoalScreen;
+}
+
+export interface GoalScreen {
+  /** Index of the stage being worked. */
+  stage: number;
+  /** The stage's prompt. */
+  prompt: string;
+  /** Every settable state of the Scene, as the Student's moves left it. */
+  state: Record<string, SceneValue>;
+  /** Idle Hints since the last move: 1 shows the idle Hint, 2 or more also nudges the next move. */
+  idle: number;
 }
 
 export interface ArrowsScreen extends ArrowsState {
@@ -84,7 +100,11 @@ export function start(lesson: PlayableLesson, stepId?: string, saved?: LessonPro
 
 export function act(lesson: PlayableLesson, screen: Screen, action: Action): Screen {
   if (action.type === "back") return screen.index > 0 ? open(lesson, screen.index - 1, screen.progress) : screen;
+  if (action.type === "idle") return idle(screen);
   if (action.type === "continue") {
+    // A goal-state Step answers an early Continue with its stage's Hint.
+    const stage = screen.step.type === "manipulate-goal" && screen.goal && screen.step.stages[screen.goal.stage];
+    if (!screen.canContinue && stage) return { ...screen, feedback: { kind: "hint", text: stage.blocked } };
     if (!screen.canContinue || screen.index + 1 >= lesson.steps.length) return screen;
     return open(lesson, screen.index + 1, screen.progress);
   }
@@ -101,6 +121,7 @@ function answerStep(screen: Screen, answer: Answer): Screen {
   const { step } = screen;
   if (step.type === "explain" || screen.canContinue) return screen;
   if (step.type === "draw-arrows") return pushArrow(screen, step, answer);
+  if (step.type === "manipulate-goal") return moveGoal(screen, step, answer);
   const result = grade(step, answer, screen.tries);
   return result ? { ...screen, ...result } : screen;
 }
@@ -119,6 +140,7 @@ function open(lesson: PlayableLesson, index: number, saved: LessonProgress): Scr
     done,
     progress: { ...saved, step: step.id, done: saved.done || done },
     ...(step.type === "draw-arrows" && { arrows: arrowsScreen(step, arrowsStart()) }),
+    ...(step.type === "manipulate-goal" && { goal: goalStart(step) }),
   };
   return (saved.answers[step.id] ?? []).reduce(answerStep, fresh);
 }
@@ -144,6 +166,44 @@ function pushArrow(screen: Screen, step: DrawArrowsStep, answer: Answer): Screen
   else if (last.kind === "wrong") feedback = { kind: "hint", text: last.hint };
   else if (last.kind === "shown") feedback = { kind: "shown", text: `Here is that push: ${last.label}.` };
   return { ...screen, arrows: arrowsScreen(step, state), tries, feedback, canContinue: state.done };
+}
+
+/** A goal-state Step opens on its first stage, the Scene at its Step state plus the stage's start. */
+function goalStart(step: GoalStep): GoalScreen {
+  // Before the answer key arrives the Step has no stages: it shows its prompt and Scene, and grades nothing.
+  const first = step.stages[0];
+  return { stage: 0, prompt: first?.prompt ?? step.prompt, state: { ...step.scene.state, ...first?.start }, idle: 0 };
+}
+
+const reached = (state: Record<string, SceneValue>, goal: Record<string, SceneValue>) =>
+  Object.entries(goal).every(([k, v]) => (typeof v === "number" ? Math.abs(Number(state[k]) - v) < 1e-9 : state[k] === v));
+
+/**
+ * A move on a goal-state Step: the Scene's new state. Reaching the stage's goal shows its Correct
+ * line and opens the next stage (or Continue, after the last). Any move clears a Hint and the idle count.
+ */
+function moveGoal(screen: Screen, step: GoalStep, answer: Answer): Screen {
+  if (!("state" in answer) || !screen.goal) return screen;
+  const { stage } = screen.goal;
+  const state = { ...screen.goal.state, ...answer.state };
+  const current = step.stages[stage];
+  if (!current || !reached(state, current.goal)) return { ...screen, feedback: null, goal: { ...screen.goal, state, idle: 0 } };
+  const feedback: Feedback = { kind: "correct", text: current.correct };
+  const next = step.stages[stage + 1];
+  if (!next) return { ...screen, feedback, canContinue: true, goal: { ...screen.goal, state, idle: 0 } };
+  return {
+    ...screen,
+    feedback,
+    goal: { stage: stage + 1, prompt: next.prompt, state: { ...state, ...next.start }, idle: 0 },
+  };
+}
+
+/** No move for a while on a goal-state Step: its stage's idle Hint (counted, so the second can nudge). */
+function idle(screen: Screen): Screen {
+  const stage = screen.step.type === "manipulate-goal" && screen.goal && screen.step.stages[screen.goal.stage];
+  if (!stage || !screen.goal || screen.canContinue) return screen;
+  const text = stage.idle;
+  return { ...screen, feedback: { kind: "hint", text }, goal: { ...screen.goal, idle: screen.goal.idle + 1 } };
 }
 
 // Before the answer key arrives a Draw-arrows Step has no results yet: it draws, but grades nothing.

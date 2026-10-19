@@ -134,6 +134,12 @@ export function renderLesson(lesson: Lesson): Lesson {
 /** One Step (or a Practice Set Problem) with its Markdown turned into HTML and its structures pre-rendered. */
 export function renderStep(s: Step): Step {
   if (s.type === "explain") return { ...s, text: md(s.text) };
+  if (s.type === "manipulate-goal")
+    return {
+      ...s,
+      prompt: md(s.prompt),
+      stages: s.stages.map((g) => ({ ...g, prompt: md(g.prompt), correct: md(g.correct), blocked: md(g.blocked), idle: md(g.idle) })),
+    };
   const shared = { prompt: md(s.prompt), correct: s.correct && md(s.correct), reveal: md(s.reveal) };
   const choices = (list: { id: string; text: string }[]) => list.map((o) => ({ ...o, text: md(o.text) }));
   switch (s.type) {

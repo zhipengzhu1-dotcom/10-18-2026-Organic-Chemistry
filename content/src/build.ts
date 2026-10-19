@@ -136,9 +136,11 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       for (const message of messages) errors.push(`${slug}/lessons/${lesson.id}.yaml: ${message}`);
     }
     for (const problem of problems.values()) {
-      if (problem)
-        for (const message of checkInteraction(problem)) errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
+      if (!problem) continue;
+      const messages = [...checkInteraction(problem), ...(options.scenes ? checkStepScene(problem, options.scenes, data) : [])];
+      for (const message of messages) errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
     }
+    const scene = (use: SceneUseFile) => resolveSceneUse(use, options.scenes, data);
     for (const message of checkTapOnly(slug, lessons, problems)) errors.push(message);
     const problemCitations = citeNumbers(slug, data, lessons, problems, errors);
 
@@ -196,11 +198,10 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
               }
               const number = lesson.onRamp ? 0 : ++coreNumber;
               const lessonRel = `${slug}/lessons/${lesson.id}.yaml`;
-              const scene = (use: SceneUseFile) => resolveSceneUse(use, options.scenes, data);
               const resolved = resolveLesson(lesson, `${url}/${lesson.slug}`, number, problems, structured, scene, lessonRel, errors);
               for (const step of resolved.steps) {
                 const cited = "problemId" in step && step.problemId && problemCitations.get(step.problemId);
-                if (cited) step.citations = cited;
+                if (cited) step.citations = mergeCited(cited, step.citations ?? []);
               }
               return [resolved];
             }),
@@ -209,7 +210,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
         }),
       });
     }
-    fillBanks(slug, courses, listed, lessons, problems, structured, problemCitations, errors);
+    fillBanks(slug, courses, listed, lessons, problems, structured, problemCitations, scene, errors);
     if (subject) subjects.push({ slug, title: subject.title, url: `/${slug}`, courses, data });
   }
 
@@ -226,14 +227,9 @@ function resolveLesson(
   rel: string,
   errors: string[],
 ): Lesson {
-  /** Resolves the Step's Scene; the Scene's cited numbers join the Step's Source note. */
-  const withScene = (step: Step): Step => {
-    if (!step.scene) return step;
-    const use = scene(step.scene);
-    const own = step.citations ?? [];
-    const extra = Object.values(use.cited).filter((c) => !own.some((o) => o.ref === c.ref));
-    return { ...step, scene: use, ...(own.length + extra.length ? { citations: [...own, ...extra] } : {}) } as Step;
-  };
+  // A goal-state Manipulate Step opens on its first stage's prompt.
+  const withScene = (step: Step) =>
+    withScenes(step.type === "manipulate-goal" ? { ...step, prompt: step.stages[0].prompt } : step, scene);
   const steps: Step[] = lesson.steps.flatMap((step): Step[] => {
     if (step.type !== "check") return withStructures(step, `${lesson.id}#${step.id}`, structured).map(withScene);
     const problem = problems.get(step.problem);
@@ -245,12 +241,30 @@ function resolveLesson(
       errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" is ${problem.status}, not approved`);
       return [];
     }
-    return problemStep(problem, step.id, structured);
+    return problemStep(problem, step.id, structured).map(withScene);
   });
   const phases = { hook: 0, build: 0, check: 0, wrap: 0 };
   for (const step of lesson.steps) phases[step.phase]++;
   const { signature, ...rest } = lesson;
   return { ...rest, url, number, signature: signatureType(lesson), phases, steps };
+}
+
+/** `a` then whatever of `b` it doesn't already hold, by ref. */
+const mergeCited = (a: Cited[], b: Cited[]) => [...a, ...b.filter((c) => !a.some((o) => o.ref === c.ref))];
+
+/** Resolves a Step's Scene and reveal Scene; their cited numbers join the Step's Source note. */
+function withScenes(step: Step, scene: (use: SceneUseFile) => SceneUse): Step {
+  const out: Record<string, unknown> = { ...step };
+  let citations = step.citations ?? [];
+  for (const field of ["scene", "revealScene"] as const) {
+    const raw = out[field] as SceneUseFile | undefined;
+    if (!raw) continue;
+    const use = scene(raw);
+    out[field] = use;
+    citations = mergeCited(citations, Object.values(use.cited));
+  }
+  if (citations.length) out.citations = citations;
+  return out as unknown as Step;
 }
 
 /**
@@ -306,6 +320,7 @@ function fillBanks(
   problems: Map<string, ProblemFile | undefined>,
   structured: Structured,
   citations: Map<string, Cited[]>,
+  scene: (use: SceneUseFile) => SceneUse,
   errors: string[],
 ): void {
   const units = new Map(courses.flatMap((c) => c.units.map((u) => [u.id, u] as const)));
@@ -327,10 +342,10 @@ function fillBanks(
     // A listed Lesson whose file is broken or missing is already reported.
     const lesson = lessons.get(problem.lesson);
     if (!lesson) continue;
-    const [step] = problemStep(problem, problem.id, structured) as GradedStep[];
+    const [step] = problemStep(problem, problem.id, structured).map((s) => withScenes(s, scene)) as GradedStep[];
     if (!step) continue;
     const cited = citations.get(problem.id);
-    if (cited) step.citations = cited;
+    if (cited) step.citations = mergeCited(cited, step.citations ?? []);
     const { id, difficulty, status, source, credit } = problem;
     unit.bank.push({
       id,

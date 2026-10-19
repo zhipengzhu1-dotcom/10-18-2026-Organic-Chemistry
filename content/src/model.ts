@@ -66,6 +66,8 @@ export interface MultipleChoiceStep {
   /** Set on Check Steps: the Bank Problem this Step plays. */
   problemId?: string;
   scene?: SceneUse;
+  /** Shown in place of `scene` once the Step is answered (e.g. the Hook reveal). */
+  revealScene?: SceneUse;
   /** The cited values this Step's text shows (`{{file/key}}`); its Source note is generated from them. */
   citations?: Cited[];
 }
@@ -92,6 +94,8 @@ export interface NumericStep {
   reveal: string;
   problemId?: string;
   scene?: SceneUse;
+  /** Shown in place of `scene` once the Step is answered (e.g. the Hook reveal). */
+  revealScene?: SceneUse;
   citations?: Cited[];
 }
 
@@ -111,6 +115,8 @@ export interface RankStep {
   reveal: string;
   problemId?: string;
   scene?: SceneUse;
+  /** Shown in place of `scene` once the Step is answered (e.g. the Hook reveal). */
+  revealScene?: SceneUse;
   citations?: Cited[];
 }
 
@@ -127,6 +133,7 @@ export interface ManipulateStep {
   type: "manipulate";
   prompt: string;
   scene: SceneUse;
+  revealScene?: SceneUse;
   /** The settable state the slider drives; it starts at `scene.state[control]`. */
   control: string;
   answer: SceneValue;
@@ -183,13 +190,46 @@ export interface DrawArrowsStep {
   reveal: string;
   problemId?: string;
   scene?: SceneUse;
+  /** Shown in place of `scene` once the Step is answered (e.g. the Hook reveal). */
+  revealScene?: SceneUse;
   citations?: Cited[];
 }
 
 /** A Step the Student answers and the engine grades. */
 export type GradedStep = MultipleChoiceStep | NumericStep | RankStep | TapStep | ManipulateStep | DrawArrowsStep;
 
-export type Step = ExplainStep | GradedStep;
+/** One stage of a goal-state Manipulate Step. */
+export interface GoalStage {
+  prompt: string;
+  /** States the Scene is set to as the stage opens, on top of where the last stage left it. */
+  start?: Record<string, SceneValue>;
+  /** The stage is done once the Scene's state holds every one of these values. */
+  goal: Record<string, SceneValue>;
+  correct: string;
+  /** The Hint when Continue is tapped before the stage is done. */
+  blocked: string;
+  /** The Hint after `idleSeconds` with no move; a second idle shows the next move as a nudge. */
+  idle: string;
+}
+
+/**
+ * A goal-state Manipulate a Scene Step: the Student works the Scene itself (its handles, e.g.
+ * atoms to drag) until its state reaches each stage's goal. Nothing is graded: the Scene's own
+ * rules refuse impossible moves, and Continue opens when the last stage is done.
+ */
+export interface GoalStep {
+  id: string;
+  phase: Phase;
+  type: "manipulate-goal";
+  /** The first stage's prompt. */
+  prompt: string;
+  scene: SceneUse;
+  idleSeconds: number;
+  stages: GoalStage[];
+  citations?: Cited[];
+}
+
+export type Step = ExplainStep | GoalStep | GradedStep;
 
 // ── Structures (2D drawings) ────────────────────────────────────────────────
 // A structure file is laid out once by RDKit.js (content/src/layout.ts) and
@@ -308,6 +348,8 @@ export interface TapStep {
   tapOnly?: { idle: string; drag: string };
   problemId?: string;
   scene?: SceneUse;
+  /** Shown in place of `scene` once the Step is answered (e.g. the Hook reveal). */
+  revealScene?: SceneUse;
   citations?: Cited[];
 }
 

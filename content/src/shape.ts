@@ -3,7 +3,7 @@
 import type { LessonFile, ProblemFile } from "./schema.ts";
 import { sameValue } from "./scenes.ts";
 
-type GradedStepFile = Exclude<LessonFile["steps"][number], { type: "explain" } | { type: "check" }>;
+type GradedStepFile = Exclude<LessonFile["steps"][number], { type: "explain" } | { type: "check" } | { type: "manipulate-goal" }>;
 /** A graded Step or a Problem: anything the Student answers. */
 type Interaction = GradedStepFile | ProblemFile;
 
@@ -33,7 +33,8 @@ export function checkLessonShape(lesson: LessonFile): string[] {
   }
 
   for (const step of steps) {
-    if (step.type === "explain" || step.type === "check") continue;
+    // A goal-state Manipulate Step has no answer to check; its stages are checked against its Scene (scenes.ts).
+    if (step.type === "explain" || step.type === "check" || step.type === "manipulate-goal") continue;
     if (step.type === "multiple-choice" && step.prediction && step.phase !== "hook")
       errors.push(`step ${step.id}: prediction is allowed only in the Hook`);
     for (const message of checkInteraction(step)) errors.push(`step ${step.id}: ${message}`);
