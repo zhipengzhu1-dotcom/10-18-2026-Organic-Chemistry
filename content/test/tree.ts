@@ -168,6 +168,34 @@ export const elements = () => ({
   },
 });
 
+/** Methane with its bonds, as the geometry pipeline writes them (for the 3D Step card). */
+export const methaneWithBonds = () => ({
+  ...methane(),
+  bonds: [
+    [0, 1, 1],
+    [0, 2, 1],
+    [0, 3, 1],
+    [0, 4, 1],
+  ],
+});
+
+/** Jmol colours and Bondi radii for H and C (real values: elements.yaml), as the 3D Step card needs. */
+export const elementsWithRadii = () => ({
+  id: "elements",
+  kind: "table",
+  title: "Elements",
+  sources: {
+    jmol: { kind: "reference", citation: "the Jmol CPK colour table", licence: "LGPL 2.1 (Jmol)" },
+    bondi: { kind: "reference", citation: "Bondi, J. Phys. Chem. 68, 441 (1964)", licence: "Published values" },
+  },
+  values: {
+    "H.colour": { label: "H colour", quantity: "colour", value: "#FFFFFF", source: "jmol" },
+    "C.colour": { label: "C colour", quantity: "colour", value: "#909090", source: "jmol" },
+    "H.vdw": { label: "H van der Waals radius", quantity: "radius", value: 1.2, unit: "Å", source: "bondi" },
+    "C.vdw": { label: "C van der Waals radius", quantity: "radius", value: 1.7, unit: "Å", source: "bondi" },
+  },
+});
+
 /** A computed molecule data file. Test fixture only: its numbers are placeholders, not chemistry. */
 export const computedEthane = () => ({
   id: "ethane",

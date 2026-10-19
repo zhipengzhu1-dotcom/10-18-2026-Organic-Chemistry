@@ -15,6 +15,7 @@ import WatchScenePlayer from "./WatchScenePlayer.tsx";
 import { watchScene } from "@astratron/scenes/watch";
 import SceneControl from "./SceneControl.tsx";
 import StructureTap from "./StructureTap.tsx";
+import MoleculeCard from "../molecule/MoleculeCard.tsx";
 import { AsideButton, Figures } from "./StepVisuals.tsx";
 import ExploreIn3D from "../explore/ExploreIn3D.tsx";
 import DrawArrows from "./DrawArrows.tsx";
@@ -67,7 +68,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   const [manipulated, setManipulated] = useState<{ stepId: string; value: SceneValue } | null>(null);
   const { step, feedback } = screen;
   const pageStep = page.steps[screen.index];
-  const single = pageStep.type === "multiple-choice" && pageStep.select === "one";
+  const single = (pageStep.type === "multiple-choice" || pageStep.type === "rotate-and-identify") && pageStep.select === "one";
 
   useEffect(() => {
     let live = true;
@@ -145,7 +146,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     step.type === "manipulate" && setting !== undefined ? { ...step.scene.state, [step.control]: setting } : step.scene?.state;
 
   const answer: Answer | null =
-    step.type === "multiple-choice" || step.type === "tap-to-identify"
+    step.type === "multiple-choice" || step.type === "rotate-and-identify" || step.type === "tap-to-identify"
       ? chosen.length > 0 ? { choice: chosen } : null
       : step.type === "numeric"
         ? Number.isFinite(parseNumber(draft)) ? { value: parseNumber(draft) } : null
@@ -283,6 +284,27 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </ScenePlayer>
         )}
 
+        {"molecule" in step && step.molecule?.card && (
+          // The 3D Step card (#68), keyed per Step so each Step opens in its own start view.
+          <MoleculeCard key={`molecule-${step.id}`} molecule={step.molecule} />
+        )}
+
+        {step.type === "rotate-and-identify" && (
+          <div className="opts" role="group" aria-label="Choices">
+            {step.options.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                className="opt"
+                aria-pressed={chosen.includes(o.id)}
+                disabled={screen.canContinue}
+                onClick={() => pick(o.id)}
+                {...html(o.text)}
+              />
+            ))}
+          </div>
+        )}
+
         {step.type === "multiple-choice" && !revealScene && (
           <div className="opts" role="group" aria-label="Choices">
             {step.options.map((o) =>
@@ -340,7 +362,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </div>
         )}
 
-        {step.explore && <ExploreIn3D key={`explore-${step.id}`} molecule={step.explore} />}
+        {"molecule" in step && step.molecule && <ExploreIn3D key={`explore-${step.id}`} molecule={step.molecule} />}
 
         {/* The aside, Source note and report link share rows at the bottom, so a Step fits a phone. */}
         <div className="step-meta">

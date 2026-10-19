@@ -51,15 +51,15 @@ describe("Explore in 3D: molecule on a Step or Problem", () => {
     const result = build((t) => (steps(t)[1].molecule = "methane"));
     expect(result.errors).toEqual([]);
     const step = result.model!.subjects[0].courses[0].units[0].lessons[0].steps[1] as ExplainStep;
-    const m = step.explore!;
+    const m = step.molecule!;
     expect(m.id).toBe("methane");
     expect(m.title).toBe("Methane");
     expect(m.tier).toBe("experimental");
     expect(m.atoms).toHaveLength(5);
     expect(m.atoms[0]).toEqual({ element: "C", x: 0, y: 0, z: 0 });
     expect(m.bonds).toHaveLength(4);
-    expect(m.elements.H.colour.value).toBe("#FFFFFF");
-    expect(m.elements.C.vdwRadius.value).toBe(1.7);
+    expect(m.elements.H.colour).toBe("#FFFFFF");
+    expect(m.elements.C.vdw).toBe(1.7);
     expect(m.notice).toBe("Data derived from NIST CCCBDB.");
     // What its Source note names: the molecule's geometry values, then the element colours, then their radii.
     expect(m.cited.map((c) => c.ref)).toEqual([
@@ -74,7 +74,7 @@ describe("Explore in 3D: molecule on a Step or Problem", () => {
 
   it("a Step without a molecule has no Explore view", () => {
     const step = build(() => {}).model!.subjects[0].courses[0].units[0].lessons[0].steps[1];
-    expect(step.explore).toBeUndefined();
+    expect("molecule" in step && step.molecule).toBeFalsy();
   });
 
   it("a Problem's molecule reaches its Check Step and its Bank entry", () => {
@@ -82,8 +82,8 @@ describe("Explore in 3D: molecule on a Step or Problem", () => {
     expect(result.errors).toEqual([]);
     const unit = result.model!.subjects[0].courses[0].units[0];
     const check = unit.lessons[0].steps.find((s) => s.type !== "explain" && s.problemId === "p1") as MultipleChoiceStep;
-    expect(check.explore?.id).toBe("methane");
-    expect(unit.bank.find((p) => p.id === "p1")!.step.explore?.id).toBe("methane");
+    expect(check.molecule?.id).toBe("methane");
+    expect(unit.bank.find((p) => p.id === "p1")!.step.molecule?.id).toBe("methane");
   });
 
   it("rejects a molecule that has no data file, a table, and a molecule without atoms or bonds", () => {
