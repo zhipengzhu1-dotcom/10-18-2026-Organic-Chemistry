@@ -219,3 +219,26 @@ describe("The tap-only cue among Draw-arrows Steps", () => {
     expect(build(treeWith({ 2: tapStep() })).errors).toEqual([]);
   });
 });
+
+describe("A Tap-to-identify reveal can replay pushes (Lesson 7 u1-res-enamine-site)", () => {
+  const replay = { start: "formaldehyde", result: "formaldehyde-polar", pushes: [{ from: "b1", to: "a2" }] };
+
+  it("resolves the replay's start and pushes", () => {
+    const tree = treeWith({ 2: tapStep({ replay }) });
+    expect(build(tree).errors).toEqual([]);
+    const step = lessonOf(tree).steps[2];
+    if (step.type !== "tap-to-identify") throw new Error(step.type);
+    expect(step.replay?.start.id).toBe("formaldehyde");
+    expect(step.replay?.pushes).toEqual([{ from: "b1", to: "a2" }]);
+  });
+
+  it("checks the replay's pushes reach its result, as a Draw-arrows answer is checked", () => {
+    const wrong = { ...replay, pushes: [{ from: "b1", to: "a1" }] };
+    expect(build(treeWith({ 2: tapStep({ replay: wrong }) })).errors).toEqual([
+      `${L}: step s03: replay: push 1 (π bond C1=O2 → C1) is not a step toward an accepted result`,
+    ]);
+    expect(build(treeWith({ 2: tapStep({ replay: { ...replay, result: "nope" } }) })).errors).toEqual([
+      `${L}: step s03: replay: structure "nope" not found`,
+    ]);
+  });
+});

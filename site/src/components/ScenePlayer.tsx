@@ -17,6 +17,8 @@ interface Props {
   aspect?: Aspect;
   /** Controls drawn under the Scene (a Manipulate Step's slider). */
   children?: ReactNode;
+  /** Opens paused on the poster frame, as under reduced motion (a Wrap's final frame). */
+  still?: boolean;
 }
 
 /** Reduced motion from the OS setting or the site's switch (`<html data-motion="reduced">`). */
@@ -34,7 +36,7 @@ export function useReducedMotion(): boolean | undefined {
 
 type Action = ClockAction | { type: "open"; reducedMotion: boolean };
 
-export default function ScenePlayer({ sceneId, state, cited, loop = false, aspect = "16:9", children }: Props) {
+export default function ScenePlayer({ sceneId, state, cited, loop = false, aspect = "16:9", children, still = false }: Props) {
   const { manifest, Component } = sceneRegistry[sceneId];
   const stateKey = JSON.stringify(state);
   return (
@@ -45,6 +47,7 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, aspec
       aspect={aspect}
       describe={(t) => manifest.describe(state, t)}
       announceKey={stateKey}
+      still={still}
       render={(t, reducedMotion) => (
         <Component t={t} state={state} aspect={aspect} reducedMotion={reducedMotion} cited={cited} />
       )}
@@ -67,15 +70,17 @@ interface FrameProps {
   announceKey?: string;
   render: (t: number, reducedMotion: boolean) => ReactNode;
   children?: ReactNode;
+  /** Opens paused on the poster frame even with motion on. */
+  still?: boolean;
 }
 
 /** A frame driven by the site clock: autoplays once on entry, or rests on its poster under reduced motion (Play starts it). */
-export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9", describe, announceKey = "", render, children }: FrameProps) {
+export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9", describe, announceKey = "", render, children, still = false }: FrameProps) {
   const config: ClockConfig = { duration, loop, posterT };
   const reducedMotion = useReducedMotion();
   // Until the island knows the motion setting (and on the server) the frame rests on its poster.
   const [clock, dispatch] = useReducer(
-    (c: Clock, a: Action) => (a.type === "open" ? openClock(config, a.reducedMotion) : clockStep(c, a, config)),
+    (c: Clock, a: Action) => (a.type === "open" ? openClock(config, a.reducedMotion || still) : clockStep(c, a, config)),
     { t: posterT, playing: false },
   );
 

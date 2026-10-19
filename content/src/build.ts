@@ -25,7 +25,7 @@ import {
   type StructureFile,
 } from "./schema.ts";
 import { checkDeletedSteps, checkFrozenIds, LOCK_FILE } from "./freeze.ts";
-import type { BuildResult, Course, GradedStep, Lesson, Option, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
+import type { BuildResult, Course, GradedStep, Lesson, Option, Push, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
 
 /** The Practice Set page sits at `<unit url>/practice`, so no Lesson may take that slug. */
 export const PRACTICE_SLUG = "practice";
@@ -39,7 +39,8 @@ import { checkStructure, resolveArrows, resolveOptions, resolveTap } from "./str
 /** What a graded Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
 type StructureFields =
   | { options: Option[] }
-  | { structure: StructureView; targets: TapTarget[] }
+  | { items: Option[] }
+  | { structure: StructureView; targets: TapTarget[]; replay?: { start: Structure; pushes: Push[] } }
   | { start: StructureView; target?: StructureView; results: Structure[] };
 type Structured = Map<string, StructureFields | undefined>;
 
@@ -154,6 +155,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       const found: string[] = [];
       let fields: StructureFields | undefined;
       if (item.type === "multiple-choice") fields = { options: resolveOptions(item.options, structures, found) };
+      else if (item.type === "rank") fields = { items: resolveOptions(item.items, structures, found) };
       else if (item.type === "tap-to-identify") fields = resolveTap(item, structures, found);
       else if (item.type === "draw-arrows") fields = resolveArrows(item, structures, found);
       else return;
@@ -280,7 +282,7 @@ function checkTapOnly(
 
 /** Swaps structure ids for the resolved structures; a Step whose structures failed is dropped (its errors are reported). */
 function withStructures(step: Record<string, unknown> & { type: string }, key: string, structured: Structured): Step[] {
-  if (step.type !== "multiple-choice" && step.type !== "tap-to-identify" && step.type !== "draw-arrows")
+  if (step.type !== "multiple-choice" && step.type !== "rank" && step.type !== "tap-to-identify" && step.type !== "draw-arrows")
     return [step as unknown as Step];
   const fields = structured.get(key);
   if (!fields) return [];

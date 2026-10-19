@@ -87,6 +87,34 @@ describe("Scenes in Steps", () => {
     ]);
   });
 
+  it("a Scene can change state once the Step is answered (a Hook's reveal) or open on its poster (a Wrap's final frame)", () => {
+    const hook = {
+      type: "multiple-choice",
+      prompt: "Guess.",
+      options: [
+        { id: "a", text: "A" },
+        { id: "b", text: "B" },
+      ],
+      answer: ["a"],
+      correct: "A.",
+      hints: [{ text: "Not B." }],
+      reveal: "Here it is.",
+      scene: { id: "twist", state: { view: "end" }, onAnswer: { twist: 90 } },
+    };
+    const result = build(hook, { type: "explain", text: "Watch.", scene: { id: "twist", still: true } });
+    expect(result.errors).toEqual([]);
+    const [, explain, mc] = stepsOf(result);
+    expect(explain.scene).toMatchObject({ id: "twist", still: true });
+    expect(mc.scene).toMatchObject({ state: { twist: 0, view: "end" }, onAnswer: { twist: 90 } });
+  });
+
+  it("checks the onAnswer states like any other", () => {
+    const explain = { type: "explain", text: "x", scene: { id: "twist", onAnswer: { twist: 200 } } };
+    expect(build(manipulate(), explain).errors).toEqual([
+      `${L}: step s02: Scene "twist" state "twist" must be a number from 0 to 180 in steps of 15`,
+    ]);
+  });
+
   it("rejects a Scene whose manifest cites data the Subject doesn't have", () => {
     const scenes = { twist: { ...catalog.twist, data: ["elements/Xx.colour"] } };
     expect(build(manipulate(), undefined, scenes).errors).toEqual([

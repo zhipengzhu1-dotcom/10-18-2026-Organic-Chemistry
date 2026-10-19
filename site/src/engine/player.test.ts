@@ -312,6 +312,19 @@ describe("Rank / order Steps", () => {
     });
   });
 
+  it("an `above` Hint fits any order with one of its pairs the wrong way up; first fit wins", () => {
+    const hints = [
+      { above: [["single", "triple"], ["double", "triple"]] as [string, string][], text: "C≡C is shortest." },
+      { above: [["single", "double"]] as [string, string][], text: "C=C before C–C." },
+      { text: "Count shared pairs." },
+    ];
+    const above: PlayableLesson = { ...lesson, steps: [{ ...rank, hints }, wrapStep] };
+    const once = (order: string[]) => act(above, start(above), { type: "answer", order });
+    expect(once(["double", "triple", "single"]).feedback).toMatchObject({ text: "C≡C is shortest." });
+    expect(once(["single", "double", "triple"]).feedback).toMatchObject({ text: "C≡C is shortest." });
+    expect(once(["triple", "single", "double"]).feedback).toMatchObject({ text: "C=C before C–C." });
+  });
+
   it("any other wrong order gets the generic fallback", () => {
     expect(run(["double", "triple", "single"])).toMatchObject({
       feedback: { kind: "hint", text: "More bonds between two atoms make the bond shorter." },

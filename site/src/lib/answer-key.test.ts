@@ -41,3 +41,21 @@ it("a Draw-arrows Step keeps its start and shown target on the page; results, pu
   expect(JSON.stringify(page)).not.toMatch(/secret|Secret/);
   expect(withKey(page, JSON.parse(JSON.stringify(key)))).toEqual(whole);
 });
+
+it("a Tap Step's reveal replay (it draws the answer) goes in the key", () => {
+  const step = {
+    id: "s05",
+    phase: "check" as const,
+    type: "tap-to-identify" as const,
+    prompt: "Tap.",
+    structure: { structure: { id: "shown", style: "full" as const, atoms: [], bonds: [] }, hide: [] },
+    targets: [],
+    answer: ["a1"],
+    reveal: "Secret reveal.",
+    replay: { start: { id: "secret-start", style: "full" as const, atoms: [], bonds: [] }, pushes: [{ from: "a3", to: "b2" }] },
+  };
+  const whole = { ...lesson(), steps: [step] };
+  const { page, key } = splitLesson(whole);
+  expect(JSON.stringify(page)).not.toMatch(/secret|Secret|pushes/);
+  expect(withKey(page, JSON.parse(JSON.stringify(key)))).toEqual(whole);
+});

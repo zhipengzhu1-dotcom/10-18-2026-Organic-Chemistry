@@ -7,7 +7,7 @@ import { find, type CitedData } from "./data.ts";
 
 type StepFile = LessonFile["steps"][number];
 /** A Step's `scene` as written in the Lesson file. */
-export type SceneUseFile ={ id: string; state?: Record<string, SceneValue> };
+export type SceneUseFile = { id: string; state?: Record<string, SceneValue>; onAnswer?: Record<string, SceneValue>; still?: boolean };
 
 /** Why `value` can't be taken by the settable state, or undefined if it can. */
 export function invalidValue(spec: SceneStateSpec, value: SceneValue): string | undefined {
@@ -32,7 +32,7 @@ export function checkStepScene(step: StepFile, catalog: SceneCatalog, data: Cite
   if (!entry) return [`Scene "${use.id}" is not in the Scene registry`];
   const errors: string[] = [];
   const scene = `Scene "${use.id}"`;
-  for (const [name, value] of Object.entries(use.state ?? {})) {
+  for (const [name, value] of [...Object.entries(use.state ?? {}), ...Object.entries(use.onAnswer ?? {})]) {
     const spec = entry.states[name];
     if (!spec) errors.push(`${scene} has no settable state "${name}"`);
     else {
@@ -65,5 +65,11 @@ export function resolveSceneUse(use: SceneUseFile, catalog: SceneCatalog | undef
     const value = find(data, ref);
     if (value) cited[ref] = value;
   }
-  return { id: use.id, state: { ...defaults, ...use.state }, cited };
+  return {
+    id: use.id,
+    state: { ...defaults, ...use.state },
+    cited,
+    ...(use.onAnswer && { onAnswer: use.onAnswer }),
+    ...(use.still && { still: true }),
+  };
 }

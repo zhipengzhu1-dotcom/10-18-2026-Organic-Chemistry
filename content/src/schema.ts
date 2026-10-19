@@ -23,9 +23,6 @@ const hide = z.array(z.enum(["charges", "lone-pairs"])).optional();
 /** A text option, or a structure card: `structure` names a structure file and `text` is then its screen-reader label. */
 const option = z.strictObject({ id, text, structure: id.optional(), hide });
 
-/** A text-only card (Rank items; structure Rank cards are not resolved yet). */
-const textOption = z.strictObject({ id, text });
-
 /** Fields shared by a Multiple choice Step and a Multiple choice Problem. */
 const multipleChoice = {
   type: z.literal("multiple-choice"),
@@ -38,6 +35,9 @@ const multipleChoice = {
   hints: z.array(hint).optional(),
   reveal: text,
 };
+
+/** One curved arrow: `from` an atom id (its lone pair) or a bond id; `to` an atom id or a bond id. */
+const push = z.strictObject({ from: id, to: id });
 
 /** Fields shared by a Tap-to-identify Step and Problem. */
 const tapToIdentify = {
@@ -59,6 +59,8 @@ const tapToIdentify = {
   reveal: text,
   /** The tap-only cue, required when the Step sits among Draw-arrows Steps: the idle callout and the message on a drag. */
   tapOnly: z.strictObject({ idle: text, drag: text }).optional(),
+  /** Pushes played (push-replay) once the Step is answered: they turn `start` into `result`. */
+  replay: z.strictObject({ start: id, result: id, pushes: z.array(push).min(1) }).optional(),
 };
 
 /** A Numeric Hint: `match` is a common wrong value, matched within the Step's tolerance. */
@@ -78,17 +80,26 @@ const numeric = {
   reveal: text,
 };
 
+/**
+ * A Rank Hint: `match` = one whole wrong order; `above` = at least one of these [upper, lower]
+ * pairs has its first card above its second (spec "`b` or `c` above `a`"). The fallback has neither.
+ */
+const rankHint = z.strictObject({
+  match: z.array(id).min(1).optional(),
+  above: z.array(z.tuple([id, id])).min(1).optional(),
+  text,
+});
+
 /** Fields shared by a Rank / order Step and a Rank Problem. */
 const rank = {
   type: z.literal("rank"),
   prompt: text,
-  /** The cards, in the order they start in. */
-  items: z.array(textOption).min(2),
+  /** The cards, in the order they start in: text, or structure cards (Lesson 7). */
+  items: z.array(option).min(2),
   /** The one strict order of item ids, first to last. */
   answer: z.array(id).min(2),
   correct: text.optional(),
-  /** A Rank Hint's `match` is one whole wrong order. */
-  hints: z.array(hint).optional(),
+  hints: z.array(rankHint).optional(),
   reveal: text,
 };
 
@@ -98,11 +109,18 @@ const sceneValue = z.union([z.number(), z.string()]);
 /**
  * The Scene a Step shows: `scene: <id>`, or `{ id, state: { <settable state>: <value> } }`.
  * States left out take the manifest's default. The ids and values are checked
- * against the Scene registry (see scenes.ts).
+ * against the Scene registry (see scenes.ts). `onAnswer`: states that change once the Step is
+ * answered, and the Scene plays again (a Hook whose Scene "plays on reveal"). `still`: the Scene
+ * opens paused on its poster frame (a Wrap's "final frame"); Play still runs it.
  */
 const sceneUse = z.preprocess(
   (v) => (typeof v === "string" ? { id: v } : v),
-  z.strictObject({ id, state: z.record(z.string(), sceneValue).optional() }),
+  z.strictObject({
+    id,
+    state: z.record(z.string(), sceneValue).optional(),
+    onAnswer: z.record(z.string(), sceneValue).optional(),
+    still: z.boolean().optional(),
+  }),
 );
 
 /** A Manipulate Hint: `match` lists the wrong control values it answers. */
@@ -124,9 +142,6 @@ const manipulate = {
   hints: z.array(manipulateHint).optional(),
   reveal: text,
 };
-
-/** One curved arrow: `from` an atom id (its lone pair) or a bond id; `to` an atom id or a bond id. */
-const push = z.strictObject({ from: id, to: id });
 
 /**
  * A Draw-arrows Hint, matched on the wrong push: `from` = it starts at one of these (atom ids =

@@ -93,6 +93,29 @@ describe("Numeric input and Rank / order Steps", () => {
     ]);
   });
 
+  it("a Rank Hint can match any order with one card above another (Lesson 7: “`b` or `c` above `a`”)", () => {
+    const hints = [
+      { above: [["single", "triple"], ["double", "triple"]], text: "C≡C is shortest." },
+      { above: [["single", "double"]], text: "C=C before C–C." },
+      { text: "Count shared pairs." },
+    ];
+    const { model, errors } = build(numeric(), rank({ hints }));
+    expect(errors).toEqual([]);
+    expect(model!.subjects[0].courses[0].units[0].lessons[0].steps[5]).toMatchObject({ hints });
+  });
+
+  it("a Rank Hint's pairs name items, and can't hold in the right order", () => {
+    const hints = [
+      { above: [["single", "quadruple"]], text: "No such card." },
+      { above: [["triple", "single"]], text: "That's the right way round." },
+      { text: "Count shared pairs." },
+    ];
+    expect(build(numeric(), rank({ hints })).errors).toEqual([
+      `${L}: step s06: a Hint names unknown item "quadruple"`,
+      `${L}: step s06: a Hint's "above" pair triple above single holds in the answer order`,
+    ]);
+  });
+
   it("a Rank Step can't start in the right order", () => {
     const items = [
       { id: "triple", text: "C≡C" },

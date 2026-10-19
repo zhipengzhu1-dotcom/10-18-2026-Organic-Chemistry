@@ -138,8 +138,14 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         : manipulated?.stepId === step.id
           ? manipulated.value
           : step.scene.state[step.control];
+  // A Scene with `onAnswer` states switches to them (and plays again) once the Step is answered.
+  const answeredScene = step.type !== "explain" && screen.canContinue && step.scene?.onAnswer;
   const sceneState =
-    step.type === "manipulate" && setting !== undefined ? { ...step.scene.state, [step.control]: setting } : step.scene?.state;
+    step.type === "manipulate" && setting !== undefined
+      ? { ...step.scene.state, [step.control]: setting }
+      : answeredScene
+        ? { ...step.scene!.state, ...answeredScene }
+        : step.scene?.state;
 
   const answer: Answer | null =
     step.type === "multiple-choice" || step.type === "tap-to-identify"
@@ -215,6 +221,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           />
         )}
 
+        {/* A Tap Step whose answer comes from a push (Lesson 7): once answered, the pushes replay. */}
+        {step.type === "tap-to-identify" && screen.canContinue && step.replay && (
+          <PushReplayPlayer key={`replay-${step.id}`} start={step.replay.start} pushes={step.replay.pushes} />
+        )}
+
         {step.type === "draw-arrows" && screen.arrows && !screen.canContinue && (
           <DrawArrows
             key={`arrows-${step.id}`}
@@ -244,11 +255,12 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         {step.scene && sceneState && !watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
           // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
           <ScenePlayer
-            key={`scene-${step.id}`}
+            key={`scene-${step.id}${answeredScene ? "-answered" : ""}`}
             sceneId={step.scene.id}
             state={sceneState}
             cited={step.scene.cited}
             loop={step.type === "manipulate"}
+            still={step.scene.still}
           >
             {step.type === "manipulate" && setting !== undefined && (
               <SceneControl
@@ -482,14 +494,17 @@ function RankCards({ step, order, onChange, locked }: RankCardsProps) {
         Drag a card, or focus it and press the up and down arrow keys to move it.
       </p>
       <ol ref={list} className="opts rank" aria-label="Order">
-        {order.map((id, i) => (
+        {order.map((id, i) => {
+          // A structure card: the drawing is pre-rendered SVG; its text is the screen-reader label.
+          const drawn = step.items.find((item) => item.id === id)?.structure?.drawn;
+          return (
           <li key={id}>
             <button
               type="button"
               data-id={id}
               aria-describedby={`${step.id}-rank-help`}
               aria-disabled={locked}
-              className={dragging === id ? "opt dragging" : "opt"}
+              className={`opt${drawn ? " structure-card" : ""}${dragging === id ? " dragging" : ""}`}
               style={{ width: "100%", touchAction: "none", userSelect: "none", cursor: locked ? "default" : "grab" }}
               onFocus={() => setFocusId(id)}
               onBlur={() => setFocusId((f) => (f === id ? null : f))}
@@ -506,10 +521,13 @@ function RankCards({ step, order, onChange, locked }: RankCardsProps) {
                 e.preventDefault();
                 moveTo(id, to, true);
               }}
-              {...html(text(id))}
-            />
+              {...(drawn ? { "aria-label": text(id) } : html(text(id)))}
+            >
+              {drawn && <span aria-hidden="true" {...html(drawn.svg)} />}
+            </button>
           </li>
-        ))}
+          );
+        })}
       </ol>
       <p aria-live="polite" className="sr">
         {said}

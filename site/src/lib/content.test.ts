@@ -1,7 +1,37 @@
 // md(): Lesson Markdown → HTML, with every number and formula set in the data
 // face (JetBrains Mono) so C never reads as O.
 import { describe, expect, it } from "vitest";
-import { md } from "./content.ts";
+import { md, renderStep } from "./content.ts";
+
+describe("renderStep", () => {
+  it("pre-renders a Rank structure card and keeps its text as the plain screen-reader label", () => {
+    const structure = {
+      id: "methyl-cation",
+      style: "full" as const,
+      atoms: [
+        { id: "a1", el: "C", x: 0, y: 0, charge: 1 },
+        { id: "a2", el: "H", x: 1.5, y: 0 },
+      ],
+      bonds: [{ id: "b1", a: "a1", b: "a2", order: 1 as const }],
+    };
+    const step = renderStep({
+      id: "s09",
+      phase: "build",
+      type: "rank",
+      prompt: "Most important **first**.",
+      items: [
+        { id: "a", text: "CH₃⁺: a carbon with a +", structure: { structure, hide: [] } },
+        { id: "b", text: "a **text** card" },
+      ],
+      answer: ["a", "b"],
+      reveal: "a, b",
+    });
+    if (step.type !== "rank") throw new Error(step.type);
+    expect(step.items[0].text).toBe("CH₃⁺: a carbon with a +");
+    expect(step.items[0].structure?.drawn?.svg).toMatch(/^<svg/);
+    expect(step.items[1].text).toBe("a <strong>text</strong> card");
+  });
+});
 
 const d = (s: string) => `<span class="data">${s}</span>`;
 

@@ -7,6 +7,16 @@ export type Phase = "hook" | "build" | "check" | "wrap";
 /** A Hint; see HintRule. */
 export type Hint = HintRule;
 
+/**
+ * A Rank Hint. Every condition given must hold: `match` = this whole wrong order; `above` = at
+ * least one [upper, lower] pair has its first card above its second. The fallback has neither.
+ */
+export interface RankHint {
+  match?: string[];
+  above?: [string, string][];
+  text: string;
+}
+
 /** A value a Scene's settable state takes: a number (range state) or an option id (choice state). */
 export type SceneValue = number | string;
 
@@ -40,6 +50,10 @@ export interface SceneUse {
   state: Record<string, SceneValue>;
   /** The Scene's cited values by ref; the Scene reads its numbers from here (ADR 0002). */
   cited: Record<string, Cited>;
+  /** States that change once the Step is answered; the Scene then plays again (a Hook's reveal). */
+  onAnswer?: Record<string, SceneValue>;
+  /** Opens paused on the poster frame (a Wrap's final frame). */
+  still?: boolean;
 }
 
 export interface ExplainStep {
@@ -101,13 +115,12 @@ export interface RankStep {
   phase: Phase;
   type: "rank";
   prompt: string;
-  /** In the order the cards start in. */
-  items: { id: string; text: string }[];
+  /** In the order the cards start in; a structure card's text is its screen-reader label. */
+  items: Option[];
   /** The one correct order of item ids, first to last. */
   answer: string[];
   correct?: string;
-  /** A Hint's `match` is one whole wrong order. */
-  hints?: Hint[];
+  hints?: RankHint[];
   reveal: string;
   problemId?: string;
   scene?: SceneUse;
@@ -306,6 +319,8 @@ export interface TapStep {
   reveal: string;
   /** Shown when the Step sits among Draw-arrows Steps: it is tap-only. */
   tapOnly?: { idle: string; drag: string };
+  /** Played (push-replay) once the Step is answered: pushes on `start` that make the δ site (Lesson 7). Secret: it shows the answer. */
+  replay?: { start: Structure; pushes: Push[] };
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];

@@ -1,5 +1,5 @@
 // Build-time access to the course model. A content error fails the site build.
-import { buildContent, type Course, type CourseModel, type Lesson, type Step, type Unit } from "@astratron/content";
+import { buildContent, type Course, type CourseModel, type Lesson, type Option, type Step, type Unit } from "@astratron/content";
 import { checkManifests, checkWatchManifests, sceneCatalog } from "@astratron/scenes/check";
 import { sceneManifests } from "@astratron/scenes/manifests";
 import { watchSceneManifests } from "@astratron/scenes/watch";
@@ -135,14 +135,15 @@ export function renderLesson(lesson: Lesson): Lesson {
 export function renderStep(s: Step): Step {
   if (s.type === "explain") return { ...s, text: md(s.text) };
   const shared = { prompt: md(s.prompt), correct: s.correct && md(s.correct), reveal: md(s.reveal) };
-  const choices = (list: { id: string; text: string }[]) => list.map((o) => ({ ...o, text: md(o.text) }));
+  // A structure card's text is its screen-reader label: kept plain; its drawing is pre-rendered SVG.
+  const choices = (list: Option[]) =>
+    list.map((o) => (o.structure ? { ...o, structure: drawView(o.structure) } : { ...o, text: md(o.text) }));
   switch (s.type) {
     case "multiple-choice":
       return {
         ...s,
         ...shared,
-        // A structure card's text is its screen-reader label: kept plain; its drawing is pre-rendered SVG.
-        options: s.options.map((o) => (o.structure ? { ...o, structure: drawView(o.structure) } : { ...o, text: md(o.text) })),
+        options: choices(s.options),
         hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
       };
     case "tap-to-identify":
