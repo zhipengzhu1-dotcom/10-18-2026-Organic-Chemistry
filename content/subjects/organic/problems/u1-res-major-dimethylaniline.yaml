@@ -1,0 +1,20 @@
+# Lesson 7 Check Problem (docs/specs/unit-1/lesson-07-which-contributor-wins.md).
+id: u1-res-major-dimethylaniline
+unit: u1
+lesson: u1-l07
+difficulty: 1
+status: approved
+source: Adapted from MIT OCW 5.12, Problem Set 1 Q6a, Berkowski, Spring 2005, CC BY-NC-SA 4.0.
+type: multiple-choice
+prompt: "N,N-Dimethylaniline and one of its contributors (the pair from Lesson 6). Which is the major contributor?"
+options:
+  - { id: a, structure: dimethylaniline, text: "The neutral drawing: N(CH₃)₂ on a benzene ring, no charges, one lone pair on N." }
+  - { id: b, structure: dimethylaniline-quinoid, text: "The drawing with N⁺ and C⁻: N⁺ double-bonded to the ring, − on the ring carbon opposite." }
+  - { id: c, text: "They count equally" }
+answer: [a]
+correct: "Both have full octets, so rule 2 decides: no charges beats two."
+hints:
+  - { match: [b], text: "Both drawings give every atom an octet, so rule 1 ties. Rule 2: count the charges." }
+  - { match: [c], text: "Equal weight needs a tie on every rule. They differ on rule 2." }
+  - text: "Go rule by rule: octets first, then charges."
+reveal: "Octets: tie. Charges: none vs two. The neutral drawing is major."

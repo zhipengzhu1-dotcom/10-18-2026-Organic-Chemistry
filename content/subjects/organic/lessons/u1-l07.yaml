@@ -1,0 +1,204 @@
+# Lesson 7: Resonance: Which Contributor Wins. Built from
+# docs/specs/unit-1/lesson-07-which-contributor-wins.md (the source of truth;
+# content/test/lesson-07.test.ts checks this file against it).
+id: u1-l07
+slug: which-contributor-wins
+title: "Resonance: Which Contributor Wins"
+goal: "Rank a molecule's resonance contributors with four rules in order (full octets, fewest charges, − on the more electronegative atom, charges close together), and use the minor contributors to find the molecule's δ+ and δ− sites."
+keyIdea: "The real molecule is a weighted blend: the drawing with full octets and the fewest, best-placed charges counts most, and the minor drawings show where the molecule is δ+ and δ−, which is where it reacts."
+act: Moving electrons
+signature: s09
+steps:
+  - id: s01
+    phase: hook
+    type: multiple-choice
+    prediction: true
+    prompt: "Acetamide is drawn with a plain C–N single bond. Methylamine has a real C–N single bond; methanimine has a C=N double bond. How long is acetamide's C–N?"
+    options:
+      - { id: a, text: "About as long as methylamine's C–N" }
+      - { id: b, text: "Shorter: between single and double" }
+      - { id: c, text: "As short as methanimine's C=N" }
+    answer: [b]
+    reveal: "Acetamide's C–N is **{{acetamide/r.CN}}** (computed): shorter than methylamine's single bond ({{methylamine/r.CN}}), longer than methanimine's double bond ({{methanimine/r.CN}}). So a drawing with C=N must count, but only partly. Which drawings count, and how much? That's this Lesson."
+    # The three molecules show first with their C–N bonds highlighted; the lengths appear on reveal.
+    scene: { id: amide-cn-lengths, state: { molecule: all, labels: hidden }, onAnswer: { labels: shown } }
+    source: "Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phase. All three molecules use the same method so they can be compared fairly. Structures: PubChem CIDs 6329, 178 and 123139. CCCBDB lists experimental geometries for acetamide and methanimine (for methylamine, internal coordinates only); they are not used here, so that one method covers all three."
+
+  - id: s02
+    phase: build
+    type: draw-arrows
+    prompt: Find the drawing behind that short bond. Push electrons to turn acetamide into its other contributor.
+    start: acetamide
+    results: [acetamide-polar]
+    answer:
+      - { from: a4, to: b3 } # lone pair on N4 → bond 2–4
+      - { from: b2, to: a3 } # π 2–3 → O3
+    inBetween:
+      over: "{atom} has {electrons} e⁻: something has to leave. Both arrows happen at once, so this halfway drawing isn't a real structure."
+      short: "{atom} has only {electrons} e⁻. This halfway drawing isn't the target: in resonance both arrows happen at once. Fill the gap."
+    correct: "C=N with N⁺ and O⁻: that's the drawing with the double bond. Same atoms, same σ bonds."
+    hints:
+      - { from: [b2], to: [a2], text: "Oxygen is the electronegative sink. Pull the π pair toward O, not C." }
+      - { from: [a3], to: [a2], text: "The new π bond has to form between C and N. Start from N's lone pair." }
+      - { from: [sigma], text: "σ bonds stay put." }
+      - text: "It's the acetate pattern from Lesson 6: one pair in from N, one pair out to O."
+    reveal: "Arrow from the lone pair on nitrogen into the C–N bond; arrow from the C=O π bond onto oxygen. Result: C double-bonded to N⁺, single-bonded to O⁻."
+
+  - id: s03
+    phase: build
+    type: explain
+    text: |-
+      Acetamide is a blend of both drawings, but **not 50:50**. The hybrid is a **weighted** blend: the more stable drawing counts more. It's the **major contributor**; the others are **minor contributors**.
+
+      Minor still matters. Acetamide's charged drawing is minor, yet it's why the C–N bond is shorter than a single bond.
+    scene: amide-hybrid
+    source: "Weighting idea from MIT OCW 5.12, Lecture 2 p. 2, 'Rules for Resonance Structures', Berkowski, Spring 2005, CC BY-NC-SA 4.0. Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phase. All three molecules use the same method so they can be compared fairly. Structures: PubChem CIDs 6329, 178 and 123139."
+
+  - id: s04
+    phase: build
+    type: multiple-choice
+    prompt: "Gut check before the rules: which acetamide drawing is the major contributor?"
+    options:
+      - { id: a, structure: acetamide, text: "CH₃–C(=O)–NH₂, no charges: C=O double bond, C–N single bond." }
+      - { id: b, structure: acetamide-polar, text: "CH₃–C(–O⁻)=N⁺H₂: C–O single bond with O⁻, C=N double bond with N⁺." }
+      - { id: c, text: "They count equally" }
+    answer: [a]
+    correct: "No charges beats two. Pulling + and − apart costs energy, so the neutral drawing is major."
+    hints:
+      - { match: [b], text: "Count the formal charges in each. Separating + from − costs energy." }
+      - { match: [c], text: "Equal weight needs the two drawings to be equally good. One carries two charges, the other none." }
+      - text: "Which drawing has fewer formal charges?"
+    reveal: "Both have full octets; the neutral one has no charges, so it wins."
+
+  - id: s05
+    phase: build
+    type: explain
+    text: |-
+      To rank contributors, test them against **four rules, in order**. The first rule that tells two drawings apart decides.
+
+      1. **Full octets.** C, N, O and F each have 8 electrons. Only carbon is ever drawn with 6, and that costs a lot.
+      2. **Fewest charges.** Fewer formal charges (so more bonds) is better.
+      3. **− on the more electronegative atom.** C < N < O < F, as in Lesson 1.
+      4. **Charges close together.** If two drawings tie on 1–3, the one with + and − nearer each other wins.
+    scene: { id: rule-ladder, state: { rung: all } }
+    source: "The four guidelines and their order adapted from MIT OCW 5.12, Lecture 2 p. 4, 'Predicting Energies of Resonance Structures', Berkowski, Spring 2005, CC BY-NC-SA 4.0."
+
+  - id: s06
+    phase: build
+    type: multiple-choice
+    prompt: The methoxymethyl cation. Which contributor is major?
+    options:
+      - { id: a, structure: methoxymethyl-cation-c, text: "CH₃–O–CH₂⁺: + on carbon; the CH₂ carbon has three bonds and no lone pair." }
+      - { id: b, structure: methoxymethyl-cation-o, text: "CH₃–O⁺=CH₂: + on oxygen; O⁺ double-bonded to CH₂, one lone pair on O." }
+      - { id: c, text: "They count equally" }
+    answer: [b]
+    correct: "Rule 1 first. In CH₃–O⁺=CH₂ every atom has an octet, and that outranks where the + sits, even on an electronegative O."
+    hints:
+      - { match: [a], text: "Count the electrons around the CH₂ carbon in each drawing. Rule 1, full octets, comes before anything about electronegativity." }
+      - { match: [c], text: "They differ on rule 1. Count the electrons on the CH₂ carbon in each." }
+      - text: "Go rule by rule: which drawing gives every atom 8 electrons?"
+    reveal: "CH₂⁺ has only 6 e⁻ (rule 1 fails); O⁺=CH₂ gives every atom 8."
+
+  - id: s07
+    phase: build
+    type: draw-arrows
+    prompt: "This anion, an **enolate**, comes from acetone (Unit 2 shows how it forms). Push electrons to move the negative charge from O onto carbon."
+    start: acetone-enolate
+    results: [acetone-enolate-carbanion]
+    answer:
+      - { from: a4, to: b3 } # lone pair on O4 → bond 2–4
+      - { from: b1, to: a1 } # π 1–2 → C1
+    inBetween:
+      over: "{atom} has {electrons} e⁻: something has to leave. This halfway drawing isn't a real structure."
+      short: "{atom} has only {electrons} e⁻. This halfway drawing isn't real either. Fill the gap."
+    correct: "Now the − sits on the CH₂ carbon and the double bond is C=O. Two drawings of one anion: which counts more?"
+    hints:
+      - { from: [b1], to: [a2], text: "C2 is about to receive O's pair. Send the C=C pair the other way, onto the CH₂ end." }
+      - { from: [sigma], text: "σ bonds stay put." }
+      - text: "One pair in from O⁻ to make C=O; one pair out of C=C onto the CH₂ carbon."
+    reveal: "Arrow from a lone pair on O⁻ into the C–O bond; arrow from the C=C π bond onto the end carbon. Result: CH₂⁻ next to a C=O."
+
+  - id: s08
+    phase: build
+    type: multiple-choice
+    prompt: Which enolate drawing is the major contributor?
+    options:
+      - { id: a, structure: acetone-enolate, text: "CH₂=C(CH₃)–O⁻: − on oxygen, C=C double bond." }
+      - { id: b, structure: acetone-enolate-carbanion, text: "⁻CH₂–C(CH₃)=O: − on carbon, C=O double bond." }
+      - { id: c, text: "They count equally" }
+    answer: [a]
+    correct: "Rules 1 and 2 tie (full octets, one charge each), so rule 3 decides: O holds − better than C. But the C⁻ drawing still counts, so that CH₂ carbon is electron-rich too. Hold that thought."
+    hints:
+      - { match: [b], text: "C=O looks stronger, but rules 1 and 2 tie here. Rule 3: which atom holds a negative charge better?" }
+      - { match: [c], text: "Equal weight needs a tie on every rule. Check rule 3." }
+      - text: "Go rule by rule and stop at the first one that tells them apart."
+    reveal: "Octets: tie. Charges: tie, one each. − on the more electronegative atom: O beats C."
+
+  - id: s09
+    phase: build
+    type: rank
+    prompt: "Acrolein has three contributors. Drag them into order, most important at the top."
+    items:
+      - { id: c, structure: acrolein-end-cation, text: "Card c: ⁺CH₂–CH=CH–O⁻. + on the end carbon, − on oxygen." }
+      - { id: a, structure: acrolein, text: "Card a: CH₂=CH–CH=O, acrolein with no charges." }
+      - { id: b, structure: acrolein-oxy-cation, text: "Card b: CH₂=CH–CH⁺–O⁻. + on the carbon next to oxygen, − on oxygen." }
+    answer: [a, b, c]
+    correct: "Neutral on top (rules 1 and 2). The two charged drawings tie on rules 1–3; rule 4 puts the one with + and − side by side ahead."
+    hints:
+      - above: [[b, a], [c, a]]
+        text: "`a` gives every atom an octet and has no charges. The other two each have a 6-electron carbon. Rule 1 puts `a` on top."
+      - above: [[c, b]]
+        text: "`b` and `c` tie on rules 1–3: a 6-electron carbon, two charges, − on O. Rule 4: in which are + and − closer?"
+      - text: "Go rule by rule, and stop at the first rule that tells two cards apart."
+    reveal: "Top to bottom: `a` (rule 1: octets), `b` (rule 4: charges adjacent), `c` (rule 4: charges far apart)."
+    source: "Ranking method adapted from MIT OCW 5.12, Lecture 2 p. 4, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Example ours."
+
+  - id: s10
+    phase: build
+    type: explain
+    text: |-
+      So what are minor contributors good for? **They show where a molecule reacts.**
+
+      The major contributor shows what the molecule mostly looks like. The minor ones show where its electrons lean:
+
+      - an atom drawn **+** in a reasonable contributor is **δ+** in the hybrid: electron-poor, a sink where an incoming electron source attacks.
+      - an atom drawn **−** is **δ−**: electron-rich, a source that can attack something else.
+
+      Acetone: C⁺–O⁻ is minor, but it marks the carbonyl carbon as the δ+ site.
+    scene: carbonyl-sites
+
+  - id: s11
+    phase: build
+    type: tap-to-identify
+    prompt: "Back to acrolein. Tap every **carbon** that is δ+ in the hybrid, then press Check. Just tap, no pushing on this Step."
+    structure: acrolein
+    tappable: { atoms: [a1, a2, a3, a4] }
+    tapOnly:
+      idle: Just tap, no pushing on this Step.
+      drag: "No pushing here: this Step only asks which carbons are δ+. Tap each one."
+    answer: [a1, a3]
+    correct: "Two δ+ carbons: C3 next to O, and C1 at the far end. An electron source can attack at either end of the π system."
+    hints:
+      - { includes: [a4], text: "O carries − in both minor drawings, so it is δ−, not δ+." }
+      - { includes: [a2], text: "No contributor puts + on the middle carbon. Check all three drawings." }
+      - { match: [a3], text: "That's one. Look at the third drawing: where else does + land?" }
+      - { match: [a1], text: "That's one. The carbon bonded to O is drawn + too, in the second drawing." }
+      - text: "An atom is δ+ wherever a reasonable contributor puts a +."
+    reveal: "C1 and C3 are δ+: the third drawing puts + on C1, the second puts + on C3."
+
+  - { id: s12, phase: check, problem: u1-res-major-dimethylaniline }
+  - { id: s13, phase: check, problem: u1-res-enamine-site }
+  - { id: s14, phase: check, problem: u1-res-rank-methoxyacrylonitrile }
+
+  - id: s15
+    phase: wrap
+    type: explain
+    text: |-
+      **Every drawing counts. The best one counts most.**
+
+      Rank with four rules, in order: full octets → fewest charges → − on the more electronegative atom → charges close together.
+
+      Minor contributors mark the δ+ and δ− sites, and that's where molecules react.
+
+      Next: why electrons flow from δ− to δ+ at all.
+    scene: { id: amide-hybrid, still: true }

@@ -206,7 +206,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
 
       <main className="player-body">
         {step.type === "explain" ? (
-          <p {...html(step.text)} />
+          <div className="explain-text" {...html(step.text)} />
         ) : (
           <p className="player-prompt" {...html(step.prompt)} />
         )}

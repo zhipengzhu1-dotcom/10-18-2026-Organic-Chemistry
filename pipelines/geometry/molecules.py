@@ -142,7 +142,7 @@ MOLECULES: list[Molecule] = [
         values={"r.CN": ("C–N", (1, 2)), "r.CO": ("C=O", (1, 3)), "r.CC": ("C–C", (0, 1))},
     ),
     M(
-        id="methanimine", title="Methanimine", formula="CH3N", smiles="C=N", cid=74747, cas="2053-29-4",
+        id="methanimine", title="Methanimine", formula="CH3N", smiles="C=N", cid=123139, cas="2053-29-4",
         tier="computed", cccbdb_name="methanimine", used_by="L7", start="smiles",
         start_note="RDKit ETKDG embed (seed 7) + MMFF94",
         note="Computed on purpose: Lesson 7 compares three C–N lengths, so all three use one method.",

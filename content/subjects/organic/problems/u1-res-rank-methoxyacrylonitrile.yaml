@@ -1,0 +1,26 @@
+# Lesson 7 Check Problem (docs/specs/unit-1/lesson-07-which-contributor-wins.md).
+# Parent: (E)-3-methoxyacrylonitrile, PubChem CID 5324713; its four minor contributors share its layout.
+id: u1-res-rank-methoxyacrylonitrile
+unit: u1
+lesson: u1-l07
+difficulty: 3
+status: approved
+source: "Adapted from MIT OCW 5.12, Lecture 2 p. 4, 'Predicting Relative Energies' (contributors B–E), Berkowski, Spring 2005, CC BY-NC-SA 4.0."
+type: rank
+prompt: "Four minor contributors of 3-methoxyacrylonitrile (the neutral, major one isn't shown). Rank them, most important at the top."
+items:
+  - { id: c, structure: methoxyacrylonitrile-c, text: "Card c: CH₃–O–CH=CH–C⁺=N⁻. + on the carbon bonded to N, − on N." }
+  - { id: a, structure: methoxyacrylonitrile-a, text: "Card a: CH₃–O⁺=CH–CH=C=N⁻. + on oxygen, − on N." }
+  - { id: d, structure: methoxyacrylonitrile-d, text: "Card d: CH₃–O–CH⁺–CH=C=N⁻. + on the carbon bonded to O, − on N." }
+  - { id: b, structure: methoxyacrylonitrile-b, text: "Card b: CH₃–O⁺=CH–CH⁻–C≡N. + on oxygen, − on the middle carbon." }
+answer: [a, b, c, d]
+correct: "Every card has two charges, so rule 2 never decides. Rule 1 puts the full-octet cards (`a`, `b`) above the 6-electron ones; rule 3 puts − on N above − on C; rule 4 puts adjacent charges above distant ones."
+hints:
+  - above: [[c, a], [c, b], [d, a], [d, b]]
+    text: "`c` and `d` each have a carbon with only 6 electrons. Rule 1 puts both full-octet cards above them."
+  - above: [[b, a]]
+    text: "`a` and `b` tie on rules 1 and 2. Rule 3: where does the − sit in each?"
+  - above: [[d, c]]
+    text: "`c` and `d` tie on rules 1–3. Rule 4: in which are + and − closer together?"
+  - text: "Count charges first: they're all two. So test octets, then where − sits, then how far apart the charges are."
+reveal: "Top to bottom: `a` (rule 1: octets ✓, rule 3: − on N), `b` (rule 1: octets ✓, rule 3: − on C), `c` (rule 1: 6-e⁻ C, rule 4: charges adjacent), `d` (rule 1: 6-e⁻ C, rule 4: charges far apart)."

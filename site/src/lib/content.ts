@@ -94,6 +94,8 @@ export const answerKeyUrl = (subject: string, lessonId: string) => `/answers/${s
  * Numbers and formulas get `<span class="data">` (the data face); see markData.
  */
 export const md = (text: string) => markData(marked.parseInline(text, { async: false }));
+/** Block Markdown (paragraphs, lists) for Explain text, which can run to several paragraphs. */
+export const mdBlocks = (text: string) => markData(marked.parse(text, { async: false }));
 
 // Element symbols that turn up in organic chemistry, two-letter ones first.
 const EL = "(?:Cl|Br|Na|Mg|Al|Si|Li|Ca|Fe|Zn|Cu|Mn|Cr|Pd|Pt|Sn|Hg|Se|Os|Ni|Ag|Au|Ti|He|Ne|Ar|H|B|C|N|O|F|P|S|K|I)";
@@ -134,7 +136,7 @@ export function renderLesson(lesson: Lesson): Lesson {
 /** One Step (or a Practice Set Problem) with its Markdown turned into HTML and its structures pre-rendered. */
 export function renderStep(s: Step): Step {
   const source = s.source ? { source: md(s.source) } : {};
-  if (s.type === "explain") return { ...s, text: md(s.text), ...source };
+  if (s.type === "explain") return { ...s, text: mdBlocks(s.text), ...source };
   const shared = { prompt: md(s.prompt), correct: s.correct && md(s.correct), reveal: md(s.reveal), ...source };
   // A structure card's text is its screen-reader label: kept plain; its drawing is pre-rendered SVG.
   const choices = (list: Option[]) =>

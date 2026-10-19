@@ -4,9 +4,22 @@
 import type { RegisteredScene } from "./types.ts";
 import { sampleTwist } from "./sample-twist/manifest.ts";
 import SampleTwist from "./sample-twist/SampleTwist.tsx";
+import { amideCnLengths } from "./amide-cn-lengths/manifest.ts";
+import AmideCnLengths from "./amide-cn-lengths/AmideCnLengths.tsx";
+import { amideHybrid } from "./amide-hybrid/manifest.ts";
+import AmideHybrid from "./amide-hybrid/AmideHybrid.tsx";
+import { ruleLadder } from "./rule-ladder/manifest.ts";
+import RuleLadder from "./rule-ladder/RuleLadder.tsx";
+import { carbonylSites } from "./carbonyl-sites/manifest.ts";
+import CarbonylSites from "./carbonyl-sites/CarbonylSites.tsx";
 
 export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [sampleTwist.id]: { manifest: sampleTwist, Component: SampleTwist },
+  // Lesson 7
+  [amideCnLengths.id]: { manifest: amideCnLengths, Component: AmideCnLengths },
+  [amideHybrid.id]: { manifest: amideHybrid, Component: AmideHybrid },
+  [ruleLadder.id]: { manifest: ruleLadder, Component: RuleLadder },
+  [carbonylSites.id]: { manifest: carbonylSites, Component: CarbonylSites },
 };
 
 export type * from "./types.ts";

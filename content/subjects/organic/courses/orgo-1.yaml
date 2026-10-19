@@ -14,6 +14,7 @@ units:
       - u1-sample-structures
       - u1-sample-scenes
       - u1-sample-arrows
+      - u1-l07
   - id: u2
     slug: acids-bases
     title: Acids & Bases

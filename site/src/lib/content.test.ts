@@ -4,6 +4,19 @@ import { describe, expect, it } from "vitest";
 import { md, renderStep } from "./content.ts";
 
 describe("renderStep", () => {
+  it("renders an Explain Step's text as blocks: paragraphs and lists keep their breaks (Lesson 7 s05, s10)", () => {
+    const step = renderStep({
+      id: "s05",
+      phase: "build",
+      type: "explain",
+      text: "Four **rules**:\n\n1. Full octets.\n2. Fewest charges.\n\nThe first that differs decides.",
+    });
+    if (step.type !== "explain") throw new Error(step.type);
+    expect(step.text).toBe(
+      `<p>Four <strong>rules</strong>:</p>\n<ol>\n<li>Full octets.</li>\n<li>Fewest charges.</li>\n</ol>\n<p>The first that differs decides.</p>\n`,
+    );
+  });
+
   it("pre-renders a Rank structure card and keeps its text as the plain screen-reader label", () => {
     const structure = {
       id: "methyl-cation",
