@@ -20,7 +20,8 @@
     "build": "pnpm --filter @astratron/site run build",
     "test:e2e": "playwright test",
     "structure": "pnpm --filter @astratron/content run structure",
-    "triage": "node site/src/submissions/triage-cli.ts"
+    "triage": "node site/src/submissions/triage-cli.ts",
+    "video": "pnpm --filter @astratron/video run cli"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

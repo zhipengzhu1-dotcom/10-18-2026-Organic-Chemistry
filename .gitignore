@@ -16,3 +16,6 @@ playwright-report/
 
 # Python bytecode (Manim scripts)
 __pycache__/
+
+# rendered video, stills and sources sidecars (never committed)
+video/out/
