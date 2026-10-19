@@ -2,6 +2,7 @@ import { fileURLToPath } from "node:url";
 
 export { buildContent } from "./build.ts";
 export { freezeStepIds } from "./freeze.ts";
+export { parseProblem, readBank } from "./bank.ts";
 export type * from "./model.ts";
 
 /** The real content tree: one folder per Subject. */
