@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 7854,
+        "MolecularFormula": "C3H5N",
+        "SMILES": "CCC#N",
+        "ConnectivitySMILES": "CCC#N",
+        "Title": "Propionitrile"
+      }
+    ]
+  }
+}

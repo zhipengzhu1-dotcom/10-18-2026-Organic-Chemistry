@@ -1,0 +1,10 @@
+{
+  "render": "matcap",
+  "blender": "5.2.2 LTS",
+  "inputs": {
+    "pipelines/blender/make_matcap.py": "db6793a797326648240f67086e72c535cebd97c729ca1a19ea3e2ba4f4b98884"
+  },
+  "outputs": {
+    "site/public/matcaps/studio.webp": "b1868ae5f344a0fd5ee7fb778f7971b563d8bd1578c6e9df2bc31fd03a8d623e"
+  }
+}

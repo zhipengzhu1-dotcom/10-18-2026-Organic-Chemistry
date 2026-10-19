@@ -1,0 +1,119 @@
+{
+  "render": "share-site",
+  "width": 1200,
+  "height": 630,
+  "scale": 190,
+  "samples": 256,
+  "seed": 69,
+  "palette": {
+    "at-space": "#0d0626",
+    "at-neb-1": "#ff4fd8",
+    "at-neb-2": "#b44dff",
+    "at-neb-3": "#2340ff",
+    "at-electron": "#3ee8ff",
+    "at-ignite": "#ff9a1f",
+    "at-ink": "#ffffff",
+    "at-ink-muted": "#b9a8e8",
+    "star-core": "#ffe2a8"
+  },
+  "fonts": {
+    "pixel": "pipelines/blender/fonts/PixelifySans-Regular.woff",
+    "text": "scenes/manim/fonts/SpaceGrotesk-wght.ttf",
+    "data": "scenes/manim/fonts/JetBrainsMono-wght.ttf"
+  },
+  "molecules": [
+    {
+      "id": "water",
+      "atoms": [
+        {
+          "element": "O",
+          "x": 1.526316,
+          "y": 0.275419,
+          "z": 0.165244
+        },
+        {
+          "element": "H",
+          "x": 0.769116,
+          "y": -0.256131,
+          "z": -0.082622
+        },
+        {
+          "element": "H",
+          "x": 2.283516,
+          "y": -0.256131,
+          "z": -0.082622
+        }
+      ],
+      "bonds": [
+        {
+          "a": 0,
+          "b": 1,
+          "order": 1
+        },
+        {
+          "a": 0,
+          "b": 2,
+          "order": 1
+        }
+      ],
+      "elements": {
+        "O": {
+          "colour": "#FF0D0D",
+          "radius": 0.456
+        },
+        "H": {
+          "colour": "#FFFFFF",
+          "radius": 0.36
+        }
+      },
+      "frame": {
+        "rotation": [
+          [
+            0,
+            -1,
+            0
+          ],
+          [
+            0.422618,
+            0,
+            0.906308
+          ],
+          [
+            -0.906308,
+            0,
+            0.422618
+          ]
+        ],
+        "centre": [
+          0,
+          0,
+          -0.2737
+        ],
+        "offset": [
+          1.526316,
+          -0.078947,
+          0
+        ]
+      }
+    }
+  ],
+  "meshes": [],
+  "text": [
+    {
+      "text": "AstraTron",
+      "font": "pixel",
+      "size": 112,
+      "x": 72,
+      "y": 300,
+      "colour": "#ff9a1f"
+    },
+    {
+      "text": "Come build.",
+      "font": "text",
+      "size": 56,
+      "x": 76,
+      "y": 392,
+      "colour": "#3ee8ff"
+    }
+  ]
+}

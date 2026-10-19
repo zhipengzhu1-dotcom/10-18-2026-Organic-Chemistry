@@ -4,7 +4,7 @@
 id: card-allene-propyne
 style: full
 smiles: C=C=C.CC#C
-source: PubChem CID 10037, 6335
+source: PubChem CIDs 10037 and 6335 (allene, propyne)
 atoms:
   - { id: a1, el: C, x: 0, y: -1.5 }
   - { id: a2, el: C, x: 0, y: 0 }

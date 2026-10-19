@@ -11,9 +11,12 @@ import { bf3Sextet } from "./bf3-sextet/manifest.ts";
 import { groupSpotlight } from "./group-spotlight/manifest.ts";
 import { groupCards } from "./group-cards/manifest.ts";
 import { carbonylNeighbours } from "./carbonyl-neighbours/manifest.ts";
+import { hFill } from "./h-fill/manifest.ts";
+import { ethanolThreeWays } from "./ethanol-three-ways/manifest.ts";
+import { lonePairFill } from "./lone-pair-fill/manifest.ts";
 import { acetateBondLengths } from "./acetate-bond-lengths/manifest.ts";
 import { formaldehydePiShift } from "./formaldehyde-pi-shift/manifest.ts";
 import { threeMoves } from "./three-moves/manifest.ts";
 import { acetateHybrid } from "./acetate-hybrid/manifest.ts";
 
-export const sceneManifests: readonly SceneManifest<any>[] = [sampleTwist, streamBend, enStrip, bondDipoles, dotsAndSticks, bf3Sextet, groupSpotlight, groupCards, carbonylNeighbours, acetateBondLengths, formaldehydePiShift, threeMoves, acetateHybrid];
+export const sceneManifests: readonly SceneManifest<any>[] = [sampleTwist, streamBend, enStrip, bondDipoles, dotsAndSticks, bf3Sextet, groupSpotlight, groupCards, carbonylNeighbours, hFill, ethanolThreeWays, lonePairFill, acetateBondLengths, formaldehydePiShift, threeMoves, acetateHybrid];

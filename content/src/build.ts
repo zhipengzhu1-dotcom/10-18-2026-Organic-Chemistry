@@ -37,7 +37,7 @@ import { dataFile, resolveDataFile } from "./data-load.ts";
 import type { SceneCatalog, SceneUse } from "./model.ts";
 import { checkStepScene, resolveSceneUse, type SceneUseFile } from "./scenes.ts";
 import { checkViews, resolveMoleculeUse, type MoleculeUseFile, type Views } from "./molecule-use.ts";
-import { checkStructure, resolveArrows, resolveFigure, resolveOptions, resolveTap } from "./structures.ts";
+import { checkAgainstPubChem, pubchemCid, checkStructure, resolveArrows, resolveFigure, resolveOptions, resolveTap } from "./structures.ts";
 
 /** What a Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
 type StructureFields = {
@@ -162,6 +162,15 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       const broken = file ? checkStructure(file) : [];
       for (const message of broken) errors.push(`${slug}/structures/${name}.yaml: ${message}`);
       structures.set(name, file && !broken.length ? file : undefined);
+      // Build sanity check (Lesson 2): a drawing of a PubChem compound whose record is cached
+      // (`data/pubchem/<cid>.json`) has that formula's H's and valence-true lone pairs.
+      const cid = file && !broken.length ? pubchemCid(file) : undefined;
+      const record = cid === undefined ? undefined : join(root, `${slug}/data/pubchem/${cid}.json`);
+      if (record && existsSync(record)) {
+        const formula = pubchemFormula(record);
+        const found = formula === undefined ? ["its cached PubChem record has no MolecularFormula"] : checkAgainstPubChem(file!, formula);
+        for (const message of found) errors.push(`${slug}/structures/${name}.yaml: ${message}`);
+      }
     }
     const structured: Structured = new Map();
     const resolveStructures = (key: string, item: LessonFile["steps"][number] | ProblemFile, where: string) => {
@@ -491,6 +500,16 @@ function resolveMolecules(
     const { item, cited } = resolve(problem, `${slug}/problems/${name}.yaml: `);
     problems.set(name, item);
     if (cited.length) problemCitations.set(name, merge(problemCitations.get(name), cited));
+  }
+}
+
+/** The molecular formula in a cached PubChem PUG REST property record (`<subject>/data/pubchem/<cid>.json`). */
+function pubchemFormula(file: string): string | undefined {
+  try {
+    const formula = JSON.parse(readFileSync(file, "utf8"))?.PropertyTable?.Properties?.[0]?.MolecularFormula;
+    return typeof formula === "string" ? formula : undefined;
+  } catch {
+    return undefined;
   }
 }
 

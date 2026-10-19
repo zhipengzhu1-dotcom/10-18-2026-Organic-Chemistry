@@ -4,7 +4,7 @@
 id: card-dimethylaniline-pair
 style: line-angle
 smiles: C[N+](C)=C1C=C[CH-]C=C1.CN(C)c1ccccc1
-source: MIT OCW 5.12 PS1 Q6a; PubChem CID 949
+source: MIT OCW 5.12 PS1 Q6a; PubChem CIDs 949 (N,N-dimethylaniline)
 atoms:
   - { id: a1, el: C, x: 3.75, y: 1.299 }
   - { id: a2, el: N, x: 3, y: 0, charge: 1 }

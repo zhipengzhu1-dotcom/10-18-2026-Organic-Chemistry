@@ -4,7 +4,7 @@
 id: card-acetate-acetic-acid
 style: line-angle
 smiles: CC(=O)[O-].CC(=O)O
-source: PubChem CID 175, 176
+source: PubChem CIDs 175 and 176 (acetate, acetic acid)
 atoms:
   - { id: a1, el: C, x: 0, y: 0 }
   - { id: a2, el: C, x: 1.299, y: -0.75 }

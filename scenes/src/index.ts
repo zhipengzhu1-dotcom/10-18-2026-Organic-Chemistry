@@ -29,6 +29,13 @@ import ThreeMoves from "./three-moves/ThreeMoves.tsx";
 import { acetateHybrid } from "./acetate-hybrid/manifest.ts";
 import AcetateHybrid from "./acetate-hybrid/AcetateHybrid.tsx";
 
+import { hFill } from "./h-fill/manifest.ts";
+import HFill from "./h-fill/HFill.tsx";
+import { ethanolThreeWays } from "./ethanol-three-ways/manifest.ts";
+import EthanolThreeWays from "./ethanol-three-ways/EthanolThreeWays.tsx";
+import { lonePairFill } from "./lone-pair-fill/manifest.ts";
+import LonePairFill from "./lone-pair-fill/LonePairFill.tsx";
+
 export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [sampleTwist.id]: { manifest: sampleTwist, Component: SampleTwist },
   [streamBend.id]: { manifest: streamBend, Component: StreamBend },
@@ -39,6 +46,9 @@ export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [groupSpotlight.id]: { manifest: groupSpotlight, Component: GroupSpotlight },
   [groupCards.id]: { manifest: groupCards, Component: GroupCards },
   [carbonylNeighbours.id]: { manifest: carbonylNeighbours, Component: CarbonylNeighbours },
+  [hFill.id]: { manifest: hFill, Component: HFill },
+  [ethanolThreeWays.id]: { manifest: ethanolThreeWays, Component: EthanolThreeWays },
+  [lonePairFill.id]: { manifest: lonePairFill, Component: LonePairFill },
   [acetateBondLengths.id]: { manifest: acetateBondLengths, Component: AcetateBondLengths },
   [formaldehydePiShift.id]: { manifest: formaldehydePiShift, Component: FormaldehydePiShift },
   [threeMoves.id]: { manifest: threeMoves, Component: ThreeMoves },
@@ -51,7 +61,8 @@ export { clamp, easeInOut, easeOut, lerp, progress, pulse, seededRandom } from "
 export { stateAt } from "./timeline.ts";
 export { defaultState } from "./state.ts";
 
-export { BOND_PX, drawStructure, type Drawing, type Highlight, type Point, type Segment } from "./structure/render.ts";
+export { BOND_PX, drawStructure, type Drawing, type DrawOptions, type Highlight, type Point, type Segment } from "./structure/render.ts";
+export { withHydrogens } from "./structure/hydrogens.ts";
 export { drawContributors, type ContributorsDrawing } from "./structure/contributors.ts";
 
 export { default as PushReplay, describeReplay, replayDuration, PUSH_SECONDS } from "./push-replay/PushReplay.tsx";

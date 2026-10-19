@@ -1,0 +1,24 @@
+# Lesson 2 Check Problem (lesson-02-drawing-molecules.md). Approved for play as a Check Step (#80).
+id: u1-draw-acetaminophen-lone-pairs
+unit: u1
+lesson: u1-l02
+difficulty: 2
+status: approved
+source: Original
+sourceNote: Acetaminophen, PubChem CID 1983.
+type: numeric
+prompt: Acetaminophen (paracetamol), the painkiller, with its lone pairs hidden. How many lone pairs does it have in all?
+figures:
+  - { structure: acetaminophen, hide: [lone-pairs], alt: "Acetaminophen, line-angle drawing: a six-membered ring with alternating double lines, OH on one side, NH on the other leading to a carbon with a double-bonded O and a CH₃ end.", caption: "Lone pairs hidden" }
+unitSymbol: lone pairs
+answer: 5
+tolerance: 0
+correct: "Two O's with 2 bonds each: 2 + 2. One N with 3 bonds: 1. Total 5."
+hints:
+  - { match: 4, text: "Both oxygens done. Now the N: it has 3 bonds, so it keeps 1 lone pair." }
+  - { match: 3, text: "There are two oxygens: the =O and the OH. Each has 2 lone pairs." }
+  - { match: 6, text: "N here has 3 bonds (to two carbons and an H). That leaves 1 lone pair, not 2." }
+  - { match: 2, text: "Every O and every N gets lone pairs. Find all three of them." }
+  - { text: "Find every O and N. O with 2 bonds → 2 lone pairs, N with 3 bonds → 1." }
+reveal: "5 lone pairs: 2 on the C=O oxygen, 1 on the N, 2 on the OH oxygen."
+revealScene: { id: lone-pair-fill, state: { molecule: acetaminophen } }

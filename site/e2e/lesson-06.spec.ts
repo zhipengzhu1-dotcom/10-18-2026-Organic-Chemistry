@@ -191,8 +191,6 @@ test("the Lesson page passes axe on its Draw-arrows and structure-card Steps", a
   for (const step of ["s06", "s12"]) {
     await open(page, step);
     const results = await new AxeBuilder({ page }).include(".player").withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-      // Structure cards (#62) name the card by its sentence; the atom letters drawn inside are a picture, not its label.
-      .disableRules(["label-content-name-mismatch"])
       .analyze();
     expect(results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ") + " " + n.failureSummary).join(" | ")}`), step).toEqual([]);
   }

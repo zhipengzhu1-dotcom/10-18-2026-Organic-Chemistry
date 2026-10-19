@@ -4,7 +4,7 @@
 id: card-acetone-enol
 style: line-angle
 smiles: CC(C)=O.CC(O)=C
-source: PubChem CID 180
+source: PubChem CIDs 180 (acetone); its enol drawn from it
 atoms:
   - { id: a1, el: C, x: 0, y: 0 }
   - { id: a2, el: C, x: 1.299, y: -0.75 }

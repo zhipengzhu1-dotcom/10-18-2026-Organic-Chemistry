@@ -1,0 +1,15 @@
+{
+  "render": "share-site",
+  "blender": "5.2.2 LTS",
+  "inputs": {
+    "pipelines/blender/share_images.py": "3d58038d16c1d68b3e30cd0ef541239deac6b7b3873548ca2d4d9a4eae180fbb",
+    "pipelines/blender/molecule_import.py": "47a3f6f680ecbca80c95d6e46c6325b63d918370b37439b9454f911f0ba1c9a2",
+    "pipelines/blender/fonts/PixelifySans-Regular.woff": "60603c6e85cc8ba29a235657dfc0ff9012bae9adcdbc40cd9056a8cb68a9864c",
+    "scenes/manim/fonts/SpaceGrotesk-wght.ttf": "acad6de1fc93436f5c0f1f4137751ef04f1aea3063e7036535970ffcfbd79f72",
+    "scenes/manim/fonts/JetBrainsMono-wght.ttf": "48715a42ec242c21e9f02692891e147d022299a52e48d5e413e1a942193ffeda",
+    "pipelines/blender/renders/share-site.props.json": "cbd51b879f22839bdbb88549a7cd9846087c9dfcec556088306c4291abd81f18"
+  },
+  "outputs": {
+    "site/public/share/site.webp": "dd2fd282c73a964fc90e698ff8194509a4c9a9ad012546e8e571acbc6fa24b03"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 947,
+        "MolecularFormula": "N2",
+        "SMILES": "N#N",
+        "ConnectivitySMILES": "N#N",
+        "Title": "Nitrogen"
+      }
+    ]
+  }
+}
