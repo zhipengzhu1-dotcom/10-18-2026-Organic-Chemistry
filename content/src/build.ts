@@ -25,7 +25,7 @@ import {
   type StructureFile,
 } from "./schema.ts";
 import { checkDeletedSteps, checkFrozenIds, LOCK_FILE } from "./freeze.ts";
-import type { BuildResult, Course, GradedStep, Lesson, Option, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
+import type { BuildResult, Course, GradedStep, HeroPush, Lesson, Option, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
 
 /** The Practice Set page sits at `<unit url>/practice`, so no Lesson may take that slug. */
 export const PRACTICE_SLUG = "practice";
@@ -210,7 +210,17 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       });
     }
     fillBanks(slug, courses, listed, lessons, problems, structured, problemCitations, errors);
-    if (subject) subjects.push({ slug, title: subject.title, url: `/${slug}`, courses, data });
+    let hero: HeroPush | undefined;
+    if (subject?.hero) {
+      const found: string[] = [];
+      const resolved = resolveArrows(subject.hero, structures, found);
+      for (const message of found) errors.push(`${slug}/subject.yaml: hero: ${message}`);
+      if (resolved && !found.length) {
+        const { answer, hints } = subject.hero;
+        hero = { start: resolved.start.structure, results: resolved.results, answer, ...(hints && { hints }) };
+      }
+    }
+    if (subject) subjects.push({ slug, title: subject.title, url: `/${slug}`, courses, data, ...(hero && { hero }) });
   }
 
   return errors.length ? { errors } : { model: { subjects }, errors };

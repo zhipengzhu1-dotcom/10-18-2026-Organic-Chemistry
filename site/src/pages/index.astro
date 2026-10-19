@@ -1,15 +1,21 @@
 ---
-// Home page. First-time visitors get the welcome (the Push hero, #73, goes there);
-// returning visitors get the Hub instead: a Continue card and the Streak. Both
+// Home page. First-time visitors get the Push hero (#73): the headline, a live
+// OH⁻ + H⁺ push and one "Start Unit 1" button, with the Course map right below.
+// Returning visitors get the Hub instead: a Continue card and the Streak. Both
 // see the Course map and can export or import their progress.
 import Base from "../layouts/Base.astro";
 import CourseMap from "../components/CourseMap.astro";
 import Preferences from "../components/Preferences.astro";
 import TopBar from "../components/TopBar.astro";
+import PushHero from "../components/PushHero.tsx";
 import { courseModel } from "../lib/content.ts";
 import type { CatalogLesson } from "../progress/hub.ts";
 
 const { subjects } = courseModel();
+const HEADLINE = "Chemistry is how the universe builds things. Come build.";
+const hero = subjects.find((s) => s.hero)?.hero;
+/** Unit 1: the first available Unit of the first Course. */
+const unit1 = subjects[0]?.courses[0]?.units.find((u) => u.status === "available");
 /** Every playable Lesson in Course order, for the Continue card. */
 const catalog: CatalogLesson[] = subjects.flatMap((s) =>
   s.courses.flatMap((c) =>
@@ -50,8 +56,11 @@ const catalog: CatalogLesson[] = subjects.flatMap((s) =>
     </section>
 
     <div class="first-visit">
-      <h1>AstraTron</h1>
-      <p>Move electrons. Move the world.</p>
+      <section class="push-hero-screen" aria-label={HEADLINE}>
+        <h1 class="hero-title">Chemistry is how the universe builds things. <span class="hero-accent">Come build.</span></h1>
+        {hero && <PushHero client:load task={hero} />}
+        {unit1 && <a class="btn btn-primary btn-block" href={unit1.url}>Start Unit 1 ▸</a>}
+      </section>
     </div>
 
     {subjects.map((subject) => <CourseMap subject={subject} />)}
