@@ -1,0 +1,6 @@
+{
+  "name": "@astratron/pipelines",
+  "private": true,
+  "license": "MIT",
+  "description": "Python build-time pipelines (PubChem, CCCBDB, PySCF, orbital meshes, Blender). Output is committed to content/."
+}

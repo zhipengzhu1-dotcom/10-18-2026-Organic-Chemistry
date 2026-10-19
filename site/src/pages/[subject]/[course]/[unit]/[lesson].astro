@@ -1,0 +1,18 @@
+---
+import type { GetStaticPaths } from "astro";
+import Base from "../../../../layouts/Base.astro";
+import StepPlayer from "../../../../components/StepPlayer.tsx";
+import { lessonPages, renderLesson, type LessonPage } from "../../../../lib/content.ts";
+
+export const getStaticPaths = (() =>
+  lessonPages().map((page) => ({
+    params: { subject: page.subject, course: page.course, unit: page.unit, lesson: page.lesson.slug },
+    props: page,
+  }))) satisfies GetStaticPaths;
+
+const { lesson, unitTitle } = Astro.props as LessonPage;
+---
+
+<Base title={`${lesson.title} · ${unitTitle} · AstraTron`} description={lesson.goal}>
+  <StepPlayer client:load lesson={renderLesson(lesson)} exitHref="/" />
+</Base>

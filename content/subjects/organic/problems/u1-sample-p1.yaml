@@ -1,0 +1,22 @@
+# Walking-skeleton sample Problem (#57).
+id: u1-sample-p1
+unit: u1
+lesson: u1-sample
+difficulty: 1
+status: approved
+source: Original
+type: multiple-choice
+prompt: In ethene, H₂C=CH₂, each carbon bonds to two hydrogens and to the other carbon. How many of carbon's four bonds does the C=C double bond use?
+options:
+  - { id: a, text: "1" }
+  - { id: b, text: "2" }
+  - { id: c, text: "4" }
+answer: [b]
+correct: Two C–H bonds plus a double bond worth two make four.
+hints:
+  - match: [a]
+    text: A double bond is two shared pairs, not one. How many bonds does that count as?
+  - match: [c]
+    text: The carbon also bonds to two hydrogens. Those bonds count toward the four too.
+  - text: Start from four, then take away one for each C–H bond on that carbon.
+reveal: "Two: each carbon has two C–H bonds, so the double bond supplies the other two of its four."

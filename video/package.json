@@ -1,0 +1,10 @@
+{
+  "name": "@astratron/video",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "@astratron/content": "workspace:*",
+    "@astratron/scenes": "workspace:*"
+  }
+}

@@ -1,0 +1,43 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <style is:global>
+      /* Placeholder styles; the Arcade Cosmos design system (#59) replaces them. */
+      body { margin: 0; font: 17px/1.5 system-ui, sans-serif; background: #0d0b1e; color: #f4f1ff; }
+      a { color: #5ee7ff; }
+      .page { max-width: 40rem; margin: 0 auto; padding: 1rem; }
+      .player { min-height: 100dvh; display: flex; flex-direction: column; max-width: 40rem; margin: 0 auto; padding: 0 1rem; }
+      .player-bar { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; }
+      .exit { min-width: 48px; min-height: 48px; display: grid; place-items: center; text-decoration: none; }
+      .story-bars { flex: 1; display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; }
+      .story-bars li { flex: 1; height: 6px; background: #3a3560; }
+      .story-bars li.seen { background: #5ee7ff; }
+      .step { flex: 1; }
+      .options { display: grid; gap: 0.5rem; }
+      .options button, .button { min-height: 48px; font: inherit; padding: 0.5rem 1rem; border: 2px solid #8b7bff; background: #1b1840; color: inherit; text-align: left; }
+      .options button[aria-pressed="true"] { border-color: #5ee7ff; background: #123848; }
+      .feedback { margin-top: 1rem; padding: 0.75rem; border: 2px solid #8b7bff; }
+      .feedback.correct { border-color: #5ee7ff; }
+      .feedback.hint { border-style: dashed; border-color: #ff5ee7; }
+      .player-action { position: sticky; bottom: 0; padding: 1rem 0; background: #0d0b1e; }
+      .button { display: block; width: 100%; text-align: center; background: #ff9d3c; color: #0d0b1e; border-color: #ff9d3c; text-decoration: none; box-sizing: border-box; }
+      .button:disabled { opacity: 0.5; }
+    </style>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
