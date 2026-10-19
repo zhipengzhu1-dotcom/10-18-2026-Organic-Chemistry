@@ -1,7 +1,8 @@
 // md(): Lesson Markdown → HTML, with every number and formula set in the data
 // face (JetBrains Mono) so C never reads as O.
 import { describe, expect, it } from "vitest";
-import { md } from "./content.ts";
+import type { Lesson, MultipleChoiceStep, Structure } from "@astratron/content";
+import { md, renderLesson } from "./content.ts";
 
 const d = (s: string) => `<span class="data">${s}</span>`;
 
@@ -26,5 +27,48 @@ describe("md marks numbers and formulas as data", () => {
   it("never touches tags, entities or code", () => {
     expect(md("Carbon's **4** bonds")).toBe(`Carbon&#39;s <strong>${d("4")}</strong> bonds`);
     expect(md("`CH4` stays code")).toBe("<code>CH4</code> stays code");
+  });
+});
+
+describe("renderLesson", () => {
+  const ethanol: Structure = {
+    id: "ethanol",
+    style: "line-angle",
+    atoms: [
+      { id: "a1", el: "C", x: 0, y: 0 },
+      { id: "a2", el: "C", x: 1.3, y: -0.75 },
+      { id: "a3", el: "O", x: 2.6, y: 0, h: 1, lp: 2 },
+    ],
+    bonds: [
+      { id: "b1", a: "a1", b: "a2", order: 1 },
+      { id: "b2", a: "a2", b: "a3", order: 1 },
+    ],
+  };
+  const step: MultipleChoiceStep = {
+    id: "s08",
+    phase: "build",
+    type: "multiple-choice",
+    prompt: "Which group?",
+    figure: [{ text: "Ethanol.", structure: { structure: ethanol, hide: ["lone-pairs"] } }],
+    options: [
+      { id: "a", text: "alcohol" },
+      { id: "b", text: "ether" },
+    ],
+    answer: ["a"],
+    reveal: "Alcohol.",
+    sourceNote: "Structure: *PubChem* CID 702.",
+  };
+  const lesson = { keyIdea: "Read the neighbours.", steps: [step] } as unknown as Lesson;
+
+  it("pre-renders a figure's structures to SVG, keeping its label plain", () => {
+    const [fig] = (renderLesson(lesson).steps[0] as MultipleChoiceStep).figure!;
+    expect(fig.text).toBe("Ethanol.");
+    expect(fig.structure.drawn?.svg).toMatch(/^<svg[^>]*class="structure"/);
+    expect(fig.structure.drawn?.svg).toContain(">OH<");
+    expect(fig.structure.drawn?.svg).not.toContain("lone-pair-dot");
+  });
+
+  it("renders a written Source note's Markdown", () => {
+    expect(renderLesson(lesson).steps[0].sourceNote).toBe(`Structure: <em>PubChem</em> CID ${d("702")}.`);
   });
 });

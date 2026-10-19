@@ -23,20 +23,44 @@ const hide = z.array(z.enum(["charges", "lone-pairs"])).optional();
 /** A text option, or a structure card: `structure` names a structure file and `text` is then its screen-reader label. */
 const option = z.strictObject({ id, text, structure: id.optional(), hide });
 
+/**
+ * The Step's written Source note: who the idea, wording or structures are credited to (the spec's
+ * "Source note" line). Cited numbers add their own sentences to it automatically.
+ */
+const sourceNote = text.optional();
+
 /** A text-only card (Rank items; structure Rank cards are not resolved yet). */
 const textOption = z.strictObject({ id, text });
+
+/** A value a Scene's settable state takes: a number (range) or an option id (choice). */
+const sceneValue = z.union([z.number(), z.string()]);
+
+/**
+ * The Scene a Step shows: `scene: <id>`, or `{ id, state: { <settable state>: <value> } }`.
+ * States left out take the manifest's default. The ids and values are checked
+ * against the Scene registry (see scenes.ts).
+ */
+const sceneUse = z.preprocess(
+  (v) => (typeof v === "string" ? { id: v } : v),
+  z.strictObject({ id, state: z.record(z.string(), sceneValue).optional() }),
+);
 
 /** Fields shared by a Multiple choice Step and a Multiple choice Problem. */
 const multipleChoice = {
   type: z.literal("multiple-choice"),
   prompt: text,
   options: z.array(option).min(2),
+  /** Structures drawn above the choices (the spec's "Visual"); each `text` is its screen-reader label. */
+  figure: z.array(z.strictObject({ structure: id, text, hide })).min(1).optional(),
   /** The exact set of correct option ids. */
   answer: z.array(id).min(1),
   /** The Correct line: the short "why" shown on a right answer. */
   correct: text.optional(),
   hints: z.array(hint).optional(),
   reveal: text,
+  sourceNote,
+  /** A Scene that appears with the answer (right, or revealed after the second try); secret until then. */
+  revealScene: sceneUse.optional(),
 };
 
 /** Fields shared by a Tap-to-identify Step and Problem. */
@@ -57,6 +81,9 @@ const tapToIdentify = {
   correct: text.optional(),
   hints: z.array(hint).optional(),
   reveal: text,
+  sourceNote,
+  /** A Scene that appears with the answer (right, or revealed after the second try); secret until then. */
+  revealScene: sceneUse.optional(),
   /** The tap-only cue, required when the Step sits among Draw-arrows Steps: the idle callout and the message on a drag. */
   tapOnly: z.strictObject({ idle: text, drag: text }).optional(),
 };
@@ -76,6 +103,7 @@ const numeric = {
   correct: text.optional(),
   hints: z.array(numericHint).optional(),
   reveal: text,
+  sourceNote,
 };
 
 /** Fields shared by a Rank / order Step and a Rank Problem. */
@@ -90,20 +118,8 @@ const rank = {
   /** A Rank Hint's `match` is one whole wrong order. */
   hints: z.array(hint).optional(),
   reveal: text,
+  sourceNote,
 };
-
-/** A value a Scene's settable state takes: a number (range) or an option id (choice). */
-const sceneValue = z.union([z.number(), z.string()]);
-
-/**
- * The Scene a Step shows: `scene: <id>`, or `{ id, state: { <settable state>: <value> } }`.
- * States left out take the manifest's default. The ids and values are checked
- * against the Scene registry (see scenes.ts).
- */
-const sceneUse = z.preprocess(
-  (v) => (typeof v === "string" ? { id: v } : v),
-  z.strictObject({ id, state: z.record(z.string(), sceneValue).optional() }),
-);
 
 /** A Manipulate Hint: `match` lists the wrong control values it answers. */
 const manipulateHint = z.strictObject({ match: z.array(sceneValue).min(1).optional(), text });
@@ -123,6 +139,7 @@ const manipulate = {
   correct: text.optional(),
   hints: z.array(manipulateHint).optional(),
   reveal: text,
+  sourceNote,
 };
 
 const stepId = z.string().regex(/^s\d{2,}$/, 'must look like "s01"');
@@ -134,6 +151,7 @@ const explainStep = z.strictObject({
   type: z.literal("explain"),
   text,
   scene: sceneUse.optional(),
+  sourceNote,
 });
 
 const multipleChoiceStep = z.strictObject({

@@ -49,6 +49,8 @@ export interface ExplainStep {
   text: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The written Source note (credits for the idea, wording and structures), Markdown. */
+  sourceNote?: string;
 }
 
 export interface MultipleChoiceStep {
@@ -58,6 +60,8 @@ export interface MultipleChoiceStep {
   prompt: string;
   /** Text options or structure cards. */
   options: Option[];
+  /** Structures drawn above the choices, each with its screen-reader label. */
+  figure?: Figure[];
   answer: string[];
   correct?: string;
   hints?: Hint[];
@@ -68,6 +72,10 @@ export interface MultipleChoiceStep {
   scene?: SceneUse;
   /** The cited values this Step's text shows (`{{file/key}}`); its Source note is generated from them. */
   citations?: Cited[];
+  /** The written Source note (credits for the idea, wording and structures), Markdown. */
+  sourceNote?: string;
+  /** The Scene shown with the answer (right, or revealed). */
+  revealScene?: SceneUse;
 }
 
 export interface NumericHint {
@@ -93,6 +101,8 @@ export interface NumericStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The written Source note (credits for the idea, wording and structures), Markdown. */
+  sourceNote?: string;
 }
 
 /** Rank / order: the Student puts the items into one strict order (the prompt names which end is first). */
@@ -112,6 +122,8 @@ export interface RankStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The written Source note (credits for the idea, wording and structures), Markdown. */
+  sourceNote?: string;
 }
 
 export interface ManipulateHint {
@@ -135,6 +147,8 @@ export interface ManipulateStep {
   reveal: string;
   problemId?: string;
   citations?: Cited[];
+  /** The written Source note (credits for the idea, wording and structures), Markdown. */
+  sourceNote?: string;
 }
 
 /** A Step the Student answers and the engine grades. */
@@ -221,6 +235,12 @@ export interface Option {
   structure?: StructureView;
 }
 
+/** A structure a Step shows (not a choice): its drawing and its screen-reader label. */
+export interface Figure {
+  text: string;
+  structure: StructureView;
+}
+
 /** Something a Student can tap on a Tap-to-identify Step. */
 export interface TapTarget {
   id: string;
@@ -260,6 +280,10 @@ export interface TapStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The written Source note (credits for the idea, wording and structures), Markdown. */
+  sourceNote?: string;
+  /** The Scene shown with the answer (right, or revealed). */
+  revealScene?: SceneUse;
 }
 
 export interface Lesson {

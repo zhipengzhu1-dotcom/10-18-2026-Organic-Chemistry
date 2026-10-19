@@ -25,16 +25,16 @@ import {
   type StructureFile,
 } from "./schema.ts";
 import { checkDeletedSteps, checkFrozenIds, LOCK_FILE } from "./freeze.ts";
-import type { BuildResult, Course, Lesson, Option, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
+import type { BuildResult, Course, Figure, Lesson, Option, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
 import { checkInteraction, checkLessonShape } from "./shape.ts";
 import { citeIn, type Cited, type CitedData } from "./data.ts";
 import { dataFile, resolveDataFile } from "./data-load.ts";
 import type { SceneCatalog, SceneUse } from "./model.ts";
-import { checkStepScene, resolveSceneUse, type SceneUseFile } from "./scenes.ts";
-import { checkStructure, resolveOptions, resolveTap } from "./structures.ts";
+import { checkRevealScene, checkStepScene, resolveSceneUse, type SceneUseFile } from "./scenes.ts";
+import { checkStructure, resolveFigure, resolveOptions, resolveTap } from "./structures.ts";
 
 /** What a graded Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
-type StructureFields = { options: Option[] } | { structure: StructureView; targets: TapTarget[] };
+type StructureFields = { options: Option[]; figure?: Figure[] } | { structure: StructureView; targets: TapTarget[] };
 type Structured = Map<string, StructureFields | undefined>;
 
 export interface BuildOptions {
@@ -130,7 +130,11 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
     }
     for (const problem of problems.values()) {
       if (problem)
-        for (const message of checkInteraction(problem)) errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
+        for (const message of [
+          ...checkInteraction(problem),
+          ...(options.scenes ? checkRevealScene(problem, options.scenes, data) : []),
+        ])
+          errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
     }
     const problemCitations = citeNumbers(slug, data, lessons, problems, errors);
 
@@ -145,7 +149,11 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
     const resolveStructures = (key: string, item: LessonFile["steps"][number] | ProblemFile, where: string) => {
       const found: string[] = [];
       let fields: StructureFields | undefined;
-      if (item.type === "multiple-choice") fields = { options: resolveOptions(item.options, structures, found) };
+      if (item.type === "multiple-choice")
+        fields = {
+          options: resolveOptions(item.options, structures, found),
+          ...(item.figure && { figure: resolveFigure(item.figure, structures, found) }),
+        };
       else if (item.type === "tap-to-identify") fields = resolveTap(item, structures, found);
       else return;
       for (const message of found) errors.push(`${where}${message}`);
@@ -185,7 +193,8 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
               const resolved = resolveLesson(lesson, `${url}/${lesson.slug}`, number, problems, structured, scene, lessonRel, errors);
               for (const step of resolved.steps) {
                 const cited = "problemId" in step && step.problemId && problemCitations.get(step.problemId);
-                if (cited) step.citations = cited;
+                // The Problem's own cites first, then any its reveal Scene added.
+                if (cited) step.citations = [...cited, ...(step.citations ?? []).filter((c) => !cited.some((o) => o.ref === c.ref))];
               }
               return [resolved];
             }),
@@ -217,13 +226,16 @@ function resolveLesson(
     const { tappable: _t, hide: _h, ...rest } = step;
     return [{ ...rest, ...fields } as unknown as Step];
   };
-  /** Resolves the Step's Scene; the Scene's cited numbers join the Step's Source note. */
+  /** Resolves the Step's Scene and reveal Scene; their cited numbers join the Step's Source note. */
   const withScene = (step: Step): Step => {
-    if (!step.scene) return step;
-    const use = scene(step.scene);
+    const reveal = "revealScene" in step ? step.revealScene : undefined;
+    if (!step.scene && !reveal) return step;
+    const uses = { ...(step.scene && { scene: scene(step.scene) }), ...(reveal && { revealScene: scene(reveal) }) };
     const own = step.citations ?? [];
-    const extra = Object.values(use.cited).filter((c) => !own.some((o) => o.ref === c.ref));
-    return { ...step, scene: use, ...(own.length + extra.length ? { citations: [...own, ...extra] } : {}) } as Step;
+    const extra = Object.values(uses)
+      .flatMap((use) => Object.values(use.cited))
+      .filter((c, i, all) => !own.some((o) => o.ref === c.ref) && all.findIndex((d) => d.ref === c.ref) === i);
+    return { ...step, ...uses, ...(own.length + extra.length ? { citations: [...own, ...extra] } : {}) } as Step;
   };
   const steps: Step[] = lesson.steps.flatMap((step): Step[] => {
     if (step.type !== "check") return withStructures(step, `${lesson.id}#${step.id}`).map(withScene);
@@ -237,7 +249,7 @@ function resolveLesson(
       return [];
     }
     const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source: _src, credit: _c, ...interaction } = problem;
-    return withStructures({ id: step.id, phase: "check", problemId, ...interaction }, `problem:${problemId}`);
+    return withStructures({ id: step.id, phase: "check", problemId, ...interaction }, `problem:${problemId}`).map(withScene);
   });
   const phases = { hook: 0, build: 0, check: 0, wrap: 0 };
   for (const step of lesson.steps) phases[step.phase]++;

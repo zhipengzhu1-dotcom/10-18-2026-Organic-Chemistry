@@ -216,6 +216,17 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </ScenePlayer>
         )}
 
+        {step.type === "multiple-choice" && step.figure && (
+          // The structures the question is about: pre-rendered SVG, each named for screen readers.
+          <div className="step-figure">
+            {step.figure.map((f, i) => (
+              <figure key={`figure-${i}`} role="img" aria-label={f.text} className="structure-figure">
+                <span aria-hidden="true" {...html(f.structure.drawn?.svg ?? "")} />
+              </figure>
+            ))}
+          </div>
+        )}
+
         {step.type === "multiple-choice" && (
           <div className="opts" role="group" aria-label="Choices">
             {step.options.map((o) =>
@@ -261,6 +272,16 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           />
         )}
 
+        {screen.canContinue && step.type !== "explain" && "revealScene" in step && step.revealScene && (
+          // The reveal Scene arrives with the answer and plays once.
+          <ScenePlayer
+            key={`reveal-scene-${step.id}`}
+            sceneId={step.revealScene.id}
+            state={step.revealScene.state}
+            cited={step.revealScene.cited}
+          />
+        )}
+
         {screen.done && (
           <div className="card">
             <h2>Key idea</h2>
@@ -274,7 +295,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         )}
 
         {/* Keyed per Step so a new Step opens its Source note collapsed. */}
-        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} />
+        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} note={step.sourceNote} />
 
         <p className="report">
           <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>

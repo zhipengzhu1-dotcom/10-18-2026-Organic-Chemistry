@@ -1,7 +1,7 @@
 // Structures in the content build: checking structure files, resolving
 // structure cards and Tap-to-identify targets, and writing the screen-reader
 // label of every tappable atom and bond.
-import type { Hidden, Option, Structure, StructureAtom, StructureView, TapTarget } from "./model.ts";
+import type { Figure, Hidden, Option, Structure, StructureAtom, StructureView, TapTarget } from "./model.ts";
 import type { ProblemFile, StructureFile } from "./schema.ts";
 import { hintIds } from "./shape.ts";
 
@@ -39,6 +39,22 @@ export function resolveOptions(
       return { id, text };
     }
     return { id, text, structure: view(found, hide) };
+  });
+}
+
+/** Resolves a figure's structures; an entry whose structure is missing is dropped (and reported). */
+export function resolveFigure(
+  figure: { structure: string; text: string; hide?: Hidden[] }[],
+  structures: Map<string, Structure | undefined>,
+  errors: string[],
+): Figure[] {
+  return figure.flatMap(({ structure, text, hide }) => {
+    const found = structures.get(structure);
+    if (!found) {
+      if (!structures.has(structure)) errors.push(`structure "${structure}" not found`);
+      return [];
+    }
+    return [{ text, structure: view(found, hide) }];
   });
 }
 

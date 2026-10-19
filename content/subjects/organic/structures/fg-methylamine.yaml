@@ -1,0 +1,11 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+
+id: fg-methylamine
+style: line-angle
+smiles: CN
+atoms:
+  - { id: a1, el: C, x: 0, y: 0 }
+  - { id: a2, el: N, x: 1.299, y: -0.75, h: 2, lp: 1 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+source: PubChem CID 6329

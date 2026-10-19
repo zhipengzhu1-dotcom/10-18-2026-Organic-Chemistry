@@ -109,9 +109,10 @@ function markData(html: string): string {
 
 /** The Lesson with every text field turned from Markdown into HTML and every structure pre-rendered to SVG. */
 export function renderLesson(lesson: Lesson): Lesson {
+  const note = (s: Step) => (s.sourceNote ? { sourceNote: md(s.sourceNote) } : {});
   const step = (s: Step): Step => {
-    if (s.type === "explain") return { ...s, text: md(s.text) };
-    const shared = { prompt: md(s.prompt), correct: s.correct && md(s.correct), reveal: md(s.reveal) };
+    if (s.type === "explain") return { ...s, text: md(s.text), ...note(s) };
+    const shared = { prompt: md(s.prompt), correct: s.correct && md(s.correct), reveal: md(s.reveal), ...note(s) };
     const choices = (list: { id: string; text: string }[]) => list.map((o) => ({ ...o, text: md(o.text) }));
     switch (s.type) {
       case "multiple-choice":
@@ -120,6 +121,7 @@ export function renderLesson(lesson: Lesson): Lesson {
           ...shared,
           // A structure card's text is its screen-reader label: kept plain; its drawing is pre-rendered SVG.
           options: s.options.map((o) => (o.structure ? { ...o, structure: drawView(o.structure) } : { ...o, text: md(o.text) })),
+          ...(s.figure && { figure: s.figure.map((f) => ({ ...f, structure: drawView(f.structure) })) }),
           hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
         };
       case "tap-to-identify":

@@ -1,7 +1,7 @@
 // Scenes in Steps (ADR 0001): checks each Scene a Step uses against the Scene
 // catalog (built by the scenes module from the registered manifests) and
 // resolves it to a full state plus its cited values.
-import type { LessonFile } from "./schema.ts";
+import type { LessonFile, ProblemFile } from "./schema.ts";
 import type { SceneCatalog, SceneStateSpec, SceneUse, SceneValue } from "./model.ts";
 import { find, type CitedData } from "./data.ts";
 
@@ -24,14 +24,12 @@ export function invalidValue(spec: SceneStateSpec, value: SceneValue): string | 
 export const sameValue = (a: SceneValue, b: SceneValue) =>
   typeof a === "number" && typeof b === "number" ? Math.abs(a - b) < 1e-9 : a === b;
 
-/** Messages for a Step's Scene and, for a Manipulate Step, its control, answer and Hints. */
-export function checkStepScene(step: StepFile, catalog: SceneCatalog, data: CitedData): string[] {
-  const use = "scene" in step ? (step.scene as SceneUseFile | undefined) : undefined;
-  if (!use) return [];
+/** Messages for one Scene use: its id, settable states and cited data. `kind` names it ("Scene", "reveal Scene"). */
+function checkSceneUse(use: SceneUseFile, catalog: SceneCatalog, data: CitedData, kind: string): string[] {
   const entry = catalog[use.id];
-  if (!entry) return [`Scene "${use.id}" is not in the Scene registry`];
+  const scene = `${kind} "${use.id}"`;
+  if (!entry) return [`${scene} is not in the Scene registry`];
   const errors: string[] = [];
-  const scene = `Scene "${use.id}"`;
   for (const [name, value] of Object.entries(use.state ?? {})) {
     const spec = entry.states[name];
     if (!spec) errors.push(`${scene} has no settable state "${name}"`);
@@ -41,6 +39,24 @@ export function checkStepScene(step: StepFile, catalog: SceneCatalog, data: Cite
     }
   }
   for (const ref of entry.data) if (!find(data, ref)) errors.push(`${scene} cites "${ref}", which is not in the cited data`);
+  return errors;
+}
+
+/** Messages for a Step's or Problem's reveal Scene. */
+export function checkRevealScene(item: StepFile | ProblemFile, catalog: SceneCatalog, data: CitedData): string[] {
+  const use = "revealScene" in item ? (item.revealScene as SceneUseFile | undefined) : undefined;
+  return use ? checkSceneUse(use, catalog, data, "reveal Scene") : [];
+}
+
+/** Messages for a Step's Scene and reveal Scene and, for a Manipulate Step, its control, answer and Hints. */
+export function checkStepScene(step: StepFile, catalog: SceneCatalog, data: CitedData): string[] {
+  const reveal = checkRevealScene(step, catalog, data);
+  const use = "scene" in step ? (step.scene as SceneUseFile | undefined) : undefined;
+  if (!use) return reveal;
+  const scene = `Scene "${use.id}"`;
+  const errors = [...checkSceneUse(use, catalog, data, "Scene"), ...reveal];
+  const entry = catalog[use.id];
+  if (!entry) return errors;
 
   if (step.type !== "manipulate") return errors;
   const spec = entry.states[step.control];
