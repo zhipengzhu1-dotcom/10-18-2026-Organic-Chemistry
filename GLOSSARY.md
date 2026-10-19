@@ -36,6 +36,10 @@ _Avoid_: Syllabus, roadmap, curriculum page
 One screen of a Lesson, holding one interaction, explanation or question.
 _Avoid_: Slide, card, page
 
+**Step id**:
+The permanent name of a Step within its Lesson, used in links; unlike the Step's position, it never changes.
+_Avoid_: Step number, step index
+
 **Step type**:
 The kind of interaction a Step holds (e.g. Explain, Multiple choice, Rank, Draw arrows, Rotate-and-identify).
 _Avoid_: Widget, component, question format
