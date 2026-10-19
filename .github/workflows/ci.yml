@@ -40,3 +40,14 @@ jobs:
           name: playwright-report
           path: test-results/
           retention-days: 7
+
+  # Build-time Python pipelines: fast unit tests only (no PySCF runs; their results are committed).
+  pipelines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - name: Pipeline unit tests
+        working-directory: pipelines
+        run: uv run --group compute pytest -q

@@ -9,3 +9,8 @@ dist/
 .astro/
 test-results/
 playwright-report/
+
+# Python (pipelines/)
+.venv/
+__pycache__/
+.pytest_cache/
