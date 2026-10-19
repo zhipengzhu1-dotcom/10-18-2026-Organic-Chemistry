@@ -1,0 +1,39 @@
+# Lesson 5 Check Problem 2 (docs/specs/unit-1/lesson-05-functional-groups.md).
+id: u1-fg-capsaicin
+unit: u1
+lesson: u1-l05
+difficulty: 2
+status: approved
+source: Original
+type: multiple-choice
+prompt: Capsaicin makes chili peppers hot. Which groups does it contain? Pick all that apply.
+figures:
+  - { structure: fg-capsaicin, hide: [lone-pairs], alt: "Capsaicin: a long carbon tail with one double bond, joined through a C=O and an NH to a CH₂ on a benzene ring; the ring carries an OH and, beside it, an O–CH₃." }
+options:
+  - { id: a, text: alkene }
+  - { id: b, text: phenol }
+  - { id: c, text: ether }
+  - { id: d, text: amide }
+  - { id: e, text: ester }
+  - { id: f, text: ketone }
+  - { id: g, text: amine }
+  - { id: h, text: alcohol }
+answer: [a, b, c, d]
+correct: "Four groups: the C=C in the tail, the amide in the middle, and on the ring an OH (phenol) beside an O–CH₃ (ether)."
+hints:
+  - includes: [e, f]
+    text: "The C=O's neighbour is N. That makes an amide, not an ester or a ketone."
+  - includes: [g]
+    text: The N sits right on the C=O carbon, so it belongs to the amide.
+  - includes: [h]
+    text: The only OH is on the arene ring. That's a phenol.
+  - misses: [c]
+    text: Next to the OH, the ring carries an O with a carbon on each side.
+  - misses: [a]
+    text: Follow the long tail. One bond in it is double.
+  - misses: [b, d]
+    text: Check the ring's OH and the C=O in the middle.
+  - text: Skip the skeleton. Name each π bond and heteroatom by its neighbours.
+reveal: "Alkene, phenol, ether and amide."
+revealScene: { id: group-spotlight, state: { view: capsaicin } }
+sourceNote: "Structure: PubChem CID 1548943."

@@ -392,7 +392,7 @@ export const subjectFile = z.strictObject({ title: text, hero: heroPush.optional
 /** A 2D structure, written by `pnpm structure` (RDKit.js layout) and committed. */
 export const structureFile = z.strictObject({
   id,
-  style: z.enum(["full", "line-angle"]),
+  style: z.enum(["full", "lewis", "line-angle"]),
   smiles: text.optional(),
   source: text.optional(),
   atoms: z

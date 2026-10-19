@@ -16,6 +16,13 @@ interface Props {
 }
 
 const DRAG_PX = 10;
+/** A little over a viewBox's own width, so hit areas round to at least 48 px. */
+const naturalWidth = (viewBox: string) => Math.ceil(Number(viewBox.split(" ")[2]) * 1.05);
+/** Width over height of a viewBox "0 0 w h". */
+const aspect = (viewBox: string) => {
+  const [, , w, h] = viewBox.split(" ").map(Number);
+  return Math.round((w / h) * 1000) / 1000;
+};
 /** Half-width of a bond's hit band. */
 const BAND = 12;
 
@@ -59,6 +66,9 @@ export default function StructureTap({ step, picked, answer, locked, onToggle }:
       )}
       <div
         className="tap-structure"
+        // On phones a tall drawing keeps to about a third of the screen's height (structure.css), so the Step
+        // fits one screen, but never below natural size, where every hit area is 48 px.
+        style={{ ["--tap-natural" as string]: `${naturalWidth(drawn.viewBox)}px`, ["--tap-aspect" as string]: aspect(drawn.viewBox) }}
         onPointerDown={(e) => (downAt.current = { x: e.clientX, y: e.clientY })}
         onPointerMove={move}
         onPointerUp={() => (downAt.current = null)}

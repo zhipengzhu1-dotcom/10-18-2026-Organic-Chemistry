@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 1983,
+        "MolecularFormula": "C8H9NO2",
+        "SMILES": "CC(=O)NC1=CC=C(C=C1)O",
+        "ConnectivitySMILES": "CC(=O)NC1=CC=C(C=C1)O",
+        "Title": "Acetaminophen"
+      }
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+# Hydrogen counts Lesson 2 states (lesson-02-drawing-molecules.md, Data notes).
+# Each is the H subscript of the compound's PubChem molecular formula. The
+# cached records are data/pubchem/<cid>.json (PUG REST, retrieved 2026-10-19);
+# the content build checks each drawing's H count against them, and
+# content/test/lesson-02.test.ts checks these values against the same records.
+id: h-counts
+kind: table
+title: Hydrogen counts
+sources:
+  cid5757:
+    kind: reference
+    citation: PubChem CID 5757, estradiol (C18H24O2), https://pubchem.ncbi.nlm.nih.gov/compound/5757
+    licence: PubChem data (NCBI), public domain; https://www.ncbi.nlm.nih.gov/home/about/policies/
+  cid7967:
+    kind: reference
+    citation: PubChem CID 7967, cyclohexanone (C6H10O), https://pubchem.ncbi.nlm.nih.gov/compound/7967
+    licence: PubChem data (NCBI), public domain; https://www.ncbi.nlm.nih.gov/home/about/policies/
+  cid22311:
+    kind: reference
+    citation: PubChem CID 22311, limonene (C10H16), https://pubchem.ncbi.nlm.nih.gov/compound/22311
+    licence: PubChem data (NCBI), public domain; https://www.ncbi.nlm.nih.gov/home/about/policies/
+  cid7855:
+    kind: reference
+    citation: PubChem CID 7855, acrylonitrile (C3H3N), https://pubchem.ncbi.nlm.nih.gov/compound/7855
+    licence: PubChem data (NCBI), public domain; https://www.ncbi.nlm.nih.gov/home/about/policies/
+values:
+  estradiol: { label: H atoms in estradiol, quantity: count, value: 24, source: cid5757 }
+  cyclohexanone: { label: H atoms in cyclohexanone, quantity: count, value: 10, source: cid7967 }
+  limonene: { label: H atoms in limonene, quantity: count, value: 16, source: cid22311 }
+  acrylonitrile: { label: H atoms in acrylonitrile, quantity: count, value: 3, source: cid7855 }

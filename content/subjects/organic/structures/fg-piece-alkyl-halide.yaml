@@ -1,0 +1,13 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+
+id: fg-piece-alkyl-halide
+style: line-angle
+smiles: CCCl
+atoms:
+  - { id: a1, el: C, x: 0, y: 0 }
+  - { id: a2, el: C, x: 1.299, y: -0.75 }
+  - { id: a3, el: X, x: 2.598, y: 0, label: "Halogen X (F, Cl, Br or I)" }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+source: Group card piece; X stands for F, Cl, Br or I

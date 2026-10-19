@@ -1,0 +1,47 @@
+# Lesson 5 Check Problem 3, the Lesson's signature Tap (docs/specs/unit-1/lesson-05-functional-groups.md).
+# Ten non-overlapping regions, as the spec numbers them: 1 phenol, 2 amine, 3 side-amide,
+# 4 lactam, 5 sulfide, 6 acid, 7–10 skeleton.
+id: u1-fg-amoxicillin
+unit: u1
+lesson: u1-l05
+difficulty: 3
+status: approved
+source: Adapted from MIT OCW 5.12 PS1 Q4
+credit: Kimberly Berkowski, MIT OCW 5.12 Organic Chemistry I, Spring 2005, CC BY-NC-SA 4.0
+type: tap-to-identify
+prompt: Back to amoxicillin. Tap **every** functional group, then press Check.
+structure: fg-amoxicillin
+hide: [lone-pairs]
+tappable:
+  regions:
+    - { id: phenol, atoms: [a14, a15, a16, a17, a18, a19, a20], label: "Far left: the benzene ring and its OH." }
+    - { id: amine, atoms: [a21], label: "Top of the left half: the NH₂." }
+    - { id: side-amide, atoms: [a10, a11, a12], label: "Between the two halves: C=O and NH." }
+    - { id: lactam, atoms: [a4, a8, a9], label: "Inside the four-membered ring: C=O and N." }
+    - { id: sulfide, atoms: [a6], label: "The S in the five-membered ring." }
+    - { id: acid, atoms: [a22, a23, a24], label: "Bottom right: C=O with OH." }
+    - { id: ch-amine, atoms: [a13], label: "The CH carrying the NH₂." }
+    - { id: ring-ch, atoms: [a5, a7], label: "The two CH carbons of the four-membered ring." }
+    - { id: dimethyl, atoms: [a1, a2, a25], label: "The ring carbon with its two CH₃." }
+    - { id: ch-acid, atoms: [a3], label: "The CH carrying the C=O with OH." }
+answer: [phenol, amine, side-amide, lactam, sulfide, acid]
+correct: "Six groups: phenol, amine, two amides (one in the four-ring), sulfide and carboxylic acid. That's how a chemist reads amoxicillin at a glance."
+hints:
+  - includes: [ch-amine, ring-ch, dimethyl, ch-acid]
+    text: "That's skeleton: carbons with only C, H and σ bonds. The groups are the heteroatoms and π bonds around them."
+  - misses: [lactam]
+    text: "The four-membered ring hides one: a C=O with N right beside it, the ring you met two Steps ago."
+  - misses: [side-amide]
+    text: Between the two halves sits a C=O with NH beside it. That's a group too.
+  - misses: [sulfide]
+    text: S isn't C or H. C–S–C is ether's sulfur twin.
+  - misses: [amine]
+    text: "Top of the left half: an N on a carbon with no C=O."
+  - misses: [acid]
+    text: "Bottom right: a C=O with OH beside it."
+  - misses: [phenol]
+    text: "Far left: an arene ring carrying OH. Ring and OH together are one group."
+  - text: Skip the skeleton. Tap every heteroatom and π bond, each with the neighbours it shares a group with.
+reveal: "Phenol, amine, the side-chain amide, the ring amide (β-lactam), sulfide and carboxylic acid."
+revealScene: { id: group-spotlight, state: { view: amoxicillin } }
+sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q4 and its key, Berkowski, Spring 2005, CC BY-NC-SA 4.0 (the key labels phenol, amine, amide twice, sulfide and carboxylic acid). Structure: PubChem CID 33613."

@@ -1,0 +1,27 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+
+id: acetone-kekule
+style: full
+smiles: CC(C)=O
+atoms:
+  - { id: a1, el: C, x: 1.299, y: -0.75 }
+  - { id: a2, el: C, x: 0, y: 0 }
+  - { id: a3, el: C, x: -1.299, y: -0.75 }
+  - { id: a4, el: O, x: 0, y: 1.5, lp: 2 }
+  - { id: a5, el: H, x: 2.049, y: 0.549 }
+  - { id: a6, el: H, x: 0.549, y: -2.049 }
+  - { id: a7, el: H, x: 2.598, y: -1.5 }
+  - { id: a8, el: H, x: -2.049, y: 0.549 }
+  - { id: a9, el: H, x: -0.549, y: -2.049 }
+  - { id: a10, el: H, x: -2.598, y: -1.5 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a2, b: a4, order: 2 }
+  - { id: b4, a: a1, b: a5, order: 1 }
+  - { id: b5, a: a1, b: a6, order: 1 }
+  - { id: b6, a: a1, b: a7, order: 1 }
+  - { id: b7, a: a3, b: a8, order: 1 }
+  - { id: b8, a: a3, b: a9, order: 1 }
+  - { id: b9, a: a3, b: a10, order: 1 }
+source: PubChem CID 180

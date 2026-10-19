@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 6337,
+        "MolecularFormula": "C2H5Cl",
+        "SMILES": "CCCl",
+        "ConnectivitySMILES": "CCCl",
+        "Title": "Chloroethane"
+      }
+    ]
+  }
+}

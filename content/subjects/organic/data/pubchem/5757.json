@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 5757,
+        "MolecularFormula": "C18H24O2",
+        "SMILES": "C[C@]12CC[C@H]3[C@H]([C@@H]1CC[C@@H]2O)CCC4=C3C=CC(=C4)O",
+        "ConnectivitySMILES": "CC12CCC3C(C1CCC2O)CCC4=C3C=CC(=C4)O",
+        "Title": "Estradiol"
+      }
+    ]
+  }
+}
