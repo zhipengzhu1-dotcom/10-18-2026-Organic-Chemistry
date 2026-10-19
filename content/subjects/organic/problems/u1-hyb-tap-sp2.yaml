@@ -1,0 +1,24 @@
+# Lesson 4 Check Problem (#82), from the merged Lesson 4 spec (approved so the Check Step plays it).
+id: u1-hyb-tap-sp2
+unit: u1
+lesson: u1-l04
+difficulty: 2
+status: approved
+source: Original
+type: tap-to-identify
+prompt: Pent-1-en-4-yne. Tap every **sp²** carbon, then press Check.
+structure: pent-1-en-4-yne
+alt: "Pent-1-en-4-yne, full Kekulé structure, carbons numbered 1 to 5 from the left: C1 double-bonded to C2, C2 single-bonded to C3, C3 single-bonded to C4, C4 triple-bonded to C5. Every H is drawn."
+tappable: { atoms: [a1, a2, a3, a4, a5] }
+answer: [a1, a2]
+correct: "C1 and C2 each have three groups, so both are sp². C3 has four (sp³); C4 and C5 have two each (sp)."
+hints:
+  - includes: [a3]
+    text: "C3 has four single bonds: four groups, so it's sp³."
+  - includes: [a4, a5]
+    text: "A carbon in a triple bond has two groups, one neighbour on each side: sp."
+  - misses: [a1, a2]
+    text: Both ends of a C=C have three groups. Find the other one.
+  - text: "Count the groups on each carbon: 4 → sp³, 3 → sp², 2 → sp."
+reveal: "C1 and C2 are sp². By carbon: C1 sp², C2 sp², C3 sp³, C4 sp, C5 sp."
+sourceNote: "Our Problem, in the style of MIT OCW 5.12 PS1 Q5. Pent-1-en-4-yne, PubChem CID 522708."

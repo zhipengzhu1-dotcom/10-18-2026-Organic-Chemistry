@@ -1191,6 +1191,14 @@
     font: 500 16px/1 var(--at-font-data);
     text-transform: none;
   }
+  /* Lesson 4's plane sheet (#82) on the no-WebGL still; the live card draws it in three.js. */
+  .molecule-plane {
+    fill: var(--at-ink-muted);
+    fill-opacity: 0.18;
+    stroke: var(--at-ink-muted);
+    stroke-opacity: 0.6;
+    stroke-width: 1.5;
+  }
   .molecule-sheet {
     fill: var(--at-electron-fill);
     fill-opacity: 0.1;

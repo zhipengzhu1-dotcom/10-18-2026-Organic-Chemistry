@@ -18,8 +18,14 @@ export interface MoleculeUseFile {
   labels?: Record<string, string>;
   pageSheet?: [number, number, number];
   dipoles?: boolean;
-  toggle?: Omit<MoleculeUseFile, "toggle">[];
+  toggle?: Omit<MoleculeUseFile, ToggleOnly>[];
+  toggleLabel?: string;
+  autoplay?: boolean;
+  plane?: { through: [number, number, number]; label?: string; on?: boolean };
+  measure?: number[];
 }
+/** Fields only the first molecule of a toggle takes. */
+type ToggleOnly = "toggle" | "toggleLabel" | "autoplay";
 export type Views = z.infer<typeof viewsFile>;
 
 /** The cited table bond-dipole arrows are sized from (Lesson 1's Pauling values). */
@@ -59,16 +65,26 @@ export function resolveMoleculeUse(
   const named = `molecule "${use.id}"`;
   if (use.toggle && (!use.label || use.toggle.some((t) => !t.label)))
     return { errors: [`${named}: a toggle needs a label on every molecule`] };
+  if (!use.toggle && (use.toggleLabel || use.autoplay)) return { errors: [`${named}: toggleLabel and autoplay need a toggle`] };
   const main = resolveOne(use, data, views, card);
   if (!main.molecule || !use.toggle) return main;
   const others = use.toggle.map((t) => resolveOne(t, data, views, true));
   const errors = others.flatMap((o) => o.errors);
   if (errors.length) return { errors };
-  return { molecule: { ...main.molecule, card: true, toggle: others.map((o) => o.molecule!) }, errors: [] };
+  return {
+    molecule: {
+      ...main.molecule,
+      card: true,
+      toggle: others.map((o) => o.molecule!),
+      ...(use.toggleLabel ? { toggleLabel: use.toggleLabel } : {}),
+      ...(use.autoplay ? { autoplay: true } : {}),
+    },
+    errors: [],
+  };
 }
 
 function resolveOne(
-  use: Omit<MoleculeUseFile, "toggle">,
+  use: Omit<MoleculeUseFile, ToggleOnly>,
   data: CitedData,
   views: Views,
   card: boolean,
@@ -96,6 +112,13 @@ function resolveOne(
     if (!errors.length)
       for (const message of viewErrors(atoms, { plane: use.pageSheet })) errors.push(`${named}: pageSheet: ${message.replace(/^plane: /, "")}`);
   }
+  if (use.plane) {
+    const before = errors.length;
+    outside("plane", use.plane.through);
+    if (errors.length === before)
+      for (const message of viewErrors(atoms, { plane: use.plane.through })) errors.push(`${named}: plane: ${message.replace(/^plane: /, "")}`);
+  }
+  if (use.measure) outside("measure", use.measure);
 
   const styles: { colour: Cited; vdw: Cited }[] = [];
   const elements: MoleculeUse["elements"] = {};
@@ -148,6 +171,8 @@ function resolveOne(
       ...(use.labels ? { labels: Object.fromEntries(Object.entries(use.labels).map(([k, v]) => [Number(k), v])) } : {}),
       ...(use.pageSheet ? { pageSheet: use.pageSheet } : {}),
       ...(use.dipoles ? { dipoles: dipoles() } : {}),
+      ...(use.plane ? { plane: { through: use.plane.through, label: use.plane.label ?? "Plane", on: !!use.plane.on } } : {}),
+      ...(use.measure ? { measure: use.measure } : {}),
     },
     errors,
   };

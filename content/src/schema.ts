@@ -36,18 +36,28 @@ const moleculeFields = {
   pageSheet: z.tuple([z.number().int(), z.number().int(), z.number().int()]).optional(),
   /** Bond-dipole arrows (from the cited Pauling electronegativities) and an Add button that sums them. */
   dipoles: z.boolean().optional(),
+  /** Computed orbitals drawn as lobes on the card (#70): `<orbital data file>/<orbital id>`. */
+  orbitals: z
+    .array(z.string().regex(/^[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9-]*$/, "must be <orbital data file>/<orbital id>"))
+    .min(1)
+    .optional(),
+  /** Lesson 4 (#82): a translucent sheet through three atoms that turns with the molecule, with a button to show it. */
+  plane: z
+    .strictObject({ through: z.tuple([z.number().int(), z.number().int(), z.number().int()]), label: text.optional(), on: z.boolean().optional() })
+    .optional(),
+  /** Lesson 4 (#82): a bond (two atoms) or angle (three) measured and labelled on load. */
+  measure: z.array(z.number().int()).min(2).max(3).optional(),
 };
 const moleculeUse = z.preprocess(
   (v) => (typeof v === "string" ? { id: v } : v),
   z.strictObject({
     ...moleculeFields,
-    /** Computed orbitals drawn as lobes on the card (#70): `<orbital data file>/<orbital id>`. */
-    orbitals: z
-      .array(z.string().regex(/^[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9-]*$/, "must be <orbital data file>/<orbital id>"))
-      .min(1)
-      .optional(),
     /** More molecules shown in the same card, switched with a segmented toggle (every molecule needs a `label`). */
     toggle: z.array(z.strictObject(moleculeFields)).min(1).optional(),
+    /** Lesson 4 (#82): the toggle group's name (default "Molecule"), e.g. "Show" for σ | π | both. */
+    toggleLabel: text.optional(),
+    /** Lesson 4 (#82): step through the toggle once on entry, ending on the last (at once under reduced motion). */
+    autoplay: z.boolean().optional(),
   }),
 );
 const molecule = moleculeUse.optional();
@@ -458,6 +468,8 @@ export const structureFile = z.strictObject({
         lp: z.number().int().min(0).max(4).optional(),
         letter: z.boolean().optional(),
         label: text.optional(),
+        /** A short visible tag beside the atom, e.g. "1" to number carbons (#82). */
+        tag: z.string().max(3).optional(),
       }),
     )
     .min(1),
