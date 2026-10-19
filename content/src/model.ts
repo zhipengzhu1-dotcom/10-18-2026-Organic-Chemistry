@@ -286,6 +286,28 @@ export interface Lesson {
   deletedSteps?: Record<string, string>;
 }
 
+/**
+ * A Problem in the Problem Bank (GLOSSARY), as the Practice Set draws it. Drafts are listed
+ * too; only approved Problems are ever drawn.
+ */
+export interface Problem {
+  id: string;
+  /** The Lesson tag: the Lesson whose content the Problem tests. */
+  lesson: string;
+  difficulty: 1 | 2 | 3;
+  status: "draft" | "approved";
+  /** Where it comes from, e.g. "Original" or "Adapted from MIT 5.12 PS1 Q1". */
+  source: string;
+  /** "Suggested by …" for a Submitted Problem. */
+  credit?: string;
+  /** True when some Lesson plays it as a Check Step. */
+  check: boolean;
+  /** True when its Lesson is the Unit's On-ramp (never drawn). */
+  onRamp: boolean;
+  /** The Problem as a playable Step: Step id = Problem id, phase "check", `problemId` set. */
+  step: GradedStep;
+}
+
 export interface Unit {
   id: string;
   slug: string;
@@ -298,6 +320,8 @@ export interface Unit {
   /** Path of the Unit page (Level select); only `available` Units have one. */
   url: string;
   lessons: Lesson[];
+  /** The Unit's Problem Bank: every Problem tagged with this Unit, by id. */
+  bank: Problem[];
 }
 
 export interface Course {

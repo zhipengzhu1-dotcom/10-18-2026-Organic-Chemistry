@@ -4,7 +4,7 @@
 // key is fetched from its own built file, and nothing is checked until it arrives.
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type { NumericStep, RankStep, SceneValue } from "@astratron/content";
-import { act, start, type Action, type Answer, type LessonProgress, type Screen } from "../engine/player.ts";
+import { act, start, type Action, type Answer, type LessonProgress, type PlayableLesson, type Screen } from "../engine/player.ts";
 import { withKey, type AnswerKey, type PageLesson } from "../lib/answer-key.ts";
 import { mistakeTarget, reportMistakeHref } from "../lib/submit-links.ts";
 import { recordProblem, saveLesson, streakOn } from "../progress/record.ts";
@@ -28,6 +28,11 @@ interface Props {
   unitId: string;
   /** The next Lesson in the Unit, for the Lesson-end screen. */
   nextHref?: string;
+  /**
+   * Set when playing a Practice Set round: Problems instead of Steps, no resume, no Step links,
+   * and after the last Problem a "See results" button hands the round's progress back.
+   */
+  practice?: { onFinish: (round: PlayableLesson, progress: LessonProgress) => void };
 }
 
 /**
@@ -38,7 +43,7 @@ type PlayerAction = Action | { type: "open"; stepId?: string; saved?: LessonProg
 
 const html = (text: string) => ({ dangerouslySetInnerHTML: { __html: text } });
 
-export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nextHref }: Props) {
+export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nextHref, practice }: Props) {
   const [key, setKey] = useState<AnswerKey>();
   const lesson = useMemo(() => withKey(page, key), [page, key]);
   const [screen, dispatch] = useReducer(
@@ -73,6 +78,10 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   // The Lesson resumes where the Student left it; a Step link opens its Step instead.
   // The address then follows the Step on screen.
   useEffect(() => {
+    if (practice) {
+      setLinked(true);
+      return;
+    }
     const linkedStep = () => (location.hash.length > 1 ? decodeURIComponent(location.hash.slice(1)) : undefined);
     const saved = readRecord().lessons[page.id];
     dispatch({ type: "open", stepId: linkedStep(), saved });
@@ -95,7 +104,10 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   useEffect(() => {
     if (!linked) return;
     const now = new Date();
-    let { record, earned } = saveLesson(readRecord(), page.id, screen.progress, now);
+    // A Practice Set isn't a Lesson: only its Problems' results are saved.
+    let { record, earned } = practice
+      ? { record: readRecord(), earned: false }
+      : saveLesson(readRecord(), page.id, screen.progress, now);
     if (key && screen.step.type !== "explain" && "problemId" in screen.step && screen.step.problemId && screen.canContinue) {
       const result = { tries: screen.tries, correct: screen.feedback?.kind === "correct" };
       const solved = recordProblem(record, screen.step.problemId, result, now);
@@ -104,11 +116,12 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     }
     writeRecord(record);
     if (earned && screen.done) setStreakTick(streakOn(record, now).count);
-  }, [linked, key, page.id, screen]);
+  }, [linked, key, page.id, screen, practice]);
   useEffect(() => {
+    if (practice) return;
     const moved = location.hash || screen.index > 0;
     if (linked && moved && location.hash !== `#${step.id}`) history.replaceState(null, "", `#${step.id}`);
-  }, [linked, step.id, screen.index]);
+  }, [linked, step.id, screen.index, practice]);
 
   const order =
     step.type !== "rank" ? [] : ranked?.stepId === step.id ? ranked.order : step.items.map((item) => item.id);
@@ -164,7 +177,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   return (
     <div className="player" id={step.id}>
       <div className="player-top">
-        <a href={exitHref} aria-label="Leave the Lesson" className="player-exit">
+        <a href={exitHref} aria-label={practice ? "Leave the Practice Set" : "Leave the Lesson"} className="player-exit">
           ✕
         </a>
         <button type="button" className="player-back" aria-label="Previous Step" disabled={screen.index === 0} onClick={back}>
@@ -176,7 +189,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           ))}
         </ol>
         <span className="player-count">
-          Step {screen.index + 1} of {screen.total}
+          {practice ? "Problem" : "Step"} {screen.index + 1} of {screen.total}
         </span>
       </div>
 
@@ -313,6 +326,10 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
               Back to Unit
             </a>
           </div>
+        ) : practice && screen.canContinue && screen.index + 1 === screen.total ? (
+          <button type="button" className="btn btn-primary btn-block" onClick={() => practice.onFinish(lesson, screen.progress)}>
+            See results
+          </button>
         ) : screen.canContinue ? (
           <button type="button" className="btn btn-primary btn-block" onClick={next}>
             Continue
