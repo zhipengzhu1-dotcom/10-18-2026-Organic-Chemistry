@@ -40,6 +40,8 @@ export interface SceneUse {
   state: Record<string, SceneValue>;
   /** The Scene's cited values by ref; the Scene reads its numbers from here (ADR 0002). */
   cited: Record<string, Cited>;
+  /** "answer": hidden until the Step is answered (right or revealed), then shown and played: a Reveal Scene. */
+  on?: "answer";
 }
 
 export interface ExplainStep {
@@ -63,6 +65,8 @@ export interface MultipleChoiceStep {
   hints?: Hint[];
   reveal: string;
   prediction?: boolean;
+  /** A drawing shown under the prompt. */
+  structure?: StructureView;
   /** Set on Check Steps: the Bank Problem this Step plays. */
   problemId?: string;
   scene?: SceneUse;
@@ -87,6 +91,8 @@ export interface NumericStep {
   answer: number;
   /** Absolute: a value within answer ± tolerance is right. */
   tolerance: number;
+  /** A drawing shown under the prompt. */
+  structure?: StructureView;
   correct?: string;
   hints?: NumericHint[];
   reveal: string;

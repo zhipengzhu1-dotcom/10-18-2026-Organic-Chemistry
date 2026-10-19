@@ -1,13 +1,13 @@
 // Scenes in Steps (ADR 0001): checks each Scene a Step uses against the Scene
 // catalog (built by the scenes module from the registered manifests) and
 // resolves it to a full state plus its cited values.
-import type { LessonFile } from "./schema.ts";
+import type { LessonFile, ProblemFile } from "./schema.ts";
 import type { SceneCatalog, SceneStateSpec, SceneUse, SceneValue } from "./model.ts";
 import { find, type CitedData } from "./data.ts";
 
 type StepFile = LessonFile["steps"][number];
 /** A Step's `scene` as written in the Lesson file. */
-export type SceneUseFile ={ id: string; state?: Record<string, SceneValue> };
+export type SceneUseFile = { id: string; state?: Record<string, SceneValue>; on?: "answer" };
 
 /** Why `value` can't be taken by the settable state, or undefined if it can. */
 export function invalidValue(spec: SceneStateSpec, value: SceneValue): string | undefined {
@@ -25,7 +25,7 @@ export const sameValue = (a: SceneValue, b: SceneValue) =>
   typeof a === "number" && typeof b === "number" ? Math.abs(a - b) < 1e-9 : a === b;
 
 /** Messages for a Step's Scene and, for a Manipulate Step, its control, answer and Hints. */
-export function checkStepScene(step: StepFile, catalog: SceneCatalog, data: CitedData): string[] {
+export function checkStepScene(step: StepFile | ProblemFile, catalog: SceneCatalog, data: CitedData): string[] {
   const use = "scene" in step ? (step.scene as SceneUseFile | undefined) : undefined;
   if (!use) return [];
   const entry = catalog[use.id];
@@ -65,5 +65,5 @@ export function resolveSceneUse(use: SceneUseFile, catalog: SceneCatalog | undef
     const value = find(data, ref);
     if (value) cited[ref] = value;
   }
-  return { id: use.id, state: { ...defaults, ...use.state }, cited };
+  return { id: use.id, state: { ...defaults, ...use.state }, cited, ...(use.on ? { on: use.on } : {}) };
 }

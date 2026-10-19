@@ -23,8 +23,25 @@ const hide = z.array(z.enum(["charges", "lone-pairs"])).optional();
 /** A text option, or a structure card: `structure` names a structure file and `text` is then its screen-reader label. */
 const option = z.strictObject({ id, text, structure: id.optional(), hide });
 
-/** A drawing shown under the prompt (a structure file id), and what it hides ("Lone pairs hidden"). */
-const figure = { structure: id.optional(), hide };
+/** A value a Scene's settable state takes: a number (range) or an option id (choice). */
+const sceneValue = z.union([z.number(), z.string()]);
+
+/**
+ * The Scene a Step shows: `scene: <id>`, or `{ id, state: { <settable state>: <value> }, on? }`.
+ * States left out take the manifest's default. The ids and values are checked
+ * against the Scene registry (see scenes.ts). `on: answer` keeps the Scene hidden
+ * until the Step is answered (right, or revealed): a Reveal Scene.
+ */
+const sceneUse = z.preprocess(
+  (v) => (typeof v === "string" ? { id: v } : v),
+  z.strictObject({ id, state: z.record(z.string(), sceneValue).optional(), on: z.literal("answer").optional() }),
+);
+
+/**
+ * A drawing shown under the prompt (a structure file id), and what it hides ("Lone pairs hidden");
+ * and the Scene shown with it (Problems too, usually `on: answer`).
+ */
+const figure = { structure: id.optional(), hide, scene: sceneUse.optional() };
 
 /** A text-only card (Rank items; structure Rank cards are not resolved yet). */
 const textOption = z.strictObject({ id, text });
@@ -97,18 +114,6 @@ const rank = {
   reveal: text,
 };
 
-/** A value a Scene's settable state takes: a number (range) or an option id (choice). */
-const sceneValue = z.union([z.number(), z.string()]);
-
-/**
- * The Scene a Step shows: `scene: <id>`, or `{ id, state: { <settable state>: <value> } }`.
- * States left out take the manifest's default. The ids and values are checked
- * against the Scene registry (see scenes.ts).
- */
-const sceneUse = z.preprocess(
-  (v) => (typeof v === "string" ? { id: v } : v),
-  z.strictObject({ id, state: z.record(z.string(), sceneValue).optional() }),
-);
 
 /** A Manipulate Hint: `match` lists the wrong control values it answers. */
 const manipulateHint = z.strictObject({ match: z.array(sceneValue).min(1).optional(), text });

@@ -96,6 +96,53 @@ describe("Scenes in Steps", () => {
   });
 });
 
+describe("Scenes shown once the Step is answered (a Reveal Scene)", () => {
+  const numericProblem = (extra: object = {}) => ({
+    id: "p1",
+    unit: "u1",
+    lesson: "l1",
+    difficulty: 1,
+    status: "approved",
+    source: "Original",
+    type: "numeric",
+    prompt: "How many?",
+    unitSymbol: "H atoms",
+    answer: 10,
+    tolerance: 0,
+    correct: "Ten.",
+    hints: [{ text: "Count." }],
+    reveal: "Ten.",
+    scene: { id: "twist", state: { view: "end" }, on: "answer" },
+    ...extra,
+  });
+  function buildWith(problem: object) {
+    const tree = validTree();
+    tree["chem/data/elements.yaml"] = elements();
+    tree["chem/problems/p1.yaml"] = problem;
+    return buildContent(writeTree(tree), { scenes: catalog });
+  }
+
+  it("a Step's Scene can wait for the answer", () => {
+    const result = build(manipulate(), { type: "explain", text: "Watch.", scene: { id: "twist", on: "answer" } });
+    expect(result.errors).toEqual([]);
+    expect(stepsOf(result)[1].scene).toMatchObject({ id: "twist", on: "answer" });
+  });
+
+  it("a Check Problem can carry a Scene; it reaches the Check Step with its cited data", () => {
+    const result = buildWith(numericProblem());
+    expect(result.errors).toEqual([]);
+    const check = stepsOf(result)[7];
+    expect(check).toMatchObject({ problemId: "p1", scene: { id: "twist", state: { twist: 0, view: "end" }, on: "answer" } });
+    expect(check.citations?.map((c) => c.ref)).toEqual(["elements/C.colour"]);
+  });
+
+  it("a Problem's Scene is checked against the registry", () => {
+    expect(buildWith(numericProblem({ scene: { id: "nope" } })).errors).toEqual([
+      `chem/problems/p1.yaml: Scene "nope" is not in the Scene registry`,
+    ]);
+  });
+});
+
 describe("Manipulate a Scene Steps", () => {
   it("build with the control, answer and Hints", () => {
     const result = build(manipulate());

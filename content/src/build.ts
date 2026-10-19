@@ -133,8 +133,9 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       for (const message of messages) errors.push(`${slug}/lessons/${lesson.id}.yaml: ${message}`);
     }
     for (const problem of problems.values()) {
-      if (problem)
-        for (const message of checkInteraction(problem)) errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
+      if (!problem) continue;
+      const messages = [...checkInteraction(problem), ...(options.scenes ? checkStepScene(problem, options.scenes, data) : [])];
+      for (const message of messages) errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
     }
     const problemCitations = citeNumbers(slug, data, lessons, problems, errors);
 
@@ -200,7 +201,8 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
               const resolved = resolveLesson(lesson, `${url}/${lesson.slug}`, number, problems, structured, scene, lessonRel, errors);
               for (const step of resolved.steps) {
                 const cited = "problemId" in step && step.problemId && problemCitations.get(step.problemId);
-                if (cited) step.citations = cited;
+                // The Problem's own cites first, then its Scene's.
+                if (cited) step.citations = [...cited, ...(step.citations ?? []).filter((c) => !cited.some((o) => o.ref === c.ref))];
               }
               return [resolved];
             }),
@@ -252,7 +254,7 @@ function resolveLesson(
       return [];
     }
     const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source: _src, credit: _c, ...interaction } = problem;
-    return withStructures({ id: step.id, phase: "check", problemId, ...interaction }, `problem:${problemId}`);
+    return withStructures({ id: step.id, phase: "check", problemId, ...interaction }, `problem:${problemId}`).map(withScene);
   });
   const phases = { hook: 0, build: 0, check: 0, wrap: 0 };
   for (const step of lesson.steps) phases[step.phase]++;

@@ -47,6 +47,20 @@ describe("cited-data lookup", () => {
     expect(cite(dataOf(build()), "methane/a.HCH")).toMatchObject({ display: "109.5°", full: "109.471°" });
   });
 
+  it("holds counts (atoms in a formula) as whole numbers with no unit", () => {
+    const result = build((t) => {
+      t["chem/data/h-counts.yaml"] = {
+        id: "h-counts",
+        kind: "table",
+        title: "Hydrogen counts",
+        sources: { cid712: { kind: "reference", citation: "PubChem CID 712, formaldehyde (CH2O)", licence: "PubChem data, public domain" } },
+        values: { formaldehyde: { label: "H atoms in formaldehyde", quantity: "count", value: 2, source: "cid712" } },
+      };
+    });
+    expect(result.errors).toEqual([]);
+    expect(cite(dataOf(result), "h-counts/formaldehyde")).toMatchObject({ quantity: "count", display: "2", full: "2" });
+  });
+
   it("throws on a value that isn't in the data", () => {
     expect(() => cite(dataOf(build()), "methane/r.CC")).toThrow('No cited value "methane/r.CC"');
   });
