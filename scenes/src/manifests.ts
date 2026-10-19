@@ -8,5 +8,7 @@ import { enStrip } from "./en-strip/manifest.ts";
 import { bondDipoles } from "./bond-dipoles/manifest.ts";
 import { dotsAndSticks } from "./dots-and-sticks/manifest.ts";
 import { bf3Sextet } from "./bf3-sextet/manifest.ts";
+import { fourDomainFamily } from "./four-domain-family/manifest.ts";
+import { dipoleSum } from "./dipole-sum/manifest.ts";
 
-export const sceneManifests: readonly SceneManifest<any>[] = [sampleTwist, streamBend, enStrip, bondDipoles, dotsAndSticks, bf3Sextet];
+export const sceneManifests: readonly SceneManifest<any>[] = [sampleTwist, streamBend, enStrip, bondDipoles, dotsAndSticks, bf3Sextet, fourDomainFamily, dipoleSum];
