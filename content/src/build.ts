@@ -11,7 +11,8 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 import { parse } from "yaml";
 import type { z } from "zod";
-import { courseFile, lessonFile, problemFile, subjectFile, type LessonFile, type ProblemFile } from "./schema.ts";
+import { courseFile, lessonFile, problemFile, stepIdLock, subjectFile, type LessonFile, type ProblemFile } from "./schema.ts";
+import { checkDeletedSteps, checkFrozenIds, LOCK_FILE } from "./freeze.ts";
 import type { BuildResult, Course, Lesson, Step, Subject } from "./model.ts";
 import { checkInteraction, checkLessonShape } from "./shape.ts";
 
@@ -59,9 +60,18 @@ export function buildContent(root: string): BuildResult {
     const lessons = loadDir<LessonFile>(`${slug}/lessons`, lessonFile);
     const problems = loadDir<ProblemFile>(`${slug}/problems`, problemFile);
 
+    const lockRel = `${slug}/${LOCK_FILE}`;
+    const lock = existsSync(join(root, lockRel)) ? load(lockRel, stepIdLock) : {};
+
     for (const lesson of lessons.values()) {
-      if (lesson)
-        for (const message of checkLessonShape(lesson)) errors.push(`${slug}/lessons/${lesson.id}.yaml: ${message}`);
+      if (!lesson) continue;
+      const frozen = lock?.[lesson.id];
+      const messages = [
+        ...checkLessonShape(lesson),
+        ...(frozen ? checkFrozenIds(lesson, frozen) : []),
+        ...checkDeletedSteps(lesson),
+      ];
+      for (const message of messages) errors.push(`${slug}/lessons/${lesson.id}.yaml: ${message}`);
     }
     for (const problem of problems.values()) {
       if (problem)
@@ -69,6 +79,7 @@ export function buildContent(root: string): BuildResult {
     }
 
     const courses: Course[] = [];
+    let unitNumber = 0;
     for (const rel of yamlFiles(root, `${slug}/courses`)) {
       const course = load(rel, courseFile);
       if (!course) continue;
@@ -76,21 +87,28 @@ export function buildContent(root: string): BuildResult {
       courses.push({
         slug: courseSlug,
         title: course.title,
-        units: course.units.map((unit) => ({
-          ...unit,
-          lessons: unit.lessons.flatMap((lessonId) => {
-            const lesson = lessons.get(lessonId);
-            if (!lesson) {
-              if (!lessons.has(lessonId)) errors.push(`${rel}: unit ${unit.id} lists Lesson "${lessonId}", which has no file`);
-              return [];
-            }
-            const url = `/${slug}/${courseSlug}/${unit.slug}/${lesson.slug}`;
-            return [resolveLesson(lesson, url, problems, `${slug}/lessons/${lesson.id}.yaml`, errors)];
-          }),
-        })),
+        units: course.units.map((unit) => {
+          const url = `/${slug}/${courseSlug}/${unit.slug}`;
+          let coreNumber = 0;
+          return {
+            ...unit,
+            number: ++unitNumber,
+            url,
+            lessons: unit.lessons.flatMap((lessonId) => {
+              const lesson = lessons.get(lessonId);
+              if (!lesson) {
+                if (!lessons.has(lessonId)) errors.push(`${rel}: unit ${unit.id} lists Lesson "${lessonId}", which has no file`);
+                return [];
+              }
+              const number = lesson.onRamp ? 0 : ++coreNumber;
+              const lessonRel = `${slug}/lessons/${lesson.id}.yaml`;
+              return [resolveLesson(lesson, `${url}/${lesson.slug}`, number, problems, lessonRel, errors)];
+            }),
+          };
+        }),
       });
     }
-    if (subject) subjects.push({ slug, title: subject.title, courses });
+    if (subject) subjects.push({ slug, title: subject.title, url: `/${slug}`, courses });
   }
 
   return errors.length ? { errors } : { model: { subjects }, errors };
@@ -99,6 +117,7 @@ export function buildContent(root: string): BuildResult {
 function resolveLesson(
   lesson: LessonFile,
   url: string,
+  number: number,
   problems: Map<string, ProblemFile | undefined>,
   rel: string,
   errors: string[],
@@ -117,7 +136,18 @@ function resolveLesson(
     const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source: _src, credit: _c, ...interaction } = problem;
     return [{ id: step.id, phase: "check", problemId, ...interaction }];
   });
-  return { ...lesson, url, steps };
+  const phases = { hook: 0, build: 0, check: 0, wrap: 0 };
+  for (const step of lesson.steps) phases[step.phase]++;
+  const { signature, ...rest } = lesson;
+  return { ...rest, url, number, signature: signatureType(lesson), phases, steps };
+}
+
+/** The named signature Step's type, else the first graded Build Step's, else the first Step's. */
+function signatureType(lesson: LessonFile): Step["type"] {
+  const named = lesson.steps.find((s) => s.id === lesson.signature);
+  const graded = lesson.steps.find((s) => s.phase === "build" && s.type !== "explain");
+  const type = (named ?? graded ?? lesson.steps[0]).type;
+  return type === "check" ? "multiple-choice" : type;
 }
 
 function subdirs(dir: string): string[] {
