@@ -51,7 +51,13 @@ export async function playThrough(page: Page, each: (label: string) => Promise<v
     while (await checkBtn.isVisible()) {
       const choices = page.getByRole("group", { name: "Choices" });
       const box = page.getByRole("textbox", { name: "Answer" });
+      const taps = page.getByRole("group", { name: "Tappable atoms and bonds" });
       if (await choices.isVisible()) await choices.getByRole("button").first().click();
+      else if (await taps.isVisible()) {
+        // Tap-to-identify: pick the first target from the keyboard (Enter toggles).
+        await taps.getByRole("button").first().focus();
+        await page.keyboard.press("Enter");
+      }
       else if (await box.isVisible()) await box.fill("1");
       // A Rank / order Step can be checked in its starting order.
       await checkBtn.click();

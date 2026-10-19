@@ -16,7 +16,8 @@
     "lint:numbers": "pnpm --filter @astratron/content run lint:numbers",
     "dev": "pnpm --filter @astratron/site run dev",
     "build": "pnpm --filter @astratron/site run build",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "structure": "pnpm --filter @astratron/content run structure"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

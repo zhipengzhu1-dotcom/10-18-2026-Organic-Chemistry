@@ -1,6 +1,7 @@
 // Build-time access to the course model. A content error fails the site build.
 import { buildContent, type Course, type CourseModel, type Lesson, type Step, type Unit } from "@astratron/content";
 import { marked } from "marked";
+import { drawView } from "./structures.ts";
 
 /** Set in astro.config.mjs: the real content tree. */
 declare const __CONTENT_ROOT__: string;
@@ -96,7 +97,7 @@ function markData(html: string): string {
     .join("");
 }
 
-/** The Lesson with every text field turned from Markdown into HTML. */
+/** The Lesson with every text field turned from Markdown into HTML and every structure pre-rendered to SVG. */
 export function renderLesson(lesson: Lesson): Lesson {
   const step = (s: Step): Step => {
     if (s.type === "explain") return { ...s, text: md(s.text) };
@@ -104,7 +105,20 @@ export function renderLesson(lesson: Lesson): Lesson {
     const choices = (list: { id: string; text: string }[]) => list.map((o) => ({ ...o, text: md(o.text) }));
     switch (s.type) {
       case "multiple-choice":
-        return { ...s, ...shared, options: choices(s.options), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
+        return {
+          ...s,
+          ...shared,
+          // A structure card's text is its screen-reader label: kept plain; its drawing is pre-rendered SVG.
+          options: s.options.map((o) => (o.structure ? { ...o, structure: drawView(o.structure) } : { ...o, text: md(o.text) })),
+          hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
+        };
+      case "tap-to-identify":
+        return {
+          ...s,
+          ...shared,
+          structure: drawView(s.structure, s.targets),
+          hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
+        };
       case "numeric":
         return { ...s, ...shared, hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
       case "rank":

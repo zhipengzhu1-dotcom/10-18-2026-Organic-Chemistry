@@ -1,0 +1,22 @@
+/* Structure drawings, structure cards and Tap targets (#62), on the Arcade
+   Cosmos tokens (#59). Drawings use currentColor (ink); lone pairs are cyan. */
+.structure { display: block; max-width: 100%; height: auto; color: var(--at-ink); --lone-pair: var(--at-electron); }
+.structure .atom, .structure .charge { font-family: var(--at-font-data); }
+/* Structure cards sit side by side so a Step of cards still fits one phone screen. */
+.opts:has(.structure-card) { grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); }
+.opts .structure-card { display: grid; place-items: center; padding: 8px; }
+.structure-card .structure { max-height: 7rem; }
+.tap-only-cue { margin: 0; padding: 8px 12px; color: var(--at-ink-muted); border: var(--at-border) dashed var(--at-line); }
+.tap-structure { position: relative; touch-action: manipulation; }
+.tap-structure .structure-svg .structure { width: 100%; }
+.tap-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tap-layer .target { cursor: pointer; outline: none; }
+.tap-layer .target[aria-disabled="true"] { cursor: default; }
+.tap-layer .target:focus-visible .hit { stroke: var(--at-electron); stroke-dasharray: 3 3; stroke-width: 3px; }
+/* Picked: solid cyan ring + ✓ (never colour alone). */
+.picked-ring circle, .picked-ring line { stroke: var(--at-electron); stroke-width: 3px; fill: none; }
+.picked-ring line { stroke-width: 14px; stroke-opacity: 0.45; stroke-linecap: round; }
+.picked-ring text { fill: var(--at-electron); font-family: var(--at-font-text); font-weight: 700; }
+/* Revealed answer: dashed plain ring, like the → reveal panel. */
+.answer-ring circle, .answer-ring line { stroke: var(--at-ink-muted); stroke-width: 3px; stroke-dasharray: 5 3; fill: none; }
+.answer-ring line { stroke-width: 12px; stroke-opacity: 0.5; }
