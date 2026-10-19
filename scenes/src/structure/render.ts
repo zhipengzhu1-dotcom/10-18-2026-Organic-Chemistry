@@ -14,6 +14,11 @@ const LETTER_GAP = 12; // bonds stop this far short of a letter
 const LP_DIST = 17;
 const LP_SPREAD = 4.5;
 const DOT_R = 2.4;
+/** Lewis style: distance between the shared pairs of a double or triple bond. */
+const PAIR_GAP = 9;
+/** A ring double bond's inner line: how far inside the ring, and how much shorter at each end. */
+const RING_INNER = 7;
+const RING_INSET = 8;
 const HASH_STROKE = 1.5;
 const LINE_STROKE = 2;
 /** How far (radians) the charge sign keeps from bonds and lone pairs before it leaves the upper right. */
@@ -47,7 +52,16 @@ const SUB = "₀₁₂₃₄₅₆₇₈₉";
 const sub = (n: number) => (n > 1 ? [...String(n)].map((d) => SUB[+d]).join("") : "");
 const r1 = (n: number) => Math.round(n * 10) / 10;
 
-export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawing {
+export interface DrawOptions {
+  /** Atom or bond id → opacity (0–1) for everything drawn for it; Scenes fade parts in and out with it. */
+  fade?: Record<string, number>;
+}
+
+export function drawStructure(structure: Structure, hide: Hidden[] = [], options: DrawOptions = {}): Drawing {
+  const fadeOf = (id: string) => {
+    const o = options.fade?.[id];
+    return o === undefined ? "" : ` opacity="${Math.round(Math.min(1, Math.max(0, o)) * 1000) / 1000}"`;
+  };
   const showCharges = !hide.includes("charges");
   const showLonePairs = !hide.includes("lone-pairs");
   const scale = BOND_PX / typicalBondLength(structure);
@@ -70,11 +84,31 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
     neighbours.get(b.b)?.push(b.a);
   }
   const lettered = (a: StructureAtom) =>
-    structure.style === "full" || a.el !== "C" || !!a.charge || !!a.letter || neighbours.get(a.id)!.length === 0;
+    structure.style !== "line-angle" || a.el !== "C" || !!a.charge || !!a.letter || neighbours.get(a.id)!.length === 0;
   const byId = new Map(structure.atoms.map((a) => [a.id, a]));
 
   const parts: string[] = [];
   const bonds: Record<string, Segment> = {};
+
+  /** The centre of the smallest ring through a bond (its atoms' mean position), or undefined if it is in no ring. */
+  const ringCentre = (bondId: string): Point | undefined => {
+    const bond = structure.bonds.find((x) => x.id === bondId)!;
+    // Shortest path from one end to the other without the bond itself.
+    const prev = new Map<string, string>([[bond.a, ""]]);
+    const queue = [bond.a];
+    while (queue.length && !prev.has(bond.b)) {
+      const cur = queue.shift()!;
+      for (const n of neighbours.get(cur)!) {
+        if (prev.has(n) || (cur === bond.a && n === bond.b)) continue;
+        prev.set(n, cur);
+        queue.push(n);
+      }
+    }
+    if (!prev.has(bond.b)) return undefined;
+    const ring: string[] = [];
+    for (let cur = bond.b; cur; cur = prev.get(cur)!) ring.push(cur);
+    return { x: mean(ring.map((id) => at[id].x)), y: mean(ring.map((id) => at[id].y)) };
+  };
 
   for (const b of structure.bonds) {
     const p = at[b.a];
@@ -90,10 +124,24 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
     const nx = -uy;
     const ny = ux;
 
+    if (structure.style === "lewis") {
+      // Each shared pair is two dots across the bond; a double bond's pairs sit side by side along it.
+      const mx = (s.x + e.x) / 2;
+      const my = (s.y + e.y) / 2;
+      for (let k = 0; k < b.order; k++) {
+        const along = (k - (b.order - 1) / 2) * PAIR_GAP;
+        for (const sgn of [1, -1]) {
+          parts.push(
+            `<circle class="bond-dot"${fadeOf(b.id)} cx="${r1(mx + ux * along + nx * LP_SPREAD * sgn)}" cy="${r1(my + uy * along + ny * LP_SPREAD * sgn)}" r="${DOT_R}" fill="currentColor"/>`,
+          );
+        }
+      }
+      continue;
+    }
     if (b.stereo === "wedge") {
       const w = 4;
       parts.push(
-        `<polygon class="bond-wedge" points="${r1(s.x)},${r1(s.y)} ${r1(e.x + nx * w)},${r1(e.y + ny * w)} ${r1(e.x - nx * w)},${r1(e.y - ny * w)}" fill="currentColor"/>`,
+        `<polygon class="bond-wedge"${fadeOf(b.id)} points="${r1(s.x)},${r1(s.y)} ${r1(e.x + nx * w)},${r1(e.y + ny * w)} ${r1(e.x - nx * w)},${r1(e.y - ny * w)}" fill="currentColor"/>`,
       );
       continue;
     }
@@ -105,17 +153,25 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
         const cy = s.y + (e.y - s.y) * t;
         const w = 4 * t + 0.5;
         parts.push(
-          `<line class="bond-hash" x1="${r1(cx + nx * w)}" y1="${r1(cy + ny * w)}" x2="${r1(cx - nx * w)}" y2="${r1(cy - ny * w)}" stroke="currentColor" stroke-width="${HASH_STROKE}"/>`,
+          `<line class="bond-hash"${fadeOf(b.id)} x1="${r1(cx + nx * w)}" y1="${r1(cy + ny * w)}" x2="${r1(cx - nx * w)}" y2="${r1(cy - ny * w)}" stroke="currentColor" stroke-width="${HASH_STROKE}"/>`,
         );
       }
       continue;
     }
-    const offsets = b.order === 1 ? [0] : b.order === 2 ? [-3.5, 3.5] : [-5.5, 0, 5.5];
-    for (const o of offsets) {
+    const line = (o: number, inset = 0) =>
       parts.push(
-        `<line class="bond-line" x1="${r1(s.x + nx * o)}" y1="${r1(s.y + ny * o)}" x2="${r1(e.x + nx * o)}" y2="${r1(e.y + ny * o)}" stroke="currentColor" stroke-width="${LINE_STROKE}" stroke-linecap="round"/>`,
+        `<line class="bond-line"${fadeOf(b.id)} x1="${r1(s.x + nx * o + ux * inset)}" y1="${r1(s.y + ny * o + uy * inset)}" x2="${r1(e.x + nx * o - ux * inset)}" y2="${r1(e.y + ny * o - uy * inset)}" stroke="currentColor" stroke-width="${LINE_STROKE}" stroke-linecap="round"/>`,
       );
+    const centre = b.order === 2 ? ringCentre(b.id) : undefined;
+    if (centre) {
+      // A ring double bond: one line on the axis, a shorter second line on the ring's inner side.
+      const side = Math.sign((centre.x - p.x) * nx + (centre.y - p.y) * ny) || 1;
+      line(0);
+      line(RING_INNER * side, RING_INSET);
+      continue;
     }
+    const offsets = b.order === 1 ? [0] : b.order === 2 ? [-3.5, 3.5] : [-5.5, 0, 5.5];
+    for (const o of offsets) line(o);
   }
 
   for (const a of structure.atoms) {
@@ -130,7 +186,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
       const anchor = !hText ? "middle" : hLeft ? "end" : "start";
       const tx = !hText ? x : hLeft ? x + (a.el.length * CHAR_W) / 2 : x - (a.el.length * CHAR_W) / 2;
       parts.push(
-        `<text class="atom" x="${r1(tx)}" y="${r1(y)}" text-anchor="${anchor}" dominant-baseline="central" font-size="${FONT}" fill="currentColor">${label}</text>`,
+        `<text class="atom"${fadeOf(a.id)} x="${r1(tx)}" y="${r1(y)}" text-anchor="${anchor}" dominant-baseline="central" font-size="${FONT}" fill="currentColor">${label}</text>`,
       );
       if (hText) occupied.push(hLeft ? Math.PI : 0);
     }
@@ -148,7 +204,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
       const dist = free ? 16 : 22;
       const right = a.h && !hLeft && free ? CHAR_W * (1 + String(a.h).length) : 0;
       parts.push(
-        `<text class="charge" x="${r1(x + Math.cos(dir) * dist + right)}" y="${r1(y + Math.sin(dir) * dist)}" text-anchor="middle" dominant-baseline="central" font-size="${FONT * 0.7}" fill="currentColor">${sign}</text>`,
+        `<text class="charge"${fadeOf(a.id)} x="${r1(x + Math.cos(dir) * dist + right)}" y="${r1(y + Math.sin(dir) * dist)}" text-anchor="middle" dominant-baseline="central" font-size="${FONT * 0.7}" fill="currentColor">${sign}</text>`,
       );
     }
 
@@ -159,7 +215,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
       const py = Math.cos(dir) * LP_SPREAD;
       for (const sgn of [1, -1]) {
         parts.push(
-          `<circle class="lone-pair-dot" cx="${r1(cx + px * sgn)}" cy="${r1(cy + py * sgn)}" r="${DOT_R}" fill="var(--lone-pair, #0e9fbf)"/>`,
+          `<circle class="lone-pair-dot"${fadeOf(a.id)} cx="${r1(cx + px * sgn)}" cy="${r1(cy + py * sgn)}" r="${DOT_R}" fill="var(--lone-pair, #0e9fbf)"/>`,
         );
       }
     }

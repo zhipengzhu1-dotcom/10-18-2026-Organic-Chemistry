@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 6569,
+        "MolecularFormula": "C4H8O",
+        "SMILES": "CCC(=O)C",
+        "ConnectivitySMILES": "CCC(=O)C",
+        "Title": "Methyl Ethyl Ketone"
+      }
+    ]
+  }
+}

@@ -4,6 +4,7 @@
 import type { Hidden, Option, Structure, StructureAtom, StructureView, TapTarget } from "./model.ts";
 import type { ProblemFile, StructureFile } from "./schema.ts";
 import { hintIds } from "./shape.ts";
+import { expectedLonePairs, hydrogenCount } from "./valence.ts";
 
 type TapFile = Extract<ProblemFile, { type: "tap-to-identify" }>;
 type TapFields = Pick<TapFile, "structure" | "hide" | "tappable" | "answer" | "hints">;
@@ -23,7 +24,53 @@ export function checkStructure(file: StructureFile): string[] {
   return errors;
 }
 
+/** The PubChem compound a structure file names in its `source` ("PubChem CID 7967"), if any. */
+export const pubchemCid = (s: Pick<Structure, "source">): number | undefined => {
+  const m = s.source?.match(/PubChem CID (\d+)/);
+  return m ? Number(m[1]) : undefined;
+};
+
+/** Atoms of one element in a molecular formula such as "C18H24O2". */
+const countIn = (formula: string, el: string) =>
+  [...formula.matchAll(/([A-Z][a-z]?)(\d*)/g)].reduce((n, [, e, k]) => n + (e === el ? Number(k || 1) : 0), 0);
+
+/**
+ * A drawing that names a PubChem compound must stand for that compound's H's
+ * (counted from the cached PubChem record's formula), and every lone pair it
+ * draws must follow from valence. `formula` is undefined when the record is missing.
+ */
+export function checkAgainstPubChem(s: Structure, formula: string | undefined): string[] {
+  const cid = pubchemCid(s);
+  if (cid === undefined || formula === undefined) return [];
+  const errors: string[] = [];
+  const drawn = hydrogenCount(s);
+  const real = countIn(formula, "H");
+  if (drawn !== real) errors.push(`the drawing has ${drawn} H, but PubChem CID ${cid} (${formula}) has ${real}`);
+  const expected = expectedLonePairs(s);
+  for (const a of s.atoms) {
+    const want = expected[a.id];
+    if (want !== undefined && (a.lp ?? 0) !== want)
+      errors.push(`${a.id} (${a.el}) draws ${a.lp ?? 0} lone pairs; its bonds and charge give ${want}`);
+  }
+  return errors;
+}
+
 const view = (structure: Structure, hide: Hidden[] | undefined): StructureView => ({ structure, hide: hide ?? [] });
+
+/** Resolves the drawing a Multiple choice or Numeric Step shows under its prompt, if it has one. */
+export function resolveFigure(
+  item: { structure?: string; hide?: Hidden[] },
+  structures: Map<string, Structure | undefined>,
+  errors: string[],
+): { structure?: StructureView } {
+  if (!item.structure) return {};
+  const found = structures.get(item.structure);
+  if (!found) {
+    if (!structures.has(item.structure)) errors.push(`structure "${item.structure}" not found`);
+    return {};
+  }
+  return { structure: view(found, item.hide) };
+}
 
 /** Resolves structure cards; text options pass through. */
 export function resolveOptions(

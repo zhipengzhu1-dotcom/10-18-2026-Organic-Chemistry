@@ -23,6 +23,9 @@ const hide = z.array(z.enum(["charges", "lone-pairs"])).optional();
 /** A text option, or a structure card: `structure` names a structure file and `text` is then its screen-reader label. */
 const option = z.strictObject({ id, text, structure: id.optional(), hide });
 
+/** A drawing shown under the prompt (a structure file id), and what it hides ("Lone pairs hidden"). */
+const figure = { structure: id.optional(), hide };
+
 /** A text-only card (Rank items; structure Rank cards are not resolved yet). */
 const textOption = z.strictObject({ id, text });
 
@@ -30,6 +33,7 @@ const textOption = z.strictObject({ id, text });
 const multipleChoice = {
   type: z.literal("multiple-choice"),
   prompt: text,
+  ...figure,
   options: z.array(option).min(2),
   /** The exact set of correct option ids. */
   answer: z.array(id).min(1),
@@ -68,6 +72,7 @@ const numericHint = z.strictObject({ match: z.number().optional(), text });
 const numeric = {
   type: z.literal("numeric"),
   prompt: text,
+  ...figure,
   /** The unit of measure, e.g. "°", "Å", "kJ/mol" (named so it can't be read as a course Unit). */
   unitSymbol: z.string(),
   answer: z.number(),
@@ -226,7 +231,7 @@ export const subjectFile = z.strictObject({ title: text });
 /** A 2D structure, written by `pnpm structure` (RDKit.js layout) and committed. */
 export const structureFile = z.strictObject({
   id,
-  style: z.enum(["full", "line-angle"]),
+  style: z.enum(["full", "lewis", "line-angle"]),
   smiles: text.optional(),
   source: text.optional(),
   atoms: z

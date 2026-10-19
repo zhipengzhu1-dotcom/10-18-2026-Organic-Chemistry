@@ -31,10 +31,14 @@ import { citeIn, type Cited, type CitedData } from "./data.ts";
 import { dataFile, resolveDataFile } from "./data-load.ts";
 import type { SceneCatalog, SceneUse } from "./model.ts";
 import { checkStepScene, resolveSceneUse, type SceneUseFile } from "./scenes.ts";
-import { checkStructure, resolveOptions, resolveTap } from "./structures.ts";
+import { checkAgainstPubChem, checkStructure, pubchemCid, resolveFigure, resolveOptions, resolveTap } from "./structures.ts";
+import type { Hidden } from "./model.ts";
 
 /** What a graded Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
-type StructureFields = { options: Option[] } | { structure: StructureView; targets: TapTarget[] };
+type StructureFields =
+  | { options: Option[]; structure?: StructureView }
+  | { structure?: StructureView }
+  | { structure: StructureView; targets: TapTarget[] };
 type Structured = Map<string, StructureFields | undefined>;
 
 export interface BuildOptions {
@@ -140,12 +144,23 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       const broken = file ? checkStructure(file) : [];
       for (const message of broken) errors.push(`${slug}/structures/${name}.yaml: ${message}`);
       structures.set(name, file && !broken.length ? file : undefined);
+      // Build sanity check: a drawing of a PubChem compound whose record is cached (`data/pubchem/<cid>.json`)
+      // has that formula's H's and valence-true lone pairs.
+      const cid = file && !broken.length ? pubchemCid(file) : undefined;
+      const record = cid === undefined ? undefined : join(root, `${slug}/data/pubchem/${cid}.json`);
+      if (record && existsSync(record)) {
+        const formula = pubchemFormula(record);
+        const found = formula === undefined ? ["its cached PubChem record has no MolecularFormula"] : checkAgainstPubChem(file!, formula);
+        for (const message of found) errors.push(`${slug}/structures/${name}.yaml: ${message}`);
+      }
     }
     const structured: Structured = new Map();
     const resolveStructures = (key: string, item: LessonFile["steps"][number] | ProblemFile, where: string) => {
       const found: string[] = [];
       let fields: StructureFields | undefined;
-      if (item.type === "multiple-choice") fields = { options: resolveOptions(item.options, structures, found) };
+      const figure = () => resolveFigure(item as { structure?: string; hide?: Hidden[] }, structures, found);
+      if (item.type === "multiple-choice") fields = { options: resolveOptions(item.options, structures, found), ...figure() };
+      else if (item.type === "numeric") fields = figure();
       else if (item.type === "tap-to-identify") fields = resolveTap(item, structures, found);
       else return;
       for (const message of found) errors.push(`${where}${message}`);
@@ -211,7 +226,7 @@ function resolveLesson(
 ): Lesson {
   /** Swaps structure ids for the resolved structures; a Step whose structures failed is dropped (its errors are reported). */
   const withStructures = (step: Record<string, unknown> & { type: string }, key: string): Step[] => {
-    if (step.type !== "multiple-choice" && step.type !== "tap-to-identify") return [step as unknown as Step];
+    if (step.type !== "multiple-choice" && step.type !== "tap-to-identify" && step.type !== "numeric") return [step as unknown as Step];
     const fields = structured.get(key);
     if (!fields) return [];
     const { tappable: _t, hide: _h, ...rest } = step;
@@ -288,6 +303,16 @@ function citeNumbers(
     if (cited.length) byProblem.set(name, cited);
   }
   return byProblem;
+}
+
+/** The molecular formula in a cached PubChem PUG REST property record (`<subject>/data/pubchem/<cid>.json`). */
+function pubchemFormula(file: string): string | undefined {
+  try {
+    const formula = JSON.parse(readFileSync(file, "utf8"))?.PropertyTable?.Properties?.[0]?.MolecularFormula;
+    return typeof formula === "string" ? formula : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function subdirs(dir: string): string[] {

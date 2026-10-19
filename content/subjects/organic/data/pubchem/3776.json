@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 3776,
+        "MolecularFormula": "C3H8O",
+        "SMILES": "CC(C)O",
+        "ConnectivitySMILES": "CC(C)O",
+        "Title": "Isopropanol"
+      }
+    ]
+  }
+}

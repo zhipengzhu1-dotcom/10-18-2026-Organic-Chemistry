@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 178,
+        "MolecularFormula": "C2H5NO",
+        "SMILES": "CC(=O)N",
+        "ConnectivitySMILES": "CC(=O)N",
+        "Title": "Acetamide"
+      }
+    ]
+  }
+}
