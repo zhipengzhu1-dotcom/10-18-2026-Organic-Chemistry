@@ -22,7 +22,7 @@ const methaneOrbitals = (extra: object = {}) => ({
     },
   },
   values: {
-    homo: { label: "Methane HOMO", quantity: "energy", value: -10.6582, unit: "eV", source: "ours" },
+    homo: { label: "Methane HOMO", quantity: "energy", value: -10.6582, unit: "eV", decimals: 1, source: "ours" },
     iso: { label: "Isosurface value", quantity: "isovalue", value: 0.05, unit: "a.u.", source: "ours" },
   },
   orbitals: {
