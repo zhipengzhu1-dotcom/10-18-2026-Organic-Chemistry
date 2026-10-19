@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { MultipleChoiceStep, NumericStep, RankStep } from "@astratron/content";
+import type { ManipulateStep, MultipleChoiceStep, NumericStep, RankStep } from "@astratron/content";
 import { act, start, type Action, type PlayableLesson, type Screen } from "./player.ts";
 
 const choice = (id: string, extra: Partial<MultipleChoiceStep> = {}): MultipleChoiceStep => ({
@@ -332,5 +332,62 @@ describe("Rank / order Steps", () => {
       feedback: { kind: "reveal", text: "C≡C < C=C < C–C.", answer: right },
       canContinue: true,
     });
+  });
+});
+
+describe("Manipulate a Scene Steps", () => {
+  const manipulate: ManipulateStep = {
+    id: "s01",
+    phase: "build",
+    type: "manipulate",
+    prompt: "Twist until the overlap is gone, then press Check.",
+    scene: { id: "sample-twist", state: { twist: 0 }, cited: {} },
+    control: "twist",
+    answer: 90,
+    correct: "At 90° the p orbitals are at right angles.",
+    hints: [
+      { match: [0], text: "That's flat: full overlap." },
+      { match: [15, 30, 45, 60, 75], text: "Keep twisting." },
+      { text: "Watch the overlap bar." },
+    ],
+    reveal: "90°: no side-on overlap.",
+  };
+  const manLesson: PlayableLesson = { ...lesson, steps: [manipulate, wrapStep] };
+  const run = (...settings: (number | string)[]) =>
+    settings.reduce((s, setting) => act(manLesson, s, { type: "answer", setting }), start(manLesson));
+
+  it("Check on the answer value shows the Correct line", () => {
+    expect(run(90)).toMatchObject({
+      tries: 1,
+      feedback: { kind: "correct", text: "At 90° the p orbitals are at right angles." },
+      canContinue: true,
+    });
+  });
+
+  it("a wrong value gets the first Hint whose list holds it, else the fallback", () => {
+    expect(run(0)).toMatchObject({ feedback: { kind: "hint", text: "That's flat: full overlap." }, canContinue: false });
+    expect(run(45)).toMatchObject({ feedback: { kind: "hint", text: "Keep twisting." } });
+    expect(run(135)).toMatchObject({ feedback: { kind: "hint", text: "Watch the overlap bar." } });
+  });
+
+  it("wrong twice reveals the answer value", () => {
+    expect(run(45, 135)).toMatchObject({
+      tries: 2,
+      feedback: { kind: "reveal", text: "90°: no side-on overlap.", answer: 90 },
+      canContinue: true,
+    });
+  });
+
+  it("choice states compare by option id, and other answer shapes are ignored", () => {
+    const choiceLesson: PlayableLesson = {
+      ...lesson,
+      steps: [{ ...manipulate, control: "view", answer: "end", hints: [{ text: "Look end-on." }] }, wrapStep],
+    };
+    const screen = start(choiceLesson);
+    expect(act(choiceLesson, screen, { type: "answer", setting: "end" })).toMatchObject({ feedback: { kind: "correct" } });
+    expect(act(choiceLesson, screen, { type: "answer", setting: "side" })).toMatchObject({
+      feedback: { kind: "hint", text: "Look end-on." },
+    });
+    expect(act(choiceLesson, screen, { type: "answer", value: 90 })).toEqual(screen);
   });
 });

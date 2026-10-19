@@ -7,11 +7,47 @@ export type Phase = "hook" | "build" | "check" | "wrap";
 /** A Hint; see HintRule. */
 export type Hint = HintRule;
 
+/** A value a Scene's settable state takes: a number (range state) or an option id (choice state). */
+export type SceneValue = number | string;
+
+/** One settable state of a Scene, as its manifest declares it. */
+export type SceneStateSpec =
+  | {
+      kind: "range";
+      /** Names the slider, e.g. "Twist". */
+      label: string;
+      min: number;
+      max: number;
+      /** The slider's stops: min, min + step, … max. */
+      step: number;
+      default: number;
+      /** Shown after the value, e.g. "°". */
+      unitSymbol?: string;
+    }
+  | { kind: "choice"; label: string; options: { id: string; label: string }[]; default: string };
+
+/** What the content build needs to know of each registered Scene (the scenes module builds it from the manifests). */
+export interface SceneCatalogEntry {
+  states: Record<string, SceneStateSpec>;
+  /** Cited-data refs (`file/key`) whose numbers the Scene shows. */
+  data: string[];
+}
+export type SceneCatalog = Record<string, SceneCatalogEntry>;
+
+/** The Scene a Step shows, resolved: every settable state has a value, and its cited data is attached. */
+export interface SceneUse {
+  id: string;
+  state: Record<string, SceneValue>;
+  /** The Scene's cited values by ref; the Scene reads its numbers from here (ADR 0002). */
+  cited: Record<string, Cited>;
+}
+
 export interface ExplainStep {
   id: string;
   phase: Phase;
   type: "explain";
   text: string;
+  scene?: SceneUse;
   citations?: Cited[];
 }
 
@@ -29,6 +65,7 @@ export interface MultipleChoiceStep {
   prediction?: boolean;
   /** Set on Check Steps: the Bank Problem this Step plays. */
   problemId?: string;
+  scene?: SceneUse;
   /** The cited values this Step's text shows (`{{file/key}}`); its Source note is generated from them. */
   citations?: Cited[];
 }
@@ -54,6 +91,7 @@ export interface NumericStep {
   hints?: NumericHint[];
   reveal: string;
   problemId?: string;
+  scene?: SceneUse;
   citations?: Cited[];
 }
 
@@ -72,11 +110,35 @@ export interface RankStep {
   hints?: Hint[];
   reveal: string;
   problemId?: string;
+  scene?: SceneUse;
+  citations?: Cited[];
+}
+
+export interface ManipulateHint {
+  /** The wrong control values this Hint answers; absent on the generic fallback. */
+  match?: SceneValue[];
+  text: string;
+}
+
+/** Manipulate a Scene: the Student works a slider (one settable state of the Scene) and presses Check on a value. */
+export interface ManipulateStep {
+  id: string;
+  phase: Phase;
+  type: "manipulate";
+  prompt: string;
+  scene: SceneUse;
+  /** The settable state the slider drives; it starts at `scene.state[control]`. */
+  control: string;
+  answer: SceneValue;
+  correct?: string;
+  hints?: ManipulateHint[];
+  reveal: string;
+  problemId?: string;
   citations?: Cited[];
 }
 
 /** A Step the Student answers and the engine grades. */
-export type GradedStep = MultipleChoiceStep | NumericStep | RankStep | TapStep;
+export type GradedStep = MultipleChoiceStep | NumericStep | RankStep | TapStep | ManipulateStep;
 
 export type Step = ExplainStep | GradedStep;
 
@@ -196,6 +258,7 @@ export interface TapStep {
   /** Shown when the Step sits among Draw-arrows Steps: it is tap-only. */
   tapOnly?: { idle: string; drag: string };
   problemId?: string;
+  scene?: SceneUse;
   citations?: Cited[];
 }
 

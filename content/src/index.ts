@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
 
-export { buildContent } from "./build.ts";
+export { buildContent, type BuildOptions } from "./build.ts";
+export { invalidValue, sameValue } from "./scenes.ts";
 export { freezeStepIds } from "./freeze.ts";
 export { parseProblem, readBank } from "./bank.ts";
 export type * from "./model.ts";

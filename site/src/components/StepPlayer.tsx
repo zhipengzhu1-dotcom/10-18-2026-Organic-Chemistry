@@ -3,13 +3,15 @@
 // The page carries the Lesson without its answers (spec story 99); the answer
 // key is fetched from its own built file, and nothing is checked until it arrives.
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
-import type { NumericStep, RankStep } from "@astratron/content";
+import type { NumericStep, RankStep, SceneValue } from "@astratron/content";
 import { act, start, type Action, type Answer, type LessonProgress, type Screen } from "../engine/player.ts";
 import { withKey, type AnswerKey, type PageLesson } from "../lib/answer-key.ts";
 import { mistakeTarget, reportMistakeHref } from "../lib/submit-links.ts";
 import { recordProblem, saveLesson, streakOn } from "../progress/record.ts";
 import { readRecord, writeRecord } from "../progress/store.ts";
 import SourceNote from "./SourceNote.tsx";
+import ScenePlayer from "./ScenePlayer.tsx";
+import SceneControl from "./SceneControl.tsx";
 import StructureTap from "./StructureTap.tsx";
 import "./structure.css";
 
@@ -63,6 +65,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   const [chosen, setChosen] = useState<string[]>([]);
   const [draft, setDraft] = useState("");
   const [ranked, setRanked] = useState<{ stepId: string; order: string[] } | null>(null);
+  const [manipulated, setManipulated] = useState<{ stepId: string; value: SceneValue } | null>(null);
   const { step, feedback } = screen;
   const pageStep = page.steps[screen.index];
   const single = pageStep.type === "multiple-choice" && pageStep.select === "one";
@@ -120,6 +123,19 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   const order =
     step.type !== "rank" ? [] : ranked?.stepId === step.id ? ranked.order : step.items.map((item) => item.id);
 
+  // Manipulate a Scene: the control's value; the reveal jumps it to the answer (and a resumed
+  // right answer shows it there too).
+  const setting: SceneValue | undefined =
+    step.type !== "manipulate"
+      ? undefined
+      : feedback?.kind === "reveal" || feedback?.kind === "correct"
+        ? step.answer
+        : manipulated?.stepId === step.id
+          ? manipulated.value
+          : step.scene.state[step.control];
+  const sceneState =
+    step.type === "manipulate" && setting !== undefined ? { ...step.scene.state, [step.control]: setting } : step.scene?.state;
+
   const answer: Answer | null =
     step.type === "multiple-choice" || step.type === "tap-to-identify"
       ? chosen.length > 0 ? { choice: chosen } : null
@@ -127,7 +143,9 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         ? Number.isFinite(parseNumber(draft)) ? { value: parseNumber(draft) } : null
         : step.type === "rank"
           ? { order }
-          : null;
+          : setting !== undefined
+            ? { setting }
+            : null;
 
   function pick(id: string) {
     setChosen((c) => (single ? [id] : c.includes(id) ? c.filter((x) => x !== id) : [...c, id]));
@@ -182,6 +200,27 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
             locked={screen.canContinue}
             onToggle={pick}
           />
+        )}
+
+        {step.scene && sceneState && (
+          // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
+          <ScenePlayer
+            key={`scene-${step.id}`}
+            sceneId={step.scene.id}
+            state={sceneState}
+            cited={step.scene.cited}
+            loop={step.type === "manipulate"}
+          >
+            {step.type === "manipulate" && setting !== undefined && (
+              <SceneControl
+                sceneId={step.scene.id}
+                control={step.control}
+                value={setting}
+                onChange={(value) => setManipulated({ stepId: step.id, value })}
+                locked={screen.canContinue}
+              />
+            )}
+          </ScenePlayer>
         )}
 
         {step.type === "multiple-choice" && (
