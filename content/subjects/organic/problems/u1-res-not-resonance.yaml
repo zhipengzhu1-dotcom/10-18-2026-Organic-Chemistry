@@ -4,7 +4,8 @@ unit: u1
 lesson: u1-l06
 difficulty: 2
 status: approved
-source: Adapted from MIT OCW 5.12, Problem Set 1 Q6, Berkowski, Spring 2005, CC BY-NC-SA 4.0.
+source: Adapted from MIT OCW 5.12 PS1 Q6
+credit: Kimberly Berkowski, MIT OCW 5.12 Organic Chemistry I, Spring 2005, CC BY-NC-SA 4.0
 type: multiple-choice
 prompt: Which pairs are **not** resonance contributors of each other? Pick all that apply.
 options:
@@ -34,3 +35,4 @@ hints:
     text: Acetone and its enol differ in where one H sits. Those are tautomers, real different molecules.
   - text: Resonance never moves an atom, hydrogens included.
 reveal: "**b** and **e**: H moved. **a**, **c** and **d**: same atoms, electrons moved."
+sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q6, Berkowski, Spring 2005, CC BY-NC-SA 4.0."

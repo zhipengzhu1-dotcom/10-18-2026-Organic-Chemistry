@@ -1,83 +1,125 @@
-// Step fields Lesson 6 (#84) added for its spec: a Step's own Source note line
-// (`source`), a Scene that waits for the answer (`scene.on: answered`), and a
-// structure drawn above a Multiple choice Step's choices (`structure`).
+// What Lesson 5 (#83) relies on besides its interaction: a written Source note
+// (credits for wording and structures), a reveal Scene (a Scene that plays only
+// once the answer is out, also in the Practice Set), and a signature that may be
+// a Check Step. Figures and asides are #79's (see their tests).
 import { describe, expect, it } from "vitest";
-import { buildContent, type MultipleChoiceStep, type SceneCatalog } from "../src/index.ts";
-import { elements, lesson, problem, sampleSteps, validTree, writeTree } from "./tree.ts";
+import { buildContent, type SceneCatalog } from "../src/index.ts";
+import { lesson, problem, sampleSteps, validTree, writeTree } from "./tree.ts";
 
 const L = "chem/lessons/l1.yaml";
-const catalog: SceneCatalog = { still: { states: {}, data: [] } };
 
-const formaldehyde = {
-  id: "formaldehyde",
-  style: "full",
+const ethanol = {
+  id: "ethanol",
+  style: "line-angle",
+  smiles: "CCO",
+  source: "PubChem CID 702",
   atoms: [
     { id: "a1", el: "C", x: 0, y: 0 },
-    { id: "a2", el: "O", x: 0, y: 1.5, lp: 2 },
+    { id: "a2", el: "C", x: 1.3, y: -0.75 },
+    { id: "a3", el: "O", x: 2.6, y: 0, h: 1, lp: 2 },
   ],
-  bonds: [{ id: "b1", a: "a1", b: "a2", order: 2 }],
+  bonds: [
+    { id: "b1", a: "a1", b: "a2", order: 1 },
+    { id: "b2", a: "a2", b: "a3", order: 1 },
+  ],
 };
 
-/** The sample Lesson with s01 and s02 replaced. */
-function build(s01: object, s02: object = { type: "explain", text: "Watch." }, extra: (t: Record<string, unknown>) => void = () => {}) {
+const catalog: SceneCatalog = {
+  spotlight: {
+    states: {
+      view: {
+        kind: "choice",
+        label: "Molecule",
+        options: [
+          { id: "ethanol", label: "Ethanol" },
+          { id: "water", label: "Water" },
+        ],
+        default: "water",
+      },
+    },
+    data: [],
+  },
+};
+
+/** The sample tree with s03 (a Multiple choice Step) and Problem p1 extended. */
+function build(s03: object = {}, p1: object = {}, scenes: SceneCatalog | undefined = catalog) {
   const steps: object[] = sampleSteps();
-  steps[0] = { ...(steps[0] as object), ...s01 };
-  steps[1] = { id: "s02", phase: "build", ...s02 };
+  steps[2] = { ...(steps[2] as object), ...s03 };
   const tree = validTree();
   tree[L] = lesson({ steps });
-  tree["chem/data/elements.yaml"] = elements();
-  tree["chem/structures/formaldehyde.yaml"] = formaldehyde;
-  extra(tree);
-  return buildContent(writeTree(tree), { scenes: catalog });
+  tree["chem/problems/p1.yaml"] = problem("p1", p1);
+  tree["chem/structures/ethanol.yaml"] = ethanol;
+  return buildContent(writeTree(tree), scenes ? { scenes } : {});
 }
 const stepsOf = (result: ReturnType<typeof build>) => result.model!.subjects[0].courses[0].units[0].lessons[0].steps;
 
-describe("a Step's Source note line", () => {
-  it("reaches the model as `source`, on any Step type", () => {
-    const result = build({ source: "Adapted from MIT OCW 5.12, Lecture 2 p. 1." }, { type: "explain", text: "Watch.", source: "Our example." });
+describe("written Source notes", () => {
+  it("a Step keeps its Source note, and a Check Step carries its Problem's", () => {
+    const result = build(
+      { sourceNote: "Structures: PubChem CID 702." },
+      { sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q4." },
+    );
     expect(result.errors).toEqual([]);
-    const [s01, s02] = stepsOf(result);
-    expect(s01.source).toBe("Adapted from MIT OCW 5.12, Lecture 2 p. 1.");
-    expect(s02.source).toBe("Our example.");
+    const steps = stepsOf(result);
+    expect(steps[2]).toMatchObject({ id: "s03", sourceNote: "Structures: PubChem CID 702." });
+    expect(steps[7]).toMatchObject({ problemId: "p1", sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q4." });
   });
 
-  it("a Check Step carries its Problem's source", () => {
-    const result = build({}, undefined, (t) => (t["chem/problems/p1.yaml"] = problem("p1", { source: "Adapted from MIT OCW 5.12, PS1 Q3c." })));
+  it("an Explain Step may carry one too", () => {
+    const steps: object[] = sampleSteps();
+    steps[1] = { ...(steps[1] as object), sourceNote: "Groups from the MIT OCW 5.12 Functional Groups sheet." };
+    const tree = validTree();
+    tree[L] = lesson({ steps });
+    const result = buildContent(writeTree(tree));
     expect(result.errors).toEqual([]);
-    const check = stepsOf(result).find((s) => s.id === "s08")!;
-    expect(check.source).toBe("Adapted from MIT OCW 5.12, PS1 Q3c.");
-  });
-});
-
-describe("a Scene that waits for the answer", () => {
-  it("`on: answered` reaches the resolved Scene; a plain Scene has no `on`", () => {
-    const result = build({ scene: { id: "still", on: "answered" } }, { type: "explain", text: "Watch.", scene: "still" });
-    expect(result.errors).toEqual([]);
-    const [s01, s02] = stepsOf(result);
-    expect(s01.scene).toMatchObject({ id: "still", on: "answered" });
-    expect(s02.scene).not.toHaveProperty("on");
+    expect(stepsOf(result)[1]).toMatchObject({ sourceNote: "Groups from the MIT OCW 5.12 Functional Groups sheet." });
   });
 });
 
-describe("a still Scene", () => {
-  it("`still: true` reaches the resolved Scene (one frame, no Play controls)", () => {
-    const result = build({}, { type: "explain", text: "The end.", scene: { id: "still", still: true } });
+describe("signature Step", () => {
+  it("a Check Step named as the signature shows its Problem's Step type", () => {
+    const steps = sampleSteps();
+    const tree = validTree();
+    tree[L] = lesson({ steps, signature: "s08" });
+    tree["chem/problems/p1.yaml"] = problem("p1", {
+      type: "tap-to-identify",
+      structure: "ethanol",
+      options: undefined,
+      tappable: { atoms: "all" },
+      answer: ["a3"],
+      hints: [{ text: "Find the O." }],
+    });
+    tree["chem/structures/ethanol.yaml"] = ethanol;
+    const result = buildContent(writeTree(tree));
     expect(result.errors).toEqual([]);
-    expect(stepsOf(result)[1].scene).toMatchObject({ id: "still", still: true });
+    expect(result.model!.subjects[0].courses[0].units[0].lessons[0].signature).toBe("tap-to-identify");
   });
 });
 
-describe("a structure above a Multiple choice Step's choices", () => {
-  it("resolves the named structure file", () => {
-    const result = build({ structure: "formaldehyde" });
+describe("reveal Scenes", () => {
+  it("a Step's reveal Scene is resolved like its Scene", () => {
+    const result = build({ revealScene: { id: "spotlight", state: { view: "ethanol" } } });
     expect(result.errors).toEqual([]);
-    const s01 = stepsOf(result)[0] as MultipleChoiceStep;
-    expect(s01.structure?.structure.id).toBe("formaldehyde");
-    expect(s01.structure?.hide).toEqual([]);
+    expect(stepsOf(result)[2]).toMatchObject({ revealScene: { id: "spotlight", state: { view: "ethanol" }, cited: {} } });
   });
 
-  it("an unknown structure is a build error", () => {
-    const result = build({ structure: "no-such-molecule" });
-    expect(result.errors).toEqual([`${L}: step s01: structure "no-such-molecule" not found`]);
+  it("a Problem's reveal Scene is resolved for its Check Step, states filled from the defaults", () => {
+    const result = build({}, { revealScene: "spotlight" });
+    expect(result.errors).toEqual([]);
+    expect(stepsOf(result)[7]).toMatchObject({ revealScene: { id: "spotlight", state: { view: "water" } } });
+  });
+
+  it("a Bank Problem's reveal Scene is resolved for the Practice Set too", () => {
+    const result = build({}, { revealScene: "spotlight" });
+    const bank = result.model!.subjects[0].courses[0].units[0].bank;
+    expect(bank.find((p) => p.id === "p1")?.step).toMatchObject({ revealScene: { id: "spotlight", state: { view: "water" } } });
+  });
+
+  it("an unknown reveal Scene or state value is an error, in a Lesson or a Problem", () => {
+    const result = build({ revealScene: { id: "spotlight", state: { view: "ice" } } }, { revealScene: "nope" });
+    expect(result.errors).toEqual([
+      `${L}: step s03: revealScene: Scene "spotlight" state "view" must be one of ethanol, water`,
+      `chem/problems/p1.yaml: revealScene: Scene "nope" is not in the Scene registry`,
+    ]);
   });
 });

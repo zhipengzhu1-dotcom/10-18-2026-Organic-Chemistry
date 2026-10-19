@@ -41,23 +41,40 @@ export interface Drawing {
   atoms: Record<string, Point>;
   /** Bonds centre to centre, in the SVG's coordinates. */
   bonds: Record<string, Segment>;
+  /** Where each drawn lone pair sits (the midpoint of its two dots), in the SVG's coordinates. */
+  lonePairs: (Point & { atom: string })[];
 }
+
+/** What a Step points at in a drawing: atoms ringed, bonds outlined (a shape, never colour alone). */
+export interface Highlight {
+  ring?: string[];
+  outline?: string[];
+}
+
+/** A dangling bond's loose end (SMILES's dummy atom): drawn as nothing, its bond runs right to it. */
+const LOOSE_END = "*";
+const RING_R = 22;
+const LOOSE_PAD = 4;
+const OUTLINE_STROKE = 14;
+const OUTLINE_PER_LINE = 6;
+const OUTLINE_OPACITY = 0.35;
 
 const SUB = "₀₁₂₃₄₅₆₇₈₉";
 const sub = (n: number) => (n > 1 ? [...String(n)].map((d) => SUB[+d]).join("") : "");
 const r1 = (n: number) => Math.round(n * 10) / 10;
 
-export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawing {
+export function drawStructure(structure: Structure, hide: Hidden[] = [], highlight: Highlight = {}): Drawing {
   const showCharges = !hide.includes("charges");
   const showLonePairs = !hide.includes("lone-pairs");
   const scale = BOND_PX / typicalBondLength(structure);
 
-  const xs = structure.atoms.map((a) => a.x * scale);
-  const ys = structure.atoms.map((a) => a.y * scale);
-  const minX = Math.min(...xs) - PAD - CHAR_W * 2;
-  const minY = Math.min(...ys) - PAD;
-  const maxX = Math.max(...xs) + PAD + CHAR_W * 2;
-  const maxY = Math.max(...ys) + PAD;
+  // Each atom keeps room for its letter, H's, charge and lone pairs; a loose end only for the line's cap.
+  const marginX = (a: StructureAtom) => (a.el === LOOSE_END ? LOOSE_PAD : PAD + CHAR_W * 2);
+  const marginY = (a: StructureAtom) => (a.el === LOOSE_END ? LOOSE_PAD : PAD);
+  const minX = Math.min(...structure.atoms.map((a) => a.x * scale - marginX(a)));
+  const minY = Math.min(...structure.atoms.map((a) => a.y * scale - marginY(a)));
+  const maxX = Math.max(...structure.atoms.map((a) => a.x * scale + marginX(a)));
+  const maxY = Math.max(...structure.atoms.map((a) => a.y * scale + marginY(a)));
   const width = r1(maxX - minX);
   const height = r1(maxY - minY);
 
@@ -70,11 +87,14 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
     neighbours.get(b.b)?.push(b.a);
   }
   const lettered = (a: StructureAtom) =>
-    structure.style === "full" || a.el !== "C" || !!a.charge || !!a.letter || neighbours.get(a.id)!.length === 0;
+    a.el !== LOOSE_END &&
+    (structure.style === "full" || a.el !== "C" || !!a.charge || !!a.letter || neighbours.get(a.id)!.length === 0);
   const byId = new Map(structure.atoms.map((a) => [a.id, a]));
 
   const parts: string[] = [];
   const bonds: Record<string, Segment> = {};
+  const lonePairPoints: Drawing["lonePairs"] = [];
+  const outlined = new Set(highlight.outline ?? []);
 
   for (const b of structure.bonds) {
     const p = at[b.a];
@@ -89,6 +109,10 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
     const e = { x: q.x - ux * trimB, y: q.y - uy * trimB };
     const nx = -uy;
     const ny = ux;
+    if (outlined.has(b.id))
+      parts.push(
+        `<line class="bond-outline" x1="${r1(s.x)}" y1="${r1(s.y)}" x2="${r1(e.x)}" y2="${r1(e.y)}" stroke="currentColor" stroke-opacity="${OUTLINE_OPACITY}" stroke-width="${OUTLINE_STROKE + (b.order - 1) * OUTLINE_PER_LINE}" stroke-linecap="round"/>`,
+      );
 
     if (b.stereo === "wedge") {
       const w = 4;
@@ -119,6 +143,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
   }
 
   for (const a of structure.atoms) {
+    if (a.el === LOOSE_END) continue;
     const { x, y } = at[a.id];
     const neighbourDirs = neighbours.get(a.id)!.map((n) => Math.atan2(at[n].y - y, at[n].x - x));
     const occupied = [...neighbourDirs];
@@ -157,6 +182,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
       const cy = y + Math.sin(dir) * LP_DIST;
       const px = -Math.sin(dir) * LP_SPREAD;
       const py = Math.cos(dir) * LP_SPREAD;
+      lonePairPoints.push({ atom: a.id, x: r1(cx), y: r1(cy) });
       for (const sgn of [1, -1]) {
         parts.push(
           `<circle class="lone-pair-dot" cx="${r1(cx + px * sgn)}" cy="${r1(cy + py * sgn)}" r="${DOT_R}" fill="var(--lone-pair, #0e9fbf)"/>`,
@@ -165,12 +191,20 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
     }
   }
 
+  for (const id of highlight.ring ?? []) {
+    const p = at[id];
+    if (p)
+      parts.push(
+        `<circle class="atom-ring" cx="${p.x}" cy="${p.y}" r="${RING_R}" fill="none" stroke="currentColor" stroke-width="${LINE_STROKE}" stroke-dasharray="6 4"/>`,
+      );
+  }
+
   const viewBox = `0 0 ${width} ${height}`;
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" class="structure" viewBox="${viewBox}" width="${width}" height="${height}" aria-hidden="true" font-family="'JetBrains Mono', ui-monospace, monospace">` +
     parts.join("") +
     `</svg>`;
-  return { svg, viewBox, width, height, atoms: at, bonds };
+  return { svg, viewBox, width, height, atoms: at, bonds, lonePairs: lonePairPoints };
 }
 
 /** Places each lone pair in the middle of the widest free angle around the atom. */

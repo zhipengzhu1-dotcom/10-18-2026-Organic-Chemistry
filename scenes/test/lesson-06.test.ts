@@ -117,7 +117,7 @@ describe("acetate-bond-lengths", () => {
   });
 
   it("the screen-reader text is the spec's", () => {
-    expect(scene.manifest.describe({ molecule: "both" }, 0)).toBe(
+    expect(scene.manifest.describe({ molecule: "both" }, 0, {})).toBe(
       "Acetic acid: one C–O bond is clearly shorter than the other. Acetate: both C–O bonds are the same length, and that length sits between acetic acid's two.",
     );
   });
@@ -141,7 +141,7 @@ describe("formaldehyde-pi-shift", () => {
   });
 
   it("the screen-reader text is the spec's", () => {
-    expect(manifest.describe({}, manifest.poster.t)).toBe(
+    expect(manifest.describe({}, manifest.poster.t, {})).toBe(
       "Formaldehyde, H₂C double-bonded to O. A curved arrow starts on the C=O π bond and ends on oxygen. The pair becomes a lone pair on O: oxygen is now negative, carbon positive. No atom moves.",
     );
   });
@@ -171,7 +171,7 @@ describe("three-moves", () => {
   });
 
   it("the screen-reader text is the spec's", () => {
-    expect(manifest.describe({ panel: "all" }, manifest.poster.t)).toBe(
+    expect(manifest.describe({ panel: "all" }, manifest.poster.t, {})).toBe(
       "Move one: the negative oxygen of acetate sends a lone pair into the bond to carbon. Move two: formaldehyde's π pair lands on oxygen. Move three: in the allyl cation, the C=C π pair slides one position toward the positive carbon.",
     );
   });
@@ -202,9 +202,9 @@ describe("acetate-hybrid", () => {
   });
 
   it("the screen-reader text is the spec's, and the Wrap's for the hybrid stage", () => {
-    expect(manifest.describe({ stage: "blend" }, 0)).toBe(
+    expect(manifest.describe({ stage: "blend" }, 0, {})).toBe(
       "The two acetate drawings merge into one: both C–O bonds dashed, each oxygen δ−, and both bonds labelled with the same length.",
     );
-    expect(manifest.describe({ stage: "hybrid" }, 0)).toBe("Acetate's hybrid: charge shared by both oxygens.");
+    expect(manifest.describe({ stage: "hybrid" }, 0, {})).toBe("Acetate's hybrid: charge shared by both oxygens.");
   });
 });

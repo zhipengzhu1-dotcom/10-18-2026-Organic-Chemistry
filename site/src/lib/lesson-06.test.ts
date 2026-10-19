@@ -94,8 +94,8 @@ describe("Lesson 6 text matches its spec", () => {
       // s01 and s07 point at the Geometry note; the bond-length test below checks them.
       if (id === "s01" || id === "s07") return;
       const note = quoted(text, "Source note");
-      if (note) expect(s.source).toBe(note);
-      else expect(s.source).toBeUndefined();
+      if (note) expect(s.sourceNote).toBe(note);
+      else expect(s.sourceNote).toBeUndefined();
     });
   }
 
@@ -107,7 +107,7 @@ describe("Lesson 6 text matches its spec", () => {
       expect(plain(s.correct)).toBe(plain(quoted(text, "Correct line")));
       expect((s.hints ?? []).map((h) => plain(h.text))).toEqual(hintTexts(text).map(plain));
       const q = /\*\*Source:\*\* PS1 (Q\w+)/.exec(text)![1];
-      expect(s.source).toBe(`Adapted from MIT OCW 5.12, Problem Set 1 ${q}, Berkowski, Spring 2005, CC BY-NC-SA 4.0.`);
+      expect(s.sourceNote).toBe(`Adapted from MIT OCW 5.12, Problem Set 1 ${q}, Berkowski, Spring 2005, CC BY-NC-SA 4.0.`);
     });
   }
 
@@ -116,11 +116,12 @@ describe("Lesson 6 text matches its spec", () => {
     expect(s).toMatchObject({ type: "multiple-choice", prediction: true });
     if (s.type !== "multiple-choice") return;
     expect(s.options.map((o) => plain(o.text))).toEqual(["The C–O single bond", "The C=O double bond", "They're the same length"]);
-    expect(s.structure?.structure.id).toBe("acetate");
+    expect(s.figures?.map((f) => f.view.structure.id)).toEqual(["acetate"]);
     expect(plain(s.reveal)).toBe(
       "Measure them and they're identical. In acetic acid they really do differ. So the drawing of acetate is hiding something. By the end of this Lesson you'll know what.",
     );
-    expect(s.scene).toMatchObject({ id: "acetate-bond-lengths", state: { molecule: "both" }, on: "answered" });
+    expect(s.scene).toBeUndefined();
+    expect(s.revealScene).toMatchObject({ id: "acetate-bond-lengths", state: { molecule: "both" } });
   });
 
   it("the Scenes sit where the spec puts them", () => {
@@ -137,12 +138,12 @@ describe("Lesson 6 text matches its spec", () => {
       const refs = (step(n).citations ?? []).map((c) => c.ref);
       expect(refs).toEqual(expect.arrayContaining(["acetate/r.CO.a", "acetate/r.CO.b"]));
       expect(step(n).citations!.every((c) => c.tier === "computed")).toBe(true);
-      expect(step(n).source).toContain(
+      expect(step(n).sourceNote).toContain(
         "Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phase. Both molecules use the same method so they can be compared fairly.",
       );
     }
     expect((step(1).citations ?? []).map((c) => c.ref)).toEqual(expect.arrayContaining(["acetic-acid/r.CO.double", "acetic-acid/r.CO.single"]));
-    expect(step(7).source).toContain("The hybrid idea follows MIT OCW 5.12, Lecture 1 p. 17, CC BY-NC-SA 4.0.");
+    expect(step(7).sourceNote).toContain("The hybrid idea follows MIT OCW 5.12, Lecture 1 p. 17, CC BY-NC-SA 4.0.");
   });
 
   it("s03 is tap-only with the spec's cue, and its answer is the two oxygens and the N=O π bond", () => {

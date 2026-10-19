@@ -4,6 +4,22 @@
 import type { RegisteredScene } from "./types.ts";
 import { sampleTwist } from "./sample-twist/manifest.ts";
 import SampleTwist from "./sample-twist/SampleTwist.tsx";
+import { streamBend } from "./stream-bend/manifest.ts";
+import StreamBend from "./stream-bend/StreamBend.tsx";
+import { enStrip } from "./en-strip/manifest.ts";
+import EnStrip from "./en-strip/EnStrip.tsx";
+import { bondDipoles } from "./bond-dipoles/manifest.ts";
+import BondDipoles from "./bond-dipoles/BondDipoles.tsx";
+import { dotsAndSticks } from "./dots-and-sticks/manifest.ts";
+import DotsAndSticks from "./dots-and-sticks/DotsAndSticks.tsx";
+import { bf3Sextet } from "./bf3-sextet/manifest.ts";
+import Bf3Sextet from "./bf3-sextet/Bf3Sextet.tsx";
+import { groupSpotlight } from "./group-spotlight/manifest.ts";
+import GroupSpotlight from "./group-spotlight/GroupSpotlight.tsx";
+import { groupCards } from "./group-cards/manifest.ts";
+import GroupCards from "./group-cards/GroupCards.tsx";
+import { carbonylNeighbours } from "./carbonyl-neighbours/manifest.ts";
+import CarbonylNeighbours from "./carbonyl-neighbours/CarbonylNeighbours.tsx";
 import { acetateBondLengths } from "./acetate-bond-lengths/manifest.ts";
 import AcetateBondLengths from "./acetate-bond-lengths/AcetateBondLengths.tsx";
 import { formaldehydePiShift } from "./formaldehyde-pi-shift/manifest.ts";
@@ -15,6 +31,14 @@ import AcetateHybrid from "./acetate-hybrid/AcetateHybrid.tsx";
 
 export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [sampleTwist.id]: { manifest: sampleTwist, Component: SampleTwist },
+  [streamBend.id]: { manifest: streamBend, Component: StreamBend },
+  [enStrip.id]: { manifest: enStrip, Component: EnStrip },
+  [bondDipoles.id]: { manifest: bondDipoles, Component: BondDipoles },
+  [dotsAndSticks.id]: { manifest: dotsAndSticks, Component: DotsAndSticks },
+  [bf3Sextet.id]: { manifest: bf3Sextet, Component: Bf3Sextet },
+  [groupSpotlight.id]: { manifest: groupSpotlight, Component: GroupSpotlight },
+  [groupCards.id]: { manifest: groupCards, Component: GroupCards },
+  [carbonylNeighbours.id]: { manifest: carbonylNeighbours, Component: CarbonylNeighbours },
   [acetateBondLengths.id]: { manifest: acetateBondLengths, Component: AcetateBondLengths },
   [formaldehydePiShift.id]: { manifest: formaldehydePiShift, Component: FormaldehydePiShift },
   [threeMoves.id]: { manifest: threeMoves, Component: ThreeMoves },
@@ -27,7 +51,7 @@ export { clamp, easeInOut, easeOut, lerp, progress, pulse, seededRandom } from "
 export { stateAt } from "./timeline.ts";
 export { defaultState } from "./state.ts";
 
-export { BOND_PX, drawStructure, type Drawing, type Point, type Segment } from "./structure/render.ts";
+export { BOND_PX, drawStructure, type Drawing, type Highlight, type Point, type Segment } from "./structure/render.ts";
 export { drawContributors, type ContributorsDrawing } from "./structure/contributors.ts";
 
 export { default as PushReplay, describeReplay, replayDuration, PUSH_SECONDS } from "./push-replay/PushReplay.tsx";

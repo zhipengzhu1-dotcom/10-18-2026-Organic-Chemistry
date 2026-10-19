@@ -59,8 +59,8 @@ describe("Numeric input and Rank / order Steps", () => {
     const { model, errors } = buildContent(writeTree(tree));
     expect(errors).toEqual([]);
     const steps = model!.subjects[0].courses[0].units[0].lessons[0].steps;
-    expect(steps[7]).toEqual({ id: "s08", phase: "check", problemId: "p1", source: "Original", ...numeric() });
-    expect(steps[8]).toEqual({ id: "s09", phase: "check", problemId: "p2", source: "Original", ...rank() });
+    expect(steps[7]).toEqual({ id: "s08", phase: "check", problemId: "p1", ...numeric() });
+    expect(steps[8]).toEqual({ id: "s09", phase: "check", problemId: "p2", ...rank() });
   });
 
   it("the unit is fixed by the file and the tolerance can't be negative", () => {
@@ -90,6 +90,21 @@ describe("Numeric input and Rank / order Steps", () => {
     expect(build(numeric(), rank({ answer: ["triple", "double", "double"], hints })).errors).toEqual([
       `${L}: step s06: answer must list every item exactly once`,
       `${L}: step s06: a Hint's match must list every item exactly once`,
+    ]);
+  });
+
+  it("a Rank Hint may name a pattern, but only with the Step's items", () => {
+    const ok = [
+      { notLast: "single", text: "Longest last." },
+      { notFirst: "triple", text: "Shortest first." },
+      { before: ["single", "double"], text: "Swapped." },
+      { text: "Count shared pairs." },
+    ];
+    expect(build(numeric(), rank({ hints: ok })).errors).toEqual([]);
+    const bad = [{ notFirst: "quadruple", text: "?" }, { before: ["single", "nope"], text: "?" }, { text: "Fallback." }];
+    expect(build(numeric(), rank({ hints: bad })).errors).toEqual([
+      `${L}: step s06: a Hint names unknown item "quadruple"`,
+      `${L}: step s06: a Hint names unknown item "nope"`,
     ]);
   });
 

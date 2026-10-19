@@ -4,7 +4,8 @@ unit: u1
 lesson: u1-l06
 difficulty: 1
 status: approved
-source: Adapted from MIT OCW 5.12, Problem Set 1 Q3c, Berkowski, Spring 2005, CC BY-NC-SA 4.0.
+source: Adapted from MIT OCW 5.12 PS1 Q3c
+credit: Kimberly Berkowski, MIT OCW 5.12 Organic Chemistry I, Spring 2005, CC BY-NC-SA 4.0
 type: draw-arrows
 prompt: "Ozone, O₃. Push electrons to reach another resonance contributor. No atom may carry a charge beyond ±1."
 start: ozone
@@ -26,3 +27,4 @@ hints:
     text: O1 has no extra pair to spare. Start from O⁻.
   - text: "Same pattern as acetate: one pair in from O⁻, one pair out to the far O."
 reveal: "Both arrows: O3's lone pair into the O2–O3 bond, and the O1=O2 π pair onto O1. Result ⁻O–O⁺=O."
+sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q3c, Berkowski, Spring 2005, CC BY-NC-SA 4.0."

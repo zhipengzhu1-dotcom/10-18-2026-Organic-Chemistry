@@ -285,16 +285,22 @@
     display: grid;
     gap: 12px;
   }
-  .player-body .player-notes {
+  /* Aside button, Source note and "Report a mistake" share rows at the foot of the body. */
+  .step-meta {
     margin-top: auto;
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px 16px;
+    align-items: flex-start;
+    gap: 8px;
   }
-  .player-notes .source-note[open] {
+  .step-meta .source-note[open] {
     flex-basis: 100%;
+  }
+  /* On a phone, once a reveal Scene plays the answer, it takes the question's place. */
+  @media (max-width: 600px) {
+    .player.revealing .player-prompt {
+      display: none;
+    }
   }
   .report a {
     display: inline-flex;
@@ -753,6 +759,33 @@
   .returning .first-visit {
     display: none;
   }
+  /* The Push hero (#73): headline, live push, one button; the Course map follows. */
+  .push-hero-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 8px 0 24px;
+  }
+  .hero-title {
+    margin: 0;
+    font: 700 clamp(30px, 8vw, 44px) / 1.05 var(--at-font-text);
+  }
+  .hero-accent {
+    color: var(--at-ignite);
+  }
+  .push-hero {
+    padding: 12px;
+    border: var(--at-border-strong) solid var(--at-line);
+    background: var(--at-surface);
+    box-shadow: var(--at-drop);
+  }
+  .push-hero-msg {
+    margin: 12px 0 0;
+    min-height: 3em;
+  }
+  .push-hero-done {
+    color: var(--at-electron);
+  }
   .continue-card {
     margin: 12px 0 24px;
     padding: 16px;
@@ -883,6 +916,160 @@
 }
 
 @layer components {
+  /* The 3D Step card (#68): frame with the WebGL (or still) layer, the SVG overlay, the readout,
+     scale bar and ↺/↻ over it; the size switch and Describe under it. */
+  /* The card takes the Step's spare height (and gives it back when the feedback panel opens),
+     so a 3D Step always fits one phone screen. */
+  .molecule {
+    margin: 0;
+    flex: 1 1 260px;
+    min-height: 170px;
+    max-height: 380px;
+    display: flex;
+    flex-direction: column;
+  }
+  .molecule-stage {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    min-height: 110px;
+    border: var(--at-border-strong) solid var(--at-line);
+    box-shadow: 6px 6px 0 var(--at-shadow);
+    /* The same dark ground in both themes, so white hydrogens never sit on white (#71). Text over it
+       uses the fills, which are the same in both themes and read on --at-on-fill. */
+    background: var(--at-on-fill);
+    overflow: hidden;
+  }
+  .molecule-frame {
+    position: absolute;
+    inset: 0;
+    touch-action: none;
+    user-select: none;
+    cursor: grab;
+  }
+  .molecule-frame:focus-visible {
+    outline: 3px solid var(--at-electron);
+    outline-offset: -6px;
+  }
+  .molecule-still,
+  .molecule-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .molecule-still line {
+    stroke: #c8c8d0; /* the WebGL layer's bond grey (MoleculeCanvas) */
+  }
+  .molecule-still circle {
+    stroke: var(--at-on-fill);
+  }
+  .molecule-overlay {
+    pointer-events: none;
+  }
+  .molecule-letter {
+    font-family: var(--at-font-data);
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .molecule-pick {
+    fill: none;
+    stroke: var(--at-ignite-fill);
+    stroke-width: 3;
+  }
+  .molecule-cursor {
+    fill: none;
+    stroke: var(--at-electron-fill);
+    stroke-width: 2;
+    stroke-dasharray: 5 4;
+  }
+  .molecule-tag path {
+    fill: none;
+    stroke: var(--at-electron-fill);
+    stroke-width: 2;
+    stroke-dasharray: 5 4;
+  }
+  .molecule-tag-angle path {
+    stroke: var(--at-ignite-fill);
+  }
+  .molecule-tag rect {
+    fill: var(--at-on-fill);
+    stroke: var(--at-electron-fill);
+    stroke-width: 2;
+  }
+  .molecule-tag-angle rect {
+    stroke: var(--at-ignite-fill);
+  }
+  .molecule-tag text {
+    font: 700 16px var(--at-font-data);
+    fill: var(--at-electron-fill);
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .molecule-readout {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    right: 112px;
+    margin: 0;
+    pointer-events: none;
+    font: 400 16px/1.25 var(--at-font-data);
+    color: var(--at-electron-fill);
+  }
+  .molecule-value {
+    font-weight: 700;
+    font-size: 20px;
+  }
+  .molecule-scalebar {
+    position: absolute;
+    left: 8px;
+    bottom: 6px;
+    pointer-events: none;
+    font: 400 16px/1 var(--at-font-data);
+    color: var(--at-electron-fill);
+  }
+  .molecule-scalebar i {
+    display: block;
+    height: 4px;
+    margin-bottom: 4px;
+    background: var(--at-electron-fill);
+  }
+  .molecule-turn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+  }
+  .molecule-btn {
+    display: grid;
+    place-items: center;
+    min-width: var(--at-tap);
+    min-height: var(--at-tap);
+    padding: 0 12px;
+    font: 700 18px/1 var(--at-font-text);
+    color: var(--at-ink);
+    background: var(--at-surface);
+    border: var(--at-border) solid var(--at-line);
+    cursor: pointer;
+  }
+  .molecule-tools {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .molecule-seg button {
+    padding: 0 10px;
+    font: 500 16px/1 var(--at-font-text);
+    text-transform: none;
+  }
+  .molecule-describe {
+    font: 500 16px/1 var(--at-font-text);
+  }
+
   /* Scene frame and its controls (#64). */
   .scene {
     margin: 0;
@@ -894,15 +1081,6 @@
     border: var(--at-border-strong) solid var(--at-line);
     box-shadow: 6px 6px 0 var(--at-shadow);
     background: var(--at-surface);
-  }
-  /* On a phone a Scene shares the screen with long Step text: keep it short (the drawing letterboxes inside). */
-  @media (max-width: 480px) {
-    .scene-frame {
-      max-height: 21dvh;
-    }
-    .scene-still .scene-frame {
-      max-height: 16dvh;
-    }
   }
   .scene-controls,
   .scene-control {

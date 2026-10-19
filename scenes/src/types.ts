@@ -37,14 +37,19 @@ export interface SceneManifest<S extends SceneState = SceneState> {
   title: string;
   /** Settable states: what a Step, a slider or the video timeline can set. May be empty. */
   states: { [K in keyof S]: SceneStateSpec };
-  /** Screen-reader text for what the Scene shows at this state and time. Never empty. */
-  describe: (state: S, t: number) => string;
+  /** Screen-reader text for what the Scene shows at this state and time (its cited values passed in, as to the Scene). Never empty. */
+  describe: (state: S, t: number, cited: Record<string, Cited>) => string;
   /** What the Scene does under reduced motion, in a sentence (it always opens paused on its poster frame). */
   reducedMotion: string;
   /** Cited-data refs (`file/key`) of every number or element colour the Scene shows. May be empty. */
   data: string[];
   /** Seconds one autoplay run lasts on the site (a Manipulate Step loops it). */
   duration: number;
+  /**
+   * false: the site shows no Play/Replay/Scrub row; the Scene plays once on entry (or rests on its
+   * poster frame) and must run 5 s or less (WCAG 2.2.2). Omitted: the controls show.
+   */
+  controls?: false;
   /** The frame shown paused under reduced motion and as the still: a time within `duration`. */
   poster: { t: number };
   /** How the video module renders the Scene with no input (#65). */

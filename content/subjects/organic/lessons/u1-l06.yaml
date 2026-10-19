@@ -14,15 +14,17 @@ steps:
     type: multiple-choice
     prediction: true
     prompt: This is acetate, what's left of vinegar's acid after it gives away H⁺. One C–O bond is drawn double, the other single. Which one is longer?
-    structure: acetate
+    figures:
+      - structure: acetate
+        alt: "Acetate, CH₃–C(=O)–O⁻, drawn with every lone pair: one C–O bond double, the other single, the negative charge on the single-bonded oxygen."
     options:
       - { id: a, text: The C–O single bond }
       - { id: b, text: The C=O double bond }
       - { id: c, text: They're the same length }
     answer: [c]
     reveal: Measure them and they're **identical**. In acetic acid they really do differ. So the drawing of acetate is hiding something. By the end of this Lesson you'll know what.
-    scene: { id: acetate-bond-lengths, state: { molecule: both }, on: answered }
-    source: >-
+    revealScene: { id: acetate-bond-lengths, state: { molecule: both } }
+    sourceNote: >-
       Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phase. Both molecules use the same method so they can be
       compared fairly. This is a deliberate exception to "experiment first": CCCBDB lists acetic acid by internal
       coordinates only, and a difference of a few hundredths of an Å is only honest when both numbers come from one
@@ -38,7 +40,7 @@ steps:
       Sinks: an electronegative atom, an atom with room for more electrons, or a positive atom.\
       (A half-headed 'fishhook' arrow moves a single electron. You'll meet it much later.)
     scene: formaldehyde-pi-shift
-    source: Source and sink lists adapted from MIT OCW 5.12, Lecture 2 p. 1, Berkowski, Spring 2005, CC BY-NC-SA 4.0.
+    sourceNote: Source and sink lists adapted from MIT OCW 5.12, Lecture 2 p. 1, Berkowski, Spring 2005, CC BY-NC-SA 4.0.
 
   - id: s03
     phase: build
@@ -64,7 +66,7 @@ steps:
         text: Both oxygens carry lone pairs. Check the other one.
       - text: Sources are lone pairs and π bonds. Find every one.
     reveal: "The three sources: lone pairs on O, lone pairs on O⁻, the N=O π bond."
-    source: Nitromethane from MIT OCW 5.12, Lecture 1 p. 17, CC BY-NC-SA 4.0.
+    sourceNote: Nitromethane from MIT OCW 5.12, Lecture 1 p. 17, CC BY-NC-SA 4.0.
 
   - id: s04
     phase: build
@@ -86,7 +88,7 @@ steps:
         text: σ bonds never move in resonance.
       - text: Which atom is the sink? Move the pair that sits between C and O toward it.
     reveal: Arrow from the C=O π bond to oxygen. Result H₂C⁺ single-bonded to O⁻.
-    source: Adapted from MIT OCW 5.12, Lecture 2 p. 1, CC BY-NC-SA 4.0.
+    sourceNote: Adapted from MIT OCW 5.12, Lecture 2 p. 1, CC BY-NC-SA 4.0.
 
   - id: s05
     phase: build
@@ -94,7 +96,7 @@ steps:
     text: >-
       Every resonance arrow is one of **three moves**: 1. **Lone pair → bond.** A lone pair becomes a new π bond to the atom next door. 2. **Bond → atom.** A π pair leaves its bond and becomes a lone pair on one of its own atoms. 3. **Bond → next bond.** A π pair slides over by one position. The rules never change: **atoms don't move, σ bonds don't break**, and every drawing must be a real Lewis structure. If one push gives an atom too many electrons, a second push has to take some away. The arrows happen together.
     scene: { id: three-moves, state: { panel: all } }
-    source: Rules adapted from MIT OCW 5.12, Lecture 2 p. 2, 'Rules for Resonance Structures', CC BY-NC-SA 4.0.
+    sourceNote: Rules adapted from MIT OCW 5.12, Lecture 2 p. 2, 'Rules for Resonance Structures', CC BY-NC-SA 4.0.
 
   - id: s06
     phase: build
@@ -120,7 +122,7 @@ steps:
         text: σ bonds stay put.
       - text: One pair comes in from O⁻ and one pair leaves toward the other O.
     reveal: Arrow from a lone pair on the lower oxygen into the C–O bond; arrow from the C=O π bond onto the upper oxygen. The double bond and the negative charge have swapped oxygens.
-    source: Acetate from MIT OCW 5.12, Problem Set 1 Q3b, CC BY-NC-SA 4.0.
+    sourceNote: Acetate from MIT OCW 5.12, Problem Set 1 Q3b, CC BY-NC-SA 4.0.
 
   - id: s07
     phase: build
@@ -129,7 +131,7 @@ steps:
       So which drawing is acetate? **Neither.** The real ion is the **resonance hybrid**: the − charge is shared by both oxygens (δ− each), and both C–O bonds sit between single and double. That's why they measured the same.\
       The ↔ arrow means 'two drawings of one thing'. It is **not** ⇌: acetate never flips back and forth. It is the blend, all the time.
     scene: acetate-hybrid
-    source: >-
+    sourceNote: >-
       Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phase. Both molecules use the same method so they can be
       compared fairly. The hybrid idea follows MIT OCW 5.12, Lecture 1 p. 17, CC BY-NC-SA 4.0.
 
@@ -199,7 +201,7 @@ steps:
         text: σ bonds stay put.
       - text: "It's the acetate pattern again: one pair in, one pair out."
     reveal: Arrow from a lone pair on O⁻ into the N–O bond; arrow from the N=O π bond onto the other oxygen. The charges have swapped oxygens.
-    source: Nitromethane from MIT OCW 5.12, Lecture 1 p. 17, CC BY-NC-SA 4.0.
+    sourceNote: Nitromethane from MIT OCW 5.12, Lecture 1 p. 17, CC BY-NC-SA 4.0.
 
   - { id: s11, phase: check, problem: u1-res-ozone }
   - { id: s12, phase: check, problem: u1-res-not-resonance }

@@ -67,7 +67,7 @@ test("keyboard only, right answers: every Step, then the Lesson-end screen", asy
   await open(page);
 
   // s01: the prediction. The drawing shows; the bond-length Scene waits for the answer.
-  await expect(page.locator(".structure-view svg.structure")).toBeVisible();
+  await expect(page.getByRole("img", { name: /^Acetate, CH₃–C\(=O\)–O⁻, drawn with every lone pair/ })).toBeVisible();
   await expect(page.locator(".scene-frame")).toHaveCount(0);
   await press(page, "They're the same length");
   await press(page, "Check");
@@ -80,7 +80,7 @@ test("keyboard only, right answers: every Step, then the Lesson-end screen", asy
 
   // s02: Explain with formaldehyde-pi-shift and its own Source note line.
   await expect(page.getByRole("img", { name: /A curved arrow starts on the C=O π bond/ })).toBeVisible();
-  await expect(page.locator(".source-note summary")).toHaveText("ⓘ Source");
+  await expect(page.locator(".source-note summary")).toHaveText("ⓘ Sources");
   await next(page);
 
   // s03: Tap, tap-only.
@@ -161,11 +161,18 @@ test("keyboard only, right answers: every Step, then the Lesson-end screen", asy
 
   // s15: the Wrap, then the Lesson-end screen.
   await expect(page.getByText("Electrons move. Atoms don't.")).toBeVisible();
-  await expect(page.getByRole("img", { name: "Acetate's hybrid: charge shared by both oxygens." })).toBeVisible();
+  // On a phone the Lesson-end screen leaves the Wrap's Scene out (the laptop test below shows it).
   // The Wrap is the Lesson-end screen: key idea, then Back to Unit (no Next Lesson until Lesson 7 lands).
   await expect(page.getByRole("heading", { name: "Key idea" })).toBeVisible();
   await expect(page.getByText("The real molecule is the hybrid of its drawings.").last()).toBeVisible();
   await expect(page.getByRole("link", { name: "Back to Unit" })).toBeVisible();
+});
+
+test("on a laptop the Wrap shows acetate's hybrid as a still frame", async ({ page }) => {
+  await page.setViewportSize(LAPTOP);
+  await open(page, "s15");
+  await expect(page.getByRole("img", { name: "Acetate's hybrid: charge shared by both oxygens." })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Play" })).toHaveCount(0);
 });
 
 test("a drag on the tap-only Step shows the no-pushing message", async ({ page }) => {

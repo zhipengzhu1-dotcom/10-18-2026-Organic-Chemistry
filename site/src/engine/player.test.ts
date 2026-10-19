@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ManipulateStep, MultipleChoiceStep, NumericStep, RankStep } from "@astratron/content";
+import type { ManipulateStep, MultipleChoiceStep, NumericStep, RankStep, RotateAndIdentifyStep } from "@astratron/content";
 import { act, start, type Action, type PlayableLesson, type Screen } from "./player.ts";
 
 const choice = (id: string, extra: Partial<MultipleChoiceStep> = {}): MultipleChoiceStep => ({
@@ -304,6 +304,31 @@ describe("Rank / order Steps", () => {
     });
   });
 
+  it("a Hint can answer a pattern: an item not first, not last, or one item placed before another", () => {
+    const patterned: RankStep = {
+      ...rank,
+      hints: [
+        { notLast: "single", text: "C–C is the longest." },
+        { notFirst: "triple", text: "C≡C is the shortest." },
+        { before: ["single", "double"], text: "C=C is shorter than C–C." },
+        { text: "Fallback." },
+      ],
+    };
+    const play = (order: string[]) =>
+      act({ ...lesson, steps: [patterned, wrapStep] }, start({ ...lesson, steps: [patterned, wrapStep] }), { type: "answer", order });
+    expect(play(["triple", "single", "double"]).feedback?.text).toBe("C–C is the longest.");
+    expect(play(["double", "triple", "single"]).feedback?.text).toBe("C≡C is the shortest.");
+    expect(play(["triple", "double", "single"]).feedback?.kind).toBe("correct");
+    const swapped: RankStep = { ...rank, hints: [{ before: ["single", "double"], text: "Swapped." }, { text: "Fallback." }] };
+    const steps = [swapped, wrapStep];
+    expect(act({ ...lesson, steps }, start({ ...lesson, steps }), { type: "answer", order: ["triple", "single", "double"] }).feedback?.text).toBe(
+      "Swapped.",
+    );
+    expect(act({ ...lesson, steps }, start({ ...lesson, steps }), { type: "answer", order: ["double", "triple", "single"] }).feedback?.text).toBe(
+      "Fallback.",
+    );
+  });
+
   it("each wrong order can carry its own Hint", () => {
     expect(run(["single", "double", "triple"])).toMatchObject({
       tries: 1,
@@ -389,5 +414,47 @@ describe("Manipulate a Scene Steps", () => {
       feedback: { kind: "hint", text: "Look end-on." },
     });
     expect(act(choiceLesson, screen, { type: "answer", value: 90 })).toEqual(screen);
+  });
+});
+
+describe("Rotate-and-identify 3D Steps", () => {
+  // Graded exactly like Multiple choice: the exact set of option ids, Hints first to last, two tries.
+  const { prediction: _p, ...mc } = choice("s01");
+  const rotate: RotateAndIdentifyStep = {
+    ...mc,
+    type: "rotate-and-identify",
+    molecule: {
+      id: "water",
+      title: "Water",
+      tier: "experimental",
+      cited: [],
+      card: true,
+      atoms: [],
+      bonds: [],
+      orientation: [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+      ],
+      elements: {},
+    },
+  };
+  const rotLesson: PlayableLesson = { ...lesson, steps: [rotate, wrapStep] };
+  const run = (...choices: string[][]) =>
+    choices.reduce((s, choice) => act(rotLesson, s, { type: "answer", choice }), start(rotLesson));
+
+  it("the right choice shows the Correct line", () => {
+    expect(run(["a"])).toMatchObject({ tries: 1, feedback: { kind: "correct", text: "Right, because." }, canContinue: true });
+  });
+
+  it("a wrong choice gets its Hint, then the reveal", () => {
+    expect(run(["b"])).toMatchObject({ feedback: { kind: "hint", text: "Hint for b." }, canContinue: false });
+    expect(run(["c"])).toMatchObject({ feedback: { kind: "hint", text: "Generic hint." } });
+    expect(run(["b"], ["c"])).toMatchObject({ feedback: { kind: "reveal", text: "It is a, because.", answer: ["a"] } });
+  });
+
+  it("ignores answers of another shape", () => {
+    const screen = start(rotLesson);
+    expect(act(rotLesson, screen, { type: "answer", value: 1 })).toEqual(screen);
   });
 });
