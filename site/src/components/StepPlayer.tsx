@@ -289,7 +289,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         {step.aside && <AsideButton key={`aside-${step.id}`} aside={step.aside} stepId={step.id} />}
 
         {/* Keyed per Step so a new Step opens its Source note collapsed. */}
-        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} />
+        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} note={step.sourceNote} />
 
         <p className="report">
           <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>
@@ -341,6 +341,13 @@ function parseNumber(text: string): number {
   return /^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(t) ? Number(t) : Number.NaN;
 }
 
+/** "+1" ↔ "−1", "1" → "−1", "" → "−". */
+export function flipSign(text: string): string {
+  const t = text.trim();
+  if (/^[-−]/.test(t)) return t.slice(1);
+  return `−${t.replace(/^\+/, "")}`;
+}
+
 interface NumericBoxProps {
   step: NumericStep;
   value: string;
@@ -371,6 +378,18 @@ function NumericBox({ step, value, onChange, onSubmit, locked }: NumericBoxProps
         className="numeric-box"
       />
       {step.unitSymbol && <span className="numeric-unit">{step.unitSymbol}</span>}
+      {step.signKey && (
+        // Phone number pads have no minus sign: the ± key flips the sign of what is typed.
+        <button
+          type="button"
+          className="btn btn-secondary numeric-sign"
+          aria-label="Change sign"
+          disabled={locked}
+          onClick={() => onChange(flipSign(value))}
+        >
+          ±
+        </button>
+      )}
     </form>
   );
 }

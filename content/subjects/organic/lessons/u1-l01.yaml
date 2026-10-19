@@ -1,0 +1,229 @@
+# Lesson 1: Bonds, Polarity & Formal Charge (#79). Built from the merged
+# Lesson spec docs/specs/unit-1/lesson-01-bonds-polarity-formal-charge.md:
+# every Prompt, Hint, Correct line, Reveal and Source note follows it.
+# Electronegativities come from data/electronegativity-pauling.yaml (cited).
+id: u1-l01
+slug: bonds-polarity-formal-charge
+title: Bonds, Polarity & Formal Charge
+act: Atoms & bonds
+signature: s08
+goal: Say which end of a bond is δ− from electronegativity, rank bonds by polarity, and work out the formal charge on any atom by counting its lone-pair electrons and bonds, spotting structures that can't exist.
+keyIdea: "Shared pairs aren't shared equally: the more electronegative atom is δ−. Each atom has a usual number of bonds and lone pairs; one more or one fewer bond shows up as a formal charge."
+steps:
+  - id: s01
+    phase: hook
+    type: multiple-choice
+    prediction: true
+    prompt: "Rub a plastic rod so it picks up a static charge, then hold it next to two thin streams falling from a tap: one of water, one of hexane (a liquid in petrol). What happens?"
+    scene: { id: stream-bend, state: { rod: away } }
+    options:
+      - { id: a, text: both streams bend toward the rod }
+      - { id: b, text: only the water bends }
+      - { id: c, text: only the hexane bends }
+      - { id: d, text: neither bends }
+    answer: [b]
+    reveal: "Only the **water** bends. Water's bonds are lopsided: its electrons crowd toward oxygen. Hexane's bonds are almost even. Liquids made of lopsided, **polar** bonds respond to charge. This Lesson is about where that lopsidedness comes from, and what happens when an atom ends up with more or fewer electrons than its share."
+    revealScene: stream-bend
+    sourceNote: "Why the stream bends: Ziaei-Moayyed, Goodman and Williams, *J. Chem. Educ.* 77, 1520 (2000)."
+
+  - id: s02
+    phase: build
+    type: explain
+    text: "In a bond, two atoms share a pair of electrons, but not always equally. **Electronegativity** is how hard an atom pulls on shared electrons.<br>It rises **across** a row toward fluorine and **up** a group. Fluorine pulls hardest of all.<br>Carbon and hydrogen are close, so a C–H bond is nearly even. Oxygen pulls far harder than hydrogen."
+    scene: { id: en-strip, state: { highlight: all } }
+
+  - id: s03
+    phase: build
+    type: tap-to-identify
+    prompt: "The atom that pulls harder gets a small negative charge, **δ−** ('partial minus'); its partner gets **δ+**. In each highlighted bond, tap the **δ−** atom, then press Check."
+    structure: polar-bonds-grid
+    outline: [b1, b2, b4, b8]
+    alt: "Four molecules: hydrogen fluoride, H–F highlighted; water, one O–H highlighted; chloromethane, C–Cl highlighted; methanol, C–O highlighted."
+    tappable: { atoms: [a1, a2, a3, a4, a6, a7, a11, a12] }
+    aside: { label: Show values, scene: { id: en-strip, state: { highlight: h-c-o-f-cl } } }
+    answer: [a2, a3, a7, a12]
+    correct: "F, O, Cl, O: each time the atom further right, or higher up, wins the pull."
+    hints:
+      - includes: [a1, a4]
+        text: Hydrogen is a weak puller. Its partner here pulls much harder.
+      - includes: [a6, a11]
+        text: Carbon sits left of O and above Cl, but Cl and O still pull harder. Check the values.
+      - misses: [a2, a3, a7, a12]
+        text: Pick one atom in **each** of the four highlighted bonds.
+      - text: "Open the values: the atom with the bigger number is δ−."
+    reveal: "δ− on F, O, Cl and O. H–F: H {{electronegativity-pauling/H}} δ+, F {{electronegativity-pauling/F}} δ−. O–H: O {{electronegativity-pauling/O}} δ−, H {{electronegativity-pauling/H}} δ+. C–Cl: C {{electronegativity-pauling/C}} δ+, Cl {{electronegativity-pauling/Cl}} δ−. C–O: C {{electronegativity-pauling/C}} δ+, O {{electronegativity-pauling/O}} δ−."
+    sourceNote: "Structures: PubChem CIDs 14917, 962, 6327, 887."
+
+  - id: s04
+    phase: build
+    type: rank
+    prompt: The bigger the difference in electronegativity, the more **polar** the bond. Order these bonds from **least** to **most** polar.
+    items:
+      - { id: oh, text: O–H }
+      - { id: cf, text: C–F }
+      - { id: ch, text: C–H }
+      - { id: nh, text: N–H }
+    answer: [ch, nh, oh, cf]
+    aside: { label: Show values, scene: { id: en-strip, state: { highlight: h-c-n-o-f } } }
+    correct: "C–H is nearly even, and C–F is the most lopsided. That's why hexane (all C–C and C–H) ignored the rod."
+    hints:
+      - notLast: cf
+        text: Fluorine is the strongest puller there is, and carbon is far below it.
+      - notFirst: ch
+        text: Carbon and hydrogen have almost the same electronegativity. That bond is nearly even.
+      - before: [oh, nh]
+        text: Oxygen sits right of nitrogen, so it pulls harder on hydrogen's electrons.
+      - text: For each bond, subtract the two values. Smallest difference first.
+    reveal: "C–H, N–H, O–H, C–F. A **bond dipole** is drawn as a crossed arrow pointing at the δ− end. Note C–H: carbon is the (slightly) δ− end, but the difference is so small that chemists treat C–H as nonpolar."
+    revealScene: { id: bond-dipoles, state: { bonds: ch-nh-oh-cf } }
+
+  - id: s05
+    phase: build
+    type: explain
+    text: "Now count. Each atom fills its outer shell (8 electrons, 2 for H) with a mix of **bonds** and **lone pairs**, and in neutral molecules each element has its usual mix: **H** 1 bond · **C** 4 bonds · **N** 3 bonds + 1 lone pair · **O** 2 bonds + 2 lone pairs · **F, Cl, Br, I** 1 bond + 3 lone pairs. A double bond counts as 2 bonds, a triple as 3."
+    figures:
+      - { structure: methane, caption: "CH₄: C 4 bonds, H 1", alt: "Methane: carbon with four bonds, each hydrogen with one." }
+      - { structure: ammonia, caption: "NH₃: N 3 + 1 pair", alt: "Ammonia: nitrogen with three bonds and one lone pair." }
+      - { structure: water, caption: "H₂O: O 2 + 2 pairs", alt: "Water: oxygen with two bonds and two lone pairs." }
+      - { structure: hydrogen-fluoride, caption: "HF: F 1 + 3 pairs", alt: "Hydrogen fluoride: fluorine with one bond and three lone pairs." }
+      - { structure: acetonitrile, caption: "CH₃–C≡N", alt: "Example: acetonitrile. The end carbon has four bonds, three of them in a triple bond to nitrogen. Nitrogen has three bonds and one lone pair." }
+    sourceNote: "Lone pairs vs 1, 2 or 3 shared pairs, and acetonitrile, after MIT OCW 5.12, Lecture 1 p. 9 ('Bonding Possibilities of Main Organic Atoms'), Berkowski, Spring 2005, CC BY-NC-SA 4.0. Table layout ours."
+
+  - id: s06
+    phase: build
+    type: explain
+    text: "When an atom breaks its usual pattern, it carries a **formal charge**. Count **dots and sticks**:<br>**Formal charge = valence electrons − lone-pair electrons − bonds**<br>(Every lone-pair dot counts; each bond counts once, for this atom's half of the pair.)<br>H₃O⁺: oxygen has 6 − 2 − 3 = **+1**. One more bond than usual → +1.<br>OH⁻: oxygen has 6 − 6 − 1 = **−1**. One fewer bond, keeping the pair → −1."
+    scene: { id: dots-and-sticks, state: { example: hydronium-hydroxide } }
+    sourceNote: "Formal charge as in MIT OCW 5.12, Problem Set 1 Q1, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Wording ours."
+
+  - id: s07
+    phase: build
+    type: numeric
+    prompt: Ammonium, NH₄⁺. What is the formal charge on nitrogen?
+    figures:
+      - { structure: ammonium, hide: [charges], ring: [a1], alt: "Ammonium: nitrogen, ringed, with four bonds to hydrogen and no lone pair. Its charge is hidden." }
+    unitSymbol: ""
+    signKey: true
+    answer: 1
+    tolerance: 0
+    correct: "5 − 0 − 4 = +1. Four bonds is one more than nitrogen's usual three."
+    hints:
+      - match: 0
+        text: Nitrogen usually makes 3 bonds with a lone pair. Here it has 4 bonds and no lone pair. Count again.
+      - match: -1
+        text: "Check the sign: subtracting fewer electrons than nitrogen owns leaves it positive."
+      - match: 4
+        text: Bonds count once each, not twice. 5 − 0 − 4.
+      - match: -4
+        text: Bonds count once each, not twice. 5 − 0 − 4.
+      - text: Valence 5, minus lone-pair electrons, minus bonds.
+    reveal: "+1. Nitrogen: 5 valence electrons, no lone pairs, 4 bonds: 5 − 0 − 4 = +1."
+    revealScene: { id: dots-and-sticks, state: { example: ammonium } }
+
+  - id: s08
+    phase: build
+    type: tap-to-identify
+    prompt: In your body, the amino acid **glycine** looks like this. The charges have been hidden. Tap **every** atom that carries a formal charge, then press Check.
+    structure: glycine-zwitterion
+    hide: [charges]
+    alt: "Glycine. A nitrogen bonded to three hydrogens and a CH₂ carbon. The CH₂ is bonded to a carbon that has a double bond to one oxygen and a single bond to another. The double-bonded oxygen has two lone pairs; the single-bonded oxygen has three."
+    tappable: { atoms: all }
+    answer: [a1, a5]
+    correct: "N has 4 bonds (+1); the single-bonded O has 1 bond and 3 lone pairs (−1). The whole molecule is neutral, yet it carries two charges."
+    hints:
+      - includes: [a4]
+        text: "That oxygen has 2 bonds (one double) and 2 lone pairs: 6 − 4 − 2 = 0. Its usual pattern."
+      - includes: [a2, a3]
+        text: "That carbon has 4 bonds and no lone pairs: 4 − 0 − 4 = 0."
+      - includes: [a6, a7, a8, a9, a10]
+        text: "Each H has its 1 bond: 1 − 0 − 1 = 0."
+      - match: [a1]
+        text: One more. Find the oxygen with only one bond.
+      - match: [a5]
+        text: One more. Count the nitrogen's bonds.
+      - text: "Look for an atom off its usual pattern: an N with 4 bonds, an O with 1."
+    reveal: "⊕ on N and ⊖ on the single-bonded O. N: 5 − 0 − 4 = +1. O: 6 − 6 − 1 = −1."
+    sourceNote: "Structure: PubChem CID 750 (glycine), drawn as the zwitterion found in water."
+
+  - id: s09
+    phase: build
+    type: multiple-choice
+    prompt: Formal charges can explain a lot, but some structures **can't exist** at all. Pick every one that can't.
+    options:
+      - { id: a, structure: methyl-cation, text: "CH₃⁺: carbon with three bonds, no lone pair, charge +1." }
+      - { id: b, structure: methyl-anion, text: "CH₃⁻: carbon with three bonds and one lone pair, charge −1." }
+      - { id: c, structure: pentahydridocarbon, text: "CH₅: carbon with five bonds." }
+      - { id: d, structure: methanediide, text: "CH₂²⁻: carbon with two bonds and two lone pairs, charge −2." }
+    answer: [c, d]
+    correct: "Two rules: **a second-row atom never holds more than 8 electrons** (CH₅ would have 10), and **charges beyond ±1 on one atom don't happen** in stable structures (CH₂²⁻). CH₃⁺ is short of an octet but real: a reactive cation you'll meet later."
+    hints:
+      - includes: [a]
+        text: CH₃⁺ has only 6 electrons around carbon. Short of an octet is allowed briefly; it's a real, very reactive ion.
+      - includes: [b]
+        text: "CH₃⁻: 3 bonds and 1 lone pair is 8 electrons, charge −1. That one's fine."
+      - misses: [c]
+        text: "Count the electrons around carbon in CH₅: 5 bonds × 2 = 10. Too many for a second-row atom."
+      - misses: [d]
+        text: "Work out carbon's formal charge in `d`: 4 − 4 − 2."
+      - text: "Check two things on every card: electrons around the atom (no more than 8), and its formal charge (no more than ±1)."
+    reveal: "`c` 10 electrons: octet exceeded. `d` −2: charge too large. `a` and `b`: real ions."
+    sourceNote: "The two rules follow MIT OCW 5.12, Problem Set 1 Q1 ('large charge … octet exceeded'), Berkowski, Spring 2005, CC BY-NC-SA 4.0."
+
+  - id: s10
+    phase: build
+    type: explain
+    text: "**Boron** breaks the rule, and stays neutral doing it. With 3 valence electrons it makes 3 bonds: BF₃ has formal charge 3 − 0 − 3 = 0 on boron, but only **6** electrons around it.<br>That empty spot makes BF₃ hungry for a pair of electrons. In Lesson 8 you'll watch a lone pair dive into it."
+    scene: bf3-sextet
+
+  - id: s11
+    phase: check
+    problem: u1-bond-polarity-rank
+
+  - id: s12
+    phase: check
+    problem: u1-fc-oxygen-three-bonds
+
+  - id: s13
+    phase: check
+    problem: u1-fc-unreasonable
+
+  - id: s14
+    phase: wrap
+    type: explain
+    text: "**Bonds aren't always fair, and atoms keep count.**<br>The more electronegative atom is δ−; a bigger difference means a more polar bond.<br>Usual patterns: H 1 · C 4 · N 3 + 1 pair · O 2 + 2 pairs · halogen 1 + 3 pairs.<br>Formal charge = valence − lone-pair electrons − bonds.<br>Never more than 8 around C, N, O; never beyond ±1.<br>Next question: water and CCl₄ both have polar bonds, so why is only one a polar molecule? Shape decides (Lesson 3)."
+    aside:
+      label: Bonding patterns card
+      table:
+        columns: ["+1", "0", "−1"]
+        rows:
+          - head: H
+            cells:
+              - { structure: frag-h-plus, alt: "H⁺: hydrogen with no bond and no electrons, charge +1." }
+              - { structure: frag-h-1, alt: "Hydrogen with one bond, charge 0." }
+              - { structure: frag-h-minus, alt: "H⁻: hydrogen with one lone pair and no bond, charge −1." }
+          - head: B
+            cells:
+              - null
+              - { structure: frag-b-3, alt: "Boron with three bonds, charge 0." }
+              - { structure: frag-b-4, alt: "Boron with four bonds, charge −1." }
+          - head: C
+            cells:
+              - { structure: frag-c-3, alt: "Carbon with three bonds and no lone pair, charge +1." }
+              - { structure: frag-c-4, alt: "Carbon with four bonds, charge 0." }
+              - { structure: frag-c-3-lp1, alt: "Carbon with three bonds and one lone pair, charge −1." }
+          - head: N
+            cells:
+              - { structure: frag-n-4, alt: "Nitrogen with four bonds, charge +1." }
+              - { structure: frag-n-3-lp1, alt: "Nitrogen with three bonds and one lone pair, charge 0." }
+              - { structure: frag-n-2-lp2, alt: "Nitrogen with two bonds and two lone pairs, charge −1." }
+          - head: O
+            cells:
+              - { structure: frag-o-3-lp1, alt: "Oxygen with three bonds and one lone pair, charge +1." }
+              - { structure: frag-o-2-lp2, alt: "Oxygen with two bonds and two lone pairs, charge 0." }
+              - { structure: frag-o-1-lp3, alt: "Oxygen with one bond and three lone pairs, charge −1." }
+          - head: halogen (X)
+            cells:
+              - { structure: frag-x-2-lp2, alt: "Halogen with two bonds and two lone pairs, charge +1." }
+              - { structure: frag-x-1-lp3, alt: "Halogen with one bond and three lone pairs, charge 0." }
+              - { structure: frag-x-0-lp4, alt: "Halide: halogen with four lone pairs and no bond, charge −1." }
+    sourceNote: "Bonding patterns card: our own table, built from the formal-charge rule taught in this Lesson."

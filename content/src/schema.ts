@@ -71,7 +71,12 @@ const aside = z
   .refine((a) => !!a.scene !== !!a.table, { message: "an aside holds a scene or a table" });
 
 /** What any Step or Problem may show besides its interaction. */
-const visuals = { figures: z.array(figure).min(1).optional(), aside: aside.optional() };
+const visuals = {
+  figures: z.array(figure).min(1).optional(),
+  aside: aside.optional(),
+  /** A written Source note (Markdown): credits for structures, wording or ideas; cited numbers add their own. */
+  sourceNote: text.optional(),
+};
 
 /** A graded Step's or Problem's visuals, plus a Scene that plays once it is answered (it can show the answer). */
 const gradedVisuals = { ...visuals, revealScene: sceneUse.optional() };
@@ -127,6 +132,8 @@ const numeric = {
   prompt: text,
   /** The unit of measure, e.g. "°", "Å", "kJ/mol" (named so it can't be read as a course Unit). */
   unitSymbol: z.string(),
+  /** Show a ± key beside the box (answers that may be negative, e.g. a formal charge). */
+  signKey: z.boolean().optional(),
   answer: z.number(),
   /** Absolute: answer ± tolerance is right. */
   tolerance: z.number().min(0),

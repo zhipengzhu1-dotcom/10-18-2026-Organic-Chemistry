@@ -114,6 +114,7 @@ export function renderLesson(lesson: Lesson): Lesson {
   const visuals = (s: Step): Step => {
     const out = { ...s };
     if (s.figures) out.figures = s.figures.map(figure);
+    if (s.sourceNote) out.sourceNote = md(s.sourceNote);
     if (s.aside?.table)
       out.aside = {
         ...s.aside,

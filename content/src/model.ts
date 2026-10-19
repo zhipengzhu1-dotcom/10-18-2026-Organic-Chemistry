@@ -63,6 +63,8 @@ export interface Aside {
 export interface Visuals {
   figures?: Figure[];
   aside?: Aside;
+  /** A written Source note (Markdown) for what isn't a cited number: structures, wording, ideas. */
+  sourceNote?: string;
 }
 
 /** A graded Step's visuals, plus the Scene that plays once it is answered (it may show the answer). */
@@ -112,6 +114,8 @@ export interface NumericStep extends GradedVisuals {
   prompt: string;
   /** The unit of measure shown beside the box, e.g. "°" or "Å". */
   unitSymbol: string;
+  /** A ± key beside the box flips the sign of what is typed. */
+  signKey?: boolean;
   answer: number;
   /** Absolute: a value within answer ± tolerance is right. */
   tolerance: number;

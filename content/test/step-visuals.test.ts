@@ -185,6 +185,18 @@ describe("aside: something one tap away", () => {
   });
 });
 
+describe("a written Source note (credits that aren't cited numbers)", () => {
+  it("rides on the Step, and a Problem's on its Check Step", () => {
+    const note = "Formal charge as in MIT OCW 5.12, Problem Set 1 Q1.";
+    const meta = { id: "p1", unit: "u1", lesson: "l1", difficulty: 1, status: "approved", source: "Original" };
+    const { id: _i, phase: _p, ...interaction } = numeric({ sourceNote: note });
+    const result = build(numeric({ sourceNote: note }), (t) => (t["chem/problems/p1.yaml"] = { ...meta, ...interaction }));
+    expect(result.errors).toEqual([]);
+    expect(stepsOf(result)[2].sourceNote).toBe(note);
+    expect(stepsOf(result)[7].sourceNote).toBe(note);
+  });
+});
+
 describe("Problems carry figures, revealScene and aside into their Check Steps", () => {
   const { id: _i, phase: _p, ...interaction } = numeric({
     revealScene: { id: "strip" },
