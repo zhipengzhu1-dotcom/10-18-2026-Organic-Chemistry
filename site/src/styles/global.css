@@ -285,8 +285,17 @@
     display: grid;
     gap: 12px;
   }
-  .player-body .report {
+  /* The Source note and Report a mistake share a row at the foot of the Step (an open note wraps). */
+  .player-body .step-meta {
     margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px 16px;
+  }
+  .step-meta .source-note[open] {
+    flex-basis: 100%;
   }
   .report a {
     display: inline-flex;
@@ -895,6 +904,13 @@
     border: var(--at-border-strong) solid var(--at-line);
     box-shadow: 6px 6px 0 var(--at-shadow);
     background: var(--at-surface);
+  }
+  /* On a phone the Lesson-end screen (Wrap text, key idea, two buttons) has no room left for the
+     Wrap's still final frame, so the key idea card stands in for it there; wider screens show both. */
+  @media (max-width: 480px) {
+    .player-body:has(> .card) .scene-still {
+      display: none;
+    }
   }
   .scene-controls,
   .scene-control {

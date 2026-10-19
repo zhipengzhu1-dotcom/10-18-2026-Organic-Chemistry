@@ -150,7 +150,8 @@ steps:
       - above: [[c, b]]
         text: "`b` and `c` tie on rules 1–3: a 6-electron carbon, two charges, − on O. Rule 4: in which are + and − closer?"
       - text: "Go rule by rule, and stop at the first rule that tells two cards apart."
-    reveal: "Top to bottom: `a` (rule 1: octets), `b` (rule 4: charges adjacent), `c` (rule 4: charges far apart)."
+    reveal: "Top to bottom: `a`, `b`, `c`."
+    revealTags: { a: "rule 1: octets", b: "rule 4: charges adjacent", c: "rule 4: charges far apart" }
     source: "Ranking method adapted from MIT OCW 5.12, Lecture 2 p. 4, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Example ours."
 
   - id: s10

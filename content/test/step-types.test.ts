@@ -116,6 +116,16 @@ describe("Numeric input and Rank / order Steps", () => {
     ]);
   });
 
+  it("a Rank Step can tag each card with why it sits there, shown once answered (Lesson 7 s09)", () => {
+    const revealTags = { triple: "three pairs", double: "two pairs", single: "one pair" };
+    const { model, errors } = build(numeric(), rank({ revealTags }));
+    expect(errors).toEqual([]);
+    expect(model!.subjects[0].courses[0].units[0].lessons[0].steps[5]).toMatchObject({ revealTags });
+    expect(build(numeric(), rank({ revealTags: { quadruple: "four" } })).errors).toEqual([
+      `${L}: step s06: a reveal tag names unknown item "quadruple"`,
+    ]);
+  });
+
   it("a Rank Step can't start in the right order", () => {
     const items = [
       { id: "triple", text: "C≡C" },

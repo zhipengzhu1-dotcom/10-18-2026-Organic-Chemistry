@@ -112,7 +112,7 @@ export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9",
   const seconds = (t: number) => `${t.toFixed(1)} of ${duration} seconds`;
 
   return (
-    <figure className="scene">
+    <figure className={still ? "scene scene-still" : "scene"}>
       <div
         className="scene-frame"
         role="img"

@@ -128,6 +128,8 @@ export interface RankStep {
   correct?: string;
   hints?: RankHint[];
   reveal: string;
+  /** Once answered, each card's note on why it sits there; secret (it gives the order away). */
+  revealTags?: Record<string, string>;
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];

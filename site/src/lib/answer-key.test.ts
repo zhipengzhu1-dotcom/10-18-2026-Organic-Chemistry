@@ -59,3 +59,23 @@ it("a Tap Step's reveal replay (it draws the answer) goes in the key", () => {
   expect(JSON.stringify(page)).not.toMatch(/secret|Secret|pushes/);
   expect(withKey(page, JSON.parse(JSON.stringify(key)))).toEqual(whole);
 });
+
+it("a Rank Step's reveal tags (they give the order away) go in the key", () => {
+  const step = {
+    id: "s09",
+    phase: "build" as const,
+    type: "rank" as const,
+    prompt: "Order.",
+    items: [
+      { id: "b", text: "B" },
+      { id: "a", text: "A" },
+    ],
+    answer: ["a", "b"],
+    reveal: "a, b",
+    revealTags: { a: "Secret tag", b: "Secret tag too" },
+  };
+  const whole = { ...lesson(), steps: [step] };
+  const { page, key } = splitLesson(whole);
+  expect(JSON.stringify(page)).not.toMatch(/Secret/);
+  expect(withKey(page, JSON.parse(JSON.stringify(key)))).toEqual(whole);
+});

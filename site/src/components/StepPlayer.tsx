@@ -125,8 +125,15 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     if (linked && moved && location.hash !== `#${step.id}`) history.replaceState(null, "", `#${step.id}`);
   }, [linked, step.id, screen.index, practice]);
 
+  // Once a Rank Step is answered the cards stand in the right order (the reveal moves them there).
   const order =
-    step.type !== "rank" ? [] : ranked?.stepId === step.id ? ranked.order : step.items.map((item) => item.id);
+    step.type !== "rank"
+      ? []
+      : screen.canContinue && step.answer.length
+        ? step.answer
+        : ranked?.stepId === step.id
+          ? ranked.order
+          : step.items.map((item) => item.id);
 
   // Manipulate a Scene: the control's value; the reveal jumps it to the answer (and a resumed
   // right answer shows it there too).
@@ -207,11 +214,14 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
       <main className="player-body">
         {step.type === "explain" ? (
           <div className="explain-text" {...html(step.text)} />
-        ) : (
+        ) : answeredScene ? null : (
+          // Once a Hook whose Scene plays on reveal is answered, the reveal and its Scene take the
+          // question's place, so the Step still fits one phone screen.
           <p className="player-prompt" {...html(step.prompt)} />
         )}
 
-        {step.type === "tap-to-identify" && (
+        {/* A Tap Step whose answer comes from a push (Lesson 7): once answered, the replay takes the drawing's place. */}
+        {step.type === "tap-to-identify" && !(screen.canContinue && step.replay) && (
           <StructureTap
             step={step}
             picked={chosen}
@@ -221,7 +231,6 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           />
         )}
 
-        {/* A Tap Step whose answer comes from a push (Lesson 7): once answered, the pushes replay. */}
         {step.type === "tap-to-identify" && screen.canContinue && step.replay && (
           <PushReplayPlayer key={`replay-${step.id}`} start={step.replay.start} pushes={step.replay.pushes} />
         )}
@@ -274,7 +283,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </ScenePlayer>
         )}
 
-        {step.type === "multiple-choice" && (
+        {/* A Scene that changes once answered (a Hook that plays on reveal) takes the Choices' place then. */}
+        {step.type === "multiple-choice" && !answeredScene && (
           <div className="opts" role="group" aria-label="Choices">
             {step.options.map((o) =>
               o.structure ? (
@@ -316,6 +326,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
             order={order}
             onChange={(o) => setRanked({ stepId: step.id, order: o })}
             locked={screen.canContinue}
+            tags={screen.canContinue ? step.revealTags : undefined}
           />
         )}
 
@@ -331,12 +342,17 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </div>
         )}
 
-        {/* Keyed per Step so a new Step opens its Source note collapsed. */}
-        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} text={step.source} />
-
-        <p className="report">
-          <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>
-        </p>
+        {/* Keyed per Step so a new Step opens its Source note collapsed. A Scene that shows its numbers
+            only once the Step is answered (a Hook's reveal) gets its Source note then, so it can't give the answer away. */}
+        {/* The Source note and Report a mistake share one row at the foot of the Step. */}
+        <div className="step-meta">
+          {!(step.type !== "explain" && step.scene?.onAnswer && !screen.canContinue) && (
+            <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} text={step.source} />
+          )}
+          <p className="report">
+            <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>
+          </p>
+        </div>
       </main>
 
       <div className="player-foot">
@@ -437,10 +453,12 @@ interface RankCardsProps {
   order: string[];
   onChange: (order: string[]) => void;
   locked: boolean;
+  /** Once answered: each card's note on why it sits there. */
+  tags?: Record<string, string>;
 }
 
 /** Cards in one column: drag a card (mouse or touch), or focus it and press ↑/↓ to move it. */
-function RankCards({ step, order, onChange, locked }: RankCardsProps) {
+function RankCards({ step, order, onChange, locked, tags }: RankCardsProps) {
   const list = useRef<HTMLOListElement>(null);
   const [dragging, setDragging] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
@@ -521,9 +539,24 @@ function RankCards({ step, order, onChange, locked }: RankCardsProps) {
                 e.preventDefault();
                 moveTo(id, to, true);
               }}
-              {...(drawn ? { "aria-label": text(id) } : html(text(id)))}
+              // A structure card is named by its text; once answered, its tag joins the name.
+              {...(drawn && { "aria-label": tags?.[id] ? `${text(id)} ${tags[id]}` : text(id) })}
             >
-              {drawn && <span aria-hidden="true" {...html(drawn.svg)} />}
+              {!drawn && <span {...html(text(id))} />}
+              {drawn && (
+                <>
+                  {/* The card's letter, which Hints name ("`a` gives every atom an octet"). */}
+                  <span className="card-tag" aria-hidden="true">
+                    {id}
+                  </span>
+                  <span aria-hidden="true" {...html(drawn.svg)} />
+                </>
+              )}
+              {tags?.[id] && (
+                <span className="rank-tag" aria-hidden={drawn ? true : undefined}>
+                  {tags[id]}
+                </span>
+              )}
             </button>
           </li>
           );

@@ -102,6 +102,8 @@ function answerRules(item: Interaction): string[] {
         if (!unknown.length && item.answer.indexOf(upper) < item.answer.indexOf(lower))
           errors.push(`a Hint's "above" pair ${upper} above ${lower} holds in the answer order`);
       }
+      for (const id of Object.keys(item.revealTags ?? {}))
+        if (!itemIds.includes(id)) errors.push(`a reveal tag names unknown item "${id}"`);
       break;
     }
     case "manipulate":

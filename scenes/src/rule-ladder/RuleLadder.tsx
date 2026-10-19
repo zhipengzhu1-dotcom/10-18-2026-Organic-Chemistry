@@ -1,5 +1,5 @@
 // rule-ladder: a pure function of (t, state); see manifest.ts.
-import { BOSS, ELECTRON, INK, LINE, MUTED, Molecule, TEXT_FONT, drawn, place } from "../contributors/draw.tsx";
+import { BOSS, DATA_FONT, ELECTRON, INK, LINE, MUTED, Molecule, TEXT_FONT, drawn, place } from "../contributors/draw.tsx";
 import { acetamide, acetamidePolar } from "../contributors/structures.ts";
 import { frameSize, type Box } from "../frame.ts";
 import { easeOut, lerp, progress } from "../motion.ts";
@@ -68,7 +68,7 @@ export default function RuleLadder({ t, state, aspect }: SceneProps<RuleLadderSt
           <g key={rule.id}>
             <rect x={box.x} y={box.y} width={box.w} height={box.h} rx={24} fill={ELECTRON} fillOpacity={0.12 * lit} stroke={lit > 0.5 ? ELECTRON : LINE} strokeWidth={4} opacity={lerp(0.4, 1, lit)} />
             <g opacity={lerp(0.4, 1, lit)} fontFamily={TEXT_FONT}>
-              <text x={box.x + L.title.dx * 0.45} y={box.y + L.title.dy} fontSize={L.font * 1.3} textAnchor="middle" fill={ELECTRON} fontWeight={700}>
+              <text x={box.x + L.title.dx * 0.45} y={box.y + L.title.dy} fontSize={L.font * 1.3} textAnchor="middle" fill={ELECTRON} fontWeight={700} fontFamily={DATA_FONT}>
                 {rule.id}
               </text>
               <text x={box.x + L.title.dx} y={box.y + L.title.dy} fontSize={L.font} fill={INK} fontWeight={700}>

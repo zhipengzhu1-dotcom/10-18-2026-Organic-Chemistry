@@ -101,6 +101,8 @@ const rank = {
   correct: text.optional(),
   hints: z.array(rankHint).optional(),
   reveal: text,
+  /** Shown on each card once the Step is answered, in the right order: why it sits there (secret: it gives the order away). */
+  revealTags: z.record(id, text).optional(),
 };
 
 /** A value a Scene's settable state takes: a number (range) or an option id (choice). */

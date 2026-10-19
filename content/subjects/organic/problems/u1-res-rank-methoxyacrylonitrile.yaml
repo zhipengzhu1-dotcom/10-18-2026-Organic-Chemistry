@@ -23,4 +23,9 @@ hints:
   - above: [[d, c]]
     text: "`c` and `d` tie on rules 1–3. Rule 4: in which are + and − closer together?"
   - text: "Count charges first: they're all two. So test octets, then where − sits, then how far apart the charges are."
-reveal: "Top to bottom: `a` (rule 1: octets ✓, rule 3: − on N), `b` (rule 1: octets ✓, rule 3: − on C), `c` (rule 1: 6-e⁻ C, rule 4: charges adjacent), `d` (rule 1: 6-e⁻ C, rule 4: charges far apart)."
+reveal: "Top to bottom: `a`, `b`, `c`, `d`."
+revealTags:
+  a: "rule 1: octets ✓, rule 3: − on N"
+  b: "rule 1: octets ✓, rule 3: − on C"
+  c: "rule 1: 6-e⁻ C, rule 4: charges adjacent"
+  d: "rule 1: 6-e⁻ C, rule 4: charges far apart"

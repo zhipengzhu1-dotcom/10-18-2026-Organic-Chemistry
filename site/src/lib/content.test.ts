@@ -62,6 +62,13 @@ describe("md marks numbers and formulas as data", () => {
     expect(md("OH⁻ takes H⁺")).toBe(`${d("OH⁻")} takes ${d("H⁺")}`);
   });
 
+  it("wraps electrons and a charge written before a formula (Lesson 7)", () => {
+    expect(md("C has only 6 e⁻ here")).toBe(`C has only ${d("6")} ${d("e⁻")} here`);
+    expect(md("rule 1: 6-e⁻ C")).toBe(`rule ${d("1")}: ${d("6")}-${d("e⁻")} C`);
+    expect(md("lands on C1: ⁻CH₂–CH=N⁺.")).toBe(`lands on C${d("1")}: ${d("⁻CH₂–CH=N⁺")}.`);
+    expect(md("the electron")).toBe("the electron");
+  });
+
   it("leaves ordinary words and capitals alone", () => {
     expect(md("A Carbon atom. I think Of course")).toBe("A Carbon atom. I think Of course");
   });

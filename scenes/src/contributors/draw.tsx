@@ -76,7 +76,7 @@ export function Molecule({ placed, opacity = 1, glow = [], dashed = [] }: Molecu
   const inner = drawing.svg.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "");
   const centre = mean(Object.values(drawing.atoms));
   return (
-    <g transform={`translate(${x} ${y}) scale(${scale})`} opacity={opacity} style={{ color: INK, ["--lone-pair" as string]: ELECTRON }}>
+    <g transform={`translate(${x} ${y}) scale(${scale})`} opacity={opacity} fontFamily={DATA_FONT} style={{ color: INK, ["--lone-pair" as string]: ELECTRON }}>
       {glow.map((id) => {
         const s = drawing.bonds[id];
         return <line key={id} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} stroke={ELECTRON} strokeOpacity={0.35} strokeWidth={16} strokeLinecap="round" />;

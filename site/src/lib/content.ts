@@ -101,7 +101,8 @@ export const mdBlocks = (text: string) => markData(marked.parse(text, { async: f
 const EL = "(?:Cl|Br|Na|Mg|Al|Si|Li|Ca|Fe|Zn|Cu|Mn|Cr|Pd|Pt|Sn|Hg|Se|Os|Ni|Ag|Au|Ti|He|Ne|Ar|H|B|C|N|O|F|P|S|K|I)";
 const CHUNK = `(?:${EL}[₀-₉]*|\\((?:${EL}[₀-₉]*)+\\)[₀-₉]*)+[⁺⁻]*`;
 const DATA = new RegExp(
-  `(?<![A-Za-z])${CHUNK}(?:[–=≡]${CHUNK})*(?![a-z])` + // formula: CH₄, H₃C–CH₃, C=O, OH⁻
+  `(?<![A-Za-z])[⁺⁻]?${CHUNK}(?:[–=≡]${CHUNK})*(?![a-z])` + // formula: CH₄, H₃C–CH₃, C=O, OH⁻, ⁻CH₂–CH=N⁺
+    `|(?<![A-Za-z])e⁻` + // an electron: 6 e⁻, 6-e⁻
     `|(?<![\\d.])[−+]?\\d+(?:\\.\\d+)?`, // number: 4, 1.54, −1.7, the 3 of 3D and sp3
   "g",
 );

@@ -113,7 +113,10 @@ describe("Lesson 7 matches its spec", () => {
 
       if (fields["Correct line"]) expect(step.correct).toBe(quotes(fields["Correct line"])[0]);
       expect(step.hints?.map((h) => h.text) ?? []).toEqual(hints);
-      for (const quote of quotes(fields.Reveal ?? "")) expect(step.reveal).toContain(quote);
+      // A Rank reveal's quoted per-card notes are the cards' tags; any other quote is in the reveal text.
+      const tags = step.type === "rank" ? Object.values(step.revealTags ?? {}) : [];
+      for (const quote of quotes(fields.Reveal ?? "")) expect([step.reveal, ...tags].some((t) => t.includes(quote)), quote).toBe(true);
+      if (step.type === "rank" && /tagged/.test(fields.Reveal)) expect(step.answer.map((id) => step.revealTags?.[id])).toEqual(quotes(fields.Reveal));
       if (fields["Tap-only cue"]) {
         const [idle, drag] = quotes(fields["Tap-only cue"]);
         expect(step.type === "tap-to-identify" && step.tapOnly).toEqual({ idle, drag });
