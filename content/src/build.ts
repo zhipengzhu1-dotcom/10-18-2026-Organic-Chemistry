@@ -9,6 +9,7 @@
 //   <subject>/problems/<problem id>.yaml
 //   <subject>/data/<data id>.yaml|.json  cited data (ADR 0002); see data-load.ts
 //   <subject>/structures/<structure id>.yaml   2D structures, written by `pnpm structure`
+//   <subject>/views.yaml               named start views of molecules for the 3D Step card (molecule.ts)
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 import { parse } from "yaml";
@@ -20,6 +21,7 @@ import {
   stepIdLock,
   structureFile,
   subjectFile,
+  viewsFile,
   type LessonFile,
   type ProblemFile,
   type StructureFile,
@@ -35,6 +37,7 @@ import { dataFile, resolveDataFile } from "./data-load.ts";
 import type { SceneCatalog, SceneUse } from "./model.ts";
 import { checkStepScene, resolveSceneUse, type SceneUseFile } from "./scenes.ts";
 import { checkStructure, resolveOptions, resolveTap } from "./structures.ts";
+import { checkViews, resolveMoleculeUse, type MoleculeUseFile, type Views } from "./molecule-use.ts";
 
 /** What a graded Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
 type StructureFields = { options: Option[] } | { structure: StructureView; targets: TapTarget[] };
@@ -137,6 +140,10 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
         for (const message of checkInteraction(problem)) errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
     }
     const problemCitations = citeNumbers(slug, data, lessons, problems, errors);
+    const viewsRel = `${slug}/views.yaml`;
+    const views = (existsSync(join(root, viewsRel)) && load(viewsRel, viewsFile)) || {};
+    for (const message of checkViews(views, data)) errors.push(`${viewsRel}: ${message}`);
+    resolveMolecules(slug, data, views, lessons, problems, problemCitations, errors);
 
     // Structure cards and Tap targets, resolved once per Step and Problem so each error is reported once.
     const structures = new Map<string, Structure | undefined>();
@@ -358,6 +365,44 @@ function citeNumbers(
     if (cited.length) byProblem.set(name, cited);
   }
   return byProblem;
+}
+
+/**
+ * Resolves every Step's and Problem's `molecule` (the 3D Step card) in place in the loaded maps,
+ * after their numbers are cited: the molecule's Cited values join the Step's (or the Problem's)
+ * citations, so its Source note covers the geometry, colours and radii.
+ */
+function resolveMolecules(
+  slug: string,
+  data: CitedData,
+  views: Views,
+  lessons: Map<string, LessonFile | undefined>,
+  problems: Map<string, ProblemFile | undefined>,
+  problemCitations: Map<string, Cited[]>,
+  errors: string[],
+): void {
+  const merge = (own: Cited[] = [], extra: Cited[]) => [...own, ...extra.filter((c) => !own.some((o) => o.ref === c.ref))];
+  const resolve = <T extends object>(item: T, where: string): { item: T; cited: Cited[] } => {
+    if (!("molecule" in item) || !item.molecule) return { item, cited: [] };
+    const { molecule, cited, errors: broken } = resolveMoleculeUse(item.molecule as MoleculeUseFile, data, views);
+    for (const message of broken) errors.push(`${where}${message}`);
+    return molecule ? { item: { ...item, molecule }, cited } : { item, cited: [] };
+  };
+  for (const [name, lesson] of lessons) {
+    if (!lesson) continue;
+    const steps = lesson.steps.map((step) => {
+      const { item, cited } = resolve(step, `${slug}/lessons/${name}.yaml: step ${step.id}: `);
+      if (!cited.length) return item;
+      return { ...item, citations: merge((item as { citations?: Cited[] }).citations, cited) };
+    });
+    lessons.set(name, { ...lesson, steps });
+  }
+  for (const [name, problem] of problems) {
+    if (!problem) continue;
+    const { item, cited } = resolve(problem, `${slug}/problems/${name}.yaml: `);
+    problems.set(name, item);
+    if (cited.length) problemCitations.set(name, merge(problemCitations.get(name), cited));
+  }
 }
 
 function subdirs(dir: string): string[] {

@@ -1,6 +1,7 @@
 // The resolved course model: what the content build hands to the site and the
 // video renderer. Check Steps arrive with their Problem inlined.
-import type { Cited, CitedData } from "./data.ts";
+import type { Atom, Bond, Cited, CitedData } from "./data.ts";
+import type { Matrix3 } from "./molecule.ts";
 
 export type Phase = "hook" | "build" | "check" | "wrap";
 
@@ -42,12 +43,34 @@ export interface SceneUse {
   cited: Record<string, Cited>;
 }
 
+/**
+ * The molecule a Step shows in the 3D Step card, resolved from its cited data file: atoms (Å) and
+ * bonds, the start orientation, and each element's Jmol colour and Bondi radius (ADR 0002).
+ * The Step's `citations` carry the matching Cited values, so its Source note covers them.
+ */
+export interface MoleculeUse {
+  /** The data file id, e.g. "methane". */
+  id: string;
+  title: string;
+  atoms: Atom[];
+  bonds: Bond[];
+  /** The named start view (views.yaml), when the Step gives one. */
+  view?: string;
+  /** The start rotation: rows are the screen's right, up and toward-the-viewer axes (molecule.ts). */
+  orientation: Matrix3;
+  /** Per element present: colour "#RRGGBB" and van der Waals radius in Å, from the cited elements table. */
+  elements: Record<string, { colour: string; vdw: number }>;
+  /** The Step's own words, read first by the Describe button. */
+  describe?: string;
+}
+
 export interface ExplainStep {
   id: string;
   phase: Phase;
   type: "explain";
   text: string;
   scene?: SceneUse;
+  molecule?: MoleculeUse;
   citations?: Cited[];
 }
 
@@ -66,6 +89,7 @@ export interface MultipleChoiceStep {
   /** Set on Check Steps: the Bank Problem this Step plays. */
   problemId?: string;
   scene?: SceneUse;
+  molecule?: MoleculeUse;
   /** The cited values this Step's text shows (`{{file/key}}`); its Source note is generated from them. */
   citations?: Cited[];
 }
@@ -92,6 +116,7 @@ export interface NumericStep {
   reveal: string;
   problemId?: string;
   scene?: SceneUse;
+  molecule?: MoleculeUse;
   citations?: Cited[];
 }
 
@@ -111,6 +136,7 @@ export interface RankStep {
   reveal: string;
   problemId?: string;
   scene?: SceneUse;
+  molecule?: MoleculeUse;
   citations?: Cited[];
 }
 
@@ -137,8 +163,26 @@ export interface ManipulateStep {
   citations?: Cited[];
 }
 
+/** Rotate-and-identify 3D: turn the molecule in the 3D card, answer with ordinary choices (graded like Multiple choice). */
+export interface RotateAndIdentifyStep {
+  id: string;
+  phase: Phase;
+  type: "rotate-and-identify";
+  prompt: string;
+  molecule: MoleculeUse;
+  options: { id: string; text: string }[];
+  /** The exact set of correct option ids. */
+  answer: string[];
+  correct?: string;
+  hints?: Hint[];
+  reveal: string;
+  problemId?: string;
+  scene?: SceneUse;
+  citations?: Cited[];
+}
+
 /** A Step the Student answers and the engine grades. */
-export type GradedStep = MultipleChoiceStep | NumericStep | RankStep | TapStep | ManipulateStep;
+export type GradedStep = MultipleChoiceStep | NumericStep | RankStep | TapStep | ManipulateStep | RotateAndIdentifyStep;
 
 export type Step = ExplainStep | GradedStep;
 

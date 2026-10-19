@@ -26,10 +26,34 @@ const option = z.strictObject({ id, text, structure: id.optional(), hide });
 /** A text-only card (Rank items; structure Rank cards are not resolved yet). */
 const textOption = z.strictObject({ id, text });
 
+/**
+ * The 3D Step card (#68): `molecule: <data file id>`, or `{ id, view, describe }`. `view` names a start
+ * view in the Subject's views.yaml (default: the file's own axes); `describe` opens what the Describe
+ * button reads.
+ */
+const moleculeUse = z.preprocess(
+  (v) => (typeof v === "string" ? { id: v } : v),
+  z.strictObject({ id, view: id.optional(), describe: text.optional() }),
+);
+
+/** A named start view; see ViewSpec in molecule.ts. Atoms are 0-based indices in the data file's order. */
+const atomIndex = z.number().int().nonnegative();
+const viewSpec = z.strictObject({
+  look: z.tuple([atomIndex, atomIndex]).optional(),
+  plane: z.tuple([atomIndex, atomIndex, atomIndex]).optional(),
+  front: atomIndex.optional(),
+  up: atomIndex.optional(),
+  rotate: z.tuple([z.number(), z.number(), z.number()]).optional(),
+});
+
+/** `<subject>/views.yaml`: molecule id → view name → view. */
+export const viewsFile = z.record(id, z.record(id, viewSpec));
+
 /** Fields shared by a Multiple choice Step and a Multiple choice Problem. */
 const multipleChoice = {
   type: z.literal("multiple-choice"),
   prompt: text,
+  molecule: moleculeUse.optional(),
   options: z.array(option).min(2),
   /** The exact set of correct option ids. */
   answer: z.array(id).min(1),
@@ -68,6 +92,7 @@ const numericHint = z.strictObject({ match: z.number().optional(), text });
 const numeric = {
   type: z.literal("numeric"),
   prompt: text,
+  molecule: moleculeUse.optional(),
   /** The unit of measure, e.g. "°", "Å", "kJ/mol" (named so it can't be read as a course Unit). */
   unitSymbol: z.string(),
   answer: z.number(),
@@ -82,12 +107,28 @@ const numeric = {
 const rank = {
   type: z.literal("rank"),
   prompt: text,
+  molecule: moleculeUse.optional(),
   /** The cards, in the order they start in. */
   items: z.array(textOption).min(2),
   /** The one strict order of item ids, first to last. */
   answer: z.array(id).min(2),
   correct: text.optional(),
   /** A Rank Hint's `match` is one whole wrong order. */
+  hints: z.array(hint).optional(),
+  reveal: text,
+};
+
+/**
+ * Rotate-and-identify 3D: the Student turns the molecule in the 3D card and answers with ordinary
+ * choices, graded exactly like Multiple choice (the exact set of correct option ids).
+ */
+const rotateAndIdentify = {
+  type: z.literal("rotate-and-identify"),
+  prompt: text,
+  molecule: moleculeUse,
+  options: z.array(textOption).min(2),
+  answer: z.array(id).min(1),
+  correct: text.optional(),
   hints: z.array(hint).optional(),
   reveal: text,
 };
@@ -134,6 +175,7 @@ const explainStep = z.strictObject({
   type: z.literal("explain"),
   text,
   scene: sceneUse.optional(),
+  molecule: moleculeUse.optional(),
 });
 
 const multipleChoiceStep = z.strictObject({
@@ -148,6 +190,7 @@ const multipleChoiceStep = z.strictObject({
 const numericStep = z.strictObject({ id: stepId, phase, ...numeric, scene: sceneUse.optional() });
 const rankStep = z.strictObject({ id: stepId, phase, ...rank, scene: sceneUse.optional() });
 const manipulateStep = z.strictObject({ id: stepId, phase, ...manipulate });
+const rotateStep = z.strictObject({ id: stepId, phase, ...rotateAndIdentify, scene: sceneUse.optional() });
 
 /** A Check Step is a Problem from the Bank, referenced by id; its Step type is the Problem's. */
 const checkStep = z.strictObject({
@@ -162,7 +205,7 @@ const tapStep = z.strictObject({ id: stepId, phase, ...tapToIdentify, scene: sce
 /** Picks the Step schema by `type` (a Check Step is recognised by its `problem`), so errors point at the broken field. */
 const step = z.preprocess(
   (v) => (v && typeof v === "object" && "problem" in v && !("type" in v) ? { ...v, type: "check" } : v),
-  z.discriminatedUnion("type", [checkStep, explainStep, multipleChoiceStep, numericStep, rankStep, tapStep, manipulateStep]),
+  z.discriminatedUnion("type", [checkStep, explainStep, multipleChoiceStep, numericStep, rankStep, tapStep, manipulateStep, rotateStep]),
 );
 
 export const lessonFile = z.strictObject({
@@ -203,6 +246,7 @@ export const problemFile = z.discriminatedUnion("type", [
   z.strictObject({ ...problemMeta, ...numeric }),
   z.strictObject({ ...problemMeta, ...rank }),
   z.strictObject({ ...problemMeta, ...tapToIdentify }),
+  z.strictObject({ ...problemMeta, ...rotateAndIdentify }),
 ]);
 
 const unit = z.strictObject({

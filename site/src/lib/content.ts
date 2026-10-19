@@ -158,5 +158,8 @@ export function renderStep(s: Step): Step {
       return { ...s, ...shared, items: choices(s.items), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
     case "manipulate":
       return { ...s, ...shared, hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
+    case "rotate-and-identify":
+      // The molecule's `describe` stays plain text: it is read aloud, not shown.
+      return { ...s, ...shared, options: choices(s.options), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
   }
 }
