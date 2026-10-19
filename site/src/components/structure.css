@@ -10,14 +10,14 @@
 .step-figure { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center; }
 .step-figure .structure-figure { margin: 0; flex: 1 1 140px; max-width: 100%; display: grid; place-items: center; }
 .step-figure .structure { max-height: 14rem; }
-/* A reveal Scene (bare, no controls) shares the phone screen with a long feedback panel. */
-.scene-bare .scene-frame { max-height: min(45dvh, 10.5rem); }
 /* Short text choices two to a row (under a figure); one-word choices as many to a row as fit
    (Lesson 5's capsaicin: eight group names). */
 .opts.opts-chips { grid-template-columns: 1fr 1fr; }
 .opts.opts-words { grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr)); }
 @media (max-width: 480px) {
   .step-figure .structure { max-height: 8rem; }
+  /* A Scene without controls (a reveal, a card deal) shares the phone screen with long text or feedback. */
+  .scene-bare .scene-frame { max-height: min(45dvh, 10.5rem); }
   /* On a phone the Lesson-end screen keeps the Wrap text and the Key idea card on one screen;
      the Wrap's recap Scene shows from tablet width up (its screen-reader text is in the Wrap). */
   .scene-at-end { display: none; }
