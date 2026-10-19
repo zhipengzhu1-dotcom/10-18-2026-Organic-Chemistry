@@ -4,6 +4,7 @@ import type { GetStaticPaths } from "astro";
 import Base from "../../../../layouts/Base.astro";
 import LevelSelect from "../../../../components/LevelSelect.tsx";
 import { unitPages, type UnitPage } from "../../../../lib/content.ts";
+import { suggestProblemHref } from "../../../../lib/submit-links.ts";
 
 export const getStaticPaths = (() =>
   unitPages().map((page) => ({
@@ -20,6 +21,9 @@ const { subject, course, unit } = Astro.props as UnitPage;
     <h1><span class="unit-number">Unit {unit.number}</span> {unit.title}</h1>
     {unit.summary && <p>{unit.summary}</p>}
     <LevelSelect unit={unit} />
+    <p class="suggest">
+      Know a good Problem for this Unit? <a href={suggestProblemHref(unit.id)}>Suggest a Problem</a>
+    </p>
   </main>
 </Base>
 

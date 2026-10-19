@@ -6,6 +6,7 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type { NumericStep, RankStep } from "@astratron/content";
 import { act, start, type Action, type Answer, type Screen } from "../engine/player.ts";
 import { withKey, type AnswerKey, type PageLesson } from "../lib/answer-key.ts";
+import { mistakeTarget, reportMistakeHref } from "../lib/submit-links.ts";
 import SourceNote from "./SourceNote.tsx";
 import StructureTap from "./StructureTap.tsx";
 import "./structure.css";
@@ -16,6 +17,8 @@ interface Props {
   /** URL of the Lesson's answer key. */
   keyUrl: string;
   exitHref: string;
+  /** The Unit id, for the "Report a mistake" link. */
+  unitId: string;
 }
 
 /** Island-only action: open the Step a Step link names (ADR 0003). */
@@ -35,7 +38,7 @@ const visuallyHidden = {
   whiteSpace: "nowrap",
 } as const;
 
-export default function StepPlayer({ lesson: page, keyUrl, exitHref }: Props) {
+export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId }: Props) {
   const [key, setKey] = useState<AnswerKey>();
   const lesson = useMemo(() => withKey(page, key), [page, key]);
   const [screen, dispatch] = useReducer(
@@ -199,6 +202,10 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref }: Props) {
 
         {/* Keyed per Step so a new Step opens its Source note collapsed. */}
         <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} />
+
+        <p className="report">
+          <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>
+        </p>
       </main>
 
       <footer className="player-action">

@@ -11,11 +11,11 @@ export const getStaticPaths = (() =>
     props: page,
   }))) satisfies GetStaticPaths;
 
-const { subject, lesson, unitTitle, unitUrl } = Astro.props as LessonPage;
+const { subject, lesson, unitId, unitTitle, unitUrl } = Astro.props as LessonPage;
 // Only what a Student sees before answering goes into the page; the answer key is its own file.
 const { page } = splitLesson(renderLesson(lesson));
 ---
 
-<Base title={`${lesson.title} · ${unitTitle} · AstraTron`} description={lesson.goal}>
-  <StepPlayer client:load lesson={page} keyUrl={answerKeyUrl(subject, lesson.id)} exitHref={unitUrl} />
+<Base title={`${lesson.title} · ${unitTitle} · AstraTron`} description={lesson.goal} bare>
+  <StepPlayer client:load lesson={page} keyUrl={answerKeyUrl(subject, lesson.id)} exitHref={unitUrl} unitId={unitId} />
 </Base>

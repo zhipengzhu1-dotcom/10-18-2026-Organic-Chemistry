@@ -1,0 +1,179 @@
+---
+// The one text-only form for Submitted Problems and Mistake reports (#75). Static HTML; a small
+// script pre-fills it from the link (?kind=&unit=&target=), checks fields, and posts to the Pages
+// Function at /api/submit. No image upload, no cookies, no analytics.
+import Base from "../layouts/Base.astro";
+import { courseModel } from "../lib/content.ts";
+import { MAX_LENGTH } from "../submissions/form.ts";
+
+const units = courseModel().subjects.flatMap((s) => s.courses.flatMap((c) => c.units));
+// Turnstile's always-pass test sitekey until the owner sets a real one before going public.
+const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? "1x00000000000000000000AA";
+---
+
+<Base title="Suggest a Problem · AstraTron" description="Propose a Problem or report a mistake in AstraTron.">
+  <main class="page submit-page">
+    <h1 id="form-title">Suggest a Problem</h1>
+    <div id="sent" role="status"></div>
+    <form id="submission" action="/api/submit" method="post" novalidate>
+      <p class="note"><strong>Don't include personal info</strong>: no full name, school, phone number or address in your text.</p>
+      <div id="form-errors" role="alert"></div>
+
+      <fieldset>
+        <legend>What are you sending?</legend>
+        <label><input type="radio" name="kind" value="problem" checked /> Suggest a Problem</label>
+        <label><input type="radio" name="kind" value="mistake" /> Report a mistake</label>
+      </fieldset>
+
+      <div class="field">
+        <label for="unit">Unit</label>
+        <select id="unit" name="unit">
+          <option value="">Choose a Unit</option>
+          {units.map((u) => <option value={u.id}>Unit {u.number} · {u.title}</option>)}
+        </select>
+        <p class="field-error" id="unit-error"></p>
+      </div>
+
+      <div class="field" id="target-field" hidden>
+        <label for="target_id">Which Step or Problem</label>
+        <input id="target_id" name="target_id" type="text" maxlength={MAX_LENGTH.target_id} autocomplete="off" />
+        <p class="field-error" id="target_id-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="problem_text" id="problem_text-label">Problem text</label>
+        <textarea id="problem_text" name="problem_text" rows="6" maxlength={MAX_LENGTH.problem_text}></textarea>
+        <p class="field-error" id="problem_text-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="answer">Your answer and reasoning</label>
+        <textarea id="answer" name="answer" rows="4" maxlength={MAX_LENGTH.answer}></textarea>
+        <p class="field-error" id="answer-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="molecule">Molecule (optional)</label>
+        <input id="molecule" name="molecule" type="text" maxlength={MAX_LENGTH.molecule} autocomplete="off" aria-describedby="molecule-hint" />
+        <p class="hint" id="molecule-hint">A SMILES string or a name, e.g. CC=C or propene.</p>
+        <p class="field-error" id="molecule-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="display_name">Display name (optional)</label>
+        <input id="display_name" name="display_name" type="text" maxlength={MAX_LENGTH.display_name} autocomplete="off" aria-describedby="display_name-hint" />
+        <p class="hint" id="display_name-hint">The credit on an accepted Problem. Leave it empty to be credited as "a Student".</p>
+        <p class="field-error" id="display_name-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="reply_email">Reply email (optional)</label>
+        <input id="reply_email" name="reply_email" type="email" maxlength={MAX_LENGTH.reply_email} autocomplete="email" aria-describedby="reply_email-hint" />
+        <p class="hint" id="reply_email-hint">Only if you want one reply. We delete the address after replying, or after 90 days.</p>
+        <p class="field-error" id="reply_email-error"></p>
+      </div>
+
+      <div class="field">
+        <label class="consent"><input id="consent" name="consent" type="checkbox" /> I agree that if my Problem is accepted, it is published under CC BY-NC-SA 4.0.</label>
+        <p class="field-error" id="consent-error"></p>
+      </div>
+
+      <div class="cf-turnstile" data-sitekey={sitekey} data-appearance="interaction-only"></div>
+      <p class="field-error" id="turnstile-error"></p>
+
+      <button type="submit" class="button">Send</button>
+    </form>
+  </main>
+</Base>
+
+<script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+<script>
+  import { confirmation, validate, type FieldErrors } from "../submissions/form.ts";
+
+  const form = document.getElementById("submission") as HTMLFormElement;
+  const title = document.getElementById("form-title")!;
+  const targetField = document.getElementById("target-field")!;
+  const problemLabel = document.getElementById("problem_text-label")!;
+  const summary = document.getElementById("form-errors")!;
+  const sent = document.getElementById("sent")!;
+  const field = (name: string) => form.elements.namedItem(name) as HTMLInputElement | null;
+
+  function showKind() {
+    const mistake = field("kind")?.value === "mistake";
+    title.textContent = mistake ? "Report a mistake" : "Suggest a Problem";
+    document.title = `${title.textContent} · AstraTron`;
+    targetField.hidden = !mistake;
+    problemLabel.textContent = mistake ? "What's wrong" : "Problem text";
+  }
+
+  // Pre-fill from the link that opened the form.
+  const params = new URLSearchParams(location.search);
+  if (params.get("kind") === "mistake") (form.querySelector('input[name=kind][value=mistake]') as HTMLInputElement).checked = true;
+  if (params.get("unit")) (field("unit") as unknown as HTMLSelectElement).value = params.get("unit")!;
+  if (params.get("target")) field("target_id")!.value = params.get("target")!;
+  showKind();
+  form.addEventListener("change", (e) => {
+    if ((e.target as HTMLInputElement).name === "kind") showKind();
+  });
+
+  function showErrors(errors: FieldErrors) {
+    for (const p of form.querySelectorAll<HTMLElement>(".field-error")) {
+      const name = p.id.replace(/-error$/, "");
+      const message = errors[name] ?? "";
+      p.textContent = message;
+      const input = field(name) as HTMLElement | null;
+      if (!input || input instanceof RadioNodeList) continue;
+      const hints = (input.getAttribute("aria-describedby") ?? "").split(" ").filter((id) => id && id !== p.id);
+      input.setAttribute("aria-describedby", [...hints, ...(message ? [p.id] : [])].join(" "));
+      input.toggleAttribute("aria-invalid", !!message);
+    }
+    const shown = Object.keys(errors).filter((name) => document.getElementById(`${name}-error`));
+    const other = Object.entries(errors)
+      .filter(([name]) => !shown.includes(name) || name === "turnstile")
+      .map(([, message]) => message);
+    summary.textContent = Object.keys(errors).length ? (other.length ? other.join(" ") : "Fix the fields marked below.") : "";
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    const checked = validate((name) => {
+      const value = data.get(name);
+      return typeof value === "string" ? value : null;
+    });
+    if (!checked.ok) return showErrors(checked.errors);
+    showErrors({});
+    const button = form.querySelector("button[type=submit]") as HTMLButtonElement;
+    button.disabled = true;
+    try {
+      const res = await fetch(form.action, { method: "POST", body: new URLSearchParams(data as unknown as Record<string, string>) });
+      const reply = (await res.json()) as { ok: boolean; errors?: FieldErrors };
+      if (!reply.ok) return showErrors(reply.errors ?? { form: "Something went wrong. Try again." });
+      sent.replaceChildren(...confirmation(!!checked.submission.reply_email).map((line) => Object.assign(document.createElement("p"), { textContent: line })));
+      form.hidden = true;
+    } catch {
+      showErrors({ form: "We couldn't send it. Check your connection and try again." });
+    } finally {
+      button.disabled = false;
+    }
+  });
+</script>
+
+<style is:global>
+  /* Placeholder form styles; the design system (#59) replaces them. */
+  .submit-page fieldset { border: 2px solid #3a3560; margin: 0 0 1rem; padding: 0.5rem 1rem; }
+  .submit-page fieldset label, .submit-page .consent { display: flex; align-items: center; gap: 0.5rem; min-height: 48px; }
+  .submit-page .field[hidden] { display: none; }
+  .submit-page .field { margin-bottom: 1rem; display: grid; gap: 0.25rem; }
+  .submit-page input[type="text"], .submit-page input[type="email"], .submit-page select, .submit-page textarea {
+    font: inherit; min-height: 48px; padding: 0.5rem; box-sizing: border-box; width: 100%;
+    background: #1b1840; color: inherit; border: 2px solid #8b7bff;
+  }
+  .submit-page input[type="checkbox"], .submit-page input[type="radio"] { width: 24px; height: 24px; }
+  .submit-page .hint { margin: 0; font-size: 0.9rem; opacity: 0.85; }
+  .submit-page .field-error { margin: 0; color: #ff9d3c; }
+  .submit-page .field-error:empty, .submit-page #form-errors:empty { display: none; }
+  .submit-page #form-errors { border: 2px solid #ff9d3c; padding: 0.75rem; margin-bottom: 1rem; }
+  .submit-page .note { border-left: 4px solid #5ee7ff; padding-left: 0.75rem; }
+</style>

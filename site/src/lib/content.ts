@@ -19,6 +19,8 @@ export interface LessonPage {
   subject: string;
   course: string;
   unit: string;
+  /** The Unit id (u1, ...), for Mistake reports. */
+  unitId: string;
   unitTitle: string;
   unitUrl: string;
   lesson: Lesson;
@@ -32,6 +34,7 @@ export function lessonPages(): LessonPage[] {
           subject: s.slug,
           course: c.slug,
           unit: u.slug,
+          unitId: u.id,
           unitTitle: u.title,
           unitUrl: u.url,
           lesson,

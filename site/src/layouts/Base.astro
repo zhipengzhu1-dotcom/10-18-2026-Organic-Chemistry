@@ -1,9 +1,13 @@
 ---
+import { suggestProblemHref } from "../lib/submit-links.ts";
+
 interface Props {
   title: string;
   description?: string;
+  /** A Lesson page: the full-screen Step player, with no footer (nothing pulls a Student out of a Lesson). */
+  bare?: boolean;
 }
-const { title, description } = Astro.props;
+const { title, description, bare = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -35,9 +39,21 @@ const { title, description } = Astro.props;
       .player-action { position: sticky; bottom: 0; padding: 1rem 0; background: #0d0b1e; }
       .button { display: block; width: 100%; text-align: center; background: #ff9d3c; color: #0d0b1e; border-color: #ff9d3c; text-decoration: none; box-sizing: border-box; }
       .button:disabled { opacity: 0.5; }
+      .report { margin-top: 1.5rem; font-size: 0.9rem; }
+      .report a { display: inline-flex; align-items: center; min-height: 48px; }
+      .site-footer { max-width: 40rem; margin: 2rem auto 0; padding: 1rem; border-top: 2px solid #3a3560; }
+      .site-footer a { display: inline-flex; align-items: center; min-height: 48px; }
     </style>
   </head>
   <body>
     <slot />
+    {
+      !bare && (
+        <footer class="site-footer">
+          {/* #77 adds the Donate line, licences, credits and the privacy link. */}
+          <a href={suggestProblemHref()}>Suggest a Problem</a>
+        </footer>
+      )
+    }
   </body>
 </html>
