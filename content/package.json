@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "node src/cli.ts",
+    "freeze": "node src/freeze-cli.ts",
     "lint:numbers": "node src/number-lint-cli.ts"
   },
   "dependencies": {

@@ -1,0 +1,20 @@
+---
+// A Subject's Course map page.
+import type { GetStaticPaths } from "astro";
+import type { Subject } from "@astratron/content";
+import Base from "../../layouts/Base.astro";
+import CourseMap from "../../components/CourseMap.astro";
+import { courseModel } from "../../lib/content.ts";
+
+export const getStaticPaths = (() =>
+  courseModel().subjects.map((subject) => ({ params: { subject: subject.slug }, props: { subject } }))) satisfies GetStaticPaths;
+
+const { subject } = Astro.props as { subject: Subject };
+---
+
+<Base title={`${subject.title} · AstraTron`} description={`The ${subject.title} Course map.`}>
+  <main class="page">
+    <h1>{subject.title}</h1>
+    <CourseMap subject={subject} />
+  </main>
+</Base>

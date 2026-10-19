@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Lesson, MultipleChoiceStep, NumericStep, RankStep } from "@astratron/content";
-import { act, start, type Action, type Screen } from "./player.ts";
+import type { MultipleChoiceStep, NumericStep, RankStep } from "@astratron/content";
+import { act, start, type Action, type PlayableLesson, type Screen } from "./player.ts";
 
 const choice = (id: string, extra: Partial<MultipleChoiceStep> = {}): MultipleChoiceStep => ({
   id,
@@ -22,14 +22,8 @@ const choice = (id: string, extra: Partial<MultipleChoiceStep> = {}): MultipleCh
   ...extra,
 });
 
-const lesson: Lesson = {
-  id: "l1",
-  slug: "first",
-  title: "First",
-  goal: "Goal.",
-  keyIdea: "Key idea.",
-  onRamp: false,
-  url: "/chem/c/u/first",
+const lesson: PlayableLesson = {
+  deletedSteps: { s06: "s03" },
   steps: [
     choice("s01", { phase: "hook", prediction: true, correct: undefined, hints: undefined }),
     { id: "s02", phase: "build", type: "explain", text: "Explain." },
@@ -137,6 +131,20 @@ describe("Step player engine", () => {
   });
 });
 
+describe("Step links (ADR 0003)", () => {
+  it("a link to a Step id opens that Step", () => {
+    expect(start(lesson, "s04")).toMatchObject({ index: 3, step: { id: "s04" }, tries: 0, feedback: null });
+  });
+
+  it("a link to a deleted Step's id opens the Step its old links now point at", () => {
+    expect(start(lesson, "s06")).toMatchObject({ index: 2, step: { id: "s03" } });
+  });
+
+  it("a link to an unknown id opens the first Step", () => {
+    expect(start(lesson, "s99")).toMatchObject({ index: 0, step: { id: "s01" } });
+  });
+});
+
 const wrapStep = { id: "s09", phase: "wrap", type: "explain", text: "Wrap." } as const;
 
 describe("Numeric input Steps", () => {
@@ -156,7 +164,7 @@ describe("Numeric input Steps", () => {
     ],
     reveal: "109.5°, the tetrahedral angle.",
   };
-  const numLesson: Lesson = { ...lesson, steps: [numeric, wrapStep] };
+  const numLesson: PlayableLesson = { ...lesson, steps: [numeric, wrapStep] };
   const run = (...values: number[]) =>
     values.reduce((s, value) => act(numLesson, s, { type: "answer", value }), start(numLesson));
 
@@ -227,7 +235,7 @@ describe("Rank / order Steps", () => {
     ],
     reveal: "C≡C < C=C < C–C.",
   };
-  const rankLesson: Lesson = { ...lesson, steps: [rank, wrapStep] };
+  const rankLesson: PlayableLesson = { ...lesson, steps: [rank, wrapStep] };
   const run = (...orders: string[][]) =>
     orders.reduce((s, order) => act(rankLesson, s, { type: "answer", order }), start(rankLesson));
   const right = ["triple", "double", "single"];

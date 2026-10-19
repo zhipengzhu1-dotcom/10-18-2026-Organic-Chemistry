@@ -1,0 +1,45 @@
+# Course manifest: ordered Units, each `available` or `coming-soon`.
+# Titles, order and scopes come from the course-map decision (issue #10).
+# Unit numbers continue from orgo-1, so this Course starts at Unit 11. Slugs freeze once public.
+title: Organic Chemistry II
+units:
+  - id: u11
+    slug: spectroscopy
+    title: Spectroscopy
+    summary: Mass spec, IR, ¹H and ¹³C NMR, working out a structure from its spectra.
+    status: coming-soon
+  - id: u12
+    slug: conjugation-diels-alder
+    title: Conjugation & Diels–Alder
+    summary: Conjugated dienes, 1,2- vs 1,4-addition, UV-vis, the Diels–Alder reaction.
+    status: coming-soon
+  - id: u13
+    slug: pericyclic-reactions
+    title: Pericyclic Reactions
+    summary: Electrocyclic reactions, cycloadditions, sigmatropic shifts, orbital-symmetry rules.
+    status: coming-soon
+  - id: u14
+    slug: aldehydes-ketones
+    title: Aldehydes & Ketones
+    summary: "Nucleophilic addition: hydrides, Grignards, acetals, imines and enamines, Wittig."
+    status: coming-soon
+  - id: u15
+    slug: carboxylic-acids-derivatives
+    title: Carboxylic Acids & Derivatives
+    summary: Acidity, then acyl substitution across the reactivity ladder (acid chloride → amide).
+    status: coming-soon
+  - id: u16
+    slug: enols-enolates
+    title: Enols & Enolates
+    summary: Alpha substitution, aldol, Claisen, Michael and Robinson reactions.
+    status: coming-soon
+  - id: u17
+    slug: amines
+    title: Amines
+    summary: Basicity, making amines, reductive amination, an intro to heterocycles.
+    status: coming-soon
+  - id: u18
+    slug: biomolecules
+    title: Biomolecules
+    summary: "Carbohydrates, amino acids and proteins, lipids: organic chemistry inside cells."
+    status: coming-soon
