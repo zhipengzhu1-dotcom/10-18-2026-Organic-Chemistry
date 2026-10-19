@@ -414,7 +414,7 @@ def run(s: OrbitalSet) -> dict:
 
 
 def energy(label: str, ev: float) -> dict:
-    return {"label": label, "quantity": "energy", "value": round(float(ev), 4), "unit": "eV", "source": "ours"}
+    return {"label": label, "quantity": "energy", "value": round(float(ev), 4), "unit": "eV", "decimals": 1, "source": "ours"}
 
 
 def largest_component_centre(m: Mesh) -> np.ndarray:

@@ -271,7 +271,7 @@ export function format(
     places ??
     (quantity === "bond-length" || quantity === "radius" || quantity === "electronegativity"
       ? 2
-      : quantity === "angle" || quantity === "dihedral" || quantity === "energy"
+      : quantity === "angle" || quantity === "dihedral"
         ? 1
         : undefined);
   // Energies can be negative: print a true minus sign (U+2212), not a hyphen.

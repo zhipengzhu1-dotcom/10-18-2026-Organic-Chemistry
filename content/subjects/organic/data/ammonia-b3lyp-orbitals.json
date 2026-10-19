@@ -22,6 +22,7 @@
    "quantity": "energy",
    "value": -7.2324,
    "unit": "eV",
+   "decimals": 1,
    "source": "ours"
   },
   "lumo": {
@@ -29,6 +30,7 @@
    "quantity": "energy",
    "value": 0.8094,
    "unit": "eV",
+   "decimals": 1,
    "source": "ours"
   },
   "gap": {
@@ -36,6 +38,7 @@
    "quantity": "energy",
    "value": 8.0418,
    "unit": "eV",
+   "decimals": 1,
    "source": "ours"
   },
   "iso": {
