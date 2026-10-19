@@ -4,28 +4,28 @@ id: fg-capsaicin
 style: line-angle
 smiles: CC(C)/C=C/CCCCC(=O)NCC1=CC(=C(C=C1)O)OC
 atoms:
-  - { id: a1, el: C, x: 14.25, y: 6.495 }
-  - { id: a2, el: C, x: 12.75, y: 6.495 }
-  - { id: a3, el: C, x: 12, y: 7.794 }
-  - { id: a4, el: C, x: 12, y: 5.196 }
-  - { id: a5, el: C, x: 10.5, y: 5.196 }
-  - { id: a6, el: C, x: 9.75, y: 3.897 }
-  - { id: a7, el: C, x: 8.25, y: 3.897 }
-  - { id: a8, el: C, x: 7.5, y: 2.598 }
-  - { id: a9, el: C, x: 6, y: 2.598 }
-  - { id: a10, el: C, x: 5.25, y: 1.299 }
-  - { id: a11, el: O, x: 6, y: 0, lp: 2 }
-  - { id: a12, el: N, x: 3.75, y: 1.299, h: 1, lp: 1 }
-  - { id: a13, el: C, x: 3, y: 0 }
-  - { id: a14, el: C, x: 1.5, y: 0 }
-  - { id: a15, el: C, x: 0.75, y: -1.299 }
-  - { id: a16, el: C, x: -0.75, y: -1.299 }
-  - { id: a17, el: C, x: -1.5, y: 0 }
-  - { id: a18, el: C, x: -0.75, y: 1.299 }
-  - { id: a19, el: C, x: 0.75, y: 1.299 }
-  - { id: a20, el: O, x: -3, y: 0, h: 1, lp: 2 }
-  - { id: a21, el: O, x: -1.5, y: -2.598, lp: 2 }
-  - { id: a22, el: C, x: -0.75, y: -3.897 }
+  - { id: a1, el: C, x: -14.25, y: 6.495 }
+  - { id: a2, el: C, x: -12.75, y: 6.495 }
+  - { id: a3, el: C, x: -12, y: 7.794 }
+  - { id: a4, el: C, x: -12, y: 5.196 }
+  - { id: a5, el: C, x: -10.5, y: 5.196 }
+  - { id: a6, el: C, x: -9.75, y: 3.897 }
+  - { id: a7, el: C, x: -8.25, y: 3.897 }
+  - { id: a8, el: C, x: -7.5, y: 2.598 }
+  - { id: a9, el: C, x: -6, y: 2.598 }
+  - { id: a10, el: C, x: -5.25, y: 1.299 }
+  - { id: a11, el: O, x: -6, y: 0, lp: 2 }
+  - { id: a12, el: N, x: -3.75, y: 1.299, h: 1, lp: 1 }
+  - { id: a13, el: C, x: -3, y: 0 }
+  - { id: a14, el: C, x: -1.5, y: 0 }
+  - { id: a15, el: C, x: -0.75, y: -1.299 }
+  - { id: a16, el: C, x: 0.75, y: -1.299 }
+  - { id: a17, el: C, x: 1.5, y: 0 }
+  - { id: a18, el: C, x: 0.75, y: 1.299 }
+  - { id: a19, el: C, x: -0.75, y: 1.299 }
+  - { id: a20, el: O, x: 3, y: 0, h: 1, lp: 2 }
+  - { id: a21, el: O, x: 1.5, y: -2.598, lp: 2 }
+  - { id: a22, el: C, x: 0.75, y: -3.897 }
 bonds:
   - { id: b1, a: a1, b: a2, order: 1 }
   - { id: b2, a: a2, b: a3, order: 1 }

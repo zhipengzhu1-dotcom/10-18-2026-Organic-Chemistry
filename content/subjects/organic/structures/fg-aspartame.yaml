@@ -4,27 +4,27 @@ id: fg-aspartame
 style: line-angle
 smiles: COC(=O)[C@H](CC1=CC=CC=C1)NC(=O)[C@H](CC(=O)O)N
 atoms:
-  - { id: a1, el: C, x: 7.5, y: 2.598 }
-  - { id: a2, el: O, x: 6, y: 2.598, lp: 2 }
-  - { id: a3, el: C, x: 5.25, y: 1.299 }
-  - { id: a4, el: O, x: 6, y: 0, lp: 2 }
-  - { id: a5, el: C, x: 3.75, y: 1.299 }
-  - { id: a6, el: C, x: 3, y: 0 }
-  - { id: a7, el: C, x: 1.5, y: 0 }
-  - { id: a8, el: C, x: 0.75, y: -1.299 }
-  - { id: a9, el: C, x: -0.75, y: -1.299 }
-  - { id: a10, el: C, x: -1.5, y: 0 }
-  - { id: a11, el: C, x: -0.75, y: 1.299 }
-  - { id: a12, el: C, x: 0.75, y: 1.299 }
-  - { id: a13, el: N, x: 3, y: 2.598, h: 1, lp: 1 }
-  - { id: a14, el: C, x: 3.75, y: 3.897 }
-  - { id: a15, el: O, x: 5.25, y: 3.897, lp: 2 }
-  - { id: a16, el: C, x: 3, y: 5.196 }
-  - { id: a17, el: C, x: 3.75, y: 6.495 }
-  - { id: a18, el: C, x: 3, y: 7.794 }
-  - { id: a19, el: O, x: 1.5, y: 7.794, lp: 2 }
-  - { id: a20, el: O, x: 3.75, y: 9.093, h: 1, lp: 2 }
-  - { id: a21, el: N, x: 1.5, y: 5.196, h: 2, lp: 1 }
+  - { id: a1, el: C, x: 2.598, y: -7.5 }
+  - { id: a2, el: O, x: 2.598, y: -6, lp: 2 }
+  - { id: a3, el: C, x: 1.299, y: -5.25 }
+  - { id: a4, el: O, x: 0, y: -6, lp: 2 }
+  - { id: a5, el: C, x: 1.299, y: -3.75 }
+  - { id: a6, el: C, x: 0, y: -3 }
+  - { id: a7, el: C, x: 0, y: -1.5 }
+  - { id: a8, el: C, x: -1.299, y: -0.75 }
+  - { id: a9, el: C, x: -1.299, y: 0.75 }
+  - { id: a10, el: C, x: 0, y: 1.5 }
+  - { id: a11, el: C, x: 1.299, y: 0.75 }
+  - { id: a12, el: C, x: 1.299, y: -0.75 }
+  - { id: a13, el: N, x: 2.598, y: -3, h: 1, lp: 1 }
+  - { id: a14, el: C, x: 3.897, y: -3.75 }
+  - { id: a15, el: O, x: 3.897, y: -5.25, lp: 2 }
+  - { id: a16, el: C, x: 5.196, y: -3 }
+  - { id: a17, el: C, x: 6.495, y: -3.75 }
+  - { id: a18, el: C, x: 7.794, y: -3 }
+  - { id: a19, el: O, x: 7.794, y: -1.5, lp: 2 }
+  - { id: a20, el: O, x: 9.093, y: -3.75, h: 1, lp: 2 }
+  - { id: a21, el: N, x: 5.196, y: -1.5, h: 2, lp: 1 }
 bonds:
   - { id: b1, a: a1, b: a2, order: 1 }
   - { id: b2, a: a2, b: a3, order: 1 }

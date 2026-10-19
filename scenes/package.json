@@ -10,7 +10,8 @@
   },
   "scripts": {
     "check": "node src/check-cli.ts",
-    "lint:purity": "node src/purity-lint-cli.ts"
+    "lint:purity": "node src/purity-lint-cli.ts",
+    "sync:structures": "node src/functional-groups/sync-cli.ts"
   },
   "dependencies": {
     "@astratron/content": "workspace:*",
