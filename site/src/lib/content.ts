@@ -70,8 +70,43 @@ export function unitPages(): UnitPage[] {
 /** Where a Lesson's answer key is built: a separate file, so answers stay out of the page's HTML. */
 export const answerKeyUrl = (subject: string, lessonId: string) => `/answers/${subject}/${lessonId}.json`;
 
-/** Inline Markdown → HTML, done at build time so no Markdown parser ships to the browser. */
-export const md = (text: string) => marked.parseInline(text, { async: false });
+
+/**
+ * Inline Markdown → HTML, done at build time so no Markdown parser ships to the browser.
+ * Numbers and formulas get `<span class="data">` (the data face); see markData.
+ */
+export const md = (text: string) => markData(marked.parseInline(text, { async: false }));
+
+// Element symbols that turn up in organic chemistry, two-letter ones first.
+const EL = "(?:Cl|Br|Na|Mg|Al|Si|Li|Ca|Fe|Zn|Cu|Mn|Cr|Pd|Pt|Sn|Hg|Se|Os|Ni|Ag|Au|Ti|He|Ne|Ar|H|B|C|N|O|F|P|S|K|I)";
+const CHUNK = `(?:${EL}[₀-₉]*|\\((?:${EL}[₀-₉]*)+\\)[₀-₉]*)+[⁺⁻]*`;
+const DATA = new RegExp(
+  `(?<![A-Za-z])${CHUNK}(?:[–=≡]${CHUNK})*(?![a-z])` + // formula: CH₄, H₃C–CH₃, C=O, OH⁻
+    `|(?<![\\d.])[−+]?\\d+(?:\\.\\d+)?`, // number: 4, 1.54, −1.7, the 3 of 3D and sp3
+  "g",
+);
+/** A formula needs a subscript, a charge or a bond; a lone capital (I, C) stays prose. */
+const isData = (t: string) => /[\d₀-₉⁺⁻–=≡]/.test(t);
+
+/** Wraps numbers and formulas in HTML text (not tags, entities or code) in the data face. */
+function markData(html: string): string {
+  let inCode = 0;
+  return html
+    .split(/(<[^>]+>)/)
+    .map((part) => {
+      if (part.startsWith("<")) {
+        if (/^<code\b/.test(part)) inCode++;
+        else if (part === "</code>") inCode--;
+        return part;
+      }
+      if (inCode) return part;
+      return part
+        .split(/(&[#\w]+;)/)
+        .map((t) => (t.startsWith("&") ? t : t.replace(DATA, (m) => (isData(m) ? `<span class="data">${m}</span>` : m))))
+        .join("");
+    })
+    .join("");
+}
 
 /** The Lesson with every text field turned from Markdown into HTML and every structure pre-rendered to SVG. */
 export function renderLesson(lesson: Lesson): Lesson {

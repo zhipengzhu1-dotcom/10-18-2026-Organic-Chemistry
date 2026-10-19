@@ -97,7 +97,9 @@ export default function LevelSelect({ unit }: { unit: Unit }) {
           <li className="level level-practice">
             <span className="level-number">Unit review</span>
             <h3 className="level-title">Practice Set</h3>
-            <p className="level-goal">10 Problems from the Unit's Bank, easy to hard, covering every Lesson.</p>
+            <p className="level-goal">
+              <span className="data">10</span> Problems from the Unit's Bank, easy to hard, covering every Lesson.
+            </p>
             <span className="chip">Mixed</span>
             <span className="chip count">10 Problems</span>
             <span className="level-soon">Opens soon</span>

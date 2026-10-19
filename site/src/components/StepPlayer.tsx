@@ -38,18 +38,6 @@ type PlayerAction = Action | { type: "open"; stepId?: string; saved?: LessonProg
 
 const html = (text: string) => ({ dangerouslySetInnerHTML: { __html: text } });
 
-/** Every number is set in JetBrains Mono (design token --at-font-data). */
-const dataFont = { fontFamily: "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)" };
-
-const visuallyHidden = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-} as const;
-
 export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nextHref }: Props) {
   const [key, setKey] = useState<AnswerKey>();
   const lesson = useMemo(() => withKey(page, key), [page, key]);
@@ -168,30 +156,35 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     setDraft("");
   }
 
+  const icon = feedback && { correct: "✓", hint: "✗", reveal: "→" }[feedback.kind];
+  const words = feedback && { correct: "Correct.", hint: "Not quite.", reveal: "Answer:" }[feedback.kind];
+
+  // Single focus: no site chrome, only the ✕, story bars, Step count and one
+  // fixed bottom button. The feedback panel sits above that button.
   return (
     <div className="player" id={step.id}>
-      <header className="player-bar">
-        <a href={exitHref} aria-label="Leave the Lesson" className="exit">
+      <div className="player-top">
+        <a href={exitHref} aria-label="Leave the Lesson" className="player-exit">
           ✕
         </a>
-        <button type="button" className="back" aria-label="Previous Step" disabled={screen.index === 0} onClick={back}>
+        <button type="button" className="player-back" aria-label="Previous Step" disabled={screen.index === 0} onClick={back}>
           ‹
         </button>
-        <ol className="story-bars" aria-hidden="true">
+        <ol className="bars" aria-hidden="true">
           {lesson.steps.map((s, i) => (
-            <li key={s.id} className={i <= screen.index ? "seen" : ""} />
+            <li key={s.id} className={i < screen.index ? "done" : i === screen.index ? "cur" : ""} />
           ))}
         </ol>
-        <span className="count">
+        <span className="player-count">
           Step {screen.index + 1} of {screen.total}
         </span>
-      </header>
+      </div>
 
-      <main className="step">
+      <main className="player-body">
         {step.type === "explain" ? (
-          <div className="explain" {...html(step.text)} />
+          <p {...html(step.text)} />
         ) : (
-          <p className="prompt" {...html(step.prompt)} />
+          <p className="player-prompt" {...html(step.prompt)} />
         )}
 
         {step.type === "tap-to-identify" && (
@@ -231,14 +224,14 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         )}
 
         {step.type === "multiple-choice" && (
-          <div className="options" role="group" aria-label="Choices">
+          <div className="opts" role="group" aria-label="Choices">
             {step.options.map((o) =>
               o.structure ? (
                 // A structure card: the drawing is pre-rendered SVG; its text is the screen-reader label.
                 <button
                   key={o.id}
                   type="button"
-                  className="structure-card"
+                  className="opt structure-card"
                   aria-label={o.text}
                   aria-pressed={chosen.includes(o.id)}
                   disabled={screen.canContinue}
@@ -250,6 +243,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
                 <button
                   key={o.id}
                   type="button"
+                  className="opt"
                   aria-pressed={chosen.includes(o.id)}
                   disabled={screen.canContinue}
                   onClick={() => pick(o.id)}
@@ -274,21 +268,12 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           />
         )}
 
-        {feedback && (
-          <div className={`feedback ${feedback.kind}`} role="status">
-            {feedback.kind === "correct" && <span>✓ Correct. </span>}
-            {feedback.kind === "hint" && <span>✗ Not quite. </span>}
-            {feedback.kind === "reveal" && <span>→ Answer: </span>}
-            <span {...html(feedback.text)} />
-          </div>
-        )}
-
         {screen.done && (
-          <div className="key-idea">
+          <div className="card">
             <h2>Key idea</h2>
             <p {...html(lesson.keyIdea)} />
             {streakTick !== null && (
-              <p className="streak-tick" style={dataFont}>
+              <p className="streak-tick data">
                 ✓ Streak: {streakTick} {streakTick === 1 ? "day" : "days"}
               </p>
             )}
@@ -303,30 +288,41 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         </p>
       </main>
 
-      <footer className="player-action">
+      <div className="player-foot">
+        <div role="status">
+          {feedback && (
+            <div className={`fb fb-${feedback.kind}`}>
+              <span className="ic" aria-hidden="true">
+                {icon}
+              </span>{" "}
+              <p>
+                <strong>{words}</strong> <span {...html(feedback.text)} />
+              </p>
+            </div>
+          )}
+        </div>
         {screen.done ? (
           // The Lesson-end screen: Next Lesson first, Back to Unit second. No donate prompt here.
-          <>
+          <div className="player-end">
             {nextHref && (
-              <a className="button" href={nextHref}>
+              <a className="btn btn-primary btn-block" href={nextHref}>
                 Next Lesson
               </a>
             )}
-            <a className={nextHref ? "button-secondary" : "button"} href={exitHref}>
+            <a className={`btn btn-block ${nextHref ? "btn-secondary" : "btn-primary"}`} href={exitHref}>
               Back to Unit
             </a>
-          </>
+          </div>
         ) : screen.canContinue ? (
-          <button type="button" className="button" onClick={next}>
+          <button type="button" className="btn btn-primary btn-block" onClick={next}>
             Continue
           </button>
         ) : (
-          <button type="button" className="button" onClick={check} disabled={!key || !answer}>
-
+          <button type="button" className="btn btn-primary btn-block" onClick={check} disabled={!key || !answer}>
             Check
           </button>
         )}
-      </footer>
+      </div>
     </div>
   );
 }
@@ -350,7 +346,6 @@ function NumericBox({ step, value, onChange, onSubmit, locked }: NumericBoxProps
   return (
     <form
       className="numeric"
-      style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
       onSubmit={(e) => {
         e.preventDefault();
         onSubmit();
@@ -365,9 +360,9 @@ function NumericBox({ step, value, onChange, onSubmit, locked }: NumericBoxProps
         value={value}
         disabled={locked}
         onChange={(e) => onChange(e.target.value)}
-        style={{ ...dataFont, fontSize: 20, minHeight: 48, width: "8em", padding: "0 0.5rem", boxSizing: "border-box" }}
+        className="numeric-box"
       />
-      {step.unitSymbol && <span style={{ ...dataFont, fontSize: 20 }}>{step.unitSymbol}</span>}
+      {step.unitSymbol && <span className="numeric-unit">{step.unitSymbol}</span>}
     </form>
   );
 }
@@ -430,10 +425,10 @@ function RankCards({ step, order, onChange, locked }: RankCardsProps) {
 
   return (
     <>
-      <p id={`${step.id}-rank-help`} style={visuallyHidden}>
+      <p id={`${step.id}-rank-help`} className="sr">
         Drag a card, or focus it and press the up and down arrow keys to move it.
       </p>
-      <ol ref={list} className="options rank" aria-label="Order" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+      <ol ref={list} className="opts rank" aria-label="Order">
         {order.map((id, i) => (
           <li key={id}>
             <button
@@ -441,7 +436,7 @@ function RankCards({ step, order, onChange, locked }: RankCardsProps) {
               data-id={id}
               aria-describedby={`${step.id}-rank-help`}
               aria-disabled={locked}
-              className={dragging === id ? "dragging" : undefined}
+              className={dragging === id ? "opt dragging" : "opt"}
               style={{ width: "100%", touchAction: "none", userSelect: "none", cursor: locked ? "default" : "grab" }}
               onFocus={() => setFocusId(id)}
               onBlur={() => setFocusId((f) => (f === id ? null : f))}
@@ -463,7 +458,7 @@ function RankCards({ step, order, onChange, locked }: RankCardsProps) {
           </li>
         ))}
       </ol>
-      <p aria-live="polite" style={visuallyHidden}>
+      <p aria-live="polite" className="sr">
         {said}
       </p>
     </>

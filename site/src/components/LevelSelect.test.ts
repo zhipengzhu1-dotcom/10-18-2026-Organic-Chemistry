@@ -59,7 +59,8 @@ describe("Level select", () => {
       "Final round",
       "Unit review",
       "Practice Set",
-      "10 Problems from the Unit's Bank, easy to hard, covering every Lesson.",
+      "10", // in the data face
+      "Problems from the Unit's Bank, easy to hard, covering every Lesson.",
       "Mixed",
       "10 Problems",
       "Opens soon",

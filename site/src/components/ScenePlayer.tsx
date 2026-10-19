@@ -72,25 +72,25 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, aspec
   const seconds = (t: number) => `${t.toFixed(1)} of ${manifest.duration} seconds`;
 
   return (
-    <figure className="scene" style={{ margin: "1rem 0" }}>
+    <figure className="scene">
       <div
         className="scene-frame"
         role="img"
         aria-label={description}
-        style={{ aspectRatio: `${w} / ${h}`, width: "100%", maxHeight: "60vh", overflow: "hidden" }}
+        style={{ aspectRatio: `${w} / ${h}` }}
       >
         <Component t={clock.t} state={state} aspect={aspect} reducedMotion={reducedMotion ?? false} cited={cited} />
       </div>
-      <div className="scene-controls" style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
+      <div className="scene-controls">
         <button
           type="button"
           aria-label={clock.playing ? "Pause" : "Play"}
+          className="scene-btn"
           onClick={() => dispatch({ type: clock.playing ? "pause" : "play" })}
-          style={{ minWidth: 44, minHeight: 44 }}
         >
           {clock.playing ? "❚❚" : "▶"}
         </button>
-        <button type="button" aria-label="Replay" onClick={() => dispatch({ type: "replay" })} style={{ minWidth: 44, minHeight: 44 }}>
+        <button type="button" aria-label="Replay" className="scene-btn" onClick={() => dispatch({ type: "replay" })}>
           ↺
         </button>
         <input
@@ -101,23 +101,14 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, aspec
           step={0.01}
           value={clock.t}
           aria-valuetext={seconds(clock.t)}
+          className="scene-range"
           onChange={(e) => dispatch({ type: "seek", t: Number(e.target.value) })}
-          style={{ flex: 1 }}
         />
       </div>
       {children}
-      <p aria-live="polite" className="visually-hidden" style={visuallyHidden}>
+      <p aria-live="polite" className="sr">
         {said}
       </p>
     </figure>
   );
 }
-
-const visuallyHidden = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-} as const;
