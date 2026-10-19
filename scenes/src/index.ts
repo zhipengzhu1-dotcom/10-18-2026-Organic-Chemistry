@@ -46,6 +46,10 @@ import { outerElectrons } from "./outer-electrons/manifest.ts";
 import OuterElectrons from "./outer-electrons/OuterElectrons.tsx";
 import { waterPush } from "./water-push/manifest.ts";
 import WaterPush from "./water-push/WaterPush.tsx";
+import { fourDomainFamily } from "./four-domain-family/manifest.ts";
+import FourDomainFamily from "./four-domain-family/FourDomainFamily.tsx";
+import { dipoleSum } from "./dipole-sum/manifest.ts";
+import DipoleSum from "./dipole-sum/DipoleSum.tsx";
 
 export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [sampleTwist.id]: { manifest: sampleTwist, Component: SampleTwist },
@@ -66,6 +70,8 @@ export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [giveOrTake.id]: { manifest: giveOrTake, Component: GiveOrTake },
   [waterPush.id]: { manifest: waterPush, Component: WaterPush },
   [buildBySharing.id]: { manifest: buildBySharing, Component: BuildBySharing },
+  [fourDomainFamily.id]: { manifest: fourDomainFamily, Component: FourDomainFamily },
+  [dipoleSum.id]: { manifest: dipoleSum, Component: DipoleSum },
   // Lesson 6 (#84)
   [acetateBondLengths.id]: { manifest: acetateBondLengths, Component: AcetateBondLengths },
   [formaldehydePiShift.id]: { manifest: formaldehydePiShift, Component: FormaldehydePiShift },

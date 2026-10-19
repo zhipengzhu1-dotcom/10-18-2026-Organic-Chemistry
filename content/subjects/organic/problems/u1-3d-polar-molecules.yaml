@@ -1,0 +1,34 @@
+# Lesson 3 Check Problem (#81), from the merged Lesson 3 spec. The spec says "draft"; Check Steps
+# need approved Problems. Its answer is checked against the cited geometry and electronegativities
+# in content/test/lesson-03.test.ts.
+id: u1-3d-polar-molecules
+unit: u1
+lesson: u1-l03
+difficulty: 2
+status: approved
+source: Original
+type: multiple-choice
+prompt: Every one of these has polar bonds. Which molecules are polar overall? Pick all that apply.
+options:
+  - { id: a, structure: water, text: "H₂O: bent, two lines." }
+  - { id: b, structure: l3-co2, text: "CO₂: a straight line." }
+  - { id: c, structure: l3-ccl4-3d, text: "CCl₄: two Cl lines, one wedge, one dash." }
+  - { id: d, structure: l3-ch2cl2-3d, text: "CH₂Cl₂: two Cl lines, an H wedge and an H dash." }
+  - { id: e, structure: l3-ammonia-3d, text: "NH₃: lone pair up; one H line, one wedge, one dash." }
+answer: [a, d, e]
+correct: "Water, dichloromethane and ammonia: their pulls lean one way. CO₂ and CCl₄ are so symmetric that every pull is balanced by another."
+hints:
+  - includes: [b]
+    text: "CO₂ is a straight line: its two equal C=O pulls point in opposite directions and cancel."
+  - includes: [c]
+    text: "CCl₄'s four C–Cl pulls point to the corners of a tetrahedron, all equal. They balance perfectly."
+  - misses: [d]
+    text: "Swap two of CCl₄'s Cl's for H's: the pulls are no longer equal. The Cl side wins."
+  - misses: [e]
+    text: "NH₃ is a pyramid: all three N–H pulls lean toward N's side. They add up."
+  - misses: [a]
+    text: Water is bent, so its two pulls lean the same way.
+  - text: "Polar bonds aren't enough. Picture the pulls added tip to tail: does anything survive?"
+reveal: "Polar: H₂O, CH₂Cl₂ and NH₃ end on a net arrow. Nonpolar: CO₂ and CCl₄ end on net zero."
+revealScene: { id: dipole-sum, state: { molecule: polar-check, added: 1 } }
+sourceNote: "Arrow lengths from Pauling electronegativity differences (the values Lesson 1 cites), a rough guide, not to scale."

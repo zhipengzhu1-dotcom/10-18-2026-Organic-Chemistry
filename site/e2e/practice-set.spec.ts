@@ -218,6 +218,32 @@ const solvers: Record<string, { outcome: Outcome; play: (page: Page) => Promise<
       await correct(page);
     },
   },
+  // Lesson 3's Check Problems (#81).
+  "u1-3d-flat-or-pyramid": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, "BF₃ only");
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-3d-perspective": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, "CH₃ on the dash, CH₂CH₃ on the wedge");
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-3d-polar-molecules": {
+    outcome: "first",
+    play: async (page) => {
+      for (const name of ["H₂O: bent, two lines.", "CH₂Cl₂: two Cl lines, an H wedge and an H dash.", "NH₃: lone pair up; one H line, one wedge, one dash."])
+        await choose(page, name);
+      await check(page);
+      await correct(page);
+    },
+  },
   // Lesson 6's Check Problems: Draw arrows (ozone open), structure-card pairs.
   "u1-res-ozone": {
     outcome: "first",

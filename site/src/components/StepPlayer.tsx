@@ -17,6 +17,7 @@ import { watchScene } from "@astratron/scenes/watch";
 import SceneControl from "./SceneControl.tsx";
 import StructureTap from "./StructureTap.tsx";
 import MoleculeCard from "../molecule/MoleculeCard.tsx";
+import MoleculeSwitch from "../molecule/MoleculeSwitch.tsx";
 import { AsideButton, Figures } from "./StepVisuals.tsx";
 import ExploreIn3D from "../explore/ExploreIn3D.tsx";
 import DrawArrows from "./DrawArrows.tsx";
@@ -153,6 +154,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           ? manipulated.value
           : step.scene.state[step.control];
   const revealScene = step.type !== "explain" && screen.canContinue ? step.revealScene : undefined;
+  /** A 3D Step card is on screen (phones lay these Steps out tighter: see .player.has-card). */
+  const hasCard = "molecule" in step && !!step.molecule?.card && !revealScene;
   const sceneState =
     step.type === "manipulate" && setting !== undefined ? { ...step.scene.state, [step.control]: setting } : step.scene?.state;
 
@@ -196,7 +199,12 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   // fixed bottom button. The feedback panel sits above that button.
   return (
     <div
-      className={revealScene ? "player revealing" : feedback && step.type === "tap-to-identify" && step.figures ? "player answered" : "player"}
+      className={playerClass({
+        revealing: !!revealScene,
+        card: hasCard,
+        // A Tap Step with figures (#78) or a 3D Step (#81), once answered: phones drop the prompt.
+        answered: (!!feedback && step.type === "tap-to-identify" && !!step.figures) || (hasCard && screen.canContinue),
+      })}
       id={step.id}
     >
       <div className="player-top">
@@ -229,7 +237,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         )}
 
         {/* Once a reveal Scene plays, it shows the answer in place of the question's widgets. */}
-        {step.figures && !revealScene && <Figures figures={step.figures} />}
+        {step.figures && !revealScene && !(hasCard && "molecule" in step && step.molecule?.toggle) && <Figures figures={step.figures} />}
 
         {step.type === "tap-to-identify" && step.alt && <p className="sr">{step.alt}</p>}
         {step.type === "tap-to-identify" && !revealScene && (
@@ -322,13 +330,26 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </ScenePlayer>
         )}
 
-        {"molecule" in step && step.molecule?.card && (
-          // The 3D Step card (#68), keyed per Step so each Step opens in its own start view.
-          <MoleculeCard key={`molecule-${step.id}`} molecule={step.molecule} />
-        )}
+        {"molecule" in step &&
+          step.molecule?.card &&
+          !revealScene &&
+          // The 3D Step card (#68), keyed per Step so each Step opens in its own start view. A toggle
+          // switches molecules (Lesson 3); a page sheet offers Snap to page after a wrong try and
+          // settles on the page once the Step is answered.
+          (step.molecule.toggle ? (
+            <MoleculeSwitch
+              key={`molecule-${step.id}`}
+              molecule={step.molecule}
+              snap={screen.tries > 0}
+              settled={screen.canContinue}
+              beside={step.figures && <Figures figures={step.figures} />}
+            />
+          ) : (
+            <MoleculeCard key={`molecule-${step.id}`} molecule={step.molecule} snap={screen.tries > 0} settled={screen.canContinue} />
+          ))}
 
-        {step.type === "rotate-and-identify" && (
-          <div className="opts" role="group" aria-label="Choices">
+        {step.type === "rotate-and-identify" && !revealScene && (
+          <div className={shortOptions(step.options) ? "opts opts-pairs" : "opts"} role="group" aria-label="Choices">
             {step.options.map((o) => (
               <button
                 key={o.id}
@@ -475,6 +496,15 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     </div>
   );
 }
+
+/** The player's classes: a reveal Scene playing, a 3D card on screen, and the Step answered (see global.css). */
+function playerClass(on: { revealing: boolean; card: boolean; answered: boolean }): string {
+  return ["player", on.revealing && "revealing", on.card && "has-card", on.answered && "answered"].filter(Boolean).join(" ");
+}
+
+/** Choices short enough (plain words, e.g. "bent", "BF₃ only") to sit two to a row. */
+const SHORT_OPTION = 24;
+export const shortOptions = (options: { text: string }[]) => options.every((o) => o.text.replace(/<[^>]*>/g, "").length <= SHORT_OPTION);
 
 /** Short text for a chip, and a single word or two: under this many characters (HTML tags aside). */
 const CHIP_TEXT = 42;

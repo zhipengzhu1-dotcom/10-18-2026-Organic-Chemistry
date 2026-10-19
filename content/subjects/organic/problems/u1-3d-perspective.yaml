@@ -1,0 +1,34 @@
+# Lesson 3 Check Problem (#81), from the merged Lesson 3 spec (PS1 Q2a). The spec says "draft";
+# Check Steps need approved Problems. Its answer is checked against the (R) geometry in
+# content/test/lesson-03.test.ts (as-right-drawing: CH₃ away, CH₂CH₃ toward you).
+id: u1-3d-perspective
+unit: u1
+lesson: u1-l03
+difficulty: 2
+status: approved
+source: Adapted from MIT OCW 5.12 Problem Set 1 Q2a
+credit: Kimberly Berkowski, MIT OCW 5.12, Spring 2005, CC BY-NC-SA 4.0
+type: rotate-and-identify
+prompt: "This is 2-fluorobutane, drawn one way (left) and partly drawn from another angle (right). Turn the 3D model until F and H sit as in the right-hand drawing. Then: which group goes on the dash, and which on the wedge?"
+figures:
+  - { structure: l3-2-fluorobutane-left, alt: "Left drawing: around one central carbon, CH₂CH₃ up and CH₃ lower left as plain lines; F to the right on a dash; H below on a wedge." }
+  - { structure: l3-2-fluorobutane-right, alt: "Right drawing, partly drawn: F upper right and H down as plain lines; an empty dash upper left and an empty wedge straight up." }
+molecule:
+  id: 2-fluorobutane-r
+  view: as-left-drawing
+  labels: { 2: F, 8: H, 0: CH₃, 3: CH₂CH₃ }
+  describe: "2-fluorobutane. The central carbon holds a fluorine, a hydrogen, a methyl group and an ethyl group at the corners of a tetrahedron."
+options:
+  - { id: a, text: "CH₃ on the dash, CH₂CH₃ on the wedge" }
+  - { id: b, text: "CH₂CH₃ on the dash, CH₃ on the wedge" }
+  - { id: c, text: "either way: it's the same molecule" }
+answer: [a]
+correct: "CH₃ goes back on the dash and CH₂CH₃ comes forward on the wedge. Same molecule, just turned."
+hints:
+  - match: [b]
+    text: "Turn the model so F points upper right and H points down, both in the page. Now which group comes toward you?"
+  - match: [c]
+    text: "Swap two groups and you get the mirror image, a different molecule (a later Unit explains why that matters). Only one completion matches the model."
+  - text: "Turn the model until F and H sit in the page as drawn, then read the other two: toward you is the wedge, away is the dash."
+reveal: "CH₃ on the dash (away), CH₂CH₃ on the wedge (toward you): the finished right-hand drawing."
+sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q2a and its key, Berkowski, Spring 2005, CC BY-NC-SA 4.0."

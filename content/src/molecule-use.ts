@@ -4,7 +4,7 @@
 import type { z } from "zod";
 import { find, geometryQuantities, type Cited, type CitedData } from "./data.ts";
 import type { MoleculeUse, OrbitalUse } from "./model.ts";
-import { viewErrors, viewMatrix, type ViewSpec } from "./molecule.ts";
+import { bondDipoles, netDipole, viewErrors, viewMatrix, type ViewSpec } from "./molecule.ts";
 import type { viewsFile } from "./schema.ts";
 
 /** A Step's `molecule` as written in the Lesson or Problem file. */
@@ -14,8 +14,16 @@ export interface MoleculeUseFile {
   view?: string;
   describe?: string;
   orbitals?: string[];
+  label?: string;
+  labels?: Record<string, string>;
+  pageSheet?: [number, number, number];
+  dipoles?: boolean;
+  toggle?: Omit<MoleculeUseFile, "toggle">[];
 }
 export type Views = z.infer<typeof viewsFile>;
+
+/** The cited table bond-dipole arrows are sized from (Lesson 1's Pauling values). */
+export const ELECTRONEGATIVITY_TABLE = "electronegativity-pauling";
 
 /**
  * The start view when a Step names none: the file's axes turned 15° about x and 70° about y.
@@ -48,6 +56,23 @@ export function resolveMoleculeUse(
   views: Views,
   card = false,
 ): { molecule?: MoleculeUse; errors: string[] } {
+  const named = `molecule "${use.id}"`;
+  if (use.toggle && (!use.label || use.toggle.some((t) => !t.label)))
+    return { errors: [`${named}: a toggle needs a label on every molecule`] };
+  const main = resolveOne(use, data, views, card);
+  if (!main.molecule || !use.toggle) return main;
+  const others = use.toggle.map((t) => resolveOne(t, data, views, true));
+  const errors = others.flatMap((o) => o.errors);
+  if (errors.length) return { errors };
+  return { molecule: { ...main.molecule, card: true, toggle: others.map((o) => o.molecule!) }, errors: [] };
+}
+
+function resolveOne(
+  use: Omit<MoleculeUseFile, "toggle">,
+  data: CitedData,
+  views: Views,
+  card: boolean,
+): { molecule?: MoleculeUse; errors: string[] } {
   const set = data[use.id];
   const named = `molecule "${use.id}"`;
   if (!set) return { errors: [`${named} is not a data file`] };
@@ -61,9 +86,21 @@ export function resolveMoleculeUse(
   if (viewErrors(atoms, spec as ViewSpec).length) return { errors: [] };
 
   const errors: string[] = [];
-  const styles: { colour: NonNullable<ReturnType<typeof find>>; vdw: NonNullable<ReturnType<typeof find>> }[] = [];
+  const last = atoms.length - 1;
+  const outside = (field: string, list: number[]) => {
+    for (const i of list) if (!Number.isInteger(i) || i < 0 || i > last) errors.push(`${named}: ${field}: atom ${i} is not in the molecule (0–${last})`);
+  };
+  if (use.labels) outside("labels", Object.keys(use.labels).map(Number));
+  if (use.pageSheet) {
+    outside("pageSheet", use.pageSheet);
+    if (!errors.length)
+      for (const message of viewErrors(atoms, { plane: use.pageSheet })) errors.push(`${named}: pageSheet: ${message.replace(/^plane: /, "")}`);
+  }
+
+  const styles: { colour: Cited; vdw: Cited }[] = [];
   const elements: MoleculeUse["elements"] = {};
-  for (const symbol of new Set(atoms.map((a) => a.element))) {
+  const symbols = [...new Set(atoms.map((a) => a.element))];
+  for (const symbol of symbols) {
     const colour = find(data, `elements/${symbol}.colour`);
     const vdw = find(data, `elements/${symbol}.vdw`);
     if (!colour) errors.push(`${named}: no cited colour for ${symbol} (elements/${symbol}.colour)`);
@@ -72,12 +109,26 @@ export function resolveMoleculeUse(
     styles.push({ colour, vdw });
     elements[symbol] = { colour: String(colour.value), vdw: Number(vdw.value) };
   }
+  const electronegativities: Cited[] = [];
+  if (use.dipoles)
+    for (const symbol of symbols) {
+      const ref = `${ELECTRONEGATIVITY_TABLE}/${symbol}`;
+      const value = find(data, ref);
+      if (value) electronegativities.push(value);
+      else errors.push(`${named}: no cited electronegativity for ${symbol} (${ref})`);
+    }
   if (errors.length) return { errors };
 
   const resolved = resolveOrbitals(use, data, card || !!use.card);
   if (resolved.errors.length) return { errors: resolved.errors.map((m) => `${named}: ${m}`) };
 
   const geometry = Object.values(set.values).filter((v) => geometryQuantities.includes(v.quantity));
+  const molecule = { title: set.title, atoms, bonds: set.bonds };
+  const dipoles = () => {
+    const en = Object.fromEntries(symbols.map((s, i) => [s, Number(electronegativities[i].value)]));
+    const arrows = bondDipoles(molecule, en);
+    return { arrows, net: netDipole(molecule, arrows) };
+  };
   return {
     molecule: {
       id: use.id,
@@ -88,11 +139,15 @@ export function resolveMoleculeUse(
       ...(use.view ? { view: use.view } : {}),
       orientation: viewMatrix(atoms, spec as ViewSpec),
       elements,
-      cited: [...geometry, ...styles.map((s) => s.colour), ...styles.map((s) => s.vdw), ...resolved.cited],
+      cited: [...geometry, ...styles.map((s) => s.colour), ...styles.map((s) => s.vdw), ...electronegativities, ...resolved.cited],
       ...(set.notice ? { notice: set.notice } : {}),
       card: card || !!use.card,
       ...(use.describe ? { describe: use.describe } : {}),
       ...(resolved.orbitals.length ? { orbitals: resolved.orbitals } : {}),
+      ...(use.label ? { label: use.label } : {}),
+      ...(use.labels ? { labels: Object.fromEntries(Object.entries(use.labels).map(([k, v]) => [Number(k), v])) } : {}),
+      ...(use.pageSheet ? { pageSheet: use.pageSheet } : {}),
+      ...(use.dipoles ? { dipoles: dipoles() } : {}),
     },
     errors,
   };

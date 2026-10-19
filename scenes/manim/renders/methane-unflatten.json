@@ -1,0 +1,30 @@
+{
+  "scene": "methane-unflatten",
+  "manim": "0.22.0",
+  "fps": 60,
+  "inputs": "af9dd594351329e03c5450483b57b9da5dec6052ef0e0e253a413371522c76d8",
+  "aspects": {
+    "16:9": {
+      "frames": 480,
+      "timings": {
+        "methane/a.HCH": [
+          [
+            5.6,
+            8
+          ]
+        ]
+      }
+    },
+    "9:16": {
+      "frames": 480,
+      "timings": {
+        "methane/a.HCH": [
+          [
+            5.6,
+            8
+          ]
+        ]
+      }
+    }
+  }
+}
