@@ -146,7 +146,8 @@ function pushArrow(screen: Screen, step: DrawArrowsStep, answer: Answer): Screen
   return { ...screen, arrows: arrowsScreen(step, state), tries, feedback, canContinue: state.done };
 }
 
-const taskOf = (step: DrawArrowsStep) => ({ ...step, start: step.start.structure });
+// Before the answer key arrives a Draw-arrows Step has no results yet: it draws, but grades nothing.
+const taskOf = (step: DrawArrowsStep) => ({ ...step, start: step.start.structure, results: step.results ?? [] });
 
 function arrowsScreen(step: DrawArrowsStep, state: ArrowsState): ArrowsScreen {
   const { structure, flags } = arrowsView(taskOf(step), state);

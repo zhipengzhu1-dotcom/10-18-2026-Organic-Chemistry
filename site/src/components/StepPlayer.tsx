@@ -13,6 +13,8 @@ import SourceNote from "./SourceNote.tsx";
 import ScenePlayer from "./ScenePlayer.tsx";
 import SceneControl from "./SceneControl.tsx";
 import StructureTap from "./StructureTap.tsx";
+import DrawArrows from "./DrawArrows.tsx";
+import { PushReplayPlayer } from "./PushReplayPlayer.tsx";
 import "./structure.css";
 
 interface Props {
@@ -143,7 +145,9 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         ? Number.isFinite(parseNumber(draft)) ? { value: parseNumber(draft) } : null
         : step.type === "rank"
           ? { order }
-          : setting !== undefined
+          : step.type === "draw-arrows"
+            ? null // pushes are dispatched one by one by the Draw-arrows view
+            : setting !== undefined
             ? { setting }
             : null;
 
@@ -196,13 +200,34 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <StructureTap
             step={step}
             picked={chosen}
-            answer={feedback?.kind === "reveal" && Array.isArray(feedback.answer) ? feedback.answer : []}
+            answer={feedback?.kind === "reveal" && Array.isArray(feedback.answer) ? (feedback.answer as string[]) : []}
             locked={screen.canContinue}
             onToggle={pick}
           />
         )}
 
-        {step.scene && sceneState && (
+        {step.type === "draw-arrows" && screen.arrows && (
+          <DrawArrows
+            key={`arrows-${step.id}`}
+            start={step.start.structure}
+            hide={step.start.hide}
+            pushes={screen.arrows.pushes}
+            structure={screen.arrows.structure}
+            flags={screen.arrows.flags}
+            last={screen.arrows.last}
+            target={step.target}
+            locked={screen.canContinue || !key}
+            onPush={(push) => dispatch({ type: "answer", push })}
+            onUndo={() => dispatch({ type: "answer", undo: true })}
+          />
+        )}
+
+        {/* Draw arrows: on success (or the reveal) the Step's Scene plays in place, else push-replay of the arrows. */}
+        {step.type === "draw-arrows" && screen.canContinue && !step.scene && screen.arrows && (
+          <PushReplayPlayer key={`replay-${step.id}`} start={step.start.structure} hide={step.start.hide} pushes={screen.arrows.pushes.map((p) => p.push)} />
+        )}
+
+        {step.scene && sceneState && (step.type !== "draw-arrows" || screen.canContinue) && (
           // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
           <ScenePlayer
             key={`scene-${step.id}`}
@@ -313,9 +338,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <button type="button" className="button" onClick={next}>
             Continue
           </button>
+        ) : step.type === "draw-arrows" ? (
+          // No Check button: each push is graded the moment it lands.
+          <p className="footer-note">Each arrow is checked as you draw it.</p>
         ) : (
           <button type="button" className="button" onClick={check} disabled={!key || !answer}>
-
             Check
           </button>
         )}

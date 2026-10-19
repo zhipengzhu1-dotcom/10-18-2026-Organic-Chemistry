@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./manifests": "./src/manifests.ts",
-    "./check": "./src/manifest-check.ts"
+    "./check": "./src/manifest-check.ts",
+    "./arrows": "./src/structure/arrows.ts"
   },
   "scripts": {
     "check": "node src/check-cli.ts",

@@ -15,3 +15,32 @@
 .picked-ring text { fill: #5ee7ff; font-weight: 700; }
 .answer-ring circle, .answer-ring line { stroke: #ffd23c; stroke-width: 3px; stroke-dasharray: 5 3; fill: none; }
 .answer-ring line { stroke-width: 12px; stroke-opacity: 0.5; }
+
+/* Draw arrows (#72). Placeholder colours until #59 tokens; never colour alone: shown arrows are dashed, flags carry ⚠ text. */
+.push-line { min-height: 1.5em; margin: 0.25rem 0; font-family: var(--at-font-data, "JetBrains Mono", ui-monospace, monospace); }
+.arrows-cards { display: grid; gap: 0.75rem; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .arrows-cards.with-target { grid-template-columns: 1fr 1fr; align-items: center; } .arrows-target { order: 2; } }
+.arrows-target { margin: 0; opacity: 0.55; max-height: 30vh; }
+.arrows-target figcaption { font-size: 0.85rem; }
+.arrows-target .structure { max-height: 24vh; margin: 0 auto; }
+.arrows-structure { position: relative; touch-action: none; user-select: none; -webkit-user-select: none; }
+.arrows-structure .structure-svg .structure { width: 100%; }
+.arrows-layer { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.arrows-layer .source { cursor: grab; outline: none; }
+.arrows-layer .source .hit { fill: transparent; stroke: transparent; pointer-events: all; }
+.arrows-layer .source:focus-visible .hit, .arrows-layer .source.active .hit { stroke: #ff9d3c; stroke-dasharray: 3 3; stroke-width: 2px; }
+.arrows-layer .source.bond:focus-visible .hit, .arrows-layer .source.bond.active .hit { stroke-opacity: 0.35; stroke-width: 14px; }
+.arrows-layer .source[aria-disabled="true"] { cursor: default; }
+.drop-spot circle { fill: rgba(94, 231, 255, 0.12); stroke: #5ee7ff; stroke-width: 2px; stroke-dasharray: 4 3; cursor: pointer; }
+.drop-spot.over circle, .drop-spot:focus-visible circle { fill: rgba(94, 231, 255, 0.35); stroke-width: 3px; }
+.drop-spot { outline: none; }
+.push-arrow { fill: none; stroke: #5ee7ff; stroke-width: 2.5px; pointer-events: none; }
+.push-arrow.shown { stroke: #ff9d3c; stroke-dasharray: 6 3; }
+.push-arrow.dragging { stroke-opacity: 0.8; }
+.arrowhead.ink { fill: #5ee7ff; }
+.arrowhead.shown { fill: #ff9d3c; }
+.riding-electron { fill: #5ee7ff; pointer-events: none; }
+.flag-ring { fill: none; stroke: #ff9d3c; stroke-width: 3px; stroke-dasharray: 5 3; pointer-events: none; }
+.arrow-flags { list-style: none; padding: 0.5rem 0.75rem; margin: 0.5rem 0; border-left: 4px solid #ff9d3c; }
+.arrows-help { font-size: 0.85rem; opacity: 0.8; }
+.arrows-tools button { min-height: 44px; }

@@ -288,14 +288,43 @@ export function dropTargets(m: Molecule, from: string): DropTarget[] {
   if (!ends.length || (atom && atom.lp < 1)) return [];
   const own = fragmentOf(m, ends[0]);
   const out: DropTarget[] = [];
-  if (bond) for (const e of ends) out.push({ id: e, place: "beside-atom", label: placeLabel(m, e) });
+  if (bond) for (const e of ends) out.push({ id: e, place: "beside-atom", label: placeLabel(m, e, "target") });
   for (const b of m.bonds.values()) {
     if (b.id === from) continue;
     const shared = [b.a, b.b].filter((e) => ends.includes(e)).length;
-    if ((atom && shared === 1) || (bond && shared === 1)) out.push({ id: b.id, place: "on-bond", label: placeLabel(m, b.id) });
+    if (shared === 1) out.push({ id: b.id, place: "on-bond", label: placeLabel(m, b.id, "target") });
   }
-  for (const a of m.atoms) if (!own.has(a.id)) out.push({ id: a.id, place: "gap", label: placeLabel(m, a.id) });
+  for (const a of m.atoms) if (!own.has(a.id)) out.push({ id: a.id, place: "gap", label: placeLabel(m, a.id, "target") });
   return out;
+}
+
+/**
+ * Where a push's arrowhead is drawn, whichever way it was dropped: beside the atom that gains a
+ * lone pair, on the bond that gains a pair, or in the gap before an atom of another molecule.
+ */
+export function arrowhead(m: Molecule, push: Push): { to: string; place: DropTarget["place"] } | undefined {
+  const move = moveOf(m, push);
+  if (!move) return undefined;
+  if ("lp" in move.to) return { to: move.to.lp, place: "beside-atom" };
+  const bond = m.bonds.get(pairKey(...move.to.pair));
+  if (bond) return { to: bond.id, place: "on-bond" };
+  const source = "lp" in move.from ? [move.from.lp] : move.from.pair;
+  const far = move.to.pair.find((a) => !source.includes(a)) ?? move.to.pair[1];
+  return { to: far, place: "gap" };
+}
+
+/** The molecules a list of pushes passes through: the start, then after each push (stopping at one that isn't a move). */
+export function replay(start: Structure, pushes: Push[]): { molecule: Molecule; push?: Push }[] {
+  let m = moleculeOf(start);
+  const frames: { molecule: Molecule; push?: Push }[] = [];
+  for (const push of pushes) {
+    const next = applyPush(m, push);
+    if (!next) break;
+    frames.push({ molecule: m, push });
+    m = next;
+  }
+  frames.push({ molecule: m });
+  return frames;
 }
 
 // ── Names read aloud and shown above the card ───────────────────────────────

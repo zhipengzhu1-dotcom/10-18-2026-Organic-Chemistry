@@ -100,6 +100,16 @@ export function renderLesson(lesson: Lesson): Lesson {
         return { ...s, ...shared, items: choices(s.items), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
       case "manipulate":
         return { ...s, ...shared, hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
+      case "draw-arrows":
+        // The start is redrawn live in the browser as pushes land; its first drawing and the
+        // target are pre-rendered. In-between copy stays plain: it is also read aloud.
+        return {
+          ...s,
+          ...shared,
+          start: drawView(s.start),
+          ...(s.target && { target: drawView(s.target) }),
+          hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
+        };
     }
   };
   return { ...lesson, keyIdea: md(lesson.keyIdea), steps: lesson.steps.map(step) };
