@@ -745,6 +745,33 @@
   .returning .first-visit {
     display: none;
   }
+  /* The Push hero (#73): headline, live push, one button; the Course map follows. */
+  .push-hero-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 8px 0 24px;
+  }
+  .hero-title {
+    margin: 0;
+    font: 700 clamp(30px, 8vw, 44px) / 1.05 var(--at-font-text);
+  }
+  .hero-accent {
+    color: var(--at-ignite);
+  }
+  .push-hero {
+    padding: 12px;
+    border: var(--at-border-strong) solid var(--at-line);
+    background: var(--at-surface);
+    box-shadow: var(--at-drop);
+  }
+  .push-hero-msg {
+    margin: 12px 0 0;
+    min-height: 3em;
+  }
+  .push-hero-done {
+    color: var(--at-electron);
+  }
   .continue-card {
     margin: 12px 0 24px;
     padding: 16px;
