@@ -54,6 +54,39 @@ const rank = {
   reveal: text,
 };
 
+/** A value a Scene's settable state takes: a number (range) or an option id (choice). */
+const sceneValue = z.union([z.number(), z.string()]);
+
+/**
+ * The Scene a Step shows: `scene: <id>`, or `{ id, state: { <settable state>: <value> } }`.
+ * States left out take the manifest's default. The ids and values are checked
+ * against the Scene registry (see scenes.ts).
+ */
+const sceneUse = z.preprocess(
+  (v) => (typeof v === "string" ? { id: v } : v),
+  z.strictObject({ id, state: z.record(z.string(), sceneValue).optional() }),
+);
+
+/** A Manipulate Hint: `match` lists the wrong control values it answers. */
+const manipulateHint = z.strictObject({ match: z.array(sceneValue).min(1).optional(), text });
+
+/**
+ * Manipulate a Scene: the Student works a control (one of the Scene's settable
+ * states, drawn as a slider under the Scene) and presses Check on a value.
+ */
+const manipulate = {
+  type: z.literal("manipulate"),
+  prompt: text,
+  scene: sceneUse,
+  /** The settable state the slider drives. */
+  control: z.string(),
+  /** The control value that is right. */
+  answer: sceneValue,
+  correct: text.optional(),
+  hints: z.array(manipulateHint).optional(),
+  reveal: text,
+};
+
 const stepId = z.string().regex(/^s\d{2,}$/, 'must look like "s01"');
 const phase = z.enum(["hook", "build", "wrap"]);
 
@@ -62,18 +95,21 @@ const explainStep = z.strictObject({
   phase,
   type: z.literal("explain"),
   text,
+  scene: sceneUse.optional(),
 });
 
 const multipleChoiceStep = z.strictObject({
   id: stepId,
   phase,
   ...multipleChoice,
+  scene: sceneUse.optional(),
   /** Hook only: every choice is accepted and the reveal follows at once. */
   prediction: z.boolean().optional(),
 });
 
-const numericStep = z.strictObject({ id: stepId, phase, ...numeric });
-const rankStep = z.strictObject({ id: stepId, phase, ...rank });
+const numericStep = z.strictObject({ id: stepId, phase, ...numeric, scene: sceneUse.optional() });
+const rankStep = z.strictObject({ id: stepId, phase, ...rank, scene: sceneUse.optional() });
+const manipulateStep = z.strictObject({ id: stepId, phase, ...manipulate });
 
 /** A Check Step is a Problem from the Bank, referenced by id; its Step type is the Problem's. */
 const checkStep = z.strictObject({
@@ -86,7 +122,7 @@ const checkStep = z.strictObject({
 /** Picks the Step schema by `type` (a Check Step is recognised by its `problem`), so errors point at the broken field. */
 const step = z.preprocess(
   (v) => (v && typeof v === "object" && "problem" in v && !("type" in v) ? { ...v, type: "check" } : v),
-  z.discriminatedUnion("type", [checkStep, explainStep, multipleChoiceStep, numericStep, rankStep]),
+  z.discriminatedUnion("type", [checkStep, explainStep, multipleChoiceStep, numericStep, rankStep, manipulateStep]),
 );
 
 export const lessonFile = z.strictObject({

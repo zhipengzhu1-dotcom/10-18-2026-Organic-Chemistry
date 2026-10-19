@@ -10,8 +10,11 @@ export type Feedback =
   /** `answer` is the Step's answer: option ids, a number, or an order of item ids. */
   | { kind: "reveal"; text: string; answer: GradedStep["answer"] };
 
-/** What a Student submits: chosen option ids (Multiple choice), a number (Numeric) or an order of item ids (Rank). */
-export type Answer = { choice: string[] } | { value: number } | { order: string[] };
+/**
+ * What a Student submits: chosen option ids (Multiple choice), a number (Numeric), an order of item ids (Rank)
+ * or the control's current value (Manipulate a Scene).
+ */
+export type Answer = { choice: string[] } | { value: number } | { order: string[] } | { setting: number | string };
 
 export type Action = ({ type: "answer" } & Answer) | { type: "continue" };
 
@@ -95,6 +98,12 @@ function judge(step: GradedStep, answer: Answer): { right: boolean; hint?: { tex
       if (!("order" in answer)) return undefined;
       const { order } = answer;
       return { right: sameOrder(order, step.answer), hint: step.hints?.find((h) => !h.match || sameOrder(h.match, order)) };
+    }
+    case "manipulate": {
+      if (!("setting" in answer)) return undefined;
+      const same = (v: number | string) =>
+        typeof v === "number" && typeof answer.setting === "number" ? Math.abs(v - answer.setting) < 1e-9 : v === answer.setting;
+      return { right: same(step.answer), hint: step.hints?.find((h) => !h.match || h.match.some(same)) };
     }
   }
 }

@@ -74,6 +74,8 @@ export function renderLesson(lesson: Lesson): Lesson {
         return { ...s, ...shared, hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
       case "rank":
         return { ...s, ...shared, items: choices(s.items), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
+      case "manipulate":
+        return { ...s, ...shared, hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
     }
   };
   return { ...lesson, keyIdea: md(lesson.keyIdea), steps: lesson.steps.map(step) };
