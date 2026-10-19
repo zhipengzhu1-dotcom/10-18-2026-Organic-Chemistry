@@ -59,6 +59,13 @@ describe("Scene manifest check", () => {
     ]);
   });
 
+  it("a Scene may play without controls only if one run lasts 5 s or less (WCAG 2.2.2)", () => {
+    expect(checkManifests([manifest({ controls: false, duration: 5, poster: { t: 5 } })])).toEqual([]);
+    expect(checkManifests([manifest({ controls: false, duration: 6, poster: { t: 6 } })])).toEqual([
+      "scenes/twist: controls: a Scene without Play/Replay/Scrub must run 5 s or less; this one runs 6 s",
+    ]);
+  });
+
   it("the video block needs a timeline, a poster time and both aspect ratios", () => {
     const video = { duration: 6, timeline: [], poster: 9, aspects: ["16:9"] };
     expect(checkManifests([manifest({ video } as never)])).toEqual([

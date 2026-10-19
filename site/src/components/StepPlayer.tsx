@@ -212,7 +212,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         {step.figures && !revealScene && <Figures figures={step.figures} />}
 
         {step.type === "tap-to-identify" && step.alt && <p className="sr">{step.alt}</p>}
-        {step.type === "tap-to-identify" && (
+        {step.type === "tap-to-identify" && !revealScene && (
           <StructureTap
             step={step}
             picked={chosen}
@@ -284,7 +284,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         )}
 
         {step.type === "multiple-choice" && !revealScene && (
-          <div className="opts" role="group" aria-label="Choices">
+          // Short text choices sit as chips: many to a row for one-word choices, two to a row under a figure.
+          <div className={["opts", chips(step)].filter(Boolean).join(" ")} role="group" aria-label="Choices">
             {step.options.map((o) =>
               o.structure ? (
                 // A structure card: the drawing is pre-rendered SVG; its text is the screen-reader label.
@@ -406,6 +407,22 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
       </div>
     </div>
   );
+}
+
+/** Short text for a chip, and a single word or two: under this many characters (HTML tags aside). */
+const CHIP_TEXT = 42;
+const WORD_TEXT = 12;
+
+/**
+ * How text choices are laid out: as word chips, as many to a row as fit (six or more one-word choices,
+ * e.g. group names), or two to a row (short choices under a figure); else one to a row.
+ */
+function chips(step: { options: { text: string; structure?: unknown }[]; figures?: unknown[] }): string | undefined {
+  if (step.options.some((o) => o.structure)) return undefined;
+  const longest = Math.max(...step.options.map((o) => o.text.replace(/<[^>]*>/g, "").length));
+  if (step.options.length >= 6 && longest < WORD_TEXT) return "opts-words";
+  if (step.options.length >= 6 || (step.figures && longest < CHIP_TEXT)) return "opts-chips";
+  return undefined;
 }
 
 /** Reads what the Student typed: accepts a comma decimal and a typographic minus; NaN when it isn't a number. */
