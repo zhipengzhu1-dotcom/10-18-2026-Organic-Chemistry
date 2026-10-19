@@ -1,7 +1,7 @@
 // The resolved course model: what the content build hands to the site and the
 // video renderer. Check Steps arrive with their Problem inlined.
 import type { Atom, Bond, Cited, CitedData, Tier } from "./data.ts";
-import type { Matrix3 } from "./molecule.ts";
+import type { BondDipole, Matrix3, Vec3 } from "./molecule.ts";
 
 export type Phase = "hook" | "build" | "check" | "wrap";
 
@@ -74,6 +74,16 @@ export interface MoleculeUse {
   card: boolean;
   /** The Step's own words, read first by the Describe button. */
   describe?: string;
+  /** Lesson 3 (#81): the molecule's name on a segmented toggle. */
+  label?: string;
+  /** Atom names the Step uses, by atom index; they replace the per-element names in readouts and are drawn beside the letters. */
+  labels?: Record<number, string>;
+  /** The page sheet: the plane of these three atoms is "in the page" when it faces the viewer (within 10°). */
+  pageSheet?: [number, number, number];
+  /** Bond-dipole arrows (from the cited electronegativities, a rough guide) and their sum, in the molecule's frame. */
+  dipoles?: { arrows: BondDipole[]; net: { vector: Vec3; size: number; zero: boolean } };
+  /** The other molecules of a segmented toggle (this one is first). */
+  toggle?: MoleculeUse[];
 }
 
 

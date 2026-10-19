@@ -213,6 +213,78 @@ export function project(atoms: Atom[], r: Matrix3): Vec3[] {
   return atoms.map((a) => apply(r, sub(pos(a), c)));
 }
 
+/**
+ * The page sheet (Lesson 3 s09): the view that lays three atoms flat in the page (the screen
+ * plane), with the first of them pointing up from the second.
+ */
+export function pageView(atoms: Atom[], plane: [number, number, number]): Matrix3 {
+  return viewMatrix(atoms, { plane, up: plane[0] });
+}
+
+/** How far (degrees, 0–90) the plane through three atoms is turned out of the screen plane. */
+export function pageTilt(atoms: Atom[], r: Matrix3, plane: [number, number, number]): number {
+  const n = unit(planeNormal(atoms, plane));
+  return deg(Math.acos(Math.min(1, Math.abs(dot(n, r[2])))));
+}
+
+/**
+ * Atoms bonded to the plane's middle atom that are not in the plane: on the viewer's side of the
+ * plane ("toward") or behind it ("away"), in the current view.
+ */
+export function pageSides(m: Molecule, r: Matrix3, plane: [number, number, number]): { atom: number; side: "toward" | "away" }[] {
+  const centre = plane[1];
+  const n = unit(planeNormal(m.atoms, plane));
+  const facing = dot(n, r[2]) >= 0 ? n : scale(n, -1);
+  return m.bonds
+    .filter((b) => b.a === centre || b.b === centre)
+    .map((b) => (b.a === centre ? b.b : b.a))
+    .filter((i) => !plane.includes(i))
+    .sort((a, b) => a - b)
+    .map((atom) => {
+      const d = dot(sub(pos(m.atoms[atom]), pos(m.atoms[centre])), facing);
+      return { atom, side: d >= 0 ? ("toward" as const) : ("away" as const) };
+    });
+}
+
+/** A bond dipole: from the δ+ atom toward the δ− atom, `size` = the electronegativity difference. */
+export interface BondDipole {
+  from: number;
+  to: number;
+  size: number;
+}
+
+/**
+ * Every polar bond's dipole (Lesson 3's `dipole-sum`): it lies along the bond and points at the
+ * more electronegative atom; its length is the two atoms' electronegativity difference, a rough
+ * guide only. `en` maps element → electronegativity (from the cited table).
+ */
+export function bondDipoles(m: Molecule, en: Record<string, number>): BondDipole[] {
+  return m.bonds.flatMap((b) => {
+    const [ea, eb] = [en[m.atoms[b.a].element], en[m.atoms[b.b].element]];
+    if (ea === undefined || eb === undefined)
+      throw new Error(`no electronegativity for ${m.atoms[b.a].element} or ${m.atoms[b.b].element}`);
+    if (ea === eb) return [];
+    return [ea > eb ? { from: b.b, to: b.a, size: ea - eb } : { from: b.a, to: b.b, size: eb - ea }];
+  });
+}
+
+/** Below this fraction of the largest bond dipole, a sum counts as zero (symmetric molecules). */
+const NET_ZERO = 0.02;
+
+/** The bond dipoles added tip to tail: the net vector (molecule frame), its size, and whether it cancels. */
+export function netDipole(m: Molecule, dipoles: BondDipole[]): { vector: Vec3; size: number; zero: boolean } {
+  const vector = dipoles.reduce<Vec3>(
+    (s, d) => {
+      const v = scale(unit(sub(pos(m.atoms[d.to]), pos(m.atoms[d.from]))), d.size);
+      return [s[0] + v[0], s[1] + v[1], s[2] + v[2]];
+    },
+    [0, 0, 0],
+  );
+  const size = length(vector);
+  const largest = Math.max(0, ...dipoles.map((d) => d.size));
+  return { vector, size, zero: size <= NET_ZERO * largest };
+}
+
 const list = (words: string[]) => (words.length < 2 ? words.join("") : `${words.slice(0, -1).join(", ")} and ${words.at(-1)}`);
 
 /**

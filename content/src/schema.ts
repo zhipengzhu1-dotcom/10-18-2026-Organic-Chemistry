@@ -23,9 +23,27 @@ const hint = z.strictObject({
  * 3D Step card (#68; Rotate-and-identify always does); `view` names a start view in the Subject's
  * views.yaml (default: the file's own axes); `describe` opens what the Describe button reads.
  */
+const moleculeFields = {
+  id,
+  card: z.boolean().optional(),
+  view: id.optional(),
+  describe: text.optional(),
+  /** Lesson 3 (#81): the molecule's name on a segmented toggle (e.g. "BF₃"). */
+  label: text.optional(),
+  /** Atom names the Step uses, by 0-based atom index (e.g. `{ 1: C1 }`); the element letters stay. */
+  labels: z.record(z.string().regex(/^\d+$/, "must be an atom index"), text).optional(),
+  /** The page sheet: three atom indices; the sheet lies in the screen plane through the middle one, with an In-the-page badge for their plane. */
+  pageSheet: z.tuple([z.number().int(), z.number().int(), z.number().int()]).optional(),
+  /** Bond-dipole arrows (from the cited Pauling electronegativities) and an Add button that sums them. */
+  dipoles: z.boolean().optional(),
+};
 const moleculeUse = z.preprocess(
   (v) => (typeof v === "string" ? { id: v } : v),
-  z.strictObject({ id, card: z.boolean().optional(), view: id.optional(), describe: text.optional() }),
+  z.strictObject({
+    ...moleculeFields,
+    /** More molecules shown in the same card, switched with a segmented toggle (every molecule needs a `label`). */
+    toggle: z.array(z.strictObject(moleculeFields)).min(1).optional(),
+  }),
 );
 const molecule = moleculeUse.optional();
 

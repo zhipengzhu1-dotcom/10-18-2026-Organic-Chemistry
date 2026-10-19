@@ -92,6 +92,7 @@ MOLECULES: list[Molecule] = [
         values={
             "r.OH": ("O–H", (2, 3)), "r.CO": ("C–O", (1, 2)), "r.CC": ("C–C", (0, 1)),
             "a.CCO": ("C–C–O", (0, 1, 2)), "a.HOC": ("H–O–C", (3, 2, 1)), "d.CCOH": ("C–C–O–H", (0, 1, 2, 3)),
+            "a.HC1H": ("H–C1–H", (7, 1, 8)),
         },
     ),
     M(
