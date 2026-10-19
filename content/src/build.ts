@@ -25,7 +25,10 @@ import {
   type StructureFile,
 } from "./schema.ts";
 import { checkDeletedSteps, checkFrozenIds, LOCK_FILE } from "./freeze.ts";
-import type { BuildResult, Course, Figure, Lesson, Option, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
+import type { BuildResult, Course, Figure, GradedStep, Lesson, Option, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
+
+/** The Practice Set page sits at `<unit url>/practice`, so no Lesson may take that slug. */
+export const PRACTICE_SLUG = "practice";
 import { checkInteraction, checkLessonShape } from "./shape.ts";
 import { citeIn, type Cited, type CitedData } from "./data.ts";
 import { dataFile, resolveDataFile } from "./data-load.ts";
@@ -120,6 +123,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
         ...checkLessonShape(lesson),
         ...(frozen ? checkFrozenIds(lesson, frozen) : []),
         ...checkDeletedSteps(lesson),
+        ...(lesson.slug === PRACTICE_SLUG ? [`slug "${PRACTICE_SLUG}" is reserved for the Practice Set page`] : []),
         ...(options.scenes
           ? lesson.steps.flatMap((step) =>
               checkStepScene(step, options.scenes!, data).map((message) => `step ${step.id}: ${message}`),
@@ -166,10 +170,16 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       if (problem) resolveStructures(`problem:${problem.id}`, problem, `${slug}/problems/${problem.id}.yaml: `);
 
     const courses: Course[] = [];
+    /** Unit id → the Lesson ids its manifest lists; undefined when a manifest is broken (tags then can't be checked). */
+    let listed: Map<string, string[]> | undefined = new Map();
     let unitNumber = 0;
     for (const rel of yamlFiles(root, `${slug}/courses`)) {
       const course = load(rel, courseFile);
-      if (!course) continue;
+      if (!course) {
+        listed = undefined;
+        continue;
+      }
+      for (const unit of course.units) listed?.set(unit.id, unit.lessons);
       const courseSlug = basename(rel, ".yaml");
       courses.push({
         slug: courseSlug,
@@ -198,10 +208,13 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
               }
               return [resolved];
             }),
+            bank: [],
           };
         }),
       });
     }
+    const revealScene = (use: SceneUseFile) => resolveSceneUse(use, options.scenes, data);
+    fillBanks(slug, courses, listed, lessons, problems, structured, problemCitations, revealScene, errors);
     if (subject) subjects.push({ slug, title: subject.title, url: `/${slug}`, courses, data });
   }
 
@@ -218,14 +231,6 @@ function resolveLesson(
   rel: string,
   errors: string[],
 ): Lesson {
-  /** Swaps structure ids for the resolved structures; a Step whose structures failed is dropped (its errors are reported). */
-  const withStructures = (step: Record<string, unknown> & { type: string }, key: string): Step[] => {
-    if (step.type !== "multiple-choice" && step.type !== "tap-to-identify") return [step as unknown as Step];
-    const fields = structured.get(key);
-    if (!fields) return [];
-    const { tappable: _t, hide: _h, ...rest } = step;
-    return [{ ...rest, ...fields } as unknown as Step];
-  };
   /** Resolves the Step's Scene and reveal Scene; their cited numbers join the Step's Source note. */
   const withScene = (step: Step): Step => {
     const reveal = "revealScene" in step ? step.revealScene : undefined;
@@ -238,7 +243,7 @@ function resolveLesson(
     return { ...step, ...uses, ...(own.length + extra.length ? { citations: [...own, ...extra] } : {}) } as Step;
   };
   const steps: Step[] = lesson.steps.flatMap((step): Step[] => {
-    if (step.type !== "check") return withStructures(step, `${lesson.id}#${step.id}`).map(withScene);
+    if (step.type !== "check") return withStructures(step, `${lesson.id}#${step.id}`, structured).map(withScene);
     const problem = problems.get(step.problem);
     if (!problem) {
       if (!problems.has(step.problem)) errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" not found`);
@@ -248,13 +253,83 @@ function resolveLesson(
       errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" is ${problem.status}, not approved`);
       return [];
     }
-    const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source: _src, credit: _c, ...interaction } = problem;
-    return withStructures({ id: step.id, phase: "check", problemId, ...interaction }, `problem:${problemId}`).map(withScene);
+    return problemStep(problem, step.id, structured).map(withScene);
   });
   const phases = { hook: 0, build: 0, check: 0, wrap: 0 };
   for (const step of lesson.steps) phases[step.phase]++;
   const { signature, ...rest } = lesson;
   return { ...rest, url, number, signature: signatureType(lesson), phases, steps };
+}
+
+/** Swaps structure ids for the resolved structures; a Step whose structures failed is dropped (its errors are reported). */
+function withStructures(step: Record<string, unknown> & { type: string }, key: string, structured: Structured): Step[] {
+  if (step.type !== "multiple-choice" && step.type !== "tap-to-identify") return [step as unknown as Step];
+  const fields = structured.get(key);
+  if (!fields) return [];
+  const { tappable: _t, hide: _h, ...rest } = step;
+  return [{ ...rest, ...fields } as unknown as Step];
+}
+
+/** A Problem as a playable Step (a Check Step, or a Practice Set Problem): its interaction without the Bank tags. */
+function problemStep(problem: ProblemFile, stepId: string, structured: Structured): Step[] {
+  const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source: _src, credit: _c, ...interaction } = problem;
+  return withStructures({ id: stepId, phase: "check", problemId, ...interaction }, `problem:${problemId}`, structured);
+}
+
+/**
+ * Files each Problem in its Unit's Bank, checking its Unit and Lesson tags. A Problem whose
+ * structures failed to resolve is left out (its errors are already reported).
+ */
+function fillBanks(
+  slug: string,
+  courses: Course[],
+  listed: Map<string, string[]> | undefined,
+  lessons: Map<string, LessonFile | undefined>,
+  problems: Map<string, ProblemFile | undefined>,
+  structured: Structured,
+  citations: Map<string, Cited[]>,
+  scene: (use: SceneUseFile) => SceneUse,
+  errors: string[],
+): void {
+  const units = new Map(courses.flatMap((c) => c.units.map((u) => [u.id, u] as const)));
+  const checks = new Set<string>();
+  for (const lesson of lessons.values())
+    for (const step of lesson?.steps ?? []) if (step.type === "check") checks.add(step.problem);
+  for (const problem of problems.values()) {
+    if (!problem) continue;
+    const rel = `${slug}/problems/${problem.id}.yaml`;
+    const unit = units.get(problem.unit);
+    if (!unit || !listed) {
+      if (listed) errors.push(`${rel}: Unit "${problem.unit}" is not in any course manifest`);
+      continue;
+    }
+    if (!listed.get(unit.id)?.includes(problem.lesson)) {
+      errors.push(`${rel}: Lesson "${problem.lesson}" is not a Lesson of Unit ${unit.id}`);
+      continue;
+    }
+    // A listed Lesson whose file is broken or missing is already reported.
+    const lesson = lessons.get(problem.lesson);
+    if (!lesson) continue;
+    const [found] = problemStep(problem, problem.id, structured) as GradedStep[];
+    if (!found) continue;
+    // A Practice Set Problem shows its reveal Scene too.
+    const reveal = "revealScene" in found ? found.revealScene : undefined;
+    const step = (reveal ? { ...found, revealScene: scene(reveal) } : found) as GradedStep;
+    const cited = citations.get(problem.id);
+    if (cited) step.citations = cited;
+    const { id, difficulty, status, source, credit } = problem;
+    unit.bank.push({
+      id,
+      lesson: problem.lesson,
+      difficulty,
+      status,
+      source,
+      ...(credit ? { credit } : {}),
+      check: checks.has(id),
+      onRamp: lesson.onRamp,
+      step,
+    });
+  }
 }
 
 /** The named signature Step's type, else the first graded Build Step's, else the first Step's. */

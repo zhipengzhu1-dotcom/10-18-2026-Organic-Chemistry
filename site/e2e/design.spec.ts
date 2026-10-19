@@ -213,10 +213,14 @@ test.describe("Step player on a phone", () => {
         });
         expect(fit, label).toEqual({ page: true, body: true });
         // One bottom button on every Step; the Lesson-end screen adds a secondary
-        // "Back to Unit" under "Next Lesson" (spec #56 story 35).
+        // "Back to Unit" under "Next Lesson" (spec #56 story 35), and the Practice Set
+        // summary has Retry missed (when any), Next Unit and Back to Unit (story 69).
         const foot = page.locator(".player-foot").locator("button, a");
         const end = await page.getByRole("link", { name: "Back to Unit" }).isVisible();
-        await expect(foot).toHaveCount(end ? (await page.getByRole("link", { name: "Next Lesson" }).count()) + 1 : 1);
+        const ends = [page.getByRole("link", { name: "Next Lesson" }), page.getByRole("link", { name: "Next Unit" }), page.getByRole("button", { name: /^Retry missed/ })];
+        let extra = 0;
+        for (const e of ends) extra += await e.count();
+        await expect(foot).toHaveCount(end ? extra + 1 : 1);
         for (const b of await foot.all()) await expect(b).toBeInViewport({ ratio: 1 });
       });
     }

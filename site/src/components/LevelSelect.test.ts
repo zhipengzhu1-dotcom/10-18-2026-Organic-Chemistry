@@ -2,11 +2,11 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { buildContent } from "@astratron/content";
+import { buildContent, type Unit } from "@astratron/content";
 import { lesson, sampleSteps, validTree, writeTree } from "../../../content/test/tree.ts";
 import LevelSelect from "./LevelSelect.tsx";
 
-function unitPage(): string {
+function unitPage(edit: (unit: Unit) => void = () => {}): string {
   const tree = validTree();
   const onRampSteps = sampleSteps().filter((s) => !["s04", "s05", "s06", "s07"].includes(s.id));
   tree["chem/lessons/l0.yaml"] = lesson({ id: "l0", slug: "why-carbon", title: "Why Carbon?", onRamp: true, act: "Warm-up", steps: onRampSteps });
@@ -16,7 +16,9 @@ function unitPage(): string {
   (tree["chem/courses/chem-1.yaml"] as { units: { lessons?: string[] }[] }).units[0].lessons = ["l0", "l1", "l2", "l3"];
   const { model, errors } = buildContent(writeTree(tree));
   expect(errors).toEqual([]);
-  return renderToStaticMarkup(createElement(LevelSelect, { unit: model!.subjects[0].courses[0].units[0] }));
+  const unit = model!.subjects[0].courses[0].units[0];
+  edit(unit);
+  return renderToStaticMarkup(createElement(LevelSelect, { unit }));
 }
 
 /** The page's visible text, in order, one entry per element that holds text. */
@@ -58,13 +60,28 @@ describe("Level select", () => {
       "10 Steps",
       "Final round",
       "Unit review",
+      "Not started",
       "Practice Set",
-      "10", // in the data face
+      "2", // in the data face
       "Problems from the Unit's Bank, easy to hard, covering every Lesson.",
       "Mixed",
-      "10 Problems",
-      "Opens soon",
+      "2 Problems",
     ]);
+  });
+
+  it("links the Practice Set row to its page, with a status the browser fills in", () => {
+    const html = unitPage();
+    expect(html).toMatch(/<a [^>]*href="\/chem\/chem-1\/unit-one\/practice"[^>]*>Practice Set<\/a>/);
+    expect(html).toMatch(/<li [^>]*data-practice-set="u1"/);
+  });
+
+  it("a Unit with nothing to draw yet shows the Practice Set as opening soon, unlinked", () => {
+    // Only On-ramp Problems and drafts: nothing can be drawn.
+    const html = unitPage((unit) => {
+      unit.bank = unit.bank.map((p, i) => (i ? { ...p, status: "draft" } : { ...p, onRamp: true }));
+    });
+    expect(texts(html).slice(-6)).toEqual(["Final round", "Unit review", "Practice Set", "Problems from the Unit's Bank, easy to hard, covering every Lesson.", "Mixed", "Opens soon"]);
+    expect(html).not.toContain("/practice");
   });
 
   it("shows n of N Lessons, not counting the On-ramp, before the browser fills in progress", () => {

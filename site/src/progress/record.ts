@@ -7,7 +7,15 @@
 // and add a step to MIGRATIONS that lifts version n to n + 1.
 import type { LessonProgress } from "../engine/player.ts";
 
-export const CURRENT_VERSION = 1;
+export const CURRENT_VERSION = 2;
+
+/** A Unit's Practice Set history. */
+export interface PracticeState {
+  /** The last full draw (Problem ids), which the next retake avoids. */
+  draw: string[];
+  /** Finished at least once; counts toward the Unit. */
+  done: boolean;
+}
 
 /** The latest result of a Problem, wherever it was played (a Check Step or the Practice Set). */
 export interface ProblemResult {
@@ -34,6 +42,8 @@ export interface ProgressRecord {
   lessons: Record<string, LessonProgress>;
   /** Problem id → its latest result. */
   problems: Record<string, ProblemResult>;
+  /** Unit id → its Practice Set history (version 2). */
+  practice: Record<string, PracticeState>;
   /** The Lesson the Student last played, for the Hub's Continue card. */
   last?: string;
   streak: StreakState;
@@ -55,14 +65,18 @@ export function emptyRecord(): ProgressRecord {
     version: CURRENT_VERSION,
     lessons: {},
     problems: {},
+    practice: {},
     last: undefined,
     streak: { count: 0, lastDay: null, freezes: MAX_FREEZES, sinceFreeze: 0 },
     today: { day: "", lessons: [], problems: [] },
   };
 }
 
-/** Version n → version n + 1, for every past version. None yet: version 1 is the first. */
-const MIGRATIONS: Record<number, (old: Record<string, unknown>) => Record<string, unknown>> = {};
+/** Version n → version n + 1, for every past version. */
+const MIGRATIONS: Record<number, (old: Record<string, unknown>) => Record<string, unknown>> = {
+  // 2 adds each Unit's Practice Set history.
+  1: (old) => ({ ...old, version: 2, practice: {} }),
+};
 
 const NOT_A_RECORD = "That file isn't an AstraTron progress file.";
 const TOO_NEW = "That file comes from a newer version of AstraTron. Reload the page and try again.";
@@ -106,10 +120,34 @@ export function lessonStatus(record: ProgressRecord, lessonId: string): LessonSt
   return lesson && Object.keys(lesson.answers).length > 0 ? "in-progress" : "not-started";
 }
 
-/** "n of N Lessons" for a Unit: the On-ramp is optional and doesn't count. */
-export function unitCount(record: ProgressRecord, lessons: { id: string; onRamp: boolean }[]) {
+/**
+ * "n of N Lessons" for a Unit: the On-ramp is optional and doesn't count. With the Unit id,
+ * also whether its Practice Set is done (optional, but it counts toward the Unit).
+ */
+export function unitCount(record: ProgressRecord, lessons: { id: string; onRamp: boolean }[]): { done: number; total: number };
+export function unitCount(
+  record: ProgressRecord,
+  lessons: { id: string; onRamp: boolean }[],
+  unitId: string,
+): { done: number; total: number; practice: boolean };
+export function unitCount(record: ProgressRecord, lessons: { id: string; onRamp: boolean }[], unitId?: string) {
   const core = lessons.filter((l) => !l.onRamp);
-  return { done: core.filter((l) => lessonStatus(record, l.id) === "done").length, total: core.length };
+  const count = { done: core.filter((l) => lessonStatus(record, l.id) === "done").length, total: core.length };
+  return unitId === undefined ? count : { ...count, practice: practiceOf(record, unitId).done };
+}
+
+/** A Unit's Practice Set history (empty when never played). */
+export const practiceOf = (record: ProgressRecord, unitId: string): PracticeState =>
+  record.practice[unitId] ?? { draw: [], done: false };
+
+/** Saves a fresh Practice Set draw, which the next retake avoids. */
+export function startPractice(record: ProgressRecord, unitId: string, draw: string[]): ProgressRecord {
+  return { ...record, practice: { ...record.practice, [unitId]: { ...practiceOf(record, unitId), draw } } };
+}
+
+/** Marks the Unit's Practice Set done (reaching its summary). */
+export function finishPractice(record: ProgressRecord, unitId: string): ProgressRecord {
+  return { ...record, practice: { ...record.practice, [unitId]: { ...practiceOf(record, unitId), done: true } } };
 }
 
 /**

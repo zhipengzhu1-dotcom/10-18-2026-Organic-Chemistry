@@ -112,6 +112,12 @@ describe("reveal Scenes", () => {
     expect(stepsOf(result)[7]).toMatchObject({ revealScene: { id: "spotlight", state: { view: "water" } } });
   });
 
+  it("a Bank Problem's reveal Scene is resolved for the Practice Set too", () => {
+    const result = build({}, { revealScene: "spotlight" });
+    const bank = result.model!.subjects[0].courses[0].units[0].bank;
+    expect(bank.find((p) => p.id === "p1")?.step).toMatchObject({ revealScene: { id: "spotlight", state: { view: "water" } } });
+  });
+
   it("an unknown reveal Scene or state value is an error, in a Lesson or a Problem", () => {
     const result = build({ revealScene: { id: "spotlight", state: { view: "ice" } } }, { revealScene: "nope" });
     expect(result.errors).toEqual([
