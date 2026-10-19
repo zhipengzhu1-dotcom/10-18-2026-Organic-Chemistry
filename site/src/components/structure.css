@@ -1,0 +1,17 @@
+/* Structure drawings, structure cards and Tap targets (#62). Placeholder
+   colours until the design system (#59) supplies tokens. */
+.structure { display: block; max-width: 100%; height: auto; color: currentColor; --lone-pair: #5ee7ff; }
+.options .structure-card { display: grid; place-items: center; padding: 0.5rem; }
+.structure-card .structure { max-height: 10rem; }
+.tap-only-cue { margin: 0.5rem 0; padding: 0.5rem 0.75rem; border: 2px dashed #8b7bff; }
+.tap-structure { position: relative; touch-action: manipulation; }
+.tap-structure .structure-svg .structure { width: 100%; }
+.tap-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tap-layer .target { cursor: pointer; outline: none; }
+.tap-layer .target[aria-disabled="true"] { cursor: default; }
+.tap-layer .target:focus-visible .hit { stroke: #ff9d3c; stroke-dasharray: 3 3; stroke-width: 2px; }
+.picked-ring circle, .picked-ring line { stroke: #5ee7ff; stroke-width: 3px; fill: none; }
+.picked-ring line { stroke-width: 14px; stroke-opacity: 0.45; stroke-linecap: round; }
+.picked-ring text { fill: #5ee7ff; font-weight: 700; }
+.answer-ring circle, .answer-ring line { stroke: #ffd23c; stroke-width: 3px; stroke-dasharray: 5 3; fill: none; }
+.answer-ring line { stroke-width: 12px; stroke-opacity: 0.5; }

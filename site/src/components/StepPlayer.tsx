@@ -7,6 +7,9 @@ import type { NumericStep, RankStep } from "@astratron/content";
 import { act, start, type Action, type Answer, type Screen } from "../engine/player.ts";
 import { withKey, type AnswerKey, type PageLesson } from "../lib/answer-key.ts";
 import { mistakeTarget, reportMistakeHref } from "../lib/submit-links.ts";
+import SourceNote from "./SourceNote.tsx";
+import StructureTap from "./StructureTap.tsx";
+import "./structure.css";
 
 interface Props {
   /** The Lesson without answers, text fields already rendered to HTML at build time. */
@@ -82,7 +85,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId }: P
     step.type !== "rank" ? [] : ranked?.stepId === step.id ? ranked.order : step.items.map((item) => item.id);
 
   const answer: Answer | null =
-    step.type === "multiple-choice"
+    step.type === "multiple-choice" || step.type === "tap-to-identify"
       ? chosen.length > 0 ? { choice: chosen } : null
       : step.type === "numeric"
         ? Number.isFinite(parseNumber(draft)) ? { value: parseNumber(draft) } : null
@@ -127,18 +130,43 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId }: P
           <p className="prompt" {...html(step.prompt)} />
         )}
 
+        {step.type === "tap-to-identify" && (
+          <StructureTap
+            step={step}
+            picked={chosen}
+            answer={feedback?.kind === "reveal" && Array.isArray(feedback.answer) ? feedback.answer : []}
+            locked={screen.canContinue}
+            onToggle={pick}
+          />
+        )}
+
         {step.type === "multiple-choice" && (
           <div className="options" role="group" aria-label="Choices">
-            {step.options.map((o) => (
-              <button
-                key={o.id}
-                type="button"
-                aria-pressed={chosen.includes(o.id)}
-                disabled={screen.canContinue}
-                onClick={() => pick(o.id)}
-                {...html(o.text)}
-              />
-            ))}
+            {step.options.map((o) =>
+              o.structure ? (
+                // A structure card: the drawing is pre-rendered SVG; its text is the screen-reader label.
+                <button
+                  key={o.id}
+                  type="button"
+                  className="structure-card"
+                  aria-label={o.text}
+                  aria-pressed={chosen.includes(o.id)}
+                  disabled={screen.canContinue}
+                  onClick={() => pick(o.id)}
+                >
+                  <span aria-hidden="true" {...html(o.structure.drawn?.svg ?? "")} />
+                </button>
+              ) : (
+                <button
+                  key={o.id}
+                  type="button"
+                  aria-pressed={chosen.includes(o.id)}
+                  disabled={screen.canContinue}
+                  onClick={() => pick(o.id)}
+                  {...html(o.text)}
+                />
+              ),
+            )}
           </div>
         )}
 
@@ -171,6 +199,9 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId }: P
             <p {...html(lesson.keyIdea)} />
           </div>
         )}
+
+        {/* Keyed per Step so a new Step opens its Source note collapsed. */}
+        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} />
 
         <p className="report">
           <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>

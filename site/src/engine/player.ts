@@ -2,7 +2,7 @@
 // renders whatever Screen it returns. Two-try feedback: right → the Correct
 // line; wrong #1 → the first matching Hint (generic fallback last); wrong #2 →
 // the reveal. A Hook `prediction` accepts every choice and reveals at once.
-import type { GradedStep, Lesson, Step } from "@astratron/content";
+import type { GradedStep, HintRule, Lesson, Step } from "@astratron/content";
 
 export type Feedback =
   | { kind: "correct"; text: string }
@@ -10,7 +10,10 @@ export type Feedback =
   /** `answer` is the Step's answer: option ids, a number, or an order of item ids. */
   | { kind: "reveal"; text: string; answer: GradedStep["answer"] };
 
-/** What a Student submits: chosen option ids (Multiple choice), a number (Numeric) or an order of item ids (Rank). */
+/**
+ * What a Student submits: chosen option ids (Multiple choice) or picked atom/bond/region ids
+ * (Tap-to-identify), a number (Numeric) or an order of item ids (Rank).
+ */
 export type Answer = { choice: string[] } | { value: number } | { order: string[] };
 
 export type Action = ({ type: "answer" } & Answer) | { type: "continue" };
@@ -81,10 +84,11 @@ function grade(step: GradedStep, answer: Answer, triesBefore: number): Partial<S
 /** Whether the answer is right and, if not, the first Hint that matches it (the generic fallback matches anything). */
 function judge(step: GradedStep, answer: Answer): { right: boolean; hint?: { text: string } } | undefined {
   switch (step.type) {
-    case "multiple-choice": {
+    case "multiple-choice":
+    case "tap-to-identify": {
       if (!("choice" in answer)) return undefined;
       const { choice } = answer;
-      return { right: sameSet(choice, step.answer), hint: step.hints?.find((h) => !h.match || sameSet(h.match, choice)) };
+      return { right: sameSet(choice, step.answer), hint: step.hints?.find((h) => hintFits(h, choice)) };
     }
     case "numeric": {
       if (!("value" in answer) || !Number.isFinite(answer.value)) return undefined;
@@ -97,6 +101,15 @@ function judge(step: GradedStep, answer: Answer): { right: boolean; hint?: { tex
       return { right: sameOrder(order, step.answer), hint: step.hints?.find((h) => !h.match || sameOrder(h.match, order)) };
     }
   }
+}
+
+/** Every condition the Hint gives must hold; the generic fallback has none. */
+function hintFits(hint: HintRule, choice: string[]): boolean {
+  return (
+    (!hint.match || sameSet(hint.match, choice)) &&
+    (!hint.includes || hint.includes.some((id) => choice.includes(id))) &&
+    (!hint.misses || hint.misses.some((id) => !choice.includes(id)))
+  );
 }
 
 function sameSet(a: string[], b: string[]): boolean {

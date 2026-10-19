@@ -48,13 +48,24 @@ export function checkInteraction(item: Interaction): string[] {
   const errors = answerRules(item);
   if (isPrediction(item)) return errors;
 
-  const hints: { match?: unknown }[] = item.hints ?? [];
-  const fallbacks = hints.filter((h) => h.match === undefined);
-  if (fallbacks.length !== 1 || hints.at(-1)?.match !== undefined)
+  const hints: Condition[] = item.hints ?? [];
+  const fallbacks = hints.filter(isFallback);
+  if (fallbacks.length !== 1 || fallbacks[0] !== hints.at(-1))
     errors.push("needs exactly one generic fallback Hint (no match), and it must come last");
   if (!item.correct) errors.push("needs a Correct line");
   return errors;
 }
+
+type Condition = { match?: unknown; includes?: string[]; misses?: string[] };
+/** The generic fallback Hint has no condition. */
+const isFallback = (h: Condition) => h.match === undefined && !h.includes && !h.misses;
+
+/** Every id a set Hint names: its exact `match`, and its `includes` / `misses` conditions. */
+export const hintIds = (h: { match?: string[]; includes?: string[]; misses?: string[] }) => [
+  ...(h.match ?? []),
+  ...(h.includes ?? []),
+  ...(h.misses ?? []),
+];
 
 /** A Hook prediction (Steps only; Problems never predict) is ungraded. */
 const isPrediction = (item: Interaction) => "prediction" in item && item.prediction === true;
@@ -67,7 +78,7 @@ function answerRules(item: Interaction): string[] {
       for (const id of item.answer) if (!optionIds.has(id)) errors.push(`answer names unknown option "${id}"`);
       if (isPrediction(item)) return errors;
       for (const hint of item.hints ?? [])
-        for (const id of hint.match ?? []) if (!optionIds.has(id)) errors.push(`a Hint matches unknown option "${id}"`);
+        for (const id of hintIds(hint)) if (!optionIds.has(id)) errors.push(`a Hint matches unknown option "${id}"`);
       break;
     }
     case "numeric":
@@ -86,6 +97,7 @@ function answerRules(item: Interaction): string[] {
         errors.push("a Hint's match must list every item exactly once");
       break;
     }
+    // tap-to-identify: answer and Hint ids are checked against the structure's targets (structures.ts).
   }
   return errors;
 }

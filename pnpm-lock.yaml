@@ -187,10 +187,18 @@ importers:
       zod:
         specifier: ^4.6.7
         version: 4.6.7
+    devDependencies:
+      '@rdkit/rdkit':
+        specifier: 2026.9.1
+        version: 2026.9.1
 
   pipelines: {}
 
-  scenes: {}
+  scenes:
+    dependencies:
+      '@astratron/content':
+        specifier: workspace:*
+        version: link:../content
 
   site:
     dependencies:
@@ -996,6 +1004,9 @@ packages:
 
   '@poppinss/exception@1.2.3':
     resolution: {integrity: sha512-dCED+QRChTVatE9ibtoaxc+WkdzOSjYTKi/+uacHWIsfodVfpsueo3+DKpgU5Px8qXjgmXkSvhXvSCz3fnP9lw==}
+
+  '@rdkit/rdkit@2026.9.1':
+    resolution: {integrity: sha512-nbdi5yEw+mG2kIxFvgVMGulS5fjNMzzocx9nKs01NAjNpFAEQVb6RDl3pd9AWEa7m5D8DR4QAS6CDzu+5xjzEA==}
 
   '@rolldown/binding-android-arm-eabi@1.2.14':
     resolution: {integrity: sha512-aWR+XKH9+rW7m5fWq/5360J3mHycrx/o6xZM2DQFdJnTMdyP7/WzxPjhtLbVWdKo2y612/4U1bWqb3HQhiF7vg==}
@@ -2793,6 +2804,8 @@ snapshots:
       supports-color: 10.2.2
 
   '@poppinss/exception@1.2.3': {}
+
+  '@rdkit/rdkit@2026.9.1': {}
 
   '@rolldown/binding-android-arm-eabi@1.2.14':
     optional: true
