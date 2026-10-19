@@ -76,16 +76,16 @@ test.describe("the 3D Step card", () => {
     const at = () => card(page).locator('.molecule-letter[data-atom="1"]').getAttribute("x");
     const before = await at();
     await page.keyboard.press("ArrowRight");
-    expect(await at()).not.toBe(before);
+    await expect.poll(at).not.toBe(before);
 
     const bar = card(page).locator(".molecule-scalebar i");
     const width = async () => (await bar.boundingBox())!.width;
     const w0 = await width();
     await page.keyboard.press("+");
-    expect(await width()).toBeGreaterThan(w0);
+    await expect.poll(width).toBeGreaterThan(w0);
     await page.keyboard.press("-");
     await page.keyboard.press("-");
-    expect(await width()).toBeLessThan(w0);
+    await expect.poll(width).toBeLessThan(w0);
   });
 
   test("↺ / ↻ turn it; Ball & stick ⟷ True scale keeps the 1 Å bar; Describe reads the arrangement", async ({ page }) => {
@@ -93,9 +93,9 @@ test.describe("the 3D Step card", () => {
     const at = () => card(page).locator('.molecule-letter[data-atom="1"]').getAttribute("x");
     const before = await at();
     await page.getByRole("button", { name: "Turn right" }).click();
-    expect(await at()).not.toBe(before);
+    await expect.poll(at).not.toBe(before);
     await page.getByRole("button", { name: "Turn left" }).click();
-    expect(await at()).toBe(before);
+    await expect.poll(at).toBe(before);
 
     const bar = card(page).locator(".molecule-scalebar i");
     const w0 = (await bar.boundingBox())!.width;
@@ -144,7 +144,9 @@ test.describe("without WebGL", () => {
     const water = card(page);
     await expect(water.locator("canvas")).toHaveCount(0);
     await expect(water.locator(".molecule-still circle")).toHaveCount(3);
-    await expect(water.locator(".molecule-letter")).toHaveCount(3);
+    // End-on, the far H hides behind the near one, so only the O and the near H are lettered.
+    await expect(water.locator(".molecule-letter")).toHaveCount(2);
+    expect((await water.locator(".molecule-letter").allTextContents()).sort()).toEqual(["H", "O"]);
     await expect(page.getByRole("application", { name: "Water, ball and stick" })).toBeVisible();
     await expect(water).toContainText("Still image");
     await page.getByRole("button", { name: "Describe" }).click();

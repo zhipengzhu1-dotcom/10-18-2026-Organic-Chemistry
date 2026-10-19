@@ -877,13 +877,21 @@
 @layer components {
   /* The 3D Step card (#68): frame with the WebGL (or still) layer, the SVG overlay, the readout,
      scale bar and ↺/↻ over it; the size switch and Describe under it. */
+  /* The card takes the Step's spare height (and gives it back when the feedback panel opens),
+     so a 3D Step always fits one phone screen. */
   .molecule {
     margin: 0;
+    flex: 1 1 260px;
+    min-height: 170px;
+    max-height: 380px;
+    display: flex;
+    flex-direction: column;
   }
   .molecule-stage {
     position: relative;
     width: 100%;
-    height: clamp(170px, 25dvh, 320px);
+    flex: 1;
+    min-height: 110px;
     border: var(--at-border-strong) solid var(--at-line);
     box-shadow: 6px 6px 0 var(--at-shadow);
     background: var(--at-surface);

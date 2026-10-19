@@ -3,7 +3,7 @@
 # still) and Rotate-and-identify Steps. Remove it with the other samples (#88).
 id: u1-sample-3d
 slug: sample-3d
-title: "Sample: Molecules in 3D"
+title: "Sample: Turn a Molecule"
 goal: Turn real molecules, measure their bonds and angles, and tell their shapes apart.
 keyIdea: Molecules are 3D. Turn one before you judge its shape, because one view can hide a bend or a pyramid.
 steps:
