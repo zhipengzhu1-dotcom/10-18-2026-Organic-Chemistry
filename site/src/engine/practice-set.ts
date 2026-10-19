@@ -8,7 +8,7 @@
 //   3. avoid the previous draw where the Bank allows;
 //   4. prefer Problems that are no Lesson's Check Step;
 //   then spread the rest across Lessons, and order the Set easy → hard, then by Lesson.
-import type { Problem, Step } from "@astratron/content";
+import type { Problem } from "@astratron/content";
 import { start, type LessonProgress, type PlayableLesson } from "./player.ts";
 
 export const SET_SIZE = 10;
@@ -60,7 +60,7 @@ export function drawSet(bank: BankEntry[], coreLessons: string[], options: DrawO
 }
 
 /** A round of the Practice Set as the Step player plays it: the named Problems, in that order. */
-export function roundOf<S extends Step>(steps: S[], ids: string[]): { steps: S[] } {
+export function roundOf<S extends { id: string }>(steps: S[], ids: string[]): { steps: S[] } {
   const byId = new Map(steps.map((s) => [s.id, s]));
   return { steps: ids.flatMap((id) => byId.get(id) ?? []) };
 }

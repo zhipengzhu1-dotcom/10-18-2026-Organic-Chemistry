@@ -2,6 +2,7 @@
 import { buildContent, type Course, type CourseModel, type Lesson, type Step, type Unit } from "@astratron/content";
 import { marked } from "marked";
 import { drawView } from "./structures.ts";
+import { setSize } from "./practice.ts";
 
 /** Set in astro.config.mjs: the real content tree. */
 declare const __CONTENT_ROOT__: string;
@@ -60,6 +61,23 @@ export function unitPages(): UnitPage[] {
       course.units.filter((u) => u.status === "available").map((unit) => ({ subject: s.slug, course, unit })),
     ),
   );
+}
+
+export interface PracticePage extends UnitPage {
+  /** Where "Next Unit" goes: the next available Unit's page, else the Course map. */
+  nextUnitUrl: string;
+}
+
+/** A Practice Set page for each available Unit whose Bank has something to draw. */
+export function practicePages(): PracticePage[] {
+  return courseModel().subjects.flatMap((s) => {
+    const units = s.courses.flatMap((c) => c.units.map((unit) => ({ course: c, unit })));
+    return units.flatMap(({ course, unit }, i) => {
+      if (unit.status !== "available" || setSize(unit) === 0) return [];
+      const next = units[i + 1]?.unit;
+      return [{ subject: s.slug, course, unit, nextUnitUrl: next?.status === "available" ? next.url : s.url }];
+    });
+  });
 }
 
 /** Where a Lesson's answer key is built: a separate file, so answers stay out of the page's HTML. */
