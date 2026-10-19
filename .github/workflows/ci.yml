@@ -28,6 +28,8 @@ jobs:
         run: pnpm content:build
       - name: Chemistry-number lint (Scene code reads numbers from cited data)
         run: pnpm lint:numbers
+      - name: Scene purity lint (no timers, frame hooks, CSS animation or unseeded randomness)
+        run: pnpm lint:scenes
       - name: Unit tests (content build + Step player engine)
         run: pnpm test
       - name: Install Playwright browser

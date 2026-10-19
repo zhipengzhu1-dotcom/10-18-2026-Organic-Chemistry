@@ -859,6 +859,49 @@
   font-family: var(--at-font-data);
 }
 
+@layer components {
+  /* Scene frame and its controls (#64). */
+  .scene {
+    margin: 0;
+  }
+  .scene-frame {
+    width: 100%;
+    max-height: 45dvh; /* leaves room for the prompt, controls and button on one screen */
+    overflow: hidden;
+    border: var(--at-border-strong) solid var(--at-line);
+    box-shadow: 6px 6px 0 var(--at-shadow);
+    background: var(--at-surface);
+  }
+  .scene-controls,
+  .scene-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .scene-btn {
+    display: grid;
+    place-items: center;
+    width: var(--at-tap);
+    height: var(--at-tap);
+    font: 700 18px/1 var(--at-font-text);
+    color: var(--at-ink);
+    background: var(--at-surface);
+    border: var(--at-border) solid var(--at-line);
+    box-shadow: var(--at-drop-sm);
+    cursor: pointer;
+  }
+  .scene-range {
+    flex: 1;
+    min-height: var(--at-tap);
+    accent-color: var(--at-electron-fill);
+  }
+  .scene-value {
+    min-width: 5ch;
+    font-family: var(--at-font-data);
+  }
+}
+
 @keyframes fb-in {
   from {
     transform: translateY(16px);
