@@ -3,49 +3,62 @@
 // The page carries the Lesson without its answers (spec story 99); the answer
 // key is fetched from its own built file, and nothing is checked until it arrives.
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
-import type { NumericStep, RankStep } from "@astratron/content";
-import { act, start, type Action, type Answer, type Screen } from "../engine/player.ts";
+import type { NumericStep, RankStep, SceneValue } from "@astratron/content";
+import { act, start, type Action, type Answer, type LessonProgress, type PlayableLesson, type Screen } from "../engine/player.ts";
 import { withKey, type AnswerKey, type PageLesson } from "../lib/answer-key.ts";
+import { mistakeTarget, reportMistakeHref } from "../lib/submit-links.ts";
+import { recordProblem, saveLesson, streakOn } from "../progress/record.ts";
+import { readRecord, writeRecord } from "../progress/store.ts";
 import SourceNote from "./SourceNote.tsx";
+import ScenePlayer from "./ScenePlayer.tsx";
+import SceneControl from "./SceneControl.tsx";
+import StructureTap from "./StructureTap.tsx";
+import "./structure.css";
 
 interface Props {
   /** The Lesson without answers, text fields already rendered to HTML at build time. */
   lesson: PageLesson;
   /** URL of the Lesson's answer key. */
   keyUrl: string;
+  /** The Unit page: ✕ and "Back to Unit" go here. */
   exitHref: string;
+  /** The Unit id, for the "Report a mistake" link. */
+  unitId: string;
+  /** The next Lesson in the Unit, for the Lesson-end screen. */
+  nextHref?: string;
+  /**
+   * Set when playing a Practice Set round: Problems instead of Steps, no resume, no Step links,
+   * and after the last Problem a "See results" button hands the round's progress back.
+   */
+  practice?: { onFinish: (round: PlayableLesson, progress: LessonProgress) => void };
 }
 
-/** Island-only action: open the Step a Step link names (ADR 0003). */
-type PlayerAction = Action | { type: "open"; stepId: string };
+/**
+ * Island-only action: (re)open a Step, replaying saved answers. With no `stepId` it opens
+ * where the progress says; with no `saved` it keeps the progress on screen.
+ */
+type PlayerAction = Action | { type: "open"; stepId?: string; saved?: LessonProgress };
 
 const html = (text: string) => ({ dangerouslySetInnerHTML: { __html: text } });
 
-/** Every number is set in JetBrains Mono (design token --at-font-data). */
-const dataFont = { fontFamily: "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)" };
-
-const visuallyHidden = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-} as const;
-
-export default function StepPlayer({ lesson: page, keyUrl, exitHref }: Props) {
+export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nextHref, practice }: Props) {
   const [key, setKey] = useState<AnswerKey>();
   const lesson = useMemo(() => withKey(page, key), [page, key]);
   const [screen, dispatch] = useReducer(
     (s: Screen, a: PlayerAction) =>
-      a.type === "open" ? start(lesson, a.stepId) : act(lesson, { ...s, step: lesson.steps[s.index] }, a),
+      a.type === "open"
+        ? start(lesson, a.stepId, a.saved ?? s.progress)
+        : act(lesson, { ...s, step: lesson.steps[s.index] }, a),
     lesson,
     (l) => start(l),
   );
   const [linked, setLinked] = useState(false);
+  /** Streak days, when reaching this Wrap earned today's Streak day. */
+  const [streakTick, setStreakTick] = useState<number | null>(null);
   const [chosen, setChosen] = useState<string[]>([]);
   const [draft, setDraft] = useState("");
   const [ranked, setRanked] = useState<{ stepId: string; order: string[] } | null>(null);
+  const [manipulated, setManipulated] = useState<{ stepId: string; value: SceneValue } | null>(null);
   const { step, feedback } = screen;
   const pageStep = page.steps[screen.index];
   const single = pageStep.type === "multiple-choice" && pageStep.select === "one";
@@ -60,33 +73,80 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref }: Props) {
     };
   }, [keyUrl]);
 
-  // A Step link opens its Step; the address then follows the Step on screen.
+  // The Lesson resumes where the Student left it; a Step link opens its Step instead.
+  // The address then follows the Step on screen.
   useEffect(() => {
+    if (practice) {
+      setLinked(true);
+      return;
+    }
+    const linkedStep = () => (location.hash.length > 1 ? decodeURIComponent(location.hash.slice(1)) : undefined);
+    const saved = readRecord().lessons[page.id];
+    dispatch({ type: "open", stepId: linkedStep(), saved });
+    setLinked(true);
     const openLinked = () => {
-      if (location.hash.length > 1) dispatch({ type: "open", stepId: decodeURIComponent(location.hash.slice(1)) });
+      const stepId = linkedStep();
+      if (stepId) dispatch({ type: "open", stepId });
       setChosen([]);
     };
-    openLinked();
-    setLinked(true);
     addEventListener("hashchange", openLinked);
     return () => removeEventListener("hashchange", openLinked);
-  }, []);
+  }, [page.id]);
+
+  // Saved answers are graded again once the key arrives.
   useEffect(() => {
+    if (key) dispatch({ type: "open" });
+  }, [key]);
+
+  // Every move is saved. A Check Step's Problem result counts toward the Streak.
+  useEffect(() => {
+    if (!linked) return;
+    const now = new Date();
+    // A Practice Set isn't a Lesson: only its Problems' results are saved.
+    let { record, earned } = practice
+      ? { record: readRecord(), earned: false }
+      : saveLesson(readRecord(), page.id, screen.progress, now);
+    if (key && screen.step.type !== "explain" && "problemId" in screen.step && screen.step.problemId && screen.canContinue) {
+      const result = { tries: screen.tries, correct: screen.feedback?.kind === "correct" };
+      const solved = recordProblem(record, screen.step.problemId, result, now);
+      record = solved.record;
+      earned ||= solved.earned;
+    }
+    writeRecord(record);
+    if (earned && screen.done) setStreakTick(streakOn(record, now).count);
+  }, [linked, key, page.id, screen, practice]);
+  useEffect(() => {
+    if (practice) return;
     const moved = location.hash || screen.index > 0;
     if (linked && moved && location.hash !== `#${step.id}`) history.replaceState(null, "", `#${step.id}`);
-  }, [linked, step.id, screen.index]);
+  }, [linked, step.id, screen.index, practice]);
 
   const order =
     step.type !== "rank" ? [] : ranked?.stepId === step.id ? ranked.order : step.items.map((item) => item.id);
 
+  // Manipulate a Scene: the control's value; the reveal jumps it to the answer (and a resumed
+  // right answer shows it there too).
+  const setting: SceneValue | undefined =
+    step.type !== "manipulate"
+      ? undefined
+      : feedback?.kind === "reveal" || feedback?.kind === "correct"
+        ? step.answer
+        : manipulated?.stepId === step.id
+          ? manipulated.value
+          : step.scene.state[step.control];
+  const sceneState =
+    step.type === "manipulate" && setting !== undefined ? { ...step.scene.state, [step.control]: setting } : step.scene?.state;
+
   const answer: Answer | null =
-    step.type === "multiple-choice"
+    step.type === "multiple-choice" || step.type === "tap-to-identify"
       ? chosen.length > 0 ? { choice: chosen } : null
       : step.type === "numeric"
         ? Number.isFinite(parseNumber(draft)) ? { value: parseNumber(draft) } : null
         : step.type === "rank"
           ? { order }
-          : null;
+          : setting !== undefined
+            ? { setting }
+            : null;
 
   function pick(id: string) {
     setChosen((c) => (single ? [id] : c.includes(id) ? c.filter((x) => x !== id) : [...c, id]));
@@ -101,42 +161,102 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref }: Props) {
     setChosen([]);
     setDraft("");
   }
+  function back() {
+    dispatch({ type: "back" });
+    setChosen([]);
+    setDraft("");
+  }
 
+  const icon = feedback && { correct: "✓", hint: "✗", reveal: "→" }[feedback.kind];
+  const words = feedback && { correct: "Correct.", hint: "Not quite.", reveal: "Answer:" }[feedback.kind];
+
+  // Single focus: no site chrome, only the ✕, story bars, Step count and one
+  // fixed bottom button. The feedback panel sits above that button.
   return (
     <div className="player" id={step.id}>
-      <header className="player-bar">
-        <a href={exitHref} aria-label="Leave the Lesson" className="exit">
+      <div className="player-top">
+        <a href={exitHref} aria-label={practice ? "Leave the Practice Set" : "Leave the Lesson"} className="player-exit">
           ✕
         </a>
-        <ol className="story-bars" aria-hidden="true">
+        <button type="button" className="player-back" aria-label="Previous Step" disabled={screen.index === 0} onClick={back}>
+          ‹
+        </button>
+        <ol className="bars" aria-hidden="true">
           {lesson.steps.map((s, i) => (
-            <li key={s.id} className={i <= screen.index ? "seen" : ""} />
+            <li key={s.id} className={i < screen.index ? "done" : i === screen.index ? "cur" : ""} />
           ))}
         </ol>
-        <span className="count">
-          Step {screen.index + 1} of {screen.total}
+        <span className="player-count">
+          {practice ? "Problem" : "Step"} {screen.index + 1} of {screen.total}
         </span>
-      </header>
+      </div>
 
-      <main className="step">
+      <main className="player-body">
         {step.type === "explain" ? (
-          <div className="explain" {...html(step.text)} />
+          <p {...html(step.text)} />
         ) : (
-          <p className="prompt" {...html(step.prompt)} />
+          <p className="player-prompt" {...html(step.prompt)} />
+        )}
+
+        {step.type === "tap-to-identify" && (
+          <StructureTap
+            step={step}
+            picked={chosen}
+            answer={feedback?.kind === "reveal" && Array.isArray(feedback.answer) ? feedback.answer : []}
+            locked={screen.canContinue}
+            onToggle={pick}
+          />
+        )}
+
+        {step.scene && sceneState && (
+          // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
+          <ScenePlayer
+            key={`scene-${step.id}`}
+            sceneId={step.scene.id}
+            state={sceneState}
+            cited={step.scene.cited}
+            loop={step.type === "manipulate"}
+          >
+            {step.type === "manipulate" && setting !== undefined && (
+              <SceneControl
+                sceneId={step.scene.id}
+                control={step.control}
+                value={setting}
+                onChange={(value) => setManipulated({ stepId: step.id, value })}
+                locked={screen.canContinue}
+              />
+            )}
+          </ScenePlayer>
         )}
 
         {step.type === "multiple-choice" && (
-          <div className="options" role="group" aria-label="Choices">
-            {step.options.map((o) => (
-              <button
-                key={o.id}
-                type="button"
-                aria-pressed={chosen.includes(o.id)}
-                disabled={screen.canContinue}
-                onClick={() => pick(o.id)}
-                {...html(o.text)}
-              />
-            ))}
+          <div className="opts" role="group" aria-label="Choices">
+            {step.options.map((o) =>
+              o.structure ? (
+                // A structure card: the drawing is pre-rendered SVG; its text is the screen-reader label.
+                <button
+                  key={o.id}
+                  type="button"
+                  className="opt structure-card"
+                  aria-label={o.text}
+                  aria-pressed={chosen.includes(o.id)}
+                  disabled={screen.canContinue}
+                  onClick={() => pick(o.id)}
+                >
+                  <span aria-hidden="true" {...html(o.structure.drawn?.svg ?? "")} />
+                </button>
+              ) : (
+                <button
+                  key={o.id}
+                  type="button"
+                  className="opt"
+                  aria-pressed={chosen.includes(o.id)}
+                  disabled={screen.canContinue}
+                  onClick={() => pick(o.id)}
+                  {...html(o.text)}
+                />
+              ),
+            )}
           </div>
         )}
 
@@ -154,42 +274,65 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref }: Props) {
           />
         )}
 
-        {feedback && (
-          <div className={`feedback ${feedback.kind}`} role="status">
-            {feedback.kind === "correct" && <span>✓ Correct. </span>}
-            {feedback.kind === "hint" && <span>✗ Not quite. </span>}
-            {feedback.kind === "reveal" && <span>→ Answer: </span>}
-            <span {...html(feedback.text)} />
-          </div>
-        )}
-
         {screen.done && (
-          <div className="key-idea">
+          <div className="card">
             <h2>Key idea</h2>
             <p {...html(lesson.keyIdea)} />
+            {streakTick !== null && (
+              <p className="streak-tick data">
+                ✓ Streak: {streakTick} {streakTick === 1 ? "day" : "days"}
+              </p>
+            )}
           </div>
         )}
 
         {/* Keyed per Step so a new Step opens its Source note collapsed. */}
         <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} />
+
+        <p className="report">
+          <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>
+        </p>
       </main>
 
-      <footer className="player-action">
+      <div className="player-foot">
+        <div role="status">
+          {feedback && (
+            <div className={`fb fb-${feedback.kind}`}>
+              <span className="ic" aria-hidden="true">
+                {icon}
+              </span>{" "}
+              <p>
+                <strong>{words}</strong> <span {...html(feedback.text)} />
+              </p>
+            </div>
+          )}
+        </div>
         {screen.done ? (
-          <a className="button" href={exitHref}>
-            Finish
-          </a>
+          // The Lesson-end screen: Next Lesson first, Back to Unit second. No donate prompt here.
+          <div className="player-end">
+            {nextHref && (
+              <a className="btn btn-primary btn-block" href={nextHref}>
+                Next Lesson
+              </a>
+            )}
+            <a className={`btn btn-block ${nextHref ? "btn-secondary" : "btn-primary"}`} href={exitHref}>
+              Back to Unit
+            </a>
+          </div>
+        ) : practice && screen.canContinue && screen.index + 1 === screen.total ? (
+          <button type="button" className="btn btn-primary btn-block" onClick={() => practice.onFinish(lesson, screen.progress)}>
+            See results
+          </button>
         ) : screen.canContinue ? (
-          <button type="button" className="button" onClick={next}>
+          <button type="button" className="btn btn-primary btn-block" onClick={next}>
             Continue
           </button>
         ) : (
-          <button type="button" className="button" onClick={check} disabled={!key || !answer}>
-
+          <button type="button" className="btn btn-primary btn-block" onClick={check} disabled={!key || !answer}>
             Check
           </button>
         )}
-      </footer>
+      </div>
     </div>
   );
 }
@@ -213,7 +356,6 @@ function NumericBox({ step, value, onChange, onSubmit, locked }: NumericBoxProps
   return (
     <form
       className="numeric"
-      style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
       onSubmit={(e) => {
         e.preventDefault();
         onSubmit();
@@ -228,9 +370,9 @@ function NumericBox({ step, value, onChange, onSubmit, locked }: NumericBoxProps
         value={value}
         disabled={locked}
         onChange={(e) => onChange(e.target.value)}
-        style={{ ...dataFont, fontSize: 20, minHeight: 48, width: "8em", padding: "0 0.5rem", boxSizing: "border-box" }}
+        className="numeric-box"
       />
-      {step.unitSymbol && <span style={{ ...dataFont, fontSize: 20 }}>{step.unitSymbol}</span>}
+      {step.unitSymbol && <span className="numeric-unit">{step.unitSymbol}</span>}
     </form>
   );
 }
@@ -293,10 +435,10 @@ function RankCards({ step, order, onChange, locked }: RankCardsProps) {
 
   return (
     <>
-      <p id={`${step.id}-rank-help`} style={visuallyHidden}>
+      <p id={`${step.id}-rank-help`} className="sr">
         Drag a card, or focus it and press the up and down arrow keys to move it.
       </p>
-      <ol ref={list} className="options rank" aria-label="Order" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+      <ol ref={list} className="opts rank" aria-label="Order">
         {order.map((id, i) => (
           <li key={id}>
             <button
@@ -304,7 +446,7 @@ function RankCards({ step, order, onChange, locked }: RankCardsProps) {
               data-id={id}
               aria-describedby={`${step.id}-rank-help`}
               aria-disabled={locked}
-              className={dragging === id ? "dragging" : undefined}
+              className={dragging === id ? "opt dragging" : "opt"}
               style={{ width: "100%", touchAction: "none", userSelect: "none", cursor: locked ? "default" : "grab" }}
               onFocus={() => setFocusId(id)}
               onBlur={() => setFocusId((f) => (f === id ? null : f))}
@@ -326,7 +468,7 @@ function RankCards({ step, order, onChange, locked }: RankCardsProps) {
           </li>
         ))}
       </ol>
-      <p aria-live="polite" style={visuallyHidden}>
+      <p aria-live="polite" className="sr">
         {said}
       </p>
     </>

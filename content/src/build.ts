@@ -8,18 +8,50 @@
 //   <subject>/lessons/<lesson id>.yaml
 //   <subject>/problems/<problem id>.yaml
 //   <subject>/data/<data id>.yaml|.json  cited data (ADR 0002); see data-load.ts
+//   <subject>/structures/<structure id>.yaml   2D structures, written by `pnpm structure`
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 import { parse } from "yaml";
 import type { z } from "zod";
-import { courseFile, lessonFile, problemFile, stepIdLock, subjectFile, type LessonFile, type ProblemFile } from "./schema.ts";
+import {
+  courseFile,
+  lessonFile,
+  problemFile,
+  stepIdLock,
+  structureFile,
+  subjectFile,
+  type LessonFile,
+  type ProblemFile,
+  type StructureFile,
+} from "./schema.ts";
 import { checkDeletedSteps, checkFrozenIds, LOCK_FILE } from "./freeze.ts";
-import type { BuildResult, Course, Lesson, Step, Subject } from "./model.ts";
+import type { BuildResult, Course, GradedStep, Lesson, Option, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
+
+/** The Practice Set page sits at `<unit url>/practice`, so no Lesson may take that slug. */
+export const PRACTICE_SLUG = "practice";
 import { checkInteraction, checkLessonShape } from "./shape.ts";
 import { citeIn, type Cited, type CitedData } from "./data.ts";
 import { dataFile, resolveDataFile } from "./data-load.ts";
+import type { SceneCatalog, SceneUse } from "./model.ts";
+import { checkStepScene, resolveSceneUse, type SceneUseFile } from "./scenes.ts";
+import { checkStructure, resolveOptions, resolveTap } from "./structures.ts";
 
-export function buildContent(root: string): BuildResult {
+/** What a graded Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
+type StructureFields = { options: Option[] } | { structure: StructureView; targets: TapTarget[] };
+type Structured = Map<string, StructureFields | undefined>;
+
+export interface BuildOptions {
+  /**
+   * The registered Scenes (from the scenes module's manifests). With it, every
+   * Scene a Step uses is checked (id, settable states, cited data, a
+   * Manipulate Step's control and answer) and resolved; without it, Scene ids
+   * go unchecked and states get no defaults. The site build and
+   * `pnpm content:build` always pass it.
+   */
+  scenes?: SceneCatalog;
+}
+
+export function buildContent(root: string, options: BuildOptions = {}): BuildResult {
   const errors: string[] = [];
 
   function load<T>(rel: string, schema: z.ZodType<T>): T | undefined {
@@ -91,6 +123,12 @@ export function buildContent(root: string): BuildResult {
         ...checkLessonShape(lesson),
         ...(frozen ? checkFrozenIds(lesson, frozen) : []),
         ...checkDeletedSteps(lesson),
+        ...(lesson.slug === PRACTICE_SLUG ? [`slug "${PRACTICE_SLUG}" is reserved for the Practice Set page`] : []),
+        ...(options.scenes
+          ? lesson.steps.flatMap((step) =>
+              checkStepScene(step, options.scenes!, data).map((message) => `step ${step.id}: ${message}`),
+            )
+          : []),
       ];
       for (const message of messages) errors.push(`${slug}/lessons/${lesson.id}.yaml: ${message}`);
     }
@@ -100,11 +138,40 @@ export function buildContent(root: string): BuildResult {
     }
     const problemCitations = citeNumbers(slug, data, lessons, problems, errors);
 
+    // Structure cards and Tap targets, resolved once per Step and Problem so each error is reported once.
+    const structures = new Map<string, Structure | undefined>();
+    for (const [name, file] of loadDir<StructureFile>(`${slug}/structures`, structureFile)) {
+      const broken = file ? checkStructure(file) : [];
+      for (const message of broken) errors.push(`${slug}/structures/${name}.yaml: ${message}`);
+      structures.set(name, file && !broken.length ? file : undefined);
+    }
+    const structured: Structured = new Map();
+    const resolveStructures = (key: string, item: LessonFile["steps"][number] | ProblemFile, where: string) => {
+      const found: string[] = [];
+      let fields: StructureFields | undefined;
+      if (item.type === "multiple-choice") fields = { options: resolveOptions(item.options, structures, found) };
+      else if (item.type === "tap-to-identify") fields = resolveTap(item, structures, found);
+      else return;
+      for (const message of found) errors.push(`${where}${message}`);
+      structured.set(key, found.length ? undefined : fields);
+    };
+    for (const lesson of lessons.values())
+      for (const step of lesson?.steps ?? [])
+        resolveStructures(`${lesson!.id}#${step.id}`, step, `${slug}/lessons/${lesson!.id}.yaml: step ${step.id}: `);
+    for (const problem of problems.values())
+      if (problem) resolveStructures(`problem:${problem.id}`, problem, `${slug}/problems/${problem.id}.yaml: `);
+
     const courses: Course[] = [];
+    /** Unit id → the Lesson ids its manifest lists; undefined when a manifest is broken (tags then can't be checked). */
+    let listed: Map<string, string[]> | undefined = new Map();
     let unitNumber = 0;
     for (const rel of yamlFiles(root, `${slug}/courses`)) {
       const course = load(rel, courseFile);
-      if (!course) continue;
+      if (!course) {
+        listed = undefined;
+        continue;
+      }
+      for (const unit of course.units) listed?.set(unit.id, unit.lessons);
       const courseSlug = basename(rel, ".yaml");
       courses.push({
         slug: courseSlug,
@@ -124,17 +191,20 @@ export function buildContent(root: string): BuildResult {
               }
               const number = lesson.onRamp ? 0 : ++coreNumber;
               const lessonRel = `${slug}/lessons/${lesson.id}.yaml`;
-              const resolved = resolveLesson(lesson, `${url}/${lesson.slug}`, number, problems, lessonRel, errors);
+              const scene = (use: SceneUseFile) => resolveSceneUse(use, options.scenes, data);
+              const resolved = resolveLesson(lesson, `${url}/${lesson.slug}`, number, problems, structured, scene, lessonRel, errors);
               for (const step of resolved.steps) {
                 const cited = "problemId" in step && step.problemId && problemCitations.get(step.problemId);
                 if (cited) step.citations = cited;
               }
               return [resolved];
             }),
+            bank: [],
           };
         }),
       });
     }
+    fillBanks(slug, courses, listed, lessons, problems, structured, problemCitations, errors);
     if (subject) subjects.push({ slug, title: subject.title, url: `/${slug}`, courses, data });
   }
 
@@ -146,11 +216,21 @@ function resolveLesson(
   url: string,
   number: number,
   problems: Map<string, ProblemFile | undefined>,
+  structured: Structured,
+  scene: (use: SceneUseFile) => SceneUse,
   rel: string,
   errors: string[],
 ): Lesson {
+  /** Resolves the Step's Scene; the Scene's cited numbers join the Step's Source note. */
+  const withScene = (step: Step): Step => {
+    if (!step.scene) return step;
+    const use = scene(step.scene);
+    const own = step.citations ?? [];
+    const extra = Object.values(use.cited).filter((c) => !own.some((o) => o.ref === c.ref));
+    return { ...step, scene: use, ...(own.length + extra.length ? { citations: [...own, ...extra] } : {}) } as Step;
+  };
   const steps: Step[] = lesson.steps.flatMap((step): Step[] => {
-    if (step.type !== "check") return [step];
+    if (step.type !== "check") return withStructures(step, `${lesson.id}#${step.id}`, structured).map(withScene);
     const problem = problems.get(step.problem);
     if (!problem) {
       if (!problems.has(step.problem)) errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" not found`);
@@ -160,13 +240,79 @@ function resolveLesson(
       errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" is ${problem.status}, not approved`);
       return [];
     }
-    const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source: _src, credit: _c, ...interaction } = problem;
-    return [{ id: step.id, phase: "check", problemId, ...interaction }];
+    return problemStep(problem, step.id, structured);
   });
   const phases = { hook: 0, build: 0, check: 0, wrap: 0 };
   for (const step of lesson.steps) phases[step.phase]++;
   const { signature, ...rest } = lesson;
   return { ...rest, url, number, signature: signatureType(lesson), phases, steps };
+}
+
+/** Swaps structure ids for the resolved structures; a Step whose structures failed is dropped (its errors are reported). */
+function withStructures(step: Record<string, unknown> & { type: string }, key: string, structured: Structured): Step[] {
+  if (step.type !== "multiple-choice" && step.type !== "tap-to-identify") return [step as unknown as Step];
+  const fields = structured.get(key);
+  if (!fields) return [];
+  const { tappable: _t, hide: _h, ...rest } = step;
+  return [{ ...rest, ...fields } as unknown as Step];
+}
+
+/** A Problem as a playable Step (a Check Step, or a Practice Set Problem): its interaction without the Bank tags. */
+function problemStep(problem: ProblemFile, stepId: string, structured: Structured): Step[] {
+  const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source: _src, credit: _c, ...interaction } = problem;
+  return withStructures({ id: stepId, phase: "check", problemId, ...interaction }, `problem:${problemId}`, structured);
+}
+
+/**
+ * Files each Problem in its Unit's Bank, checking its Unit and Lesson tags. A Problem whose
+ * structures failed to resolve is left out (its errors are already reported).
+ */
+function fillBanks(
+  slug: string,
+  courses: Course[],
+  listed: Map<string, string[]> | undefined,
+  lessons: Map<string, LessonFile | undefined>,
+  problems: Map<string, ProblemFile | undefined>,
+  structured: Structured,
+  citations: Map<string, Cited[]>,
+  errors: string[],
+): void {
+  const units = new Map(courses.flatMap((c) => c.units.map((u) => [u.id, u] as const)));
+  const checks = new Set<string>();
+  for (const lesson of lessons.values())
+    for (const step of lesson?.steps ?? []) if (step.type === "check") checks.add(step.problem);
+  for (const problem of problems.values()) {
+    if (!problem) continue;
+    const rel = `${slug}/problems/${problem.id}.yaml`;
+    const unit = units.get(problem.unit);
+    if (!unit || !listed) {
+      if (listed) errors.push(`${rel}: Unit "${problem.unit}" is not in any course manifest`);
+      continue;
+    }
+    if (!listed.get(unit.id)?.includes(problem.lesson)) {
+      errors.push(`${rel}: Lesson "${problem.lesson}" is not a Lesson of Unit ${unit.id}`);
+      continue;
+    }
+    // A listed Lesson whose file is broken or missing is already reported.
+    const lesson = lessons.get(problem.lesson);
+    if (!lesson) continue;
+    const [step] = problemStep(problem, problem.id, structured) as GradedStep[];
+    if (!step) continue;
+    const cited = citations.get(problem.id);
+    if (cited) step.citations = cited;
+    const { id, difficulty, status, source, credit } = problem;
+    unit.bank.push({
+      id,
+      lesson: problem.lesson,
+      difficulty,
+      status,
+      source,
+      ...(credit ? { credit } : {}),
+      check: checks.has(id),
+      onRamp: lesson.onRamp,
+      step,
+    });
+  }
 }
 
 /** The named signature Step's type, else the first graded Build Step's, else the first Step's. */

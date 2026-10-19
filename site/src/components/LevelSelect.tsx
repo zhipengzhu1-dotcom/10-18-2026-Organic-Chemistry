@@ -2,6 +2,7 @@
 // On-ramp marked optional, the capstone styled as a boss level and the Practice
 // Set as the final row. Rendered to static HTML at build time (no client JS).
 import type { Lesson, Phase, Unit } from "@astratron/content";
+import { practiceUrl, setSize } from "../lib/practice.ts";
 
 /** Step type names as the GLOSSARY and the Lesson specs write them. */
 const STEP_TYPE_NAMES: Record<string, string> = { numeric: "Numeric input", rank: "Rank / order" };
@@ -48,8 +49,12 @@ function LessonRow({ lesson, firstCore }: { lesson: Lesson; firstCore?: Lesson }
     : `Lesson ${lesson.number}${lesson.capstone ? " · boss level" : ""}`;
   const steps = lesson.steps.length;
   return (
-    <li className={`level level-${kind}`}>
+    <li className={`level level-${kind}`} data-lesson-id={lesson.id} data-on-ramp={lesson.onRamp || undefined}>
       <span className="level-number">{number}</span>
+      {/* Filled in from the browser's progress record (progress/unit-page.ts). */}
+      <span className="level-status" data-status="not-started">
+        Not started
+      </span>
       <h3 className="level-title">
         <a href={lesson.url}>{lesson.title}</a>
       </h3>
@@ -69,8 +74,13 @@ function LessonRow({ lesson, firstCore }: { lesson: Lesson; firstCore?: Lesson }
 export default function LevelSelect({ unit }: { unit: Unit }) {
   const firstCore = unit.lessons.find((l) => !l.onRamp);
   const groups = acts(unit.lessons);
+  const core = unit.lessons.filter((l) => !l.onRamp).length;
   return (
     <div className="level-select">
+      {/* The On-ramp doesn't count toward the Unit; the browser fills in n from the progress record. */}
+      <p className="unit-progress" data-unit-progress>
+        0 of {core} Lessons
+      </p>
       {groups.map((group, i) => (
         <section key={i} className="act">
           {group.title && <h2 className="act-title">{group.title}</h2>}
@@ -84,17 +94,42 @@ export default function LevelSelect({ unit }: { unit: Unit }) {
       <section className="act">
         <h2 className="act-title">Final round</h2>
         <ol className="levels">
-          {/* The Practice Set page arrives with the Problem Bank (#74); link it here then. */}
-          <li className="level level-practice">
-            <span className="level-number">Unit review</span>
-            <h3 className="level-title">Practice Set</h3>
-            <p className="level-goal">10 Problems from the Unit's Bank, easy to hard, covering every Lesson.</p>
-            <span className="chip">Mixed</span>
-            <span className="chip count">10 Problems</span>
-            <span className="level-soon">Opens soon</span>
-          </li>
+          <PracticeRow unit={unit} />
         </ol>
       </section>
     </div>
+  );
+}
+
+/** The final row: the Practice Set, once the Bank has something to draw. Optional; it never locks anything. */
+function PracticeRow({ unit }: { unit: Unit }) {
+  const size = setSize(unit);
+  const goal = "Problems from the Unit's Bank, easy to hard, covering every Lesson.";
+  if (size === 0)
+    return (
+      <li className="level level-practice">
+        <span className="level-number">Unit review</span>
+        <h3 className="level-title">Practice Set</h3>
+        <p className="level-goal">{goal}</p>
+        <span className="chip">Mixed</span>
+        <span className="level-soon">Opens soon</span>
+      </li>
+    );
+  return (
+    <li className="level level-practice" data-practice-set={unit.id}>
+      <span className="level-number">Unit review</span>
+      {/* Filled in from the browser's progress record (progress/pages.ts). */}
+      <span className="level-status" data-status="not-started">
+        Not started
+      </span>
+      <h3 className="level-title">
+        <a href={practiceUrl(unit)}>Practice Set</a>
+      </h3>
+      <p className="level-goal">
+        <span className="data">{size}</span> {goal}
+      </p>
+      <span className="chip">Mixed</span>
+      <span className="chip count">{plural(size, "Problem")}</span>
+    </li>
   );
 }

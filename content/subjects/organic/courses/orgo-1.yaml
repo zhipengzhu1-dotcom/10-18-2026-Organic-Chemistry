@@ -11,6 +11,8 @@ units:
     lessons:
       - u1-sample
       - u1-sample-step-types
+      - u1-sample-structures
+      - u1-sample-scenes
   - id: u2
     slug: acids-bases
     title: Acids & Bases

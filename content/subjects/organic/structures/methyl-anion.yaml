@@ -1,0 +1,14 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+
+id: methyl-anion
+style: full
+smiles: "[CH3-]"
+atoms:
+  - { id: a1, el: C, x: 0, y: 0, charge: -1, lp: 1 }
+  - { id: a2, el: H, x: 1.299, y: -0.75 }
+  - { id: a3, el: H, x: -1.299, y: -0.75 }
+  - { id: a4, el: H, x: 0, y: 1.5 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a1, b: a3, order: 1 }
+  - { id: b3, a: a1, b: a4, order: 1 }

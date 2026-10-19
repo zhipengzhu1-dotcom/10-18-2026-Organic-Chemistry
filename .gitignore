@@ -14,3 +14,10 @@ playwright-report/
 .venv/
 __pycache__/
 .pytest_cache/
+
+# Cloudflare local emulator state (local D1) and local secrets
+.wrangler/
+.dev.vars
+
+# rendered video, stills and sources sidecars (never committed)
+video/out/

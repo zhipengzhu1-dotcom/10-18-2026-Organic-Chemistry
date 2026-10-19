@@ -28,12 +28,18 @@ jobs:
         run: pnpm content:build
       - name: Chemistry-number lint (Scene code reads numbers from cited data)
         run: pnpm lint:numbers
+      - name: Scene purity lint (no timers, frame hooks, CSS animation or unseeded randomness)
+        run: pnpm lint:scenes
       - name: Unit tests (content build + Step player engine)
         run: pnpm test
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
-      - name: Browser smoke test
+      - name: Browser tests (smoke, design system, axe on every page in both themes)
         run: pnpm test:e2e
+      - name: The site ships no Remotion code (checks the site/dist the smoke test built)
+        run: pnpm video check-site
+      - name: Video path (one frame of every Scene at 16:9 and 9:16 through Remotion)
+        run: pnpm video stills
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

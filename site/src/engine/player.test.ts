@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { MultipleChoiceStep, NumericStep, RankStep } from "@astratron/content";
+import type { ManipulateStep, MultipleChoiceStep, NumericStep, RankStep } from "@astratron/content";
 import { act, start, type Action, type PlayableLesson, type Screen } from "./player.ts";
 
 const choice = (id: string, extra: Partial<MultipleChoiceStep> = {}): MultipleChoiceStep => ({
@@ -145,6 +145,62 @@ describe("Step links (ADR 0003)", () => {
   });
 });
 
+describe("Navigation and resume", () => {
+  const back: Action = { type: "back" };
+
+  it("back opens the previous Step, and an answered Step stays locked with its feedback", () => {
+    const screen = play(answer("c"), next, next, answer("b"), answer("a"), next, back);
+    expect(screen).toMatchObject({
+      step: { id: "s03" },
+      tries: 2,
+      feedback: { kind: "correct", text: "Right, because." },
+      canContinue: true,
+    });
+    expect(act(lesson, screen, answer("c"))).toEqual(screen);
+  });
+
+  it("back on the first Step does nothing", () => {
+    const first = start(lesson);
+    expect(act(lesson, first, back)).toEqual(first);
+  });
+
+  it("after going back, Continue walks forward again but never past an unanswered Step", () => {
+    const screen = play(answer("c"), next, next, back, back, next, next, next, next);
+    expect(screen).toMatchObject({ step: { id: "s03" }, canContinue: false, feedback: null });
+  });
+
+  it("the progress record keeps each answer under its Step id and where the Student is", () => {
+    expect(play(answer("c"), next, next, answer("b")).progress).toEqual({
+      step: "s03",
+      answers: { s01: [{ choice: ["c"] }], s03: [{ choice: ["b"] }] },
+      done: false,
+    });
+  });
+
+  it("resumes mid-Lesson at the same Step, in the same state", () => {
+    const left = play(answer("c"), next, next, answer("b"));
+    const resumed = start(lesson, undefined, left.progress);
+    expect(resumed).toEqual(left);
+  });
+
+  it("a resumed Lesson keeps earlier answers locked", () => {
+    const left = play(answer("c"), next, next, answer("a"), next);
+    const resumed = act(lesson, start(lesson, undefined, left.progress), back);
+    expect(resumed).toMatchObject({ step: { id: "s03" }, canContinue: true, feedback: { kind: "correct" } });
+  });
+
+  it("a saved Step id that was deleted resumes at the Step its old links point at", () => {
+    const resumed = start(lesson, undefined, { step: "s06", answers: {}, done: false });
+    expect(resumed.step.id).toBe("s03");
+  });
+
+  it("a Lesson is done on reaching Wrap, whatever was answered, and stays done after going back", () => {
+    const wrap = play(answer("c"), next, next, answer("c"), answer("c"), next, answer("b"), answer("b"), next);
+    expect(wrap).toMatchObject({ done: true, progress: { done: true } });
+    expect(act(lesson, wrap, back)).toMatchObject({ done: false, progress: { step: "s04", done: true } });
+  });
+});
+
 const wrapStep = { id: "s09", phase: "wrap", type: "explain", text: "Wrap." } as const;
 
 describe("Numeric input Steps", () => {
@@ -276,5 +332,62 @@ describe("Rank / order Steps", () => {
       feedback: { kind: "reveal", text: "C≡C < C=C < C–C.", answer: right },
       canContinue: true,
     });
+  });
+});
+
+describe("Manipulate a Scene Steps", () => {
+  const manipulate: ManipulateStep = {
+    id: "s01",
+    phase: "build",
+    type: "manipulate",
+    prompt: "Twist until the overlap is gone, then press Check.",
+    scene: { id: "sample-twist", state: { twist: 0 }, cited: {} },
+    control: "twist",
+    answer: 90,
+    correct: "At 90° the p orbitals are at right angles.",
+    hints: [
+      { match: [0], text: "That's flat: full overlap." },
+      { match: [15, 30, 45, 60, 75], text: "Keep twisting." },
+      { text: "Watch the overlap bar." },
+    ],
+    reveal: "90°: no side-on overlap.",
+  };
+  const manLesson: PlayableLesson = { ...lesson, steps: [manipulate, wrapStep] };
+  const run = (...settings: (number | string)[]) =>
+    settings.reduce((s, setting) => act(manLesson, s, { type: "answer", setting }), start(manLesson));
+
+  it("Check on the answer value shows the Correct line", () => {
+    expect(run(90)).toMatchObject({
+      tries: 1,
+      feedback: { kind: "correct", text: "At 90° the p orbitals are at right angles." },
+      canContinue: true,
+    });
+  });
+
+  it("a wrong value gets the first Hint whose list holds it, else the fallback", () => {
+    expect(run(0)).toMatchObject({ feedback: { kind: "hint", text: "That's flat: full overlap." }, canContinue: false });
+    expect(run(45)).toMatchObject({ feedback: { kind: "hint", text: "Keep twisting." } });
+    expect(run(135)).toMatchObject({ feedback: { kind: "hint", text: "Watch the overlap bar." } });
+  });
+
+  it("wrong twice reveals the answer value", () => {
+    expect(run(45, 135)).toMatchObject({
+      tries: 2,
+      feedback: { kind: "reveal", text: "90°: no side-on overlap.", answer: 90 },
+      canContinue: true,
+    });
+  });
+
+  it("choice states compare by option id, and other answer shapes are ignored", () => {
+    const choiceLesson: PlayableLesson = {
+      ...lesson,
+      steps: [{ ...manipulate, control: "view", answer: "end", hints: [{ text: "Look end-on." }] }, wrapStep],
+    };
+    const screen = start(choiceLesson);
+    expect(act(choiceLesson, screen, { type: "answer", setting: "end" })).toMatchObject({ feedback: { kind: "correct" } });
+    expect(act(choiceLesson, screen, { type: "answer", setting: "side" })).toMatchObject({
+      feedback: { kind: "hint", text: "Look end-on." },
+    });
+    expect(act(choiceLesson, screen, { type: "answer", value: 90 })).toEqual(screen);
   });
 });
