@@ -18,7 +18,8 @@
     "dev": "pnpm --filter @astratron/site run dev",
     "build": "pnpm --filter @astratron/site run build",
     "test:e2e": "playwright test",
-    "structure": "pnpm --filter @astratron/content run structure"
+    "structure": "pnpm --filter @astratron/content run structure",
+    "triage": "node site/src/submissions/triage-cli.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",
