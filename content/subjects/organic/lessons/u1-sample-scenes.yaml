@@ -68,8 +68,6 @@ steps:
     phase: build
     type: explain
     text: So the π bond is what makes a double bond rigid.
-    # A watch-only Manim Scene (#66) in a Step; Lesson 0 (#78) shows it in s01.
-    scene: star-forge
 
   - id: s07
     phase: build

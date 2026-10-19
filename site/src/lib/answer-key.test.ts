@@ -78,3 +78,23 @@ it("a Draw-arrows Step keeps its start and shown target on the page; results, pu
   expect(JSON.stringify(page)).not.toMatch(/secret|Secret/);
   expect(withKey(page, JSON.parse(JSON.stringify(key)))).toEqual(whole);
 });
+
+it("a goal-state Step's stages and any reveal Scene go in the key; without the key it has no stages yet", () => {
+  const scene = { id: "build-by-sharing", state: {}, cited: {} };
+  const goal = {
+    id: "s05",
+    phase: "build" as const,
+    type: "manipulate-goal" as const,
+    prompt: "Give carbon a full shell.",
+    scene,
+    idleSeconds: 30,
+    stages: [{ prompt: "Give carbon a full shell.", goal: { bonded: 4 }, correct: "Secret correct.", blocked: "Secret blocked.", idle: "Secret idle." }],
+  };
+  const mc = { ...lesson().steps[2], revealScene: { id: "secret-scene", state: {}, cited: {} } };
+  const whole = { ...lesson(), steps: [goal, mc] };
+  const { page, key } = splitLesson(whole);
+  expect(Object.keys(page.steps[0]).sort()).toEqual(["id", "idleSeconds", "phase", "prompt", "scene", "type"]);
+  expect(JSON.stringify(page)).not.toMatch(/secret|Secret/);
+  expect(withKey(page, JSON.parse(JSON.stringify(key)))).toEqual(whole);
+  expect(withKey(page).steps[0]).toMatchObject({ stages: [] });
+});

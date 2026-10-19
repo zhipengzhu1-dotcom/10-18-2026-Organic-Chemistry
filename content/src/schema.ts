@@ -84,6 +84,8 @@ const figure = z.strictObject({
   outline: z.array(id).min(1).optional(),
   caption: text.optional(),
   alt: text,
+  /** Draw it at a size to read, not as a thumbnail (e.g. the molecule a Tap Step compares against). */
+  large: z.boolean().optional(),
 });
 
 /**
@@ -244,6 +246,20 @@ const manipulate = {
   reveal: text,
 };
 
+/** One stage of a goal-state Manipulate Step: work the Scene until its state reaches `goal`. */
+const goalStage = z.strictObject({
+  prompt: text,
+  /** States the Scene is set to as the stage opens (on top of where the last stage left it). */
+  start: z.record(z.string(), sceneValue).optional(),
+  /** The stage is done once the Scene's state holds every one of these values. */
+  goal: z.record(z.string(), sceneValue),
+  correct: text,
+  /** The Hint when Continue is tapped before the stage is done. */
+  blocked: text,
+  /** The Hint after `idleSeconds` with no move (a second idle shows the next move as a nudge). */
+  idle: text,
+});
+
 /** One curved arrow: `from` an atom id (its lone pair) or a bond id; `to` an atom id or a bond id. */
 const push = z.strictObject({ from: id, to: id });
 
@@ -302,6 +318,22 @@ const manipulateStep = z.strictObject({ id: stepId, phase, ...manipulate });
 const rotateStep = z.strictObject({ id: stepId, phase, ...rotateAndIdentify, scene: sceneUse.optional() });
 const drawArrowsStep = z.strictObject({ id: stepId, phase, ...drawArrows, scene: sceneUse.optional() });
 
+/**
+ * A goal-state Manipulate a Scene Step: the Student works the Scene itself (drags atoms) until
+ * its state reaches each stage's goal in turn. No Check: Continue opens when the last stage is
+ * done; the Scene's own rules refuse moves that can't be made.
+ */
+const manipulateGoalStep = z.strictObject({
+  id: stepId,
+  phase,
+  type: z.literal("manipulate-goal"),
+  ...visuals,
+  scene: sceneUse,
+  /** Seconds without a move before the stage's idle Hint. */
+  idleSeconds: z.number().positive().default(30),
+  stages: z.array(goalStage).min(1),
+});
+
 /** A Check Step is a Problem from the Bank, referenced by id; its Step type is the Problem's. */
 const checkStep = z.strictObject({
   id: stepId,
@@ -315,7 +347,9 @@ const tapStep = z.strictObject({ id: stepId, phase, ...tapToIdentify, scene: sce
 /** Picks the Step schema by `type` (a Check Step is recognised by its `problem`), so errors point at the broken field. */
 const step = z.preprocess(
   (v) => (v && typeof v === "object" && "problem" in v && !("type" in v) ? { ...v, type: "check" } : v),
-  z.discriminatedUnion("type", [checkStep, explainStep, multipleChoiceStep, numericStep, rankStep, tapStep, manipulateStep, rotateStep, drawArrowsStep]),
+  z.discriminatedUnion("type", [
+    checkStep, explainStep, multipleChoiceStep, numericStep, rankStep, tapStep, manipulateStep, rotateStep, drawArrowsStep, manipulateGoalStep,
+  ]),
 );
 
 export const lessonFile = z.strictObject({
@@ -348,6 +382,8 @@ const problemMeta = {
   /** Where the Problem comes from, e.g. "Adapted from MIT 5.12 PS1 Q1" or "Original". */
   source: text,
   credit: text.optional(),
+  /** The Scene the Problem shows from the start, as on a graded Step (its `revealScene` comes with its visuals). */
+  scene: sceneUse.optional(),
 };
 
 /** A Problem's `type` picks its interaction: the same fields as the Step type of that name. */

@@ -19,7 +19,8 @@ export type Quantity =
   | "count"
   | "electronegativity"
   /** The orbital amplitude an isosurface is drawn at (a.u.). */
-  | "isovalue";
+  | "isovalue"
+  | "fraction";
 
 /** Quantities that make up a molecule's geometry; a molecule never mixes tiers across them. */
 export const geometryQuantities: readonly Quantity[] = ["bond-length", "angle", "dihedral"];
@@ -258,15 +259,21 @@ function named(values: Cited[]): string {
 }
 
 /** The display and full strings for a value; used when the data is loaded. */
-export function format(quantity: Quantity, value: number | string, unit?: string): { display: string; full: string } {
-  const withUnit = (v: string) => (!unit ? v : unit === "°" ? `${v}°` : `${v} ${unit}`);
+export function format(
+  quantity: Quantity,
+  value: number | string,
+  unit?: string,
+  places?: number,
+): { display: string; full: string } {
+  const withUnit = (v: string) => (!unit ? v : unit === "°" || unit === "%" ? `${v}${unit}` : `${v} ${unit}`);
   if (typeof value === "string") return { display: withUnit(value), full: withUnit(value) };
   const decimals =
-    quantity === "bond-length" || quantity === "radius" || quantity === "electronegativity"
+    places ??
+    (quantity === "bond-length" || quantity === "radius" || quantity === "electronegativity"
       ? 2
       : quantity === "angle" || quantity === "dihedral" || quantity === "energy"
         ? 1
-        : undefined;
+        : undefined);
   // Energies can be negative: print a true minus sign (U+2212), not a hyphen.
   const sign = (s: string) => (quantity === "energy" ? s.replace(/^-/, "−") : s);
   return {

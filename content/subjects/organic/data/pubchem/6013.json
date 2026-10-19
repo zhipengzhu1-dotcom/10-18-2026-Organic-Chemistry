@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 6013,
+        "MolecularFormula": "C19H28O2",
+        "SMILES": "C[C@]12CC[C@H]3[C@H]([C@@H]1CC[C@@H]2O)CCC4=CC(=O)CC[C@]34C",
+        "ConnectivitySMILES": "CC12CCC3C(C1CCC2O)CCC4=CC(=O)CCC34C",
+        "Title": "Testosterone"
+      }
+    ]
+  }
+}

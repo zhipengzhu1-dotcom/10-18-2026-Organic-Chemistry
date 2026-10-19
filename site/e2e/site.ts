@@ -79,6 +79,22 @@ export async function playThrough(page: Page, each: (label: string) => Promise<v
         await each(`${label} feedback`);
       }
     }
+    // A goal-state Manipulate Step has no Check: work its Scene from the keyboard (pick up the
+    // first handle, try each target in turn) until its last goal opens Continue.
+    const goal = page.locator(".scene-goal");
+    const blocked = page.locator(".player-foot button[aria-disabled='true']", { hasText: "Continue" });
+    for (let i = 0; i < 40 && (await goal.isVisible()) && (await blocked.isVisible()); i++) {
+      const before = await goal.getAttribute("aria-label");
+      const spots = goal.locator("[data-target], [data-handle]");
+      for (let t = 0; t < (await spots.count()); t++) {
+        await goal.locator("[data-handle]").first().focus();
+        await page.keyboard.press("Enter");
+        await spots.nth(t).focus();
+        await page.keyboard.press("Enter");
+        if ((await goal.getAttribute("aria-label")) !== before) break;
+      }
+      if (!(await blocked.isVisible())) await each(`${label} feedback`);
+    }
     // A Practice Set ends on its summary instead of a Wrap.
     const results = page.getByRole("button", { name: "See results" });
     if (await results.isVisible()) {

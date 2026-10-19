@@ -1,0 +1,28 @@
+# Lesson 0 Check Problem (#78), from the merged Lesson spec. Lesson-only: tagged with the
+# On-ramp, so the Practice Set never draws it. Approved (the spec says draft) because a
+# Check Step plays only approved Problems. The CH₄ dot drawing is build-by-sharing's methane
+# with its count hidden; on the reveal the four pairs light up one by one, counting 2, 4, 6, 8.
+id: u1-onramp-octet-count
+unit: u1
+lesson: u1-l00
+difficulty: 1
+status: approved
+source: Based on MIT OCW 5.12, Lecture 1 pp. 4 and 8, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Wording ours.
+type: numeric
+prompt: "Methane, CH₄. How many electrons surround the carbon, counting both electrons of every shared pair?"
+scene: { id: build-by-sharing, state: { n: H, e: H, s: H, w: H, count: hidden }, still: true }
+unitSymbol: electrons
+answer: 8
+tolerance: 0
+correct: "4 shared pairs × 2 = 8. A full shell."
+hints:
+  - match: 4
+    text: "Those are carbon's own 4. Each H added one more to its pair. Count both dots in every pair."
+  - match: 2
+    text: "That's the count around one H. Count around the carbon."
+  - match: 16
+    text: "Count each pair once: two dots per bond, four bonds."
+  - text: "Count the dots touching carbon: two per bond."
+reveal: "8: the four shared pairs light up one by one, counting 2, 4, 6, 8."
+revealScene: { id: build-by-sharing, state: { n: H, e: H, s: H, w: H, count: pairs } }
+sourceNote: "Based on MIT OCW 5.12, Lecture 1 pp. 4 and 8, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Wording ours."
