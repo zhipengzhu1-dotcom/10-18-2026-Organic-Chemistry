@@ -5,8 +5,8 @@
 import type { GradedStep, Lesson, Step } from "@astratron/content";
 
 // Draw arrows: `results` (accepted results) and `inBetween` (flag copy) grade pushes, so they are secret too;
-// the start and the target the Step shows stay on the page.
-const SECRET_FIELDS = ["answer", "tolerance", "correct", "hints", "reveal", "results", "inBetween"] as const;
+// the start and the target the Step shows stay on the page. A reveal Scene shows the answer.
+const SECRET_FIELDS = ["answer", "tolerance", "correct", "hints", "reveal", "results", "inBetween", "revealScene"] as const;
 type Secret = (typeof SECRET_FIELDS)[number];
 type Shown<S> = S extends GradedStep ? Omit<S, Extract<Secret, keyof S>> : S;
 

@@ -1,0 +1,27 @@
+# Lesson 1 Check Problem (#79), from the merged Lesson 1 spec.
+id: u1-bond-polarity-rank
+unit: u1
+lesson: u1-l01
+difficulty: 1
+status: approved
+source: Original
+type: rank
+prompt: Order these bonds from **least** to **most** polar.
+items:
+  - { id: co, text: C–O }
+  - { id: ch, text: C–H }
+  - { id: oh, text: O–H }
+  - { id: ccl, text: C–Cl }
+answer: [ch, ccl, co, oh]
+aside: { label: Show values, scene: { id: en-strip, state: { highlight: h-c-o-cl } } }
+correct: "Rank by the difference in electronegativity: C–H is nearly even, O–H the most lopsided."
+hints:
+  - before: [co, ccl]
+    text: Chlorine is a strong puller, but oxygen pulls harder than chlorine. Compare their values.
+  - notFirst: ch
+    text: Carbon and hydrogen are almost equal pullers.
+  - notLast: oh
+    text: Hydrogen is a weaker puller than carbon, so O–H is more lopsided than C–O.
+  - text: Subtract the two values in each bond. Smallest difference first.
+reveal: C–H, C–Cl, C–O, O–H.
+revealScene: { id: bond-dipoles, state: { bonds: ch-ccl-co-oh } }

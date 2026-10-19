@@ -7,7 +7,7 @@ import { drawStructure, type Segment } from "@astratron/scenes";
 const ATOM_HIT = 24;
 
 export function drawView(view: StructureView, targets: TapTarget[] = []): StructureView {
-  const drawing = drawStructure(view.structure, view.hide);
+  const drawing = drawStructure(view.structure, view.hide, view.highlight);
   const hits: Record<string, HitShape> = {};
   const bondsOf = new Map(view.structure.bonds.map((b) => [b.id, b]));
 

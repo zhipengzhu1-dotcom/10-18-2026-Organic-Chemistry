@@ -20,6 +20,27 @@
 /* Revealed answer: dashed plain ring, like the → reveal panel. */
 .answer-ring circle, .answer-ring line { stroke: var(--at-ink-muted); stroke-width: 3px; stroke-dasharray: 5 3; fill: none; }
 .answer-ring line { stroke-width: 12px; stroke-opacity: 0.5; }
+/* Figures drawn with a Step (#79): small drawings side by side, captions under them. */
+.figures { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px; }
+.figure { margin: 0; display: grid; justify-items: center; gap: 4px; }
+.figure-drawing { display: block; }
+.figure-drawing .structure { max-height: 4.5rem; width: auto; }
+.figure figcaption { font-size: 16px; color: var(--at-ink-muted); text-align: center; }
+.structure .atom-ring { color: var(--at-electron); }
+/* An aside (values to look up, a reference card) opens in a modal dialog. */
+/* The aside button looks like the Source note's summary: a quiet dashed control, not a second primary. */
+.aside-open { display: inline-flex; align-items: center; min-height: var(--at-tap); padding: 0 12px; font: 600 16px/1.2 var(--at-font-text); color: var(--at-ink); background: none; border: var(--at-border) dashed var(--at-electron); cursor: pointer; }
+dialog.aside { width: min(640px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 16px; color: var(--at-ink); background: var(--at-space); border: var(--at-border-strong) solid var(--at-line); }
+dialog.aside::backdrop { background: rgb(0 0 0 / 0.6); }
+.aside-title { margin: 0 0 12px; font: 700 20px/1.3 var(--at-font-text); }
+dialog.aside > .btn { margin-top: 12px; }
+.aside-table { width: 100%; border-collapse: collapse; font-family: var(--at-font-data); }
+.aside-table th, .aside-table td { padding: 4px; border: 1px solid var(--at-line); text-align: center; vertical-align: middle; font-size: 16px; }
+.aside-table .structure { max-height: 4.5rem; width: auto; margin: 0 auto; }
+.aside-table caption { caption-side: bottom; padding-top: 8px; text-align: left; font: 400 16px/1.4 var(--at-font-text); color: var(--at-ink-muted); }
+/* Four structure cards sit 2 × 2 so each drawing is big enough to read on a phone. */
+.opts:has(> .structure-card:nth-child(4):last-child) { grid-template-columns: 1fr 1fr; }
+.opts:has(> .structure-card:nth-child(4):last-child) .structure-card .structure { max-height: 6rem; }
 
 
 /* Draw arrows (#72). Never colour alone: shown arrows and flag rings are dashed, flags carry ⚠ words.

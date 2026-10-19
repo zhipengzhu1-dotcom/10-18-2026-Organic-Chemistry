@@ -16,6 +16,7 @@ import { watchScene } from "@astratron/scenes/watch";
 import SceneControl from "./SceneControl.tsx";
 import StructureTap from "./StructureTap.tsx";
 import MoleculeCard from "../molecule/MoleculeCard.tsx";
+import { AsideButton, Figures } from "./StepVisuals.tsx";
 import ExploreIn3D from "../explore/ExploreIn3D.tsx";
 import DrawArrows from "./DrawArrows.tsx";
 import { PushReplayPlayer } from "./PushReplayPlayer.tsx";
@@ -140,6 +141,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         : manipulated?.stepId === step.id
           ? manipulated.value
           : step.scene.state[step.control];
+  const revealScene = step.type !== "explain" && screen.canContinue ? step.revealScene : undefined;
   const sceneState =
     step.type === "manipulate" && setting !== undefined ? { ...step.scene.state, [step.control]: setting } : step.scene?.state;
 
@@ -182,7 +184,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   // Single focus: no site chrome, only the ✕, story bars, Step count and one
   // fixed bottom button. The feedback panel sits above that button.
   return (
-    <div className="player" id={step.id}>
+    <div className={revealScene ? "player revealing" : "player"} id={step.id}>
       <div className="player-top">
         <a href={exitHref} aria-label={practice ? "Leave the Practice Set" : "Leave the Lesson"} className="player-exit">
           ✕
@@ -207,6 +209,10 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <p className="player-prompt" {...html(step.prompt)} />
         )}
 
+        {/* Once a reveal Scene plays, it shows the answer in place of the question's widgets. */}
+        {step.figures && !revealScene && <Figures figures={step.figures} />}
+
+        {step.type === "tap-to-identify" && step.alt && <p className="sr">{step.alt}</p>}
         {step.type === "tap-to-identify" && (
           <StructureTap
             step={step}
@@ -238,12 +244,25 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <PushReplayPlayer key={`replay-${step.id}`} start={step.start.structure} hide={step.start.hide} pushes={screen.arrows.pushes.map((p) => p.push)} />
         )}
 
-        {step.scene && watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
+        {revealScene &&
+          // Once the Step is answered its reveal Scene takes the Scene's place and plays.
+          (watchScene(revealScene.id) ? (
+            <WatchScenePlayer key={`reveal-scene-${step.id}`} sceneId={revealScene.id} cited={revealScene.cited} />
+          ) : (
+            <ScenePlayer
+              key={`reveal-scene-${step.id}`}
+              sceneId={revealScene.id}
+              state={revealScene.state}
+              cited={revealScene.cited}
+            />
+          ))}
+
+        {!revealScene && step.scene && watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
           // A watch-only Scene (#66): the committed video, keyed per Step so it autoplays on entry.
           <WatchScenePlayer key={`scene-${step.id}`} sceneId={step.scene.id} cited={step.scene.cited} />
         )}
 
-        {step.scene && sceneState && !watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
+        {!revealScene && step.scene && sceneState && !watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
           // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
           <ScenePlayer
             key={`scene-${step.id}`}
@@ -251,6 +270,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
             state={sceneState}
             cited={step.scene.cited}
             loop={step.type === "manipulate"}
+            still={step.scene.still}
           >
             {step.type === "manipulate" && setting !== undefined && (
               <SceneControl
@@ -285,7 +305,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </div>
         )}
 
-        {step.type === "multiple-choice" && (
+        {step.type === "multiple-choice" && !revealScene && (
           <div className="opts" role="group" aria-label="Choices">
             {step.options.map((o) =>
               o.structure ? (
@@ -316,11 +336,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </div>
         )}
 
-        {step.type === "numeric" && (
+        {step.type === "numeric" && !revealScene && (
           <NumericBox step={step} value={draft} onChange={setDraft} onSubmit={check} locked={screen.canContinue} />
         )}
 
-        {step.type === "rank" && (
+        {step.type === "rank" && !revealScene && (
           <RankCards
             key={step.id}
             step={step}
@@ -344,12 +364,17 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
 
         {"molecule" in step && step.molecule && <ExploreIn3D key={`explore-${step.id}`} molecule={step.molecule} />}
 
-        {/* Keyed per Step so a new Step opens its Source note collapsed. */}
-        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} />
+        {/* The aside, Source note and report link share rows at the bottom, so a Step fits a phone. */}
+        <div className="step-meta">
+          {step.aside && <AsideButton key={`aside-${step.id}`} aside={step.aside} stepId={step.id} />}
 
-        <p className="report">
-          <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>
-        </p>
+          {/* Keyed per Step so a new Step opens its Source note collapsed. */}
+          <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} note={step.sourceNote} />
+
+          <p className="report">
+            <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>
+          </p>
+        </div>
       </main>
 
       <div className="player-foot">
@@ -411,6 +436,13 @@ function parseNumber(text: string): number {
   return /^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(t) ? Number(t) : Number.NaN;
 }
 
+/** "+1" ↔ "−1", "1" → "−1", "" → "−". */
+export function flipSign(text: string): string {
+  const t = text.trim();
+  if (/^[-−]/.test(t)) return t.slice(1);
+  return `−${t.replace(/^\+/, "")}`;
+}
+
 interface NumericBoxProps {
   step: NumericStep;
   value: string;
@@ -441,6 +473,18 @@ function NumericBox({ step, value, onChange, onSubmit, locked }: NumericBoxProps
         className="numeric-box"
       />
       {step.unitSymbol && <span className="numeric-unit">{step.unitSymbol}</span>}
+      {step.signKey && (
+        // Phone number pads have no minus sign: the ± key flips the sign of what is typed.
+        <button
+          type="button"
+          className="btn btn-secondary numeric-sign"
+          aria-label="Change sign"
+          disabled={locked}
+          onClick={() => onChange(flipSign(value))}
+        >
+          ±
+        </button>
+      )}
     </form>
   );
 }

@@ -285,8 +285,22 @@
     display: grid;
     gap: 12px;
   }
-  .player-body .report {
+  /* Aside button, Source note and "Report a mistake" share rows at the foot of the body. */
+  .step-meta {
     margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .step-meta .source-note[open] {
+    flex-basis: 100%;
+  }
+  /* On a phone, once a reveal Scene plays the answer, it takes the question's place. */
+  @media (max-width: 600px) {
+    .player.revealing .player-prompt {
+      display: none;
+    }
   }
   .report a {
     display: inline-flex;
