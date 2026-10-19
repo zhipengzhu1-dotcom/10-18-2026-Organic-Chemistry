@@ -69,7 +69,12 @@ export const lessonFile = z.strictObject({
   /** The Step whose type is shown as the Lesson's signature Step type; defaults to the first graded Build Step. */
   signature: stepId.optional(),
   steps: z.array(step).min(1),
+  /** ADR 0003: a deleted Step's id → the live Step its old links now open. Ids here are never reused. */
+  deletedSteps: z.record(stepId, stepId).optional(),
 });
+
+/** `<subject>/step-ids.lock.yaml`: every Step id each Lesson has ever had, written by `pnpm content:freeze`. */
+export const stepIdLock = z.record(id, z.array(stepId));
 
 export const problemFile = z.strictObject({
   id,

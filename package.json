@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc -p .",
     "content:build": "pnpm --filter @astratron/content run build",
+    "content:freeze": "pnpm --filter @astratron/content run freeze",
     "dev": "pnpm --filter @astratron/site run dev",
     "build": "pnpm --filter @astratron/site run build",
     "test:e2e": "playwright test"

@@ -11,7 +11,8 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 import { parse } from "yaml";
 import type { z } from "zod";
-import { courseFile, lessonFile, problemFile, subjectFile, type LessonFile, type ProblemFile } from "./schema.ts";
+import { courseFile, lessonFile, problemFile, stepIdLock, subjectFile, type LessonFile, type ProblemFile } from "./schema.ts";
+import { checkDeletedSteps, checkFrozenIds, LOCK_FILE } from "./freeze.ts";
 import type { BuildResult, Course, Lesson, Step, Subject } from "./model.ts";
 import { checkInteraction, checkLessonShape } from "./shape.ts";
 
@@ -59,9 +60,18 @@ export function buildContent(root: string): BuildResult {
     const lessons = loadDir<LessonFile>(`${slug}/lessons`, lessonFile);
     const problems = loadDir<ProblemFile>(`${slug}/problems`, problemFile);
 
+    const lockRel = `${slug}/${LOCK_FILE}`;
+    const lock = existsSync(join(root, lockRel)) ? load(lockRel, stepIdLock) : {};
+
     for (const lesson of lessons.values()) {
-      if (lesson)
-        for (const message of checkLessonShape(lesson)) errors.push(`${slug}/lessons/${lesson.id}.yaml: ${message}`);
+      if (!lesson) continue;
+      const frozen = lock?.[lesson.id];
+      const messages = [
+        ...checkLessonShape(lesson),
+        ...(frozen ? checkFrozenIds(lesson, frozen) : []),
+        ...checkDeletedSteps(lesson),
+      ];
+      for (const message of messages) errors.push(`${slug}/lessons/${lesson.id}.yaml: ${message}`);
     }
     for (const problem of problems.values()) {
       if (problem)
