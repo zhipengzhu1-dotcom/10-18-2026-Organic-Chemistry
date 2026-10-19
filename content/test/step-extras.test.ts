@@ -76,6 +76,26 @@ describe("written Source notes", () => {
   });
 });
 
+describe("signature Step", () => {
+  it("a Check Step named as the signature shows its Problem's Step type", () => {
+    const steps = sampleSteps();
+    const tree = validTree();
+    tree[L] = lesson({ steps, signature: "s08" });
+    tree["chem/problems/p1.yaml"] = problem("p1", {
+      type: "tap-to-identify",
+      structure: "ethanol",
+      options: undefined,
+      tappable: { atoms: "all" },
+      answer: ["a3"],
+      hints: [{ text: "Find the O." }],
+    });
+    tree["chem/structures/ethanol.yaml"] = ethanol;
+    const result = buildContent(writeTree(tree));
+    expect(result.errors).toEqual([]);
+    expect(result.model!.subjects[0].courses[0].units[0].lessons[0].signature).toBe("tap-to-identify");
+  });
+});
+
 describe("figures", () => {
   it("a Multiple choice Step shows its figure's structures, resolved", () => {
     const result = build({

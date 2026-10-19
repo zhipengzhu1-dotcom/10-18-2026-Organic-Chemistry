@@ -258,7 +258,7 @@ function resolveLesson(
   const phases = { hook: 0, build: 0, check: 0, wrap: 0 };
   for (const step of lesson.steps) phases[step.phase]++;
   const { signature, ...rest } = lesson;
-  return { ...rest, url, number, signature: signatureType(lesson), phases, steps };
+  return { ...rest, url, number, signature: signatureType(lesson, problems), phases, steps };
 }
 
 /** Swaps structure ids for the resolved structures; a Step whose structures failed is dropped (its errors are reported). */
@@ -332,12 +332,13 @@ function fillBanks(
   }
 }
 
-/** The named signature Step's type, else the first graded Build Step's, else the first Step's. */
-function signatureType(lesson: LessonFile): Step["type"] {
+/** The named signature Step's type (a Check Step's is its Problem's), else the first graded Build Step's, else the first Step's. */
+function signatureType(lesson: LessonFile, problems: Map<string, ProblemFile | undefined>): Step["type"] {
   const named = lesson.steps.find((s) => s.id === lesson.signature);
   const graded = lesson.steps.find((s) => s.phase === "build" && s.type !== "explain");
-  const type = (named ?? graded ?? lesson.steps[0]).type;
-  return type === "check" ? "multiple-choice" : type;
+  const step = named ?? graded ?? lesson.steps[0];
+  if (step.type !== "check") return step.type;
+  return problems.get(step.problem)?.type ?? "multiple-choice";
 }
 
 /**
