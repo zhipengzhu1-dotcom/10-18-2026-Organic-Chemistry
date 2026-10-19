@@ -1,0 +1,22 @@
+---
+// The site header outside the Step player: wordmark and the Streak (flame and
+// number), filled in from the browser's progress record. Donate (#77) goes here too.
+---
+
+<header class="topbar">
+  <a class="wordmark" href="/">AstraTron</a>
+  <span class="streak" data-streak role="img" aria-label="Streak: 0 days">🔥<b>0</b></span>
+</header>
+
+<script>
+  import { showStreak } from "../progress/pages.ts";
+  showStreak();
+</script>
+
+<style>
+  /* Placeholder styles; the design system (#59) replaces them. */
+  .topbar { display: flex; align-items: center; justify-content: space-between; max-width: 40rem; margin: 0 auto; padding: 0.5rem 1rem; }
+  .wordmark { font-weight: 700; text-decoration: none; color: inherit; }
+  .streak { display: inline-flex; align-items: center; gap: 0.25rem; }
+  .streak b { font-family: var(--at-font-data, "JetBrains Mono", ui-monospace, monospace); color: #ff9d3c; }
+</style>

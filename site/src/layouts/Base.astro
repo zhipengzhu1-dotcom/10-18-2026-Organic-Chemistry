@@ -35,6 +35,9 @@ const { title, description } = Astro.props;
       .player-action { position: sticky; bottom: 0; padding: 1rem 0; background: #0d0b1e; }
       .button { display: block; width: 100%; text-align: center; background: #ff9d3c; color: #0d0b1e; border-color: #ff9d3c; text-decoration: none; box-sizing: border-box; }
       .button:disabled { opacity: 0.5; }
+      .player-bar .back { min-width: 48px; min-height: 48px; font: inherit; background: none; border: 0; color: inherit; }
+      .player-bar .back:disabled { opacity: 0.3; }
+      .button-secondary { display: block; min-height: 48px; margin-top: 0.5rem; padding: 0.5rem 1rem; text-align: center; border: 2px solid #8b7bff; box-sizing: border-box; }
     </style>
   </head>
   <body>

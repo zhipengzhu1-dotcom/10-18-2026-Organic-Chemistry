@@ -21,19 +21,22 @@ export interface LessonPage {
   unitTitle: string;
   unitUrl: string;
   lesson: Lesson;
+  /** The next Lesson in the Unit, if any. */
+  nextUrl?: string;
 }
 
 export function lessonPages(): LessonPage[] {
   return courseModel().subjects.flatMap((s) =>
     s.courses.flatMap((c) =>
       c.units.flatMap((u) =>
-        u.lessons.map((lesson) => ({
+        u.lessons.map((lesson, i) => ({
           subject: s.slug,
           course: c.slug,
           unit: u.slug,
           unitTitle: u.title,
           unitUrl: u.url,
           lesson,
+          nextUrl: u.lessons[i + 1]?.url,
         })),
       ),
     ),

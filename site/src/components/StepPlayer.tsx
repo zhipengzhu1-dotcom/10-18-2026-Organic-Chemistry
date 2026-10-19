@@ -4,19 +4,27 @@
 // key is fetched from its own built file, and nothing is checked until it arrives.
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type { NumericStep, RankStep } from "@astratron/content";
-import { act, start, type Action, type Answer, type Screen } from "../engine/player.ts";
+import { act, start, type Action, type Answer, type LessonProgress, type Screen } from "../engine/player.ts";
 import { withKey, type AnswerKey, type PageLesson } from "../lib/answer-key.ts";
+import { recordProblem, saveLesson, streakOn } from "../progress/record.ts";
+import { readRecord, writeRecord } from "../progress/store.ts";
 
 interface Props {
   /** The Lesson without answers, text fields already rendered to HTML at build time. */
   lesson: PageLesson;
   /** URL of the Lesson's answer key. */
   keyUrl: string;
+  /** The Unit page: ✕ and "Back to Unit" go here. */
   exitHref: string;
+  /** The next Lesson in the Unit, for the Lesson-end screen. */
+  nextHref?: string;
 }
 
-/** Island-only action: open the Step a Step link names (ADR 0003). */
-type PlayerAction = Action | { type: "open"; stepId: string };
+/**
+ * Island-only action: (re)open a Step, replaying saved answers. With no `stepId` it opens
+ * where the progress says; with no `saved` it keeps the progress on screen.
+ */
+type PlayerAction = Action | { type: "open"; stepId?: string; saved?: LessonProgress };
 
 const html = (text: string) => ({ dangerouslySetInnerHTML: { __html: text } });
 
@@ -32,16 +40,20 @@ const visuallyHidden = {
   whiteSpace: "nowrap",
 } as const;
 
-export default function StepPlayer({ lesson: page, keyUrl, exitHref }: Props) {
+export default function StepPlayer({ lesson: page, keyUrl, exitHref, nextHref }: Props) {
   const [key, setKey] = useState<AnswerKey>();
   const lesson = useMemo(() => withKey(page, key), [page, key]);
   const [screen, dispatch] = useReducer(
     (s: Screen, a: PlayerAction) =>
-      a.type === "open" ? start(lesson, a.stepId) : act(lesson, { ...s, step: lesson.steps[s.index] }, a),
+      a.type === "open"
+        ? start(lesson, a.stepId, a.saved ?? s.progress)
+        : act(lesson, { ...s, step: lesson.steps[s.index] }, a),
     lesson,
     (l) => start(l),
   );
   const [linked, setLinked] = useState(false);
+  /** Streak days, when reaching this Wrap earned today's Streak day. */
+  const [streakTick, setStreakTick] = useState<number | null>(null);
   const [chosen, setChosen] = useState<string[]>([]);
   const [draft, setDraft] = useState("");
   const [ranked, setRanked] = useState<{ stepId: string; order: string[] } | null>(null);
@@ -59,17 +71,41 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref }: Props) {
     };
   }, [keyUrl]);
 
-  // A Step link opens its Step; the address then follows the Step on screen.
+  // The Lesson resumes where the Student left it; a Step link opens its Step instead.
+  // The address then follows the Step on screen.
   useEffect(() => {
+    const linkedStep = () => (location.hash.length > 1 ? decodeURIComponent(location.hash.slice(1)) : undefined);
+    const saved = readRecord().lessons[page.id];
+    dispatch({ type: "open", stepId: linkedStep(), saved });
+    setLinked(true);
     const openLinked = () => {
-      if (location.hash.length > 1) dispatch({ type: "open", stepId: decodeURIComponent(location.hash.slice(1)) });
+      const stepId = linkedStep();
+      if (stepId) dispatch({ type: "open", stepId });
       setChosen([]);
     };
-    openLinked();
-    setLinked(true);
     addEventListener("hashchange", openLinked);
     return () => removeEventListener("hashchange", openLinked);
-  }, []);
+  }, [page.id]);
+
+  // Saved answers are graded again once the key arrives.
+  useEffect(() => {
+    if (key) dispatch({ type: "open" });
+  }, [key]);
+
+  // Every move is saved. A Check Step's Problem result counts toward the Streak.
+  useEffect(() => {
+    if (!linked) return;
+    const now = new Date();
+    let { record, earned } = saveLesson(readRecord(), page.id, screen.progress, now);
+    if (key && screen.step.type !== "explain" && "problemId" in screen.step && screen.step.problemId && screen.canContinue) {
+      const result = { tries: screen.tries, correct: screen.feedback?.kind === "correct" };
+      const solved = recordProblem(record, screen.step.problemId, result, now);
+      record = solved.record;
+      earned ||= solved.earned;
+    }
+    writeRecord(record);
+    if (earned && screen.done) setStreakTick(streakOn(record, now).count);
+  }, [linked, key, page.id, screen]);
   useEffect(() => {
     const moved = location.hash || screen.index > 0;
     if (linked && moved && location.hash !== `#${step.id}`) history.replaceState(null, "", `#${step.id}`);
@@ -100,6 +136,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref }: Props) {
     setChosen([]);
     setDraft("");
   }
+  function back() {
+    dispatch({ type: "back" });
+    setChosen([]);
+    setDraft("");
+  }
 
   return (
     <div className="player" id={step.id}>
@@ -107,6 +148,9 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref }: Props) {
         <a href={exitHref} aria-label="Leave the Lesson" className="exit">
           ✕
         </a>
+        <button type="button" className="back" aria-label="Previous Step" disabled={screen.index === 0} onClick={back}>
+          ‹
+        </button>
         <ol className="story-bars" aria-hidden="true">
           {lesson.steps.map((s, i) => (
             <li key={s.id} className={i <= screen.index ? "seen" : ""} />
@@ -166,15 +210,28 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref }: Props) {
           <div className="key-idea">
             <h2>Key idea</h2>
             <p {...html(lesson.keyIdea)} />
+            {streakTick !== null && (
+              <p className="streak-tick" style={dataFont}>
+                ✓ Streak: {streakTick} {streakTick === 1 ? "day" : "days"}
+              </p>
+            )}
           </div>
         )}
       </main>
 
       <footer className="player-action">
         {screen.done ? (
-          <a className="button" href={exitHref}>
-            Finish
-          </a>
+          // The Lesson-end screen: Next Lesson first, Back to Unit second. No donate prompt here.
+          <>
+            {nextHref && (
+              <a className="button" href={nextHref}>
+                Next Lesson
+              </a>
+            )}
+            <a className={nextHref ? "button-secondary" : "button"} href={exitHref}>
+              Back to Unit
+            </a>
+          </>
         ) : screen.canContinue ? (
           <button type="button" className="button" onClick={next}>
             Continue
