@@ -58,7 +58,6 @@
  "provenance": {
   "pipeline": "pipelines/orbitals (#70)",
   "inputSha256": "c1451f69d32399cd13410c4a2aadffb000007e7521c04011f36fd1d1fc80eaa2",
-  "scfEnergyHartree": -79.86434021799256,
   "grid": {
    "step": 0.14,
    "pad": 4.5,
@@ -69,6 +68,7 @@
    ]
   },
   "checks": [],
+  "scfEnergyHartree": -79.86434021799256,
   "homoIndex": 8,
   "energiesHartree": {
    "homo": -0.34553760766813346,

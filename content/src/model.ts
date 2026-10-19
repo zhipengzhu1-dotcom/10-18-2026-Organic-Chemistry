@@ -24,6 +24,8 @@ export type SceneStateSpec =
       default: number;
       /** Shown after the value, e.g. "°". */
       unitSymbol?: string;
+      /** A Manipulate Step works it with − / + buttons (and the − / + keys) instead of a slider (Lesson 8's mo-filler). */
+      stepper?: true;
     }
   | { kind: "choice"; label: string; options: { id: string; label: string }[]; default: string };
 

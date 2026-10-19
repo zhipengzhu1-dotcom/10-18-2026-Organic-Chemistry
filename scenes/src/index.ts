@@ -39,6 +39,12 @@ import OuterElectrons from "./outer-electrons/OuterElectrons.tsx";
 import { waterPush } from "./water-push/manifest.ts";
 import WaterPush from "./water-push/WaterPush.tsx";
 
+// Lesson 8 (#86)
+import { moFiller } from "./mo-filler/manifest.ts";
+import MoFiller from "./mo-filler/MoFiller.tsx";
+import { frontierLadder } from "./frontier-ladder/manifest.ts";
+import FrontierLadder from "./frontier-ladder/FrontierLadder.tsx";
+
 export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [sampleTwist.id]: { manifest: sampleTwist, Component: SampleTwist },
   [streamBend.id]: { manifest: streamBend, Component: StreamBend },
@@ -58,6 +64,9 @@ export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [giveOrTake.id]: { manifest: giveOrTake, Component: GiveOrTake },
   [waterPush.id]: { manifest: waterPush, Component: WaterPush },
   [buildBySharing.id]: { manifest: buildBySharing, Component: BuildBySharing },
+  // Lesson 8 (#86)
+  [moFiller.id]: { manifest: moFiller, Component: MoFiller },
+  [frontierLadder.id]: { manifest: frontierLadder, Component: FrontierLadder },
 };
 
 export type * from "./types.ts";

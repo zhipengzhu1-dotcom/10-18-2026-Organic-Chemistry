@@ -19,6 +19,7 @@ const stateSpec = z.discriminatedUnion("kind", [
     step: z.number().positive(),
     default: z.number(),
     unitSymbol: z.string().optional(),
+    stepper: z.literal(true).optional(),
   }),
   z.strictObject({
     kind: z.literal("choice"),

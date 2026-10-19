@@ -1161,6 +1161,19 @@
     min-width: 5ch;
     font-family: var(--at-font-data);
   }
+  /* A − / + stepper in place of the slider (Lesson 8's mo-filler). */
+  .scene-stepper .scene-value {
+    min-width: 3ch;
+    text-align: center;
+    font-size: 1.25rem;
+  }
+  .scene-step {
+    font-size: 26px;
+  }
+  .scene-step[aria-disabled="true"] {
+    opacity: 0.4;
+    cursor: default;
+  }
   /* On a phone, a Manipulate Step's Scene sits a little lower so its slider and a Hint fit (#78). */
   @media (max-width: 600px) {
     .scene:has(.scene-control) .scene-frame {
