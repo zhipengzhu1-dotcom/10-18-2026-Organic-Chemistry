@@ -1,0 +1,16 @@
+{
+  "scene": "arrow-is-flow",
+  "manim": "0.22.0",
+  "fps": 60,
+  "inputs": "df14716d6c5d4656c78681328c21704f0fd174152a5cdc28f091935f15b7cc30",
+  "aspects": {
+    "16:9": {
+      "frames": 600,
+      "timings": {}
+    },
+    "9:16": {
+      "frames": 600,
+      "timings": {}
+    }
+  }
+}

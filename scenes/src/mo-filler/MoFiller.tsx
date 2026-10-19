@@ -108,6 +108,7 @@ export default function MoFiller({ state, aspect }: SceneProps<MoFillerState>) {
     </text>
   );
   const named = NAMED[n];
+  const lineGap = size * 1.4; // cited-data: ok, line spacing
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%" aria-hidden="true" style={{ display: "block" }}>
@@ -137,12 +138,12 @@ export default function MoFiller({ state, aspect }: SceneProps<MoFillerState>) {
       </text>
       {wide ? (
         <text x={mid.x} y={height - area.y - 10} fill={ink} fontSize={50} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
-          {`bonding ${f.bonding} · antibonding ${f.antibonding} · bond order (${f.bonding} − ${f.antibonding}) ÷ 2 = ${f.order}`}
+          {`bonding ${f.bonding} · antibonding ${f.antibonding} · bond order (${f.bonding} − ${f.antibonding}) ÷ ${PER_LEVEL} = ${f.order}`}
         </text>
       ) : (
         <text x={mid.x} y={height - area.y - 160} fill={ink} fontSize={52} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
           <tspan x={mid.x}>{`bonding ${f.bonding} · antibonding ${f.antibonding}`}</tspan>
-          <tspan x={mid.x} dy={80}>{`bond order (${f.bonding} − ${f.antibonding}) ÷ 2 = ${f.order}`}</tspan>
+          <tspan x={mid.x} dy={lineGap}>{`bond order (${f.bonding} − ${f.antibonding}) ÷ ${PER_LEVEL} = ${f.order}`}</tspan>
         </text>
       )}
     </svg>
