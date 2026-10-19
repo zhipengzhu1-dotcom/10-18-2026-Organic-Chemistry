@@ -1,5 +1,5 @@
 // Build-time access to the course model. A content error fails the site build.
-import { buildContent, type CourseModel, type Lesson, type Step } from "@astratron/content";
+import { buildContent, type Course, type CourseModel, type Lesson, type Step, type Unit } from "@astratron/content";
 import { marked } from "marked";
 import { drawView } from "./structures.ts";
 
@@ -20,6 +20,7 @@ export interface LessonPage {
   course: string;
   unit: string;
   unitTitle: string;
+  unitUrl: string;
   lesson: Lesson;
 }
 
@@ -27,38 +28,66 @@ export function lessonPages(): LessonPage[] {
   return courseModel().subjects.flatMap((s) =>
     s.courses.flatMap((c) =>
       c.units.flatMap((u) =>
-        u.lessons.map((lesson) => ({ subject: s.slug, course: c.slug, unit: u.slug, unitTitle: u.title, lesson })),
+        u.lessons.map((lesson) => ({
+          subject: s.slug,
+          course: c.slug,
+          unit: u.slug,
+          unitTitle: u.title,
+          unitUrl: u.url,
+          lesson,
+        })),
       ),
     ),
   );
 }
+
+export interface UnitPage {
+  subject: string;
+  course: Course;
+  unit: Unit;
+}
+
+/** Only `available` Units get a page; coming-soon Units can't be entered. */
+export function unitPages(): UnitPage[] {
+  return courseModel().subjects.flatMap((s) =>
+    s.courses.flatMap((course) =>
+      course.units.filter((u) => u.status === "available").map((unit) => ({ subject: s.slug, course, unit })),
+    ),
+  );
+}
+
+/** Where a Lesson's answer key is built: a separate file, so answers stay out of the page's HTML. */
+export const answerKeyUrl = (subject: string, lessonId: string) => `/answers/${subject}/${lessonId}.json`;
 
 /** Inline Markdown → HTML, done at build time so no Markdown parser ships to the browser. */
 export const md = (text: string) => marked.parseInline(text, { async: false });
 
 /** The Lesson with every text field turned from Markdown into HTML and every structure pre-rendered to SVG. */
 export function renderLesson(lesson: Lesson): Lesson {
-  const graded = <S extends Exclude<Step, { type: "explain" }>>(s: S): S => ({
-    ...s,
-    prompt: md(s.prompt),
-    correct: s.correct && md(s.correct),
-    hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
-    reveal: md(s.reveal),
-  });
   const step = (s: Step): Step => {
+    if (s.type === "explain") return { ...s, text: md(s.text) };
+    const shared = { prompt: md(s.prompt), correct: s.correct && md(s.correct), reveal: md(s.reveal) };
+    const choices = (list: { id: string; text: string }[]) => list.map((o) => ({ ...o, text: md(o.text) }));
     switch (s.type) {
-      case "explain":
-        return { ...s, text: md(s.text) };
       case "multiple-choice":
         return {
-          ...graded(s),
-          // A structure card's text is its screen-reader label: kept plain.
-          options: s.options.map((o) =>
-            o.structure ? { ...o, structure: drawView(o.structure) } : { ...o, text: md(o.text) },
-          ),
+          ...s,
+          ...shared,
+          // A structure card's text is its screen-reader label: kept plain; its drawing is pre-rendered SVG.
+          options: s.options.map((o) => (o.structure ? { ...o, structure: drawView(o.structure) } : { ...o, text: md(o.text) })),
+          hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
         };
       case "tap-to-identify":
-        return { ...graded(s), structure: drawView(s.structure, s.targets) };
+        return {
+          ...s,
+          ...shared,
+          structure: drawView(s.structure, s.targets),
+          hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
+        };
+      case "numeric":
+        return { ...s, ...shared, hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
+      case "rank":
+        return { ...s, ...shared, items: choices(s.items), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
     }
   };
   return { ...lesson, keyIdea: md(lesson.keyIdea), steps: lesson.steps.map(step) };

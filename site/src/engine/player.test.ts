@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Lesson, MultipleChoiceStep } from "@astratron/content";
-import { act, start, type Action, type Screen } from "./player.ts";
+import type { MultipleChoiceStep, NumericStep, RankStep } from "@astratron/content";
+import { act, start, type Action, type PlayableLesson, type Screen } from "./player.ts";
 
 const choice = (id: string, extra: Partial<MultipleChoiceStep> = {}): MultipleChoiceStep => ({
   id,
@@ -22,14 +22,8 @@ const choice = (id: string, extra: Partial<MultipleChoiceStep> = {}): MultipleCh
   ...extra,
 });
 
-const lesson: Lesson = {
-  id: "l1",
-  slug: "first",
-  title: "First",
-  goal: "Goal.",
-  keyIdea: "Key idea.",
-  onRamp: false,
-  url: "/chem/c/u/first",
+const lesson: PlayableLesson = {
+  deletedSteps: { s06: "s03" },
   steps: [
     choice("s01", { phase: "hook", prediction: true, correct: undefined, hints: undefined }),
     { id: "s02", phase: "build", type: "explain", text: "Explain." },
@@ -134,5 +128,153 @@ describe("Step player engine", () => {
     const wrap = act(lesson, beforeWrap, next);
     expect(wrap).toMatchObject({ index: 4, done: true });
     expect(act(lesson, wrap, next)).toEqual(wrap);
+  });
+});
+
+describe("Step links (ADR 0003)", () => {
+  it("a link to a Step id opens that Step", () => {
+    expect(start(lesson, "s04")).toMatchObject({ index: 3, step: { id: "s04" }, tries: 0, feedback: null });
+  });
+
+  it("a link to a deleted Step's id opens the Step its old links now point at", () => {
+    expect(start(lesson, "s06")).toMatchObject({ index: 2, step: { id: "s03" } });
+  });
+
+  it("a link to an unknown id opens the first Step", () => {
+    expect(start(lesson, "s99")).toMatchObject({ index: 0, step: { id: "s01" } });
+  });
+});
+
+const wrapStep = { id: "s09", phase: "wrap", type: "explain", text: "Wrap." } as const;
+
+describe("Numeric input Steps", () => {
+  const numeric: NumericStep = {
+    id: "s01",
+    phase: "build",
+    type: "numeric",
+    prompt: "What is the H–C–H angle in methane?",
+    unitSymbol: "°",
+    answer: 109.5,
+    tolerance: 0.5,
+    correct: "Tetrahedral: 109.5°.",
+    hints: [
+      { match: 120, text: "120° is trigonal planar." },
+      { match: 90, text: "90° is a square on paper, not in 3D." },
+      { text: "Four groups spread out in 3D." },
+    ],
+    reveal: "109.5°, the tetrahedral angle.",
+  };
+  const numLesson: PlayableLesson = { ...lesson, steps: [numeric, wrapStep] };
+  const run = (...values: number[]) =>
+    values.reduce((s, value) => act(numLesson, s, { type: "answer", value }), start(numLesson));
+
+  it("right within the absolute tolerance shows the Correct line", () => {
+    expect(run(109.5)).toMatchObject({
+      tries: 1,
+      feedback: { kind: "correct", text: "Tetrahedral: 109.5°." },
+      canContinue: true,
+    });
+    expect(run(110)).toMatchObject({ feedback: { kind: "correct" } });
+    expect(run(109)).toMatchObject({ feedback: { kind: "correct" } });
+  });
+
+  it("outside the tolerance is wrong and falls back to the generic Hint", () => {
+    expect(run(110.1)).toMatchObject({
+      tries: 1,
+      feedback: { kind: "hint", text: "Four groups spread out in 3D." },
+      canContinue: false,
+    });
+  });
+
+  it("each wrong value can carry its own Hint, matched within the tolerance", () => {
+    expect(run(120)).toMatchObject({ feedback: { kind: "hint", text: "120° is trigonal planar." } });
+    expect(run(90.4)).toMatchObject({ feedback: { kind: "hint", text: "90° is a square on paper, not in 3D." } });
+  });
+
+  it("wrong then right shows the Correct line", () => {
+    expect(run(120, 109.5)).toMatchObject({ tries: 2, feedback: { kind: "correct" }, canContinue: true });
+  });
+
+  it("wrong twice shows the reveal with the answer", () => {
+    expect(run(120, 100)).toMatchObject({
+      tries: 2,
+      feedback: { kind: "reveal", text: "109.5°, the tetrahedral angle.", answer: 109.5 },
+      canContinue: true,
+    });
+  });
+
+  it("an answered Numeric Step is locked", () => {
+    const answered = run(109.5);
+    expect(act(numLesson, answered, { type: "answer", value: 1 })).toEqual(answered);
+  });
+
+  it("ignores an answer that is not a number", () => {
+    const screen = start(numLesson);
+    expect(act(numLesson, screen, { type: "answer", value: Number.NaN })).toEqual(screen);
+    expect(act(numLesson, screen, { type: "answer", choice: ["a"] })).toEqual(screen);
+  });
+});
+
+describe("Rank / order Steps", () => {
+  const rank: RankStep = {
+    id: "s01",
+    phase: "check",
+    problemId: "p9",
+    type: "rank",
+    prompt: "Rank the C–C bonds from shortest to longest.",
+    items: [
+      { id: "single", text: "C–C" },
+      { id: "double", text: "C=C" },
+      { id: "triple", text: "C≡C" },
+    ],
+    answer: ["triple", "double", "single"],
+    correct: "More shared pairs pull the carbons closer.",
+    hints: [
+      { match: ["single", "double", "triple"], text: "That is longest to shortest." },
+      { text: "More bonds between two atoms make the bond shorter." },
+    ],
+    reveal: "C≡C < C=C < C–C.",
+  };
+  const rankLesson: PlayableLesson = { ...lesson, steps: [rank, wrapStep] };
+  const run = (...orders: string[][]) =>
+    orders.reduce((s, order) => act(rankLesson, s, { type: "answer", order }), start(rankLesson));
+  const right = ["triple", "double", "single"];
+
+  it("the one strict order is right", () => {
+    expect(run(right)).toMatchObject({
+      tries: 1,
+      feedback: { kind: "correct", text: "More shared pairs pull the carbons closer." },
+      canContinue: true,
+    });
+  });
+
+  it("each wrong order can carry its own Hint", () => {
+    expect(run(["single", "double", "triple"])).toMatchObject({
+      tries: 1,
+      feedback: { kind: "hint", text: "That is longest to shortest." },
+      canContinue: false,
+    });
+  });
+
+  it("any other wrong order gets the generic fallback", () => {
+    expect(run(["double", "triple", "single"])).toMatchObject({
+      feedback: { kind: "hint", text: "More bonds between two atoms make the bond shorter." },
+    });
+  });
+
+  it("wrong then right shows the Correct line", () => {
+    expect(run(["single", "double", "triple"], right)).toMatchObject({
+      tries: 2,
+      feedback: { kind: "correct" },
+      canContinue: true,
+    });
+  });
+
+  it("wrong twice shows the reveal with the order", () => {
+    expect(run(["single", "double", "triple"], ["double", "triple", "single"])).toMatchObject({
+      tries: 2,
+      feedback: { kind: "reveal", text: "C≡C < C=C < C–C.", answer: right },
+      canContinue: true,
+    });
   });
 });

@@ -3,10 +3,10 @@
 // label of every tappable atom and bond.
 import type { Hidden, Option, Structure, StructureAtom, StructureView, TapTarget } from "./model.ts";
 import type { ProblemFile, StructureFile } from "./schema.ts";
-import { checkGraded } from "./shape.ts";
+import { hintIds } from "./shape.ts";
 
 type TapFile = Extract<ProblemFile, { type: "tap-to-identify" }>;
-type TapFields = Pick<TapFile, "structure" | "hide" | "tappable" | "answer" | "correct" | "hints">;
+type TapFields = Pick<TapFile, "structure" | "hide" | "tappable" | "answer" | "hints">;
 type OptionFile = Extract<ProblemFile, { type: "multiple-choice" }>["options"][number];
 
 /** Internal consistency of one structure file. */
@@ -94,12 +94,11 @@ export function resolveTap(
     t.label = `${t.label.replace(/\.$/, "")} (${i} of ${n}).`;
   }
 
-  errors.push(
-    ...checkGraded(item, new Set(targets.map((t) => t.id)), {
-      answer: (id) => `answer names "${id}", which can't be tapped`,
-      hint: (id) => `a Hint names "${id}", which can't be tapped`,
-    }),
-  );
+  // The answer and Hints may only name targets (the shared Hint and Correct-line rules run in shape.ts).
+  const tappable = new Set(targets.map((t) => t.id));
+  for (const id of item.answer) if (!tappable.has(id)) errors.push(`answer names "${id}", which can't be tapped`);
+  for (const hint of item.hints ?? [])
+    for (const id of hintIds(hint)) if (!tappable.has(id)) errors.push(`a Hint names "${id}", which can't be tapped`);
   return { structure: view(structure, item.hide), targets };
 }
 

@@ -1,0 +1,20 @@
+# Sample Multiple choice Problem with structure cards (#62).
+id: u1-sample-p6
+unit: u1
+lesson: u1-sample-structures
+difficulty: 1
+status: approved
+source: Original
+type: multiple-choice
+prompt: Which structure has a carbon with a +1 formal charge?
+options:
+  - { id: a, structure: methyl-anion, text: "CH₃⁻: carbon with three bonds to H and one lone pair, charge −1." }
+  - { id: b, structure: methyl-cation, text: "CH₃⁺: carbon with three bonds to H, no lone pair, charge +1." }
+  - { id: c, structure: methane, text: "CH₄: carbon with four bonds to H." }
+answer: [b]
+correct: "CH₃⁺: 4 − 0 − 3 = +1."
+hints:
+  - match: [a]
+    text: That carbon has a lone pair. Work out 4 − 2 − 3.
+  - text: Find the carbon with three bonds and no lone pair.
+reveal: "CH₃⁺, whose carbon is 4 − 0 − 3 = +1."

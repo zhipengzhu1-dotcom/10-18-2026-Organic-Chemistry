@@ -1,18 +1,18 @@
-# Sample Tap-to-identify Problem (#62).
+# Walking-skeleton sample Problem for the Numeric input Step type (#63).
 id: u1-sample-p3
 unit: u1
-lesson: u1-sample-structures
+lesson: u1-sample-step-types
 difficulty: 1
 status: approved
 source: Original
-type: tap-to-identify
-prompt: The methyl anion, CH₃⁻. Tap the atom that holds the lone pair, then press Check.
-structure: methyl-anion
-tappable: { atoms: all }
-answer: [a1]
-correct: The lone pair sits on carbon, which makes it 4 − 2 − 3 = −1.
+type: numeric
+prompt: How many electrons are shared in a C≡C triple bond?
+unitSymbol: electrons
+answer: 6
+tolerance: 0
+correct: Three shared pairs make six electrons.
 hints:
-  - includes: [a2, a3, a4]
-    text: Each H has one bond and no room for a lone pair.
-  - text: Look for the pair of dots.
-reveal: The carbon holds the lone pair.
+  - match: 3
+    text: Three is the number of bonds. Each bond is a pair of electrons.
+  - text: Count the pairs in a triple bond, then two electrons per pair.
+reveal: "6: a triple bond is three shared pairs."

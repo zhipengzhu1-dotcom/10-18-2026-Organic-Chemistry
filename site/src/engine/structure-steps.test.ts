@@ -1,7 +1,7 @@
 // Engine paths for Multiple choice with structure cards and for Tap-to-identify.
 import { describe, expect, it } from "vitest";
-import type { Lesson, MultipleChoiceStep, Structure, TapStep } from "@astratron/content";
-import { act, start, type Action } from "./player.ts";
+import type { MultipleChoiceStep, Structure, TapStep } from "@astratron/content";
+import { act, start, type Action, type PlayableLesson } from "./player.ts";
 
 const formaldehyde: Structure = {
   id: "formaldehyde",
@@ -57,14 +57,7 @@ const tap: TapStep = {
   reveal: "O and the C=O π bond.",
 };
 
-const lesson: Lesson = {
-  id: "l1",
-  slug: "first",
-  title: "First",
-  goal: "Goal.",
-  keyIdea: "Key idea.",
-  onRamp: false,
-  url: "/chem/c/u/first",
+const lesson: PlayableLesson = {
   steps: [cards, tap, { id: "s03", phase: "wrap", type: "explain", text: "Wrap." }],
 };
 

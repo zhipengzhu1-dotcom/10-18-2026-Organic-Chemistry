@@ -7,6 +7,7 @@
 //   <subject>/courses/<course>.yaml   one course manifest per Course; file name is its slug
 //   <subject>/lessons/<lesson id>.yaml
 //   <subject>/problems/<problem id>.yaml
+//   <subject>/data/<data id>.yaml|.json  cited data (ADR 0002); see data-load.ts
 //   <subject>/structures/<structure id>.yaml   2D structures, written by `pnpm structure`
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
@@ -16,22 +17,23 @@ import {
   courseFile,
   lessonFile,
   problemFile,
+  stepIdLock,
   structureFile,
   subjectFile,
   type LessonFile,
   type ProblemFile,
   type StructureFile,
 } from "./schema.ts";
-import type { BuildResult, Course, Lesson, Step, Structure, Subject } from "./model.ts";
+import { checkDeletedSteps, checkFrozenIds, LOCK_FILE } from "./freeze.ts";
+import type { BuildResult, Course, Lesson, Option, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
 import { checkInteraction, checkLessonShape } from "./shape.ts";
+import { citeIn, type Cited, type CitedData } from "./data.ts";
+import { dataFile, resolveDataFile } from "./data-load.ts";
 import { checkStructure, resolveOptions, resolveTap } from "./structures.ts";
 
-type StepFile = LessonFile["steps"][number];
-/** A graded Step or Problem as written, before its structures are resolved. */
-type Interactive = Extract<StepFile | ProblemFile, { type: "multiple-choice" | "tap-to-identify" }>;
-/** The resolved interaction fields of a graded Step or Problem. */
-type Resolved = DistributiveOmit<Extract<Step, { type: "multiple-choice" | "tap-to-identify" }>, "id" | "phase" | "problemId">;
-type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+/** What a graded Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
+type StructureFields = { options: Option[] } | { structure: StructureView; targets: TapTarget[] };
+type Structured = Map<string, StructureFields | undefined>;
 
 export function buildContent(root: string): BuildResult {
   const errors: string[] = [];
@@ -70,52 +72,75 @@ export function buildContent(root: string): BuildResult {
     return out;
   }
 
+  /** Loads and checks a Subject's cited data files. */
+  function loadData(dir: string): CitedData {
+    const data: CitedData = {};
+    for (const rel of yamlFiles(root, dir, [".yaml", ".json"])) {
+      const file = load(rel, dataFile);
+      if (!file) continue;
+      if (file.id !== basename(rel).replace(/\.(yaml|json)$/, "")) {
+        errors.push(`${rel}: id "${file.id}" must match the file name`);
+        continue;
+      }
+      const { set, errors: broken } = resolveDataFile(file);
+      for (const message of broken) errors.push(`${rel}: ${message}`);
+      data[file.id] = set;
+    }
+    return data;
+  }
+
   const subjects: Subject[] = [];
   for (const slug of subdirs(root)) {
     if (!existsSync(join(root, slug, "subject.yaml"))) continue;
     const subject = load(`${slug}/subject.yaml`, subjectFile);
+    const data = loadData(`${slug}/data`);
     const lessons = loadDir<LessonFile>(`${slug}/lessons`, lessonFile);
     const problems = loadDir<ProblemFile>(`${slug}/problems`, problemFile);
-    const structures = new Map<string, Structure | undefined>();
-    for (const [name, file] of loadDir<StructureFile>(`${slug}/structures`, structureFile)) {
-      const problems = file ? checkStructure(file) : [];
-      for (const message of problems) errors.push(`${slug}/structures/${name}.yaml: ${message}`);
-      structures.set(name, file && !problems.length ? file : undefined);
-    }
 
-    /** Resolves each graded Step and Problem once, so its errors are reported once. */
-    const resolved = new Map<Interactive, Resolved | undefined>();
-    function resolveInteractive(item: Interactive, where: string): void {
-      const found: string[] = [];
-      let out: Resolved | undefined;
-      const { type, prompt, answer, correct, hints, reveal } = item;
-      if (type === "multiple-choice") {
-        const options = resolveOptions(item.options, structures, found);
-        const prediction = "prediction" in item && item.prediction ? { prediction: true } : {};
-        out = { type, prompt, options, answer, correct, hints, reveal, ...prediction };
-      } else {
-        const tap = resolveTap(item, structures, found);
-        if (tap) out = { type, prompt, ...tap, answer, correct, hints, reveal, ...(item.tapOnly && { tapOnly: item.tapOnly }) };
-      }
-      for (const message of found) errors.push(`${where}${message}`);
-      resolved.set(item, found.length ? undefined : out);
-    }
+    const lockRel = `${slug}/${LOCK_FILE}`;
+    const lock = existsSync(join(root, lockRel)) ? load(lockRel, stepIdLock) : {};
 
     for (const lesson of lessons.values()) {
       if (!lesson) continue;
-      const rel = `${slug}/lessons/${lesson.id}.yaml`;
-      for (const message of checkLessonShape(lesson)) errors.push(`${rel}: ${message}`);
-      for (const step of lesson.steps)
-        if (step.type === "multiple-choice" || step.type === "tap-to-identify") resolveInteractive(step, `${rel}: step ${step.id}: `);
+      const frozen = lock?.[lesson.id];
+      const messages = [
+        ...checkLessonShape(lesson),
+        ...(frozen ? checkFrozenIds(lesson, frozen) : []),
+        ...checkDeletedSteps(lesson),
+      ];
+      for (const message of messages) errors.push(`${slug}/lessons/${lesson.id}.yaml: ${message}`);
     }
     for (const problem of problems.values()) {
-      if (!problem) continue;
-      const rel = `${slug}/problems/${problem.id}.yaml: `;
-      if (problem.type === "multiple-choice") for (const message of checkInteraction(problem)) errors.push(rel + message);
-      resolveInteractive(problem, rel);
+      if (problem)
+        for (const message of checkInteraction(problem)) errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
     }
+    const problemCitations = citeNumbers(slug, data, lessons, problems, errors);
+
+    // Structure cards and Tap targets, resolved once per Step and Problem so each error is reported once.
+    const structures = new Map<string, Structure | undefined>();
+    for (const [name, file] of loadDir<StructureFile>(`${slug}/structures`, structureFile)) {
+      const broken = file ? checkStructure(file) : [];
+      for (const message of broken) errors.push(`${slug}/structures/${name}.yaml: ${message}`);
+      structures.set(name, file && !broken.length ? file : undefined);
+    }
+    const structured: Structured = new Map();
+    const resolveStructures = (key: string, item: LessonFile["steps"][number] | ProblemFile, where: string) => {
+      const found: string[] = [];
+      let fields: StructureFields | undefined;
+      if (item.type === "multiple-choice") fields = { options: resolveOptions(item.options, structures, found) };
+      else if (item.type === "tap-to-identify") fields = resolveTap(item, structures, found);
+      else return;
+      for (const message of found) errors.push(`${where}${message}`);
+      structured.set(key, found.length ? undefined : fields);
+    };
+    for (const lesson of lessons.values())
+      for (const step of lesson?.steps ?? [])
+        resolveStructures(`${lesson!.id}#${step.id}`, step, `${slug}/lessons/${lesson!.id}.yaml: step ${step.id}: `);
+    for (const problem of problems.values())
+      if (problem) resolveStructures(`problem:${problem.id}`, problem, `${slug}/problems/${problem.id}.yaml: `);
 
     const courses: Course[] = [];
+    let unitNumber = 0;
     for (const rel of yamlFiles(root, `${slug}/courses`)) {
       const course = load(rel, courseFile);
       if (!course) continue;
@@ -123,21 +148,33 @@ export function buildContent(root: string): BuildResult {
       courses.push({
         slug: courseSlug,
         title: course.title,
-        units: course.units.map((unit) => ({
-          ...unit,
-          lessons: unit.lessons.flatMap((lessonId) => {
-            const lesson = lessons.get(lessonId);
-            if (!lesson) {
-              if (!lessons.has(lessonId)) errors.push(`${rel}: unit ${unit.id} lists Lesson "${lessonId}", which has no file`);
-              return [];
-            }
-            const url = `/${slug}/${courseSlug}/${unit.slug}/${lesson.slug}`;
-            return [resolveLesson(lesson, url, problems, resolved, `${slug}/lessons/${lesson.id}.yaml`, errors)];
-          }),
-        })),
+        units: course.units.map((unit) => {
+          const url = `/${slug}/${courseSlug}/${unit.slug}`;
+          let coreNumber = 0;
+          return {
+            ...unit,
+            number: ++unitNumber,
+            url,
+            lessons: unit.lessons.flatMap((lessonId) => {
+              const lesson = lessons.get(lessonId);
+              if (!lesson) {
+                if (!lessons.has(lessonId)) errors.push(`${rel}: unit ${unit.id} lists Lesson "${lessonId}", which has no file`);
+                return [];
+              }
+              const number = lesson.onRamp ? 0 : ++coreNumber;
+              const lessonRel = `${slug}/lessons/${lesson.id}.yaml`;
+              const resolved = resolveLesson(lesson, `${url}/${lesson.slug}`, number, problems, structured, lessonRel, errors);
+              for (const step of resolved.steps) {
+                const cited = "problemId" in step && step.problemId && problemCitations.get(step.problemId);
+                if (cited) step.citations = cited;
+              }
+              return [resolved];
+            }),
+          };
+        }),
       });
     }
-    if (subject) subjects.push({ slug, title: subject.title, courses });
+    if (subject) subjects.push({ slug, title: subject.title, url: `/${slug}`, courses, data });
   }
 
   return errors.length ? { errors } : { model: { subjects }, errors };
@@ -146,17 +183,22 @@ export function buildContent(root: string): BuildResult {
 function resolveLesson(
   lesson: LessonFile,
   url: string,
+  number: number,
   problems: Map<string, ProblemFile | undefined>,
-  resolved: Map<Interactive, Resolved | undefined>,
+  structured: Structured,
   rel: string,
   errors: string[],
 ): Lesson {
+  /** Swaps structure ids for the resolved structures; a Step whose structures failed is dropped (its errors are reported). */
+  const withStructures = (step: Record<string, unknown> & { type: string }, key: string): Step[] => {
+    if (step.type !== "multiple-choice" && step.type !== "tap-to-identify") return [step as unknown as Step];
+    const fields = structured.get(key);
+    if (!fields) return [];
+    const { tappable: _t, hide: _h, ...rest } = step;
+    return [{ ...rest, ...fields } as unknown as Step];
+  };
   const steps: Step[] = lesson.steps.flatMap((step): Step[] => {
-    if (step.type === "explain") return [step];
-    if (step.type !== "check") {
-      const fields = resolved.get(step);
-      return fields ? [{ id: step.id, phase: step.phase, ...fields } as Step] : [];
-    }
+    if (step.type !== "check") return withStructures(step, `${lesson.id}#${step.id}`);
     const problem = problems.get(step.problem);
     if (!problem) {
       if (!problems.has(step.problem)) errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" not found`);
@@ -166,10 +208,58 @@ function resolveLesson(
       errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" is ${problem.status}, not approved`);
       return [];
     }
-    const fields = resolved.get(problem);
-    return fields ? [{ id: step.id, phase: "check", problemId: problem.id, ...fields } as Step] : [];
+    const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source: _src, credit: _c, ...interaction } = problem;
+    return withStructures({ id: step.id, phase: "check", problemId, ...interaction }, `problem:${problemId}`);
   });
-  return { ...lesson, url, steps };
+  const phases = { hook: 0, build: 0, check: 0, wrap: 0 };
+  for (const step of lesson.steps) phases[step.phase]++;
+  const { signature, ...rest } = lesson;
+  return { ...rest, url, number, signature: signatureType(lesson), phases, steps };
+}
+
+/** The named signature Step's type, else the first graded Build Step's, else the first Step's. */
+function signatureType(lesson: LessonFile): Step["type"] {
+  const named = lesson.steps.find((s) => s.id === lesson.signature);
+  const graded = lesson.steps.find((s) => s.phase === "build" && s.type !== "explain");
+  const type = (named ?? graded ?? lesson.steps[0]).type;
+  return type === "check" ? "multiple-choice" : type;
+}
+
+/**
+ * Swaps every `{{file/key}}` in Lesson Steps and Problems for its cited
+ * display value (ADR 0002), in place in the loaded maps. A Step keeps what it
+ * cited as `citations`; Problems' citations are returned by id for their
+ * Check Steps.
+ */
+function citeNumbers(
+  slug: string,
+  data: CitedData,
+  lessons: Map<string, LessonFile | undefined>,
+  problems: Map<string, ProblemFile | undefined>,
+  errors: string[],
+): Map<string, Cited[]> {
+  const missing = (where: string, refs: string[]) => {
+    for (const ref of refs) errors.push(`${where}cites "${ref}", which is not in the cited data`);
+  };
+  for (const [name, lesson] of lessons) {
+    if (!lesson) continue;
+    const steps = lesson.steps.map((step) => {
+      if (step.type === "check") return step;
+      const { item, cited, missing: refs } = citeIn(step, data);
+      missing(`${slug}/lessons/${name}.yaml: step ${step.id}: `, refs);
+      return cited.length ? { ...item, citations: cited } : item;
+    });
+    lessons.set(name, { ...lesson, steps });
+  }
+  const byProblem = new Map<string, Cited[]>();
+  for (const [name, problem] of problems) {
+    if (!problem) continue;
+    const { item, cited, missing: refs } = citeIn(problem, data);
+    missing(`${slug}/problems/${name}.yaml: `, refs);
+    problems.set(name, item);
+    if (cited.length) byProblem.set(name, cited);
+  }
+  return byProblem;
 }
 
 function subdirs(dir: string): string[] {
@@ -178,10 +268,10 @@ function subdirs(dir: string): string[] {
     .sort();
 }
 
-function yamlFiles(root: string, dir: string): string[] {
+function yamlFiles(root: string, dir: string, extensions = [".yaml"]): string[] {
   if (!existsSync(join(root, dir))) return [];
   return readdirSync(join(root, dir))
-    .filter((name) => name.endsWith(".yaml"))
+    .filter((name) => extensions.some((ext) => name.endsWith(ext)))
     .sort()
     .map((name) => `${dir}/${name}`);
 }

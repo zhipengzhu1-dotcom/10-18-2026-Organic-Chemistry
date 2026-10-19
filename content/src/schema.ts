@@ -23,6 +23,9 @@ const hide = z.array(z.enum(["charges", "lone-pairs"])).optional();
 /** A text option, or a structure card: `structure` names a structure file and `text` is then its screen-reader label. */
 const option = z.strictObject({ id, text, structure: id.optional(), hide });
 
+/** A text-only card (Rank items; structure Rank cards are not resolved yet). */
+const textOption = z.strictObject({ id, text });
+
 /** Fields shared by a Multiple choice Step and a Multiple choice Problem. */
 const multipleChoice = {
   type: z.literal("multiple-choice"),
@@ -58,6 +61,37 @@ const tapToIdentify = {
   tapOnly: z.strictObject({ idle: text, drag: text }).optional(),
 };
 
+/** A Numeric Hint: `match` is a common wrong value, matched within the Step's tolerance. */
+const numericHint = z.strictObject({ match: z.number().optional(), text });
+
+/** Fields shared by a Numeric input Step and a Numeric Problem. The unit is fixed here and shown, never typed. */
+const numeric = {
+  type: z.literal("numeric"),
+  prompt: text,
+  /** The unit of measure, e.g. "°", "Å", "kJ/mol" (named so it can't be read as a course Unit). */
+  unitSymbol: z.string(),
+  answer: z.number(),
+  /** Absolute: answer ± tolerance is right. */
+  tolerance: z.number().min(0),
+  correct: text.optional(),
+  hints: z.array(numericHint).optional(),
+  reveal: text,
+};
+
+/** Fields shared by a Rank / order Step and a Rank Problem. */
+const rank = {
+  type: z.literal("rank"),
+  prompt: text,
+  /** The cards, in the order they start in. */
+  items: z.array(textOption).min(2),
+  /** The one strict order of item ids, first to last. */
+  answer: z.array(id).min(2),
+  correct: text.optional(),
+  /** A Rank Hint's `match` is one whole wrong order. */
+  hints: z.array(hint).optional(),
+  reveal: text,
+};
+
 const stepId = z.string().regex(/^s\d{2,}$/, 'must look like "s01"');
 const phase = z.enum(["hook", "build", "wrap"]);
 
@@ -76,6 +110,9 @@ const multipleChoiceStep = z.strictObject({
   prediction: z.boolean().optional(),
 });
 
+const numericStep = z.strictObject({ id: stepId, phase, ...numeric });
+const rankStep = z.strictObject({ id: stepId, phase, ...rank });
+
 /** A Check Step is a Problem from the Bank, referenced by id; its Step type is the Problem's. */
 const checkStep = z.strictObject({
   id: stepId,
@@ -89,7 +126,7 @@ const tapStep = z.strictObject({ id: stepId, phase, ...tapToIdentify });
 /** Picks the Step schema by `type` (a Check Step is recognised by its `problem`), so errors point at the broken field. */
 const step = z.preprocess(
   (v) => (v && typeof v === "object" && "problem" in v && !("type" in v) ? { ...v, type: "check" } : v),
-  z.discriminatedUnion("type", [checkStep, explainStep, multipleChoiceStep, tapStep]),
+  z.discriminatedUnion("type", [checkStep, explainStep, multipleChoiceStep, numericStep, rankStep, tapStep]),
 );
 
 export const lessonFile = z.strictObject({
@@ -99,10 +136,21 @@ export const lessonFile = z.strictObject({
   goal: text,
   keyIdea: text,
   onRamp: z.boolean().default(false),
+  /** The act this Lesson sits in on the Unit's Level select page, e.g. "Shape". */
+  act: text.optional(),
+  /** The Unit's capstone, styled as a boss level. */
+  capstone: z.boolean().default(false),
+  /** The Step whose type is shown as the Lesson's signature Step type; defaults to the first graded Build Step. */
+  signature: stepId.optional(),
   steps: z.array(step).min(1),
+  /** ADR 0003: a deleted Step's id → the live Step its old links now open. Ids here are never reused. */
+  deletedSteps: z.record(stepId, stepId).optional(),
 });
 
-const problemBase = {
+/** `<subject>/step-ids.lock.yaml`: every Step id each Lesson has ever had, written by `pnpm content:freeze`. */
+export const stepIdLock = z.record(id, z.array(stepId));
+
+const problemMeta = {
   id,
   unit: id,
   lesson: id,
@@ -113,15 +161,20 @@ const problemBase = {
   credit: text.optional(),
 };
 
+/** A Problem's `type` picks its interaction: the same fields as the Step type of that name. */
 export const problemFile = z.discriminatedUnion("type", [
-  z.strictObject({ ...problemBase, ...multipleChoice }),
-  z.strictObject({ ...problemBase, ...tapToIdentify }),
+  z.strictObject({ ...problemMeta, ...multipleChoice }),
+  z.strictObject({ ...problemMeta, ...numeric }),
+  z.strictObject({ ...problemMeta, ...rank }),
+  z.strictObject({ ...problemMeta, ...tapToIdentify }),
 ]);
 
 const unit = z.strictObject({
   id,
   slug: id,
   title: text,
+  /** One-line scope shown on the Unit tile. */
+  summary: text.optional(),
   status: z.enum(["available", "coming-soon"]),
   /** Lesson ids in play order. */
   lessons: z.array(id).default([]),

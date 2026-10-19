@@ -6,7 +6,7 @@
 import type { Hidden, Structure, StructureAtom } from "@astratron/content";
 
 /** Drawn length of one bond, in SVG units (≈ CSS px at natural size). */
-export const BOND_PX = 60;
+export const BOND_PX = 60; // cited-data: ok, drawing scale in px, not a bond length
 const PAD = 36;
 const FONT = 20;
 const CHAR_W = FONT * 0.6; // JetBrains Mono advance width
@@ -14,6 +14,12 @@ const LETTER_GAP = 12; // bonds stop this far short of a letter
 const LP_DIST = 17;
 const LP_SPREAD = 4.5;
 const DOT_R = 2.4;
+const HASH_STROKE = 1.5;
+const LINE_STROKE = 2;
+/** How far (radians) the charge sign keeps from bonds and lone pairs before it leaves the upper right. */
+/** Write "HO" rather than "OH" when the neighbours lie to the right by more than this (mean cosine). */
+const H_LEFT_BIAS = 0.1;
+const SIGN_CLEARANCE = (35 * Math.PI) / 180;
 
 export interface Point {
   x: number;
@@ -99,7 +105,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
         const cy = s.y + (e.y - s.y) * t;
         const w = 4 * t + 0.5;
         parts.push(
-          `<line class="bond-hash" x1="${r1(cx + nx * w)}" y1="${r1(cy + ny * w)}" x2="${r1(cx - nx * w)}" y2="${r1(cy - ny * w)}" stroke="currentColor" stroke-width="1.5"/>`,
+          `<line class="bond-hash" x1="${r1(cx + nx * w)}" y1="${r1(cy + ny * w)}" x2="${r1(cx - nx * w)}" y2="${r1(cy - ny * w)}" stroke="currentColor" stroke-width="${HASH_STROKE}"/>`,
         );
       }
       continue;
@@ -107,16 +113,16 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
     const offsets = b.order === 1 ? [0] : b.order === 2 ? [-3.5, 3.5] : [-5.5, 0, 5.5];
     for (const o of offsets) {
       parts.push(
-        `<line class="bond-line" x1="${r1(s.x + nx * o)}" y1="${r1(s.y + ny * o)}" x2="${r1(e.x + nx * o)}" y2="${r1(e.y + ny * o)}" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`,
+        `<line class="bond-line" x1="${r1(s.x + nx * o)}" y1="${r1(s.y + ny * o)}" x2="${r1(e.x + nx * o)}" y2="${r1(e.y + ny * o)}" stroke="currentColor" stroke-width="${LINE_STROKE}" stroke-linecap="round"/>`,
       );
     }
   }
 
   for (const a of structure.atoms) {
     const { x, y } = at[a.id];
-    const bondDirs = neighbours.get(a.id)!.map((n) => Math.atan2(at[n].y - y, at[n].x - x));
-    const occupied = [...bondDirs];
-    const hLeft = bondDirs.length > 0 && mean(bondDirs.map(Math.cos)) > 0.1;
+    const neighbourDirs = neighbours.get(a.id)!.map((n) => Math.atan2(at[n].y - y, at[n].x - x));
+    const occupied = [...neighbourDirs];
+    const hLeft = neighbourDirs.length > 0 && mean(neighbourDirs.map(Math.cos)) > H_LEFT_BIAS;
 
     if (lettered(a)) {
       const hText = a.h ? `H${sub(a.h)}` : "";
@@ -137,7 +143,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
       // Upper right when clear of bonds and lone pairs, else the widest gap left.
       const taken = [...occupied, ...lonePairs];
       const preferred = -Math.PI / 4;
-      const free = taken.every((d) => angleBetween(d, preferred) >= (35 * Math.PI) / 180);
+      const free = taken.every((d) => turnBetween(d, preferred) >= SIGN_CLEARANCE);
       const dir = free ? preferred : lonePairDirections(taken, 1)[0];
       const dist = free ? 16 : 22;
       const right = a.h && !hLeft && free ? CHAR_W * (1 + String(a.h).length) : 0;
@@ -194,7 +200,7 @@ function lonePairDirections(occupied: number[], count: number): number[] {
   return out;
 }
 
-const angleBetween = (p: number, q: number) => {
+const turnBetween = (p: number, q: number) => {
   const d = norm(p - q);
   return Math.min(d, 2 * Math.PI - d);
 };

@@ -104,11 +104,11 @@ steps:
 
   - id: s08
     phase: check
-    problem: u1-sample-p3
+    problem: u1-sample-p5
 
   - id: s09
     phase: check
-    problem: u1-sample-p4
+    problem: u1-sample-p6
 
   - id: s10
     phase: wrap
