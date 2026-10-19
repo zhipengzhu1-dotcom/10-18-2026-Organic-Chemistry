@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 7855,
+        "MolecularFormula": "C3H3N",
+        "SMILES": "C=CC#N",
+        "ConnectivitySMILES": "C=CC#N",
+        "Title": "Acrylonitrile"
+      }
+    ]
+  }
+}

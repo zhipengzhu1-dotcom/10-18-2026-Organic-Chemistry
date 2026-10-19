@@ -14,10 +14,7 @@ export interface LayoutRequest {
   source?: string;
 }
 
-/** Valence electrons of the main-group elements a drawing can hold. */
-const VALENCE: Record<string, number> = {
-  H: 1, B: 3, C: 4, N: 5, O: 6, F: 7, Si: 4, P: 5, S: 6, Cl: 7, Br: 7, I: 7,
-};
+import { VALENCE } from "./valence.ts";
 
 let rdkit: Promise<MainModule> | undefined;
 async function loadRDKit(): Promise<MainModule> {
@@ -30,7 +27,7 @@ export async function layoutStructure(req: LayoutRequest): Promise<Structure> {
   const RDKit = await loadRDKit();
   let mol = RDKit.get_mol(req.smiles);
   if (!mol) throw new Error(`${req.id}: RDKit could not parse SMILES "${req.smiles}"`);
-  if (req.style === "full") {
+  if (req.style !== "line-angle") {
     const withHs = RDKit.get_mol(mol.add_hs());
     mol.delete();
     if (!withHs) throw new Error(`${req.id}: RDKit could not add hydrogens`);

@@ -185,6 +185,39 @@ const solvers: Record<string, { outcome: Outcome; play: (page: Page) => Promise<
       await correct(page);
     },
   },
+  // Lesson 2's Check Problems.
+  "u1-draw-n2-kekule": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, "N triple-bonded to N; one lone pair on each N");
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-draw-acrylonitrile": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, "CH₂ double-bonded to CH, single-bonded to C, triple-bonded to N; one lone pair on N");
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-draw-acetaminophen-lone-pairs": {
+    outcome: "first",
+    play: async (page) => {
+      await page.getByRole("textbox", { name: "Answer" }).fill("5");
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-draw-limonene-h": {
+    outcome: "first",
+    play: async (page) => {
+      await page.getByRole("textbox", { name: "Answer" }).fill("16");
+      await check(page);
+      await correct(page);
+    },
+  },
 };
 
 test("the Unit page's Practice Set row opens the Practice Set", async ({ page }) => {

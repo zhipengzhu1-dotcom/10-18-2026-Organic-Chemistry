@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 712,
+        "MolecularFormula": "CH2O",
+        "SMILES": "C=O",
+        "ConnectivitySMILES": "C=O",
+        "Title": "Formaldehyde"
+      }
+    ]
+  }
+}
