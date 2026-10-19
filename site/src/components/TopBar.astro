@@ -1,0 +1,16 @@
+---
+// The site header outside the Step player: wordmark and the Streak (flame and
+// number), filled in from the browser's progress record. Donate (#77) goes here too.
+// Styles: global.css (Top bar).
+---
+
+<header class="topbar">
+  <a class="wordmark" href="/">AstraTron</a>
+  <span class="streak" data-streak role="img" aria-label="Streak: 0 days">🔥<b>0</b></span>
+</header>
+
+<script>
+  import { showStreak } from "../progress/pages.ts";
+  showStreak();
+</script>
+

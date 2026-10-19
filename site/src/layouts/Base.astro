@@ -1,11 +1,14 @@
 ---
 import "../styles/global.css";
+import { suggestProblemHref } from "../lib/submit-links.ts";
 
 interface Props {
   title: string;
   description?: string;
+  /** A Lesson page: the full-screen Step player, with no footer (nothing pulls a Student out of a Lesson). */
+  bare?: boolean;
 }
-const { title, description } = Astro.props;
+const { title, description, bare = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -40,5 +43,13 @@ const { title, description } = Astro.props;
   </head>
   <body>
     <slot />
+    {
+      !bare && (
+        <footer class="site-footer">
+          {/* #77 adds the Donate line, licences, credits and the privacy link. */}
+          <a href={suggestProblemHref()}>Suggest a Problem</a>
+        </footer>
+      )
+    }
   </body>
 </html>

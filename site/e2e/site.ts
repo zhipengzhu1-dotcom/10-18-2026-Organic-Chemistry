@@ -46,7 +46,7 @@ export async function playThrough(page: Page, each: (label: string) => Promise<v
   for (let guard = 0; guard < 40; guard++) {
     const label = (await count.textContent()) ?? "";
     await each(label);
-    if (await page.getByRole("link", { name: "Finish" }).isVisible()) return;
+    if (await page.getByRole("link", { name: "Back to Unit" }).isVisible()) return;
     const checkBtn = page.getByRole("button", { name: "Check" });
     while (await checkBtn.isVisible()) {
       const choices = page.getByRole("group", { name: "Choices" });

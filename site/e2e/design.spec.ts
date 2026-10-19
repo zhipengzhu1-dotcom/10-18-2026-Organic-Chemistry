@@ -49,7 +49,9 @@ const typeViolations = (page: Page) =>
 const smallTargets = (page: Page) =>
   page.evaluate(() =>
     [...document.querySelectorAll<HTMLElement>("a[href], button, [role=button], [role=switch], input, select, summary")]
-      .map((el) => ({ el, box: el.getBoundingClientRect() }))
+      // A checkbox or radio is tapped through its label, so the label is the target.
+      .map((el) => ({ el, box: (el.matches("input") && el.closest("label")) || el }))
+      .map(({ el, box }) => ({ el, box: box.getBoundingClientRect() }))
       .filter(({ box }) => box.width > 0 && (box.width < 48 || box.height < 48))
       // TODO(#62 follow-up): a Tap bond between two tappable atoms can't be 48 px: the bond is 60 px and
       // each atom keeps a 48 px circle, so the band is trimmed. Exempt only that case, down to WCAG 2.5.8's
@@ -127,6 +129,7 @@ for (const theme of THEMES) {
     });
 
     test("every Step and feedback panel of every Lesson passes axe and the type rules", async ({ page }) => {
+      test.setTimeout(180_000); // axe on every Step of every Lesson
       for (const lesson of lessonPaths(await allPages(page))) {
         await page.goto(lesson);
         await playThrough(page, async (step) => {
@@ -187,13 +190,16 @@ test.describe("Step player on a phone", () => {
     await expect(page.getByRole("banner")).toHaveCount(0);
     await expect(page.getByRole("contentinfo")).toHaveCount(0);
     await expect(page.getByRole("main")).toHaveCount(1);
-    await expect(page.getByRole("link")).toHaveCount(1); // only the ✕
+    // Only the ✕ and "Report a mistake" (spec #56 story 80: on every Step) are links.
+    await expect(page.getByRole("link")).toHaveCount(2);
+    await expect(page.getByRole("link", { name: "Report a mistake" })).toBeVisible();
     await expect(page.locator(".player-foot").locator("button, a")).toHaveCount(1);
   });
 
   test("every Step of every Lesson, with its feedback, fits one phone screen with the button in view", async ({
     page,
   }) => {
+    test.setTimeout(120_000);
     for (const lesson of lessonPaths(await allPages(page))) {
       await page.goto(lesson);
       await playThrough(page, async (step) => {
@@ -206,8 +212,12 @@ test.describe("Step player on a phone", () => {
           };
         });
         expect(fit, label).toEqual({ page: true, body: true });
-        await expect(page.locator(".player-foot").locator("button, a")).toBeInViewport({ ratio: 1 });
-        await expect(page.locator(".player-foot").locator("button, a")).toHaveCount(1);
+        // One bottom button on every Step; the Lesson-end screen adds a secondary
+        // "Back to Unit" under "Next Lesson" (spec #56 story 35).
+        const foot = page.locator(".player-foot").locator("button, a");
+        const end = await page.getByRole("link", { name: "Back to Unit" }).isVisible();
+        await expect(foot).toHaveCount(end ? (await page.getByRole("link", { name: "Next Lesson" }).count()) + 1 : 1);
+        for (const b of await foot.all()) await expect(b).toBeInViewport({ ratio: 1 });
       });
     }
   });

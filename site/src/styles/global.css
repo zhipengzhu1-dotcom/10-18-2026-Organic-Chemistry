@@ -254,7 +254,7 @@
   }
   .player-top {
     display: grid;
-    grid-template-columns: var(--at-tap) 1fr auto;
+    grid-template-columns: var(--at-tap) var(--at-tap) 1fr auto;
     gap: 12px;
     align-items: center;
     padding: 8px var(--at-gutter);
@@ -262,7 +262,8 @@
     width: 100%;
     margin: 0 auto;
   }
-  .player-exit {
+  .player-exit,
+  .player-back {
     width: var(--at-tap);
     height: var(--at-tap);
     display: grid;
@@ -271,6 +272,30 @@
     color: var(--at-ink);
     text-decoration: none;
     border: var(--at-border) solid var(--at-line);
+  }
+  .player-back {
+    cursor: pointer;
+  }
+  .player-back:disabled {
+    color: var(--at-ink-muted);
+    border-style: dashed;
+    cursor: default;
+  }
+  .player-end {
+    display: grid;
+    gap: 12px;
+  }
+  .player-body .report {
+    margin-top: auto;
+  }
+  .report a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--at-tap);
+  }
+  .card .streak-tick {
+    margin-top: 8px;
+    color: var(--at-electron);
   }
   .player-count {
     font: 400 16px/1 var(--at-font-data);
@@ -666,6 +691,172 @@
     text-transform: uppercase;
     color: var(--at-ignite);
   }
+}
+
+@layer components {
+  /* Top bar (outside the Step player): wordmark + Streak. */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 12px var(--at-gutter) 0;
+  }
+  .topbar .wordmark {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--at-tap);
+    text-decoration: none;
+  }
+  .streak {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: 600 16px var(--at-font-text);
+  }
+  .streak b {
+    font: 700 20px var(--at-font-data);
+    color: var(--at-ignite);
+  }
+
+  /* Home: first visit vs the returning Student's Hub. */
+  .hub {
+    display: none;
+  }
+  .returning .hub {
+    display: block;
+  }
+  .returning .first-visit {
+    display: none;
+  }
+  .continue-card {
+    margin: 12px 0 24px;
+    padding: 16px;
+    border: var(--at-border-strong) solid var(--at-ignite-fill);
+    background: var(--at-surface);
+    box-shadow: var(--at-drop);
+  }
+  .continue-card h2 {
+    margin: 6px 0 4px;
+    font-size: 22px;
+  }
+  .continue-card p {
+    margin: 0 0 12px;
+    color: var(--at-ink-muted);
+  }
+  .continue-card .continue-unit {
+    margin: 0;
+    font: 600 16px/1.2 var(--at-font-data);
+    text-transform: uppercase;
+    color: var(--at-ignite);
+  }
+  .your-progress {
+    margin-top: 40px;
+    display: grid;
+    gap: 12px;
+    justify-items: start;
+  }
+  .your-progress h2,
+  .your-progress p {
+    margin: 0;
+  }
+  .your-progress .import {
+    display: grid;
+    gap: 6px;
+    min-height: var(--at-tap);
+  }
+  .your-progress [role="alert"]:empty {
+    display: none;
+  }
+  .suggest a,
+  .site-footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--at-tap);
+  }
+  .site-footer {
+    max-width: 640px;
+    margin: 32px auto 0;
+    padding: 16px var(--at-gutter) 40px;
+    border-top: var(--at-border) solid var(--at-line);
+  }
+  .level-select .level-status {
+    font: 500 16px/1.2 var(--at-font-text);
+    color: var(--at-ink-muted);
+  }
+  .level-select .level-status[data-status="done"] {
+    color: var(--at-electron);
+  }
+
+  /* The submission form (/submit). */
+  .submit-page fieldset {
+    margin: 0 0 16px;
+    padding: 8px 16px;
+    border: var(--at-border) solid var(--at-line);
+  }
+  .submit-page fieldset label,
+  .submit-page .consent {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: var(--at-tap);
+  }
+  .submit-page .field[hidden] {
+    display: none;
+  }
+  .submit-page .field {
+    margin-bottom: 16px;
+    display: grid;
+    gap: 6px;
+  }
+  .submit-page input[type="text"],
+  .submit-page input[type="email"],
+  .submit-page select,
+  .submit-page textarea {
+    width: 100%;
+    min-height: var(--at-tap);
+    padding: 8px 12px;
+    font: inherit;
+    color: var(--at-ink);
+    background: var(--at-surface);
+    border: var(--at-border) solid var(--at-line);
+  }
+  .submit-page input[type="checkbox"],
+  .submit-page input[type="radio"] {
+    width: 24px;
+    height: 24px;
+    flex: none;
+    accent-color: var(--at-electron-fill);
+  }
+  .submit-page .hint {
+    margin: 0;
+    color: var(--at-ink-muted);
+  }
+  .submit-page .field-error {
+    margin: 0;
+    color: var(--at-boss);
+  }
+  .submit-page .field-error:empty,
+  .submit-page #form-errors:empty {
+    display: none;
+  }
+  .submit-page #form-errors {
+    margin-bottom: 16px;
+    padding: 12px;
+    border: var(--at-border) dashed var(--at-boss);
+  }
+  .submit-page .note {
+    padding-left: 12px;
+    border-left: 4px solid var(--at-electron-fill);
+  }
+}
+
+/* Lines that #61's script fills with numbers (Streak, "Step 3 of 10", "0 of 3 Lessons"). */
+[data-streak-text],
+[data-continue="where"],
+[data-unit-progress] {
+  font-family: var(--at-font-data);
 }
 
 @keyframes fb-in {

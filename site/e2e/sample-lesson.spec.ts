@@ -69,6 +69,6 @@ test("a Student clicks through the sample Lesson from the home page", async ({ p
   // s10 Wrap: the Lesson is done and shows its key idea.
   await at(10);
   await expect(page.getByRole("heading", { name: "Key idea" })).toBeVisible();
-  await page.getByRole("link", { name: "Finish" }).click();
+  await page.getByRole("link", { name: "Back to Unit" }).click();
   await expect(page).toHaveURL(UNIT);
 });
