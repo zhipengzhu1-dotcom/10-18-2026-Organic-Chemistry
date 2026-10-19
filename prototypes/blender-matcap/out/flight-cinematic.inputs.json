@@ -6,7 +6,7 @@
   "blender": "5.2.2 LTS",
   "inputs": {
     "data/ethylene.geometry.json": "de6b3e796b1a5bcff43aafd43c5e0087e7e179548aed29743abe0b4ac920514b",
-    "data/ethylene-pi.mesh.json": "029269cacb6f82c53895f1bf6ed7dc10407db87362fe324a01d1128aa5e2c960",
+    "data/ethylene-pi.mesh.json": "c75397bfb8645dc043c68beca0ec81a5b25072e42420cc1988f9ef0b4c9d53ba",
     "blender/hero_and_flight.py": "8e1c3a1e656dad155bc56a85a8f86ac32e77be3e8fb9e350340fb584177c485a"
   }
 }

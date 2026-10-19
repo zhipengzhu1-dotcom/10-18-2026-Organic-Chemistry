@@ -47,7 +47,13 @@ psi = (mol.eval_gto("GTOval", grid) @ pi).reshape(n, n, n)
 def mesh(level):
     v, f, nrm, _ = measure.marching_cubes(psi if level > 0 else -psi, abs(level), spacing=(ax[1] - ax[0],) * 3)
     v = v - half
-    return {"positions": np.round(v, 4).ravel().tolist(), "normals": np.round(-nrm, 4).ravel().tolist(), "index": f.ravel().tolist()}
+    # skimage hands back inward normals and winding here; renderers that cull back faces (three.js) need both outward
+    f = f[:, ::-1]
+    c = v.mean(0)
+    fn = np.cross(v[f[:, 1]] - v[f[:, 0]], v[f[:, 2]] - v[f[:, 0]])
+    assert (np.sum(nrm * (v - c), 1) > 0).mean() > 0.99, "normals must point out of the lobe"
+    assert (np.sum(fn * (v[f].mean(1) - c), 1) > 0).mean() > 0.99, "triangles must wind counter-clockwise seen from outside"
+    return {"positions": np.round(v, 4).ravel().tolist(), "normals": np.round(nrm, 4).ravel().tolist(), "index": f.ravel().tolist()}
 
 out = {
     "_prototype": "PROTOTYPE mesh, never merged",

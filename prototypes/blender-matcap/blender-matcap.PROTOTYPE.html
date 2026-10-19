@@ -106,7 +106,7 @@ function hatch(m){
   m.onBeforeCompile = s => {
     s.vertexShader = "varying vec3 vObj;\n" + s.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\nvObj = position;");
     s.fragmentShader = "varying vec3 vObj;\n" + s.fragmentShader.replace("#include <dithering_fragment>",
-      "#include <dithering_fragment>\nif (fract((vObj.x + vObj.y + vObj.z) * 2.2) < 0.45) gl_FragColor.rgb *= 0.16;");
+      "#include <dithering_fragment>\nif (fract((vObj.x + vObj.y + vObj.z) * 2.6) < 0.42) gl_FragColor.rgb *= 0.3;");
   };
   m.customProgramCacheKey = () => "hatch";
   return m;
@@ -147,7 +147,11 @@ function buildMolecule(v){
     });
   });
   const pi = new THREE.Group(); pi.name = "pi";
-  pi.add(new THREE.Mesh(lobeGeo.solid, material(v, cyan)), new THREE.Mesh(lobeGeo.hatched, material(v, cyan, {hatched:true})));
+  // translucent like the Blender render (alpha 0.82), drawn after the atoms so they show through
+  [[lobeGeo.solid, material(v, cyan)], [lobeGeo.hatched, material(v, cyan, {hatched:true})]].forEach(([g, m]) => {
+    Object.assign(m, {transparent:true, opacity:.82, depthWrite:false});
+    const lobe = new THREE.Mesh(g, m); lobe.renderOrder = 1; pi.add(lobe);
+  });
   grp.add(pi);
   grp.rotation.set(0, 0, 0);
   const holder = new THREE.Group(); holder.add(grp); grp.rotation.y = -Math.PI / 2; // C=C horizontal, as on paper; a rigid turn
