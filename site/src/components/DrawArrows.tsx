@@ -8,7 +8,7 @@
 // Controlled and engine-free, so the homepage hero push (#73) can use it with
 // `@astratron/content/arrows` directly.
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
-import type { Hidden, Push, Structure, StructureView } from "@astratron/content";
+import type { Hidden, OrbitalMark, Push, Structure, StructureView } from "@astratron/content";
 import {
   arrowhead,
   dropTargets,
@@ -34,6 +34,8 @@ export interface DrawArrowsProps {
   /** The drawing now: the start with every placed push applied. */
   structure: Structure;
   hide?: Hidden[];
+  /** Orbital marks drawn on the start until the first arrow lands (Lesson 8 s11: "HOMO", "LUMO (empty)"). */
+  marks?: OrbitalMark[];
   /** In-between flags to ring and say. */
   flags: Flag[];
   /** What the last action did, to read aloud. */
@@ -65,8 +67,10 @@ interface Spot extends DropTarget {
   y: number;
 }
 
-export default function DrawArrows({ start, pushes, structure, hide = [], flags, last, target, locked, onPush, onUndo }: DrawArrowsProps) {
-  const drawing = useMemo(() => drawStructure(structure, hide), [structure, hide]);
+export default function DrawArrows({ start, pushes, structure, hide = [], marks, flags, last, target, locked, onPush, onUndo }: DrawArrowsProps) {
+  // The marks name the start's orbitals, so they go once electrons have moved.
+  const shownMarks = pushes.length ? undefined : marks;
+  const drawing = useMemo(() => drawStructure(structure, hide, shownMarks ? { marks: shownMarks } : {}), [structure, hide, shownMarks]);
   const molecule = useMemo(() => moleculeOf(structure), [structure]);
   const srcs = useMemo(() => sources(molecule), [molecule]);
   const [picked, setPicked] = useState<string | null>(null);

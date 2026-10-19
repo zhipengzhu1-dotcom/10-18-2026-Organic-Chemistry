@@ -255,6 +255,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
             key={`arrows-${step.id}`}
             start={step.start.structure}
             hide={step.start.hide}
+            marks={step.start.highlight?.marks}
             pushes={screen.arrows.pushes}
             structure={screen.arrows.structure}
             flags={screen.arrows.flags}

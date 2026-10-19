@@ -301,6 +301,11 @@ const drawArrows = {
   results: z.array(id).min(1),
   /** Open Problems and "no target this time": don't draw the target. */
   hideTarget: z.boolean().optional(),
+  /**
+   * Lesson 8 (#86): orbital marks on the start drawing, drawing aids only: `lone-pair` labels an atom's
+   * lone pair (e.g. "HOMO"); `empty-p` outlines an empty p orbital on the atom (e.g. "LUMO (empty)").
+   */
+  marks: z.array(z.strictObject({ atom: id, kind: z.enum(["lone-pair", "empty-p"]), text })).min(1).optional(),
   /** The correct pushes, in an order that works (shown after two wrong tries, and in the reveal). */
   answer: z.array(push).min(1),
   /** In-between copy; `{atom}` and `{electrons}` are filled in. Plain defaults apply when absent. */

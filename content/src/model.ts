@@ -430,11 +430,18 @@ export interface Structure {
 export type Hidden = "charges" | "lone-pairs";
 
 /** A structure as one Step shows it. */
+/** A drawing aid on a structure (Lesson 8 s11): a lone pair labelled, or an empty p orbital outlined and labelled. */
+export interface OrbitalMark {
+  atom: string;
+  kind: "lone-pair" | "empty-p";
+  text: string;
+}
+
 export interface StructureView {
   structure: Structure;
   hide: Hidden[];
   /** Atoms ringed and bonds outlined to point the Student at them. */
-  highlight?: { ring: string[]; outline: string[]; corner?: [string, string, string] };
+  highlight?: { ring: string[]; outline: string[]; corner?: [string, string, string]; marks?: OrbitalMark[] };
   /** Added at site build time by the renderer; absent in the raw course model. */
   drawn?: DrawnStructure;
 }

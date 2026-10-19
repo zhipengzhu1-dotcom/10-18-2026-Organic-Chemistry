@@ -191,7 +191,7 @@ export function resolveTap(
 }
 
 type ArrowsFile = Extract<ProblemFile, { type: "draw-arrows" }>;
-type ArrowsFields = Pick<ArrowsFile, "start" | "results" | "hideTarget" | "answer" | "hints" | "inBetween">;
+type ArrowsFields = Pick<ArrowsFile, "start" | "results" | "hideTarget" | "answer" | "hints" | "inBetween" | "marks">;
 
 /**
  * Resolves a Draw-arrows item's start, target and results, and checks them: every structure's
@@ -251,6 +251,11 @@ export function resolveArrows(
   for (const hint of item.hints ?? [])
     for (const id of [...(hint.from ?? []), ...(hint.to ?? [])])
       if (!ids.has(id) && id !== "sigma") errors.push(`a Hint names "${id}", which the start structure doesn't have`);
+  for (const mark of item.marks ?? []) {
+    const atom = start.atoms.find((a) => a.id === mark.atom);
+    if (!atom) errors.push(`an orbital mark names "${mark.atom}", which the start structure doesn't have`);
+    else if (mark.kind === "lone-pair" && !atom.lp) errors.push(`a lone-pair mark on "${mark.atom}", which has no lone pair`);
+  }
 
   if (errors.length === before) {
     const task: ArrowsTask = { start, results, answer: item.answer };
@@ -272,7 +277,7 @@ export function resolveArrows(
   }
 
   return {
-    start: view(start, []),
+    start: item.marks ? { ...view(start, []), highlight: { ring: [], outline: [], marks: item.marks } } : view(start, []),
     ...(!item.hideTarget && { target: view(results[0], []) }),
     results,
   };

@@ -56,6 +56,15 @@ export interface Highlight {
   outline?: string[];
   /** A right-angle mark at the middle atom, between its bonds to the other two (a drawing mark, e.g. the flat Lewis CH₄'s). */
   corner?: [string, string, string];
+  /** Orbital marks (Lesson 8 s11): a lone pair labelled (e.g. "HOMO"), or an empty p orbital outlined and labelled. Drawing aids only. */
+  marks?: OrbitalMark[];
+}
+
+/** `lone-pair`: the atom's (first) lone pair gets `text` just below it. `empty-p`: a faint dashed two-lobe outline on the atom, clear of its bonds, with `text` past one lobe. */
+export interface OrbitalMark {
+  atom: string;
+  kind: "lone-pair" | "empty-p";
+  text: string;
 }
 
 /** A dangling bond's loose end (SMILES's dummy atom): drawn as nothing, its bond runs right to it. */
@@ -67,6 +76,11 @@ const LOOSE_PAD = 4;
 const OUTLINE_STROKE = 14;
 const OUTLINE_PER_LINE = 6;
 const OUTLINE_OPACITY = 0.35;
+/** Empty p outline: each lobe's centre this far from the atom, its half-length and half-width (px). */
+const LOBE_OFFSET = 24;
+const LOBE_LONG = 13;
+const LOBE_WIDE = 8;
+const MARK_FONT = FONT * 0.6;
 
 const SUB = "₀₁₂₃₄₅₆₇₈₉";
 const sub = (n: number) => (n > 1 ? [...String(n)].map((d) => SUB[+d]).join("") : "");
@@ -282,6 +296,43 @@ export function drawStructure(structure: Structure, hide: Hidden[] = [], highlig
         `<polyline class="corner-mark" points="${pts.map((p) => `${r1(p.x)},${r1(p.y)}`).join(" ")}" fill="none" stroke="var(--lone-pair, #0e9fbf)" stroke-width="${LINE_STROKE}"/>`,
       );
     }
+  }
+
+  for (const mark of highlight.marks ?? []) {
+    const p = at[mark.atom];
+    if (!p) continue;
+    if (mark.kind === "lone-pair") {
+      const lp = lonePairPoints.find((l) => l.atom === mark.atom);
+      if (!lp) continue;
+      parts.push(
+        `<text class="orbital-mark" x="${lp.x}" y="${r1(lp.y + 16)}" text-anchor="middle" dominant-baseline="hanging" font-size="${MARK_FONT}" fill="var(--lone-pair, #0e9fbf)">${mark.text}</text>`,
+      );
+      continue;
+    }
+    // The p orbital's axis: the line through the atom that keeps farthest from its bonds (upright on a tie).
+    const bondDirs = (neighbours.get(mark.atom) ?? []).map((n) => Math.atan2(at[n].y - p.y, at[n].x - p.x));
+    let axis = Math.PI / 2;
+    let best = -1;
+    for (let k = 0; k < 12; k++) {
+      const theta = Math.PI / 2 + (k * Math.PI) / 12;
+      const clear = Math.min(...bondDirs.map((d) => Math.min(turnBetween(d, theta), turnBetween(d, theta + Math.PI))), Math.PI);
+      if (clear > best + 0.05) [axis, best] = [theta, clear]; // upright unless another axis is clearly clearer
+    }
+    const u = { x: Math.cos(axis), y: Math.sin(axis) };
+    const deg = r1((axis * 180) / Math.PI);
+    for (const sgn of [1, -1]) {
+      const cx = r1(p.x + u.x * LOBE_OFFSET * sgn);
+      const cy = r1(p.y + u.y * LOBE_OFFSET * sgn);
+      parts.push(
+        `<ellipse class="empty-p" cx="${cx}" cy="${cy}" rx="${LOBE_LONG}" ry="${LOBE_WIDE}" transform="rotate(${deg} ${cx} ${cy})" fill="none" stroke="var(--lone-pair, #0e9fbf)" stroke-opacity="0.7" stroke-width="${HASH_STROKE}" stroke-dasharray="4 3"/>`,
+      );
+    }
+    // The label past the upper lobe.
+    const up = u.y <= 0 ? 1 : -1;
+    const reach = LOBE_OFFSET + LOBE_LONG + 10;
+    parts.push(
+      `<text class="orbital-mark" x="${r1(p.x + u.x * reach * up)}" y="${r1(p.y + u.y * reach * up)}" text-anchor="middle" dominant-baseline="central" font-size="${MARK_FONT}" fill="var(--lone-pair, #0e9fbf)">${mark.text}</text>`,
+    );
   }
 
   const viewBox = `0 0 ${width} ${height}`;
