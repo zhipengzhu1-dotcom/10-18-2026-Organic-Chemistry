@@ -55,6 +55,8 @@ export interface Highlight {
 const LOOSE_END = "*";
 const RING_R = 22;
 const OUTLINE_STROKE = 14;
+const OUTLINE_PER_LINE = 6;
+const OUTLINE_OPACITY = 0.35;
 
 const SUB = "₀₁₂₃₄₅₆₇₈₉";
 const sub = (n: number) => (n > 1 ? [...String(n)].map((d) => SUB[+d]).join("") : "");
@@ -107,7 +109,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = [], highlig
     const ny = ux;
     if (outlined.has(b.id))
       parts.push(
-        `<line class="bond-outline" x1="${r1(s.x)}" y1="${r1(s.y)}" x2="${r1(e.x)}" y2="${r1(e.y)}" stroke="currentColor" stroke-opacity="0.35" stroke-width="${OUTLINE_STROKE + (b.order - 1) * 6}" stroke-linecap="round"/>`,
+        `<line class="bond-outline" x1="${r1(s.x)}" y1="${r1(s.y)}" x2="${r1(e.x)}" y2="${r1(e.y)}" stroke="currentColor" stroke-opacity="${OUTLINE_OPACITY}" stroke-width="${OUTLINE_STROKE + (b.order - 1) * OUTLINE_PER_LINE}" stroke-linecap="round"/>`,
       );
 
     if (b.stereo === "wedge") {

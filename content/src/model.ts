@@ -42,7 +42,35 @@ export interface SceneUse {
   cited: Record<string, Cited>;
 }
 
-export interface ExplainStep {
+/** A structure drawn with a Step, static. */
+export interface Figure {
+  view: StructureView;
+  /** Shown under the drawing (Markdown). */
+  caption?: string;
+  /** Screen-reader text for the drawing. */
+  alt: string;
+}
+
+/** Something one tap away from a Step: a Scene, or a reference table of drawings. */
+export interface Aside {
+  /** Names the button that opens it. */
+  label: string;
+  scene?: SceneUse;
+  table?: { columns: string[]; rows: { head: string; cells: (Figure | null)[] }[] };
+}
+
+/** What any Step may show besides its interaction. */
+export interface Visuals {
+  figures?: Figure[];
+  aside?: Aside;
+}
+
+/** A graded Step's visuals, plus the Scene that plays once it is answered (it may show the answer). */
+export interface GradedVisuals extends Visuals {
+  revealScene?: SceneUse;
+}
+
+export interface ExplainStep extends Visuals {
   id: string;
   phase: Phase;
   type: "explain";
@@ -51,7 +79,7 @@ export interface ExplainStep {
   citations?: Cited[];
 }
 
-export interface MultipleChoiceStep {
+export interface MultipleChoiceStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "multiple-choice";
@@ -77,7 +105,7 @@ export interface NumericHint {
 }
 
 /** Numeric input: the Student types a number; the unit is fixed and shown beside the box, never typed. */
-export interface NumericStep {
+export interface NumericStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "numeric";
@@ -96,7 +124,7 @@ export interface NumericStep {
 }
 
 /** Rank / order: the Student puts the items into one strict order (the prompt names which end is first). */
-export interface RankStep {
+export interface RankStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "rank";
@@ -121,7 +149,7 @@ export interface ManipulateHint {
 }
 
 /** Manipulate a Scene: the Student works a slider (one settable state of the Scene) and presses Check on a value. */
-export interface ManipulateStep {
+export interface ManipulateStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "manipulate";
@@ -196,6 +224,8 @@ export type Hidden = "charges" | "lone-pairs";
 export interface StructureView {
   structure: Structure;
   hide: Hidden[];
+  /** Atoms ringed and bonds outlined to point the Student at them. */
+  highlight?: { ring: string[]; outline: string[] };
   /** Added at site build time by the renderer; absent in the raw course model. */
   drawn?: DrawnStructure;
 }
@@ -243,12 +273,14 @@ export interface HintRule {
   text: string;
 }
 
-export interface TapStep {
+export interface TapStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "tap-to-identify";
   prompt: string;
   structure: StructureView;
+  /** Screen-reader text for the whole drawing. */
+  alt?: string;
   targets: TapTarget[];
   /** The exact set of target ids to pick. */
   answer: string[];

@@ -26,8 +26,59 @@ const option = z.strictObject({ id, text, structure: id.optional(), hide });
 /** A text-only card (Rank items; structure Rank cards are not resolved yet). */
 const textOption = z.strictObject({ id, text });
 
+/** A value a Scene's settable state takes: a number (range) or an option id (choice). */
+const sceneValue = z.union([z.number(), z.string()]);
+
+/**
+ * The Scene a Step shows: `scene: <id>`, or `{ id, state: { <settable state>: <value> } }`.
+ * States left out take the manifest's default. The ids and values are checked
+ * against the Scene registry (see scenes.ts).
+ */
+const sceneUse = z.preprocess(
+  (v) => (typeof v === "string" ? { id: v } : v),
+  z.strictObject({ id, state: z.record(z.string(), sceneValue).optional() }),
+);
+
+/**
+ * A structure drawn with a Step (static): atoms it rings and bonds it outlines point the
+ * Student at them; `alt` is its screen-reader text; `caption` (Markdown) is shown under it.
+ */
+const figure = z.strictObject({
+  structure: id,
+  hide,
+  ring: z.array(id).min(1).optional(),
+  outline: z.array(id).min(1).optional(),
+  caption: text.optional(),
+  alt: text,
+});
+
+/**
+ * Something one tap away from the Step (a button named `label` opens it): a Scene (e.g. the
+ * values to look up) or a reference table of drawings (column heads, then rows of cells; a
+ * cell may be empty).
+ */
+const aside = z
+  .strictObject({
+    label: text,
+    scene: sceneUse.optional(),
+    table: z
+      .strictObject({
+        columns: z.array(text).min(1),
+        rows: z.array(z.strictObject({ head: text, cells: z.array(figure.nullable()).min(1) })).min(1),
+      })
+      .optional(),
+  })
+  .refine((a) => !!a.scene !== !!a.table, { message: "an aside holds a scene or a table" });
+
+/** What any Step or Problem may show besides its interaction. */
+const visuals = { figures: z.array(figure).min(1).optional(), aside: aside.optional() };
+
+/** A graded Step's or Problem's visuals, plus a Scene that plays once it is answered (it can show the answer). */
+const gradedVisuals = { ...visuals, revealScene: sceneUse.optional() };
+
 /** Fields shared by a Multiple choice Step and a Multiple choice Problem. */
 const multipleChoice = {
+  ...gradedVisuals,
   type: z.literal("multiple-choice"),
   prompt: text,
   options: z.array(option).min(2),
@@ -41,11 +92,16 @@ const multipleChoice = {
 
 /** Fields shared by a Tap-to-identify Step and Problem. */
 const tapToIdentify = {
+  ...gradedVisuals,
   type: z.literal("tap-to-identify"),
   prompt: text,
   /** The structure file drawn. */
   structure: id,
   hide,
+  /** Bonds drawn with a thick outline (not colour alone), e.g. the bond each tap is about. */
+  outline: z.array(id).min(1).optional(),
+  /** Screen-reader text for the whole drawing. */
+  alt: text.optional(),
   /** What can be tapped: atom and bond ids of the structure ("all" for every one), and named regions (fixed atom sets). */
   tappable: z.strictObject({
     atoms: z.union([z.literal("all"), z.array(id).min(1)]).optional(),
@@ -66,6 +122,7 @@ const numericHint = z.strictObject({ match: z.number().optional(), text });
 
 /** Fields shared by a Numeric input Step and a Numeric Problem. The unit is fixed here and shown, never typed. */
 const numeric = {
+  ...gradedVisuals,
   type: z.literal("numeric"),
   prompt: text,
   /** The unit of measure, e.g. "°", "Å", "kJ/mol" (named so it can't be read as a course Unit). */
@@ -80,6 +137,7 @@ const numeric = {
 
 /** Fields shared by a Rank / order Step and a Rank Problem. */
 const rank = {
+  ...gradedVisuals,
   type: z.literal("rank"),
   prompt: text,
   /** The cards, in the order they start in. */
@@ -92,19 +150,6 @@ const rank = {
   reveal: text,
 };
 
-/** A value a Scene's settable state takes: a number (range) or an option id (choice). */
-const sceneValue = z.union([z.number(), z.string()]);
-
-/**
- * The Scene a Step shows: `scene: <id>`, or `{ id, state: { <settable state>: <value> } }`.
- * States left out take the manifest's default. The ids and values are checked
- * against the Scene registry (see scenes.ts).
- */
-const sceneUse = z.preprocess(
-  (v) => (typeof v === "string" ? { id: v } : v),
-  z.strictObject({ id, state: z.record(z.string(), sceneValue).optional() }),
-);
-
 /** A Manipulate Hint: `match` lists the wrong control values it answers. */
 const manipulateHint = z.strictObject({ match: z.array(sceneValue).min(1).optional(), text });
 
@@ -113,6 +158,7 @@ const manipulateHint = z.strictObject({ match: z.array(sceneValue).min(1).option
  * states, drawn as a slider under the Scene) and presses Check on a value.
  */
 const manipulate = {
+  ...gradedVisuals,
   type: z.literal("manipulate"),
   prompt: text,
   scene: sceneUse,
@@ -134,6 +180,7 @@ const explainStep = z.strictObject({
   type: z.literal("explain"),
   text,
   scene: sceneUse.optional(),
+  ...visuals,
 });
 
 const multipleChoiceStep = z.strictObject({
@@ -233,7 +280,7 @@ export const structureFile = z.strictObject({
     .array(
       z.strictObject({
         id,
-        el: z.string().regex(/^[A-Z][a-z]?$/, "must be an element symbol"),
+        el: z.string().regex(/^([A-Z][a-z]?|\*)$/, "must be an element symbol, or * for a loose bond end"),
         x: z.number(),
         y: z.number(),
         charge: z.number().int().optional(),
