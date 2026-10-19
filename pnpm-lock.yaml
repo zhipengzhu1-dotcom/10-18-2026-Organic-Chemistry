@@ -195,7 +195,11 @@ importers:
         specifier: 2026.9.1
         version: 2026.9.1
 
-  pipelines: {}
+  pipelines:
+    dependencies:
+      '@astratron/content':
+        specifier: workspace:*
+        version: link:../content
 
   scenes:
     dependencies:
