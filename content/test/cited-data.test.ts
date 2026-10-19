@@ -47,18 +47,38 @@ describe("cited-data lookup", () => {
     expect(cite(dataOf(build()), "methane/a.HCH")).toMatchObject({ display: "109.5°", full: "109.471°" });
   });
 
-  it("holds counts (atoms in a formula) as whole numbers with no unit", () => {
-    const result = build((t) => {
-      t["chem/data/h-counts.yaml"] = {
-        id: "h-counts",
-        kind: "table",
-        title: "Hydrogen counts",
-        sources: { cid712: { kind: "reference", citation: "PubChem CID 712, formaldehyde (CH2O)", licence: "PubChem data, public domain" } },
-        values: { formaldehyde: { label: "H atoms in formaldehyde", quantity: "count", value: 2, source: "cid712" } },
-      };
-    });
+  it("holds unitless counts, such as a nuclide's mass number, as whole numbers", () => {
+    const result = build(
+      (t) =>
+        (t["chem/data/nuclides.yaml"] = [
+          "id: nuclides",
+          "kind: table",
+          "title: Nuclides",
+          "sources:",
+          "  nubase: { kind: reference, citation: NUBASE2020, licence: Published values }",
+          "values:",
+          "  C-12.A: { label: carbon-12 mass number, quantity: count, value: 12, source: nubase }",
+          "  He-4.A: { label: helium-4 mass number, quantity: count, value: 4.5, source: nubase }",
+        ].join("\n")),
+    );
+    expect(result.errors).toEqual(["chem/data/nuclides.yaml: values.He-4.A.value: a count must be a whole number"]);
+  });
+
+  it("shows a count as the plain whole number", () => {
+    const result = build(
+      (t) =>
+        (t["chem/data/nuclides.yaml"] = [
+          "id: nuclides",
+          "kind: table",
+          "title: Nuclides",
+          "sources:",
+          "  nubase: { kind: reference, citation: NUBASE2020, licence: Published values }",
+          "values:",
+          "  C-12.A: { label: carbon-12 mass number, quantity: count, value: 12, source: nubase }",
+        ].join("\n")),
+    );
     expect(result.errors).toEqual([]);
-    expect(cite(dataOf(result), "h-counts/formaldehyde")).toMatchObject({ quantity: "count", display: "2", full: "2" });
+    expect(cite(dataOf(result), "nuclides/C-12.A")).toMatchObject({ quantity: "count", value: 12, display: "12", full: "12" });
   });
 
   it("throws on a value that isn't in the data", () => {
@@ -166,6 +186,14 @@ describe("Source note", () => {
     });
     expect(note[1].lead).toBe("Geometry: experimental (gas phase).");
   });
+
+  it("still names a shared source once after the values cross to the browser as JSON", () => {
+    const data = dataOf(build((t) => (t["chem/data/elements.yaml"] = elements())));
+    const shipped = JSON.parse(JSON.stringify([cite(data, "elements/C.colour"), cite(data, "elements/H.colour")]));
+    expect(sourceNote(shipped)).toEqual([
+      { text: "C colour #909090 and H colour #FFFFFF from the Jmol CPK colour table, Jmol source org/jmol/c/PAL.java." },
+    ]);
+  });
 });
 
 describe("the build rejects broken data files", () => {
@@ -183,6 +211,33 @@ describe("the build rejects broken data files", () => {
     ).toEqual([
       'chem/data/methane.yaml: values.r.CH: computed source "ours" in an experimental molecule; one molecule never mixes experimental and computed geometry',
     ]);
+  });
+
+  it("bonds or value atoms that point past the last atom", () => {
+    expect(
+      errorsFor(
+        editMethane((m) => {
+          Object.assign(m, { bonds: [[0, 1, 1], [0, 9, 1]] });
+          Object.assign(m.values["r.CH"], { atoms: [0, 7] });
+        }),
+      ),
+    ).toEqual([
+      "chem/data/methane.yaml: bonds: [0, 9] is not a pair of atoms in this file",
+      "chem/data/methane.yaml: values.r.CH.atoms: an index is past the last atom",
+    ]);
+  });
+
+  it("carries bonds, value atoms and the licence notice through to the lookup", () => {
+    const result = build((t) => {
+      const m = t["chem/data/methane.yaml"] as File;
+      Object.assign(m, { bonds: [[0, 1, 1]], notice: "Data derived from NIST CCCBDB." });
+      Object.assign(m.values["r.CH"], { atoms: [0, 1], note: "re" });
+    });
+    expect(result.errors).toEqual([]);
+    const m = dataOf(result).methane;
+    expect(m.bonds).toEqual([{ a: 0, b: 1, order: 1 }]);
+    expect(m.notice).toBe("Data derived from NIST CCCBDB.");
+    expect(cite(dataOf(result), "methane/r.CH")).toMatchObject({ atoms: [0, 1], note: "re" });
   });
 
   it("coordinates from a different tier than the molecule", () => {

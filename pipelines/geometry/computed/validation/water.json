@@ -1,0 +1,48 @@
+{
+ "id": "water",
+ "smiles": "O",
+ "charge": 0,
+ "multiplicity": 1,
+ "method": {
+  "program": "PySCF",
+  "version": "2.14.0",
+  "level": "B3LYP/cc-pVTZ",
+  "xc": "b3lyp",
+  "xc_definition": "((0, 0, 0), ((402, 1),))",
+  "basis": "cc-pvtz",
+  "grid_level": 4,
+  "optimizer": "geomeTRIC 1.1.1, GAU_TIGHT",
+  "phase": "gas (isolated molecule)"
+ },
+ "date": "2026-10-19",
+ "start": "CCCBDB experimental Cartesians (CAS 7732-18-5)",
+ "input_sha256": "58961e44c4bc1c3029f1a995b104e77f3ef75bf947968bad5bc7b4658bd01b65",
+ "converged": {
+  "optimiser": true,
+  "scf": true
+ },
+ "energy_hartree": -76.45984089903362,
+ "atoms": [
+  [
+   "O",
+   -0.0,
+   0.0,
+   0.118591
+  ],
+  [
+   "H",
+   -0.0,
+   0.760262,
+   -0.469789
+  ],
+  [
+   "H",
+   -0.0,
+   -0.760262,
+   -0.469789
+  ]
+ ],
+ "frequencies_cm1": null,
+ "imaginary_modes": null,
+ "seconds": 5
+}

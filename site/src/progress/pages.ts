@@ -37,8 +37,17 @@ export function showUnitProgress(): void {
     }
   }
   const lessons = rows.map((row) => ({ id: row.dataset.lessonId!, onRamp: row.dataset.onRamp !== undefined }));
-  const { done, total } = unitCount(record, lessons);
-  for (const el of document.querySelectorAll("[data-unit-progress]")) el.textContent = `${done} of ${total} Lessons`;
+  // The Practice Set row: optional, but once done it counts toward the Unit.
+  const practiceRow = document.querySelector<HTMLElement>("[data-practice-set]");
+  const unitId = practiceRow?.dataset.practiceSet;
+  const { done, total, practice } = unitId ? unitCount(record, lessons, unitId) : { ...unitCount(record, lessons), practice: false };
+  const practiceStatus = practiceRow?.querySelector<HTMLElement>(".level-status");
+  if (practiceStatus && practice) {
+    practiceStatus.dataset.status = "done";
+    practiceStatus.textContent = STATUS_TEXT.done;
+  }
+  for (const el of document.querySelectorAll("[data-unit-progress]"))
+    el.textContent = `${done} of ${total} Lessons${practice ? " · Practice Set done" : ""}`;
 }
 
 /** Home page: the Hub's Continue card for returning visitors (the page shows the Hub when `last` is set). */

@@ -9,8 +9,9 @@ import { hydrogenCount } from "../src/valence.ts";
 import { readStructures } from "../src/structures-json.ts";
 import { sceneCatalog } from "../../scenes/src/manifest-check.ts";
 import { sceneManifests } from "../../scenes/src/manifests.ts";
+import { watchSceneManifests } from "../../scenes/src/watch.ts";
 
-const { model, errors } = buildContent(contentRoot, { scenes: sceneCatalog(sceneManifests) });
+const { model, errors } = buildContent(contentRoot, { scenes: sceneCatalog(sceneManifests, watchSceneManifests) });
 const organic = model?.subjects.find((s) => s.slug === "organic");
 const lesson = organic?.courses.flatMap((c) => c.units.flatMap((u) => u.lessons)).find((l) => l.id === "u1-l02") as Lesson;
 

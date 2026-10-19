@@ -3,11 +3,10 @@
 // Scene that fills in H's) and the content build's checks share one rule.
 // Browser import: "@astratron/content/valence".
 import type { Structure } from "./model.ts";
+import { VALENCE } from "./arrows.ts";
 
-/** Valence electrons of the main-group elements a drawing can hold. */
-export const VALENCE: Record<string, number> = {
-  H: 1, B: 3, C: 4, N: 5, O: 6, F: 7, Si: 4, P: 5, S: 6, Cl: 7, Br: 7, I: 7,
-};
+/** Valence electrons of the elements a drawing can hold (one table, shared with Draw arrows). */
+export { VALENCE };
 
 /** Sum of bond orders at each atom. */
 function bondOrders(s: Structure): Map<string, number> {

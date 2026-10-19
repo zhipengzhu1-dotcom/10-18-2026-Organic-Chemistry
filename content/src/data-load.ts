@@ -32,6 +32,10 @@ const value = z.strictObject({
   value: z.union([z.number(), z.string().min(1)]),
   unit: text.optional(),
   source: key,
+  /** Geometry values: the 0-based atom indices the value measures (2 = distance, 3 = angle at the middle, 4 = dihedral). */
+  atoms: z.array(z.number().int().nonnegative()).min(2).max(4).optional(),
+  /** The source's own remark on the value, e.g. "re", "from symmetry". */
+  note: text.optional(),
 });
 
 const atom = z.tuple([z.string().regex(/^[A-Z][a-z]?$/, "must be an element symbol"), z.number(), z.number(), z.number()]);
@@ -44,6 +48,12 @@ export const dataFile = z.strictObject({
   sources: z.record(key, source),
   values: z.record(key, value),
   atoms: z.strictObject({ source: key, list: z.array(atom).min(1) }).optional(),
+  /** Molecules: bonds as [atom index, atom index, bond order], 0-based (pipeline output). */
+  bonds: z.array(z.tuple([z.number().int().nonnegative(), z.number().int().nonnegative(), z.union([z.literal(1), z.literal(2), z.literal(3)])])).optional(),
+  /** Licence notice for third-party data (e.g. the NIST acknowledgement on CCCBDB-derived files). */
+  notice: text.optional(),
+  /** How the pipeline made the file (start geometry, checks, what CCCBDB has). Kept in the file, not passed to pages. */
+  provenance: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type DataFile = z.infer<typeof dataFile>;
@@ -101,6 +111,10 @@ export function resolveDataFile(file: DataFile): { set: DataSet; errors: string[
       errors.push(`values.${k}.unit: a ${v.quantity} needs one of ${allowed.join(", ")}; found ${v.unit ?? "none"}`);
       continue;
     }
+    if (v.quantity === "count" && !(typeof v.value === "number" && Number.isInteger(v.value) && v.unit === undefined)) {
+      errors.push(`values.${k}.value: a count must be a whole number`);
+      continue;
+    }
     if (geometryQuantities.includes(v.quantity)) mixes(`values.${k}`, src);
     set.values[k] = {
       ref: `${file.id}/${k}`,
@@ -108,6 +122,8 @@ export function resolveDataFile(file: DataFile): { set: DataSet; errors: string[
       quantity: v.quantity,
       value: v.value,
       ...(v.unit ? { unit: v.unit } : {}),
+      ...(v.atoms ? { atoms: v.atoms } : {}),
+      ...(v.note ? { note: v.note } : {}),
       source: src,
       licence: src.licence,
       ...(file.geometry ? { tier: file.geometry } : {}),
@@ -123,6 +139,14 @@ export function resolveDataFile(file: DataFile): { set: DataSet; errors: string[
       set.atoms = { source: src, list: file.atoms.list.map(([element, x, y, z]) => ({ element, x, y, z })) };
     }
   }
+  if (file.notice) set.notice = file.notice;
+  if (file.bonds) {
+    const n = file.atoms?.list.length ?? 0;
+    set.bonds = file.bonds.map(([a, b, order]) => ({ a, b, order }));
+    for (const [a, b] of file.bonds) if (a >= n || b >= n || a === b) errors.push(`bonds: [${a}, ${b}] is not a pair of atoms in this file`);
+  }
+  for (const [k, v] of Object.entries(file.values))
+    if (v.atoms?.some((i) => i >= (file.atoms?.list.length ?? 0))) errors.push(`values.${k}.atoms: an index is past the last atom`);
 
   return { set, errors };
 }

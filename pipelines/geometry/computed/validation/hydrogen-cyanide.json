@@ -1,0 +1,48 @@
+{
+ "id": "hydrogen-cyanide",
+ "smiles": "C#N",
+ "charge": 0,
+ "multiplicity": 1,
+ "method": {
+  "program": "PySCF",
+  "version": "2.14.0",
+  "level": "B3LYP/cc-pVTZ",
+  "xc": "b3lyp",
+  "xc_definition": "((0, 0, 0), ((402, 1),))",
+  "basis": "cc-pvtz",
+  "grid_level": 4,
+  "optimizer": "geomeTRIC 1.1.1, GAU_TIGHT",
+  "phase": "gas (isolated molecule)"
+ },
+ "date": "2026-10-19",
+ "start": "CCCBDB experimental Cartesians (CAS 74-90-8)",
+ "input_sha256": "383a81b2a665d54a80a17109bf5ce9df9910e8b2580096b48a14741361c103c8",
+ "converged": {
+  "optimiser": true,
+  "scf": true
+ },
+ "energy_hartree": -93.46137291936563,
+ "atoms": [
+  [
+   "C",
+   0.0,
+   0.0,
+   -0.003654
+  ],
+  [
+   "H",
+   -0.0,
+   -0.0,
+   1.061634
+  ],
+  [
+   "N",
+   0.0,
+   0.0,
+   -1.149919
+  ]
+ ],
+ "frequencies_cm1": null,
+ "imaginary_modes": null,
+ "seconds": 8
+}

@@ -1,0 +1,48 @@
+{
+ "id": "carbon-dioxide",
+ "smiles": "O=C=O",
+ "charge": 0,
+ "multiplicity": 1,
+ "method": {
+  "program": "PySCF",
+  "version": "2.14.0",
+  "level": "B3LYP/cc-pVTZ",
+  "xc": "b3lyp",
+  "xc_definition": "((0, 0, 0), ((402, 1),))",
+  "basis": "cc-pvtz",
+  "grid_level": 4,
+  "optimizer": "geomeTRIC 1.1.1, GAU_TIGHT",
+  "phase": "gas (isolated molecule)"
+ },
+ "date": "2026-10-19",
+ "start": "CCCBDB experimental Cartesians (CAS 124-38-9)",
+ "input_sha256": "a670a94ddffeebe2ba54c4972e32385f00a8e88c83eb6d8a5a552cd5a5c7d591",
+ "converged": {
+  "optimiser": true,
+  "scf": true
+ },
+ "energy_hartree": -188.660569639169,
+ "atoms": [
+  [
+   "C",
+   -0.0,
+   -0.0,
+   0.0
+  ],
+  [
+   "O",
+   -0.0,
+   -0.0,
+   1.160379
+  ],
+  [
+   "O",
+   0.0,
+   0.0,
+   -1.160379
+  ]
+ ],
+ "frequencies_cm1": null,
+ "imaginary_modes": null,
+ "seconds": 13
+}

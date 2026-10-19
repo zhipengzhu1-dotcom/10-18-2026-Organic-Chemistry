@@ -6,7 +6,11 @@
 import type { Cited } from "@astratron/content/data";
 import { sourceNote } from "@astratron/content/data";
 
-export default function SourceNote({ cited, note }: { cited: Cited[]; /** Build-rendered HTML. */ note?: string }) {
+/**
+ * `notice`: a licence notice the data asks to travel with it (the NIST acknowledgement).
+ * `note`: the Step's written attribution, build-rendered HTML.
+ */
+export default function SourceNote({ cited, notice, note }: { cited: Cited[]; notice?: string; note?: string }) {
   if (!cited.length && !note) return null;
   return (
     <details className="source-note">
@@ -16,6 +20,7 @@ export default function SourceNote({ cited, note }: { cited: Cited[]; /** Build-
           {p.lead && <strong>{p.lead}</strong>} {p.text}
         </p>
       ))}
+      {notice && <p>{notice}</p>}
       {note && <p dangerouslySetInnerHTML={{ __html: note }} />}
     </details>
   );

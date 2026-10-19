@@ -4,15 +4,20 @@
 // key is fetched from its own built file, and nothing is checked until it arrives.
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type { NumericStep, RankStep, SceneValue, StructureView } from "@astratron/content";
-import { act, start, type Action, type Answer, type LessonProgress, type Screen } from "../engine/player.ts";
+import { act, start, type Action, type Answer, type LessonProgress, type PlayableLesson, type Screen } from "../engine/player.ts";
 import { withKey, type AnswerKey, type PageLesson } from "../lib/answer-key.ts";
 import { mistakeTarget, reportMistakeHref } from "../lib/submit-links.ts";
 import { recordProblem, saveLesson, streakOn } from "../progress/record.ts";
 import { readRecord, writeRecord } from "../progress/store.ts";
 import SourceNote from "./SourceNote.tsx";
 import ScenePlayer from "./ScenePlayer.tsx";
+import WatchScenePlayer from "./WatchScenePlayer.tsx";
+import { watchScene } from "@astratron/scenes/watch";
 import SceneControl from "./SceneControl.tsx";
 import StructureTap from "./StructureTap.tsx";
+import ExploreIn3D from "../explore/ExploreIn3D.tsx";
+import DrawArrows from "./DrawArrows.tsx";
+import { PushReplayPlayer } from "./PushReplayPlayer.tsx";
 import "./structure.css";
 
 interface Props {
@@ -26,6 +31,11 @@ interface Props {
   unitId: string;
   /** The next Lesson in the Unit, for the Lesson-end screen. */
   nextHref?: string;
+  /**
+   * Set when playing a Practice Set round: Problems instead of Steps, no resume, no Step links,
+   * and after the last Problem a "See results" button hands the round's progress back.
+   */
+  practice?: { onFinish: (round: PlayableLesson, progress: LessonProgress) => void };
 }
 
 /**
@@ -36,7 +46,7 @@ type PlayerAction = Action | { type: "open"; stepId?: string; saved?: LessonProg
 
 const html = (text: string) => ({ dangerouslySetInnerHTML: { __html: text } });
 
-export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nextHref }: Props) {
+export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nextHref, practice }: Props) {
   const [key, setKey] = useState<AnswerKey>();
   const lesson = useMemo(() => withKey(page, key), [page, key]);
   const [screen, dispatch] = useReducer(
@@ -71,6 +81,10 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   // The Lesson resumes where the Student left it; a Step link opens its Step instead.
   // The address then follows the Step on screen.
   useEffect(() => {
+    if (practice) {
+      setLinked(true);
+      return;
+    }
     const linkedStep = () => (location.hash.length > 1 ? decodeURIComponent(location.hash.slice(1)) : undefined);
     const saved = readRecord().lessons[page.id];
     dispatch({ type: "open", stepId: linkedStep(), saved });
@@ -93,7 +107,10 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   useEffect(() => {
     if (!linked) return;
     const now = new Date();
-    let { record, earned } = saveLesson(readRecord(), page.id, screen.progress, now);
+    // A Practice Set isn't a Lesson: only its Problems' results are saved.
+    let { record, earned } = practice
+      ? { record: readRecord(), earned: false }
+      : saveLesson(readRecord(), page.id, screen.progress, now);
     if (key && screen.step.type !== "explain" && "problemId" in screen.step && screen.step.problemId && screen.canContinue) {
       const result = { tries: screen.tries, correct: screen.feedback?.kind === "correct" };
       const solved = recordProblem(record, screen.step.problemId, result, now);
@@ -102,11 +119,12 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     }
     writeRecord(record);
     if (earned && screen.done) setStreakTick(streakOn(record, now).count);
-  }, [linked, key, page.id, screen]);
+  }, [linked, key, page.id, screen, practice]);
   useEffect(() => {
+    if (practice) return;
     const moved = location.hash || screen.index > 0;
     if (linked && moved && location.hash !== `#${step.id}`) history.replaceState(null, "", `#${step.id}`);
-  }, [linked, step.id, screen.index]);
+  }, [linked, step.id, screen.index, practice]);
 
   const order =
     step.type !== "rank" ? [] : ranked?.stepId === step.id ? ranked.order : step.items.map((item) => item.id);
@@ -134,7 +152,9 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         ? Number.isFinite(parseNumber(draft)) ? { value: parseNumber(draft) } : null
         : step.type === "rank"
           ? { order }
-          : setting !== undefined
+          : step.type === "draw-arrows"
+            ? null // pushes are dispatched one by one by the Draw-arrows view
+            : setting !== undefined
             ? { setting }
             : null;
 
@@ -157,15 +177,16 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     setDraft("");
   }
 
-  const icon = feedback && { correct: "✓", hint: "✗", reveal: "→" }[feedback.kind];
-  const words = feedback && { correct: "Correct.", hint: "Not quite.", reveal: "Answer:" }[feedback.kind];
+  const icon = feedback && { correct: "✓", hint: "✗", reveal: "→", shown: "→" }[feedback.kind];
+  // Draw arrows' shown push already reads "Here is that push: …".
+  const words = feedback && { correct: "Correct.", hint: "Not quite.", reveal: "Answer:", shown: "" }[feedback.kind];
 
   // Single focus: no site chrome, only the ✕, story bars, Step count and one
   // fixed bottom button. The feedback panel sits above that button.
   return (
     <div className="player" id={step.id}>
       <div className="player-top">
-        <a href={exitHref} aria-label="Leave the Lesson" className="player-exit">
+        <a href={exitHref} aria-label={practice ? "Leave the Practice Set" : "Leave the Lesson"} className="player-exit">
           ✕
         </a>
         <button type="button" className="player-back" aria-label="Previous Step" disabled={screen.index === 0} onClick={back}>
@@ -177,7 +198,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           ))}
         </ol>
         <span className="player-count">
-          Step {screen.index + 1} of {screen.total}
+          {practice ? "Problem" : "Step"} {screen.index + 1} of {screen.total}
         </span>
       </div>
 
@@ -192,7 +213,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <StructureTap
             step={step}
             picked={chosen}
-            answer={feedback?.kind === "reveal" && Array.isArray(feedback.answer) ? feedback.answer : []}
+            answer={feedback?.kind === "reveal" && Array.isArray(feedback.answer) ? (feedback.answer as string[]) : []}
             locked={screen.canContinue}
             onToggle={pick}
           />
@@ -203,7 +224,33 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <StructureFigure view={step.structure} />
         )}
 
-        {step.scene && sceneState && step.scene.on !== "answered" && (
+        {step.type === "draw-arrows" && screen.arrows && !screen.canContinue && (
+          <DrawArrows
+            key={`arrows-${step.id}`}
+            start={step.start.structure}
+            hide={step.start.hide}
+            pushes={screen.arrows.pushes}
+            structure={screen.arrows.structure}
+            flags={screen.arrows.flags}
+            last={screen.arrows.last}
+            target={step.target}
+            locked={screen.canContinue || !key}
+            onPush={(push) => dispatch({ type: "answer", push })}
+            onUndo={() => dispatch({ type: "answer", undo: true })}
+          />
+        )}
+
+        {/* Draw arrows: on success (or the reveal) the Step's Scene plays in place of the card, else push-replay of the arrows. */}
+        {step.type === "draw-arrows" && screen.canContinue && !step.scene && screen.arrows && (
+          <PushReplayPlayer key={`replay-${step.id}`} start={step.start.structure} hide={step.start.hide} pushes={screen.arrows.pushes.map((p) => p.push)} />
+        )}
+
+        {step.scene && step.scene.on !== "answered" && watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
+          // A watch-only Scene (#66): the committed video, keyed per Step so it autoplays on entry.
+          <WatchScenePlayer key={`scene-${step.id}`} sceneId={step.scene.id} cited={step.scene.cited} />
+        )}
+
+        {step.scene && step.scene.on !== "answered" && sceneState && !watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
           // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
           <ScenePlayer
             key={`scene-${step.id}`}
@@ -289,6 +336,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </div>
         )}
 
+        {step.explore && <ExploreIn3D key={`explore-${step.id}`} molecule={step.explore} />}
+
         {/* Keyed per Step so a new Step opens its Source note collapsed. */}
         <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} note={step.sourceNote} />
 
@@ -300,7 +349,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
       <div className="player-foot">
         <div role="status">
           {feedback && (
-            <div className={`fb fb-${feedback.kind}`}>
+            <div className={`fb fb-${feedback.kind === "shown" ? "reveal fb-shown" : feedback.kind}`}>
               <span className="ic" aria-hidden="true">
                 {icon}
               </span>{" "}
@@ -322,9 +371,23 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
               Back to Unit
             </a>
           </div>
+        ) : practice && screen.canContinue && screen.index + 1 === screen.total ? (
+          <button type="button" className="btn btn-primary btn-block" onClick={() => practice.onFinish(lesson, screen.progress)}>
+            See results
+          </button>
         ) : screen.canContinue ? (
           <button type="button" className="btn btn-primary btn-block" onClick={next}>
             Continue
+          </button>
+        ) : step.type === "draw-arrows" ? (
+          // No Check button: each push is graded the moment it lands. The one bottom button undoes.
+          <button
+            type="button"
+            className="btn btn-secondary btn-block"
+            onClick={() => dispatch({ type: "answer", undo: true })}
+            disabled={!key || !screen.arrows?.pushes.length}
+          >
+            Undo arrow
           </button>
         ) : (
           <button type="button" className="btn btn-primary btn-block" onClick={check} disabled={!key || !answer}>

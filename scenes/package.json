@@ -6,11 +6,14 @@
   "exports": {
     ".": "./src/index.ts",
     "./manifests": "./src/manifests.ts",
-    "./check": "./src/manifest-check.ts"
+    "./check": "./src/manifest-check.ts",
+    "./arrows": "./src/structure/arrows.ts",
+    "./watch": "./src/watch.ts"
   },
   "scripts": {
     "check": "node src/check-cli.ts",
-    "lint:purity": "node src/purity-lint-cli.ts"
+    "lint:purity": "node src/purity-lint-cli.ts",
+    "render": "node src/manim/render-cli.ts"
   },
   "dependencies": {
     "@astratron/content": "workspace:*",

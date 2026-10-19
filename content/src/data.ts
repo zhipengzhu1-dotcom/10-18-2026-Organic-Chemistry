@@ -54,6 +54,10 @@ export interface Cited {
   display: string;
   /** The full stored value with its unit, for the Source note. */
   full: string;
+  /** Geometry values: the 0-based atom indices measured (so a viewer can highlight the cited bond or angle). */
+  atoms?: number[];
+  /** The source's own remark on the value, e.g. "re" or "from symmetry". */
+  note?: string;
 }
 
 export interface Atom {
@@ -72,6 +76,16 @@ export interface DataSet {
   values: Record<string, Cited>;
   /** Molecules only: Cartesian coordinates in Å, from one source of the molecule's tier. */
   atoms?: { source: Source; list: Atom[] };
+  /** Molecules: bonds between atom indices (0-based), with bond order 1–3. */
+  bonds?: Bond[];
+  /** Licence notice for third-party data, e.g. the NIST acknowledgement on CCCBDB-derived geometry. */
+  notice?: string;
+}
+
+export interface Bond {
+  a: number;
+  b: number;
+  order: 1 | 2 | 3;
 }
 
 /** Every data file of one Subject, by id. */
@@ -182,10 +196,14 @@ function clauses(values: Cited[]): string {
     .join(" ");
 }
 
+/** Groups by the source's id and citation, not object identity: values reach browser islands as JSON copies. */
 function bySource(values: Cited[]): [Source, Cited[]][] {
-  const groups = new Map<Source, Cited[]>();
-  for (const v of values) (groups.get(v.source) ?? groups.set(v.source, []).get(v.source)!).push(v);
-  return [...groups];
+  const groups = new Map<string, [Source, Cited[]]>();
+  for (const v of values) {
+    const key = `${v.source.id}\n${v.source.citation}`;
+    (groups.get(key) ?? groups.set(key, [v.source, []]).get(key)!)[1].push(v);
+  }
+  return [...groups.values()];
 }
 
 function named(values: Cited[]): string {

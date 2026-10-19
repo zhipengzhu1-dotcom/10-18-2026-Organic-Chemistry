@@ -1,0 +1,61 @@
+{
+ "id": "boron-trifluoride-b3lyp",
+ "smiles": "FB(F)F",
+ "charge": 0,
+ "multiplicity": 1,
+ "method": {
+  "program": "PySCF",
+  "version": "2.14.0",
+  "level": "B3LYP/cc-pVTZ",
+  "xc": "b3lyp",
+  "xc_definition": "((0, 0, 0), ((402, 1),))",
+  "basis": "cc-pvtz",
+  "grid_level": 4,
+  "optimizer": "geomeTRIC 1.1.1, GAU_TIGHT",
+  "phase": "gas (isolated molecule)"
+ },
+ "date": "2026-10-19",
+ "start": "CCCBDB experimental Cartesians (CAS 7637-07-2)",
+ "input_sha256": "d98553eaf7e5b0d9cf0299413e3e1dad968f5c0958315c346ba1d6863abdb18a",
+ "converged": {
+  "optimiser": true,
+  "scf": true
+ },
+ "energy_hartree": -324.69636019115563,
+ "atoms": [
+  [
+   "B",
+   -2e-06,
+   -0.000908,
+   0.0
+  ],
+  [
+   "F",
+   3e-06,
+   1.313741,
+   0.0
+  ],
+  [
+   "F",
+   1.138567,
+   -0.658189,
+   -0.0
+  ],
+  [
+   "F",
+   -1.138568,
+   -0.658194,
+   0.0
+  ]
+ ],
+ "frequencies_cm1": [
+  475.6,
+  475.9,
+  688.6,
+  889.9,
+  1467.2,
+  1467.9
+ ],
+ "imaginary_modes": 0,
+ "seconds": 117
+}

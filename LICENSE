@@ -26,4 +26,6 @@ This licence covers the code in this repository. It does not cover:
 - the content in content/ (Lessons, Problems, course manifests, authored data),
   which is licensed under CC BY-NC-SA 4.0; see content/LICENSE;
 - third-party data (e.g. CCCBDB-derived geometry), which keeps its own
-  per-value licence and acknowledgement.
+  per-value licence and acknowledgement. This includes the NIST CCCBDB pages
+  cached in pipelines/geometry/cccbdb/ and every data file that carries a NIST
+  notice (see pipelines/geometry/cccbdb/NOTICE.md).

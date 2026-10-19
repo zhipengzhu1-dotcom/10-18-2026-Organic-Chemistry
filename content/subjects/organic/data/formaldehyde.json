@@ -1,0 +1,122 @@
+{
+  "id": "formaldehyde",
+  "kind": "molecule",
+  "title": "Formaldehyde",
+  "geometry": "experimental",
+  "notice": "Data derived from NIST CCCBDB; not covered by the repository's MIT licence or the content's CC BY-NC-SA licence. NIST Computational Chemistry Comparison and Benchmark Database, NIST Standard Reference Database Number 101, Release 22, May 2022, Editor: Russell D. Johnson III, http://cccbdb.nist.gov/, DOI:10.18434/T47C7Z. © U.S. Secretary of Commerce; used with acknowledgement under https://www.nist.gov/open/license.",
+  "sources": {
+    "cccbdb": {
+      "kind": "experimental",
+      "citation": "NIST CCCBDB, SRD 101, Release 22 (May 2022), doi:10.18434/T47C7Z",
+      "licence": "NIST SRD 101; reuse with acknowledgement (https://www.nist.gov/open/license). Not covered by the repo's MIT licence."
+    },
+    "gurvich": {
+      "kind": "experimental",
+      "citation": "Gurvich, L.V.; Veyts, I. V.; Alcock, C. B., Thermodynamic Properties of Individual Substances, Fouth Edition, Hemisphere Pub. Co., New York, 1989",
+      "via": "cccbdb",
+      "licence": "NIST SRD 101; reuse with acknowledgement (https://www.nist.gov/open/license). Not covered by the repo's MIT licence."
+    }
+  },
+  "values": {
+    "r.CH": {
+      "label": "C–H",
+      "quantity": "bond-length",
+      "value": 1.111,
+      "unit": "Å",
+      "source": "gurvich",
+      "atoms": [
+        1,
+        2
+      ]
+    },
+    "r.CO": {
+      "label": "O–C",
+      "quantity": "bond-length",
+      "value": 1.205,
+      "unit": "Å",
+      "source": "gurvich",
+      "atoms": [
+        0,
+        1
+      ]
+    },
+    "a.HCH": {
+      "label": "H–C–H",
+      "quantity": "angle",
+      "value": 116.133,
+      "unit": "°",
+      "source": "gurvich",
+      "atoms": [
+        2,
+        1,
+        3
+      ]
+    },
+    "a.HCO": {
+      "label": "O–C–H",
+      "quantity": "angle",
+      "value": 121.9,
+      "unit": "°",
+      "source": "gurvich",
+      "atoms": [
+        0,
+        1,
+        2
+      ],
+      "note": "from aHCH by symmetry"
+    }
+  },
+  "atoms": {
+    "source": "cccbdb",
+    "list": [
+      [
+        "O",
+        0.0,
+        0.0,
+        1.205
+      ],
+      [
+        "C",
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        "H",
+        0.0,
+        0.9429,
+        -0.5876
+      ],
+      [
+        "H",
+        0.0,
+        -0.9429,
+        -0.5876
+      ]
+    ]
+  },
+  "bonds": [
+    [
+      0,
+      1,
+      2
+    ],
+    [
+      1,
+      2,
+      1
+    ],
+    [
+      1,
+      3,
+      1
+    ]
+  ],
+  "provenance": {
+    "pipeline": "pipelines/geometry (#67)",
+    "url": "https://cccbdb.nist.gov/expgeom2x.asp?casno=50000&charge=0",
+    "cccbdbName": "Formaldehyde",
+    "pointGroup": "not used (CCCBDB labels can be wrong)",
+    "usedBy": "L3"
+  }
+}

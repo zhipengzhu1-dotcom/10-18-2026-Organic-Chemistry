@@ -31,7 +31,7 @@ describe("citedFor", () => {
   it("looks each ref up in the course model's cited data", () => {
     const cited = citedFor(model, ["methane/r.CH"]);
     expect(cited["methane/r.CH"]!.display).toBe("1.09 Å");
-    expect(cited["methane/r.CH"]!.source.citation).toMatch(/^Hirota/);
+    expect(cited["methane/r.CH"]!.source.citation).toMatch(/^E Hirota "Anharmonic Potential Function/);
   });
 
   it("names a ref that isn't in any Subject's data", () => {
@@ -53,16 +53,16 @@ describe("sourcesSidecar", () => {
       shown: "text",
       onScreen: [{ from: 2, to: 4 }],
     });
-    expect(ch!.citation).toMatch(/^Hirota, J\. Mol\. Spectrosc\. 77, 213 \(1979\)/);
+    expect(ch!.citation).toMatch(/^E Hirota "Anharmonic Potential Function and Equilibrium Structure of Methane" J\. Mol\. Spect\. 77, 213-221 \(1979\)/);
     expect(ch!.via).toMatch(/^NIST CCCBDB/);
   });
 
   it("writes a paste-ready description naming each number, its time range and its source", () => {
     const { description } = sourcesSidecar(flash, "9:16", citedFor(model, flash.manifest.data));
     expect(description).toContain("0:02–0:04  C–H 1.09 Å");
-    expect(description).toContain("Hirota, J. Mol. Spectrosc. 77, 213 (1979)");
+    expect(description).toContain("E Hirota \"Anharmonic Potential Function and Equilibrium Structure of Methane\" J. Mol. Spect. 77, 213-221 (1979)");
     // The site's Source note text, word for word, follows the timed list.
-    expect(description).toContain("Geometry: experimental (gas phase). C–H 1.087 Å from Hirota");
+    expect(description).toContain("Geometry: experimental (gas phase). C–H 1.087 Å from E Hirota");
   });
 
   it("counts a cited colour the Scene draws with as on screen for the whole video", () => {
