@@ -34,7 +34,7 @@ jobs:
         run: pnpm test
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
-      - name: Browser smoke test
+      - name: Browser tests (smoke, design system, axe on every page in both themes)
         run: pnpm test:e2e
       - name: The site ships no Remotion code (checks the site/dist the smoke test built)
         run: pnpm video check-site
