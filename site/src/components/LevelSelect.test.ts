@@ -33,7 +33,7 @@ describe("Level select", () => {
       "Final round",
     ]);
     const row = shown.slice(shown.indexOf("Atoms & bonds"), shown.indexOf("Second Lesson") + 1);
-    expect(row).toEqual(["Atoms & bonds", "Lesson 1", "First Lesson", "Do the first thing.", "Multiple choice", "10 Steps", "Lesson 2", "Second Lesson"]);
+    expect(row).toEqual(["Atoms & bonds", "Lesson 1", "Not started", "First Lesson", "Do the first thing.", "Multiple choice", "10 Steps", "Lesson 2", "Not started", "Second Lesson"]);
   });
 
   it("shows each Lesson's Hook/Build/Check/Wrap bar", () => {
@@ -42,7 +42,7 @@ describe("Level select", () => {
 
   it("marks the On-ramp optional with a link that skips it to Lesson 1", () => {
     const html = unitPage();
-    expect(texts(html).slice(1, 4)).toEqual(["On-ramp · optional", "Why Carbon?", "Do the first thing."]);
+    expect(texts(html).slice(2, 6)).toEqual(["On-ramp · optional", "Not started", "Why Carbon?", "Do the first thing."]);
     expect(html).toMatch(/<a [^>]*href="\/chem\/chem-1\/unit-one\/first-lesson"[^>]*>Skip the on-ramp<\/a>/);
   });
 
@@ -51,6 +51,7 @@ describe("Level select", () => {
     expect(shown.slice(shown.indexOf("Capstone"))).toEqual([
       "Capstone",
       "Lesson 3 · boss level",
+      "Not started",
       "Orbitals",
       "Do the first thing.",
       "Multiple choice",
@@ -63,6 +64,10 @@ describe("Level select", () => {
       "10 Problems",
       "Opens soon",
     ]);
+  });
+
+  it("shows n of N Lessons, not counting the On-ramp, before the browser fills in progress", () => {
+    expect(texts(unitPage())[0]).toBe("0 of 3 Lessons");
   });
 
   it("links each Lesson row to its Lesson page", () => {

@@ -14,3 +14,5 @@ export { frameSize, safeArea, type Box } from "./frame.ts";
 export { clamp, easeInOut, easeOut, lerp, progress, pulse, seededRandom } from "./motion.ts";
 export { stateAt } from "./timeline.ts";
 export { defaultState } from "./state.ts";
+
+export { BOND_PX, drawStructure, type Drawing, type Point, type Segment } from "./structure/render.ts";

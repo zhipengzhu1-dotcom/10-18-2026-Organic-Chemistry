@@ -17,7 +17,8 @@
     "lint:scenes": "pnpm --filter @astratron/scenes run lint:purity",
     "dev": "pnpm --filter @astratron/site run dev",
     "build": "pnpm --filter @astratron/site run build",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "structure": "pnpm --filter @astratron/content run structure"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",

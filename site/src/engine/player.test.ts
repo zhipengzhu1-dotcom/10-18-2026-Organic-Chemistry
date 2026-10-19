@@ -145,6 +145,62 @@ describe("Step links (ADR 0003)", () => {
   });
 });
 
+describe("Navigation and resume", () => {
+  const back: Action = { type: "back" };
+
+  it("back opens the previous Step, and an answered Step stays locked with its feedback", () => {
+    const screen = play(answer("c"), next, next, answer("b"), answer("a"), next, back);
+    expect(screen).toMatchObject({
+      step: { id: "s03" },
+      tries: 2,
+      feedback: { kind: "correct", text: "Right, because." },
+      canContinue: true,
+    });
+    expect(act(lesson, screen, answer("c"))).toEqual(screen);
+  });
+
+  it("back on the first Step does nothing", () => {
+    const first = start(lesson);
+    expect(act(lesson, first, back)).toEqual(first);
+  });
+
+  it("after going back, Continue walks forward again but never past an unanswered Step", () => {
+    const screen = play(answer("c"), next, next, back, back, next, next, next, next);
+    expect(screen).toMatchObject({ step: { id: "s03" }, canContinue: false, feedback: null });
+  });
+
+  it("the progress record keeps each answer under its Step id and where the Student is", () => {
+    expect(play(answer("c"), next, next, answer("b")).progress).toEqual({
+      step: "s03",
+      answers: { s01: [{ choice: ["c"] }], s03: [{ choice: ["b"] }] },
+      done: false,
+    });
+  });
+
+  it("resumes mid-Lesson at the same Step, in the same state", () => {
+    const left = play(answer("c"), next, next, answer("b"));
+    const resumed = start(lesson, undefined, left.progress);
+    expect(resumed).toEqual(left);
+  });
+
+  it("a resumed Lesson keeps earlier answers locked", () => {
+    const left = play(answer("c"), next, next, answer("a"), next);
+    const resumed = act(lesson, start(lesson, undefined, left.progress), back);
+    expect(resumed).toMatchObject({ step: { id: "s03" }, canContinue: true, feedback: { kind: "correct" } });
+  });
+
+  it("a saved Step id that was deleted resumes at the Step its old links point at", () => {
+    const resumed = start(lesson, undefined, { step: "s06", answers: {}, done: false });
+    expect(resumed.step.id).toBe("s03");
+  });
+
+  it("a Lesson is done on reaching Wrap, whatever was answered, and stays done after going back", () => {
+    const wrap = play(answer("c"), next, next, answer("c"), answer("c"), next, answer("b"), answer("b"), next);
+    expect(wrap).toMatchObject({ done: true, progress: { done: true } });
+    expect(act(lesson, wrap, back)).toMatchObject({ done: false, progress: { step: "s04", done: true } });
+  });
+});
+
 const wrapStep = { id: "s09", phase: "wrap", type: "explain", text: "Wrap." } as const;
 
 describe("Numeric input Steps", () => {

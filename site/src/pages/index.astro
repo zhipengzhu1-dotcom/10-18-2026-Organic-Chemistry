@@ -1,17 +1,89 @@
 ---
-// Placeholder home page: the Course map of every Subject. The Push hero (#73)
-// goes above it.
+// Home page. First-time visitors get the welcome (the Push hero, #73, goes there);
+// returning visitors get the Hub instead: a Continue card and the Streak. Both
+// see the Course map and can export or import their progress.
 import Base from "../layouts/Base.astro";
 import CourseMap from "../components/CourseMap.astro";
+import TopBar from "../components/TopBar.astro";
 import { courseModel } from "../lib/content.ts";
+import type { CatalogLesson } from "../progress/hub.ts";
 
 const { subjects } = courseModel();
+/** Every playable Lesson in Course order, for the Continue card. */
+const catalog: CatalogLesson[] = subjects.flatMap((s) =>
+  s.courses.flatMap((c) =>
+    c.units
+      .filter((u) => u.status === "available")
+      .flatMap((u) =>
+        u.lessons.map((l) => ({
+          id: l.id,
+          title: l.title,
+          url: l.url,
+          unit: `Unit ${u.number} · ${u.title}`,
+          steps: l.steps.map((step) => step.id),
+          onRamp: l.onRamp,
+        })),
+      ),
+  ),
+);
 ---
 
 <Base title="AstraTron">
+  <script is:inline>
+    // Decide first-time vs returning before the page paints, so neither view flashes.
+    try {
+      if (JSON.parse(localStorage.getItem("astratron.progress") ?? "{}").last) document.documentElement.classList.add("returning");
+    } catch {}
+  </script>
+  <TopBar />
   <main class="page">
-    <h1>AstraTron</h1>
-    <p>Move electrons. Move the world.</p>
+    <section class="hub" aria-labelledby="hub-title">
+      <h1 id="hub-title">Welcome back</h1>
+      <p data-streak-text>Streak: 0 days</p>
+      <section class="continue-card" aria-label="Continue">
+        <p class="continue-unit" data-continue="unit"></p>
+        <h2 data-continue="title"></h2>
+        <p data-continue="where"></p>
+        <a class="button" data-continue="link" href="/">Resume</a>
+      </section>
+    </section>
+
+    <div class="first-visit">
+      <h1>AstraTron</h1>
+      <p>Move electrons. Move the world.</p>
+    </div>
+
     {subjects.map((subject) => <CourseMap subject={subject} />)}
+
+    <section class="your-progress" aria-labelledby="your-progress">
+      <h2 id="your-progress">Your progress</h2>
+      <p>Your progress stays in this browser. Export it to a file to carry it to another browser.</p>
+      <button type="button" class="button" data-export>Export progress</button>
+      <label class="import">
+        Import progress
+        <input type="file" accept="application/json,.json" data-import />
+      </label>
+      <p role="alert" data-import-error></p>
+    </section>
   </main>
+  <script type="application/json" id="lesson-catalog" set:html={JSON.stringify(catalog)} />
 </Base>
+
+<script>
+  import { showHub, showStreak, wireExportImport } from "../progress/pages.ts";
+  showHub(JSON.parse(document.getElementById("lesson-catalog")!.textContent!));
+  showStreak();
+  wireExportImport();
+</script>
+
+<style is:global>
+  /* Placeholder styles; the design system (#59) replaces them. */
+  .hub { display: none; }
+  .returning .hub { display: block; }
+  .returning .first-visit { display: none; }
+  .continue-card { border: 2px solid #5ee7ff; box-shadow: 4px 4px 0 #8b7bff; padding: 1rem; margin: 1rem 0 1.5rem; }
+  .continue-card h2 { margin: 0.25rem 0; }
+  .continue-unit { margin: 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .your-progress { margin-top: 2rem; display: grid; gap: 0.5rem; }
+  .your-progress .import { display: grid; gap: 0.25rem; min-height: 48px; }
+</style>

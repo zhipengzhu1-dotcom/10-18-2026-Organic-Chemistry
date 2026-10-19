@@ -9,3 +9,7 @@ dist/
 .astro/
 test-results/
 playwright-report/
+
+# Cloudflare local emulator state (local D1) and local secrets
+.wrangler/
+.dev.vars

@@ -1,3 +1,4 @@
 # Frozen Step ids per Lesson (ADR 0003). Written by `pnpm content:freeze`; don't edit by hand.
 u1-sample: [ s01, s02, s03, s04, s05, s06, s07, s08, s09, s10 ]
 u1-sample-step-types: [ s01, s02, s03, s04, s05, s06, s07, s08, s09, s10 ]
+u1-sample-structures: [ s01, s02, s03, s04, s05, s06, s07, s08, s09, s10 ]

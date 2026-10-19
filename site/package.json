@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "db:migrate": "wrangler d1 migrations apply astratron-submissions --local",
+    "pages:dev": "wrangler pages dev ./dist"
   },
   "dependencies": {
     "@astratron/content": "workspace:*",
@@ -19,6 +21,7 @@
   },
   "devDependencies": {
     "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0"
+    "@types/react-dom": "^19.3.0",
+    "wrangler": "4.147.0"
   }
 }

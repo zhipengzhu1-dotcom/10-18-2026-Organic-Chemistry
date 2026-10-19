@@ -13,5 +13,5 @@
     "jsx": "react-jsx",
     "types": ["node"]
   },
-  "include": ["content/src", "content/test", "site/src/engine", "site/src/components", "site/src/lib", "site/e2e", "playwright.config.ts", "scenes/src", "scenes/test", "video/src"]
+  "include": ["content/src", "content/test", "site/src/engine", "site/src/components", "site/src/lib", "site/src/submissions", "site/functions", "site/e2e", "playwright.config.ts", "scenes/src", "scenes/test", "video/src"]
 }
