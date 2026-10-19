@@ -16,6 +16,7 @@ import GoalScene from "./GoalScene.tsx";
 import { watchScene } from "@astratron/scenes/watch";
 import SceneControl from "./SceneControl.tsx";
 import StructureTap from "./StructureTap.tsx";
+import MoleculeCard from "../molecule/MoleculeCard.tsx";
 import { AsideButton, Figures } from "./StepVisuals.tsx";
 import ExploreIn3D from "../explore/ExploreIn3D.tsx";
 import DrawArrows from "./DrawArrows.tsx";
@@ -70,7 +71,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   const [introPlaying, setIntroPlaying] = useState<string | null>(null);
   const { step, feedback } = screen;
   const pageStep = page.steps[screen.index];
-  const single = pageStep.type === "multiple-choice" && pageStep.select === "one";
+  const single = (pageStep.type === "multiple-choice" || pageStep.type === "rotate-and-identify") && pageStep.select === "one";
 
   useEffect(() => {
     let live = true;
@@ -156,7 +157,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     step.type === "manipulate" && setting !== undefined ? { ...step.scene.state, [step.control]: setting } : step.scene?.state;
 
   const answer: Answer | null =
-    step.type === "multiple-choice" || step.type === "tap-to-identify"
+    step.type === "multiple-choice" || step.type === "rotate-and-identify" || step.type === "tap-to-identify"
       ? chosen.length > 0 ? { choice: chosen } : null
       : step.type === "numeric"
         ? Number.isFinite(parseNumber(draft)) ? { value: parseNumber(draft) } : null
@@ -231,7 +232,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         {step.figures && !revealScene && <Figures figures={step.figures} />}
 
         {step.type === "tap-to-identify" && step.alt && <p className="sr">{step.alt}</p>}
-        {step.type === "tap-to-identify" && (
+        {step.type === "tap-to-identify" && !revealScene && (
           <StructureTap
             step={step}
             picked={chosen}
@@ -321,8 +322,30 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </ScenePlayer>
         )}
 
-        {step.type === "multiple-choice" && !revealScene && (
+        {"molecule" in step && step.molecule?.card && (
+          // The 3D Step card (#68), keyed per Step so each Step opens in its own start view.
+          <MoleculeCard key={`molecule-${step.id}`} molecule={step.molecule} />
+        )}
+
+        {step.type === "rotate-and-identify" && (
           <div className="opts" role="group" aria-label="Choices">
+            {step.options.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                className="opt"
+                aria-pressed={chosen.includes(o.id)}
+                disabled={screen.canContinue}
+                onClick={() => pick(o.id)}
+                {...html(o.text)}
+              />
+            ))}
+          </div>
+        )}
+
+        {step.type === "multiple-choice" && !revealScene && (
+          // Short text choices sit as chips: many to a row for one-word choices, two to a row under a figure.
+          <div className={["opts", chips(step)].filter(Boolean).join(" ")} role="group" aria-label="Choices">
             {step.options.map((o) =>
               o.structure ? (
                 // A structure card: the drawing is pre-rendered SVG; its text is the screen-reader label.
@@ -378,7 +401,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </div>
         )}
 
-        {step.explore && <ExploreIn3D key={`explore-${step.id}`} molecule={step.explore} />}
+        {"molecule" in step && step.molecule && <ExploreIn3D key={`explore-${step.id}`} molecule={step.molecule} />}
 
         {/* The aside, Source note and report link share rows at the bottom, so a Step fits a phone. */}
         <div className="step-meta">
@@ -449,6 +472,22 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
       </div>
     </div>
   );
+}
+
+/** Short text for a chip, and a single word or two: under this many characters (HTML tags aside). */
+const CHIP_TEXT = 42;
+const WORD_TEXT = 12;
+
+/**
+ * How text choices are laid out: as word chips, as many to a row as fit (six or more one-word choices,
+ * e.g. group names), or two to a row (short choices under a figure); else one to a row.
+ */
+function chips(step: { options: { text: string; structure?: unknown }[]; figures?: unknown[] }): string | undefined {
+  if (step.options.some((o) => o.structure)) return undefined;
+  const longest = Math.max(...step.options.map((o) => o.text.replace(/<[^>]*>/g, "").length));
+  if (step.options.length >= 6 && longest < WORD_TEXT) return "opts-words";
+  if (step.options.length >= 6 || (step.figures && longest < CHIP_TEXT)) return "opts-chips";
+  return undefined;
 }
 
 /** Reads what the Student typed: accepts a comma decimal and a typographic minus; NaN when it isn't a number. */

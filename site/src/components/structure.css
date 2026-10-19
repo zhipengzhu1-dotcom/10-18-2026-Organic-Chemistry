@@ -6,6 +6,17 @@
 .opts:has(.structure-card) { grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); }
 .opts .structure-card { display: grid; place-items: center; padding: 8px; }
 .structure-card .structure { max-height: 7rem; }
+/* Short text choices two to a row (under a figure); one-word choices as many to a row as fit
+   (Lesson 5's capsaicin: eight group names). */
+.opts.opts-chips { grid-template-columns: 1fr 1fr; }
+.opts.opts-words { grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr)); }
+@media (max-width: 480px) {
+  /* A Scene without controls (a reveal, a card deal) shares the phone screen with long text or feedback. */
+  .scene-bare .scene-frame { max-height: min(45dvh, 10.5rem); }
+  /* On a phone the Lesson-end screen keeps the Wrap text and the Key idea card on one screen; the
+     Wrap's recap Scene (Lesson 5's group cards) shows from tablet width up. */
+  .player:has(.player-end) .player-body .scene { display: none; }
+}
 .tap-only-cue { margin: 0; padding: 8px 12px; color: var(--at-ink-muted); border: var(--at-border) dashed var(--at-line); }
 .tap-structure { position: relative; touch-action: manipulation; }
 .tap-structure .structure-svg .structure { width: 100%; }

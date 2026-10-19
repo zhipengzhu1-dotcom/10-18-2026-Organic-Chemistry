@@ -17,7 +17,7 @@ export type Feedback =
   | { kind: "reveal"; text: string; answer: GradedStep["answer"] };
 
 /**
- * What a Student submits: chosen option ids (Multiple choice) or picked atom/bond/region ids
+ * What a Student submits: chosen option ids (Multiple choice, Rotate-and-identify) or picked atom/bond/region ids
  * (Tap-to-identify), a number (Numeric), an order of item ids (Rank) or the control's
  * current value (Manipulate a Scene).
  */
@@ -231,6 +231,7 @@ function grade(step: GradedStep, answer: Answer, triesBefore: number): Partial<S
 function judge(step: GradedStep, answer: Answer): { right: boolean; hint?: { text: string } } | undefined {
   switch (step.type) {
     case "multiple-choice":
+    case "rotate-and-identify":
     case "tap-to-identify": {
       if (!("choice" in answer)) return undefined;
       const { choice } = answer;

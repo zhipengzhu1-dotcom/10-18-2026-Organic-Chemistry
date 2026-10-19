@@ -6,7 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./data": "./src/data.ts",
-    "./explore": "./src/explore.ts",
+    "./molecule": "./src/molecule.ts",
     "./arrows": "./src/arrows.ts"
   },
   "scripts": {

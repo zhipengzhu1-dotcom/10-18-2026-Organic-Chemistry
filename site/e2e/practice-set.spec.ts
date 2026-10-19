@@ -94,6 +94,23 @@ const solvers: Record<string, { outcome: Outcome; play: (page: Page) => Promise<
       await correct(page);
     },
   },
+  // Rotate-and-identify 3D (#68), graded like Multiple choice: formaldehyde is flat, ammonia a pyramid.
+  "u1-sample-p7": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, "Flat");
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-sample-p8": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, "A pyramid");
+      await check(page);
+      await correct(page);
+    },
+  },
   // Draw arrows, graded push by push. Ozone: one wrong push (its Hint), then both right.
   "u1-sample-arrows-p1": {
     outcome: "eventually",
@@ -136,6 +153,34 @@ const solvers: Record<string, { outcome: Outcome; play: (page: Page) => Promise<
     outcome: "first",
     play: async (page) => {
       await choose(page, "Nitrogen with three single bonds and one double bond.");
+      await check(page);
+      await correct(page);
+    },
+  },
+  // Lesson 5's Check Problems; capsaicin and amoxicillin show their reveal Scene with the answer.
+  "u1-fg-ketone": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, /^Acetone/);
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-fg-capsaicin": {
+    outcome: "first",
+    play: async (page) => {
+      for (const group of ["alkene", "phenol", "ether", "amide"]) await choose(page, group);
+      await check(page);
+      await correct(page);
+      await expect(page.getByRole("img", { name: /^Capsaicin\. Lit:/ })).toBeVisible();
+    },
+  },
+  "u1-fg-amoxicillin": {
+    outcome: "first",
+    play: async (page) => {
+      const taps = page.getByRole("group", { name: "Tappable atoms and bonds" });
+      for (const region of [/^Far left/, /^Top of the left half/, /^Between the two halves/, /^Inside the four-membered/, /^The S in/, /^Bottom right/])
+        await taps.getByRole("button", { name: region }).locator("circle.hit").first().click();
       await check(page);
       await correct(page);
     },

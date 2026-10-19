@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { GoalStep, ManipulateStep, MultipleChoiceStep, NumericStep, RankStep } from "@astratron/content";
+import type { GoalStep, ManipulateStep, MultipleChoiceStep, NumericStep, RankStep, RotateAndIdentifyStep } from "@astratron/content";
 import { act, start, type Action, type PlayableLesson, type Screen } from "./player.ts";
 
 const choice = (id: string, extra: Partial<MultipleChoiceStep> = {}): MultipleChoiceStep => ({
@@ -414,6 +414,48 @@ describe("Manipulate a Scene Steps", () => {
       feedback: { kind: "hint", text: "Look end-on." },
     });
     expect(act(choiceLesson, screen, { type: "answer", value: 90 })).toEqual(screen);
+  });
+});
+
+describe("Rotate-and-identify 3D Steps", () => {
+  // Graded exactly like Multiple choice: the exact set of option ids, Hints first to last, two tries.
+  const { prediction: _p, ...mc } = choice("s01");
+  const rotate: RotateAndIdentifyStep = {
+    ...mc,
+    type: "rotate-and-identify",
+    molecule: {
+      id: "water",
+      title: "Water",
+      tier: "experimental",
+      cited: [],
+      card: true,
+      atoms: [],
+      bonds: [],
+      orientation: [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+      ],
+      elements: {},
+    },
+  };
+  const rotLesson: PlayableLesson = { ...lesson, steps: [rotate, wrapStep] };
+  const run = (...choices: string[][]) =>
+    choices.reduce((s, choice) => act(rotLesson, s, { type: "answer", choice }), start(rotLesson));
+
+  it("the right choice shows the Correct line", () => {
+    expect(run(["a"])).toMatchObject({ tries: 1, feedback: { kind: "correct", text: "Right, because." }, canContinue: true });
+  });
+
+  it("a wrong choice gets its Hint, then the reveal", () => {
+    expect(run(["b"])).toMatchObject({ feedback: { kind: "hint", text: "Hint for b." }, canContinue: false });
+    expect(run(["c"])).toMatchObject({ feedback: { kind: "hint", text: "Generic hint." } });
+    expect(run(["b"], ["c"])).toMatchObject({ feedback: { kind: "reveal", text: "It is a, because.", answer: ["a"] } });
+  });
+
+  it("ignores answers of another shape", () => {
+    const screen = start(rotLesson);
+    expect(act(rotLesson, screen, { type: "answer", value: 1 })).toEqual(screen);
   });
 });
 

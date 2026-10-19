@@ -39,7 +39,7 @@ export function splitSteps(all: Step[]): { steps: PageStep[]; key: AnswerKey } {
       delete shown[field];
     }
     key[step.id] = secrets;
-    if (step.type === "multiple-choice") shown.select = step.answer.length === 1 ? "one" : "many";
+    if (step.type === "multiple-choice" || step.type === "rotate-and-identify") shown.select = step.answer.length === 1 ? "one" : "many";
     return shown as PageStep;
   });
   return { steps, key };

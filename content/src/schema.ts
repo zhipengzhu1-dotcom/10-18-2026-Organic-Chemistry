@@ -17,8 +17,17 @@ const hint = z.strictObject({
   text,
 });
 
-/** Explore in 3D (#71): the molecule data file whose 3D view the Step or Problem offers. */
-const molecule = id.optional();
+/**
+ * The molecule a Step or Problem names: `molecule: <data file id>`, or `{ id, card, view, describe }`.
+ * Every Step that names one offers Explore in 3D (#71). `card: true` also shows it inline in the
+ * 3D Step card (#68; Rotate-and-identify always does); `view` names a start view in the Subject's
+ * views.yaml (default: the file's own axes); `describe` opens what the Describe button reads.
+ */
+const moleculeUse = z.preprocess(
+  (v) => (typeof v === "string" ? { id: v } : v),
+  z.strictObject({ id, card: z.boolean().optional(), view: id.optional(), describe: text.optional() }),
+);
+const molecule = moleculeUse.optional();
 
 /** What a Step may hide in a drawing. */
 const hide = z.array(z.enum(["charges", "lone-pairs"])).optional();
@@ -29,6 +38,18 @@ const option = z.strictObject({ id, text, structure: id.optional(), hide });
 /** A text-only card (Rank items; structure Rank cards are not resolved yet). */
 const textOption = z.strictObject({ id, text });
 
+/** A named start view; see ViewSpec in molecule.ts. Atoms are 0-based indices in the data file's order. */
+const atomIndex = z.number().int().nonnegative();
+const viewSpec = z.strictObject({
+  look: z.tuple([atomIndex, atomIndex]).optional(),
+  plane: z.tuple([atomIndex, atomIndex, atomIndex]).optional(),
+  front: atomIndex.optional(),
+  up: atomIndex.optional(),
+  rotate: z.tuple([z.number(), z.number(), z.number()]).optional(),
+});
+
+/** `<subject>/views.yaml`: molecule id → view name → view. */
+export const viewsFile = z.record(id, z.record(id, viewSpec));
 /** A value a Scene's settable state takes: a number (range) or an option id (choice). */
 const sceneValue = z.union([z.number(), z.string()]);
 
@@ -177,6 +198,22 @@ const rank = {
   reveal: text,
 };
 
+/**
+ * Rotate-and-identify 3D: the Student turns the molecule in the 3D card and answers with ordinary
+ * choices, graded exactly like Multiple choice (the exact set of correct option ids).
+ */
+const rotateAndIdentify = {
+  type: z.literal("rotate-and-identify"),
+  prompt: text,
+  molecule: moleculeUse,
+  ...gradedVisuals,
+  options: z.array(textOption).min(2),
+  answer: z.array(id).min(1),
+  correct: text.optional(),
+  hints: z.array(hint).optional(),
+  reveal: text,
+};
+
 /** A Manipulate Hint: `match` lists the wrong control values it answers. */
 const manipulateHint = z.strictObject({ match: z.array(sceneValue).min(1).optional(), text });
 
@@ -268,6 +305,7 @@ const multipleChoiceStep = z.strictObject({
 const numericStep = z.strictObject({ id: stepId, phase, ...numeric, scene: sceneUse.optional() });
 const rankStep = z.strictObject({ id: stepId, phase, ...rank, scene: sceneUse.optional() });
 const manipulateStep = z.strictObject({ id: stepId, phase, ...manipulate });
+const rotateStep = z.strictObject({ id: stepId, phase, ...rotateAndIdentify, scene: sceneUse.optional() });
 const drawArrowsStep = z.strictObject({ id: stepId, phase, ...drawArrows, scene: sceneUse.optional() });
 
 /**
@@ -300,7 +338,7 @@ const tapStep = z.strictObject({ id: stepId, phase, ...tapToIdentify, scene: sce
 const step = z.preprocess(
   (v) => (v && typeof v === "object" && "problem" in v && !("type" in v) ? { ...v, type: "check" } : v),
   z.discriminatedUnion("type", [
-    checkStep, explainStep, multipleChoiceStep, numericStep, rankStep, tapStep, manipulateStep, drawArrowsStep, manipulateGoalStep,
+    checkStep, explainStep, multipleChoiceStep, numericStep, rankStep, tapStep, manipulateStep, rotateStep, drawArrowsStep, manipulateGoalStep,
   ]),
 );
 
@@ -344,6 +382,7 @@ export const problemFile = z.discriminatedUnion("type", [
   z.strictObject({ ...problemMeta, ...numeric }),
   z.strictObject({ ...problemMeta, ...rank }),
   z.strictObject({ ...problemMeta, ...tapToIdentify }),
+  z.strictObject({ ...problemMeta, ...rotateAndIdentify }),
   z.strictObject({ ...problemMeta, ...drawArrows }),
 ]);
 

@@ -13,6 +13,7 @@
   "scripts": {
     "check": "node src/check-cli.ts",
     "lint:purity": "node src/purity-lint-cli.ts",
+    "sync:structures": "node src/functional-groups/sync-cli.ts",
     "render": "node src/manim/render-cli.ts"
   },
   "dependencies": {
