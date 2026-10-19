@@ -66,10 +66,14 @@ test("no built Lesson page carries an answer, a Hint, a Correct line or a reveal
     expect(html, `${lesson.url} should be its Lesson page`).toContain(lesson.title);
     for (const step of lesson.steps) {
       if (step.type === "explain") continue;
-      const secrets = [step.correct, step.reveal, ...(step.hints ?? []).map((h) => h.text)].filter(Boolean) as string[];
+      const secrets = (
+        step.type === "manipulate-goal"
+          ? step.stages.flatMap((s) => [s.correct, s.blocked, s.idle])
+          : [step.correct, step.reveal, ...(step.hints ?? []).map((h) => h.text)]
+      ).filter(Boolean) as string[];
       for (const secret of secrets) if (html.includes(plain(secret))) leaks.push(`${lesson.url}#${step.id}: "${secret}"`);
     }
-    const keys = html.match(/"(answer|tolerance|hints|reveal|correct)"/g);
+    const keys = html.match(/"(answer|tolerance|hints|reveal|correct|stages|revealScene)"/g);
     if (keys) leaks.push(`${lesson.url}: answer-key fields ${[...new Set(keys)].join(", ")}`);
   }
   expect(leaks).toEqual([]);

@@ -12,6 +12,7 @@ import { readRecord, writeRecord } from "../progress/store.ts";
 import SourceNote from "./SourceNote.tsx";
 import ScenePlayer from "./ScenePlayer.tsx";
 import WatchScenePlayer from "./WatchScenePlayer.tsx";
+import GoalScene from "./GoalScene.tsx";
 import { watchScene } from "@astratron/scenes/watch";
 import SceneControl from "./SceneControl.tsx";
 import StructureTap from "./StructureTap.tsx";
@@ -66,6 +67,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   const [draft, setDraft] = useState("");
   const [ranked, setRanked] = useState<{ stepId: string; order: string[] } | null>(null);
   const [manipulated, setManipulated] = useState<{ stepId: string; value: SceneValue } | null>(null);
+  /** The graded Step whose watch-only video is playing now (its prompt waits until it stops). */
+  const [introPlaying, setIntroPlaying] = useState<string | null>(null);
   const { step, feedback } = screen;
   const pageStep = page.steps[screen.index];
   const single = (pageStep.type === "multiple-choice" || pageStep.type === "rotate-and-identify") && pageStep.select === "one";
@@ -128,6 +131,14 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     if (linked && moved && location.hash !== `#${step.id}`) history.replaceState(null, "", `#${step.id}`);
   }, [linked, step.id, screen.index, practice]);
 
+  // Goal-state Manipulate: after `idleSeconds` with no move, the stage's idle Hint (the second also nudges).
+  const goalIdle = step.type === "manipulate-goal" && screen.goal && !screen.canContinue && key ? step.idleSeconds : 0;
+  useEffect(() => {
+    if (!goalIdle) return;
+    const timer = setTimeout(() => dispatch({ type: "idle" }), goalIdle * 1000);
+    return () => clearTimeout(timer);
+  }, [goalIdle, step.id, screen.goal?.state, screen.goal?.idle, screen.goal?.stage]);
+
   const order =
     step.type !== "rank" ? [] : ranked?.stepId === step.id ? ranked.order : step.items.map((item) => item.id);
 
@@ -184,7 +195,10 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   // Single focus: no site chrome, only the ✕, story bars, Step count and one
   // fixed bottom button. The feedback panel sits above that button.
   return (
-    <div className={revealScene ? "player revealing" : "player"} id={step.id}>
+    <div
+      className={revealScene ? "player revealing" : feedback && step.type === "tap-to-identify" && step.figures ? "player answered" : "player"}
+      id={step.id}
+    >
       <div className="player-top">
         <a href={exitHref} aria-label={practice ? "Leave the Practice Set" : "Leave the Lesson"} className="player-exit">
           ✕
@@ -206,7 +220,12 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         {step.type === "explain" ? (
           <p {...html(step.text)} />
         ) : (
-          <p className="player-prompt" {...html(step.prompt)} />
+          // A goal-state Manipulate Step shows the prompt of the stage on screen. While a Hook's
+          // video plays, its question waits (still read to screen readers), as the spec has it.
+          <p
+            className={introPlaying === step.id ? "player-prompt sr" : "player-prompt"}
+            {...html(screen.goal?.prompt ?? step.prompt)}
+          />
         )}
 
         {/* Once a reveal Scene plays, it shows the answer in place of the question's widgets. */}
@@ -259,10 +278,29 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
 
         {!revealScene && step.scene && watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
           // A watch-only Scene (#66): the committed video, keyed per Step so it autoplays on entry.
-          <WatchScenePlayer key={`scene-${step.id}`} sceneId={step.scene.id} cited={step.scene.cited} />
+          <WatchScenePlayer
+            key={`scene-${step.id}`}
+            sceneId={step.scene.id}
+            cited={step.scene.cited}
+            shrinkWhenDone={step.type !== "explain"}
+            onPlaying={(playing) => setIntroPlaying(playing && step.type !== "explain" ? step.id : null)}
+          />
         )}
 
-        {!revealScene && step.scene && sceneState && !watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
+        {step.type === "manipulate-goal" && screen.goal && (
+          // Goal-state Manipulate: the Student works the Scene itself; keyed per Step.
+          <GoalScene
+            key={`goal-${step.id}`}
+            sceneId={step.scene.id}
+            state={screen.goal.state}
+            cited={step.scene.cited}
+            nudge={screen.goal.idle >= 2}
+            locked={screen.canContinue || !key}
+            onMove={(patch) => dispatch({ type: "answer", state: patch })}
+          />
+        )}
+
+        {!revealScene && step.type !== "manipulate-goal" && step.scene && sceneState && !watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
           // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
           <ScenePlayer
             key={`scene-${step.id}`}
@@ -411,6 +449,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </button>
         ) : screen.canContinue ? (
           <button type="button" className="btn btn-primary btn-block" onClick={next}>
+            Continue
+          </button>
+        ) : step.type === "manipulate-goal" ? (
+          // No Check: Continue opens when the last stage is done; tapped before then it gives the stage's Hint.
+          <button type="button" className="btn btn-primary btn-block" aria-disabled="true" onClick={() => dispatch({ type: "continue" })}>
             Continue
           </button>
         ) : step.type === "draw-arrows" ? (
