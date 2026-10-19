@@ -169,6 +169,12 @@ describe("fading parts (for Scenes)", () => {
     expect([...svg.matchAll(/class="bond-line"[^>]*opacity="0"/g)]).toHaveLength(1);
     expect(svg).toMatch(/<text class="atom"(?![^>]*opacity)[^>]*>C</);
   });
+
+  it("fades only an atom's lone pairs with `<atom id>.lp`", () => {
+    const { svg } = drawStructure(methoxide, [], { fade: { "a2.lp": 0.5 } });
+    expect([...svg.matchAll(/class="lone-pair-dot"[^>]*opacity="0.5"/g)]).toHaveLength(6);
+    expect(svg).toMatch(/<text class="atom"(?![^>]*opacity)[^>]*>O</);
+  });
 });
 
 describe("Lewis style", () => {
@@ -178,6 +184,8 @@ describe("Lewis style", () => {
     expect(count(svg, "bond-line")).toBe(0);
     // C::O is two pairs, each C:H one pair: 4 shared pairs, 8 dots.
     expect(count(svg, "bond-dot")).toBe(8);
+    // Every valence electron is a cyan dot, shared or not.
+    expect([...svg.matchAll(/class="bond-dot"[^>]*fill="var\(--lone-pair/g)]).toHaveLength(8);
     expect(count(svg, "lone-pair-dot")).toBe(4);
   });
 });

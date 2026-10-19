@@ -19,6 +19,7 @@
     "build": "pnpm --filter @astratron/site run build",
     "test:e2e": "playwright test",
     "structure": "pnpm --filter @astratron/content run structure",
+    "structures:json": "pnpm --filter @astratron/content run structures:json",
     "triage": "node site/src/submissions/triage-cli.ts",
     "video": "pnpm --filter @astratron/video run cli"
   },

@@ -1,0 +1,26 @@
+# Hand-placed coordinates; drawn by the site’s own renderer.
+
+id: ethanol-lewis
+style: lewis
+smiles: "CCO"
+source: PubChem CID 702
+label: "Ethanol as a Lewis structure: two carbons and an oxygen in a row, six hydrogens, every shared pair two dots, two more pairs of dots on oxygen."
+atoms:
+  - { id: a1, el: C, x: 0, y: 0 }
+  - { id: a2, el: C, x: 1.5, y: 0 }
+  - { id: a3, el: O, x: 3, y: 0, lp: 2 }
+  - { id: a4, el: H, x: -1.5, y: 0 }
+  - { id: a5, el: H, x: 0, y: -1.5 }
+  - { id: a6, el: H, x: 0, y: 1.5 }
+  - { id: a7, el: H, x: 1.5, y: -1.5 }
+  - { id: a8, el: H, x: 1.5, y: 1.5 }
+  - { id: a9, el: H, x: 4.5, y: 0 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a1, b: a4, order: 1 }
+  - { id: b4, a: a1, b: a5, order: 1 }
+  - { id: b5, a: a1, b: a6, order: 1 }
+  - { id: b6, a: a2, b: a7, order: 1 }
+  - { id: b7, a: a2, b: a8, order: 1 }
+  - { id: b8, a: a3, b: a9, order: 1 }

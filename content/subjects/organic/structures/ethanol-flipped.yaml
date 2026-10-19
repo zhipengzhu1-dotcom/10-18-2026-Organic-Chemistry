@@ -1,0 +1,13 @@
+# Hand-placed coordinates; drawn by the site’s own renderer.
+
+id: ethanol-flipped
+style: line-angle
+smiles: "OCC"
+source: PubChem CID 702
+atoms:
+  - { id: a1, el: O, x: 0, y: 0, h: 1, lp: 2 }
+  - { id: a2, el: C, x: 1.299, y: -0.75 }
+  - { id: a3, el: C, x: 2.598, y: 0 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 1 }

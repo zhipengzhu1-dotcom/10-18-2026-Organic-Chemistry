@@ -1,0 +1,16 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+
+id: acrylonitrile
+style: line-angle
+smiles: C=CC#N
+atoms:
+  - { id: a1, el: C, x: 0, y: 0 }
+  - { id: a2, el: C, x: 1.299, y: -0.75 }
+  - { id: a3, el: C, x: 2.598, y: 0 }
+  - { id: a4, el: N, x: 3.897, y: 0.75, lp: 1 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 2 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a3, b: a4, order: 3 }
+source: PubChem CID 7855
+label: "Acrylonitrile, line-angle drawing: a double line up to a corner, then one line into a straight triple line ending in N with one lone pair."

@@ -53,7 +53,10 @@ const sub = (n: number) => (n > 1 ? [...String(n)].map((d) => SUB[+d]).join("") 
 const r1 = (n: number) => Math.round(n * 10) / 10;
 
 export interface DrawOptions {
-  /** Atom or bond id → opacity (0–1) for everything drawn for it; Scenes fade parts in and out with it. */
+  /**
+   * Atom or bond id → opacity (0–1) for everything drawn for it; `<atom id>.lp` fades only that atom's
+   * lone pairs. Scenes fade parts in and out with it.
+   */
   fade?: Record<string, number>;
 }
 
@@ -132,7 +135,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = [], options
         const along = (k - (b.order - 1) / 2) * PAIR_GAP;
         for (const sgn of [1, -1]) {
           parts.push(
-            `<circle class="bond-dot"${fadeOf(b.id)} cx="${r1(mx + ux * along + nx * LP_SPREAD * sgn)}" cy="${r1(my + uy * along + ny * LP_SPREAD * sgn)}" r="${DOT_R}" fill="currentColor"/>`,
+            `<circle class="bond-dot"${fadeOf(b.id)} cx="${r1(mx + ux * along + nx * LP_SPREAD * sgn)}" cy="${r1(my + uy * along + ny * LP_SPREAD * sgn)}" r="${DOT_R}" fill="var(--lone-pair, #0e9fbf)"/>`,
           );
         }
       }
@@ -215,7 +218,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = [], options
       const py = Math.cos(dir) * LP_SPREAD;
       for (const sgn of [1, -1]) {
         parts.push(
-          `<circle class="lone-pair-dot"${fadeOf(a.id)} cx="${r1(cx + px * sgn)}" cy="${r1(cy + py * sgn)}" r="${DOT_R}" fill="var(--lone-pair, #0e9fbf)"/>`,
+          `<circle class="lone-pair-dot"${fadeOf(options.fade?.[`${a.id}.lp`] === undefined ? a.id : `${a.id}.lp`)} cx="${r1(cx + px * sgn)}" cy="${r1(cy + py * sgn)}" r="${DOT_R}" fill="var(--lone-pair, #0e9fbf)"/>`,
         );
       }
     }
