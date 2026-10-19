@@ -23,7 +23,7 @@ async function move(page: Page, handle: string, target: string) {
   await page.keyboard.press("Enter");
 }
 
-async function playLesson0(page: Page) {
+async function playLesson0(page: Page, phone = false) {
   await page.goto(LESSON);
   await expect(page.getByText("Step 1 of 9")).toBeVisible();
 
@@ -105,7 +105,8 @@ async function playLesson0(page: Page) {
 
   // s09: the Wrap, then Lesson 1.
   await expect(page.getByText("Step 9 of 9")).toBeVisible();
-  await expect(page.getByRole("img", { name: "Ethane, two carbons sharing a pair, each with three hydrogens." })).toBeVisible();
+  // (On a phone the Lesson-end screen leaves the Wrap's picture out, for the Key idea.)
+  if (!phone) await expect(page.getByRole("img", { name: "Ethane, two carbons sharing a pair, each with three hydrogens." })).toBeVisible();
   await expect(page.getByRole("link", { name: "Next Lesson" })).toHaveAttribute("href", /bonds-polarity-formal-charge$/);
 }
 
@@ -119,7 +120,7 @@ test.describe("on a phone", () => {
 
   test("Lesson 0 plays start to Wrap by keyboard on a phone", async ({ page }) => {
     test.setTimeout(90_000);
-    await playLesson0(page);
+    await playLesson0(page, true);
   });
 
   test("build-by-sharing works by drag: an H onto a single dot bonds; onto empty space it slides back", async ({ page }) => {

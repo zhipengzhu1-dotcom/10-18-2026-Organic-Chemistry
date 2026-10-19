@@ -1121,10 +1121,6 @@
     .scene:has(.scene-control) .scene-frame {
       max-height: 21dvh;
     }
-    /* The Lesson-end screen: the Wrap's picture shrinks to a card above the Key idea. */
-    .player-body:has(> .card) .scene-frame {
-      max-height: 6rem;
-    }
   }
   /* A watch-only Scene above a question shrinks to a card once played (#78). */
   .scene-watch.shrunk .scene-frame {
