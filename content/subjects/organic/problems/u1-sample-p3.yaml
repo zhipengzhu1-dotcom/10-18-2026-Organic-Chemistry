@@ -1,0 +1,18 @@
+# Sample Tap-to-identify Problem (#62).
+id: u1-sample-p3
+unit: u1
+lesson: u1-sample-structures
+difficulty: 1
+status: approved
+source: Original
+type: tap-to-identify
+prompt: The methyl anion, CH₃⁻. Tap the atom that holds the lone pair, then press Check.
+structure: methyl-anion
+tappable: { atoms: all }
+answer: [a1]
+correct: The lone pair sits on carbon, which makes it 4 − 2 − 3 = −1.
+hints:
+  - includes: [a2, a3, a4]
+    text: Each H has one bond and no room for a lone pair.
+  - text: Look for the pair of dots.
+reveal: The carbon holds the lone pair.

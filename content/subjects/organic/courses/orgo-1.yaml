@@ -8,3 +8,4 @@ units:
     status: available
     lessons:
       - u1-sample
+      - u1-sample-structures
