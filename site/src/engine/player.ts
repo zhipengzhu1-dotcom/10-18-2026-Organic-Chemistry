@@ -5,11 +5,14 @@
 // Navigation: back is allowed, answered Steps stay locked, Continue never passes
 // an unanswered Step, and the Lesson is done on reaching Wrap. Every Screen
 // carries the Lesson's progress (answers by Step id), from which it resumes.
-import type { GradedStep, HintRule, Lesson, RankHint, Step } from "@astratron/content";
+import type { DrawArrowsStep, GradedStep, HintRule, Lesson, Push, RankHint, Step, Structure } from "@astratron/content";
+import { arrowsAct, arrowsStart, arrowsView, type ArrowsState, type Flag } from "@astratron/content/arrows";
 
 export type Feedback =
   | { kind: "correct"; text: string }
   | { kind: "hint"; text: string }
+  /** Draw arrows, second wrong try on a push: that push is placed for the Student ("Here is that push: …"). */
+  | { kind: "shown"; text: string }
   /** `answer` is the Step's answer: option ids, a number, or an order of item ids. */
   | { kind: "reveal"; text: string; answer: GradedStep["answer"] };
 
@@ -18,7 +21,14 @@ export type Feedback =
  * (Tap-to-identify), a number (Numeric), an order of item ids (Rank) or the control's
  * current value (Manipulate a Scene).
  */
-export type Answer = { choice: string[] } | { value: number } | { order: string[] } | { setting: number | string };
+export type Answer =
+  | { choice: string[] }
+  | { value: number }
+  | { order: string[] }
+  | { setting: number | string }
+  /** Draw arrows: one curved arrow, graded the moment it is drawn, or undoing the last one. */
+  | { push: Push }
+  | { undo: true };
 
 export type Action = ({ type: "answer" } & Answer) | { type: "continue" } | { type: "back" };
 
@@ -46,6 +56,15 @@ export interface Screen {
   done: boolean;
   /** The Lesson's progress, updated by every action; save it to resume later. */
   progress: LessonProgress;
+  /** Draw-arrows Steps: the pushes so far, the drawing they give and its in-between flags. */
+  arrows?: ArrowsScreen;
+}
+
+export interface ArrowsScreen extends ArrowsState {
+  /** The start with every placed push applied: bonds, lone pairs and charges as they are now. */
+  structure: Structure;
+  /** Atoms over their octet or newly short of it (none once done). */
+  flags: Flag[];
 }
 
 /** What the engine needs from a resolved Lesson. */
@@ -81,6 +100,7 @@ export function act(lesson: PlayableLesson, screen: Screen, action: Action): Scr
 function answerStep(screen: Screen, answer: Answer): Screen {
   const { step } = screen;
   if (step.type === "explain" || screen.canContinue) return screen;
+  if (step.type === "draw-arrows") return pushArrow(screen, step, answer);
   const result = grade(step, answer, screen.tries);
   return result ? { ...screen, ...result } : screen;
 }
@@ -98,8 +118,40 @@ function open(lesson: PlayableLesson, index: number, saved: LessonProgress): Scr
     canContinue: step.type === "explain",
     done,
     progress: { ...saved, step: step.id, done: saved.done || done },
+    ...(step.type === "draw-arrows" && { arrows: arrowsScreen(step, arrowsStart()) }),
   };
   return (saved.answers[step.id] ?? []).reduce(answerStep, fresh);
+}
+
+/**
+ * Draw arrows: each push is graded the moment it is made, by the structure it gives. Two tries
+ * per push (its Hint, then the push is shown). `tries` counts wrong pushes, plus one when done,
+ * so 1 means no push was wrong (first try). Done with every push the Student's own → the Correct
+ * line; a push had to be shown → the reveal.
+ */
+function pushArrow(screen: Screen, step: DrawArrowsStep, answer: Answer): Screen {
+  if (!("push" in answer) && !("undo" in answer)) return screen;
+  const before = screen.arrows ?? arrowsScreen(step, arrowsStart());
+  const state = arrowsAct(taskOf(step), before, answer);
+  if (state === before) return screen;
+  const tries = state.wrong + (state.done ? 1 : 0);
+  const last = state.last!;
+  let feedback: Feedback | null = null;
+  if (state.done)
+    feedback = state.pushes.some((p) => p.shown)
+      ? { kind: "reveal", text: step.reveal, answer: step.answer }
+      : { kind: "correct", text: step.correct ?? "" };
+  else if (last.kind === "wrong") feedback = { kind: "hint", text: last.hint };
+  else if (last.kind === "shown") feedback = { kind: "shown", text: `Here is that push: ${last.label}.` };
+  return { ...screen, arrows: arrowsScreen(step, state), tries, feedback, canContinue: state.done };
+}
+
+// Before the answer key arrives a Draw-arrows Step has no results yet: it draws, but grades nothing.
+const taskOf = (step: DrawArrowsStep) => ({ ...step, start: step.start.structure, results: step.results ?? [] });
+
+function arrowsScreen(step: DrawArrowsStep, state: ArrowsState): ArrowsScreen {
+  const { structure, flags } = arrowsView(taskOf(step), state);
+  return { ...state, structure, flags };
 }
 
 /** Returns the Screen changes for an answer, or undefined when the answer doesn't fit the Step type. */

@@ -1,13 +1,14 @@
 // The Practice Set at the end of Unit 1: drawn from the Bank, played with the
 // Lessons' two-try feedback, then the summary, Retry missed and Next Unit.
-// The Bank has 9 approved Problems, so the draw is all nine, easy to hard, in Lesson
-// order: u1-bond-polarity-rank (Lesson 1, difficulty 1), p1, p2 (u1-sample), p3, p4
-// (step types), p5, p6 (structures), then Lesson 1's u1-fc-oxygen-three-bonds and
-// u1-fc-unreasonable (difficulty 2).
+// The Bank holds more Problems than a Set (10), and the draw is random, so the
+// walk-through reads which Problem is on screen (its Report a mistake link names
+// it) and answers it with that Problem's solver; the expected summary follows
+// from what was drawn.
 import { expect, test, type Page } from "@playwright/test";
 
 const UNIT = "/organic/orgo-1/structure-bonding";
 const PRACTICE = `${UNIT}/practice`;
+const SET = 10;
 
 const choose = (page: Page, name: string | RegExp) =>
   page.getByRole("group", { name: "Choices" }).getByRole("button", { name, exact: typeof name === "string" }).click();
@@ -15,6 +16,131 @@ const check = (page: Page) => page.getByRole("button", { name: "Check" }).click(
 const next = (page: Page) => page.getByRole("button", { name: "Continue" }).click();
 const at = (page: Page, n: number, of: number) => expect(page.getByText(`Problem ${n} of ${of}`)).toBeVisible();
 const status = (page: Page) => page.getByRole("status");
+const correct = (page: Page) => expect(status(page)).toContainText("✓ Correct.");
+
+/** The Problem on screen, from its Report a mistake link. */
+async function problemOnScreen(page: Page): Promise<string> {
+  const href = await page.getByRole("link", { name: "Report a mistake" }).getAttribute("href");
+  return new URL(href!, "http://site").searchParams.get("target")!;
+}
+
+/** Draw-arrows: push from a source to a drop spot, by keyboard. */
+async function push(page: Page, from: string, to: string) {
+  await page.getByRole("button", { name: from, exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: `Push to ${to}`, exact: true }).focus();
+  await page.keyboard.press("Enter");
+}
+
+/** Moves a Rank card by keyboard. */
+async function move(page: Page, card: string, key: "ArrowUp" | "ArrowDown", times: number) {
+  await page.getByRole("list", { name: "Order" }).getByRole("button", { name: card, exact: true }).focus();
+  for (let i = 0; i < times; i++) await page.keyboard.press(key);
+}
+
+type Outcome = "first" | "eventually" | "missed";
+/** How the walk-through answers each Bank Problem, and how that Problem ends. */
+const solvers: Record<string, { outcome: Outcome; play: (page: Page) => Promise<void> }> = {
+  "u1-sample-p1": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, "2");
+      await check(page);
+      await correct(page);
+    },
+  },
+  // Wrong twice: the Hint, then the reveal.
+  "u1-sample-p2": {
+    outcome: "missed",
+    play: async (page) => {
+      await choose(page, "CH₄");
+      await check(page);
+      await expect(status(page)).toContainText("Methane has four C–H bonds");
+      await choose(page, "CH₂O");
+      await check(page);
+      await expect(status(page)).toContainText("→ Answer:");
+    },
+  },
+  "u1-sample-p3": {
+    outcome: "first",
+    play: async (page) => {
+      await page.getByRole("textbox", { name: "Answer" }).fill("6");
+      await check(page);
+      await correct(page);
+    },
+  },
+  // Rank: the start order, twice, is wrong.
+  "u1-sample-p4": {
+    outcome: "missed",
+    play: async (page) => {
+      await check(page);
+      await check(page);
+      await expect(status(page)).toContainText("→ Answer:");
+    },
+  },
+  "u1-sample-p5": {
+    outcome: "first",
+    play: async (page) => {
+      await page.getByRole("group", { name: "Tappable atoms and bonds" }).getByRole("button", { name: /^Carbon/ }).click();
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-sample-p6": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, /^CH₃⁺/);
+      await check(page);
+      await correct(page);
+    },
+  },
+  // Draw arrows, graded push by push. Ozone: one wrong push (its Hint), then both right.
+  "u1-sample-arrows-p1": {
+    outcome: "eventually",
+    play: async (page) => {
+      await push(page, "π bond O1=O2", "O2");
+      await expect(status(page)).toContainText("That leaves the end oxygen with only 6 electrons.");
+      await push(page, "lone pair on O3", "O2–O3 bond");
+      await push(page, "π bond O1=O2", "O1");
+      await correct(page);
+    },
+  },
+  // Acetylacetonate (open): right first try.
+  "u1-sample-arrows-p2": {
+    outcome: "first",
+    play: async (page) => {
+      await push(page, "lone pair on C4", "C4–C5 bond");
+      await push(page, "π bond C5=O6", "O6");
+      await correct(page);
+    },
+  },
+  // Lesson 1's Check Problems.
+  "u1-bond-polarity-rank": {
+    outcome: "first",
+    play: async (page) => {
+      await move(page, "C–H", "ArrowUp", 1);
+      await move(page, "C–Cl", "ArrowUp", 2);
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-fc-oxygen-three-bonds": {
+    outcome: "first",
+    play: async (page) => {
+      await page.getByRole("textbox", { name: "Answer" }).fill("+1");
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-fc-unreasonable": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, "Nitrogen with three single bonds and one double bond.");
+      await check(page);
+      await correct(page);
+    },
+  },
+};
 
 test("the Unit page's Practice Set row opens the Practice Set", async ({ page }) => {
   await page.goto(UNIT);
@@ -22,7 +148,7 @@ test("the Unit page's Practice Set row opens the Practice Set", async ({ page })
   await expect(row).toContainText("Not started");
   await row.getByRole("link", { name: "Practice Set" }).click();
   await expect(page).toHaveURL(PRACTICE);
-  await at(page, 1, 9);
+  await at(page, 1, SET);
 });
 
 test("the Practice Set page's HTML carries no answers", async ({ request }) => {
@@ -34,103 +160,61 @@ test("the Practice Set page's HTML carries no answers", async ({ request }) => {
 });
 
 test("a Student plays the Set, sees the summary, retries exactly the missed Problems and earns the Streak", async ({ page }) => {
+  test.setTimeout(90_000);
   await page.goto(PRACTICE);
 
-  // Lesson 1's bond-polarity Rank, right first try (by keyboard).
-  await at(page, 1, 9);
-  const order = page.getByRole("list", { name: "Order" });
-  await order.getByRole("button", { name: "C–H", exact: true }).focus();
-  await page.keyboard.press("ArrowUp");
-  await order.getByRole("button", { name: "C–Cl", exact: true }).focus();
-  await page.keyboard.press("ArrowUp");
-  await page.keyboard.press("ArrowUp");
-  await check(page);
-  await expect(status(page)).toContainText("✓ Correct.");
-  await next(page);
-
-  // p1 right first try; each Problem has its own Report a mistake link.
-  await at(page, 2, 9);
-  await expect(page.getByRole("link", { name: "Report a mistake" })).toHaveAttribute(
-    "href",
-    "/submit?kind=mistake&unit=u1&target=u1-sample-p1",
-  );
-  await choose(page, "2");
-  await check(page);
-  await expect(status(page)).toContainText("✓ Correct.");
-  await next(page);
-
-  // p2 wrong twice: the Hint, then the reveal.
-  await at(page, 3, 9);
-  await choose(page, "CH₄");
-  await check(page);
-  await expect(status(page)).toContainText("Methane has four C–H bonds");
-  await choose(page, "CH₂O");
-  await check(page);
-  await expect(status(page)).toContainText("→ Answer:");
-  await next(page);
-
-  // p3 numeric, right first try.
-  await at(page, 4, 9);
-  await page.getByRole("textbox", { name: "Answer" }).fill("6");
-  await check(page);
-  await expect(status(page)).toContainText("✓ Correct.");
-  await next(page);
-
-  // p4 rank: the start order, twice, is wrong.
-  await at(page, 5, 9);
-  await check(page);
-  await check(page);
-  await expect(status(page)).toContainText("→ Answer:");
-  await next(page);
-
-  // p5 tap the carbon; p6 the CH₃⁺ card.
-  await at(page, 6, 9);
-  await page.getByRole("group", { name: "Tappable atoms and bonds" }).getByRole("button", { name: /^Carbon/ }).click();
-  await check(page);
-  await expect(status(page)).toContainText("✓ Correct.");
-  await next(page);
-  await at(page, 7, 9);
-  await choose(page, /^CH₃⁺/);
-  await check(page);
-  await expect(status(page)).toContainText("✓ Correct.");
-  await next(page);
-
-  // Lesson 1's formal-charge Problems, right first try.
-  await at(page, 8, 9);
-  await page.getByRole("textbox", { name: "Answer" }).fill("+1");
-  await check(page);
-  await expect(status(page)).toContainText("✓ Correct.");
-  await next(page);
-  await at(page, 9, 9);
-  await choose(page, "Nitrogen with three single bonds and one double bond.");
-  await check(page);
-  await expect(status(page)).toContainText("✓ Correct.");
+  const drawn: string[] = [];
+  for (let n = 1; n <= SET; n++) {
+    await at(page, n, SET);
+    const id = await problemOnScreen(page);
+    expect(solvers[id], `a solver for ${id}`).toBeDefined();
+    // Each Problem has its own Report a mistake link.
+    await expect(page.getByRole("link", { name: "Report a mistake" })).toHaveAttribute(
+      "href",
+      `/submit?kind=mistake&unit=u1&target=${id}`,
+    );
+    drawn.push(id);
+    await solvers[id].play(page);
+    if (n < SET) await next(page);
+  }
+  expect(new Set(drawn).size).toBe(SET);
   await page.getByRole("button", { name: "See results" }).click();
 
   // Summary: first-try %, eventually correct, n/N.
+  const count = (o: Outcome[]) => drawn.filter((id) => o.includes(solvers[id].outcome)).length;
+  const first = count(["first"]);
+  const eventually = count(["first", "eventually"]);
   const summary = page.getByRole("region", { name: "Practice Set results" });
-  await expect(summary).toContainText("First try: 7/9 (78%)");
-  await expect(summary).toContainText("Eventually correct: 7/9");
+  await expect(summary).toContainText(`First try: ${first}/${SET} (${Math.round((100 * first) / SET)}%)`);
+  await expect(summary).toContainText(`Eventually correct: ${eventually}/${SET}`);
   await expect(summary.getByRole("link", { name: "Suggest a Problem" })).toHaveAttribute("href", "/submit?kind=problem&unit=u1");
   // Unit 2 is coming soon, so Next Unit goes to the Course map.
   await expect(summary.getByRole("link", { name: "Next Unit" })).toHaveAttribute("href", "/organic");
 
-  // Retry missed: exactly p2 and p4.
-  await summary.getByRole("button", { name: "Retry missed (2)" }).click();
-  await at(page, 1, 2);
-  await choose(page, "CH₅");
-  await check(page);
-  await expect(status(page)).toContainText("✓ Correct.");
-  await next(page);
-  await at(page, 2, 2);
-  const methane = page.getByRole("list", { name: "Order" }).getByRole("button", { name: "methane, CH₄" });
-  await methane.focus();
-  await page.keyboard.press("ArrowDown");
-  await page.keyboard.press("ArrowDown");
-  await check(page);
-  await expect(status(page)).toContainText("✓ Correct.");
+  // Retry missed: exactly the missed ones, answered right this time.
+  const missed = drawn.filter((id) => solvers[id].outcome === "missed");
+  expect(missed.length).toBeGreaterThan(0);
+  await summary.getByRole("button", { name: `Retry missed (${missed.length})` }).click();
+  const retry: Record<string, (page: Page) => Promise<void>> = {
+    "u1-sample-p2": async (p) => {
+      await choose(p, "CH₅");
+      await check(p);
+    },
+    "u1-sample-p4": async (p) => {
+      await move(p, "methane, CH₄", "ArrowDown", 2);
+      await check(p);
+    },
+  };
+  for (let n = 1; n <= missed.length; n++) {
+    await at(page, n, missed.length);
+    const id = await problemOnScreen(page);
+    expect(missed).toContain(id);
+    await retry[id](page);
+    await correct(page);
+    if (n < missed.length) await next(page);
+  }
   await page.getByRole("button", { name: "See results" }).click();
-  await expect(summary).toContainText("First try: 2/2 (100%)");
+  await expect(summary).toContainText(`First try: ${missed.length}/${missed.length} (100%)`);
   await expect(summary.getByRole("button", { name: /Retry missed/ })).toHaveCount(0);
 
   // Back on the Unit page: the Practice Set counts, and 3+ Problems today earned the Streak.

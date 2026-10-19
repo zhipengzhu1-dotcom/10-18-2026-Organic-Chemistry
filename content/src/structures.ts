@@ -4,6 +4,18 @@
 import type { Figure, Hidden, Option, Structure, StructureAtom, StructureView, TapTarget } from "./model.ts";
 import type { ProblemFile, StructureFile } from "./schema.ts";
 import { hintIds } from "./shape.ts";
+import {
+  arrowsAct,
+  arrowsStart,
+  arrowsView,
+  atomName,
+  charges,
+  electrons,
+  moleculeOf,
+  pushLabel,
+  VALENCE,
+  type ArrowsTask,
+} from "./arrows.ts";
 
 type TapFile = Extract<ProblemFile, { type: "tap-to-identify" }>;
 type TapFields = Pick<TapFile, "structure" | "hide" | "outline" | "tappable" | "answer" | "hints">;
@@ -138,6 +150,96 @@ export function resolveTap(
     for (const id of hintIds(hint)) if (!tappable.has(id)) errors.push(`a Hint names "${id}", which can't be tapped`);
   return { structure: view(structure, item.hide, undefined, item.outline), targets };
 }
+
+type ArrowsFile = Extract<ProblemFile, { type: "draw-arrows" }>;
+type ArrowsFields = Pick<ArrowsFile, "start" | "results" | "hideTarget" | "answer" | "hints" | "inBetween">;
+
+/**
+ * Resolves a Draw-arrows item's start, target and results, and checks them: every structure's
+ * charges agree with its lone pairs and bonds; each result has the start's atoms (same elements
+ * and H's) and total charge, with no atom past its octet (H: 2; a carbocation's sextet is a real
+ * contributor, e.g. Lesson 6 s04's H₂C⁺–O⁻); the authored pushes are each
+ * a step toward a result and end on one; every Hint names atoms or bonds of the start.
+ */
+export function resolveArrows(
+  item: ArrowsFields,
+  structures: Map<string, Structure | undefined>,
+  errors: string[],
+): { start: StructureView; target?: StructureView; results: Structure[] } | undefined {
+  const named = [item.start, ...item.results].map((id) => {
+    const found = structures.get(id);
+    if (!found && !structures.has(id)) errors.push(`structure "${id}" not found`);
+    return found;
+  });
+  if (named.some((s) => !s)) return undefined;
+  const [start, ...results] = named as Structure[];
+  const before = errors.length;
+
+  for (const s of [start, ...results]) {
+    const m = moleculeOf(s);
+    const q = charges(m);
+    for (const a of s.atoms) {
+      if (VALENCE[a.el] === undefined) errors.push(`structure "${s.id}": no valence known for ${a.el}`);
+      else if ((q.get(a.id) ?? 0) !== (a.charge ?? 0))
+        errors.push(
+          `structure "${s.id}": ${atomName(m, a.id)} is drawn with charge ${signed(a.charge ?? 0)}, but its lone pairs and bonds give ${signed(q.get(a.id)!)}`,
+        );
+    }
+  }
+  const first = moleculeOf(start);
+  const total = (s: Structure) => s.atoms.reduce((t, a) => t + (a.charge ?? 0), 0);
+  for (const r of results) {
+    const m = moleculeOf(r);
+    const theirs = new Map(m.atoms.map((a) => [a.id, a]));
+    const mismatch: string[] = [];
+    for (const a of first.atoms) {
+      const b = theirs.get(a.id);
+      if (!b) mismatch.push(`${a.id} is missing`);
+      else if (b.el !== a.el) mismatch.push(`${a.id} is ${a.el} in the start, ${b.el} here`);
+      else if (b.h !== a.h) mismatch.push(`${a.id} has ${a.h} H in the start, ${b.h} here`);
+    }
+    for (const b of m.atoms) if (!first.atoms.some((a) => a.id === b.id)) mismatch.push(`${b.id} is extra`);
+    if (mismatch.length) errors.push(`result "${r.id}" must have the start's atoms: ${mismatch.join("; ")}`);
+    else if (total(r) !== total(start)) errors.push(`result "${r.id}" must have the start's total charge`);
+    const e = electrons(m);
+    for (const a of m.atoms) {
+      const full = a.el === "H" ? 2 : 8;
+      if (e.get(a.id)! > full) errors.push(`result "${r.id}": ${atomName(m, a.id)} has ${e.get(a.id)} e⁻, past its octet`);
+    }
+  }
+
+  const ids = new Set([...start.atoms.map((a) => a.id), ...start.bonds.map((b) => b.id)]);
+  for (const hint of item.hints ?? [])
+    for (const id of [...(hint.from ?? []), ...(hint.to ?? [])])
+      if (!ids.has(id) && id !== "sigma") errors.push(`a Hint names "${id}", which the start structure doesn't have`);
+
+  if (errors.length === before) {
+    const task: ArrowsTask = { start, results, answer: item.answer };
+    let state = arrowsStart();
+    for (const [i, push] of item.answer.entries()) {
+      const label = pushLabel(arrowsView(task, state).molecule, push);
+      const next = arrowsAct(task, state, { push });
+      if (next.last?.kind !== "accepted") {
+        errors.push(`push ${i + 1} (${label}) is not a step toward an accepted result`);
+        break;
+      }
+      state = next;
+      if (state.done && i < item.answer.length - 1) {
+        errors.push(`the pushes reach a result after push ${i + 1}; drop the rest`);
+        break;
+      }
+    }
+    if (errors.length === before && !state.done) errors.push("the pushes end before reaching an accepted result");
+  }
+
+  return {
+    start: view(start, []),
+    ...(!item.hideTarget && { target: view(results[0], []) }),
+    results,
+  };
+}
+
+const signed = (n: number) => (n > 0 ? `+${n}` : n < 0 ? `−${-n}` : "0");
 
 const ELEMENT: Record<string, string> = {
   H: "Hydrogen", B: "Boron", C: "Carbon", N: "Nitrogen", O: "Oxygen", F: "Fluorine", Si: "Silicon",

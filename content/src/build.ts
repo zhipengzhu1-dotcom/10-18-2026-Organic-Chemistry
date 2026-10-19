@@ -34,10 +34,19 @@ import { citeIn, type Cited, type CitedData } from "./data.ts";
 import { dataFile, resolveDataFile } from "./data-load.ts";
 import type { SceneCatalog, SceneUse } from "./model.ts";
 import { checkStepScene, resolveSceneUse, type SceneUseFile } from "./scenes.ts";
-import { checkStructure, resolveFigure, resolveOptions, resolveTap } from "./structures.ts";
+import { checkStructure, resolveArrows, resolveFigure, resolveOptions, resolveTap } from "./structures.ts";
 
-/** What a graded Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
-type StructureFields = { options?: Option[]; structure?: StructureView; targets?: TapTarget[]; figures?: Figure[]; aside?: Aside };
+/** What a Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
+type StructureFields = {
+  options?: Option[];
+  structure?: StructureView;
+  targets?: TapTarget[];
+  start?: StructureView;
+  target?: StructureView;
+  results?: Structure[];
+  figures?: Figure[];
+  aside?: Aside;
+};
 type Structured = Map<string, StructureFields | undefined>;
 
 export interface BuildOptions {
@@ -137,6 +146,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       const messages = [...checkInteraction(problem), ...(options.scenes ? checkStepScene(problem, options.scenes, data) : [])];
       for (const message of messages) errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
     }
+    for (const message of checkTapOnly(slug, lessons, problems)) errors.push(message);
     const problemCitations = citeNumbers(slug, data, lessons, problems, errors);
 
     // Structure cards and Tap targets, resolved once per Step and Problem so each error is reported once.
@@ -153,6 +163,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       const fields: StructureFields = {};
       if (item.type === "multiple-choice") fields.options = resolveOptions(item.options, structures, found);
       else if (item.type === "tap-to-identify") Object.assign(fields, resolveTap(item, structures, found));
+      else if (item.type === "draw-arrows") Object.assign(fields, resolveArrows(item, structures, found));
       if (item.figures) fields.figures = item.figures.flatMap((f) => resolveFigure(f, structures, found) ?? []);
       if (item.aside) {
         const { table, ...aside } = item.aside;
@@ -257,13 +268,38 @@ function resolveLesson(
 }
 
 /**
+ * Spec story 26: in a Lesson with Draw-arrows Steps (its own or Check Problems), every Tap Step
+ * and every Tap Problem tagged with that Lesson must carry the tap-only cue, since a Student who
+ * has just pushed electrons will try to drag.
+ */
+function checkTapOnly(
+  slug: string,
+  lessons: Map<string, LessonFile | undefined>,
+  problems: Map<string, ProblemFile | undefined>,
+): string[] {
+  const errors: string[] = [];
+  for (const lesson of lessons.values()) {
+    if (!lesson) continue;
+    const typeOf = (s: LessonFile["steps"][number]) => (s.type === "check" ? problems.get(s.problem)?.type : s.type);
+    if (!lesson.steps.some((s) => typeOf(s) === "draw-arrows")) continue;
+    for (const s of lesson.steps)
+      if (s.type === "tap-to-identify" && !s.tapOnly)
+        errors.push(`${slug}/lessons/${lesson.id}.yaml: step ${s.id}: a Tap Step in a Lesson with Draw-arrows Steps needs a tapOnly cue`);
+    for (const p of problems.values())
+      if (p?.lesson === lesson.id && p.type === "tap-to-identify" && !p.tapOnly)
+        errors.push(`${slug}/problems/${p.id}.yaml: a Tap Problem of a Lesson with Draw-arrows Steps needs a tapOnly cue`);
+  }
+  return errors;
+}
+
+/**
  * Swaps structure ids for the resolved structures (cards, Tap targets, figures, aside tables);
  * a Step whose structures failed is dropped (its errors are reported).
  */
 function withStructures(step: Record<string, unknown> & { type: string }, key: string, structured: Structured): Step[] {
   const fields = structured.get(key);
   if (!fields) return [];
-  const { tappable: _t, hide: _h, outline: _o, ...rest } = step;
+  const { tappable: _t, hide: _h, outline: _o, start: _s, results: _r, hideTarget: _ht, ...rest } = step;
   return [{ ...rest, ...fields } as unknown as Step];
 }
 
