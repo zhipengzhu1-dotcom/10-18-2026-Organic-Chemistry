@@ -36,7 +36,7 @@ const sceneValue = z.union([z.number(), z.string()]);
  */
 const sceneUse = z.preprocess(
   (v) => (typeof v === "string" ? { id: v } : v),
-  z.strictObject({ id, state: z.record(z.string(), sceneValue).optional() }),
+  z.strictObject({ id, state: z.record(z.string(), sceneValue).optional(), still: z.boolean().optional() }),
 );
 
 /**
@@ -64,6 +64,8 @@ const aside = z
     table: z
       .strictObject({
         columns: z.array(text).min(1),
+        /** Shown under the table (Markdown), e.g. where the table comes from. */
+        caption: text.optional(),
         rows: z.array(z.strictObject({ head: text, cells: z.array(figure.nullable()).min(1) })).min(1),
       })
       .optional(),

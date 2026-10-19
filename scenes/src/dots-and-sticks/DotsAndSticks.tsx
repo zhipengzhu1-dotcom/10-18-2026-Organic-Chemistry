@@ -75,7 +75,7 @@ function Panel({ example, box, u, glow }: { example: Example; box: Box; u: numbe
   const counting = (done: number, n: number, k: number) => k === done - 1 && done <= n && u < PHASE.total;
   const bondsCounted = sticks.slice(0, sticksDone).reduce((n, b) => n + b.order, 0);
 
-  const font = Math.min(textBox.h / 5, textBox.w / 13);
+  const font = Math.min(textBox.h / 5, textBox.w / 15);
   const lines: { text: string; colour: string }[] = [{ text: `valence ${count.valence}`, colour: INK }];
   if (u >= PHASE.pairs[0]) lines.push({ text: `− lone-pair electrons ${2 * pairsDone}`, colour: CYAN });
   if (u >= PHASE.sticks[0]) lines.push({ text: `− bonds ${bondsCounted}`, colour: INK });

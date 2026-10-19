@@ -15,7 +15,7 @@ steps:
     type: multiple-choice
     prediction: true
     prompt: "Rub a plastic rod so it picks up a static charge, then hold it next to two thin streams falling from a tap: one of water, one of hexane (a liquid in petrol). What happens?"
-    scene: { id: stream-bend, state: { rod: away } }
+    scene: { id: stream-bend, state: { rod: away }, still: true }
     options:
       - { id: a, text: both streams bend toward the rod }
       - { id: b, text: only the water bends }
@@ -51,7 +51,7 @@ steps:
       - misses: [a2, a3, a7, a12]
         text: Pick one atom in **each** of the four highlighted bonds.
       - text: "Open the values: the atom with the bigger number is δ−."
-    reveal: "δ− on F, O, Cl and O. H–F: H {{electronegativity-pauling/H}} δ+, F {{electronegativity-pauling/F}} δ−. O–H: O {{electronegativity-pauling/O}} δ−, H {{electronegativity-pauling/H}} δ+. C–Cl: C {{electronegativity-pauling/C}} δ+, Cl {{electronegativity-pauling/Cl}} δ−. C–O: C {{electronegativity-pauling/C}} δ+, O {{electronegativity-pauling/O}} δ−."
+    reveal: "δ− on F {{electronegativity-pauling/F}} (H {{electronegativity-pauling/H}}), O {{electronegativity-pauling/O}} (H {{electronegativity-pauling/H}}), Cl {{electronegativity-pauling/Cl}} (C {{electronegativity-pauling/C}}) and O {{electronegativity-pauling/O}} (C {{electronegativity-pauling/C}}); their partners are δ+."
     sourceNote: "Structures: PubChem CIDs 14917, 962, 6327, 887."
 
   - id: s04
@@ -82,10 +82,10 @@ steps:
     type: explain
     text: "Now count. Each atom fills its outer shell (8 electrons, 2 for H) with a mix of **bonds** and **lone pairs**, and in neutral molecules each element has its usual mix: **H** 1 bond · **C** 4 bonds · **N** 3 bonds + 1 lone pair · **O** 2 bonds + 2 lone pairs · **F, Cl, Br, I** 1 bond + 3 lone pairs. A double bond counts as 2 bonds, a triple as 3."
     figures:
-      - { structure: methane, caption: "CH₄: C 4 bonds, H 1", alt: "Methane: carbon with four bonds, each hydrogen with one." }
-      - { structure: ammonia, caption: "NH₃: N 3 + 1 pair", alt: "Ammonia: nitrogen with three bonds and one lone pair." }
-      - { structure: water, caption: "H₂O: O 2 + 2 pairs", alt: "Water: oxygen with two bonds and two lone pairs." }
-      - { structure: hydrogen-fluoride, caption: "HF: F 1 + 3 pairs", alt: "Hydrogen fluoride: fluorine with one bond and three lone pairs." }
+      - { structure: methane, caption: "CH₄", alt: "Methane: carbon with four bonds, each hydrogen with one." }
+      - { structure: ammonia, caption: "NH₃", alt: "Ammonia: nitrogen with three bonds and one lone pair." }
+      - { structure: water, caption: "H₂O", alt: "Water: oxygen with two bonds and two lone pairs." }
+      - { structure: hydrogen-fluoride, caption: "HF", alt: "Hydrogen fluoride: fluorine with one bond and three lone pairs." }
       - { structure: acetonitrile, caption: "CH₃–C≡N", alt: "Example: acetonitrile. The end carbon has four bonds, three of them in a triple bond to nitrogen. Nitrogen has three bonds and one lone pair." }
     sourceNote: "Lone pairs vs 1, 2 or 3 shared pairs, and acetonitrile, after MIT OCW 5.12, Lecture 1 p. 9 ('Bonding Possibilities of Main Organic Atoms'), Berkowski, Spring 2005, CC BY-NC-SA 4.0. Table layout ours."
 
@@ -226,4 +226,4 @@ steps:
               - { structure: frag-x-2-lp2, alt: "Halogen with two bonds and two lone pairs, charge +1." }
               - { structure: frag-x-1-lp3, alt: "Halogen with one bond and three lone pairs, charge 0." }
               - { structure: frag-x-0-lp4, alt: "Halide: halogen with four lone pairs and no bond, charge −1." }
-    sourceNote: "Bonding patterns card: our own table, built from the formal-charge rule taught in this Lesson."
+        caption: "Source: our own table, built from the formal-charge rule taught in this Lesson."

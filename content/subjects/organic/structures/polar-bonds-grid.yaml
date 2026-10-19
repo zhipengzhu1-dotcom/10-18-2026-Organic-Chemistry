@@ -16,18 +16,18 @@ atoms:
   - { id: a4, el: "H", x: 4.701, y: 0.75, label: "Water: the H of the outlined O–H bond." }
   - { id: a5, el: "H", x: 7.299, y: 0.75 }
   # Chloromethane, bottom left
-  - { id: a6, el: "C", x: 0, y: 4.5, label: "Chloromethane: the C of the outlined C–Cl bond." }
-  - { id: a7, el: "Cl", x: 1.5, y: 4.5, lp: 3, label: "Chloromethane: the Cl of the outlined C–Cl bond." }
-  - { id: a8, el: "H", x: 0, y: 3 }
-  - { id: a9, el: "H", x: 0, y: 6 }
-  - { id: a10, el: "H", x: -1.5, y: 4.5 }
+  - { id: a6, el: "C", x: 0, y: 3.5, label: "Chloromethane: the C of the outlined C–Cl bond." }
+  - { id: a7, el: "Cl", x: 1.5, y: 3.5, lp: 3, label: "Chloromethane: the Cl of the outlined C–Cl bond." }
+  - { id: a8, el: "H", x: 0, y: 2 }
+  - { id: a9, el: "H", x: 0, y: 5 }
+  - { id: a10, el: "H", x: -1.5, y: 3.5 }
   # Methanol, bottom right
-  - { id: a11, el: "C", x: 5.25, y: 4.5, label: "Methanol: the C of the outlined C–O bond." }
-  - { id: a12, el: "O", x: 6.75, y: 4.5, lp: 2, label: "Methanol: the O of the outlined C–O bond." }
-  - { id: a13, el: "H", x: 7.5, y: 5.799 }
-  - { id: a14, el: "H", x: 5.25, y: 3 }
-  - { id: a15, el: "H", x: 5.25, y: 6 }
-  - { id: a16, el: "H", x: 3.75, y: 4.5 }
+  - { id: a11, el: "C", x: 5.25, y: 3.5, label: "Methanol: the C of the outlined C–O bond." }
+  - { id: a12, el: "O", x: 6.75, y: 3.5, lp: 2, label: "Methanol: the O of the outlined C–O bond." }
+  - { id: a13, el: "H", x: 7.5, y: 4.799 }
+  - { id: a14, el: "H", x: 5.25, y: 2 }
+  - { id: a15, el: "H", x: 5.25, y: 5 }
+  - { id: a16, el: "H", x: 3.75, y: 3.5 }
 bonds:
   - { id: b1, a: a1, b: a2, order: 1 }
   - { id: b2, a: a3, b: a4, order: 1 }

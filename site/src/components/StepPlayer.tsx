@@ -162,7 +162,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   // Single focus: no site chrome, only the ✕, story bars, Step count and one
   // fixed bottom button. The feedback panel sits above that button.
   return (
-    <div className="player" id={step.id}>
+    <div className={revealScene ? "player revealing" : "player"} id={step.id}>
       <div className="player-top">
         <a href={exitHref} aria-label="Leave the Lesson" className="player-exit">
           ✕
@@ -187,7 +187,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <p className="player-prompt" {...html(step.prompt)} />
         )}
 
-        {step.figures && <Figures figures={step.figures} />}
+        {/* Once a reveal Scene plays, it shows the answer in place of the question's widgets. */}
+        {step.figures && !revealScene && <Figures figures={step.figures} />}
 
         {step.type === "tap-to-identify" && step.alt && <p className="sr">{step.alt}</p>}
         {step.type === "tap-to-identify" && (
@@ -216,6 +217,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
             state={sceneState}
             cited={step.scene.cited}
             loop={step.type === "manipulate"}
+            still={step.scene.still}
           >
             {step.type === "manipulate" && setting !== undefined && (
               <SceneControl
@@ -229,7 +231,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </ScenePlayer>
         )}
 
-        {step.type === "multiple-choice" && (
+        {step.type === "multiple-choice" && !revealScene && (
           <div className="opts" role="group" aria-label="Choices">
             {step.options.map((o) =>
               o.structure ? (
@@ -260,11 +262,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </div>
         )}
 
-        {step.type === "numeric" && (
+        {step.type === "numeric" && !revealScene && (
           <NumericBox step={step} value={draft} onChange={setDraft} onSubmit={check} locked={screen.canContinue} />
         )}
 
-        {step.type === "rank" && (
+        {step.type === "rank" && !revealScene && (
           <RankCards
             key={step.id}
             step={step}
@@ -286,14 +288,17 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </div>
         )}
 
-        {step.aside && <AsideButton key={`aside-${step.id}`} aside={step.aside} stepId={step.id} />}
+        {/* The aside, Source note and report link share rows at the bottom, so a Step fits a phone. */}
+        <div className="step-meta">
+          {step.aside && <AsideButton key={`aside-${step.id}`} aside={step.aside} stepId={step.id} />}
 
-        {/* Keyed per Step so a new Step opens its Source note collapsed. */}
-        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} note={step.sourceNote} />
+          {/* Keyed per Step so a new Step opens its Source note collapsed. */}
+          <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} note={step.sourceNote} />
 
-        <p className="report">
-          <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>
-        </p>
+          <p className="report">
+            <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>
+          </p>
+        </div>
       </main>
 
       <div className="player-foot">

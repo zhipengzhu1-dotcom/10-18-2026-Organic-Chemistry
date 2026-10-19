@@ -156,6 +156,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
         if (table)
           fields.aside.table = {
             columns: table.columns,
+            ...(table.caption ? { caption: table.caption } : {}),
             rows: table.rows.map((row) => ({
               head: row.head,
               cells: row.cells.map((cell) => (cell ? (resolveFigure(cell, structures, found) ?? null) : null)),

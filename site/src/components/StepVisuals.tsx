@@ -31,7 +31,7 @@ export function AsideButton({ aside, stepId }: { aside: Aside; stepId: string })
   const titleId = `aside-${stepId}`;
   return (
     <>
-      <button type="button" className="btn btn-secondary aside-open" onClick={() => dialog.current?.showModal()}>
+      <button type="button" className="aside-open" onClick={() => dialog.current?.showModal()}>
         {aside.label}
       </button>
       <dialog ref={dialog} className="aside" aria-labelledby={titleId}>
@@ -43,6 +43,7 @@ export function AsideButton({ aside, stepId }: { aside: Aside; stepId: string })
         )}
         {aside.table && (
           <table className="aside-table">
+            {aside.table.caption && <caption {...html(aside.table.caption)} />}
             <thead>
               <tr>
                 <td />

@@ -120,6 +120,7 @@ export function renderLesson(lesson: Lesson): Lesson {
         ...s.aside,
         table: {
           columns: s.aside.table.columns.map(md),
+          ...(s.aside.table.caption ? { caption: md(s.aside.table.caption) } : {}),
           rows: s.aside.table.rows.map((r) => ({ head: md(r.head), cells: r.cells.map((c) => c && figure(c)) })),
         },
       };

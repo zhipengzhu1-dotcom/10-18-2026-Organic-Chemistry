@@ -62,6 +62,6 @@ describe("Lesson 1 content", () => {
     // (Scene values join the Source note only in a build with the Scene catalog: see the scenes tests.)
     const s03 = lesson.steps.find((s) => s.id === "s03")!;
     expect(s03.citations?.map((c) => c.ref)).toContain("electronegativity-pauling/F");
-    expect(s03.type !== "explain" && s03.reveal).toContain("F 3.98 δ−");
+    expect(s03.type !== "explain" && s03.reveal).toContain("F 3.98 (H 2.20)");
   });
 });

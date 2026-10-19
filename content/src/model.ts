@@ -40,6 +40,8 @@ export interface SceneUse {
   state: Record<string, SceneValue>;
   /** The Scene's cited values by ref; the Scene reads its numbers from here (ADR 0002). */
   cited: Record<string, Cited>;
+  /** Shown on its poster frame only, with no playback controls (a still picture). */
+  still?: boolean;
 }
 
 /** A structure drawn with a Step, static. */
@@ -56,7 +58,7 @@ export interface Aside {
   /** Names the button that opens it. */
   label: string;
   scene?: SceneUse;
-  table?: { columns: string[]; rows: { head: string; cells: (Figure | null)[] }[] };
+  table?: { columns: string[]; rows: { head: string; cells: (Figure | null)[] }[]; caption?: string };
 }
 
 /** What any Step may show besides its interaction. */

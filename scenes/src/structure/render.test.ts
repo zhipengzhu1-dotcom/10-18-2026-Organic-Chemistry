@@ -107,6 +107,8 @@ describe("2D structure renderer", () => {
     expect(count(svg, "bond-line")).toBe(3);
     // The single bond runs all the way to its loose end.
     expect(svg).toContain(`x2="${atoms.a2.x}" y2="${atoms.a2.y}"`);
+    // Loose ends carry no letter, so the drawing keeps no letter margin past them: it stays legible when small.
+    expect(drawStructure(fragment).width).toBeLessThan(2 * 60 + 20);
   });
 
   it("rings an atom and outlines a bond a Step points at (shape, not colour alone)", () => {

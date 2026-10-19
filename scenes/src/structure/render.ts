@@ -54,6 +54,7 @@ export interface Highlight {
 /** A dangling bond's loose end (SMILES's dummy atom): drawn as nothing, its bond runs right to it. */
 const LOOSE_END = "*";
 const RING_R = 22;
+const LOOSE_PAD = 4;
 const OUTLINE_STROKE = 14;
 const OUTLINE_PER_LINE = 6;
 const OUTLINE_OPACITY = 0.35;
@@ -67,12 +68,13 @@ export function drawStructure(structure: Structure, hide: Hidden[] = [], highlig
   const showLonePairs = !hide.includes("lone-pairs");
   const scale = BOND_PX / typicalBondLength(structure);
 
-  const xs = structure.atoms.map((a) => a.x * scale);
-  const ys = structure.atoms.map((a) => a.y * scale);
-  const minX = Math.min(...xs) - PAD - CHAR_W * 2;
-  const minY = Math.min(...ys) - PAD;
-  const maxX = Math.max(...xs) + PAD + CHAR_W * 2;
-  const maxY = Math.max(...ys) + PAD;
+  // Each atom keeps room for its letter, H's, charge and lone pairs; a loose end only for the line's cap.
+  const marginX = (a: StructureAtom) => (a.el === LOOSE_END ? LOOSE_PAD : PAD + CHAR_W * 2);
+  const marginY = (a: StructureAtom) => (a.el === LOOSE_END ? LOOSE_PAD : PAD);
+  const minX = Math.min(...structure.atoms.map((a) => a.x * scale - marginX(a)));
+  const minY = Math.min(...structure.atoms.map((a) => a.y * scale - marginY(a)));
+  const maxX = Math.max(...structure.atoms.map((a) => a.x * scale + marginX(a)));
+  const maxY = Math.max(...structure.atoms.map((a) => a.y * scale + marginY(a)));
   const width = r1(maxX - minX);
   const height = r1(maxY - minY);
 

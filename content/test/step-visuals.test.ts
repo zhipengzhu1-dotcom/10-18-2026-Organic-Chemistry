@@ -158,6 +158,14 @@ describe("revealScene: a Scene shown once the Step is answered", () => {
   });
 });
 
+describe("a still Scene", () => {
+  it("is shown on its poster frame without playback (e.g. the Hook's setup before the reveal plays)", () => {
+    const result = build(numeric({ scene: { id: "strip", still: true } }));
+    expect(result.errors).toEqual([]);
+    expect(stepsOf(result)[2].scene).toMatchObject({ id: "strip", still: true });
+  });
+});
+
 describe("aside: something one tap away", () => {
   it("can hold a Scene", () => {
     const result = build(numeric({ aside: { label: "Show values", scene: { id: "strip" } } }));
@@ -168,12 +176,14 @@ describe("aside: something one tap away", () => {
   it("can hold a table of drawings, with empty cells", () => {
     const table = {
       columns: ["+1", "0"],
+      caption: "Our own table.",
       rows: [{ head: "N", cells: [{ structure: "ammonium", alt: "N with 4 bonds." }, null] }],
     };
     const result = build(numeric({ aside: { label: "Card", table } }));
     expect(result.errors).toEqual([]);
     const aside = stepsOf(result)[2].aside!;
     expect(aside.table!.columns).toEqual(["+1", "0"]);
+    expect(aside.table!.caption).toBe("Our own table.");
     expect(aside.table!.rows[0].cells[0]?.view.structure.id).toBe("ammonium");
     expect(aside.table!.rows[0].cells[1]).toBeNull();
   });

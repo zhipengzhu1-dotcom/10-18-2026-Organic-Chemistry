@@ -14,6 +14,8 @@ interface Props {
   /** True in Manipulate Steps only. */
   loop?: boolean;
   aspect?: Aspect;
+  /** A still picture: the poster frame, no playback controls. */
+  still?: boolean;
   /** Controls drawn under the Scene (a Manipulate Step's slider). */
   children?: ReactNode;
 }
@@ -33,7 +35,7 @@ export function useReducedMotion(): boolean | undefined {
 
 type Action = ClockAction | { type: "open"; reducedMotion: boolean };
 
-export default function ScenePlayer({ sceneId, state, cited, loop = false, aspect = "16:9", children }: Props) {
+export default function ScenePlayer({ sceneId, state, cited, loop = false, still = false, aspect = "16:9", children }: Props) {
   const { manifest, Component } = sceneRegistry[sceneId];
   const config: ClockConfig = { duration: manifest.duration, loop, posterT: manifest.poster.t };
   const reducedMotion = useReducedMotion();
@@ -44,8 +46,8 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, aspec
   );
 
   useEffect(() => {
-    if (reducedMotion !== undefined) dispatch({ type: "open", reducedMotion });
-  }, [reducedMotion]);
+    if (reducedMotion !== undefined) dispatch({ type: "open", reducedMotion: reducedMotion || still });
+  }, [reducedMotion, still]);
 
   // The site's own clock: animation-frame ticks while playing.
   useEffect(() => {
@@ -79,8 +81,9 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, aspec
         aria-label={description}
         style={{ aspectRatio: `${w} / ${h}` }}
       >
-        <Component t={clock.t} state={state} aspect={aspect} reducedMotion={reducedMotion ?? false} cited={cited} />
+        <Component t={clock.t} state={state} aspect={aspect} reducedMotion={still || (reducedMotion ?? false)} cited={cited} />
       </div>
+      {!still && (
       <div className="scene-controls">
         <button
           type="button"
@@ -105,6 +108,7 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, aspec
           onChange={(e) => dispatch({ type: "seek", t: Number(e.target.value) })}
         />
       </div>
+      )}
       {children}
       <p aria-live="polite" className="sr">
         {said}
