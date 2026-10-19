@@ -141,8 +141,8 @@ function resolveLesson(
       errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" is ${problem.status}, not approved`);
       return [];
     }
-    const { type, prompt, options, answer, correct, hints, reveal } = problem;
-    return [{ id: step.id, phase: "check", problemId: problem.id, type, prompt, options, answer, correct, hints, reveal }];
+    const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source: _src, credit: _c, ...interaction } = problem;
+    return [{ id: step.id, phase: "check", problemId, ...interaction }];
   });
   return { ...lesson, url, steps };
 }

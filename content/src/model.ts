@@ -35,7 +35,52 @@ export interface MultipleChoiceStep {
   citations?: Cited[];
 }
 
-export type Step = ExplainStep | MultipleChoiceStep;
+export interface NumericHint {
+  /** A common wrong value this Hint answers, matched within the Step's tolerance; absent on the generic fallback. */
+  match?: number;
+  text: string;
+}
+
+/** Numeric input: the Student types a number; the unit is fixed and shown beside the box, never typed. */
+export interface NumericStep {
+  id: string;
+  phase: Phase;
+  type: "numeric";
+  prompt: string;
+  /** The unit of measure shown beside the box, e.g. "°" or "Å". */
+  unitSymbol: string;
+  answer: number;
+  /** Absolute: a value within answer ± tolerance is right. */
+  tolerance: number;
+  correct?: string;
+  hints?: NumericHint[];
+  reveal: string;
+  problemId?: string;
+  citations?: Cited[];
+}
+
+/** Rank / order: the Student puts the items into one strict order (the prompt names which end is first). */
+export interface RankStep {
+  id: string;
+  phase: Phase;
+  type: "rank";
+  prompt: string;
+  /** In the order the cards start in. */
+  items: { id: string; text: string }[];
+  /** The one correct order of item ids, first to last. */
+  answer: string[];
+  correct?: string;
+  /** A Hint's `match` is one whole wrong order. */
+  hints?: Hint[];
+  reveal: string;
+  problemId?: string;
+  citations?: Cited[];
+}
+
+/** A Step the Student answers and the engine grades. */
+export type GradedStep = MultipleChoiceStep | NumericStep | RankStep;
+
+export type Step = ExplainStep | GradedStep;
 
 export interface Lesson {
   id: string;

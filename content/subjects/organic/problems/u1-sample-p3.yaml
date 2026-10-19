@@ -1,0 +1,18 @@
+# Walking-skeleton sample Problem for the Numeric input Step type (#63).
+id: u1-sample-p3
+unit: u1
+lesson: u1-sample-step-types
+difficulty: 1
+status: approved
+source: Original
+type: numeric
+prompt: How many electrons are shared in a C≡C triple bond?
+unitSymbol: electrons
+answer: 6
+tolerance: 0
+correct: Three shared pairs make six electrons.
+hints:
+  - match: 3
+    text: Three is the number of bonds. Each bond is a pair of electrons.
+  - text: Count the pairs in a triple bond, then two electrons per pair.
+reveal: "6: a triple bond is three shared pairs."
