@@ -13,7 +13,8 @@ test("a cited number shows 2 decimals, with its Source note one tap away", async
   await expect(page.getByText("1.09 Å long")).toBeVisible();
 
   const note = page.getByText("ⓘ Where these numbers come from");
-  const full = page.getByText(/C–H 1\.087 Å from Hirota, J\. Mol\. Spectrosc\. 77, 213 \(1979\)/);
+  // The citation as CCCBDB lists it (methane.json is written by the geometry pipeline, #67).
+  const full = page.getByText(/C–H 1\.087 Å from E Hirota "Anharmonic Potential Function and Equilibrium Structure of Methane" J\. Mol\. Spect\. 77, 213-221 \(1979\)/);
   await expect(note).toBeVisible();
   await expect(full).toBeHidden();
   await note.click();

@@ -1,6 +1,6 @@
 // The resolved course model: what the content build hands to the site and the
 // video renderer. Check Steps arrive with their Problem inlined.
-import type { Cited, CitedData } from "./data.ts";
+import type { Atom, Bond, Cited, CitedData, Tier } from "./data.ts";
 
 export type Phase = "hook" | "build" | "check" | "wrap";
 
@@ -42,6 +42,28 @@ export interface SceneUse {
   cited: Record<string, Cited>;
 }
 
+/**
+ * A molecule as the Explore in 3D view draws it (#71): its coordinates and bonds, and the
+ * cited colour and van der Waals radius of each element in it. Viewers use these, never
+ * their library's defaults (ADR 0002).
+ */
+export interface ExploreMolecule {
+  /** The data file id, e.g. "methane". */
+  id: string;
+  title: string;
+  /** Geometry tier of the coordinates. */
+  tier: Tier;
+  /** Cartesian coordinates in Å. */
+  atoms: Atom[];
+  bonds: Bond[];
+  /** Per element symbol in the molecule. */
+  elements: Record<string, { colour: Cited; vdwRadius: Cited }>;
+  /** Everything the view's Source note names: the molecule's geometry values, then each element's colour and radius. */
+  cited: Cited[];
+  /** Licence notice for third-party data (the NIST acknowledgement on CCCBDB-derived geometry). */
+  notice?: string;
+}
+
 export interface ExplainStep {
   id: string;
   phase: Phase;
@@ -51,6 +73,8 @@ export interface ExplainStep {
   citations?: Cited[];
   /** The written Source note (credits for the idea, wording and structures), Markdown. */
   sourceNote?: string;
+  /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
+  explore?: ExploreMolecule;
 }
 
 export interface MultipleChoiceStep {
@@ -76,6 +100,8 @@ export interface MultipleChoiceStep {
   sourceNote?: string;
   /** The Scene shown with the answer (right, or revealed). */
   revealScene?: SceneUse;
+  /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
+  explore?: ExploreMolecule;
 }
 
 export interface NumericHint {
@@ -103,6 +129,8 @@ export interface NumericStep {
   citations?: Cited[];
   /** The written Source note (credits for the idea, wording and structures), Markdown. */
   sourceNote?: string;
+  /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
+  explore?: ExploreMolecule;
 }
 
 /** Rank / order: the Student puts the items into one strict order (the prompt names which end is first). */
@@ -124,6 +152,8 @@ export interface RankStep {
   citations?: Cited[];
   /** The written Source note (credits for the idea, wording and structures), Markdown. */
   sourceNote?: string;
+  /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
+  explore?: ExploreMolecule;
 }
 
 export interface ManipulateHint {
@@ -149,10 +179,65 @@ export interface ManipulateStep {
   citations?: Cited[];
   /** The written Source note (credits for the idea, wording and structures), Markdown. */
   sourceNote?: string;
+  /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
+  explore?: ExploreMolecule;
+}
+
+/**
+ * One curved arrow, as the Student draws it. `from` is an atom id (a lone pair on that atom) or a
+ * bond id (that bond's electrons); `to` is an atom id or a bond id (where the arrowhead lands).
+ */
+export interface Push {
+  from: string;
+  to: string;
+}
+
+/**
+ * A Draw-arrows Hint, matched on the wrong push. Every condition given must hold: `from` = the push
+ * starts at one of these (atom ids = their lone pair, bond ids, or `sigma` = any single bond);
+ * `to` = it lands on one of these (an atom drop and the bond it makes count as the same).
+ * The generic fallback has neither and comes last.
+ */
+export interface PushHint {
+  from?: string[];
+  to?: string[];
+  text: string;
+}
+
+/**
+ * Draw arrows: the Student pushes electrons on the atom-mapped start, one arrow at a time. Each push
+ * is applied to our own molecule graph and accepted when it moves toward an accepted result
+ * (`@astratron/content/arrows`). Two tries per push; the Step is done when the drawing is a result.
+ */
+export interface DrawArrowsStep {
+  id: string;
+  phase: Phase;
+  type: "draw-arrows";
+  prompt: string;
+  /** The atom-mapped start the Student pushes on (atom ids are the map). */
+  start: StructureView;
+  /** The target drawn dimmed beside (or above) the start; absent when the Step hides it (open or "no target"). */
+  target?: StructureView;
+  /** Every accepted result (same atom ids as the start). */
+  results: Structure[];
+  /** The correct pushes, in an order that works: shown on a second wrong try and in the reveal. */
+  answer: Push[];
+  /** Copy for in-between states; `{atom}` and `{electrons}` are filled in. Defaults apply when absent. */
+  inBetween?: { over?: string; short?: string };
+  correct?: string;
+  hints?: PushHint[];
+  reveal: string;
+  problemId?: string;
+  scene?: SceneUse;
+  citations?: Cited[];
+  /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
+  explore?: ExploreMolecule;
+  /** The written Source note (credits for the idea, wording and structures), Markdown. */
+  sourceNote?: string;
 }
 
 /** A Step the Student answers and the engine grades. */
-export type GradedStep = MultipleChoiceStep | NumericStep | RankStep | TapStep | ManipulateStep;
+export type GradedStep = MultipleChoiceStep | NumericStep | RankStep | TapStep | ManipulateStep | DrawArrowsStep;
 
 export type Step = ExplainStep | GradedStep;
 
@@ -284,6 +369,8 @@ export interface TapStep {
   sourceNote?: string;
   /** The Scene shown with the answer (right, or revealed). */
   revealScene?: SceneUse;
+  /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
+  explore?: ExploreMolecule;
 }
 
 export interface Lesson {

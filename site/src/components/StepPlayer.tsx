@@ -11,8 +11,13 @@ import { recordProblem, saveLesson, streakOn } from "../progress/record.ts";
 import { readRecord, writeRecord } from "../progress/store.ts";
 import SourceNote from "./SourceNote.tsx";
 import ScenePlayer from "./ScenePlayer.tsx";
+import WatchScenePlayer from "./WatchScenePlayer.tsx";
+import { watchScene } from "@astratron/scenes/watch";
 import SceneControl from "./SceneControl.tsx";
 import StructureTap from "./StructureTap.tsx";
+import ExploreIn3D from "../explore/ExploreIn3D.tsx";
+import DrawArrows from "./DrawArrows.tsx";
+import { PushReplayPlayer } from "./PushReplayPlayer.tsx";
 import "./structure.css";
 
 interface Props {
@@ -144,7 +149,9 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         ? Number.isFinite(parseNumber(draft)) ? { value: parseNumber(draft) } : null
         : step.type === "rank"
           ? { order }
-          : setting !== undefined
+          : step.type === "draw-arrows"
+            ? null // pushes are dispatched one by one by the Draw-arrows view
+            : setting !== undefined
             ? { setting }
             : null;
 
@@ -175,8 +182,9 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     <ScenePlayer key={`reveal-scene-${step.id}`} sceneId={revealUse.id} state={revealUse.state} cited={revealUse.cited} bare />
   );
 
-  const icon = feedback && { correct: "✓", hint: "✗", reveal: "→" }[feedback.kind];
-  const words = feedback && { correct: "Correct.", hint: "Not quite.", reveal: "Answer:" }[feedback.kind];
+  const icon = feedback && { correct: "✓", hint: "✗", reveal: "→", shown: "→" }[feedback.kind];
+  // Draw arrows' shown push already reads "Here is that push: …".
+  const words = feedback && { correct: "Correct.", hint: "Not quite.", reveal: "Answer:", shown: "" }[feedback.kind];
 
   // Single focus: no site chrome, only the ✕, story bars, Step count and one
   // fixed bottom button. The feedback panel sits above that button.
@@ -212,13 +220,39 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <StructureTap
             step={step}
             picked={chosen}
-            answer={feedback?.kind === "reveal" && Array.isArray(feedback.answer) ? feedback.answer : []}
+            answer={feedback?.kind === "reveal" && Array.isArray(feedback.answer) ? (feedback.answer as string[]) : []}
             locked={screen.canContinue}
             onToggle={pick}
           />
         )}
 
-        {step.scene && sceneState && (
+        {step.type === "draw-arrows" && screen.arrows && !screen.canContinue && (
+          <DrawArrows
+            key={`arrows-${step.id}`}
+            start={step.start.structure}
+            hide={step.start.hide}
+            pushes={screen.arrows.pushes}
+            structure={screen.arrows.structure}
+            flags={screen.arrows.flags}
+            last={screen.arrows.last}
+            target={step.target}
+            locked={screen.canContinue || !key}
+            onPush={(push) => dispatch({ type: "answer", push })}
+            onUndo={() => dispatch({ type: "answer", undo: true })}
+          />
+        )}
+
+        {/* Draw arrows: on success (or the reveal) the Step's Scene plays in place of the card, else push-replay of the arrows. */}
+        {step.type === "draw-arrows" && screen.canContinue && !step.scene && screen.arrows && (
+          <PushReplayPlayer key={`replay-${step.id}`} start={step.start.structure} hide={step.start.hide} pushes={screen.arrows.pushes.map((p) => p.push)} />
+        )}
+
+        {step.scene && watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
+          // A watch-only Scene (#66): the committed video, keyed per Step so it autoplays on entry.
+          <WatchScenePlayer key={`scene-${step.id}`} sceneId={step.scene.id} cited={step.scene.cited} />
+        )}
+
+        {step.scene && sceneState && !watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
           // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
           // On the Lesson-end screen (the Wrap) it sits beside the Key idea card; see structure.css.
           <div className={screen.done ? "scene-at-end" : "scene-in-step"} key={`scene-${step.id}`}>
@@ -316,6 +350,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </div>
         )}
 
+        {step.explore && <ExploreIn3D key={`explore-${step.id}`} molecule={step.explore} />}
+
         {/* Keyed per Step so a new Step opens its Source note collapsed. */}
         <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} note={step.sourceNote} />
 
@@ -327,7 +363,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
       <div className="player-foot">
         <div role="status">
           {feedback && (
-            <div className={`fb fb-${feedback.kind}`}>
+            <div className={`fb fb-${feedback.kind === "shown" ? "reveal fb-shown" : feedback.kind}`}>
               <span className="ic" aria-hidden="true">
                 {icon}
               </span>{" "}
@@ -356,6 +392,16 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         ) : screen.canContinue ? (
           <button type="button" className="btn btn-primary btn-block" onClick={next}>
             Continue
+          </button>
+        ) : step.type === "draw-arrows" ? (
+          // No Check button: each push is graded the moment it lands. The one bottom button undoes.
+          <button
+            type="button"
+            className="btn btn-secondary btn-block"
+            onClick={() => dispatch({ type: "answer", undo: true })}
+            disabled={!key || !screen.arrows?.pushes.length}
+          >
+            Undo arrow
           </button>
         ) : (
           <button type="button" className="btn btn-primary btn-block" onClick={check} disabled={!key || !answer}>

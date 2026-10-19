@@ -2,6 +2,7 @@
 // with Play/Pause, Replay and a scrubber. Autoplays once on entry (loops in
 // Manipulate Steps); under reduced motion it opens paused on the poster frame.
 // The clock rules live in engine/scene-clock.ts; Scenes only see (t, state).
+// ClockedFrame is the same frame for any pure function of t (push-replay).
 import { useEffect, useReducer, useState, type ReactNode } from "react";
 import { sceneRegistry, type Aspect, type SceneState } from "@astratron/scenes";
 import type { Cited } from "@astratron/content/data";
@@ -19,6 +20,7 @@ interface Props {
   /**
    * No Play/Replay/Scrub row: for a short reveal Scene (5 s or less, so WCAG 2.2.2 needs no pause)
    * that must fit a phone screen beside its feedback. It still plays once, or rests on its poster frame.
+   * A Scene whose manifest says `controls: false` is always bare.
    */
   bare?: boolean;
 }
@@ -38,15 +40,52 @@ export function useReducedMotion(): boolean | undefined {
 
 type Action = ClockAction | { type: "open"; reducedMotion: boolean };
 
-export default function ScenePlayer({ sceneId, state, cited, loop = false, aspect = "16:9", children, bare: asked = false }: Props) {
+export default function ScenePlayer({ sceneId, state, cited, loop = false, aspect = "16:9", children, bare = false }: Props) {
   const { manifest, Component } = sceneRegistry[sceneId];
-  const bare = asked || manifest.controls === false;
-  const config: ClockConfig = { duration: manifest.duration, loop, posterT: manifest.poster.t };
+  const stateKey = JSON.stringify(state);
+  return (
+    <ClockedFrame
+      duration={manifest.duration}
+      posterT={manifest.poster.t}
+      loop={loop}
+      aspect={aspect}
+      describe={(t) => manifest.describe(state, t)}
+      announceKey={stateKey}
+      bare={bare || manifest.controls === false}
+      render={(t, reducedMotion) => (
+        <Component t={t} state={state} aspect={aspect} reducedMotion={reducedMotion} cited={cited} />
+      )}
+    >
+      {children}
+    </ClockedFrame>
+  );
+}
+
+interface FrameProps {
+  /** Seconds in one run. */
+  duration: number;
+  /** The reduced-motion still. */
+  posterT: number;
+  loop?: boolean;
+  aspect?: Aspect;
+  /** Screen-reader text at t; the frame's accessible name. */
+  describe: (t: number) => string;
+  /** When this changes after entry, the description is read aloud (a Student changed the state). */
+  announceKey?: string;
+  render: (t: number, reducedMotion: boolean) => ReactNode;
+  children?: ReactNode;
+  /** No Play/Replay/Scrub row (see ScenePlayer's `bare`). */
+  bare?: boolean;
+}
+
+/** A frame driven by the site clock: autoplays once on entry, or rests on its poster under reduced motion (Play starts it). */
+export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9", describe, announceKey = "", render, children, bare = false }: FrameProps) {
+  const config: ClockConfig = { duration, loop, posterT };
   const reducedMotion = useReducedMotion();
-  // Until the island knows the motion setting (and on the server) the Scene rests on its poster frame.
+  // Until the island knows the motion setting (and on the server) the frame rests on its poster.
   const [clock, dispatch] = useReducer(
     (c: Clock, a: Action) => (a.type === "open" ? openClock(config, a.reducedMotion) : clockStep(c, a, config)),
-    { t: manifest.poster.t, playing: false },
+    { t: posterT, playing: false },
   );
 
   useEffect(() => {
@@ -65,17 +104,16 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, aspec
     return () => cancelAnimationFrame(frame);
   }, [clock.playing]);
 
-  const description = manifest.describe(state, clock.t);
+  const description = describe(clock.t);
   const [said, setSaid] = useState("");
-  const stateKey = JSON.stringify(state);
-  const [firstKey] = useState(stateKey);
-  // Announce what the Scene shows when the Student changes its state (not on entry, not every frame).
+  const [firstKey] = useState(announceKey);
+  // Announce what the frame shows when the Student changes its state (not on entry, not every frame).
   useEffect(() => {
-    if (stateKey !== firstKey) setSaid(manifest.describe(state, clock.t));
-  }, [stateKey]);
+    if (announceKey !== firstKey) setSaid(describe(clock.t));
+  }, [announceKey]);
 
   const [w, h] = aspect === "16:9" ? [16, 9] : [9, 16];
-  const seconds = (t: number) => `${t.toFixed(1)} of ${manifest.duration} seconds`;
+  const seconds = (t: number) => `${t.toFixed(1)} of ${duration} seconds`;
 
   return (
     <figure className={bare ? "scene scene-bare" : "scene"}>
@@ -85,7 +123,7 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, aspec
         aria-label={description}
         style={{ aspectRatio: `${w} / ${h}` }}
       >
-        <Component t={clock.t} state={state} aspect={aspect} reducedMotion={reducedMotion ?? false} cited={cited} />
+        {render(clock.t, reducedMotion ?? false)}
       </div>
       {!bare && (
         <div className="scene-controls">
@@ -104,7 +142,7 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, aspec
             type="range"
             aria-label="Scrub"
             min={0}
-            max={manifest.duration}
+            max={duration}
             step={0.01}
             value={clock.t}
             aria-valuetext={seconds(clock.t)}

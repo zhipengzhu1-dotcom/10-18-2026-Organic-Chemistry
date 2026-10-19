@@ -32,12 +32,16 @@ export const PRACTICE_SLUG = "practice";
 import { checkInteraction, checkLessonShape } from "./shape.ts";
 import { citeIn, type Cited, type CitedData } from "./data.ts";
 import { dataFile, resolveDataFile } from "./data-load.ts";
-import type { SceneCatalog, SceneUse } from "./model.ts";
+import type { ExploreMolecule, SceneCatalog, SceneUse } from "./model.ts";
 import { checkRevealScene, checkStepScene, resolveSceneUse, type SceneUseFile } from "./scenes.ts";
-import { checkStructure, resolveFigure, resolveOptions, resolveTap } from "./structures.ts";
+import { checkStructure, resolveArrows, resolveFigure, resolveOptions, resolveTap } from "./structures.ts";
+import { exploreMolecule } from "./explore.ts";
 
 /** What a graded Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
-type StructureFields = { options: Option[]; figure?: Figure[] } | { structure: StructureView; targets: TapTarget[] };
+type StructureFields =
+  | { options: Option[]; figure?: Figure[] }
+  | { structure: StructureView; targets: TapTarget[] }
+  | { start: StructureView; target?: StructureView; results: Structure[] };
 type Structured = Map<string, StructureFields | undefined>;
 
 export interface BuildOptions {
@@ -140,6 +144,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
         ])
           errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
     }
+    for (const message of checkTapOnly(slug, lessons, problems)) errors.push(message);
     const problemCitations = citeNumbers(slug, data, lessons, problems, errors);
 
     // Structure cards and Tap targets, resolved once per Step and Problem so each error is reported once.
@@ -159,6 +164,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
           ...(item.figure && { figure: resolveFigure(item.figure, structures, found) }),
         };
       else if (item.type === "tap-to-identify") fields = resolveTap(item, structures, found);
+      else if (item.type === "draw-arrows") fields = resolveArrows(item, structures, found);
       else return;
       for (const message of found) errors.push(`${where}${message}`);
       structured.set(key, found.length ? undefined : fields);
@@ -215,6 +221,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
     }
     const revealScene = (use: SceneUseFile) => resolveSceneUse(use, options.scenes, data);
     fillBanks(slug, courses, listed, lessons, problems, structured, problemCitations, revealScene, errors);
+    exploreMolecules(slug, data, lessons, problems, courses, errors);
     if (subject) subjects.push({ slug, title: subject.title, url: `/${slug}`, courses, data });
   }
 
@@ -261,12 +268,38 @@ function resolveLesson(
   return { ...rest, url, number, signature: signatureType(lesson, problems), phases, steps };
 }
 
+/**
+ * Spec story 26: in a Lesson with Draw-arrows Steps (its own or Check Problems), every Tap Step
+ * and every Tap Problem tagged with that Lesson must carry the tap-only cue, since a Student who
+ * has just pushed electrons will try to drag.
+ */
+function checkTapOnly(
+  slug: string,
+  lessons: Map<string, LessonFile | undefined>,
+  problems: Map<string, ProblemFile | undefined>,
+): string[] {
+  const errors: string[] = [];
+  for (const lesson of lessons.values()) {
+    if (!lesson) continue;
+    const typeOf = (s: LessonFile["steps"][number]) => (s.type === "check" ? problems.get(s.problem)?.type : s.type);
+    if (!lesson.steps.some((s) => typeOf(s) === "draw-arrows")) continue;
+    for (const s of lesson.steps)
+      if (s.type === "tap-to-identify" && !s.tapOnly)
+        errors.push(`${slug}/lessons/${lesson.id}.yaml: step ${s.id}: a Tap Step in a Lesson with Draw-arrows Steps needs a tapOnly cue`);
+    for (const p of problems.values())
+      if (p?.lesson === lesson.id && p.type === "tap-to-identify" && !p.tapOnly)
+        errors.push(`${slug}/problems/${p.id}.yaml: a Tap Problem of a Lesson with Draw-arrows Steps needs a tapOnly cue`);
+  }
+  return errors;
+}
+
 /** Swaps structure ids for the resolved structures; a Step whose structures failed is dropped (its errors are reported). */
 function withStructures(step: Record<string, unknown> & { type: string }, key: string, structured: Structured): Step[] {
-  if (step.type !== "multiple-choice" && step.type !== "tap-to-identify") return [step as unknown as Step];
+  if (step.type !== "multiple-choice" && step.type !== "tap-to-identify" && step.type !== "draw-arrows")
+    return [step as unknown as Step];
   const fields = structured.get(key);
   if (!fields) return [];
-  const { tappable: _t, hide: _h, ...rest } = step;
+  const { tappable: _t, hide: _h, start: _s, results: _r, hideTarget: _ht, ...rest } = step;
   return [{ ...rest, ...fields } as unknown as Step];
 }
 
@@ -329,6 +362,43 @@ function fillBanks(
       onRamp: lesson.onRamp,
       step,
     });
+  }
+}
+
+/**
+ * Explore in 3D (#71): checks every `molecule:` (reported once, in the file that names it)
+ * and swaps it for the resolved molecule on every Step and Bank Problem that carries it.
+ */
+function exploreMolecules(
+  slug: string,
+  data: CitedData,
+  lessons: Map<string, LessonFile | undefined>,
+  problems: Map<string, ProblemFile | undefined>,
+  courses: Course[],
+  errors: string[],
+): void {
+  const resolved = new Map<string, ExploreMolecule | undefined>();
+  const resolve = (id: string, where: string) => {
+    const { molecule, errors: found } = exploreMolecule(data, id);
+    for (const message of found) errors.push(`${where}${message}`);
+    resolved.set(id, molecule);
+  };
+  for (const lesson of lessons.values())
+    for (const step of lesson?.steps ?? [])
+      if ("molecule" in step && step.molecule) resolve(step.molecule, `${slug}/lessons/${lesson!.id}.yaml: step ${step.id}: `);
+  for (const problem of problems.values())
+    if (problem?.molecule) resolve(problem.molecule, `${slug}/problems/${problem.id}.yaml: `);
+
+  const swap = (step: Step) => {
+    const named = step as Step & { molecule?: string };
+    if (!named.molecule) return;
+    const molecule = resolved.get(named.molecule);
+    delete named.molecule;
+    if (molecule) step.explore = molecule;
+  };
+  for (const unit of courses.flatMap((c) => c.units)) {
+    for (const lesson of unit.lessons) lesson.steps.forEach(swap);
+    for (const problem of unit.bank) swap(problem.step);
   }
 }
 

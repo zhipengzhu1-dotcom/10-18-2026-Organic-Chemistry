@@ -1,0 +1,99 @@
+{
+  "id": "boron-trifluoride",
+  "kind": "molecule",
+  "title": "Boron trifluoride",
+  "geometry": "experimental",
+  "notice": "Data derived from NIST CCCBDB; not covered by the repository's MIT licence or the content's CC BY-NC-SA licence. NIST Computational Chemistry Comparison and Benchmark Database, NIST Standard Reference Database Number 101, Release 22, May 2022, Editor: Russell D. Johnson III, http://cccbdb.nist.gov/, DOI:10.18434/T47C7Z. © U.S. Secretary of Commerce; used with acknowledgement under https://www.nist.gov/open/license.",
+  "sources": {
+    "cccbdb": {
+      "kind": "experimental",
+      "citation": "NIST CCCBDB, SRD 101, Release 22 (May 2022), doi:10.18434/T47C7Z",
+      "licence": "NIST SRD 101; reuse with acknowledgement (https://www.nist.gov/open/license). Not covered by the repo's MIT licence."
+    },
+    "1998kuc": {
+      "kind": "experimental",
+      "citation": "K Kuchitsu(ed) \"Structure of Free Polyatomic Molecules - Basic Data\" Springer, Berlin, 1998, doi:10.1007/978-3-642-45748-7",
+      "via": "cccbdb",
+      "licence": "NIST SRD 101; reuse with acknowledgement (https://www.nist.gov/open/license). Not covered by the repo's MIT licence."
+    }
+  },
+  "values": {
+    "r.BF": {
+      "label": "B–F",
+      "quantity": "bond-length",
+      "value": 1.307,
+      "unit": "Å",
+      "source": "1998kuc",
+      "atoms": [
+        0,
+        1
+      ],
+      "note": "re value"
+    },
+    "a.FBF": {
+      "label": "F–B–F",
+      "quantity": "angle",
+      "value": 120.0,
+      "unit": "°",
+      "source": "1998kuc",
+      "atoms": [
+        1,
+        0,
+        2
+      ]
+    }
+  },
+  "atoms": {
+    "source": "cccbdb",
+    "list": [
+      [
+        "B",
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        "F",
+        0.0,
+        1.307,
+        0.0
+      ],
+      [
+        "F",
+        1.1319,
+        -0.6535,
+        0.0
+      ],
+      [
+        "F",
+        -1.1319,
+        -0.6535,
+        0.0
+      ]
+    ]
+  },
+  "bonds": [
+    [
+      0,
+      1,
+      1
+    ],
+    [
+      0,
+      2,
+      1
+    ],
+    [
+      0,
+      3,
+      1
+    ]
+  ],
+  "provenance": {
+    "pipeline": "pipelines/geometry (#67)",
+    "url": "https://cccbdb.nist.gov/expgeom2x.asp?casno=7637072&charge=0",
+    "cccbdbName": "Borane, trifluoro-",
+    "pointGroup": "not used (CCCBDB labels can be wrong)",
+    "usedBy": "L3"
+  }
+}

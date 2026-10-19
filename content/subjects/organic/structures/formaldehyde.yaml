@@ -1,0 +1,14 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+
+id: formaldehyde
+style: full
+smiles: "[CH2:1]=[O:2]"
+atoms:
+  - { id: a1, el: C, x: 0, y: 0 }
+  - { id: a2, el: O, x: 0, y: 1.5, lp: 2 }
+  - { id: a3, el: H, x: 1.299, y: -0.75 }
+  - { id: a4, el: H, x: -1.299, y: -0.75 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 2 }
+  - { id: b2, a: a1, b: a3, order: 1 }
+  - { id: b3, a: a1, b: a4, order: 1 }

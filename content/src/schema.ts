@@ -17,6 +17,9 @@ const hint = z.strictObject({
   text,
 });
 
+/** Explore in 3D (#71): the molecule data file whose 3D view the Step or Problem offers. */
+const molecule = id.optional();
+
 /** What a Step may hide in a drawing. */
 const hide = z.array(z.enum(["charges", "lone-pairs"])).optional();
 
@@ -48,6 +51,7 @@ const sceneUse = z.preprocess(
 /** Fields shared by a Multiple choice Step and a Multiple choice Problem. */
 const multipleChoice = {
   type: z.literal("multiple-choice"),
+  molecule,
   prompt: text,
   options: z.array(option).min(2),
   /** Structures drawn above the choices (the spec's "Visual"); each `text` is its screen-reader label. */
@@ -66,6 +70,7 @@ const multipleChoice = {
 /** Fields shared by a Tap-to-identify Step and Problem. */
 const tapToIdentify = {
   type: z.literal("tap-to-identify"),
+  molecule,
   prompt: text,
   /** The structure file drawn. */
   structure: id,
@@ -94,6 +99,7 @@ const numericHint = z.strictObject({ match: z.number().optional(), text });
 /** Fields shared by a Numeric input Step and a Numeric Problem. The unit is fixed here and shown, never typed. */
 const numeric = {
   type: z.literal("numeric"),
+  molecule,
   prompt: text,
   /** The unit of measure, e.g. "°", "Å", "kJ/mol" (named so it can't be read as a course Unit). */
   unitSymbol: z.string(),
@@ -109,6 +115,7 @@ const numeric = {
 /** Fields shared by a Rank / order Step and a Rank Problem. */
 const rank = {
   type: z.literal("rank"),
+  molecule,
   prompt: text,
   /** The cards, in the order they start in. */
   items: z.array(textOption).min(2),
@@ -130,6 +137,7 @@ const manipulateHint = z.strictObject({ match: z.array(sceneValue).min(1).option
  */
 const manipulate = {
   type: z.literal("manipulate"),
+  molecule,
   prompt: text,
   scene: sceneUse,
   /** The settable state the slider drives. */
@@ -142,6 +150,36 @@ const manipulate = {
   sourceNote,
 };
 
+/** One curved arrow: `from` an atom id (its lone pair) or a bond id; `to` an atom id or a bond id. */
+const push = z.strictObject({ from: id, to: id });
+
+/**
+ * A Draw-arrows Hint, matched on the wrong push: `from` = it starts at one of these (atom ids =
+ * their lone pair, bond ids, `sigma` = any single bond); `to` = it lands on one of these.
+ */
+const pushHint = z.strictObject({ from: z.array(id).min(1).optional(), to: z.array(id).min(1).optional(), text });
+
+/** Fields shared by a Draw-arrows Step and Problem. Structures are named by file id; atom ids are the atom map. */
+const drawArrows = {
+  type: z.literal("draw-arrows"),
+  molecule,
+  prompt: text,
+  /** The structure the Student pushes on. */
+  start: id,
+  /** Every accepted result; the first is the target drawn dimmed beside the start. */
+  results: z.array(id).min(1),
+  /** Open Problems and "no target this time": don't draw the target. */
+  hideTarget: z.boolean().optional(),
+  /** The correct pushes, in an order that works (shown after two wrong tries, and in the reveal). */
+  answer: z.array(push).min(1),
+  /** In-between copy; `{atom}` and `{electrons}` are filled in. Plain defaults apply when absent. */
+  inBetween: z.strictObject({ over: text.optional(), short: text.optional() }).optional(),
+  correct: text.optional(),
+  hints: z.array(pushHint).optional(),
+  reveal: text,
+  sourceNote,
+};
+
 const stepId = z.string().regex(/^s\d{2,}$/, 'must look like "s01"');
 const phase = z.enum(["hook", "build", "wrap"]);
 
@@ -149,6 +187,7 @@ const explainStep = z.strictObject({
   id: stepId,
   phase,
   type: z.literal("explain"),
+  molecule,
   text,
   scene: sceneUse.optional(),
   sourceNote,
@@ -166,6 +205,7 @@ const multipleChoiceStep = z.strictObject({
 const numericStep = z.strictObject({ id: stepId, phase, ...numeric, scene: sceneUse.optional() });
 const rankStep = z.strictObject({ id: stepId, phase, ...rank, scene: sceneUse.optional() });
 const manipulateStep = z.strictObject({ id: stepId, phase, ...manipulate });
+const drawArrowsStep = z.strictObject({ id: stepId, phase, ...drawArrows, scene: sceneUse.optional() });
 
 /** A Check Step is a Problem from the Bank, referenced by id; its Step type is the Problem's. */
 const checkStep = z.strictObject({
@@ -180,7 +220,7 @@ const tapStep = z.strictObject({ id: stepId, phase, ...tapToIdentify, scene: sce
 /** Picks the Step schema by `type` (a Check Step is recognised by its `problem`), so errors point at the broken field. */
 const step = z.preprocess(
   (v) => (v && typeof v === "object" && "problem" in v && !("type" in v) ? { ...v, type: "check" } : v),
-  z.discriminatedUnion("type", [checkStep, explainStep, multipleChoiceStep, numericStep, rankStep, tapStep, manipulateStep]),
+  z.discriminatedUnion("type", [checkStep, explainStep, multipleChoiceStep, numericStep, rankStep, tapStep, manipulateStep, drawArrowsStep]),
 );
 
 export const lessonFile = z.strictObject({
@@ -221,6 +261,7 @@ export const problemFile = z.discriminatedUnion("type", [
   z.strictObject({ ...problemMeta, ...numeric }),
   z.strictObject({ ...problemMeta, ...rank }),
   z.strictObject({ ...problemMeta, ...tapToIdentify }),
+  z.strictObject({ ...problemMeta, ...drawArrows }),
 ]);
 
 const unit = z.strictObject({

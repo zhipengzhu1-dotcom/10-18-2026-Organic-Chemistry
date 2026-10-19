@@ -1,0 +1,61 @@
+{
+ "id": "ammonia-b3lyp",
+ "smiles": "N",
+ "charge": 0,
+ "multiplicity": 1,
+ "method": {
+  "program": "PySCF",
+  "version": "2.14.0",
+  "level": "B3LYP/cc-pVTZ",
+  "xc": "b3lyp",
+  "xc_definition": "((0, 0, 0), ((402, 1),))",
+  "basis": "cc-pvtz",
+  "grid_level": 4,
+  "optimizer": "geomeTRIC 1.1.1, GAU_TIGHT",
+  "phase": "gas (isolated molecule)"
+ },
+ "date": "2026-10-19",
+ "start": "CCCBDB experimental Cartesians (CAS 7664-41-7)",
+ "input_sha256": "8271cce03a7ee8bb9119794f82b7dbb4f888fbc6d258d91e39845881c15d81b3",
+ "converged": {
+  "optimiser": true,
+  "scf": true
+ },
+ "energy_hartree": -56.5847258934187,
+ "atoms": [
+  [
+   "N",
+   -0.0,
+   4.5e-05,
+   0.002383
+  ],
+  [
+   "H",
+   -0.0,
+   -0.937882,
+   -0.382365
+  ],
+  [
+   "H",
+   0.812269,
+   0.469009,
+   -0.382364
+  ],
+  [
+   "H",
+   -0.812269,
+   0.469009,
+   -0.382364
+  ]
+ ],
+ "frequencies_cm1": [
+  1064.1,
+  1676.3,
+  1676.3,
+  3461.3,
+  3577.9,
+  3577.9
+ ],
+ "imaginary_modes": 0,
+ "seconds": 18
+}

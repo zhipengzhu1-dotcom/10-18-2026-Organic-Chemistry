@@ -5,7 +5,9 @@
   "license": "CC-BY-NC-SA-4.0",
   "exports": {
     ".": "./src/index.ts",
-    "./data": "./src/data.ts"
+    "./data": "./src/data.ts",
+    "./explore": "./src/explore.ts",
+    "./arrows": "./src/arrows.ts"
   },
   "scripts": {
     "build": "node src/cli.ts",

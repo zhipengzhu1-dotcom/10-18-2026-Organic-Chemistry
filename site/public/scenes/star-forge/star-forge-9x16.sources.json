@@ -1,0 +1,83 @@
+{
+  "scene": "star-forge",
+  "title": "Forged in a star",
+  "aspect": "9:16",
+  "file": "star-forge-9x16.mp4",
+  "fps": 60,
+  "duration": 13,
+  "numbers": [
+    {
+      "ref": "nuclides/He-4.Z",
+      "label": "helium-4 protons",
+      "quantity": "count",
+      "value": 2,
+      "display": "2",
+      "full": "2",
+      "citation": "Kondev et al., \"The NUBASE2020 evaluation of nuclear physics properties\", Chinese Phys. C 45, 030001 (2021), doi:10.1088/1674-1137/abddae",
+      "licence": "Published values, cited (facts from the literature)",
+      "shown": "drawn",
+      "onScreen": [
+        {
+          "from": 0,
+          "to": 13
+        }
+      ]
+    },
+    {
+      "ref": "nuclides/He-4.A",
+      "label": "helium-4 mass number",
+      "quantity": "count",
+      "value": 4,
+      "display": "4",
+      "full": "4",
+      "citation": "Kondev et al., \"The NUBASE2020 evaluation of nuclear physics properties\", Chinese Phys. C 45, 030001 (2021), doi:10.1088/1674-1137/abddae",
+      "licence": "Published values, cited (facts from the literature)",
+      "shown": "text",
+      "onScreen": [
+        {
+          "from": 2,
+          "to": 4.5
+        },
+        {
+          "from": 5,
+          "to": 7.1
+        }
+      ]
+    },
+    {
+      "ref": "nuclides/C-12.Z",
+      "label": "carbon-12 protons",
+      "quantity": "count",
+      "value": 6,
+      "display": "6",
+      "full": "6",
+      "citation": "Kondev et al., \"The NUBASE2020 evaluation of nuclear physics properties\", Chinese Phys. C 45, 030001 (2021), doi:10.1088/1674-1137/abddae",
+      "licence": "Published values, cited (facts from the literature)",
+      "shown": "drawn",
+      "onScreen": [
+        {
+          "from": 0,
+          "to": 13
+        }
+      ]
+    },
+    {
+      "ref": "nuclides/C-12.A",
+      "label": "carbon-12 mass number",
+      "quantity": "count",
+      "value": 12,
+      "display": "12",
+      "full": "12",
+      "citation": "Kondev et al., \"The NUBASE2020 evaluation of nuclear physics properties\", Chinese Phys. C 45, 030001 (2021), doi:10.1088/1674-1137/abddae",
+      "licence": "Published values, cited (facts from the literature)",
+      "shown": "text",
+      "onScreen": [
+        {
+          "from": 5,
+          "to": 9.3
+        }
+      ]
+    }
+  ],
+  "description": "Forged in a star\n\nNumbers on screen:\n0:00–0:13  helium-4 protons 2\n0:02–0:05  helium-4 mass number 4\n0:05–0:08  helium-4 mass number 4\n0:00–0:13  carbon-12 protons 6\n0:05–0:10  carbon-12 mass number 12\n\nSources:\nhelium-4 protons 2, helium-4 mass number 4, carbon-12 protons 6 and carbon-12 mass number 12 from Kondev et al., \"The NUBASE2020 evaluation of nuclear physics properties\", Chinese Phys. C 45, 030001 (2021), doi:10.1088/1674-1137/abddae."
+}

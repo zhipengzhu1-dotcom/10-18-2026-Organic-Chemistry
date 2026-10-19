@@ -1,7 +1,8 @@
 // Build-time access to the course model. A content error fails the site build.
 import { buildContent, type Course, type CourseModel, type Lesson, type Step, type Unit } from "@astratron/content";
-import { checkManifests, sceneCatalog } from "@astratron/scenes/check";
+import { checkManifests, checkWatchManifests, sceneCatalog } from "@astratron/scenes/check";
 import { sceneManifests } from "@astratron/scenes/manifests";
+import { watchSceneManifests } from "@astratron/scenes/watch";
 import { marked } from "marked";
 import { drawView } from "./structures.ts";
 import { setSize } from "./practice.ts";
@@ -14,8 +15,8 @@ let cached: CourseModel | undefined;
 export function courseModel(): CourseModel {
   if (cached) return cached;
   // Every Scene manifest must be complete, and every Step's Scene is checked against the registry.
-  const sceneErrors = checkManifests(sceneManifests);
-  const { model, errors } = buildContent(__CONTENT_ROOT__, { scenes: sceneCatalog(sceneManifests) });
+  const sceneErrors = [...checkManifests(sceneManifests), ...checkWatchManifests(watchSceneManifests, sceneManifests)];
+  const { model, errors } = buildContent(__CONTENT_ROOT__, { scenes: sceneCatalog(sceneManifests, watchSceneManifests) });
   if (!model || sceneErrors.length) throw new Error(`Content build failed:\n  ${[...sceneErrors, ...errors].join("\n  ")}`);
   return (cached = model);
 }
@@ -159,5 +160,15 @@ export function renderStep(s: Step): Step {
       return { ...s, ...shared, items: choices(s.items), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
     case "manipulate":
       return { ...s, ...shared, hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
+    case "draw-arrows":
+      // The start is redrawn live in the browser as pushes land; its first drawing and the
+      // target are pre-rendered. In-between copy stays plain: it is also read aloud.
+      return {
+        ...s,
+        ...shared,
+        start: drawView(s.start),
+        ...(s.target && { target: drawView(s.target) }),
+        hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
+      };
   }
 }

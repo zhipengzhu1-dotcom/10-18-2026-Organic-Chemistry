@@ -65,6 +65,33 @@ export interface SceneManifest<S extends SceneState = SceneState> {
   };
 }
 
+/**
+ * A watch-only Scene (#66): a video rendered offline by Manim CE, silent, at
+ * 60 fps, with no editing pass. It plays in a Step like any Scene but has no
+ * settable states and no React component; the site plays the committed video.
+ */
+export interface WatchSceneManifest {
+  /** Kebab-case, unique across every Scene; Lesson files name the Scene by it. */
+  id: string;
+  title: string;
+  /** The renderer script (under scenes/manim/) and its Scene class. */
+  render: { engine: "manim"; script: string; sceneClass: string };
+  /** Screen-reader text for the whole video, from its cited values. Never empty. */
+  describe: (cited: Record<string, Cited>) => string;
+  /** What the Scene does under reduced motion, in a sentence (it always opens paused on its poster frame). */
+  reducedMotion: string;
+  /** Cited-data refs (`file/key`) of every number the video shows; the renderer reads them from here (ADR 0002). */
+  data: string[];
+  /** On-screen words, handed to the renderer as they are (the screen-reader text repeats them). */
+  text: Record<string, string[]>;
+  /** Seconds; the render must come out this long. */
+  duration: number;
+  /** Seconds into the video for the poster frame (reduced motion, still). */
+  poster: number;
+  /** Must hold both "16:9" and "9:16". */
+  aspects: Aspect[];
+}
+
 export interface RegisteredScene<S extends SceneState = SceneState> {
   manifest: SceneManifest<S>;
   Component: ComponentType<SceneProps<S>>;

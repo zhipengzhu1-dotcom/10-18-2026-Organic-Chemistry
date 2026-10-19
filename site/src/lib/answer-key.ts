@@ -4,7 +4,9 @@
 // A new Step type whose grading needs other fields adds them to SECRET_FIELDS.
 import type { GradedStep, Lesson, Step } from "@astratron/content";
 
-const SECRET_FIELDS = ["answer", "tolerance", "correct", "hints", "reveal", "revealScene"] as const;
+// Draw arrows: `results` (accepted results) and `inBetween` (flag copy) grade pushes, so they are secret too;
+// the start and the target the Step shows stay on the page.
+const SECRET_FIELDS = ["answer", "tolerance", "correct", "hints", "reveal", "results", "inBetween", "revealScene"] as const;
 type Secret = (typeof SECRET_FIELDS)[number];
 type Shown<S> = S extends GradedStep ? Omit<S, Extract<Secret, keyof S>> : S;
 
