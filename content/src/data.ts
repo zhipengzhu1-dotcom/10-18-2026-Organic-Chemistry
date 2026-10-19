@@ -83,6 +83,15 @@ export function cite(data: CitedData, ref: string): Cited {
   return value;
 }
 
+/**
+ * How a viewer draws an element: colour and van der Waals radius from the
+ * cited "elements" table (`<symbol>.colour`, `<symbol>.vdw`). Viewers use
+ * these instead of their library's defaults. Throws if either is missing.
+ */
+export function elementStyle(data: CitedData, symbol: string): { colour: Cited; vdwRadius: Cited } {
+  return { colour: cite(data, `elements/${symbol}.colour`), vdwRadius: cite(data, `elements/${symbol}.vdw`) };
+}
+
 export function find(data: CitedData, ref: string): Cited | undefined {
   const slash = ref.indexOf("/");
   if (slash < 0) return undefined;
