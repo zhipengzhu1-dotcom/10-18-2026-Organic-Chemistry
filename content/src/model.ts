@@ -40,6 +40,8 @@ export interface SceneUse {
   state: Record<string, SceneValue>;
   /** The Scene's cited values by ref; the Scene reads its numbers from here (ADR 0002). */
   cited: Record<string, Cited>;
+  /** `answer`: hidden until the Step is answered (e.g. a prediction's reveal); absent = shown on entry. */
+  on?: "answer";
 }
 
 export interface ExplainStep {
@@ -49,6 +51,8 @@ export interface ExplainStep {
   text: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The Step's own Source note line (where its example or wording comes from); a Check Step has its Problem's. */
+  source?: string;
 }
 
 export interface MultipleChoiceStep {
@@ -58,6 +62,8 @@ export interface MultipleChoiceStep {
   prompt: string;
   /** Text options or structure cards. */
   options: Option[];
+  /** A structure drawn above the choices. */
+  structure?: StructureView;
   answer: string[];
   correct?: string;
   hints?: Hint[];
@@ -68,6 +74,8 @@ export interface MultipleChoiceStep {
   scene?: SceneUse;
   /** The cited values this Step's text shows (`{{file/key}}`); its Source note is generated from them. */
   citations?: Cited[];
+  /** The Step's own Source note line (where its example or wording comes from); a Check Step has its Problem's. */
+  source?: string;
 }
 
 export interface NumericHint {
@@ -93,6 +101,8 @@ export interface NumericStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The Step's own Source note line (where its example or wording comes from); a Check Step has its Problem's. */
+  source?: string;
 }
 
 /** Rank / order: the Student puts the items into one strict order (the prompt names which end is first). */
@@ -112,6 +122,8 @@ export interface RankStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The Step's own Source note line (where its example or wording comes from); a Check Step has its Problem's. */
+  source?: string;
 }
 
 export interface ManipulateHint {
@@ -135,6 +147,8 @@ export interface ManipulateStep {
   reveal: string;
   problemId?: string;
   citations?: Cited[];
+  /** The Step's own Source note line (where its example or wording comes from); a Check Step has its Problem's. */
+  source?: string;
 }
 
 /**
@@ -184,6 +198,8 @@ export interface DrawArrowsStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The Step's own Source note line (where its example or wording comes from); a Check Step has its Problem's. */
+  source?: string;
 }
 
 /** A Step the Student answers and the engine grades. */
@@ -309,6 +325,8 @@ export interface TapStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The Step's own Source note line (where its example or wording comes from); a Check Step has its Problem's. */
+  source?: string;
 }
 
 export interface Lesson {

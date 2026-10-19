@@ -141,6 +141,9 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   const sceneState =
     step.type === "manipulate" && setting !== undefined ? { ...step.scene.state, [step.control]: setting } : step.scene?.state;
 
+  // A Scene with `on: answer` (a prediction's reveal) waits until the Step is answered.
+  const sceneShown = step.scene?.on !== "answer" || screen.canContinue;
+
   const answer: Answer | null =
     step.type === "multiple-choice" || step.type === "tap-to-identify"
       ? chosen.length > 0 ? { choice: chosen } : null
@@ -236,12 +239,12 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <PushReplayPlayer key={`replay-${step.id}`} start={step.start.structure} hide={step.start.hide} pushes={screen.arrows.pushes.map((p) => p.push)} />
         )}
 
-        {step.scene && watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
+        {step.scene && watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && sceneShown && (
           // A watch-only Scene (#66): the committed video, keyed per Step so it autoplays on entry.
           <WatchScenePlayer key={`scene-${step.id}`} sceneId={step.scene.id} cited={step.scene.cited} />
         )}
 
-        {step.scene && sceneState && !watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
+        {step.scene && sceneState && !watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && sceneShown && (
           // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
           <ScenePlayer
             key={`scene-${step.id}`}
@@ -260,6 +263,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
               />
             )}
           </ScenePlayer>
+        )}
+
+        {step.type === "multiple-choice" && step.structure?.drawn && (
+          // The molecule the question is about, pre-rendered; the prompt names it.
+          <div className="structure-view" aria-hidden="true" {...html(step.structure.drawn.svg)} />
         )}
 
         {step.type === "multiple-choice" && (
@@ -320,7 +328,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         )}
 
         {/* Keyed per Step so a new Step opens its Source note collapsed. */}
-        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} />
+        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} line={step.source} />
 
         <p className="report">
           <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>

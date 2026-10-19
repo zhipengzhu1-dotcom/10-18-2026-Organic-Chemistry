@@ -59,8 +59,8 @@ describe("Numeric input and Rank / order Steps", () => {
     const { model, errors } = buildContent(writeTree(tree));
     expect(errors).toEqual([]);
     const steps = model!.subjects[0].courses[0].units[0].lessons[0].steps;
-    expect(steps[7]).toEqual({ id: "s08", phase: "check", problemId: "p1", ...numeric() });
-    expect(steps[8]).toEqual({ id: "s09", phase: "check", problemId: "p2", ...rank() });
+    expect(steps[7]).toEqual({ id: "s08", phase: "check", problemId: "p1", source: "Original", ...numeric() });
+    expect(steps[8]).toEqual({ id: "s09", phase: "check", problemId: "p2", source: "Original", ...rank() });
   });
 
   it("the unit is fixed by the file and the tolerance can't be negative", () => {

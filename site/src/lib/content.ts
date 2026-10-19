@@ -143,6 +143,7 @@ export function renderStep(s: Step): Step {
         ...shared,
         // A structure card's text is its screen-reader label: kept plain; its drawing is pre-rendered SVG.
         options: s.options.map((o) => (o.structure ? { ...o, structure: drawView(o.structure) } : { ...o, text: md(o.text) })),
+        ...(s.structure && { structure: drawView(s.structure) }),
         hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
       };
     case "tap-to-identify":

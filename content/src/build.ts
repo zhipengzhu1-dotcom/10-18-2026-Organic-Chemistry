@@ -38,7 +38,7 @@ import { checkStructure, resolveArrows, resolveOptions, resolveTap } from "./str
 
 /** What a graded Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
 type StructureFields =
-  | { options: Option[] }
+  | { options: Option[]; structure?: StructureView }
   | { structure: StructureView; targets: TapTarget[] }
   | { start: StructureView; target?: StructureView; results: Structure[] };
 type Structured = Map<string, StructureFields | undefined>;
@@ -153,7 +153,10 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
     const resolveStructures = (key: string, item: LessonFile["steps"][number] | ProblemFile, where: string) => {
       const found: string[] = [];
       let fields: StructureFields | undefined;
-      if (item.type === "multiple-choice") fields = { options: resolveOptions(item.options, structures, found) };
+      if (item.type === "multiple-choice") {
+        const [shown] = item.structure ? resolveOptions([{ id: "structure", text: "-", structure: item.structure }], structures, found) : [];
+        fields = { options: resolveOptions(item.options, structures, found), ...(shown?.structure && { structure: shown.structure }) };
+      }
       else if (item.type === "tap-to-identify") fields = resolveTap(item, structures, found);
       else if (item.type === "draw-arrows") fields = resolveArrows(item, structures, found);
       else return;
@@ -290,7 +293,7 @@ function withStructures(step: Record<string, unknown> & { type: string }, key: s
 
 /** A Problem as a playable Step (a Check Step, or a Practice Set Problem): its interaction without the Bank tags. */
 function problemStep(problem: ProblemFile, stepId: string, structured: Structured): Step[] {
-  const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source: _src, credit: _c, ...interaction } = problem;
+  const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, credit: _c, ...interaction } = problem;
   return withStructures({ id: stepId, phase: "check", problemId, ...interaction }, `problem:${problemId}`, structured);
 }
 

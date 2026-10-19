@@ -31,6 +31,8 @@ const multipleChoice = {
   type: z.literal("multiple-choice"),
   prompt: text,
   options: z.array(option).min(2),
+  /** A structure file drawn above the choices (the molecule the question is about). */
+  structure: id.optional(),
   /** The exact set of correct option ids. */
   answer: z.array(id).min(1),
   /** The Correct line: the short "why" shown on a right answer. */
@@ -102,7 +104,12 @@ const sceneValue = z.union([z.number(), z.string()]);
  */
 const sceneUse = z.preprocess(
   (v) => (typeof v === "string" ? { id: v } : v),
-  z.strictObject({ id, state: z.record(z.string(), sceneValue).optional() }),
+  z.strictObject({
+    id,
+    state: z.record(z.string(), sceneValue).optional(),
+    /** `answer`: the Scene stays hidden until the Step is answered (a prediction's reveal). */
+    on: z.literal("answer").optional(),
+  }),
 );
 
 /** A Manipulate Hint: `match` lists the wrong control values it answers. */
@@ -154,6 +161,8 @@ const drawArrows = {
 };
 
 const stepId = z.string().regex(/^s\d{2,}$/, 'must look like "s01"');
+/** The Step's own Source note line: where its example or wording comes from (a Check Step uses its Problem's `source`). */
+const source = text.optional();
 const phase = z.enum(["hook", "build", "wrap"]);
 
 const explainStep = z.strictObject({
@@ -162,6 +171,7 @@ const explainStep = z.strictObject({
   type: z.literal("explain"),
   text,
   scene: sceneUse.optional(),
+  source,
 });
 
 const multipleChoiceStep = z.strictObject({
@@ -169,14 +179,15 @@ const multipleChoiceStep = z.strictObject({
   phase,
   ...multipleChoice,
   scene: sceneUse.optional(),
+  source,
   /** Hook only: every choice is accepted and the reveal follows at once. */
   prediction: z.boolean().optional(),
 });
 
-const numericStep = z.strictObject({ id: stepId, phase, ...numeric, scene: sceneUse.optional() });
-const rankStep = z.strictObject({ id: stepId, phase, ...rank, scene: sceneUse.optional() });
-const manipulateStep = z.strictObject({ id: stepId, phase, ...manipulate });
-const drawArrowsStep = z.strictObject({ id: stepId, phase, ...drawArrows, scene: sceneUse.optional() });
+const numericStep = z.strictObject({ id: stepId, phase, ...numeric, scene: sceneUse.optional(), source });
+const rankStep = z.strictObject({ id: stepId, phase, ...rank, scene: sceneUse.optional(), source });
+const manipulateStep = z.strictObject({ id: stepId, phase, ...manipulate, source });
+const drawArrowsStep = z.strictObject({ id: stepId, phase, ...drawArrows, scene: sceneUse.optional(), source });
 
 /** A Check Step is a Problem from the Bank, referenced by id; its Step type is the Problem's. */
 const checkStep = z.strictObject({
@@ -186,7 +197,7 @@ const checkStep = z.strictObject({
   problem: id,
 });
 
-const tapStep = z.strictObject({ id: stepId, phase, ...tapToIdentify, scene: sceneUse.optional() });
+const tapStep = z.strictObject({ id: stepId, phase, ...tapToIdentify, scene: sceneUse.optional(), source });
 
 /** Picks the Step schema by `type` (a Check Step is recognised by its `problem`), so errors point at the broken field. */
 const step = z.preprocess(
