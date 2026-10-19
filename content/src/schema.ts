@@ -17,6 +17,9 @@ const hint = z.strictObject({
   text,
 });
 
+/** Explore in 3D (#71): the molecule data file whose 3D view the Step or Problem offers. */
+const molecule = id.optional();
+
 /** What a Step may hide in a drawing. */
 const hide = z.array(z.enum(["charges", "lone-pairs"])).optional();
 
@@ -87,6 +90,7 @@ const gradedVisuals = { ...visuals, revealScene: sceneUse.optional() };
 const multipleChoice = {
   ...gradedVisuals,
   type: z.literal("multiple-choice"),
+  molecule,
   prompt: text,
   options: z.array(option).min(2),
   /** The exact set of correct option ids. */
@@ -101,6 +105,7 @@ const multipleChoice = {
 const tapToIdentify = {
   ...gradedVisuals,
   type: z.literal("tap-to-identify"),
+  molecule,
   prompt: text,
   /** The structure file drawn. */
   structure: id,
@@ -131,6 +136,7 @@ const numericHint = z.strictObject({ match: z.number().optional(), text });
 const numeric = {
   ...gradedVisuals,
   type: z.literal("numeric"),
+  molecule,
   prompt: text,
   /** The unit of measure, e.g. "°", "Å", "kJ/mol" (named so it can't be read as a course Unit). */
   unitSymbol: z.string(),
@@ -157,6 +163,7 @@ const rankHint = z.strictObject({
 const rank = {
   ...gradedVisuals,
   type: z.literal("rank"),
+  molecule,
   prompt: text,
   /** The cards, in the order they start in. */
   items: z.array(textOption).min(2),
@@ -178,6 +185,7 @@ const manipulateHint = z.strictObject({ match: z.array(sceneValue).min(1).option
 const manipulate = {
   ...gradedVisuals,
   type: z.literal("manipulate"),
+  molecule,
   prompt: text,
   scene: sceneUse,
   /** The settable state the slider drives. */
@@ -202,6 +210,7 @@ const pushHint = z.strictObject({ from: z.array(id).min(1).optional(), to: z.arr
 const drawArrows = {
   ...gradedVisuals,
   type: z.literal("draw-arrows"),
+  molecule,
   prompt: text,
   /** The structure the Student pushes on. */
   start: id,
@@ -225,6 +234,7 @@ const explainStep = z.strictObject({
   id: stepId,
   phase,
   type: z.literal("explain"),
+  molecule,
   text,
   scene: sceneUse.optional(),
   ...visuals,

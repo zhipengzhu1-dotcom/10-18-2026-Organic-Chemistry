@@ -16,6 +16,7 @@ import { watchScene } from "@astratron/scenes/watch";
 import SceneControl from "./SceneControl.tsx";
 import StructureTap from "./StructureTap.tsx";
 import { AsideButton, Figures } from "./StepVisuals.tsx";
+import ExploreIn3D from "../explore/ExploreIn3D.tsx";
 import DrawArrows from "./DrawArrows.tsx";
 import { PushReplayPlayer } from "./PushReplayPlayer.tsx";
 import "./structure.css";
@@ -338,6 +339,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
             )}
           </div>
         )}
+
+        {step.explore && <ExploreIn3D key={`explore-${step.id}`} molecule={step.explore} />}
 
         {/* The aside, Source note and report link share rows at the bottom, so a Step fits a phone. */}
         <div className="step-meta">

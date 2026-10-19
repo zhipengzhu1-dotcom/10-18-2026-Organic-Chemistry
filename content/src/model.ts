@@ -1,6 +1,6 @@
 // The resolved course model: what the content build hands to the site and the
 // video renderer. Check Steps arrive with their Problem inlined.
-import type { Cited, CitedData } from "./data.ts";
+import type { Atom, Bond, Cited, CitedData, Tier } from "./data.ts";
 
 export type Phase = "hook" | "build" | "check" | "wrap";
 
@@ -44,6 +44,29 @@ export interface SceneUse {
   still?: boolean;
 }
 
+/**
+ * A molecule as the Explore in 3D view draws it (#71): its coordinates and bonds, and the
+ * cited colour and van der Waals radius of each element in it. Viewers use these, never
+ * their library's defaults (ADR 0002).
+ */
+export interface ExploreMolecule {
+  /** The data file id, e.g. "methane". */
+  id: string;
+  title: string;
+  /** Geometry tier of the coordinates. */
+  tier: Tier;
+  /** Cartesian coordinates in Å. */
+  atoms: Atom[];
+  bonds: Bond[];
+  /** Per element symbol in the molecule. */
+  elements: Record<string, { colour: Cited; vdwRadius: Cited }>;
+  /** Everything the view's Source note names: the molecule's geometry values, then each element's colour and radius. */
+  cited: Cited[];
+  /** Licence notice for third-party data (the NIST acknowledgement on CCCBDB-derived geometry). */
+  notice?: string;
+}
+
+
 /** A structure drawn with a Step, static. */
 export interface Figure {
   view: StructureView;
@@ -81,6 +104,8 @@ export interface ExplainStep extends Visuals {
   text: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
+  explore?: ExploreMolecule;
 }
 
 export interface MultipleChoiceStep extends GradedVisuals {
@@ -100,6 +125,8 @@ export interface MultipleChoiceStep extends GradedVisuals {
   scene?: SceneUse;
   /** The cited values this Step's text shows (`{{file/key}}`); its Source note is generated from them. */
   citations?: Cited[];
+  /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
+  explore?: ExploreMolecule;
 }
 
 export interface NumericHint {
@@ -127,6 +154,8 @@ export interface NumericStep extends GradedVisuals {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
+  explore?: ExploreMolecule;
 }
 
 /** Rank / order: the Student puts the items into one strict order (the prompt names which end is first). */
@@ -146,6 +175,8 @@ export interface RankStep extends GradedVisuals {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
+  explore?: ExploreMolecule;
 }
 
 /**
@@ -182,6 +213,8 @@ export interface ManipulateStep extends GradedVisuals {
   reveal: string;
   problemId?: string;
   citations?: Cited[];
+  /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
+  explore?: ExploreMolecule;
 }
 
 /**
@@ -231,6 +264,8 @@ export interface DrawArrowsStep extends GradedVisuals {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
+  explore?: ExploreMolecule;
 }
 
 /** A Step the Student answers and the engine grades. */
@@ -360,6 +395,8 @@ export interface TapStep extends GradedVisuals {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
+  explore?: ExploreMolecule;
 }
 
 export interface Lesson {
