@@ -193,6 +193,33 @@ describe("the build rejects broken data files", () => {
     ]);
   });
 
+  it("bonds or value atoms that point past the last atom", () => {
+    expect(
+      errorsFor(
+        editMethane((m) => {
+          Object.assign(m, { bonds: [[0, 1, 1], [0, 9, 1]] });
+          Object.assign(m.values["r.CH"], { atoms: [0, 7] });
+        }),
+      ),
+    ).toEqual([
+      "chem/data/methane.yaml: bonds: [0, 9] is not a pair of atoms in this file",
+      "chem/data/methane.yaml: values.r.CH.atoms: an index is past the last atom",
+    ]);
+  });
+
+  it("carries bonds, value atoms and the licence notice through to the lookup", () => {
+    const result = build((t) => {
+      const m = t["chem/data/methane.yaml"] as File;
+      Object.assign(m, { bonds: [[0, 1, 1]], notice: "Data derived from NIST CCCBDB." });
+      Object.assign(m.values["r.CH"], { atoms: [0, 1], note: "re" });
+    });
+    expect(result.errors).toEqual([]);
+    const m = dataOf(result).methane;
+    expect(m.bonds).toEqual([{ a: 0, b: 1, order: 1 }]);
+    expect(m.notice).toBe("Data derived from NIST CCCBDB.");
+    expect(cite(dataOf(result), "methane/r.CH")).toMatchObject({ atoms: [0, 1], note: "re" });
+  });
+
   it("coordinates from a different tier than the molecule", () => {
     expect(
       errorsFor((t) => {

@@ -1,0 +1,88 @@
+{
+ "id": "methylamine",
+ "smiles": "CN",
+ "charge": 0,
+ "multiplicity": 1,
+ "method": {
+  "program": "PySCF",
+  "version": "2.14.0",
+  "level": "B3LYP/cc-pVTZ",
+  "xc": "b3lyp",
+  "xc_definition": "((0, 0, 0), ((402, 1),))",
+  "basis": "cc-pvtz",
+  "grid_level": 4,
+  "optimizer": "geomeTRIC 1.1.1, GAU_TIGHT",
+  "phase": "gas (isolated molecule)"
+ },
+ "date": "2026-10-19",
+ "start": "RDKit ETKDG embed (seed 7) + MMFF94 (staggered)",
+ "input_sha256": "de14ddf02abd8f8131d9d2eb53934b0c91fb296af1eeaaa038916a7190843aeb",
+ "converged": {
+  "optimiser": true,
+  "scf": true
+ },
+ "energy_hartree": -95.89997533346062,
+ "atoms": [
+  [
+   "C",
+   -0.564406,
+   0.096078,
+   -0.015896
+  ],
+  [
+   "N",
+   0.859064,
+   -0.092668,
+   -0.30119
+  ],
+  [
+   "H",
+   -1.146736,
+   -0.610424,
+   -0.608413
+  ],
+  [
+   "H",
+   -0.863876,
+   1.0975,
+   -0.327024
+  ],
+  [
+   "H",
+   -0.853849,
+   -0.029267,
+   1.035857
+  ],
+  [
+   "H",
+   1.15429,
+   -1.020128,
+   -0.021762
+  ],
+  [
+   "H",
+   1.415778,
+   0.558771,
+   0.238362
+  ]
+ ],
+ "frequencies_cm1": [
+  300.5,
+  841.8,
+  975.4,
+  1052.5,
+  1172.4,
+  1349.6,
+  1458.4,
+  1497.7,
+  1518.4,
+  1664.4,
+  2960.5,
+  3053.0,
+  3086.8,
+  3491.0,
+  3566.1
+ ],
+ "imaginary_modes": 0,
+ "seconds": 132
+}
