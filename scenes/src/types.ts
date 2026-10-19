@@ -22,6 +22,41 @@ export interface SceneProps<S extends SceneState = SceneState> {
   reducedMotion: boolean;
   /** The cited values the manifest's `data` names, by ref; the only way a number reaches the Scene (ADR 0002). */
   cited: Record<string, Cited>;
+  /**
+   * Set only when the Student can work the Scene itself (a goal-state Manipulate Step): the Scene
+   * then draws its handles and drop targets as focusable buttons (`data-handle` / `data-target`,
+   * each with an aria-label) and shows the Student's hold. The site's player owns this state.
+   */
+  input?: SceneInput;
+}
+
+/** A Student's hold on an interactive Scene, as the player tracks it. */
+export interface SceneInput {
+  /** The handle picked up (by Enter, or by pressing on it), if any. */
+  held?: string;
+  /** While a handle is dragged: the pointer, in frame coordinates. */
+  pointer?: { x: number; y: number };
+  /** The next move, drawn ghosted as a nudge after the Student has been idle twice. */
+  nudge?: SceneMove;
+}
+
+/** Moving one handle onto one target. */
+export interface SceneMove {
+  handle: string;
+  target: string;
+}
+
+/**
+ * The rules of an interactive Scene (pure, no React): what a drop does. `state` = the settable
+ * states the move changes, `say` = what a screen reader hears. `refused` = the move can't be made
+ * (the Scene is unchanged and the Student is told why). Null = nothing there: the handle slides back.
+ */
+export type DropResult<S> = { state: Partial<S>; say: string } | { refused: string } | null;
+
+export interface SceneInteraction<S extends SceneState = SceneState> {
+  drop: (state: S, move: SceneMove) => DropResult<S>;
+  /** A move that the Scene accepts from this state, for the idle nudge; undefined when none is left. */
+  next: (state: S) => SceneMove | undefined;
 }
 
 export interface TimelineKey<S extends SceneState = SceneState> {
@@ -39,6 +74,8 @@ export interface SceneManifest<S extends SceneState = SceneState> {
   states: { [K in keyof S]: SceneStateSpec };
   /** Screen-reader text for what the Scene shows at this state and time (its cited values passed in, as to the Scene). Never empty. */
   describe: (state: S, t: number, cited: Record<string, Cited>) => string;
+  /** Interactive Scenes only: the rules for moving their handles (goal-state Manipulate Steps). */
+  interact?: SceneInteraction<S>;
   /** What the Scene does under reduced motion, in a sentence (it always opens paused on its poster frame). */
   reducedMotion: string;
   /** Cited-data refs (`file/key`) of every number or element colour the Scene shows. May be empty. */

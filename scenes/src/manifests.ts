@@ -19,4 +19,35 @@ import { formaldehydePiShift } from "./formaldehyde-pi-shift/manifest.ts";
 import { threeMoves } from "./three-moves/manifest.ts";
 import { acetateHybrid } from "./acetate-hybrid/manifest.ts";
 
-export const sceneManifests: readonly SceneManifest<any>[] = [sampleTwist, streamBend, enStrip, bondDipoles, dotsAndSticks, bf3Sextet, groupSpotlight, groupCards, carbonylNeighbours, hFill, ethanolThreeWays, lonePairFill, acetateBondLengths, formaldehydePiShift, threeMoves, acetateHybrid];
+// Lesson 0 (#78)
+import { buildBySharing } from "./build-by-sharing/manifest.ts";
+import { crustVsBody } from "./crust-vs-body/manifest.ts";
+import { giveOrTake } from "./give-or-take/manifest.ts";
+import { outerElectrons } from "./outer-electrons/manifest.ts";
+import { waterPush } from "./water-push/manifest.ts";
+
+export const sceneManifests: readonly SceneManifest<any>[] = [
+  sampleTwist,
+  streamBend,
+  enStrip,
+  bondDipoles,
+  dotsAndSticks,
+  bf3Sextet,
+  groupSpotlight,
+  groupCards,
+  carbonylNeighbours,
+  hFill,
+  ethanolThreeWays,
+  lonePairFill,
+  // Lesson 0 (#78)
+  crustVsBody,
+  outerElectrons,
+  giveOrTake,
+  waterPush,
+  buildBySharing,
+  // Lesson 6 (#84)
+  acetateBondLengths,
+  formaldehydePiShift,
+  threeMoves,
+  acetateHybrid,
+];

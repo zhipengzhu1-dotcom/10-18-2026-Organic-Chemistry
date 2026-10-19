@@ -3,7 +3,7 @@
 // scrubber; under reduced motion it opens paused on its poster frame.
 import { expect, test, type Page } from "@playwright/test";
 
-const STEP = "/organic/orgo-1/structure-bonding/sample-scenes#s06";
+const STEP = "/organic/orgo-1/structure-bonding/why-carbon#s01";
 
 const scene = (page: Page) => page.getByRole("img", { name: /^A star's core\. Three helium nuclei fuse into one carbon nucleus: three helium-4 make carbon-12\./ });
 const video = (page: Page) => page.locator("figure.scene video");
@@ -14,7 +14,7 @@ const currentTime = (page: Page) => video(page).evaluate((v: HTMLVideoElement) =
 
 test("star-forge plays in a Step: silent video, autoplay once, replay and scrub", async ({ page }) => {
   await page.goto(STEP);
-  await expect(page.getByText("Step 6 of 10")).toBeVisible();
+  await expect(page.getByText("Step 1 of 9")).toBeVisible();
   await expect(scene(page)).toBeVisible();
   await expect(scene(page)).toHaveAttribute("aria-label", /Text: Every carbon atom in you was forged in a star\./);
   await expect(video(page)).toHaveAttribute("src", /\/scenes\/star-forge\/star-forge-16x9\.mp4$/);

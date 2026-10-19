@@ -1,0 +1,28 @@
+# Lesson 0 Check Problem (#78), from the merged Lesson spec. Lesson-only: tagged with the
+# On-ramp, so the Practice Set never draws it. Approved (the spec says draft) because a
+# Check Step plays only approved Problems.
+id: u1-onramp-why-share
+unit: u1
+lesson: u1-l00
+difficulty: 1
+status: approved
+source: Based on MIT OCW 5.12, Lecture 1 pp. 4 and 8, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Wording ours.
+type: multiple-choice
+prompt: Why does carbon share electrons instead of gaining or losing them?
+options:
+  - { id: a, text: "Gaining or losing 4 electrons is too hard, so sharing is the cheaper way to fill its shell." }
+  - { id: b, text: Carbon has no outer electrons to give. }
+  - { id: c, text: "Carbon's outer shell is already full." }
+  - { id: d, text: "Shared electrons don't count for either atom." }
+answer: [a]
+correct: "Right: 4 is the most electrons any atom in the row has to move. Sharing fills the shell without moving any."
+hints:
+  - match: [b]
+    text: "Carbon has 4 outer electrons. Giving them all away is possible on paper. Why doesn't it?"
+  - match: [c]
+    text: "A full shell is 8. Carbon has 4, so it still needs more."
+  - match: [d]
+    text: "Shared electrons count for both atoms. That's what makes sharing work."
+  - text: "Think back to Give or take: how many electrons would carbon have to move?"
+reveal: "Moving 4 electrons either way is too costly. Sharing 4 pairs gets carbon to 8."
+sourceNote: "Based on MIT OCW 5.12, Lecture 1 pp. 4 and 8, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Wording ours."

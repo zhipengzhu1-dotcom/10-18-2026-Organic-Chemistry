@@ -88,8 +88,9 @@ describe("Lesson 6 text matches its spec", () => {
       const prompt = s.type === "explain" ? s.text : s.prompt;
       expect(plain(prompt)).toBe(plain(quoted(text, "Prompt")));
       if (s.type !== "explain") {
-        expect(plain(s.correct)).toBe(plain(quoted(text, "Correct line")));
-        expect((s.hints ?? []).map((h) => plain(h.text))).toEqual(hintTexts(text).map(plain));
+        const graded = s as GradedStep;
+        expect(plain(graded.correct)).toBe(plain(quoted(text, "Correct line")));
+        expect((graded.hints ?? []).map((h) => plain(h.text))).toEqual(hintTexts(text).map(plain));
       }
       // s01 and s07 point at the Geometry note; the bond-length test below checks them.
       if (id === "s01" || id === "s07") return;
