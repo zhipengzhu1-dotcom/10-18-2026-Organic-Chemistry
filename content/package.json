@@ -4,10 +4,13 @@
   "type": "module",
   "license": "CC-BY-NC-SA-4.0",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./data": "./src/data.ts"
   },
   "scripts": {
-    "build": "node src/cli.ts"
+    "build": "node src/cli.ts",
+    "freeze": "node src/freeze-cli.ts",
+    "lint:numbers": "node src/number-lint-cli.ts"
   },
   "dependencies": {
     "yaml": "^2.9.1",

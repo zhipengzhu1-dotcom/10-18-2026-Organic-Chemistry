@@ -1,0 +1,25 @@
+---
+// The Unit page: Level select. Static HTML; LevelSelect renders without client JS.
+import type { GetStaticPaths } from "astro";
+import Base from "../../../../layouts/Base.astro";
+import LevelSelect from "../../../../components/LevelSelect.tsx";
+import { md, unitPages, type UnitPage } from "../../../../lib/content.ts";
+
+export const getStaticPaths = (() =>
+  unitPages().map((page) => ({
+    params: { subject: page.subject, course: page.course.slug, unit: page.unit.slug },
+    props: page,
+  }))) satisfies GetStaticPaths;
+
+const { subject, course, unit } = Astro.props as UnitPage;
+---
+
+<Base title={`${unit.title} · AstraTron`} description={unit.summary}>
+  <main class="page">
+    <p class="crumbs"><a href={`/${subject}`}>Course map</a> · {course.title}</p>
+    <h1><span class="unit-number">Unit {unit.number}</span> {unit.title}</h1>
+    {unit.summary && <p set:html={md(unit.summary)} />}
+    <LevelSelect unit={unit} />
+  </main>
+</Base>
+

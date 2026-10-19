@@ -106,3 +106,83 @@ export const validTree = (): Tree => ({
   "chem/problems/p1.yaml": problem("p1"),
   "chem/problems/p2.yaml": problem("p2"),
 });
+
+const nist = "NIST SRD 101; reuse with acknowledgement (https://www.nist.gov/open/license)";
+
+/** An experimental molecule data file (real CCCBDB values for methane). */
+export const methane = () => ({
+  id: "methane",
+  kind: "molecule",
+  title: "Methane",
+  geometry: "experimental",
+  sources: {
+    cccbdb: {
+      kind: "experimental",
+      citation: "NIST CCCBDB, SRD 101, Release 22 (May 2022), doi:10.18434/T47C7Z",
+      licence: nist,
+    },
+    hirota1979: {
+      kind: "experimental",
+      citation: "Hirota, J. Mol. Spectrosc. 77, 213 (1979), doi:10.1016/0022-2852(79)90103-6",
+      via: "cccbdb",
+      licence: nist,
+    },
+    sverdlov1974: {
+      kind: "experimental",
+      citation: "Sverdlov, Kovner and Krainov, Vibrational Spectra of Polyatomic Molecules, Wiley (1974)",
+      via: "cccbdb",
+      licence: nist,
+    },
+  },
+  values: {
+    "r.CH": { label: "C–H", quantity: "bond-length", value: 1.087, unit: "Å", source: "hirota1979" },
+    "a.HCH": { label: "H–C–H", quantity: "angle", value: 109.471, unit: "°", source: "sverdlov1974" },
+  },
+  atoms: {
+    source: "cccbdb",
+    list: [
+      ["C", 0, 0, 0],
+      ["H", 0.6276, 0.6276, 0.6276],
+      ["H", 0.6276, -0.6276, -0.6276],
+      ["H", -0.6276, 0.6276, -0.6276],
+      ["H", -0.6276, -0.6276, 0.6276],
+    ],
+  },
+});
+
+/** A table data file (Jmol CPK colours for H and C). */
+export const elements = () => ({
+  id: "elements",
+  kind: "table",
+  title: "Elements",
+  sources: {
+    jmol: {
+      kind: "reference",
+      citation: "the Jmol CPK colour table, Jmol source org/jmol/c/PAL.java",
+      licence: "LGPL 2.1 (Jmol)",
+    },
+  },
+  values: {
+    "H.colour": { label: "H colour", quantity: "colour", value: "#FFFFFF", source: "jmol" },
+    "C.colour": { label: "C colour", quantity: "colour", value: "#909090", source: "jmol" },
+  },
+});
+
+/** A computed molecule data file. Test fixture only: its numbers are placeholders, not chemistry. */
+export const computedEthane = () => ({
+  id: "ethane",
+  kind: "molecule",
+  title: "Ethane",
+  geometry: "computed",
+  sources: {
+    ours: {
+      kind: "computed",
+      citation: "Test fixture calculation",
+      licence: "CC BY-NC-SA 4.0",
+      method: { program: "PySCF", version: "0.0.0", level: "B3LYP/cc-pVTZ", date: "2026-01-01" },
+    },
+  },
+  values: {
+    "r.CC": { label: "C–C", quantity: "bond-length", value: 1.5, unit: "Å", source: "ours" },
+  },
+});

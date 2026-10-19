@@ -125,6 +125,9 @@ for (const theme of THEMES) {
         await page.goto(lesson);
         await playThrough(page, async (step) => {
           const label = `${lesson} ${step}`;
+          // Open the Source note (if the Step has one) so its numbers are checked too.
+          const note = page.locator("details.source-note:not([open]) summary");
+          if (await note.count()) await note.click();
           await page.waitForTimeout(250); // let the panel's entry finish before axe reads colours
           const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
           expect(axe.violations.map((v) => `${label}: ${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);

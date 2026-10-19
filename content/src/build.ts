@@ -7,13 +7,17 @@
 //   <subject>/courses/<course>.yaml   one course manifest per Course; file name is its slug
 //   <subject>/lessons/<lesson id>.yaml
 //   <subject>/problems/<problem id>.yaml
+//   <subject>/data/<data id>.yaml|.json  cited data (ADR 0002); see data-load.ts
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 import { parse } from "yaml";
 import type { z } from "zod";
-import { courseFile, lessonFile, problemFile, subjectFile, type LessonFile, type ProblemFile } from "./schema.ts";
+import { courseFile, lessonFile, problemFile, stepIdLock, subjectFile, type LessonFile, type ProblemFile } from "./schema.ts";
+import { checkDeletedSteps, checkFrozenIds, LOCK_FILE } from "./freeze.ts";
 import type { BuildResult, Course, Lesson, Step, Subject } from "./model.ts";
 import { checkInteraction, checkLessonShape } from "./shape.ts";
+import { citeIn, type Cited, type CitedData } from "./data.ts";
+import { dataFile, resolveDataFile } from "./data-load.ts";
 
 export function buildContent(root: string): BuildResult {
   const errors: string[] = [];
@@ -52,23 +56,52 @@ export function buildContent(root: string): BuildResult {
     return out;
   }
 
+  /** Loads and checks a Subject's cited data files. */
+  function loadData(dir: string): CitedData {
+    const data: CitedData = {};
+    for (const rel of yamlFiles(root, dir, [".yaml", ".json"])) {
+      const file = load(rel, dataFile);
+      if (!file) continue;
+      if (file.id !== basename(rel).replace(/\.(yaml|json)$/, "")) {
+        errors.push(`${rel}: id "${file.id}" must match the file name`);
+        continue;
+      }
+      const { set, errors: broken } = resolveDataFile(file);
+      for (const message of broken) errors.push(`${rel}: ${message}`);
+      data[file.id] = set;
+    }
+    return data;
+  }
+
   const subjects: Subject[] = [];
   for (const slug of subdirs(root)) {
     if (!existsSync(join(root, slug, "subject.yaml"))) continue;
     const subject = load(`${slug}/subject.yaml`, subjectFile);
+    const data = loadData(`${slug}/data`);
     const lessons = loadDir<LessonFile>(`${slug}/lessons`, lessonFile);
     const problems = loadDir<ProblemFile>(`${slug}/problems`, problemFile);
 
+    const lockRel = `${slug}/${LOCK_FILE}`;
+    const lock = existsSync(join(root, lockRel)) ? load(lockRel, stepIdLock) : {};
+
     for (const lesson of lessons.values()) {
-      if (lesson)
-        for (const message of checkLessonShape(lesson)) errors.push(`${slug}/lessons/${lesson.id}.yaml: ${message}`);
+      if (!lesson) continue;
+      const frozen = lock?.[lesson.id];
+      const messages = [
+        ...checkLessonShape(lesson),
+        ...(frozen ? checkFrozenIds(lesson, frozen) : []),
+        ...checkDeletedSteps(lesson),
+      ];
+      for (const message of messages) errors.push(`${slug}/lessons/${lesson.id}.yaml: ${message}`);
     }
     for (const problem of problems.values()) {
       if (problem)
         for (const message of checkInteraction(problem)) errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
     }
+    const problemCitations = citeNumbers(slug, data, lessons, problems, errors);
 
     const courses: Course[] = [];
+    let unitNumber = 0;
     for (const rel of yamlFiles(root, `${slug}/courses`)) {
       const course = load(rel, courseFile);
       if (!course) continue;
@@ -76,21 +109,33 @@ export function buildContent(root: string): BuildResult {
       courses.push({
         slug: courseSlug,
         title: course.title,
-        units: course.units.map((unit) => ({
-          ...unit,
-          lessons: unit.lessons.flatMap((lessonId) => {
-            const lesson = lessons.get(lessonId);
-            if (!lesson) {
-              if (!lessons.has(lessonId)) errors.push(`${rel}: unit ${unit.id} lists Lesson "${lessonId}", which has no file`);
-              return [];
-            }
-            const url = `/${slug}/${courseSlug}/${unit.slug}/${lesson.slug}`;
-            return [resolveLesson(lesson, url, problems, `${slug}/lessons/${lesson.id}.yaml`, errors)];
-          }),
-        })),
+        units: course.units.map((unit) => {
+          const url = `/${slug}/${courseSlug}/${unit.slug}`;
+          let coreNumber = 0;
+          return {
+            ...unit,
+            number: ++unitNumber,
+            url,
+            lessons: unit.lessons.flatMap((lessonId) => {
+              const lesson = lessons.get(lessonId);
+              if (!lesson) {
+                if (!lessons.has(lessonId)) errors.push(`${rel}: unit ${unit.id} lists Lesson "${lessonId}", which has no file`);
+                return [];
+              }
+              const number = lesson.onRamp ? 0 : ++coreNumber;
+              const lessonRel = `${slug}/lessons/${lesson.id}.yaml`;
+              const resolved = resolveLesson(lesson, `${url}/${lesson.slug}`, number, problems, lessonRel, errors);
+              for (const step of resolved.steps) {
+                const cited = "problemId" in step && step.problemId && problemCitations.get(step.problemId);
+                if (cited) step.citations = cited;
+              }
+              return [resolved];
+            }),
+          };
+        }),
       });
     }
-    if (subject) subjects.push({ slug, title: subject.title, courses });
+    if (subject) subjects.push({ slug, title: subject.title, url: `/${slug}`, courses, data });
   }
 
   return errors.length ? { errors } : { model: { subjects }, errors };
@@ -99,6 +144,7 @@ export function buildContent(root: string): BuildResult {
 function resolveLesson(
   lesson: LessonFile,
   url: string,
+  number: number,
   problems: Map<string, ProblemFile | undefined>,
   rel: string,
   errors: string[],
@@ -117,7 +163,55 @@ function resolveLesson(
     const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source: _src, credit: _c, ...interaction } = problem;
     return [{ id: step.id, phase: "check", problemId, ...interaction }];
   });
-  return { ...lesson, url, steps };
+  const phases = { hook: 0, build: 0, check: 0, wrap: 0 };
+  for (const step of lesson.steps) phases[step.phase]++;
+  const { signature, ...rest } = lesson;
+  return { ...rest, url, number, signature: signatureType(lesson), phases, steps };
+}
+
+/** The named signature Step's type, else the first graded Build Step's, else the first Step's. */
+function signatureType(lesson: LessonFile): Step["type"] {
+  const named = lesson.steps.find((s) => s.id === lesson.signature);
+  const graded = lesson.steps.find((s) => s.phase === "build" && s.type !== "explain");
+  const type = (named ?? graded ?? lesson.steps[0]).type;
+  return type === "check" ? "multiple-choice" : type;
+}
+
+/**
+ * Swaps every `{{file/key}}` in Lesson Steps and Problems for its cited
+ * display value (ADR 0002), in place in the loaded maps. A Step keeps what it
+ * cited as `citations`; Problems' citations are returned by id for their
+ * Check Steps.
+ */
+function citeNumbers(
+  slug: string,
+  data: CitedData,
+  lessons: Map<string, LessonFile | undefined>,
+  problems: Map<string, ProblemFile | undefined>,
+  errors: string[],
+): Map<string, Cited[]> {
+  const missing = (where: string, refs: string[]) => {
+    for (const ref of refs) errors.push(`${where}cites "${ref}", which is not in the cited data`);
+  };
+  for (const [name, lesson] of lessons) {
+    if (!lesson) continue;
+    const steps = lesson.steps.map((step) => {
+      if (step.type === "check") return step;
+      const { item, cited, missing: refs } = citeIn(step, data);
+      missing(`${slug}/lessons/${name}.yaml: step ${step.id}: `, refs);
+      return cited.length ? { ...item, citations: cited } : item;
+    });
+    lessons.set(name, { ...lesson, steps });
+  }
+  const byProblem = new Map<string, Cited[]>();
+  for (const [name, problem] of problems) {
+    if (!problem) continue;
+    const { item, cited, missing: refs } = citeIn(problem, data);
+    missing(`${slug}/problems/${name}.yaml: `, refs);
+    problems.set(name, item);
+    if (cited.length) byProblem.set(name, cited);
+  }
+  return byProblem;
 }
 
 function subdirs(dir: string): string[] {
@@ -126,10 +220,10 @@ function subdirs(dir: string): string[] {
     .sort();
 }
 
-function yamlFiles(root: string, dir: string): string[] {
+function yamlFiles(root: string, dir: string, extensions = [".yaml"]): string[] {
   if (!existsSync(join(root, dir))) return [];
   return readdirSync(join(root, dir))
-    .filter((name) => name.endsWith(".yaml"))
+    .filter((name) => extensions.some((ext) => name.endsWith(ext)))
     .sort()
     .map((name) => `${dir}/${name}`);
 }

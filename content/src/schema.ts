@@ -96,8 +96,19 @@ export const lessonFile = z.strictObject({
   goal: text,
   keyIdea: text,
   onRamp: z.boolean().default(false),
+  /** The act this Lesson sits in on the Unit's Level select page, e.g. "Shape". */
+  act: text.optional(),
+  /** The Unit's capstone, styled as a boss level. */
+  capstone: z.boolean().default(false),
+  /** The Step whose type is shown as the Lesson's signature Step type; defaults to the first graded Build Step. */
+  signature: stepId.optional(),
   steps: z.array(step).min(1),
+  /** ADR 0003: a deleted Step's id → the live Step its old links now open. Ids here are never reused. */
+  deletedSteps: z.record(stepId, stepId).optional(),
 });
+
+/** `<subject>/step-ids.lock.yaml`: every Step id each Lesson has ever had, written by `pnpm content:freeze`. */
+export const stepIdLock = z.record(id, z.array(stepId));
 
 const problemMeta = {
   id,
@@ -121,6 +132,8 @@ const unit = z.strictObject({
   id,
   slug: id,
   title: text,
+  /** One-line scope shown on the Unit tile. */
+  summary: text.optional(),
   status: z.enum(["available", "coming-soon"]),
   /** Lesson ids in play order. */
   lessons: z.array(id).default([]),

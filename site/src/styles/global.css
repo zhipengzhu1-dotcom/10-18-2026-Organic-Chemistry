@@ -428,6 +428,41 @@
     color: var(--at-space);
   }
 
+  /* Source note: one tap away; the numbers inside are data. */
+  .source-note summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: var(--at-tap);
+    padding: 0 12px;
+    font: 500 16px/1.2 var(--at-font-text);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--at-ink-muted);
+    border: var(--at-border) dashed var(--at-line);
+    cursor: pointer;
+    list-style: none;
+  }
+  .source-note summary::-webkit-details-marker {
+    display: none;
+  }
+  .source-note[open] summary {
+    border-style: solid;
+    color: var(--at-ink);
+  }
+  .source-note p {
+    margin: 0;
+    padding: 8px 12px;
+    font: 400 16px/1.55 var(--at-font-data);
+    color: var(--at-ink-muted);
+    border: var(--at-border) dashed var(--at-line);
+    border-top: 0;
+  }
+  .source-note strong {
+    color: var(--at-ink);
+    font-weight: 600;
+  }
+
   /* Key idea card at the Wrap */
   .card {
     border: var(--at-border-strong) solid var(--at-ignite-fill);
@@ -438,6 +473,198 @@
   .card h2 {
     margin: 0 0 6px;
     font-size: 20px;
+  }
+}
+
+@layer components {
+  /* Course map: each Course a strip of Unit tiles. */
+  .course-map {
+    display: grid;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .course h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+  }
+  .tiles {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    list-style: none;
+    margin: 0 calc(-1 * var(--at-gutter));
+    padding: 6px var(--at-gutter) 16px;
+    scroll-snap-type: x proximity;
+    scroll-padding: 0 var(--at-gutter);
+  }
+  .tile {
+    flex: 0 0 min(58vw, 200px);
+    scroll-snap-align: start;
+    border: var(--at-border-strong) solid var(--at-line);
+    background: var(--at-surface);
+    box-shadow: 5px 5px 0 var(--at-line);
+  }
+  .tile > a,
+  .tile > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    height: 100%;
+    min-height: 200px;
+    padding: 14px;
+    color: var(--at-ink);
+    text-decoration: none;
+  }
+  .tile.open {
+    border-color: var(--at-ignite-fill);
+    box-shadow: var(--at-drop);
+  }
+  .tile.soon {
+    border-style: dashed;
+    box-shadow: none;
+  }
+  .tile-number {
+    font: 600 16px/1 var(--at-font-data);
+    text-transform: uppercase;
+    color: var(--at-ink-muted);
+  }
+  .tile.open .tile-number {
+    color: var(--at-ignite);
+  }
+  .tile-title {
+    font: 700 19px/1.15 var(--at-font-text);
+  }
+  .tile-summary {
+    color: var(--at-ink-muted);
+  }
+  .tile-soon {
+    margin-top: auto;
+    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    text-transform: uppercase;
+    color: var(--at-ink-muted);
+  }
+
+  /* Unit page and its Level select */
+  .crumbs a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--at-tap);
+  }
+  .unit-number {
+    display: block;
+    font: 600 16px/1.2 var(--at-font-data);
+    text-transform: uppercase;
+    color: var(--at-ignite);
+  }
+  .level-select .act-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 24px 0 10px;
+    font: 600 16px/1.2 var(--at-font-text);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--at-electron);
+  }
+  .level-select .act-title::after {
+    content: "";
+    flex: 1;
+    height: 2px;
+    background: var(--at-line);
+  }
+  .level-select .levels {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+  }
+  .level-select .level {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    gap: 6px 8px;
+    padding: 12px;
+    border: var(--at-border) solid var(--at-line);
+    background: var(--at-surface);
+    box-shadow: 3px 3px 0 var(--at-line);
+  }
+  .level-select .level > :not(.chip) {
+    grid-column: 1 / -1;
+  }
+  .level-select .level-number {
+    font: 600 16px/1.2 var(--at-font-data);
+    color: var(--at-ink-muted);
+  }
+  .level-select .level-title {
+    margin: 0;
+    font-size: 19px;
+  }
+  .level-select .level-title a {
+    display: flex;
+    align-items: center;
+    min-height: var(--at-tap);
+    color: var(--at-ink);
+  }
+  .level-select .level-goal {
+    margin: 0;
+    color: var(--at-ink-muted);
+  }
+  .level-select .chip {
+    justify-self: start;
+    padding: 2px 8px;
+    font: 500 16px/1.3 var(--at-font-text);
+    color: var(--at-ink-muted);
+    border: var(--at-border) solid currentColor;
+  }
+  .level-select .chip.count {
+    font-family: var(--at-font-data);
+  }
+  .level-select .phase-bar {
+    display: flex;
+    gap: 2px;
+    height: 8px;
+  }
+  .level-select .phase {
+    min-width: 4px;
+  }
+  .level-select .phase-hook {
+    background: var(--at-ignite-fill);
+  }
+  .level-select .phase-build {
+    background: var(--at-electron-fill);
+  }
+  .level-select .phase-check {
+    background: var(--at-boss-fill);
+  }
+  .level-select .phase-wrap {
+    background: var(--at-ink-muted);
+  }
+  .level-select .skip {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--at-tap);
+  }
+  .level-select .level-on-ramp {
+    border-style: dashed;
+    box-shadow: none;
+  }
+  .level-select .level-boss {
+    border-color: var(--at-boss-fill);
+    border-width: var(--at-border-strong);
+    box-shadow: 3px 3px 0 var(--at-boss-fill);
+  }
+  .level-select .level-boss .level-number {
+    color: var(--at-boss);
+  }
+  .level-select .level-practice {
+    border-color: var(--at-ignite-fill);
+  }
+  .level-select .level-soon {
+    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    text-transform: uppercase;
+    color: var(--at-ignite);
   }
 }
 

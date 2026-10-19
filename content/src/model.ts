@@ -1,5 +1,6 @@
 // The resolved course model: what the content build hands to the site and the
 // video renderer. Check Steps arrive with their Problem inlined.
+import type { Cited, CitedData } from "./data.ts";
 
 export type Phase = "hook" | "build" | "check" | "wrap";
 
@@ -14,6 +15,7 @@ export interface ExplainStep {
   phase: Phase;
   type: "explain";
   text: string;
+  citations?: Cited[];
 }
 
 export interface MultipleChoiceStep {
@@ -29,6 +31,8 @@ export interface MultipleChoiceStep {
   prediction?: boolean;
   /** Set on Check Steps: the Bank Problem this Step plays. */
   problemId?: string;
+  /** The cited values this Step's text shows (`{{file/key}}`); its Source note is generated from them. */
+  citations?: Cited[];
 }
 
 export interface NumericHint {
@@ -52,6 +56,7 @@ export interface NumericStep {
   hints?: NumericHint[];
   reveal: string;
   problemId?: string;
+  citations?: Cited[];
 }
 
 /** Rank / order: the Student puts the items into one strict order (the prompt names which end is first). */
@@ -69,6 +74,7 @@ export interface RankStep {
   hints?: Hint[];
   reveal: string;
   problemId?: string;
+  citations?: Cited[];
 }
 
 /** A Step the Student answers and the engine grades. */
@@ -83,16 +89,34 @@ export interface Lesson {
   goal: string;
   keyIdea: string;
   onRamp: boolean;
+  /** Lesson number in its Unit: the On-ramp is 0, core Lessons count from 1. */
+  number: number;
+  /** The act this Lesson sits in on the Level select page. */
+  act?: string;
+  /** The Unit's capstone, styled as a boss level. */
+  capstone: boolean;
+  /** The Lesson's signature Step type. */
+  signature: Step["type"];
+  /** Step count per phase, for the Hook/Build/Check/Wrap bar. */
+  phases: Record<Phase, number>;
   /** Path of the Lesson page; a Step link appends `#<step id>` (ADR 0003). */
   url: string;
   steps: Step[];
+  /** Deleted Step id → the live Step id its old links now open (ADR 0003). */
+  deletedSteps?: Record<string, string>;
 }
 
 export interface Unit {
   id: string;
   slug: string;
+  /** Position in the Subject, counted continuously across its Courses (Orgo II starts at Unit 11). */
+  number: number;
   title: string;
+  /** One-line scope shown on the Unit tile. */
+  summary?: string;
   status: "available" | "coming-soon";
+  /** Path of the Unit page (Level select); only `available` Units have one. */
+  url: string;
   lessons: Lesson[];
 }
 
@@ -105,7 +129,11 @@ export interface Course {
 export interface Subject {
   slug: string;
   title: string;
+  /** Path of the Subject's Course map page. */
+  url: string;
   courses: Course[];
+  /** The Subject's cited data files, by id; read numbers from it with `cite` (ADR 0002). */
+  data: CitedData;
 }
 
 export interface CourseModel {

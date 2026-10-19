@@ -23,7 +23,7 @@ steps:
   - id: s02
     phase: build
     type: explain
-    text: A **covalent bond** is a pair of electrons shared between two atoms. Carbon brings four valence electrons, so it can share in four bonds.
+    text: A **covalent bond** is a pair of electrons shared between two atoms. Carbon brings four valence electrons, so it can share in four bonds. In methane, each C–H bond is {{methane/r.CH}} long.
 
   - id: s03
     phase: build

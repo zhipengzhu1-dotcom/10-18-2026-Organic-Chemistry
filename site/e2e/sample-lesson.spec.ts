@@ -1,9 +1,11 @@
 import { expect, test } from "@playwright/test";
 
-const LESSON = "/organic/orgo-1/structure-bonding/sample-carbons-four-bonds";
+const UNIT = "/organic/orgo-1/structure-bonding";
+const LESSON = `${UNIT}/sample-carbons-four-bonds`;
 
 test("a Student clicks through the sample Lesson from the home page", async ({ page }) => {
   await page.goto("/");
+  await page.getByRole("link", { name: /Structure & Bonding/ }).click();
   await page.getByRole("link", { name: "Sample: Carbon's Four Bonds" }).click();
   await expect(page).toHaveURL(LESSON);
   await expect(page).toHaveTitle("Sample: Carbon's Four Bonds · Structure & Bonding · AstraTron");
@@ -68,5 +70,5 @@ test("a Student clicks through the sample Lesson from the home page", async ({ p
   await at(10);
   await expect(page.getByRole("heading", { name: "Key idea" })).toBeVisible();
   await page.getByRole("link", { name: "Finish" }).click();
-  await expect(page).toHaveURL("/");
+  await expect(page).toHaveURL(UNIT);
 });
