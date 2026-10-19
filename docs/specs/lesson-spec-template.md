@@ -86,3 +86,28 @@ One block per Problem, written in full (it becomes a Problem file in the Bank).
 - **Status:** `draft` (becomes `approved` on merge)
 - then the same fields as a Step: Prompt, Visual, Interaction, Answer, Correct line, Hints, Reveal, Scene, Source note
 - **Credit:** optional
+
+---
+
+## Practice Problems file
+
+A Unit's Bank Problems beyond its Check Problems live in one file, `docs/specs/<unit>/practice-problems.md`, written in one session and approved in one PR ([Decide the content authoring and review workflow](https://github.com/zhipengzhu1-dotcom/10-18-2026-Organic-Chemistry/issues/52)). Example: [Unit 1](unit-1/practice-problems.md).
+
+**Order of the file:**
+
+1. Title, one paragraph on what the file holds, and links to the workflow and Unit tickets.
+2. **Problem checks** (the reviewer ticks these):
+   - [ ] Every core Lesson has a Problem at each difficulty 1, 2 and 3; the Unit has at least 20 Practice Problems (Check Problems don't count). The On-ramp has none.
+   - [ ] No Problem duplicates a Check Problem (a molecule may come back only to ask a different question)
+   - [ ] Every interactive Problem has a Hint for each anticipated wrong answer, plus a generic fallback
+   - [ ] Every number points at cited data; none is typed in
+   - [ ] Every Scene in a reveal has screen-reader text; every 3D viewer has its Describe text
+   - [ ] Every Problem has a source line, and its source's licence allows adaptation
+   - [ ] Every Tap-to-identify Problem in a Lesson that has Draw-arrows Steps says it is tap-only (a Practice Set can place it right after a Draw-arrows Problem)
+   - [ ] A second agent re-solved every Problem blind before the PR; disagreements are fixed or listed at the top of the PR body
+3. **Sources**: a table of every source with its licence and how many Problems use it, then what is excluded and why, then the Source note wording.
+4. **Data and Scene additions**: new geometry files, Scene parameters and build-time sanity checks the Problems need beyond the Lessons'. `n/a` if none.
+5. One `## Lesson N: <title>` section per core Lesson, its Problems in order of difficulty, each written as a Check Problem block (above) with one extra field after Tags and Status:
+   - **Source line:** where the Problem comes from, in one line: "Adapted from MIT 5.12 PS1 Q1", "Adapted from LibreTexts Wade 1-20(b) and its solution", or "Original".
+
+**Sources, in order of preference:** adapt from the Unit's own course source first (for Unit 1, MIT 5.12 Spring 2005: unused problem-set parts, then other problem sets and exams in the Unit's scope), then LibreTexts pages whose own licence tag is CC BY or CC BY-NC-SA; write fresh only for gaps. Never adapt OpenStax (its pages restrict generative-AI use), LibreTexts books remixed from OpenStax, CC BY-SA pages (they can't be relicensed under our NC terms), or "used with permission" figures.
