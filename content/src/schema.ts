@@ -23,6 +23,37 @@ const multipleChoice = {
   reveal: text,
 };
 
+/** A Numeric Hint: `match` is a common wrong value, matched within the Step's tolerance. */
+const numericHint = z.strictObject({ match: z.number().optional(), text });
+
+/** Fields shared by a Numeric input Step and a Numeric Problem. The unit is fixed here and shown, never typed. */
+const numeric = {
+  type: z.literal("numeric"),
+  prompt: text,
+  /** The unit of measure, e.g. "°", "Å", "kJ/mol" (named so it can't be read as a course Unit). */
+  unitSymbol: z.string(),
+  answer: z.number(),
+  /** Absolute: answer ± tolerance is right. */
+  tolerance: z.number().min(0),
+  correct: text.optional(),
+  hints: z.array(numericHint).optional(),
+  reveal: text,
+};
+
+/** Fields shared by a Rank / order Step and a Rank Problem. */
+const rank = {
+  type: z.literal("rank"),
+  prompt: text,
+  /** The cards, in the order they start in. */
+  items: z.array(option).min(2),
+  /** The one strict order of item ids, first to last. */
+  answer: z.array(id).min(2),
+  correct: text.optional(),
+  /** A Rank Hint's `match` is one whole wrong order. */
+  hints: z.array(hint).optional(),
+  reveal: text,
+};
+
 const stepId = z.string().regex(/^s\d{2,}$/, 'must look like "s01"');
 const phase = z.enum(["hook", "build", "wrap"]);
 
@@ -41,6 +72,9 @@ const multipleChoiceStep = z.strictObject({
   prediction: z.boolean().optional(),
 });
 
+const numericStep = z.strictObject({ id: stepId, phase, ...numeric });
+const rankStep = z.strictObject({ id: stepId, phase, ...rank });
+
 /** A Check Step is a Problem from the Bank, referenced by id; its Step type is the Problem's. */
 const checkStep = z.strictObject({
   id: stepId,
@@ -52,7 +86,7 @@ const checkStep = z.strictObject({
 /** Picks the Step schema by `type` (a Check Step is recognised by its `problem`), so errors point at the broken field. */
 const step = z.preprocess(
   (v) => (v && typeof v === "object" && "problem" in v && !("type" in v) ? { ...v, type: "check" } : v),
-  z.discriminatedUnion("type", [checkStep, explainStep, multipleChoiceStep]),
+  z.discriminatedUnion("type", [checkStep, explainStep, multipleChoiceStep, numericStep, rankStep]),
 );
 
 export const lessonFile = z.strictObject({
@@ -76,7 +110,7 @@ export const lessonFile = z.strictObject({
 /** `<subject>/step-ids.lock.yaml`: every Step id each Lesson has ever had, written by `pnpm content:freeze`. */
 export const stepIdLock = z.record(id, z.array(stepId));
 
-export const problemFile = z.strictObject({
+const problemMeta = {
   id,
   unit: id,
   lesson: id,
@@ -85,8 +119,14 @@ export const problemFile = z.strictObject({
   /** Where the Problem comes from, e.g. "Adapted from MIT 5.12 PS1 Q1" or "Original". */
   source: text,
   credit: text.optional(),
-  ...multipleChoice,
-});
+};
+
+/** A Problem's `type` picks its interaction: the same fields as the Step type of that name. */
+export const problemFile = z.discriminatedUnion("type", [
+  z.strictObject({ ...problemMeta, ...multipleChoice }),
+  z.strictObject({ ...problemMeta, ...numeric }),
+  z.strictObject({ ...problemMeta, ...rank }),
+]);
 
 const unit = z.strictObject({
   id,

@@ -3,8 +3,12 @@
 // Set as the final row. Rendered to static HTML at build time (no client JS).
 import type { Lesson, Phase, Unit } from "@astratron/content";
 
+/** Step type names as the GLOSSARY and the Lesson specs write them. */
+const STEP_TYPE_NAMES: Record<string, string> = { numeric: "Numeric input", rank: "Rank / order" };
+
 /** A Step type as a Student reads it: "multiple-choice" → "Multiple choice". */
-export const stepTypeName = (type: string) => type[0].toUpperCase() + type.slice(1).replace(/-/g, " ");
+export const stepTypeName = (type: string) =>
+  STEP_TYPE_NAMES[type] ?? type[0].toUpperCase() + type.slice(1).replace(/-/g, " ");
 
 const PHASES: Phase[] = ["hook", "build", "check", "wrap"];
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
