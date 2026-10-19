@@ -155,7 +155,8 @@
     border-color: var(--at-ink);
     box-shadow: 5px 5px 0 var(--at-line);
   }
-  .btn:disabled {
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
     background: var(--at-raised);
     color: var(--at-ink-muted);
     box-shadow: none;
@@ -301,18 +302,20 @@
     .player.revealing .player-prompt {
       display: none;
     }
+    /* A Tap Step that draws figures beside its question (#78, s06): once it is answered (a Hint,
+       the Correct line or the reveal), the feedback and the drawings take the screen. */
+    .player.answered .player-prompt {
+      display: none;
+    }
     /* A 3D Step (Lesson 3, #81): a long prompt, the card and the choices share one screen, so the
-       Step sits tighter; once answered, the card (settled on the answer) and the feedback take the
-       prompt's place. */
+       Step sits tighter. Once answered (.player.answered, above), the card settles on the answer
+       and takes the prompt's place with the feedback. */
     .player.has-card .player-body {
       gap: 10px;
     }
     .player.has-card .player-prompt {
       font-size: 17px;
       line-height: 1.25;
-    }
-    .player.has-card.answered .player-prompt {
-      display: none;
     }
     /* The inline card is the same viewer Explore opens, so on a phone it stands in for the button. */
     .player.has-card .explore-open {
@@ -348,10 +351,6 @@
     }
     .player.has-card .figure-drawing .structure {
       max-height: 3.75rem;
-    }
-    /* The Wrap's Scene gives way to the Key idea card on the Lesson-end screen. */
-    .player:has(.player-end) .scene {
-      display: none;
     }
   }
   /* Short choices (one or two words) sit two to a row. */
@@ -1242,6 +1241,36 @@
   .scene-value {
     min-width: 5ch;
     font-family: var(--at-font-data);
+  }
+  /* On a phone, a Manipulate Step's Scene sits a little lower so its slider and a Hint fit (#78). */
+  @media (max-width: 600px) {
+    .scene:has(.scene-control) .scene-frame {
+      max-height: 21dvh;
+    }
+  }
+  /* A watch-only Scene above a question shrinks to a card once played (#78). */
+  .scene-watch.shrunk .scene-frame {
+    max-height: 7rem;
+  }
+  /* A goal-state Scene's refusal ("It's full."), shown at once under it (#78). */
+  .scene-say {
+    margin: 4px 0 0;
+    min-height: 0;
+    color: var(--at-ink);
+  }
+  .scene-say:empty {
+    display: none;
+  }
+  .scene-goal [data-handle],
+  .scene-goal [data-target] {
+    cursor: pointer;
+    outline: none;
+  }
+  .scene-goal [data-handle]:focus-visible circle,
+  .scene-goal [data-target]:focus-visible circle {
+    stroke: var(--at-electron);
+    stroke-width: 8px;
+    stroke-dasharray: 18 12;
   }
 }
 

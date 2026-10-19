@@ -78,9 +78,9 @@ describe("Lesson 3 content", () => {
     ]);
   });
 
-  it("follows Lesson 1 in Unit 1", () => {
+  it("follows Lesson 2 in Unit 1", () => {
     const ids = organic.courses[0].units[0].lessons.map((l) => l.id);
-    expect(ids.indexOf("u1-l03")).toBe(ids.indexOf("u1-l01") + 1);
+    expect(ids.indexOf("u1-l03")).toBe(ids.indexOf("u1-l02") + 1);
   });
 
   it("puts every measured angle through the cited data, with its Source note", () => {

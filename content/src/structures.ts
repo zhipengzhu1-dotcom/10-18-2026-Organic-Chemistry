@@ -4,6 +4,7 @@
 import type { Figure, Hidden, Option, Structure, StructureAtom, StructureView, TapTarget } from "./model.ts";
 import type { ProblemFile, StructureFile } from "./schema.ts";
 import { hintIds } from "./shape.ts";
+import { expectedLonePairs, hydrogenCount } from "./valence.ts";
 import {
   arrowsAct,
   arrowsStart,
@@ -23,6 +24,37 @@ type FigureFile = NonNullable<TapFile["figures"]>[number];
 type OptionFile = Extract<ProblemFile, { type: "multiple-choice" }>["options"][number];
 
 /** Internal consistency of one structure file. */
+/** The PubChem compound a structure file names in its `source` ("PubChem CID 7967"), if any. */
+export const pubchemCid = (s: Pick<Structure, "source">): number | undefined => {
+  const m = s.source?.match(/PubChem CID (\d+)/);
+  return m ? Number(m[1]) : undefined;
+};
+
+/** Atoms of one element in a molecular formula such as "C18H24O2". */
+const countIn = (formula: string, el: string) =>
+  [...formula.matchAll(/([A-Z][a-z]?)(\d*)/g)].reduce((n, [, e, k]) => n + (e === el ? Number(k || 1) : 0), 0);
+
+/**
+ * A drawing that names a PubChem compound must stand for that compound's H's
+ * (counted from the cached PubChem record's formula), and every lone pair it
+ * draws must follow from valence.
+ */
+export function checkAgainstPubChem(s: Structure, formula: string): string[] {
+  const cid = pubchemCid(s);
+  if (cid === undefined) return [];
+  const errors: string[] = [];
+  const drawn = hydrogenCount(s);
+  const real = countIn(formula, "H");
+  if (drawn !== real) errors.push(`the drawing has ${drawn} H, but PubChem CID ${cid} (${formula}) has ${real}`);
+  const expected = expectedLonePairs(s);
+  for (const a of s.atoms) {
+    const want = expected[a.id];
+    if (want !== undefined && (a.lp ?? 0) !== want)
+      errors.push(`${a.id} (${a.el}) draws ${a.lp ?? 0} lone pairs; its bonds and charge give ${want}`);
+  }
+  return errors;
+}
+
 export function checkStructure(file: StructureFile): string[] {
   const errors: string[] = [];
   const seen = new Set<string>();
@@ -75,6 +107,7 @@ export function resolveFigure(
   return {
     view: view(found, figure.hide, figure.ring, figure.outline, figure.corner),
     alt: figure.alt,
+    ...(figure.large && { large: true }),
     ...(figure.caption ? { caption: figure.caption } : {}),
   };
 }

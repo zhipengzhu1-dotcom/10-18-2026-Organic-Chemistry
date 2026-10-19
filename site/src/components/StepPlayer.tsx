@@ -12,6 +12,7 @@ import { readRecord, writeRecord } from "../progress/store.ts";
 import SourceNote from "./SourceNote.tsx";
 import ScenePlayer from "./ScenePlayer.tsx";
 import WatchScenePlayer from "./WatchScenePlayer.tsx";
+import GoalScene from "./GoalScene.tsx";
 import { watchScene } from "@astratron/scenes/watch";
 import SceneControl from "./SceneControl.tsx";
 import StructureTap from "./StructureTap.tsx";
@@ -67,6 +68,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   const [draft, setDraft] = useState("");
   const [ranked, setRanked] = useState<{ stepId: string; order: string[] } | null>(null);
   const [manipulated, setManipulated] = useState<{ stepId: string; value: SceneValue } | null>(null);
+  /** The graded Step whose watch-only video is playing now (its prompt waits until it stops). */
+  const [introPlaying, setIntroPlaying] = useState<string | null>(null);
   const { step, feedback } = screen;
   const pageStep = page.steps[screen.index];
   const single = (pageStep.type === "multiple-choice" || pageStep.type === "rotate-and-identify") && pageStep.select === "one";
@@ -129,6 +132,14 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     if (linked && moved && location.hash !== `#${step.id}`) history.replaceState(null, "", `#${step.id}`);
   }, [linked, step.id, screen.index, practice]);
 
+  // Goal-state Manipulate: after `idleSeconds` with no move, the stage's idle Hint (the second also nudges).
+  const goalIdle = step.type === "manipulate-goal" && screen.goal && !screen.canContinue && key ? step.idleSeconds : 0;
+  useEffect(() => {
+    if (!goalIdle) return;
+    const timer = setTimeout(() => dispatch({ type: "idle" }), goalIdle * 1000);
+    return () => clearTimeout(timer);
+  }, [goalIdle, step.id, screen.goal?.state, screen.goal?.idle, screen.goal?.stage]);
+
   const order =
     step.type !== "rank" ? [] : ranked?.stepId === step.id ? ranked.order : step.items.map((item) => item.id);
 
@@ -187,7 +198,15 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   // Single focus: no site chrome, only the ✕, story bars, Step count and one
   // fixed bottom button. The feedback panel sits above that button.
   return (
-    <div className={playerClass({ revealing: !!revealScene, card: hasCard, answered: hasCard && screen.canContinue })} id={step.id}>
+    <div
+      className={playerClass({
+        revealing: !!revealScene,
+        card: hasCard,
+        // A Tap Step with figures (#78) or a 3D Step (#81), once answered: phones drop the prompt.
+        answered: (!!feedback && step.type === "tap-to-identify" && !!step.figures) || (hasCard && screen.canContinue),
+      })}
+      id={step.id}
+    >
       <div className="player-top">
         <a href={exitHref} aria-label={practice ? "Leave the Practice Set" : "Leave the Lesson"} className="player-exit">
           ✕
@@ -209,14 +228,19 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         {step.type === "explain" ? (
           <p {...html(step.text)} />
         ) : (
-          <p className="player-prompt" {...html(step.prompt)} />
+          // A goal-state Manipulate Step shows the prompt of the stage on screen. While a Hook's
+          // video plays, its question waits (still read to screen readers), as the spec has it.
+          <p
+            className={introPlaying === step.id ? "player-prompt sr" : "player-prompt"}
+            {...html(screen.goal?.prompt ?? step.prompt)}
+          />
         )}
 
         {/* Once a reveal Scene plays, it shows the answer in place of the question's widgets. */}
         {step.figures && !revealScene && !(hasCard && "molecule" in step && step.molecule?.toggle) && <Figures figures={step.figures} />}
 
         {step.type === "tap-to-identify" && step.alt && <p className="sr">{step.alt}</p>}
-        {step.type === "tap-to-identify" && (
+        {step.type === "tap-to-identify" && !revealScene && (
           <StructureTap
             step={step}
             picked={chosen}
@@ -262,10 +286,29 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
 
         {!revealScene && step.scene && watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
           // A watch-only Scene (#66): the committed video, keyed per Step so it autoplays on entry.
-          <WatchScenePlayer key={`scene-${step.id}`} sceneId={step.scene.id} cited={step.scene.cited} />
+          <WatchScenePlayer
+            key={`scene-${step.id}`}
+            sceneId={step.scene.id}
+            cited={step.scene.cited}
+            shrinkWhenDone={step.type !== "explain"}
+            onPlaying={(playing) => setIntroPlaying(playing && step.type !== "explain" ? step.id : null)}
+          />
         )}
 
-        {!revealScene && step.scene && sceneState && !watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
+        {step.type === "manipulate-goal" && screen.goal && (
+          // Goal-state Manipulate: the Student works the Scene itself; keyed per Step.
+          <GoalScene
+            key={`goal-${step.id}`}
+            sceneId={step.scene.id}
+            state={screen.goal.state}
+            cited={step.scene.cited}
+            nudge={screen.goal.idle >= 2}
+            locked={screen.canContinue || !key}
+            onMove={(patch) => dispatch({ type: "answer", state: patch })}
+          />
+        )}
+
+        {!revealScene && step.type !== "manipulate-goal" && step.scene && sceneState && !watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
           // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
           <ScenePlayer
             key={`scene-${step.id}`}
@@ -322,7 +365,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         )}
 
         {step.type === "multiple-choice" && !revealScene && (
-          <div className="opts" role="group" aria-label="Choices">
+          // Short text choices sit as chips: many to a row for one-word choices, two to a row under a figure.
+          <div className={["opts", chips(step)].filter(Boolean).join(" ")} role="group" aria-label="Choices">
             {step.options.map((o) =>
               o.structure ? (
                 // A structure card: the drawing is pre-rendered SVG; its text is the screen-reader label.
@@ -330,11 +374,13 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
                   key={o.id}
                   type="button"
                   className="opt structure-card"
-                  aria-label={o.text}
                   aria-pressed={chosen.includes(o.id)}
                   disabled={screen.canContinue}
                   onClick={() => pick(o.id)}
                 >
+                  {/* The name comes from this hidden text, not aria-label: the drawing's letters (N, OH…)
+                      would otherwise be visible text missing from the name (WCAG 2.5.3 Label in Name). */}
+                  <span className="sr">{o.text}</span>
                   <span aria-hidden="true" {...html(o.structure.drawn?.svg ?? "")} />
                 </button>
               ) : (
@@ -426,6 +472,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <button type="button" className="btn btn-primary btn-block" onClick={next}>
             Continue
           </button>
+        ) : step.type === "manipulate-goal" ? (
+          // No Check: Continue opens when the last stage is done; tapped before then it gives the stage's Hint.
+          <button type="button" className="btn btn-primary btn-block" aria-disabled="true" onClick={() => dispatch({ type: "continue" })}>
+            Continue
+          </button>
         ) : step.type === "draw-arrows" ? (
           // No Check button: each push is graded the moment it lands. The one bottom button undoes.
           <button
@@ -446,7 +497,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   );
 }
 
-/** The player's classes: a reveal Scene playing, a 3D card on screen, and that 3D Step answered. */
+/** The player's classes: a reveal Scene playing, a 3D card on screen, and the Step answered (see global.css). */
 function playerClass(on: { revealing: boolean; card: boolean; answered: boolean }): string {
   return ["player", on.revealing && "revealing", on.card && "has-card", on.answered && "answered"].filter(Boolean).join(" ");
 }
@@ -454,6 +505,22 @@ function playerClass(on: { revealing: boolean; card: boolean; answered: boolean 
 /** Choices short enough (plain words, e.g. "bent", "BF₃ only") to sit two to a row. */
 const SHORT_OPTION = 24;
 export const shortOptions = (options: { text: string }[]) => options.every((o) => o.text.replace(/<[^>]*>/g, "").length <= SHORT_OPTION);
+
+/** Short text for a chip, and a single word or two: under this many characters (HTML tags aside). */
+const CHIP_TEXT = 42;
+const WORD_TEXT = 12;
+
+/**
+ * How text choices are laid out: as word chips, as many to a row as fit (six or more one-word choices,
+ * e.g. group names), or two to a row (short choices under a figure); else one to a row.
+ */
+function chips(step: { options: { text: string; structure?: unknown }[]; figures?: unknown[] }): string | undefined {
+  if (step.options.some((o) => o.structure)) return undefined;
+  const longest = Math.max(...step.options.map((o) => o.text.replace(/<[^>]*>/g, "").length));
+  if (step.options.length >= 6 && longest < WORD_TEXT) return "opts-words";
+  if (step.options.length >= 6 || (step.figures && longest < CHIP_TEXT)) return "opts-chips";
+  return undefined;
+}
 
 /** Reads what the Student typed: accepts a comma decimal and a typographic minus; NaN when it isn't a number. */
 function parseNumber(text: string): number {

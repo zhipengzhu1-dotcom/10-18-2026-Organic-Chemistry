@@ -94,6 +94,8 @@ export interface Figure {
   caption?: string;
   /** Screen-reader text for the drawing. */
   alt: string;
+  /** Drawn at a size to read, not as a thumbnail. */
+  large?: boolean;
 }
 
 /** Something one tap away from a Step: a Scene, or a reference table of drawings. */
@@ -312,7 +314,42 @@ export type GradedStep =
   | RotateAndIdentifyStep
   | DrawArrowsStep;
 
-export type Step = ExplainStep | GradedStep;
+/** One stage of a goal-state Manipulate Step. */
+export interface GoalStage {
+  prompt: string;
+  /** States the Scene is set to as the stage opens, on top of where the last stage left it. */
+  start?: Record<string, SceneValue>;
+  /** The stage is done once the Scene's state holds every one of these values. */
+  goal: Record<string, SceneValue>;
+  correct: string;
+  /** The Hint when Continue is tapped before the stage is done. */
+  blocked: string;
+  /** The Hint after `idleSeconds` with no move; a second idle shows the next move as a nudge. */
+  idle: string;
+}
+
+/**
+ * A goal-state Manipulate a Scene Step: the Student works the Scene itself (its handles, e.g.
+ * atoms to drag) until its state reaches each stage's goal. Nothing is graded: the Scene's own
+ * rules refuse impossible moves, and Continue opens when the last stage is done.
+ */
+export interface GoalStep extends GradedVisuals {
+  id: string;
+  phase: Phase;
+  type: "manipulate-goal";
+  /** The first stage's prompt. */
+  prompt: string;
+  scene: SceneUse;
+  idleSeconds: number;
+  stages: GoalStage[];
+  /** Nothing is graded, so there is no reveal; never a Problem. */
+  reveal?: undefined;
+  problemId?: undefined;
+  citations?: Cited[];
+  molecule?: MoleculeUse;
+}
+
+export type Step = ExplainStep | GoalStep | GradedStep;
 
 // ── Structures (2D drawings) ────────────────────────────────────────────────
 // A structure file is laid out once by RDKit.js (content/src/layout.ts) and
@@ -352,7 +389,8 @@ export interface StructureBond {
 export interface Structure {
   id: string;
   /** full = every atom a letter (Lewis/Kekulé); line-angle = carbons are corners unless charged or `letter`. */
-  style: "full" | "line-angle";
+  /** lewis = every atom a letter and each shared pair two dots between its atoms (no lines). */
+  style: "full" | "lewis" | "line-angle";
   /** The SMILES it was laid out from (provenance). */
   smiles?: string;
   /** Where the structure comes from, e.g. "PubChem CID 750". */

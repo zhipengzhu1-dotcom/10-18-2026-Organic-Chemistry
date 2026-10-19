@@ -1,0 +1,11 @@
+# Hand-placed coordinates; drawn by the site’s own renderer.
+
+id: n2-too-many-pairs
+style: full
+smiles: "N#N"
+source: Drawn wrong on purpose (Lesson 2 card)
+atoms:
+  - { id: a1, el: N, x: 0, y: 0, lp: 2 }
+  - { id: a2, el: N, x: 1.5, y: 0, lp: 2 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 3 }

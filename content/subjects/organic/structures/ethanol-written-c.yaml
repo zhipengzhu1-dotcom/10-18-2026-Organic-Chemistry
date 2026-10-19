@@ -1,0 +1,12 @@
+# Hand-placed coordinates; drawn by the site’s own renderer.
+
+id: ethanol-written-c
+style: line-angle
+source: Drawn wrong on purpose (Lesson 2 card)
+atoms:
+  - { id: a1, el: O, x: 0, y: 0, h: 1, lp: 2 }
+  - { id: a2, el: C, x: 1.299, y: -0.75, letter: true }
+  - { id: a3, el: C, x: 2.598, y: 0, h: 3, letter: true }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 1 }

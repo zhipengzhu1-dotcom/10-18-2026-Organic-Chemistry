@@ -157,6 +157,67 @@ const solvers: Record<string, { outcome: Outcome; play: (page: Page) => Promise<
       await correct(page);
     },
   },
+  // Lesson 5's Check Problems; capsaicin and amoxicillin show their reveal Scene with the answer.
+  "u1-fg-ketone": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, /^Acetone/);
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-fg-capsaicin": {
+    outcome: "first",
+    play: async (page) => {
+      for (const group of ["alkene", "phenol", "ether", "amide"]) await choose(page, group);
+      await check(page);
+      await correct(page);
+      await expect(page.getByRole("img", { name: /^Capsaicin\. Lit:/ })).toBeVisible();
+    },
+  },
+  "u1-fg-amoxicillin": {
+    outcome: "first",
+    play: async (page) => {
+      const taps = page.getByRole("group", { name: "Tappable atoms and bonds" });
+      for (const region of [/^Far left/, /^Top of the left half/, /^Between the two halves/, /^Inside the four-membered/, /^The S in/, /^Bottom right/])
+        await taps.getByRole("button", { name: region }).locator("circle.hit").first().click();
+      await check(page);
+      await correct(page);
+    },
+  },
+  // Lesson 2's Check Problems.
+  "u1-draw-n2-kekule": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, "N triple-bonded to N; one lone pair on each N");
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-draw-acrylonitrile": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, "CH₂ double-bonded to CH, single-bonded to C, triple-bonded to N; one lone pair on N");
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-draw-acetaminophen-lone-pairs": {
+    outcome: "first",
+    play: async (page) => {
+      await page.getByRole("textbox", { name: "Answer" }).fill("5");
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-draw-limonene-h": {
+    outcome: "first",
+    play: async (page) => {
+      await page.getByRole("textbox", { name: "Answer" }).fill("16");
+      await check(page);
+      await correct(page);
+    },
+  },
   // Lesson 3's Check Problems (#81).
   "u1-3d-flat-or-pyramid": {
     outcome: "first",

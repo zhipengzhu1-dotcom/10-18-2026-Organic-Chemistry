@@ -37,7 +37,7 @@ import { dataFile, resolveDataFile } from "./data-load.ts";
 import type { SceneCatalog, SceneUse } from "./model.ts";
 import { checkStepScene, resolveSceneUse, type SceneUseFile } from "./scenes.ts";
 import { checkViews, resolveMoleculeUse, type MoleculeUseFile, type Views } from "./molecule-use.ts";
-import { checkStructure, resolveArrows, resolveFigure, resolveOptions, resolveTap } from "./structures.ts";
+import { checkAgainstPubChem, pubchemCid, checkStructure, resolveArrows, resolveFigure, resolveOptions, resolveTap } from "./structures.ts";
 
 /** What a Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
 type StructureFields = {
@@ -162,6 +162,15 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       const broken = file ? checkStructure(file) : [];
       for (const message of broken) errors.push(`${slug}/structures/${name}.yaml: ${message}`);
       structures.set(name, file && !broken.length ? file : undefined);
+      // Build sanity check (Lesson 2): a drawing of a PubChem compound whose record is cached
+      // (`data/pubchem/<cid>.json`) has that formula's H's and valence-true lone pairs.
+      const cid = file && !broken.length ? pubchemCid(file) : undefined;
+      const record = cid === undefined ? undefined : join(root, `${slug}/data/pubchem/${cid}.json`);
+      if (record && existsSync(record)) {
+        const formula = pubchemFormula(record);
+        const found = formula === undefined ? ["its cached PubChem record has no MolecularFormula"] : checkAgainstPubChem(file!, formula);
+        for (const message of found) errors.push(`${slug}/structures/${name}.yaml: ${message}`);
+      }
     }
     const structured: Structured = new Map();
     const resolveStructures = (key: string, item: LessonFile["steps"][number] | ProblemFile, where: string) => {
@@ -266,7 +275,10 @@ function resolveLesson(
   errors: string[],
 ): Lesson {
   const steps: Step[] = lesson.steps.flatMap((step): Step[] => {
-    if (step.type !== "check") return withStructures(step, `${lesson.id}#${step.id}`, structured).map((st) => withScene(st, scene));
+    // A goal-state Manipulate Step opens on its first stage's prompt.
+    const opening = (st: Step): Step => (st.type === "manipulate-goal" ? { ...st, prompt: st.stages[0].prompt } : st);
+    if (step.type !== "check")
+      return withStructures(step, `${lesson.id}#${step.id}`, structured).map((st) => withScene(opening(st), scene));
     const problem = problems.get(step.problem);
     if (!problem) {
       if (!problems.has(step.problem)) errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" not found`);
@@ -281,7 +293,7 @@ function resolveLesson(
   const phases = { hook: 0, build: 0, check: 0, wrap: 0 };
   for (const step of lesson.steps) phases[step.phase]++;
   const { signature, ...rest } = lesson;
-  return { ...rest, url, number, signature: signatureType(lesson), phases, steps };
+  return { ...rest, url, number, signature: signatureType(lesson, problems), phases, steps };
 }
 
 /**
@@ -406,11 +418,13 @@ function fillBanks(
 }
 
 /** The named signature Step's type,else the first graded Build Step's, else the first Step's. */
-function signatureType(lesson: LessonFile): Step["type"] {
+function signatureType(lesson: LessonFile, problems: Map<string, ProblemFile | undefined>): Step["type"] {
   const named = lesson.steps.find((s) => s.id === lesson.signature);
   const graded = lesson.steps.find((s) => s.phase === "build" && s.type !== "explain");
-  const type = (named ?? graded ?? lesson.steps[0]).type;
-  return type === "check" ? "multiple-choice" : type;
+  const step = named ?? graded ?? lesson.steps[0];
+  // A Check Step shows its Problem's type.
+  if (step.type !== "check") return step.type;
+  return problems.get(step.problem)?.type ?? "multiple-choice";
 }
 
 /**
@@ -492,6 +506,16 @@ function resolveMolecules(
     const { item, cited } = resolve(problem, `${slug}/problems/${name}.yaml: `);
     problems.set(name, item);
     if (cited.length) problemCitations.set(name, merge(problemCitations.get(name), cited));
+  }
+}
+
+/** The molecular formula in a cached PubChem PUG REST property record (`<subject>/data/pubchem/<cid>.json`). */
+function pubchemFormula(file: string): string | undefined {
+  try {
+    const formula = JSON.parse(readFileSync(file, "utf8"))?.PropertyTable?.Properties?.[0]?.MolecularFormula;
+    return typeof formula === "string" ? formula : undefined;
+  } catch {
+    return undefined;
   }
 }
 

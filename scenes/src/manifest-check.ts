@@ -28,6 +28,9 @@ const stateSpec = z.discriminatedUnion("kind", [
   }),
 ]);
 
+/** Seconds: motion that stops by itself within this needs no pause control (WCAG 2.2.2). */
+const SHORT_RUN = 5;
+
 const manifestSchema = z.strictObject({
   id: z.string().regex(/^[a-z0-9][a-z0-9-]*$/, "must be lowercase letters, digits and dashes"),
   title: z.string().min(1),
@@ -36,8 +39,14 @@ const manifestSchema = z.strictObject({
     message: "needs screen-reader text: a function (state, t) => string",
   }),
   reducedMotion: z.string().min(1),
+  interact: z
+    .custom<SceneManifest["interact"]>((v) => !!v && typeof v === "object" && typeof (v as { drop?: unknown }).drop === "function" && typeof (v as { next?: unknown }).next === "function", {
+      message: "needs drop(state, move) and next(state) functions",
+    })
+    .optional(),
   data: z.array(z.string().regex(/^[a-z0-9][a-z0-9-]*\/\S+$/, "must be a cited-data ref like methane/r.CH")),
   duration: z.number().positive(),
+  controls: z.literal(false).optional(),
   poster: z.strictObject({ t: z.number().min(0) }),
   video: z.strictObject({
     duration: z.number().positive(),
@@ -75,6 +84,8 @@ function checkSemantics(m: SceneManifest, at: (where: string, message: string) =
     if (why) at(`states.${name}`, `default ${why}`);
   }
   if (m.poster.t > m.duration) at("poster", `t ${m.poster.t} is outside the Scene's ${m.duration} s`);
+  if (m.controls === false && m.duration > SHORT_RUN)
+    at("controls", `a Scene without Play/Replay/Scrub must run ${SHORT_RUN} s or less; this one runs ${m.duration} s`);
   const defaults = defaultState(m);
   let text = "";
   try {

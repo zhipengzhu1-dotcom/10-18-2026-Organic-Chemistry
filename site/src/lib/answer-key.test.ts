@@ -15,6 +15,16 @@ it("the page's Lesson carries no answers, Hints, Correct lines or reveals", () =
   expect(page.steps[2]).toMatchObject({ id: "s03", prompt: "Question s03", select: "one" });
 });
 
+it("a reveal Scene shows the answer, so it travels in the key, not the page", () => {
+  const base = lesson();
+  const revealScene = { id: "group-spotlight", state: { view: "amoxicillin", labels: "on" }, cited: {} };
+  const withReveal = { ...base, steps: base.steps.map((s, i) => (i === 2 ? { ...s, revealScene } : s)) };
+  const { page, key } = splitLesson(withReveal);
+  expect(JSON.stringify(page)).not.toContain("group-spotlight");
+  expect(key.s03.revealScene).toEqual(revealScene);
+  expect(withKey(page, key)).toEqual(withReveal);
+});
+
 it("a Rotate-and-identify Step keeps its molecule and choices on the page, its answer in the key", () => {
   const tree = validTree();
   const steps = (tree["chem/lessons/l1.yaml"] as { steps: Record<string, unknown>[] }).steps;
@@ -67,4 +77,24 @@ it("a Draw-arrows Step keeps its start and shown target on the page; results, pu
   expect(Object.keys(page.steps[0]).sort()).toEqual(["id", "phase", "prompt", "start", "target", "type"]);
   expect(JSON.stringify(page)).not.toMatch(/secret|Secret/);
   expect(withKey(page, JSON.parse(JSON.stringify(key)))).toEqual(whole);
+});
+
+it("a goal-state Step's stages and any reveal Scene go in the key; without the key it has no stages yet", () => {
+  const scene = { id: "build-by-sharing", state: {}, cited: {} };
+  const goal = {
+    id: "s05",
+    phase: "build" as const,
+    type: "manipulate-goal" as const,
+    prompt: "Give carbon a full shell.",
+    scene,
+    idleSeconds: 30,
+    stages: [{ prompt: "Give carbon a full shell.", goal: { bonded: 4 }, correct: "Secret correct.", blocked: "Secret blocked.", idle: "Secret idle." }],
+  };
+  const mc = { ...lesson().steps[2], revealScene: { id: "secret-scene", state: {}, cited: {} } };
+  const whole = { ...lesson(), steps: [goal, mc] };
+  const { page, key } = splitLesson(whole);
+  expect(Object.keys(page.steps[0]).sort()).toEqual(["id", "idleSeconds", "phase", "prompt", "scene", "type"]);
+  expect(JSON.stringify(page)).not.toMatch(/secret|Secret/);
+  expect(withKey(page, JSON.parse(JSON.stringify(key)))).toEqual(whole);
+  expect(withKey(page).steps[0]).toMatchObject({ stages: [] });
 });
