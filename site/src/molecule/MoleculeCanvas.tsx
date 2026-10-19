@@ -5,7 +5,7 @@
 //
 // Renders on demand (frameloop "demand"): a frame is drawn when props change, never on a loop.
 import { Canvas, useLoader, useThree } from "@react-three/fiber";
-import { Suspense, useEffect, useMemo, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useMemo, type ReactNode } from "react";
 import {
   CylinderGeometry,
   Matrix4,
@@ -20,14 +20,19 @@ import type { MoleculeUse } from "@astratron/content";
 import { centroid, type Matrix3 } from "@astratron/content/molecule";
 import { radius } from "./layout.ts";
 
+// Only a Step that shows orbitals fetches the GLB loader and its meshes (#70).
+const OrbitalLobes = lazy(() => import("./OrbitalLobes.tsx"));
+
 export interface MoleculeCanvasProps {
   molecule: MoleculeUse;
   rotation: Matrix3;
   /** Pixels per Å. */
   scale: number;
   trueScale: boolean;
-  /** Extra three.js objects drawn in the molecule's frame (Å, centred on the molecule), e.g. orbital lobes (#70). */
+  /** Extra three.js objects drawn in the molecule's frame (Å, centred on the molecule). */
   children?: ReactNode;
+  /** Called once the molecule's computed orbitals (molecule.orbitals, #70) are drawn. */
+  onOrbitalsDrawn?: () => void;
 }
 
 /** The studio matcap (Blender, #69); tinted per element. */
@@ -57,7 +62,7 @@ export default function MoleculeCanvas(props: MoleculeCanvasProps) {
   );
 }
 
-function Molecule({ molecule, rotation, scale, trueScale, children }: MoleculeCanvasProps) {
+function Molecule({ molecule, rotation, scale, trueScale, children, onOrbitalsDrawn }: MoleculeCanvasProps) {
   const matcap = useLoader(TextureLoader, MATCAP_URL);
   matcap.colorSpace = SRGBColorSpace;
   const { camera, invalidate } = useThree();
@@ -119,6 +124,12 @@ function Molecule({ molecule, rotation, scale, trueScale, children }: MoleculeCa
         bonds.map((b, i) => (
           <mesh key={`b${i}`} geometry={stick} material={bondMaterial} position={b.position} quaternion={b.quaternion} scale={b.scale} />
         ))}
+      {molecule.orbitals?.length ? (
+        // Its own Suspense: the atoms show while the meshes load.
+        <Suspense fallback={null}>
+          <OrbitalLobes orbitals={molecule.orbitals} centre={centre} onDrawn={onOrbitalsDrawn} />
+        </Suspense>
+      ) : null}
       {children}
     </group>
   );

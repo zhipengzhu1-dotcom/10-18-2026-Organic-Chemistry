@@ -17,6 +17,10 @@ boron-trifluoride:
   face-on: {}
 ammonia:
   face-on: {}
+ethylene:
+  # Orbital sample (#70) and Lesson 4's ethylene-sigma-pi poster: C=C level, the plane edge-on, so π
+  # lobes sit above and below it.
+  edge-on: { plane: [2, 0, 1], up: 1, rotate: [0, -90, 90] }
 ethanol:
   # Lesson 3 s09: the O–C–C plane turned well away from the screen plane.
   off-page: { plane: [2, 1, 0], up: 2, rotate: [70, 0, 0] }

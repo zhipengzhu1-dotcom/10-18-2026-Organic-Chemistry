@@ -8,7 +8,18 @@
 
 export type Tier = "experimental" | "computed";
 export type SourceKind = Tier | "reference";
-export type Quantity = "bond-length" | "angle" | "dihedral" | "radius" | "colour" | "energy" | "pka" | "count" | "electronegativity";
+export type Quantity =
+  | "bond-length"
+  | "angle"
+  | "dihedral"
+  | "radius"
+  | "colour"
+  | "energy"
+  | "pka"
+  | "count"
+  | "electronegativity"
+  /** The orbital amplitude an isosurface is drawn at (a.u.). */
+  | "isovalue";
 
 /** Quantities that make up a molecule's geometry; a molecule never mixes tiers across them. */
 export const geometryQuantities: readonly Quantity[] = ["bond-length", "angle", "dihedral"];
@@ -35,6 +46,8 @@ export interface Source {
   via?: Source;
   /** Computed sources: how the number was calculated. */
   method?: Method;
+  /** A sentence the Source note adds after the source's values, e.g. the model caveat on computed orbital energies. */
+  note?: string;
 }
 
 export interface Cited {
@@ -79,6 +92,37 @@ export interface DataSet {
   bonds?: Bond[];
   /** Licence notice for third-party data, e.g. the NIST acknowledgement on CCCBDB-derived geometry. */
   notice?: string;
+  /** Orbital data files (pipelines/orbitals): the computed orbitals and their meshes. */
+  orbitals?: OrbitalSet;
+}
+
+/** Computed orbitals of one molecule (#70), meshed at one isovalue. */
+export interface OrbitalSet {
+  /** The molecule data file the orbitals were computed on (so they sit on its atoms). */
+  molecule: string;
+  /** "ibo": intrinsic bond orbitals (Lesson 4); "canonical": canonical MOs (Lesson 8). */
+  kind: "ibo" | "canonical";
+  /** Value key of the isovalue in this file. */
+  iso: string;
+  list: Record<string, OrbitalEntry>;
+}
+
+export interface OrbitalEntry {
+  label: string;
+  /** The text chip that names it on screen, e.g. "π" or "LUMO". */
+  chip: string;
+  /** "sigma" / "pi": colour says the kind, pattern the sign (Lesson 4); "phase": + solid cyan, − hatched orange (Lesson 8). */
+  style: "sigma" | "pi" | "phase";
+  /** Value key of its orbital energy in this file. */
+  energy?: string;
+  /** True when the mesh is a summed density (one sign). */
+  density?: boolean;
+  /** Site URL of the GLB (one node per lobe sign: "plus", "minus"). */
+  mesh: string;
+  sha256: string;
+  triangles: number;
+  /** Where to put each sign's label: the centre of its largest lobe, Å in the molecule file's frame. */
+  lobes: { sign: "+" | "-"; at: [number, number, number] }[];
 }
 
 export interface Bond {
@@ -165,7 +209,10 @@ export function sourceNote(values: Cited[]): SourceNoteParagraph[] {
     const geometry = list.filter((v) => v.tier && geometryQuantities.includes(v.quantity));
     const other = list.filter((v) => !geometry.includes(v));
     if (geometry.length) paragraphs.push(geometryParagraph(geometry));
-    if (other.length) paragraphs.push({ text: clauses(other) });
+    if (other.length) {
+      const computed = other.every((v) => v.source.kind === "computed");
+      paragraphs.push({ ...(computed ? { lead: "Computed, not measured." } : {}), text: clauses(other) });
+    }
   }
   return paragraphs;
 }
@@ -191,7 +238,7 @@ function geometryParagraph(values: Cited[]): SourceNoteParagraph {
 /** "A 1 Å and B 2° from <citation>, via <database>." per source. */
 function clauses(values: Cited[]): string {
   return bySource(values)
-    .map(([source, vs]) => `${named(vs)} from ${source.citation}${source.via ? `, via ${source.via.citation}` : ""}.`)
+    .map(([source, vs]) => `${named(vs)} from ${source.citation}${source.via ? `, via ${source.via.citation}` : ""}.${source.note ? ` ${source.note}` : ""}`)
     .join(" ");
 }
 
@@ -215,6 +262,15 @@ export function format(quantity: Quantity, value: number | string, unit?: string
   const withUnit = (v: string) => (!unit ? v : unit === "°" ? `${v}°` : `${v} ${unit}`);
   if (typeof value === "string") return { display: withUnit(value), full: withUnit(value) };
   const decimals =
-    quantity === "bond-length" || quantity === "radius" || quantity === "electronegativity" ? 2 : quantity === "angle" || quantity === "dihedral" ? 1 : undefined;
-  return { display: withUnit(decimals === undefined ? String(value) : value.toFixed(decimals)), full: withUnit(String(value)) };
+    quantity === "bond-length" || quantity === "radius" || quantity === "electronegativity"
+      ? 2
+      : quantity === "angle" || quantity === "dihedral" || quantity === "energy"
+        ? 1
+        : undefined;
+  // Energies can be negative: print a true minus sign (U+2212), not a hyphen.
+  const sign = (s: string) => (quantity === "energy" ? s.replace(/^-/, "−") : s);
+  return {
+    display: withUnit(sign(decimals === undefined ? String(value) : value.toFixed(decimals))),
+    full: withUnit(sign(String(value))),
+  };
 }

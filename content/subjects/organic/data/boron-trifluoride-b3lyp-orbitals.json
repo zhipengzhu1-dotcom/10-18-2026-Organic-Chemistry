@@ -1,0 +1,107 @@
+{
+ "id": "boron-trifluoride-b3lyp-orbitals",
+ "kind": "table",
+ "title": "Boron trifluoride frontier orbitals",
+ "sources": {
+  "ours": {
+   "kind": "computed",
+   "citation": "Our calculation: canonical molecular orbitals and their energies with PySCF 2.14.0, B3LYP/cc-pVTZ, isolated molecule at the geometry optimised with the same method, 2026-10-19; hartree to eV with CODATA 2018 (Tiesinga et al., Rev. Mod. Phys. 93, 025010 (2021), doi:10.1103/RevModPhys.93.025010)",
+   "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+   "note": "Computed orbital energies are model values: compare them with each other, not with measured energies.",
+   "method": {
+    "program": "PySCF",
+    "version": "2.14.0",
+    "level": "B3LYP/cc-pVTZ",
+    "date": "2026-10-19"
+   }
+  }
+ },
+ "values": {
+  "homo": {
+   "label": "BF₃ HOMO",
+   "quantity": "energy",
+   "value": -11.8285,
+   "unit": "eV",
+   "source": "ours"
+  },
+  "lumo": {
+   "label": "BF₃ LUMO",
+   "quantity": "energy",
+   "value": 0.4744,
+   "unit": "eV",
+   "source": "ours"
+  },
+  "gap": {
+   "label": "BF₃ HOMO–LUMO gap",
+   "quantity": "energy",
+   "value": 12.303,
+   "unit": "eV",
+   "source": "ours"
+  },
+  "iso": {
+   "label": "Isosurface value",
+   "quantity": "isovalue",
+   "value": 0.05,
+   "unit": "a.u.",
+   "source": "ours"
+  }
+ },
+ "orbitals": {
+  "molecule": "boron-trifluoride-b3lyp",
+  "kind": "canonical",
+  "iso": "iso",
+  "list": {
+   "lumo": {
+    "label": "empty p on boron (LUMO)",
+    "chip": "LUMO",
+    "style": "phase",
+    "energy": "lumo",
+    "mesh": "/orbitals/boron-trifluoride-b3lyp-orbitals/lumo.glb",
+    "sha256": "03d3867da699611a9986698212c1ae4e63187383d9161beed794f9849be446dc",
+    "triangles": 6240,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       0.0,
+       -0.014,
+       -1.026
+      ]
+     },
+     {
+      "sign": "-",
+      "at": [
+       0.0,
+       -0.014,
+       1.026
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "provenance": {
+  "pipeline": "pipelines/orbitals (#70)",
+  "inputSha256": "375ef90d97b5a58e5e3c507b67a53822dd0989583ee1cfcc3a5605088ba4b1ab",
+  "scfEnergyHartree": -324.6963601826018,
+  "grid": {
+   "step": 0.14,
+   "pad": 4.5,
+   "shape": [
+    83,
+    80,
+    67
+   ]
+  },
+  "checks": [
+   "BF₃: LUMO antisymmetric through the molecular plane, largest share on B; HOMO a non-degenerate F lone-pair combination (boron share below 0.05, f functions only)"
+  ],
+  "homoIndex": 15,
+  "energiesHartree": {
+   "homo": -0.43469058248364334,
+   "lumo": 0.017434546354630598
+  },
+  "bf3HomoBoronShare": 0.02,
+  "seconds": 3
+ }
+}

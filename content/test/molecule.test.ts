@@ -183,6 +183,16 @@ describe("Unit 1 start views (views.yaml) put the atoms where each Step's drawin
     }
   });
 
+  it("ethylene edge-on (orbital sample, Lesson 4 poster): C=C level across the screen, the molecular plane seen edge-on", () => {
+    const p = shown("ethylene", "edge-on");
+    expect(p[0][1]).toBeCloseTo(p[1][1], 6); // the two carbons level
+    expect(Math.abs(p[0][0] - p[1][0])).toBeGreaterThan(1);
+    for (const a of p) expect(a[1]).toBeCloseTo(0, 6); // every atom on the horizontal line: the plane is edge-on
+    // The file's +x side (where the π orbital's solid lobe sits) faces up: "solid lobe above the plane".
+    const r = viewMatrix(data.ethylene.atoms!.list, views.ethylene["edge-on"]);
+    expect(r[1][0]).toBeCloseTo(1, 6);
+  });
+
   it("ethanol off-page: the O–C–C plane is turned well away (over 45°) from the screen plane", () => {
     const [c1, c2, o] = [0, 1, 2].map((i) => shown("ethanol", "off-page")[i]);
     const u: Vec3 = [o[0] - c2[0], o[1] - c2[1], o[2] - c2[2]];
