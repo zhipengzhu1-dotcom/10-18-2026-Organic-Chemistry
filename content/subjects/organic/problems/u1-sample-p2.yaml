@@ -1,0 +1,22 @@
+# Walking-skeleton sample Problem (#57).
+id: u1-sample-p2
+unit: u1
+lesson: u1-sample
+difficulty: 1
+status: approved
+source: Original
+type: multiple-choice
+prompt: Which neutral formula would need carbon to make more than four bonds?
+options:
+  - { id: a, text: CH₄ }
+  - { id: b, text: CH₂O }
+  - { id: c, text: CH₅ }
+answer: [c]
+correct: Five hydrogens would need five bonds to one carbon, one more than a neutral carbon makes.
+hints:
+  - match: [b]
+    text: In CH₂O the carbon makes a double bond to oxygen. Count it as two, plus the two C–H bonds.
+  - match: [a]
+    text: Methane has four C–H bonds, exactly carbon's four.
+  - text: Count the bonds each formula needs on carbon. One of them needs five.
+reveal: "CH₅: five hydrogens would mean five bonds to carbon. CH₄ uses four single bonds, and CH₂O uses two single bonds plus a double bond."

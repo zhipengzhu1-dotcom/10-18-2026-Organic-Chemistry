@@ -1,0 +1,86 @@
+# Walking-skeleton sample Lesson (#57). Not from a Lesson spec; it exists to
+# prove the path from content file to Step player. Remove it from the course
+# manifest once the real Unit 1 Lessons land.
+id: u1-sample
+slug: sample-carbons-four-bonds
+title: "Sample: Carbon's Four Bonds"
+goal: Count the bonds around a carbon atom and spot a structure that breaks the four-bond rule.
+keyIdea: A neutral carbon makes four bonds, and a double bond counts as two of them.
+steps:
+  - id: s01
+    phase: hook
+    type: multiple-choice
+    prediction: true
+    prompt: Carbon sits at the centre of almost every molecule in your body. How many bonds do you think a neutral carbon atom usually makes?
+    options:
+      - { id: a, text: "2" }
+      - { id: b, text: "3" }
+      - { id: c, text: "4" }
+      - { id: d, text: "6" }
+    answer: [c]
+    reveal: Four. A neutral carbon has four valence electrons and shares each one in a bond, which fills its octet.
+
+  - id: s02
+    phase: build
+    type: explain
+    text: A **covalent bond** is a pair of electrons shared between two atoms. Carbon brings four valence electrons, so it can share in four bonds.
+
+  - id: s03
+    phase: build
+    type: multiple-choice
+    prompt: In methane, CH₄, every bond is carbon to hydrogen. How many hydrogens bond to the one carbon?
+    options:
+      - { id: a, text: "2" }
+      - { id: b, text: "3" }
+      - { id: c, text: "4" }
+    answer: [c]
+    correct: Four C–H bonds use all four of carbon's valence electrons.
+    hints:
+      - match: [b]
+        text: Count again from the formula. The subscript after H tells you how many hydrogens there are.
+      - text: Read the formula CH₄. Each H makes one bond, and every H is bonded to the carbon.
+    reveal: "Four: CH₄ has four hydrogens, each joined to carbon by one bond."
+
+  - id: s04
+    phase: build
+    type: explain
+    text: Each bond holds two electrons, one from each atom. Four bonds put eight electrons around carbon, a full **octet**.
+
+  - id: s05
+    phase: build
+    type: explain
+    text: Bonds between two carbons count too. In ethane, H₃C–CH₃, each carbon bonds to three hydrogens **and** to the other carbon.
+
+  - id: s06
+    phase: build
+    type: multiple-choice
+    prompt: In ethane, H₃C–CH₃, how many bonds does each carbon make?
+    options:
+      - { id: a, text: "3" }
+      - { id: b, text: "4" }
+      - { id: c, text: "5" }
+    answer: [b]
+    correct: Three C–H bonds plus one C–C bond make four.
+    hints:
+      - match: [a]
+        text: You counted the hydrogens. Don't forget the bond joining the two carbons.
+      - text: Count the C–H bonds on one carbon, then add the C–C bond.
+    reveal: "Four: each carbon has three C–H bonds and one C–C bond."
+
+  - id: s07
+    phase: build
+    type: explain
+    text: Carbon can also spend its four bonds as a **double bond** (two shared pairs) or a triple bond (three). A double bond counts as two of the four.
+
+  - id: s08
+    phase: check
+    problem: u1-sample-p1
+
+  - id: s09
+    phase: check
+    problem: u1-sample-p2
+
+  - id: s10
+    phase: wrap
+    type: explain
+    text: A neutral carbon makes four bonds. Count each double bond as two and each triple bond as three, and the total always comes to four.

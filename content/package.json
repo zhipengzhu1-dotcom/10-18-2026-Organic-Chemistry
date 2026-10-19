@@ -1,0 +1,16 @@
+{
+  "name": "@astratron/content",
+  "private": true,
+  "type": "module",
+  "license": "CC-BY-NC-SA-4.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "node src/cli.ts"
+  },
+  "dependencies": {
+    "yaml": "^2.9.1",
+    "zod": "^4.6.7"
+  }
+}

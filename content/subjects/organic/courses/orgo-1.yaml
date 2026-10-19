@@ -1,0 +1,10 @@
+# Course manifest: ordered Units, each `available` or `coming-soon`.
+# Units 2–10 are added by the Course map ticket (#58).
+title: Organic Chemistry I
+units:
+  - id: u1
+    slug: structure-bonding
+    title: Structure & Bonding
+    status: available
+    lessons:
+      - u1-sample
