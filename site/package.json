@@ -12,10 +12,16 @@
     "@astratron/content": "workspace:*",
     "@astratron/scenes": "workspace:*",
     "@astrojs/react": "^7.1.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/space-grotesk": "^5.3.0",
+    "@fontsource/pixelify-sans": "^5.3.0",
+    "@fontsource/silkscreen": "^5.3.0",
+    "@tailwindcss/vite": "^4.3.3",
     "astro": "~7.3.8",
     "marked": "^18.1.1",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",

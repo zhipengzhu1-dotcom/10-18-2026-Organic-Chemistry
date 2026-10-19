@@ -30,33 +30,39 @@ export default function StepPlayer({ lesson, exitHref }: Props) {
     setChosen([]);
   }
 
+  const icon = feedback && { correct: "✓", hint: "✗", reveal: "→" }[feedback.kind];
+  const words = feedback && { correct: "Correct.", hint: "Not quite.", reveal: "Answer:" }[feedback.kind];
+
+  // Single focus: no site chrome, only the ✕, story bars, Step count and one
+  // fixed bottom button. The feedback panel sits above that button.
   return (
     <div className="player" id={step.id}>
-      <header className="player-bar">
-        <a href={exitHref} aria-label="Leave the Lesson" className="exit">
+      <div className="player-top">
+        <a href={exitHref} aria-label="Leave the Lesson" className="player-exit">
           ✕
         </a>
-        <ol className="story-bars" aria-hidden="true">
+        <ol className="bars" aria-hidden="true">
           {lesson.steps.map((s, i) => (
-            <li key={s.id} className={i <= screen.index ? "seen" : ""} />
+            <li key={s.id} className={i < screen.index ? "done" : i === screen.index ? "cur" : ""} />
           ))}
         </ol>
-        <span className="count">
+        <span className="player-count">
           Step {screen.index + 1} of {screen.total}
         </span>
-      </header>
+      </div>
 
-      <main className="step">
+      <main className="player-body">
         {step.type === "explain" ? (
-          <div className="explain" {...html(step.text)} />
+          <p {...html(step.text)} />
         ) : (
           <>
-            <p className="prompt" {...html(step.prompt)} />
-            <div className="options" role="group" aria-label="Choices">
+            <p className="player-prompt" {...html(step.prompt)} />
+            <div className="opts" role="group" aria-label="Choices">
               {step.options.map((o) => (
                 <button
                   key={o.id}
                   type="button"
+                  className="opt"
                   aria-pressed={chosen.includes(o.id)}
                   disabled={screen.canContinue}
                   onClick={() => pick(o.id)}
@@ -67,38 +73,41 @@ export default function StepPlayer({ lesson, exitHref }: Props) {
           </>
         )}
 
-        {feedback && (
-          <div className={`feedback ${feedback.kind}`} role="status">
-            {feedback.kind === "correct" && <span>✓ Correct. </span>}
-            {feedback.kind === "hint" && <span>✗ Not quite. </span>}
-            {feedback.kind === "reveal" && <span>→ Answer: </span>}
-            <span {...html(feedback.text)} />
-          </div>
-        )}
-
         {screen.done && (
-          <div className="key-idea">
+          <div className="card">
             <h2>Key idea</h2>
             <p {...html(lesson.keyIdea)} />
           </div>
         )}
       </main>
 
-      <footer className="player-action">
+      <div className="player-foot">
+        <div role="status">
+          {feedback && (
+            <div className={`fb fb-${feedback.kind}`}>
+              <span className="ic" aria-hidden="true">
+                {icon}
+              </span>{" "}
+              <p>
+                <strong>{words}</strong> <span {...html(feedback.text)} />
+              </p>
+            </div>
+          )}
+        </div>
         {screen.done ? (
-          <a className="button" href={exitHref}>
+          <a className="btn btn-primary btn-block" href={exitHref}>
             Finish
           </a>
         ) : screen.canContinue ? (
-          <button type="button" className="button" onClick={next}>
+          <button type="button" className="btn btn-primary btn-block" onClick={next}>
             Continue
           </button>
         ) : (
-          <button type="button" className="button" onClick={check} disabled={chosen.length === 0}>
+          <button type="button" className="btn btn-primary btn-block" onClick={check} disabled={chosen.length === 0}>
             Check
           </button>
         )}
-      </footer>
+      </div>
     </div>
   );
 }

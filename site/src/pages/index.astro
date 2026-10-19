@@ -2,6 +2,7 @@
 // Placeholder home page listing every Lesson; the Push hero (#73) and the
 // Course map (#58) replace it.
 import Base from "../layouts/Base.astro";
+import Preferences from "../components/Preferences.astro";
 import { lessonPages } from "../lib/content.ts";
 
 const pages = lessonPages();
@@ -9,14 +10,38 @@ const pages = lessonPages();
 
 <Base title="AstraTron">
   <main class="page">
-    <h1>AstraTron</h1>
+    <h1 class="wordmark">AstraTron</h1>
     <p>Move electrons. Move the world.</p>
-    <ul>
+    <ul class="lesson-list">
       {pages.map((p) => (
         <li>
-          <a href={p.lesson.url}>{p.lesson.title}</a> · {p.unitTitle}
+          <a href={p.lesson.url}>{p.lesson.title}</a>
+          <span>{p.unitTitle}</span>
         </li>
       ))}
     </ul>
+    <Preferences />
   </main>
 </Base>
+
+<style>
+  .lesson-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+  .lesson-list li {
+    display: flex;
+    flex-direction: column;
+  }
+  .lesson-list a {
+    display: flex;
+    align-items: center;
+    min-height: var(--at-tap);
+    font-weight: 700;
+  }
+  .lesson-list span {
+    color: var(--at-ink-muted);
+  }
+</style>
