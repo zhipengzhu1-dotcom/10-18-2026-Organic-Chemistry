@@ -18,8 +18,14 @@ export type PageLesson = Omit<Lesson, "steps"> & { steps: PageStep[] };
 export type AnswerKey = Record<string, Record<string, unknown>>;
 
 export function splitLesson(lesson: Lesson): { page: PageLesson; key: AnswerKey } {
+  const { steps, key } = splitSteps(lesson.steps);
+  return { page: { ...lesson, steps }, key };
+}
+
+/** Splits Steps (a Lesson's, or a Practice Set's Problems) into what the page shows and the key, by Step id. */
+export function splitSteps(all: Step[]): { steps: PageStep[]; key: AnswerKey } {
   const key: AnswerKey = {};
-  const steps = lesson.steps.map((step): PageStep => {
+  const steps = all.map((step): PageStep => {
     if (step.type === "explain") return step;
     const shown: Record<string, unknown> = { ...step };
     const secrets: Record<string, unknown> = {};
@@ -32,7 +38,7 @@ export function splitLesson(lesson: Lesson): { page: PageLesson; key: AnswerKey 
     if (step.type === "multiple-choice") shown.select = step.answer.length === 1 ? "one" : "many";
     return shown as PageStep;
   });
-  return { page: { ...lesson, steps }, key };
+  return { steps, key };
 }
 
 /** The playable Lesson. Without the key, graded Steps carry empty secrets and must not be graded. */

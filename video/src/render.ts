@@ -11,6 +11,7 @@ import { buildContent, contentRoot } from "@astratron/content";
 import { sceneRegistry } from "@astratron/scenes";
 import { sceneCatalog } from "@astratron/scenes/check";
 import { sceneManifests } from "@astratron/scenes/manifests";
+import { watchSceneManifests } from "@astratron/scenes/watch";
 import { citedFor } from "./cited.ts";
 import { videoJobs, type VideoJob } from "./jobs.ts";
 import { sourcesSidecar } from "./sidecar.ts";
@@ -38,7 +39,8 @@ export async function renderScenes({ mode, scenes = [], sidecarOnly = false, out
   if (unknown.length) throw new Error(`Unknown Scene(s): ${unknown.join(", ")}. Scenes: ${Object.keys(sceneRegistry).join(", ")}`);
   const jobs = videoJobs(sceneManifests).filter((j) => !scenes.length || scenes.includes(j.sceneId));
 
-  const { model, errors } = buildContent(contentRoot, { scenes: sceneCatalog(sceneManifests) });
+  // Watch-only Scenes (#66) are in the catalog so Lessons that show them build; Manim renders them (`pnpm scenes:render`).
+  const { model, errors } = buildContent(contentRoot, { scenes: sceneCatalog(sceneManifests, watchSceneManifests) });
   if (!model) throw new Error(`Content build failed:\n  ${errors.join("\n  ")}`);
   mkdirSync(out, { recursive: true });
 

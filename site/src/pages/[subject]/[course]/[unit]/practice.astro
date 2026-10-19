@@ -1,0 +1,30 @@
+---
+// The Unit's Practice Set. The page carries the drawable Problems without their
+// answers; the island draws a Set in the browser and fetches the answer key.
+import type { GetStaticPaths } from "astro";
+import Base from "../../../../layouts/Base.astro";
+import PracticeSet from "../../../../components/PracticeSet.tsx";
+import { practicePages, renderStep, type PracticePage } from "../../../../lib/content.ts";
+import { coreLessons, practiceKeyUrl, splitPractice } from "../../../../lib/practice.ts";
+
+export const getStaticPaths = (() =>
+  practicePages().map((page) => ({
+    params: { subject: page.subject, course: page.course.slug, unit: page.unit.slug },
+    props: page,
+  }))) satisfies GetStaticPaths;
+
+const { subject, unit, nextUnitUrl } = Astro.props as PracticePage;
+const { problems } = splitPractice(unit, renderStep);
+---
+
+<Base title={`Practice Set · ${unit.title} · AstraTron`} description={`Ten Problems covering Unit ${unit.number}.`} bare>
+  <PracticeSet
+    client:load
+    unitId={unit.id}
+    problems={problems}
+    coreLessons={coreLessons(unit)}
+    keyUrl={practiceKeyUrl(subject, unit.id)}
+    unitHref={unit.url}
+    nextUnitHref={nextUnitUrl}
+  />
+</Base>

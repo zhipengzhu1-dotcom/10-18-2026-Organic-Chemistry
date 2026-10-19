@@ -1,0 +1,106 @@
+{
+  "id": "methanimine",
+  "kind": "molecule",
+  "title": "Methanimine",
+  "geometry": "computed",
+  "sources": {
+    "ours": {
+      "kind": "computed",
+      "citation": "Our calculation: PySCF 2.14.0, B3LYP/cc-pVTZ, isolated molecule, optimised with geomeTRIC 1.1.1, GAU_TIGHT and checked as a true minimum (all harmonic frequencies real), 2026-10-19",
+      "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+      "method": {
+        "program": "PySCF",
+        "version": "2.14.0",
+        "level": "B3LYP/cc-pVTZ",
+        "date": "2026-10-19",
+        "maxDeviation": 0.039
+      }
+    }
+  },
+  "values": {
+    "r.CN": {
+      "label": "C=N",
+      "quantity": "bond-length",
+      "value": 1.2633,
+      "unit": "Å",
+      "source": "ours",
+      "atoms": [
+        0,
+        1
+      ]
+    }
+  },
+  "atoms": {
+    "source": "ours",
+    "list": [
+      [
+        "C",
+        -0.3909,
+        -0.0137,
+        -0.0025
+      ],
+      [
+        "N",
+        0.752,
+        -0.5503,
+        -0.0425
+      ],
+      [
+        "H",
+        -1.274,
+        -0.6498,
+        -0.0582
+      ],
+      [
+        "H",
+        -0.5768,
+        1.0609,
+        0.0854
+      ],
+      [
+        "H",
+        1.4896,
+        0.1532,
+        0.0182
+      ]
+    ]
+  },
+  "bonds": [
+    [
+      0,
+      1,
+      2
+    ],
+    [
+      0,
+      2,
+      1
+    ],
+    [
+      0,
+      3,
+      1
+    ],
+    [
+      1,
+      4,
+      1
+    ]
+  ],
+  "provenance": {
+    "pipeline": "pipelines/geometry (#67)",
+    "start": "RDKit ETKDG embed (seed 7) + MMFF94",
+    "inputSha256": "a73e29fe0c8bba9b148d648c9d58a524b1326b8d2c4d54126334f77afd43cc12",
+    "optimiser": "geomeTRIC 1.1.1, GAU_TIGHT",
+    "basis": "cc-pvtz",
+    "gridLevel": 4,
+    "xcDefinition": "((0, 0, 0), ((402, 1),))",
+    "energyHartree": -94.6694018282723,
+    "lowestFrequency": 1075.4,
+    "imaginaryModes": 0,
+    "charge": 0,
+    "note": "Computed on purpose: Lesson 7 compares three C–N lengths, so all three use one method.",
+    "cccbdb": "CCCBDB has experimental Cartesians and parameters (CAS 2053-29-4, checked 2026-10-19); not used, see note",
+    "usedBy": "L7"
+  }
+}

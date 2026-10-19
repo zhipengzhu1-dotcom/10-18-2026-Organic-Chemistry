@@ -1,0 +1,24 @@
+[project]
+name = "astratron-pipelines"
+version = "0.1.0"
+description = "Build-time pipelines; output is committed under content/ (see README.md)."
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+dependencies = [
+  "beautifulsoup4==4.15.0",
+  "lxml==6.1.3",
+  "numpy>=2.0",
+  "scipy>=1.14",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+# Heavy: only for `python -m geometry.compute` (PySCF optimisations). Not needed to parse or assemble.
+compute = ["pyscf==2.14.0", "geometric==1.1.1", "rdkit==2026.9.1"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
