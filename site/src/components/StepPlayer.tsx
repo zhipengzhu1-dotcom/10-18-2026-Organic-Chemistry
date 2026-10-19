@@ -11,6 +11,8 @@ import { recordProblem, saveLesson, streakOn } from "../progress/record.ts";
 import { readRecord, writeRecord } from "../progress/store.ts";
 import SourceNote from "./SourceNote.tsx";
 import ScenePlayer from "./ScenePlayer.tsx";
+import WatchScenePlayer from "./WatchScenePlayer.tsx";
+import { watchScene } from "@astratron/scenes/watch";
 import SceneControl from "./SceneControl.tsx";
 import StructureTap from "./StructureTap.tsx";
 import "./structure.css";
@@ -202,7 +204,12 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           />
         )}
 
-        {step.scene && sceneState && (
+        {step.scene && watchScene(step.scene.id) && (
+          // A watch-only Scene (#66): the committed video, keyed per Step so it autoplays on entry.
+          <WatchScenePlayer key={`scene-${step.id}`} sceneId={step.scene.id} cited={step.scene.cited} />
+        )}
+
+        {step.scene && sceneState && !watchScene(step.scene.id) && (
           // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
           <ScenePlayer
             key={`scene-${step.id}`}

@@ -12,6 +12,8 @@ steps:
     type: multiple-choice
     prediction: true
     prompt: A C=C double bond has a σ bond and a π bond. Do you think one end can spin freely?
+    # A watch-only Manim Scene (#66) in a Step, as Lesson 0's s01 will use it (#78).
+    scene: star-forge
     options:
       - { id: a, text: "Yes, like any bond" }
       - { id: b, text: "No, something holds it flat" }

@@ -8,6 +8,7 @@ import { buildContent, contentRoot } from "@astratron/content";
 import { find } from "@astratron/content/data";
 import { sceneRegistry } from "../src/index.ts";
 import { sceneManifests } from "../src/manifests.ts";
+import { watchSceneManifests } from "../src/watch.ts";
 import { checkManifests, defaultState, sceneCatalog } from "../src/manifest-check.ts";
 import { frameSize } from "../src/frame.ts";
 import { layoutTwist } from "../src/sample-twist/layout.ts";
@@ -28,8 +29,8 @@ describe("Scene registry", () => {
     expect(checkManifests(sceneManifests)).toEqual([]);
   });
 
-  it("the real content builds against the registered Scenes", () => {
-    expect(buildContent(contentRoot, { scenes: sceneCatalog(sceneManifests) }).errors).toEqual([]);
+  it("the real content builds against the registered Scenes (interactive and watch-only)", () => {
+    expect(buildContent(contentRoot, { scenes: sceneCatalog(sceneManifests, watchSceneManifests) }).errors).toEqual([]);
   });
 
   it("every data source is in the cited data", () => {
