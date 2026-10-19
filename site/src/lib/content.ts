@@ -161,5 +161,15 @@ export function renderStep(s: Step): Step {
     case "rotate-and-identify":
       // The molecule's `describe` stays plain text: it is read aloud, not shown.
       return { ...s, ...shared, options: choices(s.options), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
+    case "draw-arrows":
+      // The start is redrawn live in the browser as pushes land; its first drawing and the
+      // target are pre-rendered. In-between copy stays plain: it is also read aloud.
+      return {
+        ...s,
+        ...shared,
+        start: drawView(s.start),
+        ...(s.target && { target: drawView(s.target) }),
+        hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
+      };
   }
 }

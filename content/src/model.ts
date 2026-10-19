@@ -181,8 +181,64 @@ export interface RotateAndIdentifyStep {
   citations?: Cited[];
 }
 
+/**
+ * One curved arrow, as the Student draws it. `from` is an atom id (a lone pair on that atom) or a
+ * bond id (that bond's electrons); `to` is an atom id or a bond id (where the arrowhead lands).
+ */
+export interface Push {
+  from: string;
+  to: string;
+}
+
+/**
+ * A Draw-arrows Hint, matched on the wrong push. Every condition given must hold: `from` = the push
+ * starts at one of these (atom ids = their lone pair, bond ids, or `sigma` = any single bond);
+ * `to` = it lands on one of these (an atom drop and the bond it makes count as the same).
+ * The generic fallback has neither and comes last.
+ */
+export interface PushHint {
+  from?: string[];
+  to?: string[];
+  text: string;
+}
+
+/**
+ * Draw arrows: the Student pushes electrons on the atom-mapped start, one arrow at a time. Each push
+ * is applied to our own molecule graph and accepted when it moves toward an accepted result
+ * (`@astratron/content/arrows`). Two tries per push; the Step is done when the drawing is a result.
+ */
+export interface DrawArrowsStep {
+  id: string;
+  phase: Phase;
+  type: "draw-arrows";
+  prompt: string;
+  /** The atom-mapped start the Student pushes on (atom ids are the map). */
+  start: StructureView;
+  /** The target drawn dimmed beside (or above) the start; absent when the Step hides it (open or "no target"). */
+  target?: StructureView;
+  /** Every accepted result (same atom ids as the start). */
+  results: Structure[];
+  /** The correct pushes, in an order that works: shown on a second wrong try and in the reveal. */
+  answer: Push[];
+  /** Copy for in-between states; `{atom}` and `{electrons}` are filled in. Defaults apply when absent. */
+  inBetween?: { over?: string; short?: string };
+  correct?: string;
+  hints?: PushHint[];
+  reveal: string;
+  problemId?: string;
+  scene?: SceneUse;
+  citations?: Cited[];
+}
+
 /** A Step the Student answers and the engine grades. */
-export type GradedStep = MultipleChoiceStep | NumericStep | RankStep | TapStep | ManipulateStep | RotateAndIdentifyStep;
+export type GradedStep =
+  | MultipleChoiceStep
+  | NumericStep
+  | RankStep
+  | TapStep
+  | ManipulateStep
+  | RotateAndIdentifyStep
+  | DrawArrowsStep;
 
 export type Step = ExplainStep | GradedStep;
 

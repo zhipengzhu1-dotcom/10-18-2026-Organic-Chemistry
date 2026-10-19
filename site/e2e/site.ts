@@ -64,6 +64,21 @@ export async function playThrough(page: Page, each: (label: string) => Promise<v
       await expect(page.getByRole("status")).not.toBeEmpty();
       await each(`${label} feedback`);
     }
+    // Draw arrows has no Check button: push the first source onto its first target from the
+    // keyboard until the Step is done (two wrong tries on a push show it, so this always ends).
+    const arrows = page.getByRole("group", { name: "Electron sources: lone pairs and bonds" });
+    let pushed = false;
+    for (let i = 0; i < 20 && (await arrows.isVisible()) && !(await page.getByRole("button", { name: "Continue" }).isVisible()); i++) {
+      if (await page.getByRole("button", { name: "See results" }).isVisible()) break;
+      await arrows.locator("[data-source][tabindex='0']").first().focus();
+      await page.keyboard.press("Enter");
+      await arrows.locator("[data-spot]").first().focus();
+      await page.keyboard.press("Enter");
+      if (!pushed && ((await page.getByRole("status").textContent()) ?? "").trim()) {
+        pushed = true;
+        await each(`${label} feedback`);
+      }
+    }
     // A Practice Set ends on its summary instead of a Wrap.
     const results = page.getByRole("button", { name: "See results" });
     if (await results.isVisible()) {
