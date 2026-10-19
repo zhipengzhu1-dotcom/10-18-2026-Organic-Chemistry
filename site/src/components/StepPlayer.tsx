@@ -126,7 +126,8 @@ export default function StepPlayer({ lesson, exitHref }: Props) {
           </div>
         )}
 
-        <SourceNote key={step.id} cited={step.citations ?? []} />
+        {/* Keyed per Step so a new Step opens its Source note collapsed. */}
+        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} />
       </main>
 
       <footer className="player-action">
