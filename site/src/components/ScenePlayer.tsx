@@ -59,13 +59,13 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, aspec
     return () => cancelAnimationFrame(frame);
   }, [clock.playing]);
 
-  const description = manifest.describe(state, clock.t);
+  const description = manifest.describe(state, clock.t, cited);
   const [said, setSaid] = useState("");
   const stateKey = JSON.stringify(state);
   const [firstKey] = useState(stateKey);
   // Announce what the Scene shows when the Student changes its state (not on entry, not every frame).
   useEffect(() => {
-    if (stateKey !== firstKey) setSaid(manifest.describe(state, clock.t));
+    if (stateKey !== firstKey) setSaid(manifest.describe(state, clock.t, cited));
   }, [stateKey]);
 
   const [w, h] = aspect === "16:9" ? [16, 9] : [9, 16];
