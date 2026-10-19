@@ -11,6 +11,7 @@ import { sceneRegistry } from "../src/index.ts";
 import { defaultState } from "../src/state.ts";
 import { SHAPES, shapeRefs, buildShape } from "../src/shapes-3d/shapes.ts";
 import { frameSize } from "../src/frame.ts";
+import { watchScene } from "../src/watch.ts";
 import type { Aspect, SceneState } from "../src/types.ts";
 
 const organic = buildContent(contentRoot).model!.subjects.find((s) => s.slug === "organic")!;
@@ -52,6 +53,35 @@ describe("shapes rebuilt from cited bond lengths and angles", () => {
       const theirs = distances(atoms);
       mine.forEach((d, i) => expect(d).toBeCloseTo(theirs[i], 2));
     });
+});
+
+describe("Lesson 3's watch-only Scenes (Manim)", () => {
+  const read = (id: string) => {
+    const m = watchScene(id)!;
+    return m.describe(citedFor(m.data));
+  };
+
+  it("methane-unflatten reads the measured H–C–H angle from the cited data", () => {
+    expect(read("methane-unflatten")).toBe(
+      "The flat drawing of methane, with a right angle between two hydrogens, lifts off the page. The four hydrogens swing out into three dimensions until every H–C–H angle is equal: 109.5 degrees.",
+    );
+  });
+
+  it("domain-spread names each model angle as the model's", () => {
+    expect(read("domain-spread")).toBe(
+      "Three panels. Two balloons on a centre push apart until they point in opposite directions: a line, model angle 180 degrees. Three balloons spread into a flat triangle, model angle 120 degrees. Four balloons spread to the corners of a tetrahedron, model angle 109.5 degrees.",
+    );
+    expect(watchScene("domain-spread")!.text.captions).toEqual(["model: 180°", "model: 120°", "model: 109.5°"]);
+  });
+
+  it("wedge-dash-methane reads the spec's words, and every one has a poster at its last frame", () => {
+    expect(read("wedge-dash-methane")).toContain("two lines, one wedge and one dash");
+    for (const id of ["methane-unflatten", "domain-spread", "wedge-dash-methane"]) {
+      const m = watchScene(id)!;
+      expect(m.poster, id).toBe(m.duration);
+      expect(m.aspects).toEqual(["16:9", "9:16"]);
+    }
+  });
 });
 
 describe("four-domain-family (s05, s15)", () => {

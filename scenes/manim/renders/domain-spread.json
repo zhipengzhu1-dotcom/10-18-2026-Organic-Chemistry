@@ -1,0 +1,16 @@
+{
+  "scene": "domain-spread",
+  "manim": "0.22.0",
+  "fps": 60,
+  "inputs": "df2c15060bc33250415caeabd9e96f2dfd644911789313140902750607ea969f",
+  "aspects": {
+    "16:9": {
+      "frames": 600,
+      "timings": {}
+    },
+    "9:16": {
+      "frames": 600,
+      "timings": {}
+    }
+  }
+}
