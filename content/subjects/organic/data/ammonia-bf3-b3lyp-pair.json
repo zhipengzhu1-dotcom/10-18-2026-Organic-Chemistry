@@ -1,0 +1,117 @@
+{
+ "id": "ammonia-bf3-b3lyp-pair",
+ "kind": "molecule",
+ "title": "NH₃ over BF₃, B3LYP",
+ "geometry": "computed",
+ "sources": {
+  "ours": {
+   "kind": "computed",
+   "citation": "Our placement for the picture: NH₃ and BF₃ each at its own geometry as optimised with PySCF 2.14.0, B3LYP/cc-pVTZ, moved without changing shape so N sits straight over B. The distance between them is chosen for clarity, not computed: the two molecules are computed separately and placed together",
+   "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+   "method": {
+    "program": "PySCF",
+    "version": "2.14.0",
+    "level": "B3LYP/cc-pVTZ",
+    "date": "2026-10-19",
+    "maxDeviation": 0.039
+   }
+  }
+ },
+ "values": {},
+ "atoms": {
+  "source": "ours",
+  "list": [
+   [
+    "N",
+    0.0,
+    0.0,
+    4.0
+   ],
+   [
+    "H",
+    0.0,
+    0.9379,
+    4.3848
+   ],
+   [
+    "H",
+    0.8123,
+    -0.469,
+    4.3848
+   ],
+   [
+    "H",
+    -0.8123,
+    -0.469,
+    4.3848
+   ],
+   [
+    "B",
+    0.0,
+    0.0,
+    0.0
+   ],
+   [
+    "F",
+    0.0,
+    1.3146,
+    0.0
+   ],
+   [
+    "F",
+    1.1386,
+    -0.6573,
+    0.0
+   ],
+   [
+    "F",
+    -1.1386,
+    -0.6573,
+    0.0
+   ]
+  ]
+ },
+ "bonds": [
+  [
+   0,
+   1,
+   1
+  ],
+  [
+   0,
+   2,
+   1
+  ],
+  [
+   0,
+   3,
+   1
+  ],
+  [
+   4,
+   5,
+   1
+  ],
+  [
+   4,
+   6,
+   1
+  ],
+  [
+   4,
+   7,
+   1
+  ]
+ ],
+ "provenance": {
+  "pipeline": "pipelines/orbitals (#86)",
+  "from": [
+   "ammonia-b3lyp",
+   "boron-trifluoride-b3lyp"
+  ],
+  "gapAngstrom": 4.0,
+  "imaginaryModes": 0,
+  "note": "Both parts are checked true minima; the pair is a picture, not a complex.",
+  "usedBy": "L8"
+ }
+}

@@ -102,6 +102,15 @@ SETS = [
         Orbital("lumo", "empty p on boron (LUMO)", "LUMO", "phase", "lumo"),
     ]),
 ]
+# Lesson 8 s09 (#86): NH₃'s HOMO and BF₃'s LUMO in one frame. Each molecule is computed on its own,
+# at its own optimised geometry; only a rigid move puts NH₃ over BF₃ for the picture.
+PAIR = "ammonia-bf3-b3lyp-pair"
+PAIR_GAP = 4.0  # Å from B up to N: chosen so the two big lobes nearly meet on screen; NOT a computed distance
+PAIR_PARTS = {"nh3-homo": ("ammonia-b3lyp", "homo", slice(0, 4)), "bf3-lumo": ("boron-trifluoride-b3lyp", "lumo", slice(4, 8))}
+SETS.append(OrbitalSet("ammonia-bf3-pair-orbitals", PAIR, "pair", "NH₃ HOMO and BF₃ LUMO, placed together", "L8", [
+    Orbital("nh3-homo", "NH₃ lone pair (HOMO)", "NH₃ HOMO", "phase"),
+    Orbital("bf3-lumo", "BF₃ empty p on boron (LUMO)", "BF₃ LUMO", "phase"),
+]))
 BY_ID = {s.id: s for s in SETS}
 FORMULA = {"hydrogen-b3lyp": "H₂", "ethane-b3lyp": "Ethane", "ethylene-b3lyp": "Ethylene", "ammonia-b3lyp": "NH₃", "boron-trifluoride-b3lyp": "BF₃"}
 
@@ -113,6 +122,81 @@ class CheckError(RuntimeError):
 def check(ok: bool, message: str) -> None:
     if not ok:
         raise CheckError(message)
+
+
+# ---- the NH₃ + BF₃ picture (#86) ---------------------------------------------------------------------
+
+
+def _r(v: float) -> float:
+    return round(float(v), 4) + 0.0
+
+
+def place_pair(nh3: list, bf3: list) -> list:
+    """NH₃ then BF₃ in one frame: BF₃ flat in z = 0 with B at the origin; NH₃ turned 180° about x
+    so its lone pair faces down, N at (0, 0, PAIR_GAP). Both files already sit on their threefold
+    axis along z (checked), so the move is a turn and a shift: neither shape changes."""
+    n_xyz = np.array([a[1:] for a in nh3], float)
+    b_xyz = np.array([a[1:] for a in bf3], float)
+    check([a[0] for a in nh3] == ["N", "H", "H", "H"] and [a[0] for a in bf3] == ["B", "F", "F", "F"], "pair: unexpected atom order")
+    check(bool(np.allclose(b_xyz[:, 2], b_xyz[0, 2], atol=1e-3)), "pair: BF₃ is not flat in a z plane")
+    check(bool(np.allclose(n_xyz[0, :2], 0, atol=1e-3) and (n_xyz[1:, 2] < n_xyz[0, 2]).all()), "pair: NH₃ is not on the z axis with N on top")
+    turned = n_xyz * np.array([1.0, -1.0, -1.0])
+    turned += np.array([0.0, 0.0, PAIR_GAP]) - turned[0]
+    flat = b_xyz - b_xyz[0]
+    return [[e, *map(_r, p)] for e, p in zip([a[0] for a in nh3] + [a[0] for a in bf3], np.vstack([turned, flat]))]
+
+
+def pair_molecule() -> dict:
+    """The combined frame's molecule data file (geometry: computed, each part as optimised)."""
+    nh3, nh3_atoms = load_atoms("ammonia-b3lyp")
+    bf3, bf3_atoms = load_atoms("boron-trifluoride-b3lyp")
+    m = nh3["sources"]["ours"]["method"]
+    bonds = [list(b) for b in nh3["bonds"]] + [[i + 4, j + 4, o] for i, j, o in bf3["bonds"]]
+    return {
+        "id": PAIR,
+        "kind": "molecule",
+        "title": "NH₃ over BF₃, B3LYP",
+        "geometry": "computed",
+        "sources": {"ours": {
+            "kind": "computed",
+            "citation": (f"Our placement for the picture: NH₃ and BF₃ each at its own geometry as optimised with {m['program']} {m['version']}, "
+                         f"{m['level']}, moved without changing shape so N sits straight over B. The distance between them is chosen "
+                         "for clarity, not computed: the two molecules are computed separately and placed together"),
+            "licence": nh3["sources"]["ours"]["licence"],
+            "method": m,
+        }},
+        "values": {},
+        "atoms": {"source": "ours", "list": place_pair(nh3_atoms, bf3_atoms)},
+        "bonds": bonds,
+        "provenance": {"pipeline": "pipelines/orbitals (#86)", "from": ["ammonia-b3lyp", "boron-trifluoride-b3lyp"], "gapAngstrom": PAIR_GAP,
+                       "imaginaryModes": 0, "note": "Both parts are checked true minima; the pair is a picture, not a complex.", "usedBy": "L8"},
+    }
+
+
+def pair_orbitals(atoms: list, points: np.ndarray, prov: dict) -> dict[str, "Field"]:
+    """Each part's frontier orbital, computed on that part's atoms alone (as placed), signed on the
+    shared grid. Checks: NH₃'s HOMO's largest lobe points down from N toward B; BF₃'s LUMO changes
+    sign across its plane (z = 0), with its largest share on B."""
+    fields: dict[str, Field] = {}
+    for oid, (_, which, part) in PAIR_PARTS.items():
+        mol, mf = scf(atoms[part])
+        homo = int(np.nonzero(mf.mo_occ > 0)[0][-1])
+        f = Field(mol, mf.mo_coeff[:, homo if which == "homo" else homo + 1])
+        fields[oid] = f
+    xyz = np.array([a[1:] for a in atoms], float)
+    # Signs for the picture: the two lobes that face each other are both + (they overlap in phase),
+    # so BF₃'s LUMO is + above its plane and − below, as the Lesson's Describe text reads.
+    signed(fields["nh3-homo"], xyz[0][None] - [[0, 0, 0.7]])
+    signed(fields["bf3-lumo"], xyz[4][None] + [[0, 0, 0.7]])
+    v = fields["nh3-homo"](points)
+    sign = 1 if (v >= ISO).sum() >= (v <= -ISO).sum() else -1
+    inside = sign * v >= ISO
+    w = v[inside] ** 2
+    centre = (points[inside] * w[:, None]).sum(0) / w.sum()
+    check(int(np.argmin(np.linalg.norm(xyz[:4] - centre, axis=1))) == 0 and centre[2] < xyz[0, 2], "pair: NH₃'s HOMO lobe does not point down at B")
+    check(parity(fields["bf3-lumo"], sample_points(xyz[4:]), reflect(2, 0.0)) < -0.99, "pair: BF₃'s LUMO does not change sign across its plane")
+    prov["checks"].append("pair: NH₃ HOMO's largest lobe on N, pointing down at B; BF₃ LUMO antisymmetric through its plane")
+    return fields
 
 
 # ---- the calculation ------------------------------------------------------------------------------
@@ -312,18 +396,27 @@ def run(s: OrbitalSet) -> dict:
     import pyscf
 
     t0 = time.time()
-    data, atoms = load_atoms(s.molecule)
+    if s.kind == "pair":
+        data = pair_molecule()
+        write(data)
+        atoms = data["atoms"]["list"]
+    else:
+        data, atoms = load_atoms(s.molecule)
     symbols = [a[0] for a in atoms]
     xyz = np.array([a[1:] for a in atoms], float)
-    mol, mf = scf(atoms)
     grid = grid_for(xyz)
     points = grid.points()
-    prov: dict = {"pipeline": "pipelines/orbitals (#70)", "inputSha256": input_sha256(s, atoms), "scfEnergyHartree": float(mf.e_tot),
+    prov: dict = {"pipeline": "pipelines/orbitals (#70)", "inputSha256": input_sha256(s, atoms),
                   "grid": {"step": STEP, "pad": PAD, "shape": list(grid.shape)}, "checks": []}
     values: dict = {}
     fields: dict[str, Field] = {}
+    if s.kind != "pair":
+        mol, mf = scf(atoms)
+        prov["scfEnergyHartree"] = float(mf.e_tot)
 
-    if s.kind == "ibo":
+    if s.kind == "pair":
+        fields = pair_orbitals(atoms, points, prov)
+    elif s.kind == "ibo":
         fields = ibo_orbitals(s, mol, mf, xyz, symbols)
         prov["checks"].append({"ethylene-orbitals": "one π IBO antisymmetric through the molecular plane, on the two carbons; one symmetric C–C σ",
                                "acetylene-orbitals": "two π IBOs rotated into the xz and yz planes; summed π density uniform within 2% around the axis",
@@ -392,8 +485,12 @@ def run(s: OrbitalSet) -> dict:
 
     prov["seconds"] = round(time.time() - t0)
     date = dt.date.today().isoformat()
-    if s.kind == "ibo":
-        citation = (f"Our calculation: intrinsic bond orbitals ({KNIZIA}) from a {LEVEL} single point with PySCF {pyscf.__version__} "
+    if s.kind == "pair":
+        citation = (f"Our calculation: canonical molecular orbitals with PySCF {pyscf.__version__}, {LEVEL}, each molecule computed on its own "
+                    f"at the geometry optimised with the same method and then placed together for the picture, {date}")
+        note = "The two molecules are computed separately and placed together for the picture; the distance between them is not computed."
+    elif s.kind == "ibo":
+        citation =(f"Our calculation: intrinsic bond orbitals ({KNIZIA}) from a {LEVEL} single point with PySCF {pyscf.__version__} "
                     f"at the experimental geometry, {date}")
         note = ("Drawn at the isosurface value given. Bond orbitals are one honest way to divide a molecule's electrons into bonds; "
                 "Lesson 8 shows another.")
@@ -408,7 +505,8 @@ def run(s: OrbitalSet) -> dict:
         "sources": {"ours": {"kind": "computed", "citation": citation, "licence": LICENCE, "note": note,
                              "method": {"program": "PySCF", "version": pyscf.__version__, "level": LEVEL, "date": date}}},
         "values": values,
-        "orbitals": {"molecule": s.molecule, "kind": s.kind, "iso": "iso", "list": orbitals},
+        # A pair's orbitals are canonical MOs too (each part's own), only placed together.
+        "orbitals": {"molecule": s.molecule, "kind": "canonical" if s.kind == "pair" else s.kind, "iso": "iso", "list": orbitals},
         "provenance": prov,
     }
 
