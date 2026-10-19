@@ -46,3 +46,23 @@ Computed orbitals for Lessons 4 and 8, as cited data plus meshes. The set list a
 OMP_NUM_THREADS=4 uv run --group compute python -m orbitals.compute            # every set, ~30 s
 OMP_NUM_THREADS=4 uv run --group compute python -m orbitals.compute ethylene-orbitals
 ```
+
+## Blender: the studio matcap and share images (#69)
+
+Blender 5.2.2 LTS at `/Applications/Blender.app` (not on PATH), headless. CI never runs it.
+
+```sh
+pnpm blender render                         # all three, or name some: matcap share-site share-unit-1
+pnpm blender check                          # CI gate: re-hash every recorded input and output
+```
+
+| Render | Script | Output |
+|---|---|---|
+| `matcap` | `blender/make_matcap.py` | `site/public/matcaps/studio.webp` (512 px, ~10 KB; the 3D card tints it per element) |
+| `share-site` | `blender/share_images.py` | `site/public/share/site.webp` (1200×630: the Push hero's water + wordmark) |
+| `share-unit-1` | `blender/share_images.py` | `site/public/share/unit-1.webp` (1200×630: methane, ethylene, acetylene + Unit 1's title) |
+
+- Molecules enter Blender only through `blender/molecule_import.py`, which reads `blender/renders/<name>.props.json`. `blender/render.ts` writes that file from the cited-data lookup (atoms, bonds, Jmol colours, Bondi radii × 0.3, the Unit's title), the design tokens and the layout. Orbital meshes (glb in the molecule's data frame, #70) go in `meshes`.
+- `blender/renders/<name>.json` records the Blender version and the sha256 of every file Blender read (scripts, fonts, props, meshes) and of each output. `pnpm blender check` (and `pnpm test`) fail when any changed, or when the props the cited data now gives differ from the committed ones. Data a render doesn't use (another element's colour) doesn't make it stale.
+- Fonts: Pixelify Sans (`blender/fonts/`, OFL) and the Manim fonts in `scenes/manim/fonts/`.
+- `blender/molecule-import.test.ts` runs the import in Blender where it is installed (skipped in CI).
