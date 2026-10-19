@@ -1,0 +1,88 @@
+---
+// The site's display switches: theme (Dark / Light) and Reduce motion.
+// Choices are stored in localStorage (`at-theme`, `at-motion`) and applied
+// before paint by the inline script in Base.astro. Not shown in the Step player.
+---
+
+<section class="prefs" aria-labelledby="prefs-h">
+  <h2 id="prefs-h">Display</h2>
+  <div class="prefs-row">
+    <span id="theme-l">Theme</span>
+    <div class="seg" role="group" aria-labelledby="theme-l">
+      <button type="button" data-theme-choice="dark" aria-pressed="true">Dark</button>
+      <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+    </div>
+  </div>
+  <div class="prefs-row">
+    <span class="switch">
+      <span id="motion-l">Reduce motion</span>
+      <button type="button" role="switch" aria-checked="false" aria-labelledby="motion-l" data-motion-switch></button>
+    </span>
+  </div>
+  <p class="prefs-note">Reduce motion is also on whenever your device asks for less motion.</p>
+</section>
+
+<style>
+  .prefs {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: var(--at-border) solid var(--at-line);
+  }
+  .prefs h2 {
+    font-size: 20px;
+    margin: 0 0 12px;
+  }
+  .prefs-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .prefs-note {
+    color: var(--at-ink-muted);
+    font-size: 16px;
+    margin: 0;
+  }
+</style>
+
+<script>
+  const root = document.documentElement;
+  const store = (k: string, v: string | null) => {
+    try {
+      if (v === null) localStorage.removeItem(k);
+      else localStorage.setItem(k, v);
+    } catch {
+      // storage blocked: the choice lasts for this page only
+    }
+  };
+  const stored = (k: string) => {
+    try {
+      return localStorage.getItem(k);
+    } catch {
+      return null;
+    }
+  };
+
+  const themeButtons = document.querySelectorAll<HTMLButtonElement>("[data-theme-choice]");
+  const showTheme = () =>
+    themeButtons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themeChoice === root.dataset.theme)));
+  themeButtons.forEach((b) =>
+    b.addEventListener("click", () => {
+      root.dataset.theme = b.dataset.themeChoice;
+      store("at-theme", b.dataset.themeChoice!);
+      showTheme();
+    }),
+  );
+  showTheme();
+
+  const motion = document.querySelector<HTMLButtonElement>("[data-motion-switch]")!;
+  const osReduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const showMotion = () => motion.setAttribute("aria-checked", String(stored("at-motion") === "reduced"));
+  motion.addEventListener("click", () => {
+    const on = motion.getAttribute("aria-checked") !== "true";
+    store("at-motion", on ? "reduced" : null);
+    root.dataset.motion = on || osReduced() ? "reduced" : "full";
+    showMotion();
+  });
+  showMotion();
+</script>
