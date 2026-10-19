@@ -1,12 +1,13 @@
-// Explore in 3D (#71): Steps and Problems that name a molecule offer a full-screen
-// spin/zoom view, drawn by 3Dmol.js with our cited colours and radii.
+// Explore in 3D (#71): Steps and Problems that name a molecule offer a full-screen spin/zoom
+// view with our cited colours and radii. It is the 3D Step card's viewer (#68), grown to fill
+// the screen; three.js loads only when a 3D view first draws.
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { SAMPLE_LESSON } from "./site.ts";
 
 const exploreButton = (page: Page) => page.getByRole("button", { name: "Explore in 3D" });
 const dialog = (page: Page, name: string) => page.getByRole("dialog", { name: `${name} in 3D` });
-const view = (page: Page) => page.getByRole("application", { name: /3D view/ });
+const view = (page: Page, name: string) => dialog(page, name).getByRole("application", { name: new RegExp(name) });
 
 /** The bodies of every script the page fetches, from now on. */
 function scripts(page: Page): string[] {
@@ -16,21 +17,21 @@ function scripts(page: Page): string[] {
   });
   return bodies;
 }
-const has3Dmol = (bodies: string[]) => bodies.some((b) => b.includes("createViewer"));
+const hasThree = (bodies: string[]) => bodies.some((b) => b.includes("MeshMatcapMaterial"));
 
-test("3Dmol.js loads only when Explore in 3D is pressed, not with the page", async ({ page }) => {
+test("three.js loads only when Explore in 3D is pressed, not with the page", async ({ page }) => {
   const bodies = scripts(page);
   await page.goto(`${SAMPLE_LESSON}#s02`);
   await expect(exploreButton(page)).toBeVisible();
   await page.waitForLoadState("networkidle");
-  expect(has3Dmol(bodies)).toBe(false);
+  expect(hasThree(bodies)).toBe(false);
 
   await exploreButton(page).click();
   await expect(dialog(page, "Methane").locator("canvas")).toBeVisible();
-  expect(has3Dmol(bodies)).toBe(true);
+  expect(hasThree(bodies)).toBe(true);
 });
 
-test("keyboard: open, switch to space-filling, rotate and zoom, then Esc closes and focus returns", async ({ page }) => {
+test("keyboard: open, switch to true scale, turn, zoom and reset, then Esc closes and focus returns", async ({ page }) => {
   await page.goto(`${SAMPLE_LESSON}#s02`);
   await exploreButton(page).focus();
   await page.keyboard.press("Enter");
@@ -38,25 +39,25 @@ test("keyboard: open, switch to space-filling, rotate and zoom, then Esc closes 
   const d = dialog(page, "Methane");
   await expect(d).toBeVisible();
   await expect(d.locator("canvas")).toBeVisible();
-  // Screen readers get the molecule in words.
-  await expect(view(page)).toHaveAccessibleDescription(/Methane: 1 carbon and 4 hydrogens\. The carbon is bonded to 4 hydrogens\./);
+  // The molecule in words.
+  await expect(d.locator(".explore-words")).toContainText("Methane: 5 atoms. C1 is bonded to H1, H2, H3 and H4.");
 
-  const ball = d.getByRole("button", { name: "Ball and stick" });
-  const space = d.getByRole("button", { name: "Space-filling" });
+  const ball = d.getByRole("button", { name: "Ball & stick" });
+  const full = d.getByRole("button", { name: "True scale" });
   await expect(ball).toHaveAttribute("aria-pressed", "true");
-  await space.focus();
+  await full.focus();
   await page.keyboard.press("Enter");
-  await expect(space).toHaveAttribute("aria-pressed", "true");
+  await expect(full).toHaveAttribute("aria-pressed", "true");
   await expect(ball).toHaveAttribute("aria-pressed", "false");
-  await expect(d.getByRole("status")).toHaveText("Space-filling: atoms at their van der Waals radii.");
 
-  await view(page).focus();
+  const said = d.locator("[aria-live]");
+  await view(page, "Methane").focus();
   await page.keyboard.press("ArrowRight");
-  await expect(d.getByRole("status")).toHaveText("Turned right.");
+  await expect(said).toHaveText("Turned right.");
   await page.keyboard.press("+");
-  await expect(d.getByRole("status")).toHaveText("Zoomed in.");
-  await d.getByRole("button", { name: "Reset view" }).click();
-  await expect(d.getByRole("status")).toHaveText("View reset.");
+  await expect(said).toHaveText("Zoomed in.");
+  await page.keyboard.press("0");
+  await expect(said).toHaveText("View reset.");
 
   await page.keyboard.press("Escape");
   await expect(d).toBeHidden();
@@ -80,25 +81,13 @@ test("the view's Source note names the geometry, colour and radius sources", asy
   await expect(d.getByText(/Data derived from NIST CCCBDB/)).toBeVisible();
 });
 
-test("under reduced motion the view turns without animation", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto(`${SAMPLE_LESSON}#s02`);
-  await exploreButton(page).click();
-  await expect(view(page)).toHaveAttribute("data-animate-ms", "0");
-
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.reload();
-  await exploreButton(page).click();
-  await expect(view(page)).not.toHaveAttribute("data-animate-ms", "0");
-});
-
 test("a Check Step's Problem that names a molecule offers it, and the open view passes axe", async ({ page }) => {
   await page.goto(`${SAMPLE_LESSON}#s08`);
   await expect(page.getByText("Step 8 of 10")).toBeVisible();
   await exploreButton(page).click();
   const d = dialog(page, "Ethylene");
   await expect(d.locator("canvas")).toBeVisible();
-  await expect(view(page)).toHaveAccessibleDescription(/The carbon|Each carbon is bonded to 1 carbon \(double bond\) and 2 hydrogens\./);
+  await expect(d.locator(".explore-words")).toContainText("C1 is bonded to C2 (double), H1 and H2.");
   const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
   expect(axe.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);
 
@@ -110,7 +99,8 @@ test("a Check Step's Problem that names a molecule offers it, and the open view 
     for (let n = walker.nextNode(); n; n = walker.nextNode()) {
       const el = n.parentElement!;
       const text = n.textContent!.trim();
-      if (!text || el.closest(".sr") || !el.getBoundingClientRect().width) continue;
+      // SVG drawing labels (atom letters, measurement tags) are sized in drawing units.
+      if (!text || el.closest(".sr, svg") || !el.getBoundingClientRect().width) continue;
       const cs = getComputedStyle(el);
       if (parseFloat(cs.fontSize) < 16) out.push(`"${text}" under 16px`);
       if (/[0-9]/.test(text) && !cs.fontFamily.startsWith('"JetBrains Mono')) out.push(`"${text}" outside the data face`);

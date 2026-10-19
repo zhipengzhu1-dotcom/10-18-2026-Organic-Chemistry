@@ -94,6 +94,23 @@ const solvers: Record<string, { outcome: Outcome; play: (page: Page) => Promise<
       await correct(page);
     },
   },
+  // Rotate-and-identify 3D (#68), graded like Multiple choice: formaldehyde is flat, ammonia a pyramid.
+  "u1-sample-p7": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, "Flat");
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-sample-p8": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, "A pyramid");
+      await check(page);
+      await correct(page);
+    },
+  },
   // Draw arrows, graded push by push. Ozone: one wrong push (its Hint), then both right.
   "u1-sample-arrows-p1": {
     outcome: "eventually",

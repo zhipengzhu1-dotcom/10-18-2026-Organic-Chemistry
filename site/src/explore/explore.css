@@ -1,4 +1,5 @@
-/* Explore in 3D (#71): a full-screen dialog on the Arcade Cosmos tokens (#59). */
+/* Explore in 3D (#71): a full-screen dialog on the Arcade Cosmos tokens (#59), holding the same
+   3D card as the Step (#68), grown to fill the screen. */
 .explore-open { align-self: flex-start; }
 dialog.explore {
   width: 100vw;
@@ -24,19 +25,5 @@ dialog.explore::backdrop { background: var(--at-space); }
 .explore-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .explore-head h2 { margin: 0; font: 600 22px/1.2 var(--at-font-text); }
 .explore-close { background: transparent; color: var(--at-ink); border-color: var(--at-ink); box-shadow: none; padding: 0; }
-.explore-stage {
-  position: relative;
-  flex: 1 1 auto;
-  min-height: min(60dvh, 520px);
-  border: var(--at-border) solid var(--at-line);
-  /* The same dark ground in both themes, so white hydrogens never sit on white. */
-  background: var(--at-on-fill);
-  touch-action: none;
-}
-.explore-stage:focus-visible { outline: 3px solid var(--at-electron); outline-offset: 2px; }
-.explore-words, .explore-failed, .explore-notice { margin: 0; color: var(--at-ink-muted); font-size: 16px; }
-.explore-controls { display: flex; flex-wrap: wrap; gap: 12px; }
-.explore-row { display: flex; flex-wrap: wrap; gap: 8px; }
-.explore-row .btn { box-shadow: var(--at-drop-sm); background: var(--at-raised); color: var(--at-ink); padding: 8px 12px; }
-.explore-row .btn[aria-pressed="true"] { background: var(--at-electron-fill); color: var(--at-on-fill); }
-.explore-row .btn[aria-pressed="true"]::before { content: "✓ " / ""; }
+.explore .molecule { flex: 1 1 auto; max-height: none; min-height: min(60dvh, 520px); }
+.explore-words { margin: 0; color: var(--at-ink-muted); font-size: 16px; }
