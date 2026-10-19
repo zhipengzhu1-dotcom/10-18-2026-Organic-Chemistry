@@ -1,0 +1,166 @@
+{
+  "id": "ethane",
+  "kind": "molecule",
+  "title": "Ethane",
+  "geometry": "experimental",
+  "notice": "Data derived from NIST CCCBDB; not covered by the repository's MIT licence or the content's CC BY-NC-SA licence. NIST Computational Chemistry Comparison and Benchmark Database, NIST Standard Reference Database Number 101, Release 22, May 2022, Editor: Russell D. Johnson III, http://cccbdb.nist.gov/, DOI:10.18434/T47C7Z. © U.S. Secretary of Commerce; used with acknowledgement under https://www.nist.gov/open/license.",
+  "sources": {
+    "cccbdb": {
+      "kind": "experimental",
+      "citation": "NIST CCCBDB, SRD 101, Release 22 (May 2022), doi:10.18434/T47C7Z",
+      "licence": "NIST SRD 101; reuse with acknowledgement (https://www.nist.gov/open/license). Not covered by the repo's MIT licence."
+    },
+    "1966herzberg": {
+      "kind": "experimental",
+      "citation": "Herzberg, G., Electronic spectra and electronic structure of polyatomic molecules,Van Nostrand,New York, 1966",
+      "via": "cccbdb",
+      "licence": "NIST SRD 101; reuse with acknowledgement (https://www.nist.gov/open/license). Not covered by the repo's MIT licence."
+    }
+  },
+  "values": {
+    "r.CC": {
+      "label": "C–C",
+      "quantity": "bond-length",
+      "value": 1.536,
+      "unit": "Å",
+      "source": "1966herzberg",
+      "atoms": [
+        0,
+        1
+      ]
+    },
+    "r.CH": {
+      "label": "C–H",
+      "quantity": "bond-length",
+      "value": 1.091,
+      "unit": "Å",
+      "source": "1966herzberg",
+      "atoms": [
+        0,
+        2
+      ]
+    },
+    "a.HCH": {
+      "label": "H–C–H",
+      "quantity": "angle",
+      "value": 108.0,
+      "unit": "°",
+      "source": "1966herzberg",
+      "atoms": [
+        2,
+        0,
+        3
+      ]
+    },
+    "a.HCC": {
+      "label": "C–C–H",
+      "quantity": "angle",
+      "value": 110.91,
+      "unit": "°",
+      "source": "1966herzberg",
+      "atoms": [
+        0,
+        1,
+        5
+      ],
+      "note": "by symmetry"
+    }
+  },
+  "atoms": {
+    "source": "cccbdb",
+    "list": [
+      [
+        "C",
+        0.0,
+        0.0,
+        0.768
+      ],
+      [
+        "C",
+        0.0,
+        0.0,
+        -0.768
+      ],
+      [
+        "H",
+        -1.0192,
+        0.0,
+        1.1573
+      ],
+      [
+        "H",
+        0.5096,
+        0.8826,
+        1.1573
+      ],
+      [
+        "H",
+        0.5096,
+        -0.8826,
+        1.1573
+      ],
+      [
+        "H",
+        1.0192,
+        0.0,
+        -1.1573
+      ],
+      [
+        "H",
+        -0.5096,
+        -0.8826,
+        -1.1573
+      ],
+      [
+        "H",
+        -0.5096,
+        0.8826,
+        -1.1573
+      ]
+    ]
+  },
+  "bonds": [
+    [
+      0,
+      1,
+      1
+    ],
+    [
+      0,
+      2,
+      1
+    ],
+    [
+      0,
+      3,
+      1
+    ],
+    [
+      0,
+      4,
+      1
+    ],
+    [
+      1,
+      5,
+      1
+    ],
+    [
+      1,
+      6,
+      1
+    ],
+    [
+      1,
+      7,
+      1
+    ]
+  ],
+  "provenance": {
+    "pipeline": "pipelines/geometry (#67)",
+    "url": "https://cccbdb.nist.gov/expgeom2x.asp?casno=74840&charge=0",
+    "cccbdbName": "Ethane",
+    "pointGroup": "not used (CCCBDB labels can be wrong)",
+    "usedBy": "L4"
+  }
+}
