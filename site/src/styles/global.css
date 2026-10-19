@@ -332,8 +332,19 @@
     .player-body:has(.figures):has(.opts > :nth-child(4)) {
       gap: 6px;
     }
+    /* The card may shrink to a 96 px stage over its tools (whose buttons sit closer). */
     .player.has-card .molecule {
-      min-height: 140px;
+      min-height: 152px;
+    }
+    .player.has-card .molecule-stage {
+      min-height: 96px;
+    }
+    .player.has-card .molecule-tools {
+      gap: 6px;
+    }
+    .player.has-card .molecule-tools .molecule-btn,
+    .player.has-card .molecule-seg button {
+      padding: 0 7px;
     }
     .player.has-card .figure-drawing .structure {
       max-height: 3.75rem;
@@ -1119,6 +1130,9 @@
     color: var(--at-on-fill);
   }
   /* Lesson 3 (#81): the molecule toggle, page sheet and badge, atom labels and bond dipoles. */
+  .molecule-snap {
+    font: 500 16px/1 var(--at-font-text);
+  }
   .molecule-switch-row {
     display: flex;
     flex-wrap: wrap;

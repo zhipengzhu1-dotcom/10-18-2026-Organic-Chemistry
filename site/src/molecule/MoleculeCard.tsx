@@ -252,6 +252,19 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
         </div>
         {turnable && (
           <div className="molecule-turn">
+            {sheet && snap && (
+              // Over the stage, with the turn buttons, so it adds no row under the card.
+              <button
+                type="button"
+                className="molecule-btn molecule-snap"
+                onClick={() => {
+                  setRotation(pageView(molecule.atoms, sheet));
+                  say("Snapped to the page.");
+                }}
+              >
+                Snap to page
+              </button>
+            )}
             <button type="button" className="molecule-btn" aria-label="Turn left" onClick={() => spin("y", -TURN_STEP)}>
               ↺
             </button>
@@ -287,18 +300,6 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
             }}
           >
             Add
-          </button>
-        )}
-        {sheet && snap && turnable && (
-          <button
-            type="button"
-            className="molecule-btn molecule-describe"
-            onClick={() => {
-              setRotation(pageView(molecule.atoms, sheet));
-              say("Snapped to the page.");
-            }}
-          >
-            Snap to page
           </button>
         )}
         <button

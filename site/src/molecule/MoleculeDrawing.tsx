@@ -201,10 +201,13 @@ export function CardMarks({ molecule, placed, size, sheet, sides, dipoles }: Mar
         ) : null;
       })}
       {sides.map(({ atom, side }) => {
+        // Seen face on, the two atoms straddling the page sit almost on top of each other: the
+        // label of the one toward you goes above it, the other's below.
         const a = placed[atom];
+        const toward = side === "toward";
         return (
-          <text key={`side-${atom}`} className="molecule-side" x={a.x} y={a.y + a.r + 14}>
-            {side === "toward" ? "toward you: wedge" : "away: dash"}
+          <text key={`side-${atom}`} className="molecule-side" x={a.x} y={toward ? a.y - a.r - 8 : a.y + a.r + 16}>
+            {toward ? "toward you: wedge" : "away: dash"}
           </text>
         );
       })}

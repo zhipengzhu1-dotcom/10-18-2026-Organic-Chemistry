@@ -11,8 +11,8 @@ credit: Kimberly Berkowski, MIT OCW 5.12, Spring 2005, CC BY-NC-SA 4.0
 type: rotate-and-identify
 prompt: "This is 2-fluorobutane, drawn one way (left) and partly drawn from another angle (right). Turn the 3D model until F and H sit as in the right-hand drawing. Then: which group goes on the dash, and which on the wedge?"
 figures:
-  - { structure: l3-2-fluorobutane-left, caption: Left, alt: "Left drawing: around one central carbon, CH₂CH₃ up and CH₃ lower left as plain lines; F to the right on a dash; H below on a wedge." }
-  - { structure: l3-2-fluorobutane-right, caption: Right, alt: "Right drawing, partly drawn: F upper right and H down as plain lines; an empty dash upper left and an empty wedge straight up." }
+  - { structure: l3-2-fluorobutane-left, alt: "Left drawing: around one central carbon, CH₂CH₃ up and CH₃ lower left as plain lines; F to the right on a dash; H below on a wedge." }
+  - { structure: l3-2-fluorobutane-right, alt: "Right drawing, partly drawn: F upper right and H down as plain lines; an empty dash upper left and an empty wedge straight up." }
 molecule:
   id: 2-fluorobutane-r
   view: as-left-drawing
