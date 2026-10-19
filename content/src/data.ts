@@ -8,7 +8,7 @@
 
 export type Tier = "experimental" | "computed";
 export type SourceKind = Tier | "reference";
-export type Quantity = "bond-length" | "angle" | "dihedral" | "radius" | "colour" | "energy" | "pka";
+export type Quantity = "bond-length" | "angle" | "dihedral" | "radius" | "colour" | "energy" | "pka" | "count";
 
 /** Quantities that make up a molecule's geometry; a molecule never mixes tiers across them. */
 export const geometryQuantities: readonly Quantity[] = ["bond-length", "angle", "dihedral"];

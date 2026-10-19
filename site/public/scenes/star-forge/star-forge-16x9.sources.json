@@ -1,0 +1,61 @@
+{
+  "scene": "star-forge",
+  "title": "Forged in a star",
+  "aspect": "16:9",
+  "fps": 60,
+  "duration": 13,
+  "video": "star-forge-16x9.mp4",
+  "numbers": [
+    {
+      "ref": "nuclides/He-4.Z",
+      "label": "helium-4 protons",
+      "value": 2,
+      "display": "2",
+      "citation": "Kondev et al., \"The NUBASE2020 evaluation of nuclear physics properties\", Chinese Phys. C 45, 030001 (2021), doi:10.1088/1674-1137/abddae",
+      "licence": "Published values, cited (facts from the literature)",
+      "shown": []
+    },
+    {
+      "ref": "nuclides/He-4.A",
+      "label": "helium-4 mass number",
+      "value": 4,
+      "display": "4",
+      "citation": "Kondev et al., \"The NUBASE2020 evaluation of nuclear physics properties\", Chinese Phys. C 45, 030001 (2021), doi:10.1088/1674-1137/abddae",
+      "licence": "Published values, cited (facts from the literature)",
+      "shown": [
+        [
+          2,
+          4.5
+        ],
+        [
+          5,
+          7.1
+        ]
+      ]
+    },
+    {
+      "ref": "nuclides/C-12.Z",
+      "label": "carbon-12 protons",
+      "value": 6,
+      "display": "6",
+      "citation": "Kondev et al., \"The NUBASE2020 evaluation of nuclear physics properties\", Chinese Phys. C 45, 030001 (2021), doi:10.1088/1674-1137/abddae",
+      "licence": "Published values, cited (facts from the literature)",
+      "shown": []
+    },
+    {
+      "ref": "nuclides/C-12.A",
+      "label": "carbon-12 mass number",
+      "value": 12,
+      "display": "12",
+      "citation": "Kondev et al., \"The NUBASE2020 evaluation of nuclear physics properties\", Chinese Phys. C 45, 030001 (2021), doi:10.1088/1674-1137/abddae",
+      "licence": "Published values, cited (facts from the literature)",
+      "shown": [
+        [
+          5,
+          9.3
+        ]
+      ]
+    }
+  ],
+  "description": "Forged in a star\n\nA star's core. Three helium nuclei fuse into one carbon nucleus: three helium-4 make carbon-12. The carbon drifts out through a nebula and into a living cell, then becomes a letter C with four electrons around it. Text: Every carbon atom in you was forged in a star. Organic chemistry is what that carbon learned to do next.\n\nSources:\n- helium-4 protons (2), helium-4 mass number (4), carbon-12 protons (6), carbon-12 mass number (12): Kondev et al., \"The NUBASE2020 evaluation of nuclear physics properties\", Chinese Phys. C 45, 030001 (2021), doi:10.1088/1674-1137/abddae. Published values, cited (facts from the literature)."
+}

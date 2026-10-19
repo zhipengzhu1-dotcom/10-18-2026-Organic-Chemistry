@@ -15,6 +15,7 @@
     "content:freeze": "pnpm --filter @astratron/content run freeze",
     "lint:numbers": "pnpm --filter @astratron/content run lint:numbers",
     "lint:scenes": "pnpm --filter @astratron/scenes run lint:purity",
+    "scenes:render": "pnpm --filter @astratron/scenes run render",
     "dev": "pnpm --filter @astratron/site run dev",
     "build": "pnpm --filter @astratron/site run build",
     "test:e2e": "playwright test",
