@@ -38,33 +38,38 @@ describe("sources sidecar", () => {
     "nuclides/C-12.A": [[5.4, 9.3]],
   });
 
-  it("lists each number with its citation and on-screen time ranges", () => {
-    expect(sidecar).toMatchObject({ scene: "star-forge", aspect: "16:9", fps: 60, duration: 13, video: "star-forge-16x9.mp4" });
+  it("has the same shape as the video module's (#65) sidecars: each number, its citation and its on-screen time ranges", () => {
+    expect(sidecar).toMatchObject({ scene: "star-forge", title: "Forged in a star", aspect: "16:9", file: "star-forge-16x9.mp4", fps: 60, duration: 13 });
     expect(sidecar.numbers.find((n) => n.ref === "nuclides/C-12.A")).toEqual({
       ref: "nuclides/C-12.A",
       label: "carbon-12 mass number",
+      quantity: "count",
       value: 12,
       display: "12",
+      full: "12",
       citation:
         'Kondev et al., "The NUBASE2020 evaluation of nuclear physics properties", Chinese Phys. C 45, 030001 (2021), doi:10.1088/1674-1137/abddae',
       licence: "Published values, cited (facts from the literature)",
-      shown: [[5.4, 9.3]],
+      shown: "text",
+      onScreen: [{ from: 5.4, to: 9.3 }],
     });
-    // A value the video draws without printing it (the proton count) is listed with no on-screen text range.
-    expect(sidecar.numbers.find((n) => n.ref === "nuclides/C-12.Z")?.shown).toEqual([]);
+    // A value the video draws without printing it (the proton count sets the nucleons) counts as on screen throughout.
+    expect(sidecar.numbers.find((n) => n.ref === "nuclides/C-12.Z")).toMatchObject({ shown: "drawn", onScreen: [{ from: 0, to: 13 }] });
   });
 
   it("ends with a paste-ready description block", () => {
-    expect(sidecar.description).toBe(
-      [
-        "Forged in a star",
-        "",
-        starForge.describe(cited),
-        "",
-        "Sources:",
-        '- helium-4 protons (2), helium-4 mass number (4), carbon-12 protons (6), carbon-12 mass number (12): Kondev et al., "The NUBASE2020 evaluation of nuclear physics properties", Chinese Phys. C 45, 030001 (2021), doi:10.1088/1674-1137/abddae. Published values, cited (facts from the literature).',
-      ].join("\n"),
-    );
+    const lines = sidecar.description.split("\n");
+    expect(lines.slice(0, 7)).toEqual([
+      "Forged in a star",
+      "",
+      "Numbers on screen:",
+      "0:00–0:13  helium-4 protons 2",
+      "0:02–0:08  helium-4 mass number 4",
+      "0:00–0:13  carbon-12 protons 6",
+      "0:05–0:10  carbon-12 mass number 12",
+    ]);
+    expect(lines[8]).toBe("Sources:");
+    expect(sidecar.description).toContain("NUBASE2020");
   });
 });
 

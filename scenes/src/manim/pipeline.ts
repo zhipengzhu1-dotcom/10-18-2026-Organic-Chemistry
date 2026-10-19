@@ -8,7 +8,7 @@ import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { find, type Cited, type CitedData } from "@astratron/content/data";
+import { find, sourceNote, type Cited, type CitedData } from "@astratron/content/data";
 import type { Aspect, WatchSceneManifest } from "../types.ts";
 import { frameSize } from "../frame.ts";
 import { aspectSlug, watchSceneFiles } from "../watch.ts";
@@ -72,56 +72,75 @@ export function manimProps(m: WatchSceneManifest, cited: Record<string, Cited>, 
 /** Seconds [from, to] a ref's number is on screen. */
 export type Timings = Record<string, [number, number][]>;
 
+/**
+ * `<scene>-<aspect>.sources.json`, in the same shape as the video module's
+ * sidecars for interactive Scenes (#65, video/src/sidecar.ts): the scenes
+ * module can't import the video module, so the shape is kept in step here.
+ */
 export interface SourcesSidecar {
   scene: string;
   title: string;
   aspect: Aspect;
+  /** The video file this sidecar describes. */
+  file: string;
   fps: number;
   duration: number;
-  video: string;
   numbers: {
     ref: string;
     label: string;
+    quantity: Cited["quantity"];
     value: number | string;
+    unit?: string;
     display: string;
+    full: string;
+    tier?: Cited["tier"];
     citation: string;
+    via?: string;
     licence: string;
-    shown: [number, number][];
+    /** `text` when printed on screen; `drawn` when it only shapes the drawing (on screen throughout). */
+    shown: "text" | "drawn";
+    onScreen: { from: number; to: number }[];
   }[];
   /** Paste-ready text for a video description. */
   description: string;
 }
 
-const round = (s: number) => Math.round(s * 100) / 100;
+const round = (s: number) => Math.round(s * 1000) / 1000;
 
-/** `<scene>-<aspect>.sources.json`: each number the video uses, its citation and when it is on screen. */
+/** m:ss, rounded down for a start and up for an end so the range covers the value (as #65 does). */
+function clock(s: number, up: boolean): string {
+  const whole = up ? Math.ceil(s - 1e-9) : Math.floor(s + 1e-9);
+  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
+}
+
+/** Each number the video uses, its citation from the cited-data lookup, and when it is on screen (from the script's timings). */
 export function sourcesSidecar(m: WatchSceneManifest, cited: Record<string, Cited>, aspect: Aspect, timings: Timings): SourcesSidecar {
-  const numbers = m.data.map((ref) => {
-    const c = cited[ref];
+  const values = m.data.map((ref) => cited[ref]);
+  const numbers = values.map((v): SourcesSidecar["numbers"][number] => {
+    const ranges = timings[v.ref] ?? [];
     return {
-      ref,
-      label: c.label,
-      value: c.value,
-      display: c.display,
-      citation: c.source.citation,
-      licence: c.licence,
-      shown: (timings[ref] ?? []).map(([a, b]) => [round(a), round(b)] as [number, number]),
+      ref: v.ref,
+      label: v.label,
+      quantity: v.quantity,
+      value: v.value,
+      ...(v.unit ? { unit: v.unit } : {}),
+      display: v.display,
+      full: v.full,
+      ...(v.tier ? { tier: v.tier } : {}),
+      citation: v.source.citation,
+      ...(v.source.via ? { via: v.source.via.citation } : {}),
+      licence: v.licence,
+      shown: ranges.length ? "text" : "drawn",
+      onScreen: ranges.length ? ranges.map(([from, to]) => ({ from: round(from), to: round(to) })) : [{ from: 0, to: m.duration }],
     };
   });
-  // One line per source, listing the values it gave.
-  const bySource = new Map<string, string[]>();
-  for (const n of numbers) {
-    const key = `${n.citation}. ${n.licence}.`;
-    bySource.set(key, [...(bySource.get(key) ?? []), `${n.label} (${n.display})`]);
-  }
-  const description = [
-    m.title,
-    "",
-    m.describe(cited),
-    ...(numbers.length ? ["", "Sources:", ...[...bySource].map(([source, values]) => `- ${values.join(", ")}: ${source}`)] : []),
-  ].join("\n");
-  const video = watchSceneFiles(m.id, aspect).video.split("/").pop()!;
-  return { scene: m.id, title: m.title, aspect, fps: FPS, duration: m.duration, video, numbers, description };
+  const lines = numbers.flatMap((n) => n.onScreen.map((r) => `${clock(r.from, false)}–${clock(r.to, true)}  ${n.label} ${n.display}`));
+  const note = sourceNote(values).map((p) => (p.lead ? `${p.lead} ${p.text}` : p.text));
+  const description = numbers.length
+    ? [m.title, "", "Numbers on screen:", ...lines, "", "Sources:", ...note].join("\n")
+    : `${m.title}\nThis video shows no cited numbers.`;
+  const file = watchSceneFiles(m.id, aspect).video.split("/").pop()!;
+  return { scene: m.id, title: m.title, aspect, file, fps: FPS, duration: m.duration, numbers, description };
 }
 
 /** The cited values a watch-only Scene names, from a Subject's data. */
