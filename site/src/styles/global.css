@@ -155,7 +155,8 @@
     border-color: var(--at-ink);
     box-shadow: 5px 5px 0 var(--at-line);
   }
-  .btn:disabled {
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
     background: var(--at-raised);
     color: var(--at-ink-muted);
     box-shadow: none;
@@ -299,6 +300,11 @@
   /* On a phone, once a reveal Scene plays the answer, it takes the question's place. */
   @media (max-width: 600px) {
     .player.revealing .player-prompt {
+      display: none;
+    }
+    /* A Tap Step that draws figures beside its question (#78, s06): once it is answered (a Hint,
+       the Correct line or the reveal), the feedback and the drawings take the screen. */
+    .player.answered .player-prompt {
       display: none;
     }
   }
@@ -955,6 +961,40 @@
   .scene-value {
     min-width: 5ch;
     font-family: var(--at-font-data);
+  }
+  /* On a phone, a Manipulate Step's Scene sits a little lower so its slider and a Hint fit (#78). */
+  @media (max-width: 600px) {
+    .scene:has(.scene-control) .scene-frame {
+      max-height: 21dvh;
+    }
+    /* The Lesson-end screen: the Wrap's picture shrinks to a card above the Key idea. */
+    .player-body:has(> .card) .scene-frame {
+      max-height: 6rem;
+    }
+  }
+  /* A watch-only Scene above a question shrinks to a card once played (#78). */
+  .scene-watch.shrunk .scene-frame {
+    max-height: 7rem;
+  }
+  /* A goal-state Scene's refusal ("It's full."), shown at once under it (#78). */
+  .scene-say {
+    margin: 4px 0 0;
+    min-height: 0;
+    color: var(--at-ink);
+  }
+  .scene-say:empty {
+    display: none;
+  }
+  .scene-goal [data-handle],
+  .scene-goal [data-target] {
+    cursor: pointer;
+    outline: none;
+  }
+  .scene-goal [data-handle]:focus-visible circle,
+  .scene-goal [data-target]:focus-visible circle {
+    stroke: var(--at-electron);
+    stroke-width: 8px;
+    stroke-dasharray: 18 12;
   }
 }
 

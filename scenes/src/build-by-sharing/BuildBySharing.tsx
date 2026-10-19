@@ -50,13 +50,13 @@ export default function BuildBySharing({ t, state, aspect, reducedMotion, input 
     });
     out.push(<Hit key="carbon" at={c} r={L.hit} role="target" id="carbon" label="The carbon atom" live={live} />);
 
-    // The tray: H atoms not yet bonded, one dot each.
-    out.push(
+    // The tray: H atoms not yet bonded, one dot each (only while carbon is being built, not in a drawing to count).
+    if (state.count === "live") out.push(
       <text key="tray" x={L.trayLabel.x} y={L.trayLabel.y} fill={muted} fontSize={L.letter * 0.42} textAnchor="middle" style={{ fontFamily: TEXT_FONT }}>
         Tray
       </text>,
     );
-    for (let k = bondedSides.length + 1; k <= TRAY; k++) {
+    for (let k = bondedSides.length + 1; state.count === "live" && k <= TRAY; k++) {
       const id = `tray-${k}`;
       const at = placed(id, L.tray[k - 1]);
       out.push(

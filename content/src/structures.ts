@@ -69,6 +69,7 @@ export function resolveFigure(
   return {
     view: view(found, figure.hide, figure.ring, figure.outline),
     alt: figure.alt,
+    ...(figure.large && { large: true }),
     ...(figure.caption ? { caption: figure.caption } : {}),
   };
 }

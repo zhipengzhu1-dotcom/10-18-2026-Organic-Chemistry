@@ -19,7 +19,7 @@ export default function CrustVsBody({ t, aspect, reducedMotion, cited }: ScenePr
   // The break sits a little past the crust value; the axis ends a little past the body value.
   const breakAt = crust * 2.5;
   const end = body * 1.25;
-  const axis = { x: area.x + (wide ? 420 : 40), w: area.w - (wide ? 460 : 80) };
+  const axis = { x: area.x + (wide ? 560 : 40), w: area.w - (wide ? 760 : 240) };
   const at = (v: number) =>
     v <= breakAt ? (v / breakAt) * MAGNIFIED * axis.w : (MAGNIFIED + ((v - breakAt) / (end - breakAt)) * (1 - MAGNIFIED)) * axis.w;
   const grow = reducedMotion ? 1 : easeOut(progress(t, 0.1, 1.2));
@@ -28,16 +28,16 @@ export default function CrustVsBody({ t, aspect, reducedMotion, cited }: ScenePr
     { label: "Earth's crust", value: crust, display: cited[CRUST]?.display ?? "", colour: boss },
     { label: "Human body", value: body, display: cited[BODY]?.display ?? "", colour: electron },
   ];
-  const rowH = wide ? 300 : 420;
+  const rowH = wide ? 320 : 420;
   const top = wide ? area.y + 200 : area.y + 500;
-  const label = wide ? 60 : 64;
-  const barH = wide ? 110 : 130;
+  const label = wide ? 84 : 72;
+  const barH = wide ? 130 : 140;
   const breakX = axis.x + MAGNIFIED * axis.w;
   const axisY = top + rows.length * rowH - rowH / 2 + barH;
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%" aria-hidden="true" style={{ display: "block" }}>
-      <text x={width / 2} y={area.y + 60} fill={muted} fontSize={wide ? 52 : 56} textAnchor="middle" style={{ fontFamily: TEXT_FONT }}>
+      <text x={width / 2} y={area.y + 60} fill={muted} fontSize={wide ? 68 : 64} textAnchor="middle" style={{ fontFamily: TEXT_FONT }}>
         Carbon, share by mass
       </text>
       {rows.map((row, i) => {
@@ -62,7 +62,7 @@ export default function CrustVsBody({ t, aspect, reducedMotion, cited }: ScenePr
         <path d={`M ${breakX - 30} ${axisY + 24} L ${breakX - 6} ${axisY - 24}`} />
         <path d={`M ${breakX + 6} ${axisY + 24} L ${breakX + 30} ${axisY - 24}`} />
       </g>
-      <text x={axis.x} y={axisY + 70} fill={muted} fontSize={wide ? 40 : 44} style={{ fontFamily: TEXT_FONT }}>
+      <text x={axis.x} y={axisY + 70} fill={muted} fontSize={wide ? 56 : 52} style={{ fontFamily: TEXT_FONT }}>
         axis broken to show the crust
       </text>
     </svg>

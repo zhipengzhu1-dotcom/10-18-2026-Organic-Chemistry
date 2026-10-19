@@ -55,7 +55,7 @@ export function layoutSharing(aspect: Aspect): SharingLayout {
   return {
     carbon,
     reach,
-    letter: 120,
+    letter: 140,
     dot: 14,
     hit: 140,
     tray,

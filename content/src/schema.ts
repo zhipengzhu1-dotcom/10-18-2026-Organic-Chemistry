@@ -53,6 +53,8 @@ const figure = z.strictObject({
   outline: z.array(id).min(1).optional(),
   caption: text.optional(),
   alt: text,
+  /** Draw it at a size to read, not as a thumbnail (e.g. the molecule a Tap Step compares against). */
+  large: z.boolean().optional(),
 });
 
 /**

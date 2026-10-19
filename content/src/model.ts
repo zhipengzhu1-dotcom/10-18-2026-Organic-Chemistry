@@ -74,6 +74,8 @@ export interface Figure {
   caption?: string;
   /** Screen-reader text for the drawing. */
   alt: string;
+  /** Drawn at a size to read, not as a thumbnail. */
+  large?: boolean;
 }
 
 /** Something one tap away from a Step: a Scene, or a reference table of drawings. */
