@@ -1,6 +1,9 @@
 // The 3D molecule module (#68): what a Student measures by tapping atoms, how picks behave,
 // the named start views and what Describe reads. Expected values come from the methane
 // geometry (CCCBDB: C–H 1.087 Å, tetrahedral 109.47°) and plain trigonometry, not from the code.
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { parse } from "yaml";
 import { describe, expect, it } from "vitest";
 import { buildContent, contentRoot } from "../src/index.ts";
 import {
@@ -14,6 +17,8 @@ import {
   viewErrors,
   viewMatrix,
   type Molecule,
+  type Vec3,
+  type ViewSpec,
 } from "../src/molecule.ts";
 
 const data = buildContent(contentRoot).model!.subjects.find((s) => s.slug === "organic")!.data;
@@ -139,6 +144,52 @@ describe("start views", () => {
     expect(viewErrors(water.atoms, { look: [1, 2], up: 1 })).toEqual(["up: atom 1 lies on the line of sight"]);
     expect(viewErrors(water.atoms, { look: [1, 2], plane: [0, 1, 2] })).toEqual(["give look or plane, not both"]);
     expect(viewErrors(water.atoms, { look: [1, 2], up: 0 })).toEqual([]);
+  });
+});
+
+describe("Unit 1 start views (views.yaml) put the atoms where each Step's drawing says", () => {
+  // Lesson 3 spec: "each startView puts the atoms where the Step's drawing says (checked by projecting the coordinates)".
+  const views = parse(readFileSync(join(contentRoot, "organic", "views.yaml"), "utf8")) as Record<string, Record<string, ViewSpec>>;
+  const shown = (id: string, view: string) => project(data[id].atoms!.list, viewMatrix(data[id].atoms!.list, views[id][view]));
+  const screenAngle = (c: Vec3, a: Vec3, b: Vec3) => {
+    const [u, v] = [a, b].map((p) => [p[0] - c[0], p[1] - c[1]]);
+    return (Math.acos((u[0] * v[0] + u[1] * v[1]) / (Math.hypot(u[0], u[1]) * Math.hypot(v[0], v[1])) ) * 180) / Math.PI;
+  };
+
+  it("methane tilted: no two H's in an obvious line with the C, none hidden behind it", () => {
+    const p = shown("methane", "tilted");
+    for (let i = 1; i <= 4; i++) {
+      expect(Math.hypot(p[i][0] - p[0][0], p[i][1] - p[0][1])).toBeGreaterThan(0.4);
+      for (let j = i + 1; j <= 4; j++) {
+        const a = screenAngle(p[0], p[i], p[j]);
+        expect(a).toBeGreaterThan(20);
+        expect(a).toBeLessThan(160);
+      }
+    }
+  });
+
+  it("water end-on: the two H's line up, so the bend is hidden", () => {
+    const p = shown("water", "end-on");
+    expect(Math.hypot(p[1][0] - p[2][0], p[1][1] - p[2][1])).toBeLessThan(0.01);
+  });
+
+  it("BF₃ and NH₃ face-on: down the threefold axis, the outer atoms 120° apart around the centre", () => {
+    for (const id of ["boron-trifluoride", "ammonia"]) {
+      const p = shown(id, "face-on");
+      expect(screenAngle(p[0], p[1], p[2])).toBeCloseTo(120, 0);
+      expect(screenAngle(p[0], p[2], p[3])).toBeCloseTo(120, 0);
+      expect(p[1][2]).toBeCloseTo(p[2][2], 6);
+      expect(p[2][2]).toBeCloseTo(p[3][2], 6);
+    }
+  });
+
+  it("ethanol off-page: the O–C–C plane is turned well away (over 45°) from the screen plane", () => {
+    const [c1, c2, o] = [0, 1, 2].map((i) => shown("ethanol", "off-page")[i]);
+    const u: Vec3 = [o[0] - c2[0], o[1] - c2[1], o[2] - c2[2]];
+    const v: Vec3 = [c1[0] - c2[0], c1[1] - c2[1], c1[2] - c2[2]];
+    const n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    const tilt = (Math.acos(Math.abs(n[2]) / Math.hypot(...n)) * 180) / Math.PI;
+    expect(tilt).toBeGreaterThan(45);
   });
 });
 
