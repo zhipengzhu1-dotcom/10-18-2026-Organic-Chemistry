@@ -95,6 +95,18 @@ describe("Lessons and Problems cite numbers as {{file/key}}", () => {
     expect(s08.citations?.map((c) => c.ref)).toEqual(["methane/a.HCH"]);
   });
 
+  it("a Step carries its written Source note (attribution); a Check Step its Problem's credit", () => {
+    const result = build((t) => {
+      const lesson = t["chem/lessons/l1.yaml"] as { steps: Record<string, unknown>[] };
+      lesson.steps[1].sourceNote = "Ethanol: PubChem CID 702.";
+      (t["chem/problems/p1.yaml"] as Record<string, unknown>).credit = "Adapted from MIT OCW 5.12, PS1 Q3a, CC BY-NC-SA 4.0.";
+    });
+    expect(result.errors).toEqual([]);
+    expect(steps(result)[1]).toMatchObject({ sourceNote: "Ethanol: PubChem CID 702." });
+    expect(steps(result)[7]).toMatchObject({ sourceNote: "Adapted from MIT OCW 5.12, PS1 Q3a, CC BY-NC-SA 4.0." });
+    expect(steps(result)[8]).not.toHaveProperty("sourceNote");
+  });
+
   it("a Step with no cited numbers has no citations", () => {
     expect(steps(build())[1].citations).toBeUndefined();
   });

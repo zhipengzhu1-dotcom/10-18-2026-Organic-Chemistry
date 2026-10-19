@@ -1,0 +1,24 @@
+# Lesson 2 Check Problem (lesson-02-drawing-molecules.md). Approved for play as a Check Step (#80).
+id: u1-draw-acrylonitrile
+unit: u1
+lesson: u1-l02
+difficulty: 2
+status: approved
+source: Original
+credit: "Acrylonitrile, PubChem CID 7855 (formula C₃H₃N)."
+type: multiple-choice
+prompt: Acrylonitrile, used to make acrylic fibres, as a line-angle drawing. Which card is its Kekulé structure?
+structure: acrylonitrile
+options:
+  - { id: a, structure: acrylonitrile-kekule, text: "CH₂ double-bonded to CH, single-bonded to C, triple-bonded to N; one lone pair on N" }
+  - { id: b, structure: acrylonitrile-no-lone-pair, text: "same bonds; no lone pair on N" }
+  - { id: c, structure: acrylonitrile-bare-carbon, text: "CH₂ double-bonded to a C with no hydrogen, then C triple-bonded to N; one lone pair on N" }
+  - { id: d, structure: propanenitrile, text: "CH₃ single-bonded to CH₂, then C triple-bonded to N; one lone pair on N" }
+answer: [a]
+correct: "Three carbons, {{h-counts/acrylonitrile}} H's: two on the end, one on the corner, none on the carbon in the triple bond."
+hints:
+  - { match: [b], text: "N with 3 bonds keeps one lone pair. A Kekulé structure shows it." }
+  - { match: [c], text: "Count the bonds on the middle carbon: a double bond and a single bond is 3. It needs one H." }
+  - { match: [d], text: "The drawing has two lines between the first two carbons. That's a double bond, so fewer H's." }
+  - { text: "A triple bond is drawn straight, so the carbon where the single line meets it is easy to miss. Count all three carbons, then give each one 4 bonds." }
+reveal: "**a**. Number the line drawing's carbons 1, 2, 3 from the double-bond end: their H's are 2, 1 and 0."

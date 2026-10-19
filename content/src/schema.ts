@@ -137,10 +137,13 @@ const manipulate = {
 
 const stepId = z.string().regex(/^s\d{2,}$/, 'must look like "s01"');
 const phase = z.enum(["hook", "build", "wrap"]);
+/** The Step's written Source note: attribution (MIT OCW credit, PubChem CIDs), shown under the Step with any cited numbers. */
+const sourceNote = text.optional();
 
 const explainStep = z.strictObject({
   id: stepId,
   phase,
+  sourceNote,
   type: z.literal("explain"),
   text,
   scene: sceneUse.optional(),
@@ -149,15 +152,16 @@ const explainStep = z.strictObject({
 const multipleChoiceStep = z.strictObject({
   id: stepId,
   phase,
+  sourceNote,
   ...multipleChoice,
   scene: sceneUse.optional(),
   /** Hook only: every choice is accepted and the reveal follows at once. */
   prediction: z.boolean().optional(),
 });
 
-const numericStep = z.strictObject({ id: stepId, phase, ...numeric, scene: sceneUse.optional() });
-const rankStep = z.strictObject({ id: stepId, phase, ...rank, scene: sceneUse.optional() });
-const manipulateStep = z.strictObject({ id: stepId, phase, ...manipulate });
+const numericStep = z.strictObject({ id: stepId, phase, sourceNote, ...numeric, scene: sceneUse.optional() });
+const rankStep = z.strictObject({ id: stepId, phase, sourceNote, ...rank, scene: sceneUse.optional() });
+const manipulateStep = z.strictObject({ id: stepId, phase, sourceNote, ...manipulate });
 
 /** A Check Step is a Problem from the Bank, referenced by id; its Step type is the Problem's. */
 const checkStep = z.strictObject({
@@ -167,7 +171,7 @@ const checkStep = z.strictObject({
   problem: id,
 });
 
-const tapStep = z.strictObject({ id: stepId, phase, ...tapToIdentify, scene: sceneUse.optional() });
+const tapStep = z.strictObject({ id: stepId, phase, sourceNote, ...tapToIdentify, scene: sceneUse.optional() });
 
 /** Picks the Step schema by `type` (a Check Step is recognised by its `problem`), so errors point at the broken field. */
 const step = z.preprocess(

@@ -51,6 +51,8 @@ export interface ExplainStep {
   text: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** Written attribution shown in the Source note (MIT OCW credit, PubChem CIDs); a Check Step gets its Problem's credit. */
+  sourceNote?: string;
 }
 
 export interface MultipleChoiceStep {
@@ -72,6 +74,8 @@ export interface MultipleChoiceStep {
   scene?: SceneUse;
   /** The cited values this Step's text shows (`{{file/key}}`); its Source note is generated from them. */
   citations?: Cited[];
+  /** Written attribution shown in the Source note (MIT OCW credit, PubChem CIDs); a Check Step gets its Problem's credit. */
+  sourceNote?: string;
 }
 
 export interface NumericHint {
@@ -99,6 +103,8 @@ export interface NumericStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** Written attribution shown in the Source note (MIT OCW credit, PubChem CIDs); a Check Step gets its Problem's credit. */
+  sourceNote?: string;
 }
 
 /** Rank / order: the Student puts the items into one strict order (the prompt names which end is first). */
@@ -118,6 +124,8 @@ export interface RankStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** Written attribution shown in the Source note (MIT OCW credit, PubChem CIDs); a Check Step gets its Problem's credit. */
+  sourceNote?: string;
 }
 
 export interface ManipulateHint {
@@ -141,6 +149,8 @@ export interface ManipulateStep {
   reveal: string;
   problemId?: string;
   citations?: Cited[];
+  /** Written attribution shown in the Source note (MIT OCW credit, PubChem CIDs); a Check Step gets its Problem's credit. */
+  sourceNote?: string;
 }
 
 /** A Step the Student answers and the engine grades. */
@@ -271,6 +281,8 @@ export interface TapStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** Written attribution shown in the Source note (MIT OCW credit, PubChem CIDs); a Check Step gets its Problem's credit. */
+  sourceNote?: string;
 }
 
 export interface Lesson {

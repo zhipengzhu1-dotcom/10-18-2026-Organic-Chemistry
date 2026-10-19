@@ -143,5 +143,6 @@ export function renderLesson(lesson: Lesson): Lesson {
         return { ...s, ...shared, hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
     }
   };
-  return { ...lesson, keyIdea: md(lesson.keyIdea), steps: lesson.steps.map(step) };
+  const withNote = (s: Step): Step => (s.sourceNote ? { ...step(s), sourceNote: md(s.sourceNote) } : step(s));
+  return { ...lesson, keyIdea: md(lesson.keyIdea), steps: lesson.steps.map(withNote) };
 }

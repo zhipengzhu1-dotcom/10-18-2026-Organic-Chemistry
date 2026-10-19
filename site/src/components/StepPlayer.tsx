@@ -283,7 +283,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         )}
 
         {/* Keyed per Step so a new Step opens its Source note collapsed. */}
-        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} />
+        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} note={step.sourceNote} />
 
         <p className="report">
           <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>

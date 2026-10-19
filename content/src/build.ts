@@ -253,8 +253,10 @@ function resolveLesson(
       errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" is ${problem.status}, not approved`);
       return [];
     }
-    const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source: _src, credit: _c, ...interaction } = problem;
-    return withStructures({ id: step.id, phase: "check", problemId, ...interaction }, `problem:${problemId}`).map(withScene);
+    const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source: _src, credit, ...interaction } = problem;
+    // The Problem's credit line is the Check Step's written Source note.
+    const note = credit ? { sourceNote: credit } : {};
+    return withStructures({ id: step.id, phase: "check", problemId, ...note, ...interaction }, `problem:${problemId}`).map(withScene);
   });
   const phases = { hook: 0, build: 0, check: 0, wrap: 0 };
   for (const step of lesson.steps) phases[step.phase]++;
