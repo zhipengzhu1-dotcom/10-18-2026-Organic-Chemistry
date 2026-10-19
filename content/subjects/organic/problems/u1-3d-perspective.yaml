@@ -17,7 +17,7 @@ molecule:
   id: 2-fluorobutane-r
   view: as-left-drawing
   labels: { 2: F, 8: H, 0: CH₃, 3: CH₂CH₃ }
-  describe: "2-fluorobutane. The central carbon holds a fluorine, a hydrogen, a methyl group and an ethyl group at the corners of a tetrahedron. In the right-hand view: fluorine upper right and hydrogen below, both in the page; methyl upper left, away from you; ethyl straight up, toward you."
+  describe: "2-fluorobutane. The central carbon holds a fluorine, a hydrogen, a methyl group and an ethyl group at the corners of a tetrahedron."
 options:
   - { id: a, text: "CH₃ on the dash, CH₂CH₃ on the wedge" }
   - { id: b, text: "CH₂CH₃ on the dash, CH₃ on the wedge" }

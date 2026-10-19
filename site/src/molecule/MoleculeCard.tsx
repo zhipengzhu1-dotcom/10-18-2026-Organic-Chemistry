@@ -9,9 +9,22 @@
 // Reusable outside the Step player: give it a resolved MoleculeUse (see notes/68-3d.md).
 import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import type { MoleculeUse } from "@astratron/content";
-import { atomNames, describeMolecule, measure, readout, togglePick, turn, type Matrix3 } from "@astratron/content/molecule";
-import { atomAt, fitScale, placeAtoms } from "./layout.ts";
-import { MoleculeOverlay, MoleculeStill } from "./MoleculeDrawing.tsx";
+import {
+  atomNames,
+  describeMolecule,
+  describePage,
+  IN_PAGE,
+  measure,
+  pageSides,
+  pageTilt,
+  pageView,
+  readout,
+  togglePick,
+  turn,
+  type Matrix3,
+} from "@astratron/content/molecule";
+import { atomAt, dipoleArrows, fitScale, placeAtoms } from "./layout.ts";
+import { CardMarks, MoleculeOverlay, MoleculeStill } from "./MoleculeDrawing.tsx";
 
 const MoleculeCanvas = lazy(() => import("./MoleculeCanvas.tsx"));
 
@@ -43,6 +56,10 @@ export interface MoleculeCardProps {
   molecule: MoleculeUse;
   /** Extra three.js objects drawn with the molecule (Å, about its centre), e.g. orbital lobes (#70). */
   children?: ReactNode;
+  /** With a page sheet: offer "Snap to page" (Lesson 3 s09 shows it after the first wrong try). */
+  snap?: boolean;
+  /** With a page sheet: the Step is answered, so settle on the page view and label which side each atom is on. */
+  settled?: boolean;
 }
 
 /** True when this browser can draw WebGL2 (three.js needs it). */
@@ -54,7 +71,7 @@ export function canDrawWebGL(): boolean {
   }
 }
 
-export default function MoleculeCard({ molecule, children }: MoleculeCardProps) {
+export default function MoleculeCard({ molecule, children, snap = false, settled = false }: MoleculeCardProps) {
   const id = useId();
   const stage = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 358, height: 220 });
@@ -66,6 +83,9 @@ export default function MoleculeCard({ molecule, children }: MoleculeCardProps) 
   const [cursor, setCursor] = useState<number | null>(null);
   const [said, setSaid] = useState("");
   const drag = useRef<{ x: number; y: number; x0: number; y0: number; moved: boolean } | null>(null);
+  /** Bond dipoles added tip to tail (Lesson 3's Add). */
+  const [added, setAdded] = useState(false);
+  const sheet = molecule.pageSheet;
 
   useEffect(() => setGl(canDrawWebGL()), []);
   useEffect(() => {
@@ -81,10 +101,24 @@ export default function MoleculeCard({ molecule, children }: MoleculeCardProps) 
     return () => observer.disconnect();
   }, []);
 
-  const names = useMemo(() => atomNames(molecule.atoms), [molecule]);
+  // A Step's `labels` (e.g. ethanol's C1) replace the per-element names in readouts and Describe.
+  const names = useMemo(() => atomNames(molecule.atoms).map((n, i) => molecule.labels?.[i] ?? n), [molecule]);
+  const inPage = sheet ? pageTilt(molecule.atoms, rotation, sheet) <= IN_PAGE : undefined;
+  const lastPage = useRef(inPage);
+  useEffect(() => {
+    // Announce the badge only when it changes, not on entry.
+    if (inPage === undefined || lastPage.current === inPage) return;
+    lastPage.current = inPage;
+    say(inPage ? "In the page." : "Not in the page.");
+  }, [inPage]);
+  useEffect(() => {
+    if (settled && sheet) setRotation(pageView(molecule.atoms, sheet));
+  }, [settled, sheet, molecule]);
   const scale = fitScale(molecule, size.width, size.height) * zoom;
   const placed = placeAtoms(molecule, rotation, { ...size, scale, trueScale });
   const measurement = measure(molecule, picks);
+  const dipoles = molecule.dipoles ? dipoleArrows(molecule, rotation, { ...size, scale, trueScale }, added) : undefined;
+  const sides = settled && sheet ? pageSides(molecule, rotation, sheet) : [];
   const shown = measurement && readout(measurement, names);
   /** Turning and zooming need the live 3D view; the no-WebGL still stays put. */
   const turnable = gl !== false;
@@ -193,7 +227,10 @@ export default function MoleculeCard({ molecule, children }: MoleculeCardProps) 
           ) : (
             <MoleculeStill molecule={molecule} placed={placed} trueScale={trueScale} size={size} />
           )}
-          <MoleculeOverlay molecule={molecule} placed={placed} picks={picks} cursor={cursor} measurement={measurement} size={size} />
+          <MoleculeOverlay molecule={molecule} placed={placed} picks={picks} cursor={cursor} measurement={measurement} size={size} names={names} />
+          {(sheet || dipoles || molecule.labels) && (
+            <CardMarks molecule={molecule} placed={placed} size={size} sheet={!!sheet} sides={sides} dipoles={dipoles} />
+          )}
         </div>
         <p className="molecule-readout" aria-hidden="true">
           {shown ? (
@@ -204,6 +241,11 @@ export default function MoleculeCard({ molecule, children }: MoleculeCardProps) 
             <span className="molecule-what">Still image: this device can't show 3D.</span>
           ) : null}
         </p>
+        {sheet && (
+          <p className={inPage ? "molecule-badge in" : "molecule-badge"} aria-hidden="true">
+            {inPage ? "In the page" : "Not in the page"}
+          </p>
+        )}
         <div className="molecule-scalebar" aria-hidden="true">
           <i style={{ width: `${scale}px` }} />
           <span>1 Å</span>
@@ -228,10 +270,53 @@ export default function MoleculeCard({ molecule, children }: MoleculeCardProps) 
             True scale
           </button>
         </span>
+        {molecule.dipoles && (
+          <button
+            type="button"
+            className="molecule-btn molecule-describe"
+            aria-pressed={added}
+            onClick={() => {
+              setAdded(!added);
+              say(
+                added
+                  ? "The arrows are back on their bonds."
+                  : molecule.dipoles!.net.zero
+                    ? "Added tip to tail: the arrows cancel, net zero."
+                    : "Added tip to tail: one net arrow is left.",
+              );
+            }}
+          >
+            Add
+          </button>
+        )}
+        {sheet && snap && turnable && (
+          <button
+            type="button"
+            className="molecule-btn molecule-describe"
+            onClick={() => {
+              setRotation(pageView(molecule.atoms, sheet));
+              say("Snapped to the page.");
+            }}
+          >
+            Snap to page
+          </button>
+        )}
         <button
           type="button"
           className="molecule-btn molecule-describe"
-          onClick={() => say(describeMolecule({ title: molecule.title, atoms: molecule.atoms, bonds: molecule.bonds, describe: molecule.describe }, rotation))}
+          onClick={() =>
+            say(
+              [
+                describeMolecule(
+                  { title: molecule.title, atoms: molecule.atoms, bonds: molecule.bonds, describe: molecule.describe, names },
+                  rotation,
+                ),
+                sheet ? describePage(molecule, rotation, sheet, names) : "",
+              ]
+                .filter(Boolean)
+                .join(" "),
+            )
+          }
         >
           Describe
         </button>

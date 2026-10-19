@@ -17,6 +17,8 @@ export interface Molecule {
   bonds: Bond[];
   /** The Step's own words for the arrangement; Describe reads them first. */
   describe?: string;
+  /** Atom names to use instead of the per-element ones (a Step's `labels`). */
+  names?: string[];
 }
 
 /**
@@ -246,6 +248,20 @@ export function pageSides(m: Molecule, r: Matrix3, plane: [number, number, numbe
     });
 }
 
+/** Within this many degrees of the screen plane, a plane of atoms is "in the page". */
+export const IN_PAGE = 10;
+
+/**
+ * What Describe adds for the page sheet: whether the three atoms' plane is in the page and, when it
+ * is, which side each other atom on the middle one sits.
+ */
+export function describePage(m: Molecule, r: Matrix3, plane: [number, number, number], names: string[]): string {
+  const three = list([...plane].map((i) => names[i]));
+  if (pageTilt(m.atoms, r, plane) > IN_PAGE) return `${three} are not in the page.`;
+  const sides = pageSides(m, r, plane).map((s) => `${names[s.atom]} points ${s.side === "toward" ? "toward you" : "away"}`);
+  return `${three} are in the page.${sides.length ? ` On ${names[plane[1]]}, ${list(sides)}.` : ""}`;
+}
+
 /** A bond dipole: from the δ+ atom toward the δ− atom, `size` = the electronegativity difference. */
 export interface BondDipole {
   from: number;
@@ -292,7 +308,7 @@ const list = (words: string[]) => (words.length < 2 ? words.join("") : `${words.
  * then what the current view shows: atoms level with the screen, and the nearest and farthest atoms.
  */
 export function describeMolecule(m: Molecule, r: Matrix3): string {
-  const names = atomNames(m.atoms);
+  const names = m.names ?? atomNames(m.atoms);
   const parts = m.describe ? [m.describe] : [];
   parts.push(`${m.title}: ${m.atoms.length} atoms.`);
   m.atoms.forEach((_, i) => {

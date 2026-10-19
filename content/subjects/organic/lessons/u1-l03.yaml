@@ -149,7 +149,7 @@ steps:
       view: off-page
       labels: { 1: C1, 0: C2 }
       pageSheet: [2, 1, 0]
-      describe: "Ethanol. C2 is bonded to C1, and C1 is bonded to the oxygen, which carries one hydrogen. With oxygen and both carbons in the page, one hydrogen on C1 points toward you and the other points away. The H–C1–H angle is {{ethanol/a.HC1H}}."
+      describe: "Ethanol. C2 is bonded to C1, and C1 is bonded to the oxygen, which carries one hydrogen. The H–C1–H angle is {{ethanol/a.HC1H}}."
     options:
       - { id: a, text: both in the page }
       - { id: b, text: "one toward you, one away" }

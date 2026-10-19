@@ -68,10 +68,12 @@ interface OverlayProps {
   cursor: number | null;
   measurement?: Measurement;
   size: Size;
+  /** Atom names for the measurement tag (a Step's `labels` replace the per-element ones). */
+  names?: string[];
 }
 
-export function MoleculeOverlay({ molecule, placed, picks, cursor, measurement, size }: OverlayProps) {
-  const names = atomNames(molecule.atoms);
+export function MoleculeOverlay({ molecule, placed, picks, cursor, measurement, size, names: given }: OverlayProps) {
+  const names = given ?? atomNames(molecule.atoms);
   const front = [...placed].sort((a, b) => a.z - b.z);
   return (
     <svg className="molecule-overlay" viewBox={`0 0 ${size.width} ${size.height}`} aria-hidden="true">
@@ -134,5 +136,88 @@ function MeasurementTag({ m, placed, names }: { m: Measurement; placed: PlacedAt
         {value}
       </text>
     </g>
+  );
+}
+
+interface Point2 {
+  x: number;
+  y: number;
+}
+
+interface MarksProps {
+  molecule: MoleculeUse;
+  placed: PlacedAtom[];
+  size: Size;
+  /** Draw the page sheet (a translucent plane in the screen plane through the sheet's middle atom). */
+  sheet: boolean;
+  /** Once settled on the page: which side of the page each atom on the middle one is. */
+  sides: { atom: number; side: "toward" | "away" }[];
+  /** Bond-dipole arrows (and, once added, their sum or the ring where they cancel), in px. */
+  dipoles?: { arrows: { from: Point2; to: Point2 }[]; net?: { from: Point2; to: Point2 }; ring?: Point2 };
+}
+
+/** An arrow with a crossed tail (+ at the δ+ end), or a plain thick one for the net pull. */
+function Arrow({ from, to, crossed, className }: { from: Point2; to: Point2; crossed: boolean; className: string }) {
+  const len = Math.hypot(to.x - from.x, to.y - from.y);
+  if (len < 2) return null;
+  const [ux, uy] = [(to.x - from.x) / len, (to.y - from.y) / len];
+  const head = Math.min(12, len * 0.4);
+  const [bx, by] = [to.x - ux * head, to.y - uy * head];
+  const [nx, ny] = [-uy, ux];
+  const [cx, cy] = [from.x + ux * Math.min(8, len * 0.2), from.y + uy * Math.min(8, len * 0.2)];
+  return (
+    <g className={className}>
+      <line x1={from.x} y1={from.y} x2={bx} y2={by} />
+      {crossed && <line x1={cx + nx * 6} y1={cy + ny * 6} x2={cx - nx * 6} y2={cy - ny * 6} />}
+      <polygon points={`${to.x},${to.y} ${bx + nx * head * 0.55},${by + ny * head * 0.55} ${bx - nx * head * 0.55},${by - ny * head * 0.55}`} />
+    </g>
+  );
+}
+
+/**
+ * Lesson 3's marks over the card (#81): the page sheet, the atom labels a Step gives (beside the
+ * letters, which always stay), "toward you: wedge" / "away: dash" once the page view settles, and
+ * the bond-dipole arrows with their sum ("net: zero" when they cancel).
+ */
+export function CardMarks({ molecule, placed, size, sheet, sides, dipoles }: MarksProps) {
+  const centre = molecule.pageSheet ? placed[molecule.pageSheet[1]] : undefined;
+  return (
+    <svg className="molecule-overlay molecule-marks" viewBox={`0 0 ${size.width} ${size.height}`} aria-hidden="true">
+      {sheet && centre && (
+        <rect
+          className="molecule-sheet"
+          x={centre.x - size.width * 0.32}
+          y={centre.y - size.height * 0.36}
+          width={size.width * 0.64}
+          height={size.height * 0.72}
+        />
+      )}
+      {Object.entries(molecule.labels ?? {}).map(([i, label]) => {
+        const a = placed[Number(i)];
+        return a?.labelled ? (
+          <text key={`label-${i}`} className="molecule-label" x={a.x + a.r + 3} y={a.y - a.r}>
+            {label}
+          </text>
+        ) : null;
+      })}
+      {sides.map(({ atom, side }) => {
+        const a = placed[atom];
+        return (
+          <text key={`side-${atom}`} className="molecule-side" x={a.x} y={a.y + a.r + 14}>
+            {side === "toward" ? "toward you: wedge" : "away: dash"}
+          </text>
+        );
+      })}
+      {dipoles?.arrows.map((a, k) => <Arrow key={`dipole-${k}`} from={a.from} to={a.to} crossed className="molecule-dipole" />)}
+      {dipoles?.net && <Arrow from={dipoles.net.from} to={dipoles.net.to} crossed={false} className="molecule-dipole molecule-net" />}
+      {dipoles?.ring && (
+        <g className="molecule-net-zero">
+          <circle cx={dipoles.ring.x} cy={dipoles.ring.y} r={14} />
+          <text x={dipoles.ring.x} y={dipoles.ring.y + 30}>
+            net: zero
+          </text>
+        </g>
+      )}
+    </svg>
   );
 }

@@ -4,7 +4,7 @@
 // add up; CO₂ and CCl₄ are symmetric, so theirs cancel.
 import { describe, expect, it } from "vitest";
 import { buildContent, contentRoot } from "../src/index.ts";
-import { bondDipoles, netDipole, pageSides, pageTilt, pageView, turn, type Molecule } from "../src/molecule.ts";
+import { bondDipoles, describeMolecule, describePage, netDipole, pageSides, pageTilt, pageView, turn, type Molecule } from "../src/molecule.ts";
 
 const data = buildContent(contentRoot).model!.subjects.find((s) => s.slug === "organic")!.data;
 const fromData = (id: string): Molecule => ({ title: data[id].title, atoms: data[id].atoms!.list, bonds: data[id].bonds! });
@@ -32,6 +32,26 @@ describe("the page sheet", () => {
     // Atoms 7 and 8 are the H's on the CH₂ carbon (atom 1).
     expect(sides.map((s) => s.atom).sort()).toEqual([7, 8]);
     expect(sides.map((s) => s.side).sort()).toEqual(["away", "toward"]);
+  });
+});
+
+describe("what Describe reads about the page", () => {
+  const names = ["C2", "C1", "O1", "H1", "H2", "H3", "H4", "H5", "H6"];
+
+  it("off the page, it says so", () => {
+    expect(describePage(ethanol, turn(pageView(ethanol.atoms, PLANE), "x", 40), PLANE, names)).toBe("O1, C1 and C2 are not in the page.");
+  });
+
+  it("in the page, it names which side each other atom on the middle one is", () => {
+    const flat = pageView(ethanol.atoms, PLANE);
+    const sides = pageSides(ethanol, flat, PLANE);
+    const toward = names[sides.find((s) => s.side === "toward")!.atom];
+    const away = names[sides.find((s) => s.side === "away")!.atom];
+    expect(describePage(ethanol, flat, PLANE, names)).toBe(`O1, C1 and C2 are in the page. On C1, ${toward} points toward you and ${away} points away.`);
+  });
+
+  it("Describe uses the Step's atom names", () => {
+    expect(describeMolecule({ ...ethanol, names }, pageView(ethanol.atoms, PLANE))).toContain("C2 is bonded to C1");
   });
 });
 
