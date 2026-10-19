@@ -6,6 +6,12 @@
 .opts:has(.structure-card) { grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); }
 .opts .structure-card { display: grid; place-items: center; padding: 8px; }
 .structure-card .structure { max-height: 7rem; }
+/* Pair cards (two molecules side by side) take a row each, as wide as the column. */
+.opts:has(.structure-card-wide) { grid-template-columns: 1fr; }
+.opts:has(.structure-card-wide) .structure-card { padding: 4px 8px; }
+.opts:has(.structure-card-wide) .structure-card .structure { width: 100%; max-height: 3.4rem; }
+/* A structure above a Multiple choice Step's choices. */
+.structure-view .structure { margin: 0 auto; max-height: 18vh; width: auto; }
 .tap-only-cue { margin: 0; padding: 8px 12px; color: var(--at-ink-muted); border: var(--at-border) dashed var(--at-line); }
 .tap-structure { position: relative; touch-action: manipulation; }
 .tap-structure .structure-svg .structure { width: 100%; }

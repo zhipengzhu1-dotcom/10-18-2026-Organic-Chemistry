@@ -1,0 +1,35 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+# A structure card: two molecules side by side (the first, then the second).
+
+id: card-allene-propyne
+style: full
+smiles: C=C=C.CC#C
+source: PubChem CID 10037, 6335
+atoms:
+  - { id: a1, el: C, x: 0, y: -1.5 }
+  - { id: a2, el: C, x: 0, y: 0 }
+  - { id: a3, el: C, x: 0, y: 1.5 }
+  - { id: a4, el: H, x: 1.299, y: -2.25 }
+  - { id: a5, el: H, x: -1.299, y: -2.25 }
+  - { id: a6, el: H, x: 1.299, y: 2.25 }
+  - { id: a7, el: H, x: -1.299, y: 2.25 }
+  - { id: a8, el: C, x: 6.299, y: -1.5 }
+  - { id: a9, el: C, x: 6.299, y: 0 }
+  - { id: a10, el: C, x: 6.299, y: 1.5 }
+  - { id: a11, el: H, x: 7.799, y: -1.5 }
+  - { id: a12, el: H, x: 4.799, y: -1.5 }
+  - { id: a13, el: H, x: 6.299, y: -3 }
+  - { id: a14, el: H, x: 6.299, y: 3 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 2 }
+  - { id: b2, a: a2, b: a3, order: 2 }
+  - { id: b3, a: a1, b: a4, order: 1 }
+  - { id: b4, a: a1, b: a5, order: 1 }
+  - { id: b5, a: a3, b: a6, order: 1 }
+  - { id: b6, a: a3, b: a7, order: 1 }
+  - { id: b7, a: a8, b: a9, order: 1 }
+  - { id: b8, a: a9, b: a10, order: 3 }
+  - { id: b9, a: a8, b: a11, order: 1 }
+  - { id: b10, a: a8, b: a12, order: 1 }
+  - { id: b11, a: a8, b: a13, order: 1 }
+  - { id: b12, a: a10, b: a14, order: 1 }

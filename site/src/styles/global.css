@@ -285,8 +285,16 @@
     display: grid;
     gap: 12px;
   }
-  .player-body .report {
+  .player-body .player-notes {
     margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+  }
+  .player-notes .source-note[open] {
+    flex-basis: 100%;
   }
   .report a {
     display: inline-flex;
@@ -886,6 +894,15 @@
     border: var(--at-border-strong) solid var(--at-line);
     box-shadow: 6px 6px 0 var(--at-shadow);
     background: var(--at-surface);
+  }
+  /* On a phone a Scene shares the screen with long Step text: keep it short (the drawing letterboxes inside). */
+  @media (max-width: 480px) {
+    .scene-frame {
+      max-height: 21dvh;
+    }
+    .scene-still .scene-frame {
+      max-height: 16dvh;
+    }
   }
   .scene-controls,
   .scene-control {

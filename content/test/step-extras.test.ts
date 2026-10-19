@@ -1,5 +1,5 @@
 // Step fields Lesson 6 (#84) added for its spec: a Step's own Source note line
-// (`source`), a Scene that waits for the answer (`scene.on: answer`), and a
+// (`source`), a Scene that waits for the answer (`scene.on: answered`), and a
 // structure drawn above a Multiple choice Step's choices (`structure`).
 import { describe, expect, it } from "vitest";
 import { buildContent, type MultipleChoiceStep, type SceneCatalog } from "../src/index.ts";
@@ -50,12 +50,20 @@ describe("a Step's Source note line", () => {
 });
 
 describe("a Scene that waits for the answer", () => {
-  it("`on: answer` reaches the resolved Scene; a plain Scene has no `on`", () => {
-    const result = build({ scene: { id: "still", on: "answer" } }, { type: "explain", text: "Watch.", scene: "still" });
+  it("`on: answered` reaches the resolved Scene; a plain Scene has no `on`", () => {
+    const result = build({ scene: { id: "still", on: "answered" } }, { type: "explain", text: "Watch.", scene: "still" });
     expect(result.errors).toEqual([]);
     const [s01, s02] = stepsOf(result);
-    expect(s01.scene).toMatchObject({ id: "still", on: "answer" });
+    expect(s01.scene).toMatchObject({ id: "still", on: "answered" });
     expect(s02.scene).not.toHaveProperty("on");
+  });
+});
+
+describe("a still Scene", () => {
+  it("`still: true` reaches the resolved Scene (one frame, no Play controls)", () => {
+    const result = build({}, { type: "explain", text: "The end.", scene: { id: "still", still: true } });
+    expect(result.errors).toEqual([]);
+    expect(stepsOf(result)[1].scene).toMatchObject({ id: "still", still: true });
   });
 });
 

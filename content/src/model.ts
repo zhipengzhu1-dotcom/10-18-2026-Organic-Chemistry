@@ -40,8 +40,10 @@ export interface SceneUse {
   state: Record<string, SceneValue>;
   /** The Scene's cited values by ref; the Scene reads its numbers from here (ADR 0002). */
   cited: Record<string, Cited>;
-  /** `answer`: hidden until the Step is answered (e.g. a prediction's reveal); absent = shown on entry. */
-  on?: "answer";
+  /** `answered`: hidden until the Step is answered (e.g. a prediction's reveal); absent = shown on entry. */
+  on?: "answered";
+  /** Shown as one frame (its poster) with no Play controls. */
+  still?: true;
 }
 
 export interface ExplainStep {

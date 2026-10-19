@@ -141,8 +141,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   const sceneState =
     step.type === "manipulate" && setting !== undefined ? { ...step.scene.state, [step.control]: setting } : step.scene?.state;
 
-  // A Scene with `on: answer` (a prediction's reveal) waits until the Step is answered.
-  const sceneShown = step.scene?.on !== "answer" || screen.canContinue;
+  // A Scene with `on: answered` (a prediction's reveal) waits until the Step is answered.
+  const sceneShown = step.scene?.on !== "answered" || screen.canContinue;
 
   const answer: Answer | null =
     step.type === "multiple-choice" || step.type === "tap-to-identify"
@@ -252,6 +252,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
             state={sceneState}
             cited={step.scene.cited}
             loop={step.type === "manipulate"}
+            still={step.scene.still}
           >
             {step.type === "manipulate" && setting !== undefined && (
               <SceneControl
@@ -265,12 +266,12 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </ScenePlayer>
         )}
 
-        {step.type === "multiple-choice" && step.structure?.drawn && (
-          // The molecule the question is about, pre-rendered; the prompt names it.
+        {step.type === "multiple-choice" && step.structure?.drawn && !(step.scene?.on === "answered" && screen.canContinue) && (
+          // The molecule the question is about, pre-rendered; the prompt names it. A reveal Scene takes its place.
           <div className="structure-view" aria-hidden="true" {...html(step.structure.drawn.svg)} />
         )}
 
-        {step.type === "multiple-choice" && (
+        {step.type === "multiple-choice" && !(step.scene?.on === "answered" && screen.canContinue) && (
           <div className="opts" role="group" aria-label="Choices">
             {step.options.map((o) =>
               o.structure ? (
@@ -278,7 +279,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
                 <button
                   key={o.id}
                   type="button"
-                  className="opt structure-card"
+                  className={`opt structure-card${wideCard(o.structure.drawn?.viewBox) ? " structure-card-wide" : ""}`}
                   aria-label={o.text}
                   aria-pressed={chosen.includes(o.id)}
                   disabled={screen.canContinue}
@@ -327,12 +328,14 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </div>
         )}
 
-        {/* Keyed per Step so a new Step opens its Source note collapsed. */}
-        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} line={step.source} />
-
-        <p className="report">
-          <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>
-        </p>
+        {/* The Source note and Report a mistake share one row at the foot of the Step. */}
+        <div className="player-notes">
+          {/* Keyed per Step so a new Step opens its Source note collapsed. */}
+          <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} line={step.source} />
+          <p className="report">
+            <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>
+          </p>
+        </div>
       </main>
 
       <div className="player-foot">
@@ -386,6 +389,12 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
       </div>
     </div>
   );
+}
+
+/** A card much wider than tall (e.g. two molecules side by side): such cards get a row each. */
+function wideCard(viewBox: string | undefined): boolean {
+  const [, , w, h] = (viewBox ?? "").split(" ").map(Number);
+  return w / h > 1.6;
 }
 
 /** Reads what the Student typed: accepts a comma decimal and a typographic minus; NaN when it isn't a number. */

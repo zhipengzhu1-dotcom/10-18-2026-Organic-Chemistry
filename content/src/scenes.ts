@@ -7,7 +7,7 @@ import { find, type CitedData } from "./data.ts";
 
 type StepFile = LessonFile["steps"][number];
 /** A Step's `scene` as written in the Lesson file. */
-export type SceneUseFile = { id: string; state?: Record<string, SceneValue>; on?: "answer" };
+export type SceneUseFile = { id: string; state?: Record<string, SceneValue>; on?: "answered"; still?: true };
 
 /** Why `value` can't be taken by the settable state, or undefined if it can. */
 export function invalidValue(spec: SceneStateSpec, value: SceneValue): string | undefined {
@@ -65,5 +65,5 @@ export function resolveSceneUse(use: SceneUseFile, catalog: SceneCatalog | undef
     const value = find(data, ref);
     if (value) cited[ref] = value;
   }
-  return { id: use.id, state: { ...defaults, ...use.state }, cited, ...(use.on && { on: use.on }) };
+  return { id: use.id, state: { ...defaults, ...use.state }, cited, ...(use.on && { on: use.on }), ...(use.still && { still: use.still }) };
 }

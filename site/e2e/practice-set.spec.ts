@@ -1,8 +1,10 @@
 // The Practice Set at the end of Unit 1: drawn from the Bank, played with the
 // Lessons' two-try feedback, then the summary, Retry missed and Next Unit.
-// The sample Bank has 8 approved Problems, so the draw is all eight, easy to hard,
-// then in Lesson order: p1, p2 (u1-sample), p3, p4 (step types), p5, p6 (structures),
-// u1-sample-arrows-p1 (ozone, Draw arrows); then the difficulty-2 u1-sample-arrows-p2.
+// The Bank has 12 approved Problems (8 samples + Lesson 6's four Check Problems), so a Set
+// draws 10. Math.random is pinned (the shuffle keeps Bank order), so the draw is fixed: every
+// sample, easy to hard, then in Lesson order: p1, p2 (u1-sample), p3, p4 (step types), p5, p6
+// (structures), u1-sample-arrows-p1 (ozone); then difficulty 2: u1-sample-arrows-p2,
+// u1-res-not-resonance and u1-res-oxocarbenium (Lesson 6).
 import { expect, test, type Page } from "@playwright/test";
 
 const UNIT = "/organic/orgo-1/structure-bonding";
@@ -15,13 +17,19 @@ const next = (page: Page) => page.getByRole("button", { name: "Continue" }).clic
 const at = (page: Page, n: number, of: number) => expect(page.getByText(`Problem ${n} of ${of}`)).toBeVisible();
 const status = (page: Page) => page.getByRole("status");
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    Math.random = () => 0.9999;
+  });
+});
+
 test("the Unit page's Practice Set row opens the Practice Set", async ({ page }) => {
   await page.goto(UNIT);
   const row = page.getByRole("listitem").filter({ hasText: "Unit review" });
   await expect(row).toContainText("Not started");
   await row.getByRole("link", { name: "Practice Set" }).click();
   await expect(page).toHaveURL(PRACTICE);
-  await at(page, 1, 8);
+  await at(page, 1, 10);
 });
 
 test("the Practice Set page's HTML carries no answers", async ({ request }) => {
@@ -36,7 +44,7 @@ test("a Student plays the Set, sees the summary, retries exactly the missed Prob
   await page.goto(PRACTICE);
 
   // p1 right first try; each Problem has its own Report a mistake link.
-  await at(page, 1, 8);
+  await at(page, 1, 10);
   await expect(page.getByRole("link", { name: "Report a mistake" })).toHaveAttribute(
     "href",
     "/submit?kind=mistake&unit=u1&target=u1-sample-p1",
@@ -47,7 +55,7 @@ test("a Student plays the Set, sees the summary, retries exactly the missed Prob
   await next(page);
 
   // p2 wrong twice: the Hint, then the reveal.
-  await at(page, 2, 8);
+  await at(page, 2, 10);
   await choose(page, "CH₄");
   await check(page);
   await expect(status(page)).toContainText("Methane has four C–H bonds");
@@ -57,26 +65,26 @@ test("a Student plays the Set, sees the summary, retries exactly the missed Prob
   await next(page);
 
   // p3 numeric, right first try.
-  await at(page, 3, 8);
+  await at(page, 3, 10);
   await page.getByRole("textbox", { name: "Answer" }).fill("6");
   await check(page);
   await expect(status(page)).toContainText("✓ Correct.");
   await next(page);
 
   // p4 rank: the start order, twice, is wrong.
-  await at(page, 4, 8);
+  await at(page, 4, 10);
   await check(page);
   await check(page);
   await expect(status(page)).toContainText("→ Answer:");
   await next(page);
 
   // p5 tap the carbon; p6 the CH₃⁺ card.
-  await at(page, 5, 8);
+  await at(page, 5, 10);
   await page.getByRole("group", { name: "Tappable atoms and bonds" }).getByRole("button", { name: /^Carbon/ }).click();
   await check(page);
   await expect(status(page)).toContainText("✓ Correct.");
   await next(page);
-  await at(page, 6, 8);
+  await at(page, 6, 10);
   await choose(page, /^CH₃⁺/);
   await check(page);
   await expect(status(page)).toContainText("✓ Correct.");
@@ -90,23 +98,36 @@ test("a Student plays the Set, sees the summary, retries exactly the missed Prob
     await page.getByRole("button", { name: `Push to ${to}`, exact: true }).focus();
     await page.keyboard.press("Enter");
   };
-  await at(page, 7, 8);
+  await at(page, 7, 10);
   await push("π bond O1=O2", "O2");
   await expect(status(page)).toContainText("That leaves the end oxygen with only 6 electrons.");
   await push("lone pair on O3", "O2–O3 bond");
   await push("π bond O1=O2", "O1");
   await expect(status(page)).toContainText("✓ Correct.");
   await next(page);
-  await at(page, 8, 8);
+  await at(page, 8, 10);
   await push("lone pair on C4", "C4–C5 bond");
   await push("π bond C5=O6", "O6");
+  await expect(status(page)).toContainText("✓ Correct.");
+  await next(page);
+
+  // Lesson 6's Check Problems, right first try: two structure cards, then the oxocarbenium.
+  await at(page, 9, 10);
+  await choose(page, /^Allene/);
+  await choose(page, /^Acetone/);
+  await check(page);
+  await expect(status(page)).toContainText("✓ Correct.");
+  await next(page);
+  await at(page, 10, 10);
+  await push("lone pair on O6", "C5–O6 bond");
+  await push("π bond C4=C5", "C3–C4 bond");
   await expect(status(page)).toContainText("✓ Correct.");
   await page.getByRole("button", { name: "See results" }).click();
 
   // Summary: first-try %, eventually correct, n/N.
   const summary = page.getByRole("region", { name: "Practice Set results" });
-  await expect(summary).toContainText("First try: 5/8 (63%)");
-  await expect(summary).toContainText("Eventually correct: 6/8");
+  await expect(summary).toContainText("First try: 7/10 (70%)");
+  await expect(summary).toContainText("Eventually correct: 8/10");
   await expect(summary.getByRole("link", { name: "Suggest a Problem" })).toHaveAttribute("href", "/submit?kind=problem&unit=u1");
   // Unit 2 is coming soon, so Next Unit goes to the Course map.
   await expect(summary.getByRole("link", { name: "Next Unit" })).toHaveAttribute("href", "/organic");

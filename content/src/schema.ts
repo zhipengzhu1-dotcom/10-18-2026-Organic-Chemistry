@@ -107,8 +107,10 @@ const sceneUse = z.preprocess(
   z.strictObject({
     id,
     state: z.record(z.string(), sceneValue).optional(),
-    /** `answer`: the Scene stays hidden until the Step is answered (a prediction's reveal). */
-    on: z.literal("answer").optional(),
+    /** `answered`: the Scene stays hidden until the Step is answered (a prediction's reveal). */
+    on: z.literal("answered").optional(),
+    /** One frame (the poster), with no Play controls: e.g. a Wrap showing a Scene's final frame. */
+    still: z.literal(true).optional(),
   }),
 );
 
