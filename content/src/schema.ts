@@ -17,6 +17,9 @@ const hint = z.strictObject({
   text,
 });
 
+/** Explore in 3D (#71): the molecule data file whose 3D view the Step or Problem offers. */
+const molecule = id.optional();
+
 /** What a Step may hide in a drawing. */
 const hide = z.array(z.enum(["charges", "lone-pairs"])).optional();
 
@@ -29,6 +32,7 @@ const textOption = z.strictObject({ id, text });
 /** Fields shared by a Multiple choice Step and a Multiple choice Problem. */
 const multipleChoice = {
   type: z.literal("multiple-choice"),
+  molecule,
   prompt: text,
   options: z.array(option).min(2),
   /** The exact set of correct option ids. */
@@ -42,6 +46,7 @@ const multipleChoice = {
 /** Fields shared by a Tap-to-identify Step and Problem. */
 const tapToIdentify = {
   type: z.literal("tap-to-identify"),
+  molecule,
   prompt: text,
   /** The structure file drawn. */
   structure: id,
@@ -67,6 +72,7 @@ const numericHint = z.strictObject({ match: z.number().optional(), text });
 /** Fields shared by a Numeric input Step and a Numeric Problem. The unit is fixed here and shown, never typed. */
 const numeric = {
   type: z.literal("numeric"),
+  molecule,
   prompt: text,
   /** The unit of measure, e.g. "°", "Å", "kJ/mol" (named so it can't be read as a course Unit). */
   unitSymbol: z.string(),
@@ -81,6 +87,7 @@ const numeric = {
 /** Fields shared by a Rank / order Step and a Rank Problem. */
 const rank = {
   type: z.literal("rank"),
+  molecule,
   prompt: text,
   /** The cards, in the order they start in. */
   items: z.array(textOption).min(2),
@@ -114,6 +121,7 @@ const manipulateHint = z.strictObject({ match: z.array(sceneValue).min(1).option
  */
 const manipulate = {
   type: z.literal("manipulate"),
+  molecule,
   prompt: text,
   scene: sceneUse,
   /** The settable state the slider drives. */
@@ -132,6 +140,7 @@ const explainStep = z.strictObject({
   id: stepId,
   phase,
   type: z.literal("explain"),
+  molecule,
   text,
   scene: sceneUse.optional(),
 });

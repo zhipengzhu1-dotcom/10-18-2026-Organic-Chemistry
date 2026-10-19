@@ -174,6 +174,14 @@ describe("Source note", () => {
     });
     expect(note[1].lead).toBe("Geometry: experimental (gas phase).");
   });
+
+  it("still names a shared source once after the values cross to the browser as JSON", () => {
+    const data = dataOf(build((t) => (t["chem/data/elements.yaml"] = elements())));
+    const shipped = JSON.parse(JSON.stringify([cite(data, "elements/C.colour"), cite(data, "elements/H.colour")]));
+    expect(sourceNote(shipped)).toEqual([
+      { text: "C colour #909090 and H colour #FFFFFF from the Jmol CPK colour table, Jmol source org/jmol/c/PAL.java." },
+    ]);
+  });
 });
 
 describe("the build rejects broken data files", () => {
