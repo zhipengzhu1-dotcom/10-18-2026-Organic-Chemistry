@@ -57,9 +57,10 @@ export function checkInteraction(item: Interaction): string[] {
   return errors;
 }
 
-type Condition = { match?: unknown; includes?: string[]; misses?: string[] };
+type Condition = { match?: unknown; includes?: string[]; misses?: string[]; notFirst?: string; notLast?: string; before?: string[] };
 /** The generic fallback Hint has no condition. */
-const isFallback = (h: Condition) => h.match === undefined && !h.includes && !h.misses;
+const isFallback = (h: Condition) =>
+  h.match === undefined && !h.includes && !h.misses && !h.notFirst && !h.notLast && !h.before;
 
 /** Every id a set Hint names: its exact `match`, and its `includes` / `misses` conditions. */
 export const hintIds = (h: { match?: string[]; includes?: string[]; misses?: string[] }) => [
@@ -96,6 +97,9 @@ function answerRules(item: Interaction): string[] {
         errors.push("the items start in the answer order; list them in a different order");
       if (item.hints?.some((h) => h.match && !wholeOrder(h.match)))
         errors.push("a Hint's match must list every item exactly once");
+      for (const h of item.hints ?? [])
+        for (const id of [h.notFirst, h.notLast, ...(h.before ?? [])])
+          if (id !== undefined && !itemIds.includes(id)) errors.push(`a Hint names unknown item "${id}"`);
       break;
     }
     case "manipulate":

@@ -135,6 +135,15 @@ const numeric = {
   reveal: text,
 };
 
+/** A Rank Hint: a whole wrong order, or a pattern (an item not first / not last, one item before another). */
+const rankHint = z.strictObject({
+  match: z.array(id).min(1).optional(),
+  notFirst: id.optional(),
+  notLast: id.optional(),
+  before: z.tuple([id, id]).optional(),
+  text,
+});
+
 /** Fields shared by a Rank / order Step and a Rank Problem. */
 const rank = {
   ...gradedVisuals,
@@ -145,8 +154,8 @@ const rank = {
   /** The one strict order of item ids, first to last. */
   answer: z.array(id).min(2),
   correct: text.optional(),
-  /** A Rank Hint's `match` is one whole wrong order. */
-  hints: z.array(hint).optional(),
+  /** A Rank Hint's `match` is one whole wrong order; `notFirst`, `notLast` and `before` name a pattern. */
+  hints: z.array(rankHint).optional(),
   reveal: text,
 };
 

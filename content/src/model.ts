@@ -134,12 +134,25 @@ export interface RankStep extends GradedVisuals {
   /** The one correct order of item ids, first to last. */
   answer: string[];
   correct?: string;
-  /** A Hint's `match` is one whole wrong order. */
-  hints?: Hint[];
+  /** A Hint's `match` is one whole wrong order; or it names a pattern (see RankHint). */
+  hints?: RankHint[];
   reveal: string;
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+}
+
+/**
+ * A Rank Hint. Every condition given must hold: `match` = this whole order; `notFirst` /
+ * `notLast` = that item isn't at that end; `before: [x, y]` = x is placed before y.
+ * The generic fallback has no condition.
+ */
+export interface RankHint {
+  match?: string[];
+  notFirst?: string;
+  notLast?: string;
+  before?: [string, string];
+  text: string;
 }
 
 export interface ManipulateHint {

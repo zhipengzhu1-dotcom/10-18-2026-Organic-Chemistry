@@ -5,7 +5,7 @@
 // Navigation: back is allowed, answered Steps stay locked, Continue never passes
 // an unanswered Step, and the Lesson is done on reaching Wrap. Every Screen
 // carries the Lesson's progress (answers by Step id), from which it resumes.
-import type { GradedStep, HintRule, Lesson, Step } from "@astratron/content";
+import type { GradedStep, HintRule, Lesson, RankHint, Step } from "@astratron/content";
 
 export type Feedback =
   | { kind: "correct"; text: string }
@@ -132,7 +132,13 @@ function judge(step: GradedStep, answer: Answer): { right: boolean; hint?: { tex
     case "rank": {
       if (!("order" in answer)) return undefined;
       const { order } = answer;
-      return { right: sameOrder(order, step.answer), hint: step.hints?.find((h) => !h.match || sameOrder(h.match, order)) };
+      const at = (id: string) => order.indexOf(id);
+      const fits = (h: RankHint) =>
+        (!h.match || sameOrder(h.match, order)) &&
+        (!h.notFirst || at(h.notFirst) !== 0) &&
+        (!h.notLast || at(h.notLast) !== order.length - 1) &&
+        (!h.before || at(h.before[0]) < at(h.before[1]));
+      return { right: sameOrder(order, step.answer), hint: step.hints?.find(fits) };
     }
     case "manipulate": {
       if (!("setting" in answer)) return undefined;
