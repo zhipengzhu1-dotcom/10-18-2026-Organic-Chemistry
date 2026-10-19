@@ -449,6 +449,16 @@ export interface Subject {
   courses: Course[];
   /** The Subject's cited data files, by id; read numbers from it with `cite` (ADR 0002). */
   data: CitedData;
+  /** The homepage Push hero, ready for `@astratron/content/arrows` (`arrowsStart`/`arrowsAct`/`arrowsView`). */
+  hero?: HeroPush;
+}
+
+/** One live push with its accepted results; the shape of `ArrowsTask`. */
+export interface HeroPush {
+  start: Structure;
+  results: Structure[];
+  answer: Push[];
+  hints?: PushHint[];
 }
 
 export interface CourseModel {

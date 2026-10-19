@@ -280,7 +280,18 @@ export const courseFile = z.strictObject({
   units: z.array(unit).min(1),
 });
 
-export const subjectFile = z.strictObject({ title: text });
+/**
+ * The homepage Push hero: one live push a first-time visitor makes before reading anything.
+ * Checked like a Draw-arrows Step (structures exist, the pushes reach a result, Hints name real ids).
+ */
+const heroPush = z.strictObject({
+  start: id,
+  results: z.array(id).min(1),
+  answer: z.array(push).min(1),
+  hints: z.array(pushHint).optional(),
+});
+
+export const subjectFile = z.strictObject({ title: text, hero: heroPush.optional() });
 
 /** A 2D structure, written by `pnpm structure` (RDKit.js layout) and committed. */
 export const structureFile = z.strictObject({
