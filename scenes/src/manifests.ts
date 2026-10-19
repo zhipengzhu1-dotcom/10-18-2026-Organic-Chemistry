@@ -8,5 +8,8 @@ import { enStrip } from "./en-strip/manifest.ts";
 import { bondDipoles } from "./bond-dipoles/manifest.ts";
 import { dotsAndSticks } from "./dots-and-sticks/manifest.ts";
 import { bf3Sextet } from "./bf3-sextet/manifest.ts";
+import { groupSpotlight } from "./group-spotlight/manifest.ts";
+import { groupCards } from "./group-cards/manifest.ts";
+import { carbonylNeighbours } from "./carbonyl-neighbours/manifest.ts";
 
-export const sceneManifests: readonly SceneManifest<any>[] = [sampleTwist, streamBend, enStrip, bondDipoles, dotsAndSticks, bf3Sextet];
+export const sceneManifests: readonly SceneManifest<any>[] = [sampleTwist, streamBend, enStrip, bondDipoles, dotsAndSticks, bf3Sextet, groupSpotlight, groupCards, carbonylNeighbours];

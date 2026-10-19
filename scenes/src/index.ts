@@ -14,6 +14,12 @@ import { dotsAndSticks } from "./dots-and-sticks/manifest.ts";
 import DotsAndSticks from "./dots-and-sticks/DotsAndSticks.tsx";
 import { bf3Sextet } from "./bf3-sextet/manifest.ts";
 import Bf3Sextet from "./bf3-sextet/Bf3Sextet.tsx";
+import { groupSpotlight } from "./group-spotlight/manifest.ts";
+import GroupSpotlight from "./group-spotlight/GroupSpotlight.tsx";
+import { groupCards } from "./group-cards/manifest.ts";
+import GroupCards from "./group-cards/GroupCards.tsx";
+import { carbonylNeighbours } from "./carbonyl-neighbours/manifest.ts";
+import CarbonylNeighbours from "./carbonyl-neighbours/CarbonylNeighbours.tsx";
 
 export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [sampleTwist.id]: { manifest: sampleTwist, Component: SampleTwist },
@@ -22,6 +28,9 @@ export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [bondDipoles.id]: { manifest: bondDipoles, Component: BondDipoles },
   [dotsAndSticks.id]: { manifest: dotsAndSticks, Component: DotsAndSticks },
   [bf3Sextet.id]: { manifest: bf3Sextet, Component: Bf3Sextet },
+  [groupSpotlight.id]: { manifest: groupSpotlight, Component: GroupSpotlight },
+  [groupCards.id]: { manifest: groupCards, Component: GroupCards },
+  [carbonylNeighbours.id]: { manifest: carbonylNeighbours, Component: CarbonylNeighbours },
 };
 
 export type * from "./types.ts";
