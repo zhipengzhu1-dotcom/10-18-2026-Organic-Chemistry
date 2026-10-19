@@ -14,12 +14,20 @@ interface Props {
   sceneId: string;
   cited: Record<string, Cited>;
   aspect?: Aspect;
+  /**
+   * In a graded Step (e.g. a Hook question under the video): whenever the video isn't playing
+   * (it has played, was paused, or rests on its last frame under reduced motion) the frame
+   * shrinks to a card at the top so the question fits one screen. Play brings it back.
+   */
+  shrinkWhenDone?: boolean;
+  /** Told each time the video starts or stops playing. */
+  onPlaying?: (playing: boolean) => void;
 }
 
 /** The shipped files live under site/public, served from the site root. */
 const url = (file: string) => `/${file}`;
 
-export default function WatchScenePlayer({ sceneId, cited, aspect = "16:9" }: Props) {
+export default function WatchScenePlayer({ sceneId, cited, aspect = "16:9", shrinkWhenDone = false, onPlaying }: Props) {
   const manifest = watchScene(sceneId)!;
   const files = watchSceneFiles(sceneId, aspect);
   const config: ClockConfig = { duration: manifest.duration, loop: false, posterT: manifest.poster };
@@ -58,11 +66,13 @@ export default function WatchScenePlayer({ sceneId, cited, aspect = "16:9" }: Pr
     return () => cancelAnimationFrame(frame);
   }, [clock.playing]);
 
+  useEffect(() => onPlaying?.(clock.playing), [clock.playing]);
+
   const [w, h] = aspect === "16:9" ? [16, 9] : [9, 16];
   const seconds = (t: number) => `${t.toFixed(1)} of ${manifest.duration} seconds`;
 
   return (
-    <figure className="scene scene-watch">
+    <figure className={shrinkWhenDone && !clock.playing ? "scene scene-watch shrunk" : "scene scene-watch"}>
       <div
         className="scene-frame"
         role="img"

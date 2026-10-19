@@ -16,7 +16,7 @@ export function Figures({ figures }: { figures: Figure[] }) {
   return (
     <div className="figures">
       {figures.map((f, i) => (
-        <figure key={i} className="figure">
+        <figure key={i} className={f.large ? "figure large" : "figure"}>
           <Drawing figure={f} />
           {f.caption && <figcaption {...html(f.caption)} />}
         </figure>

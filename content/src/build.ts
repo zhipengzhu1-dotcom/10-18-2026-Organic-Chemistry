@@ -275,7 +275,10 @@ function resolveLesson(
   errors: string[],
 ): Lesson {
   const steps: Step[] = lesson.steps.flatMap((step): Step[] => {
-    if (step.type !== "check") return withStructures(step, `${lesson.id}#${step.id}`, structured).map((st) => withScene(st, scene));
+    // A goal-state Manipulate Step opens on its first stage's prompt.
+    const opening = (st: Step): Step => (st.type === "manipulate-goal" ? { ...st, prompt: st.stages[0].prompt } : st);
+    if (step.type !== "check")
+      return withStructures(step, `${lesson.id}#${step.id}`, structured).map((st) => withScene(opening(st), scene));
     const problem = problems.get(step.problem);
     if (!problem) {
       if (!problems.has(step.problem)) errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" not found`);
