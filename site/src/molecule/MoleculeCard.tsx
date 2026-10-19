@@ -7,10 +7,10 @@
 // Without WebGL2 the card shows a still drawn from the same coordinates, with the same text, so the
 // Step can still be finished. The WebGL layer (three.js + React-Three-Fiber) is loaded lazily.
 // Reusable outside the Step player: give it a resolved MoleculeUse (see notes/68-3d.md).
-import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { lazy, Suspense, useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import type { MoleculeUse } from "@astratron/content";
 import { atomNames, describeMolecule, measure, readout, togglePick, turn, type Matrix3 } from "@astratron/content/molecule";
-import { atomAt, fitScale, placeAtoms } from "./layout.ts";
+import { atomAt, fitScale, placeAtoms, placePoints } from "./layout.ts";
 import { MoleculeOverlay, MoleculeStill } from "./MoleculeDrawing.tsx";
 
 const MoleculeCanvas = lazy(() => import("./MoleculeCanvas.tsx"));
@@ -65,6 +65,8 @@ export default function MoleculeCard({ molecule, children }: MoleculeCardProps) 
   const [picks, setPicks] = useState<number[]>([]);
   const [cursor, setCursor] = useState<number | null>(null);
   const [said, setSaid] = useState("");
+  const [orbitalsDrawn, setOrbitalsDrawn] = useState(false);
+  const orbitalsReady = useCallback(() => setOrbitalsDrawn(true), []);
   const drag = useRef<{ x: number; y: number; x0: number; y0: number; moved: boolean } | null>(null);
 
   useEffect(() => setGl(canDrawWebGL()), []);
@@ -85,6 +87,10 @@ export default function MoleculeCard({ molecule, children }: MoleculeCardProps) 
   const scale = fitScale(molecule, size.width, size.height) * zoom;
   const placed = placeAtoms(molecule, rotation, { ...size, scale, trueScale });
   const measurement = measure(molecule, picks);
+  const orbitals = molecule.orbitals ?? [];
+  const signs = orbitals.flatMap((o) =>
+    placePoints(molecule, rotation, { ...size, scale, trueScale }, o.lobes.map((l) => l.at)).map((p, i) => ({ ...p, sign: o.lobes[i].sign, key: `${o.ref}${i}` })),
+  );
   const shown = measurement && readout(measurement, names);
   /** Turning and zooming need the live 3D view; the no-WebGL still stays put. */
   const turnable = gl !== false;
@@ -151,13 +157,13 @@ export default function MoleculeCard({ molecule, children }: MoleculeCardProps) 
   const mode = trueScale ? "true scale (van der Waals radii)" : "ball and stick";
   return (
     <figure className="molecule">
-      <div className="molecule-stage" ref={stage}>
+      <div className="molecule-stage" ref={stage} data-orbitals={orbitals.length ? (orbitalsDrawn ? "drawn" : "loading") : undefined}>
         <div
           className="molecule-frame"
           role="application"
           tabIndex={0}
           aria-roledescription="3D model"
-          aria-label={`${molecule.title}, ${mode}`}
+          aria-label={`${molecule.title}, ${mode}${orbitals.length ? `, with the computed ${orbitals.map((o) => o.label).join(" and ")}` : ""}`}
           aria-describedby={`${id}-help`}
           onKeyDown={onKeyDown}
           onPointerDown={(e) => {
@@ -186,7 +192,7 @@ export default function MoleculeCard({ molecule, children }: MoleculeCardProps) 
         >
           {gl ? (
             <Suspense fallback={<MoleculeStill molecule={molecule} placed={placed} trueScale={trueScale} size={size} />}>
-              <MoleculeCanvas molecule={molecule} rotation={rotation} scale={scale} trueScale={trueScale}>
+              <MoleculeCanvas molecule={molecule} rotation={rotation} scale={scale} trueScale={trueScale} onOrbitalsDrawn={orbitalsReady}>
                 {children}
               </MoleculeCanvas>
             </Suspense>
@@ -194,6 +200,16 @@ export default function MoleculeCard({ molecule, children }: MoleculeCardProps) 
             <MoleculeStill molecule={molecule} placed={placed} trueScale={trueScale} size={size} />
           )}
           <MoleculeOverlay molecule={molecule} placed={placed} picks={picks} cursor={cursor} measurement={measurement} size={size} />
+          {signs.length > 0 && (
+            // Each lobe's sign as text, so the phase is never colour or pattern alone.
+            <svg className="orbital-signs" viewBox={`0 0 ${size.width} ${size.height}`} aria-hidden="true">
+              {signs.map((p) => (
+                <text key={p.key} className="orbital-sign" x={p.x} y={p.y}>
+                  {p.sign === "+" ? "+" : "−"}
+                </text>
+              ))}
+            </svg>
+          )}
         </div>
         <p className="molecule-readout" aria-hidden="true">
           {shown ? (
@@ -204,6 +220,16 @@ export default function MoleculeCard({ molecule, children }: MoleculeCardProps) 
             <span className="molecule-what">Still image: this device can't show 3D.</span>
           ) : null}
         </p>
+        {orbitals.length > 0 && (
+          <ul className="orbital-chips" aria-label="Orbitals shown">
+            {orbitals.map((o) => (
+              <li key={o.ref} className={`orbital-chip orbital-chip-${o.style}`} title={o.label}>
+                <span className="orbital-chip-name">{o.chip}</span> <span className="orbital-chip-tier">computed</span>
+                {o.energy && <span className="orbital-chip-energy"> {o.energy.display}</span>}
+              </li>
+            ))}
+          </ul>
+        )}
         <div className="molecule-scalebar" aria-hidden="true">
           <i style={{ width: `${scale}px` }} />
           <span>1 Å</span>

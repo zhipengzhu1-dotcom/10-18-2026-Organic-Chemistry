@@ -1,0 +1,133 @@
+{
+ "id": "ethylene-b3lyp-orbitals",
+ "kind": "table",
+ "title": "Ethylene frontier orbitals",
+ "sources": {
+  "ours": {
+   "kind": "computed",
+   "citation": "Our calculation: canonical molecular orbitals and their energies with PySCF 2.14.0, B3LYP/cc-pVTZ, isolated molecule at the geometry optimised with the same method, 2026-10-19; hartree to eV with CODATA 2018 (Tiesinga et al., Rev. Mod. Phys. 93, 025010 (2021), doi:10.1103/RevModPhys.93.025010)",
+   "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+   "note": "Computed orbital energies are model values: compare them with each other, not with measured energies.",
+   "method": {
+    "program": "PySCF",
+    "version": "2.14.0",
+    "level": "B3LYP/cc-pVTZ",
+    "date": "2026-10-19"
+   }
+  }
+ },
+ "values": {
+  "homo": {
+   "label": "Ethylene HOMO",
+   "quantity": "energy",
+   "value": -7.6303,
+   "unit": "eV",
+   "source": "ours"
+  },
+  "lumo": {
+   "label": "Ethylene LUMO",
+   "quantity": "energy",
+   "value": -0.0326,
+   "unit": "eV",
+   "source": "ours"
+  },
+  "gap": {
+   "label": "Ethylene HOMO–LUMO gap",
+   "quantity": "energy",
+   "value": 7.5978,
+   "unit": "eV",
+   "source": "ours"
+  },
+  "iso": {
+   "label": "Isosurface value",
+   "quantity": "isovalue",
+   "value": 0.05,
+   "unit": "a.u.",
+   "source": "ours"
+  }
+ },
+ "orbitals": {
+  "molecule": "ethylene-b3lyp",
+  "kind": "canonical",
+  "iso": "iso",
+  "list": {
+   "homo": {
+    "label": "π (HOMO)",
+    "chip": "π",
+    "style": "phase",
+    "energy": "homo",
+    "mesh": "/orbitals/ethylene-b3lyp-orbitals/homo.glb",
+    "sha256": "58f31358203b49d4be1eb664b9a3bd9319927181a6d7374e8b31ec77670e028a",
+    "triangles": 4800,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       0.762,
+       0.0,
+       0.0
+      ]
+     },
+     {
+      "sign": "-",
+      "at": [
+       -0.762,
+       0.0,
+       0.0
+      ]
+     }
+    ]
+   },
+   "lumo": {
+    "label": "π* (LUMO)",
+    "chip": "π*",
+    "style": "phase",
+    "energy": "lumo",
+    "mesh": "/orbitals/ethylene-b3lyp-orbitals/lumo.glb",
+    "sha256": "a278bf6b81d1b07b0b2636edb3b709d83ec6833e3f4bb483d92ddcedc1cdfbd9",
+    "triangles": 6448,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       -0.797,
+       0.0,
+       -0.993
+      ]
+     },
+     {
+      "sign": "-",
+      "at": [
+       -0.797,
+       0.0,
+       0.993
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "provenance": {
+  "pipeline": "pipelines/orbitals (#70)",
+  "inputSha256": "4803701df12c608439ca60bd06eddfd0561f88d1ed658a14977eaa4f86836b6e",
+  "scfEnergyHartree": -78.62318013301908,
+  "grid": {
+   "step": 0.14,
+   "pad": 4.5,
+   "shape": [
+    67,
+    79,
+    83
+   ]
+  },
+  "checks": [
+   "ethylene: HOMO antisymmetric through the molecular plane only (π); LUMO also through the C=C bisector (π*)"
+  ],
+  "homoIndex": 7,
+  "energiesHartree": {
+   "homo": -0.2804085569621826,
+   "lumo": -0.0011963833103934007
+  },
+  "seconds": 3
+ }
+}

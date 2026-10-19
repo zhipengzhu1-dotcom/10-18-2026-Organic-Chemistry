@@ -1069,6 +1069,51 @@
   .molecule-describe {
     font: 500 16px/1 var(--at-font-text);
   }
+  /* Computed orbitals on the card (#70): each lobe's sign as text over it, and a chip per orbital
+     naming it and saying it is computed (bottom right; the scale bar is bottom left). */
+  .orbital-signs {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .orbital-sign {
+    font: 700 22px var(--at-font-data);
+    fill: var(--at-electron-fill);
+    stroke: var(--at-on-fill);
+    stroke-width: 4px;
+    paint-order: stroke;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .orbital-chips {
+    position: absolute;
+    right: 8px;
+    bottom: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+    pointer-events: none;
+  }
+  .orbital-chip {
+    padding: 2px 8px;
+    font: 400 16px/1.3 var(--at-font-data);
+    color: var(--at-electron-fill);
+    border: 2px solid var(--at-electron-fill);
+    background: var(--at-on-fill);
+  }
+  .orbital-chip-sigma {
+    color: var(--at-ignite-fill);
+    border-color: var(--at-ignite-fill);
+  }
+  .orbital-chip-name {
+    font-weight: 700;
+  }
 
   /* Scene frame and its controls (#64). */
   .scene {
