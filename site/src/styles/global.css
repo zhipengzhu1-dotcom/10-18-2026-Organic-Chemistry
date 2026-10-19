@@ -307,6 +307,55 @@
     .player.answered .player-prompt {
       display: none;
     }
+    /* A 3D Step (Lesson 3, #81): a long prompt, the card and the choices share one screen, so the
+       Step sits tighter. Once answered (.player.answered, above), the card settles on the answer
+       and takes the prompt's place with the feedback. */
+    .player.has-card .player-body {
+      gap: 10px;
+    }
+    .player.has-card .player-prompt {
+      font-size: 17px;
+      line-height: 1.25;
+    }
+    /* The inline card is the same viewer Explore opens, so on a phone it stands in for the button. */
+    .player.has-card .explore-open {
+      display: none;
+    }
+    .player.has-card .opt,
+    .opts:has(> :nth-child(4)) .opt {
+      padding-block: 6px;
+    }
+    .player.has-card .opts,
+    .opts:has(> :nth-child(4)) {
+      gap: 6px;
+    }
+    /* A watch-only video and its controls, or a drawing over four choices, fill most of the
+       screen: the Step sits tighter. */
+    .player-body:has(.scene video),
+    .player-body:has(.figures):has(.opts > :nth-child(4)) {
+      gap: 6px;
+    }
+    /* The card may shrink to a 96 px stage over its tools (whose buttons sit closer). */
+    .player.has-card .molecule {
+      min-height: 152px;
+    }
+    .player.has-card .molecule-stage {
+      min-height: 96px;
+    }
+    .player.has-card .molecule-tools {
+      gap: 6px;
+    }
+    .player.has-card .molecule-tools .molecule-btn,
+    .player.has-card .molecule-seg button {
+      padding: 0 7px;
+    }
+    .player.has-card .figure-drawing .structure {
+      max-height: 3.75rem;
+    }
+  }
+  /* Short choices (one or two words) sit two to a row. */
+  .opts.opts-pairs {
+    grid-template-columns: 1fr 1fr;
   }
   .report a {
     display: inline-flex;
@@ -1119,6 +1168,83 @@
   }
   .orbital-chip-name {
     font-weight: 700;
+  }
+  .molecule-describe[aria-pressed="true"] {
+    background: var(--at-electron-fill);
+    color: var(--at-on-fill);
+  }
+  /* Lesson 3 (#81): the molecule toggle, page sheet and badge, atom labels and bond dipoles. */
+  .molecule-snap {
+    font: 500 16px/1 var(--at-font-text);
+  }
+  .molecule-switch-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+  }
+  .molecule-switch-row .figures {
+    flex: 1;
+  }
+  .molecule-switch button {
+    padding: 0 14px;
+    font: 500 16px/1 var(--at-font-data);
+    text-transform: none;
+  }
+  .molecule-sheet {
+    fill: var(--at-electron-fill);
+    fill-opacity: 0.1;
+    stroke: var(--at-electron-fill);
+    stroke-opacity: 0.6;
+    stroke-width: 1.5;
+  }
+  .molecule-badge {
+    position: absolute;
+    right: 8px;
+    bottom: 6px;
+    margin: 0;
+    padding: 4px 8px;
+    pointer-events: none;
+    font: 700 16px/1 var(--at-font-data);
+    color: var(--at-electron-fill);
+    border: 2px dashed var(--at-electron-fill);
+  }
+  .molecule-badge.in {
+    border-style: solid;
+  }
+  .molecule-label,
+  .molecule-side,
+  .molecule-net-zero text {
+    font: 700 13px var(--at-font-data);
+    fill: var(--at-electron-fill);
+    paint-order: stroke;
+    stroke: var(--at-on-fill);
+    stroke-width: 3px;
+  }
+  .molecule-side,
+  .molecule-net-zero text {
+    text-anchor: middle;
+  }
+  .molecule-dipole line {
+    stroke: var(--at-electron-fill);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+  .molecule-dipole polygon {
+    fill: var(--at-electron-fill);
+  }
+  .molecule-net line {
+    stroke: var(--at-ignite-fill);
+    stroke-width: 6;
+  }
+  .molecule-net polygon {
+    fill: var(--at-ignite-fill);
+  }
+  .molecule-net-zero circle {
+    fill: none;
+    stroke: var(--at-ignite-fill);
+    stroke-width: 3;
+    stroke-dasharray: 6 4;
   }
 
   /* Scene frame and its controls (#64). */

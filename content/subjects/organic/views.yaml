@@ -24,3 +24,9 @@ ethylene:
 ethanol:
   # Lesson 3 s09: the O–C–C plane turned well away from the screen plane.
   off-page: { plane: [2, 1, 0], up: 2, rotate: [70, 0, 0] }
+2-fluorobutane-r:
+  # Lesson 3 Check Problem u1-3d-perspective (PS1 Q2a), left drawing: CH₂CH₃ (atom 3) up and CH₃ (0)
+  # lower left in the page, H (8) toward you, so F goes away to the right.
+  as-left-drawing: { plane: [3, 1, 0], up: 3, front: 8 }
+  # Its right drawing: F (2) upper right and H (8) down, both in the page.
+  as-right-drawing: { plane: [8, 1, 2], up: 2, rotate: [0, 0, -58] }

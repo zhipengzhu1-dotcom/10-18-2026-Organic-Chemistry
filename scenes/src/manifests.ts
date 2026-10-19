@@ -21,6 +21,9 @@ import { crustVsBody } from "./crust-vs-body/manifest.ts";
 import { giveOrTake } from "./give-or-take/manifest.ts";
 import { outerElectrons } from "./outer-electrons/manifest.ts";
 import { waterPush } from "./water-push/manifest.ts";
+// Lesson 3 (#81)
+import { fourDomainFamily } from "./four-domain-family/manifest.ts";
+import { dipoleSum } from "./dipole-sum/manifest.ts";
 
 export const sceneManifests: readonly SceneManifest<any>[] = [
   sampleTwist,
@@ -41,4 +44,7 @@ export const sceneManifests: readonly SceneManifest<any>[] = [
   giveOrTake,
   waterPush,
   buildBySharing,
+  // Lesson 3 (#81)
+  fourDomainFamily,
+  dipoleSum,
 ];
