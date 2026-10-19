@@ -1,0 +1,38 @@
+# Lesson 6 Check Problem (spec: docs/specs/unit-1/lesson-06-resonance.md). Multi-correct structure cards.
+id: u1-res-not-resonance
+unit: u1
+lesson: u1-l06
+difficulty: 2
+status: approved
+source: Adapted from MIT OCW 5.12 PS1 Q6
+credit: Kimberly Berkowski, MIT OCW 5.12 Organic Chemistry I, Spring 2005, CC BY-NC-SA 4.0
+type: multiple-choice
+prompt: Which pairs are **not** resonance contributors of each other? Pick all that apply.
+options:
+  - id: a
+    structure: card-dimethylaniline-pair
+    text: "N,N-Dimethylaniline drawn with N⁺=C to the ring and a C⁻ in the ring, next to N,N-dimethylaniline drawn with a neutral benzene ring."
+  - id: b
+    structure: card-allene-propyne
+    text: "Allene, CH₂=C=CH₂, next to propyne, CH₃–C≡CH."
+  - id: c
+    structure: card-pyranyl-pair
+    text: "A six-membered ring with one O and a C⁺ next to a C=C, next to the same ring drawn with C=C and C=O⁺."
+  - id: d
+    structure: card-thiodienyl-pair
+    text: "CH₃–C(=S)–CH=CH–CH₂⁻, next to CH₃–C(S⁻)=CH–CH=CH₂."
+  - id: e
+    structure: card-acetone-enol
+    text: "Acetone, CH₃–C(=O)–CH₃, next to its enol, CH₃–C(OH)=CH₂."
+answer: [b, e]
+correct: In both, a hydrogen moved. That makes different molecules (isomers), not drawings of one molecule.
+hints:
+  - includes: [a, c, d]
+    text: "Check that pair atom by atom: every atom stays where it was, and only lone pairs and π bonds shift. That is resonance."
+  - misses: [b]
+    text: "Look at the ends of allene and propyne. CH₂ and CH₂ vs CH₃ and CH: an H moved."
+  - misses: [e]
+    text: Acetone and its enol differ in where one H sits. Those are tautomers, real different molecules.
+  - text: Resonance never moves an atom, hydrogens included.
+reveal: "**b** and **e**: H moved. **a**, **c** and **d**: same atoms, electrons moved."
+sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q6, Berkowski, Spring 2005, CC BY-NC-SA 4.0."

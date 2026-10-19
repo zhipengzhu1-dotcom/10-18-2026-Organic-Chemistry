@@ -14,6 +14,10 @@ import { carbonylNeighbours } from "./carbonyl-neighbours/manifest.ts";
 import { hFill } from "./h-fill/manifest.ts";
 import { ethanolThreeWays } from "./ethanol-three-ways/manifest.ts";
 import { lonePairFill } from "./lone-pair-fill/manifest.ts";
+import { acetateBondLengths } from "./acetate-bond-lengths/manifest.ts";
+import { formaldehydePiShift } from "./formaldehyde-pi-shift/manifest.ts";
+import { threeMoves } from "./three-moves/manifest.ts";
+import { acetateHybrid } from "./acetate-hybrid/manifest.ts";
 
 // Lesson 0 (#78)
 import { buildBySharing } from "./build-by-sharing/manifest.ts";
@@ -41,4 +45,9 @@ export const sceneManifests: readonly SceneManifest<any>[] = [
   giveOrTake,
   waterPush,
   buildBySharing,
+  // Lesson 6 (#84)
+  acetateBondLengths,
+  formaldehydePiShift,
+  threeMoves,
+  acetateHybrid,
 ];
