@@ -133,8 +133,9 @@ export function renderLesson(lesson: Lesson): Lesson {
 
 /** One Step (or a Practice Set Problem) with its Markdown turned into HTML and its structures pre-rendered. */
 export function renderStep(s: Step): Step {
-  if (s.type === "explain") return { ...s, text: md(s.text) };
-  const shared = { prompt: md(s.prompt), correct: s.correct && md(s.correct), reveal: md(s.reveal) };
+  const source = s.source ? { source: md(s.source) } : {};
+  if (s.type === "explain") return { ...s, text: md(s.text), ...source };
+  const shared = { prompt: md(s.prompt), correct: s.correct && md(s.correct), reveal: md(s.reveal), ...source };
   // A structure card's text is its screen-reader label: kept plain; its drawing is pre-rendered SVG.
   const choices = (list: Option[]) =>
     list.map((o) => (o.structure ? { ...o, structure: drawView(o.structure) } : { ...o, text: md(o.text) }));

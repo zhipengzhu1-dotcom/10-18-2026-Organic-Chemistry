@@ -63,6 +63,8 @@ export interface ExplainStep {
   text: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The written Source note (credits, licences); a Check Step's is its Problem's `source`. */
+  source?: string;
 }
 
 export interface MultipleChoiceStep {
@@ -82,6 +84,8 @@ export interface MultipleChoiceStep {
   scene?: SceneUse;
   /** The cited values this Step's text shows (`{{file/key}}`); its Source note is generated from them. */
   citations?: Cited[];
+  /** The written Source note (credits, licences); a Check Step's is its Problem's `source`. */
+  source?: string;
 }
 
 export interface NumericHint {
@@ -107,6 +111,8 @@ export interface NumericStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The written Source note (credits, licences); a Check Step's is its Problem's `source`. */
+  source?: string;
 }
 
 /** Rank / order: the Student puts the items into one strict order (the prompt names which end is first). */
@@ -125,6 +131,8 @@ export interface RankStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The written Source note (credits, licences); a Check Step's is its Problem's `source`. */
+  source?: string;
 }
 
 export interface ManipulateHint {
@@ -148,6 +156,8 @@ export interface ManipulateStep {
   reveal: string;
   problemId?: string;
   citations?: Cited[];
+  /** The written Source note (credits, licences); a Check Step's is its Problem's `source`. */
+  source?: string;
 }
 
 /**
@@ -197,6 +207,8 @@ export interface DrawArrowsStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The written Source note (credits, licences); a Check Step's is its Problem's `source`. */
+  source?: string;
 }
 
 /** A Step the Student answers and the engine grades. */
@@ -324,6 +336,8 @@ export interface TapStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The written Source note (credits, licences); a Check Step's is its Problem's `source`. */
+  source?: string;
 }
 
 export interface Lesson {

@@ -292,8 +292,10 @@ function withStructures(step: Record<string, unknown> & { type: string }, key: s
 
 /** A Problem as a playable Step (a Check Step, or a Practice Set Problem): its interaction without the Bank tags. */
 function problemStep(problem: ProblemFile, stepId: string, structured: Structured): Step[] {
-  const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source: _src, credit: _c, ...interaction } = problem;
-  return withStructures({ id: stepId, phase: "check", problemId, ...interaction }, `problem:${problemId}`, structured);
+  const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source, credit: _c, ...interaction } = problem;
+  // The Problem's source is its Source note, unless it is our own ("Original"), which needs none.
+  const note = source === "Original" ? {} : { source };
+  return withStructures({ id: stepId, phase: "check", problemId, ...interaction, ...note }, `problem:${problemId}`, structured);
 }
 
 /**

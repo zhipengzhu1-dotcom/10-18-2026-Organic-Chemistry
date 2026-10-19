@@ -170,10 +170,13 @@ const drawArrows = {
 
 const stepId = z.string().regex(/^s\d{2,}$/, 'must look like "s01"');
 const phase = z.enum(["hook", "build", "wrap"]);
+/** A Step's written Source note (credits and licences; numbers cite themselves). Check Steps take their Problem's `source`. */
+const stepSource = text.optional();
 
 const explainStep = z.strictObject({
   id: stepId,
   phase,
+  source: stepSource,
   type: z.literal("explain"),
   text,
   scene: sceneUse.optional(),
@@ -182,16 +185,17 @@ const explainStep = z.strictObject({
 const multipleChoiceStep = z.strictObject({
   id: stepId,
   phase,
+  source: stepSource,
   ...multipleChoice,
   scene: sceneUse.optional(),
   /** Hook only: every choice is accepted and the reveal follows at once. */
   prediction: z.boolean().optional(),
 });
 
-const numericStep = z.strictObject({ id: stepId, phase, ...numeric, scene: sceneUse.optional() });
-const rankStep = z.strictObject({ id: stepId, phase, ...rank, scene: sceneUse.optional() });
-const manipulateStep = z.strictObject({ id: stepId, phase, ...manipulate });
-const drawArrowsStep = z.strictObject({ id: stepId, phase, ...drawArrows, scene: sceneUse.optional() });
+const numericStep = z.strictObject({ id: stepId, phase, source: stepSource, ...numeric, scene: sceneUse.optional() });
+const rankStep = z.strictObject({ id: stepId, phase, source: stepSource, ...rank, scene: sceneUse.optional() });
+const manipulateStep = z.strictObject({ id: stepId, phase, source: stepSource, ...manipulate });
+const drawArrowsStep = z.strictObject({ id: stepId, phase, source: stepSource, ...drawArrows, scene: sceneUse.optional() });
 
 /** A Check Step is a Problem from the Bank, referenced by id; its Step type is the Problem's. */
 const checkStep = z.strictObject({
@@ -201,7 +205,7 @@ const checkStep = z.strictObject({
   problem: id,
 });
 
-const tapStep = z.strictObject({ id: stepId, phase, ...tapToIdentify, scene: sceneUse.optional() });
+const tapStep = z.strictObject({ id: stepId, phase, source: stepSource, ...tapToIdentify, scene: sceneUse.optional() });
 
 /** Picks the Step schema by `type` (a Check Step is recognised by its `problem`), so errors point at the broken field. */
 const step = z.preprocess(
