@@ -36,10 +36,16 @@ export function checkStructure(file: StructureFile): string[] {
   return errors;
 }
 
-const view = (structure: Structure, hide: Hidden[] | undefined, ring?: string[], outline?: string[]): StructureView => ({
+const view = (
+  structure: Structure,
+  hide: Hidden[] | undefined,
+  ring?: string[],
+  outline?: string[],
+  corner?: [string, string, string],
+): StructureView => ({
   structure,
   hide: hide ?? [],
-  ...(ring || outline ? { highlight: { ring: ring ?? [], outline: outline ?? [] } } : {}),
+  ...(ring || outline || corner ? { highlight: { ring: ring ?? [], outline: outline ?? [], ...(corner ? { corner } : {}) } } : {}),
 });
 
 /** Messages for ringed atoms and outlined bonds the structure doesn't have. */
@@ -63,11 +69,11 @@ export function resolveFigure(
     if (!structures.has(figure.structure)) errors.push(`structure "${figure.structure}" not found`);
     return undefined;
   }
-  const broken = checkHighlight(found, figure.ring, figure.outline);
+  const broken = checkHighlight(found, [...(figure.ring ?? []), ...(figure.corner ?? [])], figure.outline);
   errors.push(...broken);
   if (broken.length) return undefined;
   return {
-    view: view(found, figure.hide, figure.ring, figure.outline),
+    view: view(found, figure.hide, figure.ring, figure.outline, figure.corner),
     alt: figure.alt,
     ...(figure.caption ? { caption: figure.caption } : {}),
   };

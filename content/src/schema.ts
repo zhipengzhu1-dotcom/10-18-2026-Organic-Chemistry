@@ -90,6 +90,8 @@ const figure = z.strictObject({
   hide,
   ring: z.array(id).min(1).optional(),
   outline: z.array(id).min(1).optional(),
+  /** A right-angle mark at the middle atom, between its bonds to the other two (Lesson 3's flat CH₄). */
+  corner: z.tuple([id, id, id]).optional(),
   caption: text.optional(),
   alt: text,
 });

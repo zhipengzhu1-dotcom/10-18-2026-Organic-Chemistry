@@ -369,7 +369,7 @@ export interface StructureView {
   structure: Structure;
   hide: Hidden[];
   /** Atoms ringed and bonds outlined to point the Student at them. */
-  highlight?: { ring: string[]; outline: string[] };
+  highlight?: { ring: string[]; outline: string[]; corner?: [string, string, string] };
   /** Added at site build time by the renderer; absent in the raw course model. */
   drawn?: DrawnStructure;
 }
