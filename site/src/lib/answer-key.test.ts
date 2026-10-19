@@ -19,3 +19,13 @@ it("the answer key puts the Lesson back together", () => {
   const { page, key } = splitLesson(lesson());
   expect(withKey(page, JSON.parse(JSON.stringify(key)))).toEqual(lesson());
 });
+
+it("a Scene that plays once a Step is answered travels in the answer key, not the page", () => {
+  const l = lesson();
+  const scene = { id: "bond-dipoles", state: {}, cited: {} };
+  l.steps[2] = { ...l.steps[2], revealScene: scene } as (typeof l.steps)[number];
+  const { page, key } = splitLesson(l);
+  expect(JSON.stringify(page.steps[2])).not.toContain("bond-dipoles");
+  expect(key.s03.revealScene).toEqual(scene);
+  expect(withKey(page, key).steps[2]).toMatchObject({ revealScene: scene });
+});

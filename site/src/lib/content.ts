@@ -1,5 +1,5 @@
 // Build-time access to the course model. A content error fails the site build.
-import { buildContent, type Course, type CourseModel, type Lesson, type Step, type Unit } from "@astratron/content";
+import { buildContent, type Course, type CourseModel, type Figure, type Lesson, type Step, type Unit } from "@astratron/content";
 import { checkManifests, sceneCatalog } from "@astratron/scenes/check";
 import { sceneManifests } from "@astratron/scenes/manifests";
 import { marked } from "marked";
@@ -109,7 +109,23 @@ function markData(html: string): string {
 
 /** The Lesson with every text field turned from Markdown into HTML and every structure pre-rendered to SVG. */
 export function renderLesson(lesson: Lesson): Lesson {
-  const step = (s: Step): Step => {
+  const figure = (f: Figure): Figure => ({ ...f, view: drawView(f.view), ...(f.caption ? { caption: md(f.caption) } : {}) });
+  /** Figures and aside tables, drawn; captions and table heads rendered. */
+  const visuals = (s: Step): Step => {
+    const out = { ...s };
+    if (s.figures) out.figures = s.figures.map(figure);
+    if (s.aside?.table)
+      out.aside = {
+        ...s.aside,
+        table: {
+          columns: s.aside.table.columns.map(md),
+          rows: s.aside.table.rows.map((r) => ({ head: md(r.head), cells: r.cells.map((c) => c && figure(c)) })),
+        },
+      };
+    return out;
+  };
+  const step = (s: Step): Step => visuals(text(s));
+  const text = (s: Step): Step => {
     if (s.type === "explain") return { ...s, text: md(s.text) };
     const shared = { prompt: md(s.prompt), correct: s.correct && md(s.correct), reveal: md(s.reveal) };
     const choices = (list: { id: string; text: string }[]) => list.map((o) => ({ ...o, text: md(o.text) }));

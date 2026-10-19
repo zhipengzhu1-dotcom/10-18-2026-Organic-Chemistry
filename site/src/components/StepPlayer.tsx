@@ -13,6 +13,7 @@ import SourceNote from "./SourceNote.tsx";
 import ScenePlayer from "./ScenePlayer.tsx";
 import SceneControl from "./SceneControl.tsx";
 import StructureTap from "./StructureTap.tsx";
+import { AsideButton, Figures } from "./StepVisuals.tsx";
 import "./structure.css";
 
 interface Props {
@@ -121,6 +122,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         : manipulated?.stepId === step.id
           ? manipulated.value
           : step.scene.state[step.control];
+  const revealScene = step.type !== "explain" && screen.canContinue ? step.revealScene : undefined;
   const sceneState =
     step.type === "manipulate" && setting !== undefined ? { ...step.scene.state, [step.control]: setting } : step.scene?.state;
 
@@ -185,6 +187,9 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <p className="player-prompt" {...html(step.prompt)} />
         )}
 
+        {step.figures && <Figures figures={step.figures} />}
+
+        {step.type === "tap-to-identify" && step.alt && <p className="sr">{step.alt}</p>}
         {step.type === "tap-to-identify" && (
           <StructureTap
             step={step}
@@ -195,7 +200,15 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           />
         )}
 
-        {step.scene && sceneState && (
+        {revealScene ? (
+          // Once the Step is answered its reveal Scene takes the Scene's place and plays.
+          <ScenePlayer
+            key={`reveal-scene-${step.id}`}
+            sceneId={revealScene.id}
+            state={revealScene.state}
+            cited={revealScene.cited}
+          />
+        ) : step.scene && sceneState && (
           // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
           <ScenePlayer
             key={`scene-${step.id}`}
@@ -272,6 +285,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
             )}
           </div>
         )}
+
+        {step.aside && <AsideButton key={`aside-${step.id}`} aside={step.aside} stepId={step.id} />}
 
         {/* Keyed per Step so a new Step opens its Source note collapsed. */}
         <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} />
