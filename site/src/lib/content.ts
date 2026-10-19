@@ -1,5 +1,7 @@
 // Build-time access to the course model. A content error fails the site build.
 import { buildContent, type Course, type CourseModel, type Lesson, type Step, type Unit } from "@astratron/content";
+import { checkManifests, sceneCatalog } from "@astratron/scenes/check";
+import { sceneManifests } from "@astratron/scenes/manifests";
 import { marked } from "marked";
 
 /** Set in astro.config.mjs: the real content tree. */
@@ -9,8 +11,10 @@ let cached: CourseModel | undefined;
 
 export function courseModel(): CourseModel {
   if (cached) return cached;
-  const { model, errors } = buildContent(__CONTENT_ROOT__);
-  if (!model) throw new Error(`Content build failed:\n  ${errors.join("\n  ")}`);
+  // Every Scene manifest must be complete, and every Step's Scene is checked against the registry.
+  const sceneErrors = checkManifests(sceneManifests);
+  const { model, errors } = buildContent(__CONTENT_ROOT__, { scenes: sceneCatalog(sceneManifests) });
+  if (!model || sceneErrors.length) throw new Error(`Content build failed:\n  ${[...sceneErrors, ...errors].join("\n  ")}`);
   return (cached = model);
 }
 

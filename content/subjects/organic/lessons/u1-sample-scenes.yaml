@@ -1,0 +1,98 @@
+# Sample Lesson for Scenes and the Manipulate a Scene Step type (#64). Not from
+# a Lesson spec; it exists so the smoke tests can drive a Scene in an Explain
+# Step and a Manipulate Step. Remove it with the other samples (#88).
+id: u1-sample-scenes
+slug: sample-scenes
+title: "Sample: Twist a Double Bond"
+goal: Watch a Scene, then twist one end of a double bond to see when its π overlap disappears.
+keyIdea: A π bond needs its two p orbitals side by side. Twist one end a quarter turn and the overlap, and the π bond, are gone.
+steps:
+  - id: s01
+    phase: hook
+    type: multiple-choice
+    prediction: true
+    prompt: A C=C double bond has a σ bond and a π bond. Do you think one end can spin freely?
+    options:
+      - { id: a, text: "Yes, like any bond" }
+      - { id: b, text: "No, something holds it flat" }
+    answer: [b]
+    reveal: "No. The π bond only works while the two p orbitals stay side by side, so twisting would break it."
+
+  - id: s02
+    phase: build
+    type: explain
+    text: Here are two carbons with one p orbital each. Side by side, the orbitals overlap above and below the axis. That side-on overlap is the **π bond**.
+    scene: sample-twist
+
+  - id: s03
+    phase: build
+    type: manipulate
+    prompt: Twist the right-hand end. Find the twist where the π overlap is gone, then press **Check**.
+    scene: { id: sample-twist, state: { twist: 0 } }
+    control: twist
+    answer: 90
+    correct: A quarter turn puts the p orbitals at right angles, so there is no side-on overlap and no π bond.
+    hints:
+      - match: [0]
+        text: That's flat, with full overlap. Start twisting.
+      - match: [15, 30, 45, 60, 75]
+        text: Still overlapping a little. Keep twisting.
+      - match: [180]
+        text: The p orbitals are side by side again, just flipped, so they overlap fully. Look in between.
+      - match: [105, 120, 135, 150, 165]
+        text: Past the gap, the overlap is coming back. Go back a little.
+      - text: Watch the overlap bar and stop where it is empty.
+    reveal: "A quarter turn: the p orbitals are at right angles, so the overlap bar is empty."
+
+  - id: s04
+    phase: build
+    type: explain
+    text: Breaking the π bond costs energy, so a double bond stays flat. A single bond has no π bond, so its ends can spin.
+
+  - id: s05
+    phase: build
+    type: multiple-choice
+    prompt: Which bond lets its two ends spin freely?
+    options:
+      - { id: a, text: "C–C, a σ bond alone" }
+      - { id: b, text: "C=C, a σ bond and a π bond" }
+    answer: [a]
+    correct: A σ bond overlaps head-on, which stays the same at any twist.
+    hints:
+      - match: [b]
+        text: Twisting a C=C pulls its p orbitals apart. Which bond has no p orbitals to pull apart?
+      - text: Which bond has no π part?
+    reveal: "C–C: its σ bond overlaps head-on, the same at any twist."
+
+  - id: s06
+    phase: build
+    type: explain
+    text: So the π bond is what makes a double bond rigid.
+
+  - id: s07
+    phase: build
+    type: multiple-choice
+    prompt: What has to happen for one end of a C=C to turn a quarter turn?
+    options:
+      - { id: a, text: The π bond breaks }
+      - { id: b, text: The σ bond breaks }
+    answer: [a]
+    correct: The quarter turn sets the p orbitals at right angles, so the π overlap is gone.
+    hints:
+      - match: [b]
+        text: The σ bond overlaps head-on along the axis. Does twisting change that?
+      - text: Which overlap did the bar show going to nothing?
+    reveal: The π bond breaks; the σ bond is untouched by the twist.
+
+  - id: s08
+    phase: check
+    problem: u1-sample-p1
+
+  - id: s09
+    phase: check
+    problem: u1-sample-p2
+
+  - id: s10
+    phase: wrap
+    type: explain
+    text: A π bond is side-on overlap of two p orbitals. Twisting one end a quarter turn removes that overlap, so double bonds stay flat.

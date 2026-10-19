@@ -5,7 +5,8 @@
   "license": "MIT",
   "exports": {
     ".": "./src/index.ts",
-    "./manifests": "./src/manifests.ts"
+    "./manifests": "./src/manifests.ts",
+    "./check": "./src/manifest-check.ts"
   },
   "scripts": {
     "check": "node src/check-cli.ts",
