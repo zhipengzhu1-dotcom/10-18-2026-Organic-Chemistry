@@ -25,7 +25,17 @@ const hint = z.strictObject({
  */
 const moleculeUse = z.preprocess(
   (v) => (typeof v === "string" ? { id: v } : v),
-  z.strictObject({ id, card: z.boolean().optional(), view: id.optional(), describe: text.optional() }),
+  z.strictObject({
+    id,
+    card: z.boolean().optional(),
+    view: id.optional(),
+    describe: text.optional(),
+    /** Computed orbitals drawn as lobes on the card (#70): `<orbital data file>/<orbital id>`. */
+    orbitals: z
+      .array(z.string().regex(/^[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9-]*$/, "must be <orbital data file>/<orbital id>"))
+      .min(1)
+      .optional(),
+  }),
 );
 const molecule = moleculeUse.optional();
 

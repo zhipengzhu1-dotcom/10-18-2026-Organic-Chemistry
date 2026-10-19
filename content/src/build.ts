@@ -103,6 +103,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
   /** Loads and checks a Subject's cited data files. */
   function loadData(dir: string): CitedData {
     const data: CitedData = {};
+    const rels = new Map<string, string>();
     for (const rel of yamlFiles(root, dir, [".yaml", ".json"])) {
       const file = load(rel, dataFile);
       if (!file) continue;
@@ -113,6 +114,12 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       const { set, errors: broken } = resolveDataFile(file);
       for (const message of broken) errors.push(`${rel}: ${message}`);
       data[file.id] = set;
+      rels.set(file.id, rel);
+    }
+    // Orbitals sit on one molecule's atoms: the file they name must be that molecule.
+    for (const [fid, set] of Object.entries(data)) {
+      const on = set.orbitals?.molecule;
+      if (on && data[on]?.kind !== "molecule") errors.push(`${rels.get(fid)}: orbitals.molecule: "${on}" is not a molecule data file`);
     }
     return data;
   }

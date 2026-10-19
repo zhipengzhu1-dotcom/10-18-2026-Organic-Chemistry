@@ -78,6 +78,18 @@ steps:
       - text: Turn it to look from the side.
     reveal: The N sits above the H's.
 
+  # Computed orbitals on the card (#70): ethylene's π bond orbital over its measured atoms.
+  - id: s11
+    phase: build
+    type: explain
+    text: This is ethylene's π bond, **computed**. One lobe sits above the flat plane of the six atoms and one below. Drag to turn it.
+    molecule:
+      id: ethylene
+      view: edge-on
+      card: true
+      orbitals: [ethylene-orbitals/pi]
+      describe: "Ethylene's π bond: one lobe above the plane of the six atoms and one below, both over the two carbons."
+
   - id: s07
     phase: build
     type: explain

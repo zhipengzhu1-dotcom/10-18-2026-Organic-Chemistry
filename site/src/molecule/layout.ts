@@ -2,7 +2,7 @@
 // WebGL canvas draws with, so the SVG overlay's letters, picks and measurements and the 2D tap
 // test all line up with the drawn atoms (and the no-WebGL still is drawn from it too).
 import type { Atom } from "@astratron/content/data";
-import { project, type Matrix3 } from "@astratron/content/molecule";
+import { centroid, project, type Matrix3 } from "@astratron/content/molecule";
 
 /** Ball-and-stick atoms are drawn at 30% of their van der Waals (Bondi) radius (spec #56). */
 export const BALL = 0.3;
@@ -52,6 +52,19 @@ export function placeAtoms(m: Drawable, rotation: Matrix3, frame: Frame): Placed
   for (const a of placed)
     a.labelled = !placed.some((b) => b.z > a.z + 1e-6 && Math.hypot(b.x - a.x, b.y - a.y) < b.r);
   return placed;
+}
+
+/**
+ * Points given in the molecule file's frame (Å), e.g. orbital lobe label points (#70), placed with
+ * the atoms' projection: px from the frame's top left, and depth in Å toward the viewer.
+ */
+export function placePoints(m: Drawable, rotation: Matrix3, frame: Frame, points: [number, number, number][]): { x: number; y: number; z: number }[] {
+  const c = centroid(m.atoms);
+  return points.map((p) => {
+    const d = [p[0] - c[0], p[1] - c[1], p[2] - c[2]];
+    const [x, y, z] = rotation.map((row) => row[0] * d[0] + row[1] * d[1] + row[2] * d[2]);
+    return { x: frame.width / 2 + x * frame.scale, y: frame.height / 2 - y * frame.scale, z };
+  });
 }
 
 /** Pixels per Å that keep the whole true-scale molecule inside the frame in any rotation. */

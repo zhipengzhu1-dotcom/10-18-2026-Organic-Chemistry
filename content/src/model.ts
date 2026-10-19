@@ -74,6 +74,27 @@ export interface MoleculeUse {
   card: boolean;
   /** The Step's own words, read first by the Describe button. */
   describe?: string;
+  /** Computed orbitals drawn as translucent lobes over the atoms (#70), in the order the Step lists them. */
+  orbitals?: OrbitalUse[];
+}
+
+/** One computed orbital on the 3D card, resolved from an orbital data file (pipelines/orbitals). */
+export interface OrbitalUse {
+  /** `<orbital data file>/<orbital id>`, e.g. "ethylene-orbitals/pi". */
+  ref: string;
+  label: string;
+  /** The text chip that names it on screen ("π", "σ*", "LUMO"). */
+  chip: string;
+  /** "sigma" / "pi": colour says the kind and the pattern the sign; "phase": + solid cyan, − hatched orange. */
+  style: "sigma" | "pi" | "phase";
+  /** A summed density: one sign, drawn solid. */
+  density?: boolean;
+  /** Site URL of the GLB; nodes "plus-solid" and "minus-hatched" hold the lobes (Å, the molecule file's frame). */
+  mesh: string;
+  /** Each sign's label point: the centre of its largest lobe (Å, the molecule file's frame). */
+  lobes: { sign: "+" | "-"; at: [number, number, number] }[];
+  /** Canonical MOs: the orbital energy (eV, shown to 1 decimal). */
+  energy?: Cited;
 }
 
 
