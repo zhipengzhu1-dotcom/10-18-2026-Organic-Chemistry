@@ -6,6 +6,10 @@
 .opts:has(.structure-card) { grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); }
 .opts .structure-card { display: grid; place-items: center; padding: 8px; }
 .structure-card .structure { max-height: 7rem; }
+/* The drawing under a prompt (MC and Numeric Steps), with its "Lone pairs hidden" chip. */
+.structure-figure { margin: 0; display: grid; justify-items: center; gap: 8px; }
+.structure-figure .structure { max-height: 14rem; width: auto; }
+.structure-figure .chip { padding: 2px 10px; border: var(--at-border) solid var(--at-line); border-radius: 999px; color: var(--at-ink-muted); font-size: 0.85rem; }
 .tap-only-cue { margin: 0; padding: 8px 12px; color: var(--at-ink-muted); border: var(--at-border) dashed var(--at-line); }
 .tap-structure { position: relative; touch-action: manipulation; }
 .tap-structure .structure-svg .structure { width: 100%; }

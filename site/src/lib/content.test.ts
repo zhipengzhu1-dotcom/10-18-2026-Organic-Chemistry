@@ -1,7 +1,38 @@
 // md(): Lesson Markdown → HTML, with every number and formula set in the data
 // face (JetBrains Mono) so C never reads as O.
 import { describe, expect, it } from "vitest";
-import { md } from "./content.ts";
+import type { Lesson, Structure } from "@astratron/content";
+import { md, renderLesson } from "./content.ts";
+
+describe("renderLesson pre-renders the drawing under a prompt", () => {
+  const water: Structure = {
+    id: "water",
+    style: "line-angle",
+    atoms: [{ id: "a1", el: "O", x: 0, y: 0, h: 2, lp: 2 }],
+    bonds: [],
+  };
+  const lesson = {
+    id: "l",
+    keyIdea: "k",
+    steps: [
+      {
+        id: "s01", phase: "build", type: "numeric", prompt: "How many?", unitSymbol: "lone pairs", answer: 2, tolerance: 0,
+        reveal: "2", structure: { structure: water, hide: ["lone-pairs"] },
+      },
+      {
+        id: "s02", phase: "build", type: "multiple-choice", prompt: "Which?", options: [{ id: "a", text: "A" }], answer: ["a"],
+        reveal: "A", structure: { structure: water, hide: [] },
+      },
+    ],
+  } as unknown as Lesson;
+
+  it("draws it as SVG at build time, honouring what it hides", () => {
+    const [numeric, choice] = renderLesson(lesson).steps as { structure?: { drawn?: { svg: string } } }[];
+    expect(numeric.structure?.drawn?.svg).toContain("<svg");
+    expect(numeric.structure?.drawn?.svg).not.toContain("lone-pair-dot");
+    expect(choice.structure?.drawn?.svg).toContain("lone-pair-dot");
+  });
+});
 
 const d = (s: string) => `<span class="data">${s}</span>`;
 

@@ -194,6 +194,8 @@ export interface Structure {
   smiles?: string;
   /** Where the structure comes from, e.g. "PubChem CID 750". */
   source?: string;
+  /** Screen-reader description of the whole drawing, used when a Step shows it under its prompt. */
+  label?: string;
   atoms: StructureAtom[];
   bonds: StructureBond[];
 }

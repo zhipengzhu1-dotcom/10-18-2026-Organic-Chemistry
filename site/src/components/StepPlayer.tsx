@@ -3,7 +3,7 @@
 // The page carries the Lesson without its answers (spec story 99); the answer
 // key is fetched from its own built file, and nothing is checked until it arrives.
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
-import type { NumericStep, RankStep, SceneValue } from "@astratron/content";
+import type { NumericStep, RankStep, SceneValue, StructureView } from "@astratron/content";
 import { act, start, type Action, type Answer, type LessonProgress, type Screen } from "../engine/player.ts";
 import { withKey, type AnswerKey, type PageLesson } from "../lib/answer-key.ts";
 import { mistakeTarget, reportMistakeHref } from "../lib/submit-links.ts";
@@ -195,7 +195,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           />
         )}
 
-        {step.scene && sceneState && (
+        {(step.type === "multiple-choice" || step.type === "numeric") && step.structure?.drawn && (
+          <StructureFigure view={step.structure} />
+        )}
+
+        {step.scene && sceneState && step.scene.on !== "answer" && (
           // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
           <ScenePlayer
             key={`scene-${step.id}`}
@@ -261,6 +265,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           />
         )}
 
+        {step.scene?.on === "answer" && sceneState && (feedback?.kind === "correct" || feedback?.kind === "reveal") && (
+          // A Reveal Scene: hidden until the Step is answered, then it plays once.
+          <ScenePlayer key={`reveal-scene-${step.id}`} sceneId={step.scene.id} state={sceneState} cited={step.scene.cited} />
+        )}
+
         {screen.done && (
           <div className="card">
             <h2>Key idea</h2>
@@ -317,6 +326,22 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         )}
       </div>
     </div>
+  );
+}
+
+/** The drawing under a prompt: pre-rendered SVG with a screen-reader label, and a chip when it hides its lone pairs. */
+function StructureFigure({ view }: { view: StructureView }) {
+  const hidden = view.hide.includes("lone-pairs");
+  const label = view.structure.label ?? "A structure drawing.";
+  return (
+    <figure className="structure-figure">
+      <div role="img" aria-label={hidden ? `${label} Lone pairs hidden.` : label} {...html(view.drawn?.svg ?? "")} />
+      {hidden && (
+        <figcaption className="chip" aria-hidden="true">
+          Lone pairs hidden
+        </figcaption>
+      )}
+    </figure>
   );
 }
 

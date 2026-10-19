@@ -121,6 +121,7 @@ export function renderLesson(lesson: Lesson): Lesson {
           // A structure card's text is its screen-reader label: kept plain; its drawing is pre-rendered SVG.
           options: s.options.map((o) => (o.structure ? { ...o, structure: drawView(o.structure) } : { ...o, text: md(o.text) })),
           hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
+          ...(s.structure && { structure: drawView(s.structure) }),
         };
       case "tap-to-identify":
         return {
@@ -130,7 +131,12 @@ export function renderLesson(lesson: Lesson): Lesson {
           hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
         };
       case "numeric":
-        return { ...s, ...shared, hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
+        return {
+          ...s,
+          ...shared,
+          hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
+          ...(s.structure && { structure: drawView(s.structure) }),
+        };
       case "rank":
         return { ...s, ...shared, items: choices(s.items), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
       case "manipulate":

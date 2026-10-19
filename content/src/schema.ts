@@ -239,6 +239,8 @@ export const structureFile = z.strictObject({
   style: z.enum(["full", "lewis", "line-angle"]),
   smiles: text.optional(),
   source: text.optional(),
+  /** Screen-reader description of the whole drawing (shown under a prompt). */
+  label: text.optional(),
   atoms: z
     .array(
       z.strictObject({
