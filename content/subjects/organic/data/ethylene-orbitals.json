@@ -35,7 +35,7 @@
     "chip": "σ",
     "style": "sigma",
     "mesh": "/orbitals/ethylene-orbitals/sigma.glb",
-    "sha256": "d081084613142a52dc6833f11aa254620a12dc97696f3051d73dd09cfcd82135",
+    "sha256": "2cf5dbb5fc94c6074d5ba1a7df055629b669b802029fe147ea22f20a9884332b",
     "triangles": 2680,
     "lobes": [
      {
@@ -61,7 +61,7 @@
     "chip": "π",
     "style": "pi",
     "mesh": "/orbitals/ethylene-orbitals/pi.glb",
-    "sha256": "5e5213f2f58c0f822aed1c26f316af5eac3ecd11ba5588d562cd0dba2b4d0d92",
+    "sha256": "b82adf69b44c7527095a3fce956b81eb7f0192fb6140708be03ad69cf2815400",
     "triangles": 4816,
     "lobes": [
      {

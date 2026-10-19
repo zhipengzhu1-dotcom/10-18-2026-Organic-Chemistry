@@ -362,7 +362,8 @@ def run(s: OrbitalSet) -> dict:
         lobes: list[tuple[str, Mesh]] = []
         labels = []
         gate = {}
-        for sign, node in (("+", "plus"), ("-", "minus")):
+        # Node names follow the Blender import contract (#69): "hatched" in the name = the striped phase.
+        for sign, node in (("+", "plus-solid"), ("-", "minus-hatched")):
             if f.density and sign == "-":
                 continue
             try:

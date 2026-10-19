@@ -35,7 +35,7 @@
     "chip": "σ",
     "style": "sigma",
     "mesh": "/orbitals/acetylene-orbitals/sigma.glb",
-    "sha256": "a346d251fa062ac42d70017ec15101a0961dc75a9bfb137f8edb9cd2274f4305",
+    "sha256": "293b0d2423f9a2cc741d8f76f9a429661193effe288fecd5f9a1dd21a2b4a509",
     "triangles": 2840,
     "lobes": [
      {
@@ -61,7 +61,7 @@
     "chip": "π",
     "style": "pi",
     "mesh": "/orbitals/acetylene-orbitals/pi1.glb",
-    "sha256": "5875a1aaf7e113f62da3c10b632ca2288d6d370e90948599d13a1d5d8f20dd3c",
+    "sha256": "3d814c72da772d37cfda00e1e80ade9ec2d48f58f7ba7f3bfebd56227f972ad5",
     "triangles": 4576,
     "lobes": [
      {
@@ -87,7 +87,7 @@
     "chip": "π",
     "style": "pi",
     "mesh": "/orbitals/acetylene-orbitals/pi2.glb",
-    "sha256": "32c937040524b4d52d423994cefdd394b0ece8d63fc19e04a34bd7ec7be83e51",
+    "sha256": "ae072dc1f302bf296cc1bcd8b01fab6612953c3ece86a7a6394c9e2c1a58e311",
     "triangles": 4576,
     "lobes": [
      {
@@ -114,7 +114,7 @@
     "style": "pi",
     "density": true,
     "mesh": "/orbitals/acetylene-orbitals/pi-both.glb",
-    "sha256": "22ab46af0e35834a0be7aa846eac700a123844a2296dba13024f6ac1d90aa230",
+    "sha256": "bfd22d55cfe67e9866c7da510f6fea98d97b9188b5d1e70e123b014cfe93a57d",
     "triangles": 5152,
     "lobes": [
      {

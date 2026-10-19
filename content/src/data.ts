@@ -117,7 +117,7 @@ export interface OrbitalEntry {
   energy?: string;
   /** True when the mesh is a summed density (one sign). */
   density?: boolean;
-  /** Site URL of the GLB (one node per lobe sign: "plus", "minus"). */
+  /** Site URL of the GLB (one node per lobe sign: "plus-solid", "minus-hatched"). */
   mesh: string;
   sha256: string;
   triangles: number;

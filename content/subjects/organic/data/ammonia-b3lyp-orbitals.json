@@ -57,7 +57,7 @@
     "style": "phase",
     "energy": "homo",
     "mesh": "/orbitals/ammonia-b3lyp-orbitals/homo.glb",
-    "sha256": "1fd5b4c4fb61c5165dbe4feb1a431c4380c1f359aed57fe40f3300a56498d331",
+    "sha256": "92ff7b47b50da50cae5cef3a68cc060c0a098dfdb778b1191aa8cfb36dfbc251",
     "triangles": 3952,
     "lobes": [
      {

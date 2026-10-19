@@ -57,7 +57,7 @@
     "style": "phase",
     "energy": "lumo",
     "mesh": "/orbitals/boron-trifluoride-b3lyp-orbitals/lumo.glb",
-    "sha256": "03d3867da699611a9986698212c1ae4e63187383d9161beed794f9849be446dc",
+    "sha256": "8c045fb18ef4b98a19207ecaff658856bda97468e05c3ddb3fce8c4c7fb8d28f",
     "triangles": 6240,
     "lobes": [
      {

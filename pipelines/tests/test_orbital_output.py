@@ -30,7 +30,8 @@ def test_committed_meshes_match_their_hash_and_face_outward(set_id, oid, entry):
     assert path.exists(), f"{path} is missing"
     assert hashlib.sha256(path.read_bytes()).hexdigest() == entry["sha256"], f"{path} changed since the data file was written"
     lobes = read_glb(path)
-    assert [name for name, _ in lobes] == ["plus" if lb["sign"] == "+" else "minus" for lb in entry["lobes"]]
+    # Node names follow the Blender import contract (#69): a name containing "hatched" gets the striped phase.
+    assert [name for name, _ in lobes] == ["plus-solid" if lb["sign"] == "+" else "minus-hatched" for lb in entry["lobes"]]
     for name, mesh in lobes:
         assert_closed_ccw(mesh)
         v, f, n = mesh

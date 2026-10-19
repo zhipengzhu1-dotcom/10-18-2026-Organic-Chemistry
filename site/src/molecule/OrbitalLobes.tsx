@@ -1,7 +1,7 @@
 // Computed orbital lobes (#70) inside the 3D card's canvas: part of the lazy three.js chunk, so the
 // GLB loader and every mesh load only when a Step shows orbitals. Each orbital's GLB (written by
 // pipelines/orbitals, already gated for closed surfaces, counter-clockwise winding and outward
-// normals) holds one node per sign, "plus" and "minus", in Å in the molecule file's frame.
+// normals) holds one node per sign, "plus-solid" and "minus-hatched", in Å in the molecule file's frame.
 //
 // Drawn translucent after the atoms: transparent, no depth writes and a higher renderOrder, so every
 // atom shows through. Front faces only (the winding gate is what makes that safe). The sign is

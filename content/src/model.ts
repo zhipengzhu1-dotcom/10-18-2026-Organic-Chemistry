@@ -89,7 +89,7 @@ export interface OrbitalUse {
   style: "sigma" | "pi" | "phase";
   /** A summed density: one sign, drawn solid. */
   density?: boolean;
-  /** Site URL of the GLB; nodes "plus" and "minus" hold the lobes (Å, the molecule file's frame). */
+  /** Site URL of the GLB; nodes "plus-solid" and "minus-hatched" hold the lobes (Å, the molecule file's frame). */
   mesh: string;
   /** Each sign's label point: the centre of its largest lobe (Å, the molecule file's frame). */
   lobes: { sign: "+" | "-"; at: [number, number, number] }[];

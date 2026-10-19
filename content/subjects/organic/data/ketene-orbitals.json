@@ -35,7 +35,7 @@
     "chip": "π",
     "style": "pi",
     "mesh": "/orbitals/ketene-orbitals/cc-pi.glb",
-    "sha256": "d89066271f8324c1adf2088412ad8230a9bc43337192c95f522ebe6e12bb61c6",
+    "sha256": "50cad5bf78581e93f4f7c3c0c227104c53967d5b0ad0d7e8ff02a89a29ec7b16",
     "triangles": 4624,
     "lobes": [
      {
@@ -61,7 +61,7 @@
     "chip": "π",
     "style": "pi",
     "mesh": "/orbitals/ketene-orbitals/co-pi.glb",
-    "sha256": "31013ed9c70effeb5b5a84befcf2f514add5640908083befc9d2a093342e16cb",
+    "sha256": "cf55afdeccc5f5fe9a7b6805a812bb1b6f23714b313062ce4f3b33164c85c1cf",
     "triangles": 3652,
     "lobes": [
      {
