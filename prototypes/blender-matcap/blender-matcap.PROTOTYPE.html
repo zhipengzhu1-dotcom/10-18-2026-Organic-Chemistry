@@ -1,0 +1,240 @@
+<!doctype html>
+<!--
+  PROTOTYPE, throwaway. Never merged. Ticket: "Prototype: Blender's role and a matcap look for the 3D Scenes" (#50).
+  Four looks for Lesson 4's ethylene card (molecule-card + the computed π bond orbital), switchable via ?variant=A|B|C|D
+  and the floating bar (← → keys too):
+    A  current lighting (toon shading + ink outline, as in the molecule-viewer prototype)
+    B  Blender matcap "clay"     C  Blender matcap "studio"     D  Blender matcap "arcade" (+ ink outline)
+  Below the card: Blender hero/share still and the cinematic flight, next to the plain three.js view, for the A/B.
+  Every number on screen is read from data/*.json (CCCBDB geometry, our PySCF π orbital). Run: pnpm-free, `python3 -m http.server`.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Matcap Look Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600;700&family=Silkscreen&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0d0626;--fg:#fff;--muted:#b9a8e8;--cyan:#3ee8ff;--uv:#b44dff;--orange:#ff9a1f;--line:#5b3bb3;--ink:#0d0626}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:"Space Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding:0 16px 96px}
+  main{max-width:720px;margin:0 auto}
+  .silk{font-family:Silkscreen,monospace}
+  .mono{font-family:"JetBrains Mono",monospace}
+  h1{font:700 22px/1.2 "Space Grotesk";margin:20px 0 4px}
+  h2{font:700 18px/1.2 "Space Grotesk";margin:32px 0 6px}
+  p{color:var(--muted);margin:0 0 12px;font-size:15px;line-height:1.45}
+  .kick{font:400 11px Silkscreen;color:var(--cyan);margin-top:18px}
+  .card{position:relative;border:3px solid var(--line);box-shadow:6px 6px 0 var(--uv);aspect-ratio:1/1;max-height:70vh;width:100%;
+    background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--uv) 30%,transparent),transparent 70%),color-mix(in srgb,var(--bg) 85%,#000);touch-action:none;overflow:hidden}
+  .card canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+  .lab{position:absolute;left:0;top:0;pointer-events:none;font:700 12px "JetBrains Mono",monospace;color:#111;transform:translate(-50%,-50%)}
+  .chip{position:absolute;font:400 10px Silkscreen;color:var(--ink);background:var(--cyan);padding:3px 6px;pointer-events:none}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  .row button{background:var(--bg);border:2px solid var(--fg);color:var(--fg);font:400 12px Silkscreen;padding:8px 10px;box-shadow:3px 3px 0 var(--uv)}
+  .row button[aria-pressed=true]{background:var(--cyan);color:var(--ink)}
+  table{border-collapse:collapse;width:100%;font:400 12px/1.5 "JetBrains Mono",monospace;color:var(--muted)}
+  td{padding:3px 6px;border-bottom:1px solid var(--line)} td:last-child{text-align:right;color:var(--fg)}
+  .src{font:400 12px/1.5 "JetBrains Mono",monospace;color:var(--muted)}
+  img,video{width:100%;display:block;border:3px solid var(--line)}
+  .ab{display:grid;grid-template-columns:1fr;gap:12px} @media(min-width:640px){.ab{grid-template-columns:1fr 1fr}}
+  .ab .card{aspect-ratio:16/9}
+  #switcher{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);display:flex;align-items:center;gap:4px;z-index:9;
+    background:#fffbe6;color:#111;border:2px solid #111;border-radius:999px;padding:4px;font:600 13px/1 system-ui,sans-serif;box-shadow:0 6px 20px #0008}
+  #switcher button{background:none;border:0;border-radius:999px;padding:8px 12px;color:#111;font-size:16px}
+  #switcher .tag{font-size:10px;letter-spacing:.08em;background:#111;color:#fffbe6;border-radius:999px;padding:4px 7px;margin-right:4px}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<main>
+  <div class="kick">PROTOTYPE · LESSON 4 · s06</div>
+  <h1>Ethylene: σ framework and π bond</h1>
+  <p>Drag to turn. The cyan π orbital sits above and below the plane of the six atoms: solid lobe on one side, hatched on the other.</p>
+  <div class="card" id="card" role="img" aria-label="Ethylene, ball-and-stick, with its computed π bond orbital: a solid cyan lobe above the plane of the atoms and a hatched lobe below."></div>
+  <div class="row">
+    <button id="tPi" aria-pressed="true">π orbital</button>
+    <button id="tSpin" aria-pressed="true">auto-spin</button>
+    <button id="tStress" aria-pressed="false">stress ×9</button>
+  </div>
+  <table id="hud"></table>
+  <p class="src" id="src" style="margin-top:12px"></p>
+
+  <h2>Blender: hero / share image</h2>
+  <p>Built by <span class="mono">blender/hero_and_flight.py</span> from the same two data files, rendered headless. Its sidecar records the input hashes.</p>
+  <img src="out/hero-share-1200x630.webp" alt="Ethylene with its π orbital, rendered in Blender against a violet nebula; the molecule sits right of centre, leaving room for a title.">
+  <p class="src" id="heroMeta"></p>
+
+  <h2>A/B: plain versus cinematic</h2>
+  <p>Left: the plain three.js card, current variant, slow spin. Right: Blender camera flight with depth of field. Same molecule, same data. Is the right one clearly better for a Lesson?</p>
+  <div class="ab">
+    <div class="card" id="cardB" role="img" aria-label="Plain spin of ethylene with its π orbital."></div>
+    <video src="out/flight-cinematic.mp4" autoplay muted loop playsinline aria-label="Blender camera flight toward ethylene's π orbital with depth of field."></video>
+  </div>
+</main>
+
+<div id="switcher" aria-label="Prototype variant switcher">
+  <button id="prev" aria-label="Previous variant">←</button><span class="tag">PROTOTYPE</span><span id="vname"></span><button id="next" aria-label="Next variant">→</button>
+</div>
+
+<script type="module">
+import * as THREE from "three";
+
+const VARIANTS = { A:"current lighting", B:"matcap clay", C:"matcap studio", D:"matcap arcade" };
+const MATCAP = { B:"out/matcap-clay.webp", C:"out/matcap-studio.webp", D:"out/matcap-arcade.webp" };
+const keys = Object.keys(VARIANTS);
+const params = new URLSearchParams(location.search);
+let variant = keys.includes(params.get("variant")) ? params.get("variant") : "A";
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const [G, PI] = await Promise.all([fetch("data/ethylene.geometry.json").then(r=>r.json()), fetch("data/ethylene-pi.mesh.json").then(r=>r.json())]);
+const BALL = 0.3;
+document.getElementById("src").innerHTML = `<b>Source note.</b> ${G.source_note} Radii: ${G.radii.table} (atoms at 30%). Colours: ${G.colours.table}, plus letter labels.
+  π orbital: computed, not measured. Intrinsic bond orbital (Knizia 2013) from a B3LYP/cc-pVTZ calculation with PySCF ${PI.method.version} (our calculation, 2026-10-19) at the experimental geometry, drawn at isovalue ${PI.method.isovalue_au} a.u.`;
+fetch("out/hero-share-1200x630.inputs.json").then(r=>r.json()).then(j=>{
+  document.getElementById("heroMeta").textContent = "inputs: " + Object.entries(j.inputs).map(([k,v])=>`${k} ${v.slice(0,10)}…`).join(" · ") + ` · Blender ${j.blender}`;
+}).catch(()=>{});
+
+const toonMap = (()=>{ const d=new Uint8Array([70,70,70,255,160,160,160,255,255,255,255,255]); const t=new THREE.DataTexture(d,3,1); t.minFilter=t.magFilter=THREE.NearestFilter; t.needsUpdate=true; return t; })();
+const loader = new THREE.TextureLoader(), matcaps = {};
+const getMatcap = v => matcaps[v] ??= loader.load(MATCAP[v], t=>{ t.colorSpace = THREE.SRGBColorSpace; });
+
+// hatching in object space, so the stripes stick to the lobe as it turns
+function hatch(m){
+  m.onBeforeCompile = s => {
+    s.vertexShader = "varying vec3 vObj;\n" + s.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\nvObj = position;");
+    s.fragmentShader = "varying vec3 vObj;\n" + s.fragmentShader.replace("#include <dithering_fragment>",
+      "#include <dithering_fragment>\nif (fract((vObj.x + vObj.y + vObj.z) * 2.2) < 0.45) gl_FragColor.rgb *= 0.16;");
+  };
+  m.customProgramCacheKey = () => "hatch";
+  return m;
+}
+function material(v, color, {hatched=false}={}){
+  const m = v==="A" ? new THREE.MeshToonMaterial({color, gradientMap:toonMap}) : new THREE.MeshMatcapMaterial({color, matcap:getMatcap(v)});
+  return hatched ? hatch(m) : m;
+}
+const outlined = v => v==="A" || v==="D";
+
+function lobeGeometry(L){
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(L.positions, 3));
+  g.setAttribute("normal", new THREE.Float32BufferAttribute(L.normals, 3));
+  g.setIndex(L.index); return g;
+}
+const lobeGeo = { solid: lobeGeometry(PI.lobes.solid), hatched: lobeGeometry(PI.lobes.hatched) };
+const sphere = new THREE.SphereGeometry(1, 40, 28), cyl = new THREE.CylinderGeometry(1, 1, 1, 20);
+const inkMat = new THREE.MeshBasicMaterial({color:0x0d0626, side:THREE.BackSide});
+
+function buildMolecule(v){
+  const grp = new THREE.Group(), cyan = new THREE.Color(0x3ee8ff);
+  const P = G.atoms.map(a => new THREE.Vector3(a[1], a[2], a[3]));
+  G.atoms.forEach(([el], i) => {
+    const r = G.radii[el] * BALL, m = new THREE.Mesh(sphere, material(v, new THREE.Color(G.colours[el])));
+    m.position.copy(P[i]); m.scale.setScalar(r); grp.add(m);
+    if (outlined(v)) { const o = new THREE.Mesh(sphere, inkMat); o.position.copy(P[i]); o.scale.setScalar(r + .05); grp.add(o); }
+  });
+  const bondMat = material(v, cyan), planeN = new THREE.Vector3(1, 0, 0);
+  G.bonds.forEach(([i, j, order]) => {
+    const a = P[i], b = P[j], d = b.clone().sub(a), off = d.clone().cross(planeN).normalize();
+    (order === 1 ? [0] : [-.5, .5]).forEach(k => {
+      const w = order === 1 ? .11 : .066, mid = a.clone().add(b).multiplyScalar(.5).addScaledVector(off, k * w * 2.6);
+      [[bondMat, w], ...(outlined(v) ? [[inkMat, w + .04]] : [])].forEach(([mat, ww]) => {
+        const m = new THREE.Mesh(cyl, mat); m.position.copy(mid);
+        m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); m.scale.set(ww, d.length(), ww); grp.add(m);
+      });
+    });
+  });
+  const pi = new THREE.Group(); pi.name = "pi";
+  pi.add(new THREE.Mesh(lobeGeo.solid, material(v, cyan)), new THREE.Mesh(lobeGeo.hatched, material(v, cyan, {hatched:true})));
+  grp.add(pi);
+  grp.rotation.set(0, 0, 0);
+  const holder = new THREE.Group(); holder.add(grp); grp.rotation.y = -Math.PI / 2; // C=C horizontal, as on paper; a rigid turn
+  return holder;
+}
+
+function makeView(host, {labels=true, stress=()=>false, spin=()=>true, showPi=()=>true}){
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); host.appendChild(renderer.domElement);
+  const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(28, 1, .1, 200);
+  scene.add(new THREE.AmbientLight(0xffffff, .55)); const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(-3, 4, 6); scene.add(sun);
+  const labLayer = document.createElement("div"); host.appendChild(labLayer);
+  const chip = document.createElement("span"); chip.className = "chip"; chip.textContent = "COMPUTED"; chip.style.cssText = "left:10px;top:10px"; host.appendChild(chip);
+  let mols = [], yaw = .6, pitch = -.35, drag = null;
+  host.addEventListener("pointerdown", e => { drag = [e.clientX, e.clientY, yaw, pitch]; host.setPointerCapture(e.pointerId); });
+  host.addEventListener("pointermove", e => { if (!drag) return; yaw = drag[2] + (e.clientX - drag[0]) * .01; pitch = Math.max(-1.4, Math.min(1.4, drag[3] + (e.clientY - drag[1]) * .01)); });
+  host.addEventListener("pointerup", () => drag = null);
+  function rebuild(){
+    mols.forEach(m => scene.remove(m)); mols = [];
+    const n = stress() ? 3 : 1;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+      const m = buildMolecule(variant); m.position.set((i - (n - 1) / 2) * 5.2, (j - (n - 1) / 2) * 5.2, 0); scene.add(m); mols.push(m);
+    }
+    labLayer.innerHTML = labels && n === 1 ? G.atoms.map(([el]) => `<span class="lab">${el}</span>`).join("") : "";
+  }
+  const v3 = new THREE.Vector3();
+  let last = performance.now();
+  function frame(t){
+    const W = host.clientWidth, H = host.clientHeight;
+    if (renderer.domElement.width !== Math.round(W * renderer.getPixelRatio())) { renderer.setSize(W, H, false); cam.aspect = W / H; cam.updateProjectionMatrix(); }
+    if (spin() && !drag && !reduced) yaw += (t - last) * .00035;
+    last = t;
+    const n = Math.sqrt(mols.length);
+    cam.position.set(0, 0, (n === 1 ? 10 : 24) / Math.min(1, cam.aspect)); cam.lookAt(0, 0, 0);
+    mols.forEach(m => { m.rotation.set(pitch, yaw, 0); m.getObjectByName("pi").visible = showPi(); });
+    renderer.render(scene, cam);
+    if (labLayer.children.length) {
+      const inner = mols[0].children[0]; inner.updateMatrixWorld();
+      G.atoms.forEach((a, i) => { v3.set(a[1], a[2], a[3]).applyMatrix4(inner.matrixWorld).project(cam);
+        const s = labLayer.children[i].style; s.left = (v3.x + 1) / 2 * W + "px"; s.top = (1 - v3.y) / 2 * H + "px"; s.color = a[0] === "H" ? "#111" : "#fff"; });
+    }
+    return renderer.info;
+  }
+  return { rebuild, frame, renderer };
+}
+
+const state = { pi:true, spin:true, stress:false };
+const main = makeView(document.getElementById("card"), { stress:()=>state.stress, spin:()=>state.spin, showPi:()=>state.pi });
+const side = makeView(document.getElementById("cardB"), { labels:false });
+
+// download weight of what this variant needs beyond three.js itself
+const bytesOf = url => { const e = performance.getEntriesByName(new URL(url, location.href).href)[0]; return e ? (e.encodedBodySize || e.transferSize || e.decodedBodySize) : null; };
+const kb = b => b == null ? "…" : (b / 1024).toFixed(1) + " KB";
+let fps = 0, frames = 0, t0 = performance.now(), worst = 0, lastT = performance.now();
+const hud = document.getElementById("hud");
+function drawHud(info){
+  const mc = MATCAP[variant];
+  hud.innerHTML = [
+    ["variant", `${variant} · ${VARIANTS[variant]}`],
+    ["frame rate (1 s avg)", `${fps.toFixed(0)} fps`],
+    ["slowest frame (1 s)", `${worst.toFixed(1)} ms`],
+    ["draw calls / triangles", `${info.render.calls} / ${info.render.triangles.toLocaleString()}`],
+    ["device pixels", `${main.renderer.domElement.width}×${main.renderer.domElement.height}`],
+    ["matcap image (not JS)", mc ? kb(bytesOf(mc)) : "none"],
+    ["π mesh (prototype JSON)", kb(bytesOf("data/ethylene-pi.mesh.json"))],
+    ["JS added by this look", "0 KB (built into three.js)"],
+  ].map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("");
+}
+function loop(t){
+  const info = main.frame(t); side.frame(t);
+  const dt = t - lastT; lastT = t; worst = Math.max(worst, dt); frames++;
+  if (t - t0 > 1000) { fps = frames * 1000 / (t - t0); frames = 0; t0 = t; drawHud(info); worst = 0; }
+  requestAnimationFrame(loop);
+}
+
+function setVariant(v){
+  variant = v; params.set("variant", v); history.replaceState(null, "", "?" + params);
+  document.getElementById("vname").textContent = `${v} (${VARIANTS[v]})`;
+  main.rebuild(); side.rebuild();
+}
+const cycle = d => setVariant(keys[(keys.indexOf(variant) + d + keys.length) % keys.length]);
+document.getElementById("prev").onclick = () => cycle(-1);
+document.getElementById("next").onclick = () => cycle(1);
+addEventListener("keydown", e => { if (e.target.closest("input,textarea,[contenteditable]")) return; if (e.key === "ArrowLeft") cycle(-1); if (e.key === "ArrowRight") cycle(1); });
+const toggle = (id, k, rebuild) => { const b = document.getElementById(id); b.onclick = () => { state[k] = !state[k]; b.setAttribute("aria-pressed", state[k]); if (rebuild) main.rebuild(); }; };
+toggle("tPi", "pi"); toggle("tSpin", "spin"); toggle("tStress", "stress", true);
+setVariant(variant); requestAnimationFrame(loop);
+</script>
+</body>
+</html>

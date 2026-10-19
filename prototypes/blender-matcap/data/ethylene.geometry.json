@@ -1,0 +1,26 @@
+{
+  "_prototype": "PROTOTYPE pipeline file for 'Prototype: Blender's role and a matcap look for the 3D Scenes' (#50). Never merged.",
+  "molecule": "ethylene",
+  "smiles": "C=C",
+  "pubchem_cid": 6325,
+  "cas": "74-85-1",
+  "label": "experimental",
+  "internal": {
+    "r.CC": {"value": 1.339, "unit": "angstrom", "ref": "1966Herzberg"},
+    "r.CH": {"value": 1.086, "unit": "angstrom", "ref": "1966Herzberg"},
+    "a.HCH": {"value": 117.6, "unit": "degree", "ref": "1966Herzberg"},
+    "a.HCC": {"value": 121.2, "unit": "degree", "ref": "1966Herzberg"}
+  },
+  "atoms": [
+    ["C", 0.0, 0.0, 0.6695],
+    ["C", 0.0, 0.0, -0.6695],
+    ["H", 0.0, 0.9289, 1.2321],
+    ["H", 0.0, -0.9289, 1.2321],
+    ["H", 0.0, 0.9289, -1.2321],
+    ["H", 0.0, -0.9289, -1.2321]
+  ],
+  "bonds": [[0, 1, 2], [0, 2, 1], [0, 3, 1], [1, 4, 1], [1, 5, 1]],
+  "source_note": "Geometry: experimental (gas phase). C=C 1.339 Å, C–H 1.086 Å, H–C–H 117.6°, H–C–C 121.2° from Herzberg, Electronic spectra and electronic structure of polyatomic molecules, Van Nostrand 1966, via NIST CCCBDB, SRD 101, Release 22 (May 2022), doi:10.18434/T47C7Z. Cartesians as CCCBDB lists them (fetched 2026-10-19).",
+  "radii": {"table": "Bondi 1964 van der Waals", "H": 1.20, "C": 1.70},
+  "colours": {"table": "Jmol", "H": "#FFFFFF", "C": "#909090"}
+}

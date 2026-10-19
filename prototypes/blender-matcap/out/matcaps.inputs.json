@@ -1,0 +1,10 @@
+{
+  "script_sha256": "70d5c70250890a69311b08a61faa44b6e7388d6c782b03311bc8c7389f2f0247",
+  "blender": "5.2.2 LTS",
+  "size_px": 512,
+  "sets": [
+    "clay",
+    "studio",
+    "arcade"
+  ]
+}
