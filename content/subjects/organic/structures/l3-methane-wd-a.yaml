@@ -1,0 +1,18 @@
+# Lesson 3 (#81): s10 card a, lines to the top and left H, wedge and dash side by side lower right. Drawn by hand: a line lies in the page, a wedge comes toward you, a hash goes away.
+# Coordinates as drawn: x right, y down.
+
+id: l3-methane-wd-a
+style: full
+smiles: "C"
+source: "PubChem CID 297"
+atoms:
+  - { id: a1, el: "C", x: 0, y: 0 }
+  - { id: a2, el: "H", x: 0, y: -1.5 }
+  - { id: a3, el: "H", x: -1.45, y: 0.4 }
+  - { id: a4, el: "H", x: 1.4, y: 0.55 }
+  - { id: a5, el: "H", x: 0.75, y: 1.3 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a1, b: a3, order: 1 }
+  - { id: b3, a: a1, b: a4, order: 1, stereo: wedge }
+  - { id: b4, a: a1, b: a5, order: 1, stereo: hash }

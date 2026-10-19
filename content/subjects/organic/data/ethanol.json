@@ -87,6 +87,18 @@
         2,
         3
       ]
+    },
+    "a.HC1H": {
+      "label": "H–C1–H",
+      "quantity": "angle",
+      "value": 107.56,
+      "unit": "°",
+      "source": "ours",
+      "atoms": [
+        7,
+        1,
+        8
+      ]
     }
   },
   "atoms": {
