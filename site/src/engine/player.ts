@@ -2,6 +2,9 @@
 // renders whatever Screen it returns. Two-try feedback: right → the Correct
 // line; wrong #1 → the first matching Hint (generic fallback last); wrong #2 →
 // the reveal. A Hook `prediction` accepts every choice and reveals at once.
+// Navigation: back is allowed, answered Steps stay locked, Continue never passes
+// an unanswered Step, and the Lesson is done on reaching Wrap. Every Screen
+// carries the Lesson's progress (answers by Step id), from which it resumes.
 import type { GradedStep, HintRule, Lesson, Step } from "@astratron/content";
 
 export type Feedback =
@@ -16,7 +19,17 @@ export type Feedback =
  */
 export type Answer = { choice: string[] } | { value: number } | { order: string[] };
 
-export type Action = ({ type: "answer" } & Answer) | { type: "continue" };
+export type Action = ({ type: "answer" } & Answer) | { type: "continue" } | { type: "back" };
+
+/** A Lesson's saved progress, keyed by stable Step ids so it survives content edits (ADR 0003). */
+export interface LessonProgress {
+  /** The Step the Student is on. */
+  step: string;
+  /** Every accepted answer per Step id, in order; replaying them restores each Step's feedback and lock. */
+  answers: Record<string, Answer[]>;
+  /** True once the Student has reached Wrap; going back doesn't undo it. */
+  done: boolean;
+}
 
 export interface Screen {
   /** Position of the current Step (0-based); `step.id` is its permanent Step id. */
@@ -28,44 +41,64 @@ export interface Screen {
   feedback: Feedback | null;
   /** True once the Step needs nothing more from the Student; it is then locked. */
   canContinue: boolean;
-  /** True on reaching Wrap. */
+  /** True while the current Step is the Wrap. */
   done: boolean;
+  /** The Lesson's progress, updated by every action; save it to resume later. */
+  progress: LessonProgress;
 }
 
 /** What the engine needs from a resolved Lesson. */
 export type PlayableLesson = Pick<Lesson, "steps" | "deletedSteps">;
 
 /**
- * Opens the Lesson at its first Step, or at the Step a Step link names (ADR 0003): a deleted
- * Step's id opens the Step its old links now point at; an unknown id opens the first Step.
+ * Opens the Lesson at the Step a Step link names (ADR 0003), else where saved progress left
+ * off, else at its first Step. A deleted Step's id opens the Step its old links now point at;
+ * an unknown id opens the first Step. Saved answers come back locked.
  */
-export function start(lesson: PlayableLesson, stepId?: string): Screen {
-  const target = (stepId && lesson.deletedSteps?.[stepId]) || stepId;
-  return open(lesson, Math.max(0, lesson.steps.findIndex((s) => s.id === target)));
+export function start(lesson: PlayableLesson, stepId?: string, saved?: LessonProgress): Screen {
+  const id = stepId ?? saved?.step;
+  const target = (id && lesson.deletedSteps?.[id]) || id;
+  const progress = { step: "", answers: saved?.answers ?? {}, done: saved?.done ?? false };
+  return open(lesson, Math.max(0, lesson.steps.findIndex((s) => s.id === target)), progress);
 }
 
 export function act(lesson: PlayableLesson, screen: Screen, action: Action): Screen {
+  if (action.type === "back") return screen.index > 0 ? open(lesson, screen.index - 1, screen.progress) : screen;
   if (action.type === "continue") {
     if (!screen.canContinue || screen.index + 1 >= lesson.steps.length) return screen;
-    return open(lesson, screen.index + 1);
+    return open(lesson, screen.index + 1, screen.progress);
   }
+  const { type: _type, ...answer } = action;
+  const next = answerStep(screen, answer);
+  if (next === screen) return screen;
+  const { answers } = screen.progress;
+  const saved = [...(answers[screen.step.id] ?? []), answer];
+  return { ...next, progress: { ...screen.progress, answers: { ...answers, [screen.step.id]: saved } } };
+}
+
+/** The Screen after one answer, or the same Screen when the Step can't take it. */
+function answerStep(screen: Screen, answer: Answer): Screen {
   const { step } = screen;
   if (step.type === "explain" || screen.canContinue) return screen;
-  const result = grade(step, action, screen.tries);
+  const result = grade(step, answer, screen.tries);
   return result ? { ...screen, ...result } : screen;
 }
 
-function open(lesson: PlayableLesson, index: number): Screen {
+/** Opens a Step and replays its saved answers, so an answered Step shows its feedback, locked. */
+function open(lesson: PlayableLesson, index: number, saved: LessonProgress): Screen {
   const step = lesson.steps[index];
-  return {
+  const done = step.phase === "wrap";
+  const fresh: Screen = {
     index,
     total: lesson.steps.length,
     step,
     tries: 0,
     feedback: null,
     canContinue: step.type === "explain",
-    done: step.phase === "wrap",
+    done,
+    progress: { ...saved, step: step.id, done: saved.done || done },
   };
+  return (saved.answers[step.id] ?? []).reduce(answerStep, fresh);
 }
 
 /** Returns the Screen changes for an answer, or undefined when the answer doesn't fit the Step type. */
