@@ -57,9 +57,9 @@ export function checkInteraction(item: Interaction): string[] {
   return errors;
 }
 
-type Condition = { match?: unknown; includes?: string[]; misses?: string[] };
+type Condition = { match?: unknown; includes?: string[]; misses?: string[]; from?: string[]; to?: string[] };
 /** The generic fallback Hint has no condition. */
-const isFallback = (h: Condition) => h.match === undefined && !h.includes && !h.misses;
+const isFallback = (h: Condition) => h.match === undefined && !h.includes && !h.misses && !h.from && !h.to;
 
 /** Every id a set Hint names: its exact `match`, and its `includes` / `misses` conditions. */
 export const hintIds = (h: { match?: string[]; includes?: string[]; misses?: string[] }) => [
@@ -104,6 +104,7 @@ function answerRules(item: Interaction): string[] {
         errors.push(`a Hint matches the answer ${item.answer}`);
       break;
     // tap-to-identify: answer and Hint ids are checked against the structure's targets (structures.ts).
+    // draw-arrows: pushes, Hint ids, starts and results are checked against the structures (structures.ts).
   }
   return errors;
 }
