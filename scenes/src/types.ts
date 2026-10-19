@@ -37,8 +37,8 @@ export interface SceneManifest<S extends SceneState = SceneState> {
   title: string;
   /** Settable states: what a Step, a slider or the video timeline can set. May be empty. */
   states: { [K in keyof S]: SceneStateSpec };
-  /** Screen-reader text for what the Scene shows at this state and time. Never empty. */
-  describe: (state: S, t: number) => string;
+  /** Screen-reader text for what the Scene shows at this state and time (its cited values passed in, as to the Scene). Never empty. */
+  describe: (state: S, t: number, cited: Record<string, Cited>) => string;
   /** What the Scene does under reduced motion, in a sentence (it always opens paused on its poster frame). */
   reducedMotion: string;
   /** Cited-data refs (`file/key`) of every number or element colour the Scene shows. May be empty. */

@@ -1,7 +1,7 @@
 // Structures in the content build: checking structure files, resolving
 // structure cards and Tap-to-identify targets, and writing the screen-reader
 // label of every tappable atom and bond.
-import type { Hidden, Option, Structure, StructureAtom, StructureView, TapTarget } from "./model.ts";
+import type { Figure, Hidden, Option, Structure, StructureAtom, StructureView, TapTarget } from "./model.ts";
 import type { ProblemFile, StructureFile } from "./schema.ts";
 import { hintIds } from "./shape.ts";
 import {
@@ -18,7 +18,8 @@ import {
 } from "./arrows.ts";
 
 type TapFile = Extract<ProblemFile, { type: "tap-to-identify" }>;
-type TapFields = Pick<TapFile, "structure" | "hide" | "tappable" | "answer" | "hints">;
+type TapFields = Pick<TapFile, "structure" | "hide" | "outline" | "tappable" | "answer" | "hints">;
+type FigureFile = NonNullable<TapFile["figures"]>[number];
 type OptionFile = Extract<ProblemFile, { type: "multiple-choice" }>["options"][number];
 
 /** Internal consistency of one structure file. */
@@ -35,7 +36,42 @@ export function checkStructure(file: StructureFile): string[] {
   return errors;
 }
 
-const view = (structure: Structure, hide: Hidden[] | undefined): StructureView => ({ structure, hide: hide ?? [] });
+const view = (structure: Structure, hide: Hidden[] | undefined, ring?: string[], outline?: string[]): StructureView => ({
+  structure,
+  hide: hide ?? [],
+  ...(ring || outline ? { highlight: { ring: ring ?? [], outline: outline ?? [] } } : {}),
+});
+
+/** Messages for ringed atoms and outlined bonds the structure doesn't have. */
+function checkHighlight(structure: Structure, ring: string[] = [], outline: string[] = []): string[] {
+  const atoms = new Set(structure.atoms.map((a) => a.id));
+  const bonds = new Set(structure.bonds.map((b) => b.id));
+  return [
+    ...ring.filter((id) => !atoms.has(id)).map((id) => `structure "${structure.id}" has no atom "${id}"`),
+    ...outline.filter((id) => !bonds.has(id)).map((id) => `structure "${structure.id}" has no bond "${id}"`),
+  ];
+}
+
+/** Resolves a figure (a structure drawn with a Step) and checks what it rings and outlines. */
+export function resolveFigure(
+  figure: FigureFile,
+  structures: Map<string, Structure | undefined>,
+  errors: string[],
+): Figure | undefined {
+  const found = structures.get(figure.structure);
+  if (!found) {
+    if (!structures.has(figure.structure)) errors.push(`structure "${figure.structure}" not found`);
+    return undefined;
+  }
+  const broken = checkHighlight(found, figure.ring, figure.outline);
+  errors.push(...broken);
+  if (broken.length) return undefined;
+  return {
+    view: view(found, figure.hide, figure.ring, figure.outline),
+    alt: figure.alt,
+    ...(figure.caption ? { caption: figure.caption } : {}),
+  };
+}
 
 /** Resolves structure cards; text options pass through. */
 export function resolveOptions(
@@ -66,6 +102,7 @@ export function resolveTap(
     return undefined;
   }
   const hide = item.hide ?? [];
+  errors.push(...checkHighlight(structure, [], item.outline));
   const atomById = new Map(structure.atoms.map((a) => [a.id, a]));
   const bondById = new Map(structure.bonds.map((b) => [b.id, b]));
   const missing = (kind: string, id: string) => errors.push(`structure "${structure.id}" has no ${kind} "${id}"`);
@@ -111,7 +148,7 @@ export function resolveTap(
   for (const id of item.answer) if (!tappable.has(id)) errors.push(`answer names "${id}", which can't be tapped`);
   for (const hint of item.hints ?? [])
     for (const id of hintIds(hint)) if (!tappable.has(id)) errors.push(`a Hint names "${id}", which can't be tapped`);
-  return { structure: view(structure, item.hide), targets };
+  return { structure: view(structure, item.hide, undefined, item.outline), targets };
 }
 
 type ArrowsFile = Extract<ProblemFile, { type: "draw-arrows" }>;

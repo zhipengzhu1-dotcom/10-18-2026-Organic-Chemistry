@@ -4,10 +4,10 @@ import { seededRandom } from "../src/motion.ts";
 
 describe("sample-twist screen-reader text", () => {
   it("says what the overlap bar shows at each kind of twist", () => {
-    expect(sampleTwist.describe({ twist: 0 }, 0)).toContain("parallel: full side-on overlap");
-    expect(sampleTwist.describe({ twist: 90 }, 0)).toContain("perpendicular: no side-on overlap");
-    expect(sampleTwist.describe({ twist: 180 }, 0)).toContain("parallel, one flipped,");
-    expect(sampleTwist.describe({ twist: 60 }, 0)).toContain("about 50 percent full");
+    expect(sampleTwist.describe({ twist: 0 }, 0, {})).toContain("parallel: full side-on overlap");
+    expect(sampleTwist.describe({ twist: 90 }, 0, {})).toContain("perpendicular: no side-on overlap");
+    expect(sampleTwist.describe({ twist: 180 }, 0, {})).toContain("parallel, one flipped,");
+    expect(sampleTwist.describe({ twist: 60 }, 0, {})).toContain("about 50 percent full");
   });
 });
 

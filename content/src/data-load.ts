@@ -28,7 +28,7 @@ const source = z.strictObject({
 
 const value = z.strictObject({
   label: text,
-  quantity: z.enum(["bond-length", "angle", "dihedral", "radius", "colour", "energy", "pka", "count"]),
+  quantity: z.enum(["bond-length", "angle", "dihedral", "radius", "colour", "energy", "pka", "count", "electronegativity"]),
   value: z.union([z.number(), z.string().min(1)]),
   unit: text.optional(),
   source: key,

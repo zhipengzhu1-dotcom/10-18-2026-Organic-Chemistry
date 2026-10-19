@@ -25,7 +25,7 @@ import {
   type StructureFile,
 } from "./schema.ts";
 import { checkDeletedSteps, checkFrozenIds, LOCK_FILE } from "./freeze.ts";
-import type { BuildResult, Course, GradedStep, HeroPush, Lesson, Option, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
+import type { Aside, BuildResult, Course, Figure, GradedStep, HeroPush, Lesson, Option, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
 
 /** The Practice Set page sits at `<unit url>/practice`, so no Lesson may take that slug. */
 export const PRACTICE_SLUG = "practice";
@@ -34,14 +34,20 @@ import { citeIn, type Cited, type CitedData } from "./data.ts";
 import { dataFile, resolveDataFile } from "./data-load.ts";
 import type { ExploreMolecule, SceneCatalog, SceneUse } from "./model.ts";
 import { checkStepScene, resolveSceneUse, type SceneUseFile } from "./scenes.ts";
-import { checkStructure, resolveArrows, resolveOptions, resolveTap } from "./structures.ts";
+import { checkStructure, resolveArrows, resolveFigure, resolveOptions, resolveTap } from "./structures.ts";
 import { exploreMolecule } from "./explore.ts";
 
-/** What a graded Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
-type StructureFields =
-  | { options: Option[] }
-  | { structure: StructureView; targets: TapTarget[] }
-  | { start: StructureView; target?: StructureView; results: Structure[] };
+/** What a Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
+type StructureFields = {
+  options?: Option[];
+  structure?: StructureView;
+  targets?: TapTarget[];
+  start?: StructureView;
+  target?: StructureView;
+  results?: Structure[];
+  figures?: Figure[];
+  aside?: Aside;
+};
 type Structured = Map<string, StructureFields | undefined>;
 
 export interface BuildOptions {
@@ -137,8 +143,9 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       for (const message of messages) errors.push(`${slug}/lessons/${lesson.id}.yaml: ${message}`);
     }
     for (const problem of problems.values()) {
-      if (problem)
-        for (const message of checkInteraction(problem)) errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
+      if (!problem) continue;
+      const messages = [...checkInteraction(problem), ...(options.scenes ? checkStepScene(problem, options.scenes, data) : [])];
+      for (const message of messages) errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
     }
     for (const message of checkTapOnly(slug, lessons, problems)) errors.push(message);
     const problemCitations = citeNumbers(slug, data, lessons, problems, errors);
@@ -152,12 +159,26 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
     }
     const structured: Structured = new Map();
     const resolveStructures = (key: string, item: LessonFile["steps"][number] | ProblemFile, where: string) => {
+      if (item.type === "check") return;
       const found: string[] = [];
-      let fields: StructureFields | undefined;
-      if (item.type === "multiple-choice") fields = { options: resolveOptions(item.options, structures, found) };
-      else if (item.type === "tap-to-identify") fields = resolveTap(item, structures, found);
-      else if (item.type === "draw-arrows") fields = resolveArrows(item, structures, found);
-      else return;
+      const fields: StructureFields = {};
+      if (item.type === "multiple-choice") fields.options = resolveOptions(item.options, structures, found);
+      else if (item.type === "tap-to-identify") Object.assign(fields, resolveTap(item, structures, found));
+      else if (item.type === "draw-arrows") Object.assign(fields, resolveArrows(item, structures, found));
+      if (item.figures) fields.figures = item.figures.flatMap((f) => resolveFigure(f, structures, found) ?? []);
+      if (item.aside) {
+        const { table, ...aside } = item.aside;
+        fields.aside = aside as Aside;
+        if (table)
+          fields.aside.table = {
+            columns: table.columns,
+            ...(table.caption ? { caption: table.caption } : {}),
+            rows: table.rows.map((row) => ({
+              head: row.head,
+              cells: row.cells.map((cell) => (cell ? (resolveFigure(cell, structures, found) ?? null) : null)),
+            })),
+          };
+      }
       for (const message of found) errors.push(`${where}${message}`);
       structured.set(key, found.length ? undefined : fields);
     };
@@ -201,7 +222,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
               const resolved = resolveLesson(lesson, `${url}/${lesson.slug}`, number, problems, structured, scene, lessonRel, errors);
               for (const step of resolved.steps) {
                 const cited = "problemId" in step && step.problemId && problemCitations.get(step.problemId);
-                if (cited) step.citations = cited;
+                if (cited) step.citations = mergeCitations(cited, step.citations ?? []);
               }
               return [resolved];
             }),
@@ -210,7 +231,8 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
         }),
       });
     }
-    fillBanks(slug, courses, listed, lessons, problems, structured, problemCitations, errors);
+    const sceneFor = (use: SceneUseFile) => resolveSceneUse(use, options.scenes, data);
+    fillBanks(slug, courses, listed, lessons, problems, structured, problemCitations, sceneFor, errors);
     exploreMolecules(slug, data, lessons, problems, courses, errors);
     let hero: HeroPush | undefined;
     if (subject?.hero) {
@@ -238,16 +260,8 @@ function resolveLesson(
   rel: string,
   errors: string[],
 ): Lesson {
-  /** Resolves the Step's Scene; the Scene's cited numbers join the Step's Source note. */
-  const withScene = (step: Step): Step => {
-    if (!step.scene) return step;
-    const use = scene(step.scene);
-    const own = step.citations ?? [];
-    const extra = Object.values(use.cited).filter((c) => !own.some((o) => o.ref === c.ref));
-    return { ...step, scene: use, ...(own.length + extra.length ? { citations: [...own, ...extra] } : {}) } as Step;
-  };
   const steps: Step[] = lesson.steps.flatMap((step): Step[] => {
-    if (step.type !== "check") return withStructures(step, `${lesson.id}#${step.id}`, structured).map(withScene);
+    if (step.type !== "check") return withStructures(step, `${lesson.id}#${step.id}`, structured).map((st) => withScene(st, scene));
     const problem = problems.get(step.problem);
     if (!problem) {
       if (!problems.has(step.problem)) errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" not found`);
@@ -257,7 +271,7 @@ function resolveLesson(
       errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" is ${problem.status}, not approved`);
       return [];
     }
-    return problemStep(problem, step.id, structured);
+    return problemStep(problem, step.id, structured, scene);
   });
   const phases = { hook: 0, build: 0, check: 0, wrap: 0 };
   for (const step of lesson.steps) phases[step.phase]++;
@@ -290,20 +304,47 @@ function checkTapOnly(
   return errors;
 }
 
-/** Swaps structure ids for the resolved structures; a Step whose structures failed is dropped (its errors are reported). */
+/**
+ * Swaps structure ids for the resolved structures (cards, Tap targets, figures, aside tables);
+ * a Step whose structures failed is dropped (its errors are reported).
+ */
 function withStructures(step: Record<string, unknown> & { type: string }, key: string, structured: Structured): Step[] {
-  if (step.type !== "multiple-choice" && step.type !== "tap-to-identify" && step.type !== "draw-arrows")
-    return [step as unknown as Step];
   const fields = structured.get(key);
   if (!fields) return [];
-  const { tappable: _t, hide: _h, start: _s, results: _r, hideTarget: _ht, ...rest } = step;
+  const { tappable: _t, hide: _h, outline: _o, start: _s, results: _r, hideTarget: _ht, ...rest } = step;
   return [{ ...rest, ...fields } as unknown as Step];
 }
 
+/** Resolves every Scene the Step uses (its own, its reveal Scene, its aside's); their cited numbers join its Source note. */
+function withScene(step: Step, scene: (use: SceneUseFile) => SceneUse): Step {
+  const out = { ...step } as Step & { revealScene?: SceneUse };
+  const uses: SceneUse[] = [];
+  const resolve = (use: SceneUseFile) => {
+    const resolved = scene(use);
+    uses.push(resolved);
+    return resolved;
+  };
+  if (step.scene) out.scene = resolve(step.scene);
+  if ("revealScene" in step && step.revealScene) out.revealScene = resolve(step.revealScene);
+  if (step.aside?.scene) out.aside = { ...step.aside, scene: resolve(step.aside.scene) };
+  if (!uses.length) return step;
+  out.citations = mergeCitations(step.citations ?? [], uses.flatMap((u) => Object.values(u.cited)));
+  return out;
+}
+
+/** `first`, then each of `more` not already there (by ref). */
+function mergeCitations(first: Cited[], more: Cited[]): Cited[] {
+  const out = [...first];
+  for (const c of more) if (!out.some((o) => o.ref === c.ref)) out.push(c);
+  return out;
+}
+
 /** A Problem as a playable Step (a Check Step, or a Practice Set Problem): its interaction without the Bank tags. */
-function problemStep(problem: ProblemFile, stepId: string, structured: Structured): Step[] {
+function problemStep(problem: ProblemFile, stepId: string, structured: Structured, scene: (use: SceneUseFile) => SceneUse): Step[] {
   const { id: problemId, unit: _u, lesson: _l, difficulty: _d, status: _s, source: _src, credit: _c, ...interaction } = problem;
-  return withStructures({ id: stepId, phase: "check", problemId, ...interaction }, `problem:${problemId}`, structured);
+  return withStructures({ id: stepId, phase: "check", problemId, ...interaction }, `problem:${problemId}`, structured).map((st) =>
+    withScene(st, scene),
+  );
 }
 
 /**
@@ -318,6 +359,7 @@ function fillBanks(
   problems: Map<string, ProblemFile | undefined>,
   structured: Structured,
   citations: Map<string, Cited[]>,
+  scene: (use: SceneUseFile) => SceneUse,
   errors: string[],
 ): void {
   const units = new Map(courses.flatMap((c) => c.units.map((u) => [u.id, u] as const)));
@@ -339,10 +381,10 @@ function fillBanks(
     // A listed Lesson whose file is broken or missing is already reported.
     const lesson = lessons.get(problem.lesson);
     if (!lesson) continue;
-    const [step] = problemStep(problem, problem.id, structured) as GradedStep[];
+    const [step] = problemStep(problem, problem.id, structured, scene) as GradedStep[];
     if (!step) continue;
     const cited = citations.get(problem.id);
-    if (cited) step.citations = cited;
+    if (cited) step.citations = mergeCitations(cited, step.citations ?? []);
     const { id, difficulty, status, source, credit } = problem;
     unit.bank.push({
       id,

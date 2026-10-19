@@ -40,6 +40,8 @@ export interface SceneUse {
   state: Record<string, SceneValue>;
   /** The Scene's cited values by ref; the Scene reads its numbers from here (ADR 0002). */
   cited: Record<string, Cited>;
+  /** Shown on its poster frame only, with no playback controls (a still picture). */
+  still?: boolean;
 }
 
 /**
@@ -64,7 +66,38 @@ export interface ExploreMolecule {
   notice?: string;
 }
 
-export interface ExplainStep {
+
+/** A structure drawn with a Step, static. */
+export interface Figure {
+  view: StructureView;
+  /** Shown under the drawing (Markdown). */
+  caption?: string;
+  /** Screen-reader text for the drawing. */
+  alt: string;
+}
+
+/** Something one tap away from a Step: a Scene, or a reference table of drawings. */
+export interface Aside {
+  /** Names the button that opens it. */
+  label: string;
+  scene?: SceneUse;
+  table?: { columns: string[]; rows: { head: string; cells: (Figure | null)[] }[]; caption?: string };
+}
+
+/** What any Step may show besides its interaction. */
+export interface Visuals {
+  figures?: Figure[];
+  aside?: Aside;
+  /** A written Source note (Markdown) for what isn't a cited number: structures, wording, ideas. */
+  sourceNote?: string;
+}
+
+/** A graded Step's visuals, plus the Scene that plays once it is answered (it may show the answer). */
+export interface GradedVisuals extends Visuals {
+  revealScene?: SceneUse;
+}
+
+export interface ExplainStep extends Visuals {
   id: string;
   phase: Phase;
   type: "explain";
@@ -75,7 +108,7 @@ export interface ExplainStep {
   explore?: ExploreMolecule;
 }
 
-export interface MultipleChoiceStep {
+export interface MultipleChoiceStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "multiple-choice";
@@ -103,13 +136,15 @@ export interface NumericHint {
 }
 
 /** Numeric input: the Student types a number; the unit is fixed and shown beside the box, never typed. */
-export interface NumericStep {
+export interface NumericStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "numeric";
   prompt: string;
   /** The unit of measure shown beside the box, e.g. "°" or "Å". */
   unitSymbol: string;
+  /** A ± key beside the box flips the sign of what is typed. */
+  signKey?: boolean;
   answer: number;
   /** Absolute: a value within answer ± tolerance is right. */
   tolerance: number;
@@ -124,7 +159,7 @@ export interface NumericStep {
 }
 
 /** Rank / order: the Student puts the items into one strict order (the prompt names which end is first). */
-export interface RankStep {
+export interface RankStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "rank";
@@ -134,14 +169,27 @@ export interface RankStep {
   /** The one correct order of item ids, first to last. */
   answer: string[];
   correct?: string;
-  /** A Hint's `match` is one whole wrong order. */
-  hints?: Hint[];
+  /** A Hint's `match` is one whole wrong order; or it names a pattern (see RankHint). */
+  hints?: RankHint[];
   reveal: string;
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
   /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
   explore?: ExploreMolecule;
+}
+
+/**
+ * A Rank Hint. Every condition given must hold: `match` = this whole order; `notFirst` /
+ * `notLast` = that item isn't at that end; `before: [x, y]` = x is placed before y.
+ * The generic fallback has no condition.
+ */
+export interface RankHint {
+  match?: string[];
+  notFirst?: string;
+  notLast?: string;
+  before?: [string, string];
+  text: string;
 }
 
 export interface ManipulateHint {
@@ -151,7 +199,7 @@ export interface ManipulateHint {
 }
 
 /** Manipulate a Scene: the Student works a slider (one settable state of the Scene) and presses Check on a value. */
-export interface ManipulateStep {
+export interface ManipulateStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "manipulate";
@@ -195,7 +243,7 @@ export interface PushHint {
  * is applied to our own molecule graph and accepted when it moves toward an accepted result
  * (`@astratron/content/arrows`). Two tries per push; the Step is done when the drawing is a result.
  */
-export interface DrawArrowsStep {
+export interface DrawArrowsStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "draw-arrows";
@@ -279,6 +327,8 @@ export type Hidden = "charges" | "lone-pairs";
 export interface StructureView {
   structure: Structure;
   hide: Hidden[];
+  /** Atoms ringed and bonds outlined to point the Student at them. */
+  highlight?: { ring: string[]; outline: string[] };
   /** Added at site build time by the renderer; absent in the raw course model. */
   drawn?: DrawnStructure;
 }
@@ -326,12 +376,14 @@ export interface HintRule {
   text: string;
 }
 
-export interface TapStep {
+export interface TapStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "tap-to-identify";
   prompt: string;
   structure: StructureView;
+  /** Screen-reader text for the whole drawing. */
+  alt?: string;
   targets: TapTarget[];
   /** The exact set of target ids to pick. */
   answer: string[];
