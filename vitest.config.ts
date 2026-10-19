@@ -4,6 +4,6 @@ import { defineConfig } from "vitest/config";
 // site/e2e and run under Playwright (playwright.config.ts), not here.
 export default defineConfig({
   test: {
-    include: ["{content,site,scenes,video}/{src,test}/**/*.test.ts"],
+    include: ["{content,site,scenes,video}/{src,test}/**/*.test.ts", "pipelines/blender/**/*.test.ts"],
   },
 });

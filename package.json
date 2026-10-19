@@ -22,7 +22,8 @@
     "structure": "pnpm --filter @astratron/content run structure",
     "structures:json": "pnpm --filter @astratron/content run structures:json",
     "triage": "node site/src/submissions/triage-cli.ts",
-    "video": "pnpm --filter @astratron/video run cli"
+    "video": "pnpm --filter @astratron/video run cli",
+    "blender": "pnpm --filter @astratron/pipelines run blender"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
