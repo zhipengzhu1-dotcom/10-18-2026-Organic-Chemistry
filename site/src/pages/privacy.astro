@@ -1,0 +1,74 @@
+---
+// The privacy page (spec story 91): plain words, names Cloudflare, lists what the form stores
+// and the retention limits. The day counts come from the code that enforces them.
+import Base from "../layouts/Base.astro";
+import TopBar from "../components/TopBar.astro";
+import { DECLINED_KEPT_MS, EMAIL_KEPT_MS } from "../submissions/store.ts";
+
+const DAY = 86_400_000;
+const emailDays = EMAIL_KEPT_MS / DAY;
+const declinedDays = DECLINED_KEPT_MS / DAY;
+---
+
+<Base title="Privacy · AstraTron" description="What AstraTron keeps about you, where, and for how long.">
+  <TopBar />
+  <main class="page prose">
+    <h1>Privacy</h1>
+    <p>
+      AstraTron has no accounts, no ads and no analytics. We don't count visits, set tracking cookies or send anything about you to
+      advertisers. Here is everything that happens to what you do and send.
+    </p>
+
+    <h2>Your progress stays in your browser</h2>
+    <p>
+      Your Lesson progress, your Streak and your theme and motion choices are saved in this browser's local storage. They never leave
+      your device unless you export them to a file yourself. Clearing your browser's site data deletes them.
+    </p>
+
+    <h2>Who runs the servers: Cloudflare</h2>
+    <p>
+      AstraTron is hosted on Cloudflare Pages, and the form's entries are kept in a Cloudflare database. Like any web host,
+      Cloudflare sees your IP address when it delivers a page; AstraTron doesn't keep it.
+    </p>
+    <p>
+      The form uses Cloudflare Turnstile to stop spam without a puzzle. To tell people from bots, Turnstile looks at your IP address and
+      browser details on Cloudflare's side, under <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare's privacy policy</a>. Only
+      a pass or fail comes back to AstraTron; none of those details are stored with your entry.
+    </p>
+
+    <h2>What the form stores</h2>
+    <p>When you suggest a Problem or report a mistake, we store only what you type or pick:</p>
+    <ul>
+      <li>whether it's a Problem or a mistake report, and the Unit;</li>
+      <li>for a mistake report, which Step or Problem it's about;</li>
+      <li>the Problem text (or what's wrong) and your answer and reasoning;</li>
+      <li>a molecule, if you give one;</li>
+      <li>a display name, if you give one, used as the credit on an accepted Problem (otherwise "a Student");</li>
+      <li>a reply email, if you give one, used for at most one reply;</li>
+      <li>your licence consent (an accepted Problem is published under CC BY-NC-SA <span class="data">4.0</span>);</li>
+      <li>where your entry is in review, and the dates it was sent, decided and replied to.</li>
+    </ul>
+    <p>
+      We store no IP address, no browser details, no cookies and no account data. Entries are never posted publicly or turned into
+      public issues. Please don't put personal info, like your full name, school or phone number, in your text.
+    </p>
+
+    <h2>How long we keep it</h2>
+    <ul>
+      <li>
+        Your reply email is deleted as soon as the one reply is sent, or after <span class="data">{emailDays}</span> days if no reply is
+        sent.
+      </li>
+      <li>
+        A Problem or report we turn down, or screen out, is deleted <span class="data">{declinedDays}</span> days after that decision.
+      </li>
+      <li>An accepted Problem's entry is deleted once the Problem is published; only the published Problem, with your credit, remains.</li>
+    </ul>
+
+    <h2>Donations</h2>
+    <p>
+      Donate goes to Ko-fi, a separate site. Anything you give Ko-fi is covered by Ko-fi's own privacy policy; AstraTron gets no payment
+      details.
+    </p>
+  </main>
+</Base>

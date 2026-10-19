@@ -826,16 +826,65 @@
     display: none;
   }
   .suggest a,
+  .prose a,
   .site-footer a {
     display: inline-flex;
     align-items: center;
     min-height: var(--at-tap);
   }
+  /* Every footer link is a full tap target, even inside a sentence. */
+  .site-footer a {
+    justify-content: center;
+    min-width: var(--at-tap);
+  }
+  /* Footer (#77): motto, Donate line, licences, credits, Privacy and Suggest a Problem. */
   .site-footer {
     max-width: 640px;
     margin: 32px auto 0;
     padding: 16px var(--at-gutter) 40px;
     border-top: var(--at-border) solid var(--at-line);
+    color: var(--at-ink-muted);
+  }
+  .site-footer p {
+    margin: 0 0 12px;
+    line-height: 1.6;
+  }
+  /* Links inside sentences are underlined, never told apart by colour alone. */
+  .site-footer p a,
+  .prose a {
+    text-decoration: underline;
+  }
+  .site-footer .motto {
+    font: 700 18px/1.3 var(--at-font-text);
+    color: var(--at-ink);
+  }
+  .site-footer nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 24px;
+  }
+  /* Donate in the top bar: an orange call to action, a full tap target. */
+  .topbar .donate {
+    margin-left: auto;
+    margin-right: 16px;
+    min-height: var(--at-tap);
+  }
+  /* The privacy page. */
+  .prose h2 {
+    margin: 32px 0 8px;
+    font-size: 22px;
+  }
+  .prose li {
+    margin: 0 0 6px;
+  }
+  /* A Lesson's Steps as plain HTML, read when the Step player can't run (and by search engines). */
+  .lesson-text {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px var(--at-gutter) 48px;
+  }
+  .lesson-text section {
+    margin: 0 0 24px;
   }
   .level-select .level-status {
     font: 500 16px/1.2 var(--at-font-text);

@@ -1,14 +1,19 @@
 ---
 import "../styles/global.css";
 import { suggestProblemHref } from "../lib/submit-links.ts";
+import { KOFI_URL, pageMeta } from "../lib/site.ts";
 
 interface Props {
   title: string;
   description?: string;
   /** A Lesson page: the full-screen Step player, with no footer (nothing pulls a Student out of a Lesson). */
   bare?: boolean;
+  /** The Unit this page belongs to, if any: Unit 1 pages share the Unit 1 image. */
+  unitId?: string;
 }
-const { title, description, bare = false } = Astro.props;
+const { title, description, bare = false, unitId } = Astro.props;
+// Canonical URL and share image come from the one site-address setting (lib/site.ts).
+const meta = pageMeta({ path: Astro.url.pathname, unitId });
 ---
 
 <!doctype html>
@@ -16,9 +21,25 @@ const { title, description, bare = false } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- Nothing is indexed until the owner goes public (pre-public checklist). -->
     <meta name="robots" content="noindex" />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={meta.canonical} />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    <meta property="og:site_name" content="AstraTron" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={meta.canonical} />
+    <meta property="og:image" content={meta.image.url} />
+    <meta property="og:image:type" content={meta.image.type} />
+    <meta property="og:image:width" content={String(meta.image.width)} />
+    <meta property="og:image:height" content={String(meta.image.height)} />
+    <meta property="og:image:alt" content={meta.image.alt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={meta.image.url} />
+    <meta name="twitter:image:alt" content={meta.image.alt} />
     <!--
       Theme and motion before first paint. The site's switches (Preferences.astro)
       store `at-theme` (dark | light) and `at-motion` (reduced) in localStorage;
@@ -46,8 +67,28 @@ const { title, description, bare = false } = Astro.props;
     {
       !bare && (
         <footer class="site-footer">
-          {/* #77 adds the Donate line, licences, credits and the privacy link. */}
-          <a href={suggestProblemHref()}>Suggest a Problem</a>
+          <p class="motto">Move electrons. Move the world.</p>
+          <p>
+            AstraTron is free, with no ads and no sign-up. If it helped you, you can <a href={KOFI_URL}>chip in on Ko-fi</a>. AstraTron
+            isn't a registered charity, so donations aren't tax-deductible.
+          </p>
+          <p>
+            Code: <a href="https://opensource.org/license/mit">MIT</a>. Content:{" "}
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+              CC BY-NC-SA <span class="data">4.0</span>
+            </a>. Third-party data keeps its own licence, named in each Source note.
+          </p>
+          <p>
+            Course sequence informed by{" "}
+            <a href="https://ocw.mit.edu/courses/5-12-organic-chemistry-i-spring-2003/">
+              MIT OpenCourseWare <span class="data">5.12</span>
+            </a>{" "}
+            and <a href="https://chem.libretexts.org/">LibreTexts</a>.
+          </p>
+          <nav aria-label="Site">
+            <a href="/privacy">Privacy</a>
+            <a href={suggestProblemHref()}>Suggest a Problem</a>
+          </nav>
         </footer>
       )
     }
