@@ -21,4 +21,4 @@ hints:
   - { match: 2, text: "Every O and every N gets lone pairs. Find all three of them." }
   - { text: "Find every O and N. O with 2 bonds → 2 lone pairs, N with 3 bonds → 1." }
 reveal: "5 lone pairs: 2 on the C=O oxygen, 1 on the N, 2 on the OH oxygen."
-scene: { id: lone-pair-fill, state: { molecule: acetaminophen }, on: answer }
+scene: { id: lone-pair-fill, state: { molecule: acetaminophen }, on: answered }

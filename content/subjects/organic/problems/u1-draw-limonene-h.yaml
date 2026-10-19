@@ -21,4 +21,4 @@ hints:
   - { match: 17, text: "Off by one. Recheck the ring corner with the branch on it: three ring-and-branch bonds leave room for one H." }
   - { text: "Go corner by corner: 4 minus the bonds you see. Double bonds count as 2." }
 reveal: "{{h-counts/limonene}} H's, counted corner by corner."
-scene: { id: h-fill, state: { molecule: limonene }, on: answer }
+scene: { id: h-fill, state: { molecule: limonene }, on: answered }

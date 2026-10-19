@@ -24,7 +24,7 @@ steps:
       - { id: d, text: about 50 }
     answer: [c]
     reveal: "**{{h-counts/estradiol}}.** The drawing leaves most of them out, on purpose: every one can be worked out from the corners. By the end of this Lesson you'll find them all without seeing them."
-    scene: { id: h-fill, state: { molecule: estradiol }, on: answer }
+    scene: { id: h-fill, state: { molecule: estradiol }, on: answered }
     sourceNote: "Estradiol, PubChem CID 5757 (formula C₁₈H₂₄O₂). Full drawing beside line drawing after MIT OCW 5.12, Lecture 1 p. 12, Berkowski, Spring 2005, CC BY-NC-SA 4.0."
 
   - id: s02
@@ -93,7 +93,7 @@ steps:
       - { match: 11, text: "Close. The C=O carbon has no H's, and each other corner has exactly two." }
       - { text: "For each corner: 4 minus the bonds you can see is the number of H's. Then add them up." }
     reveal: "{{h-counts/cyclohexanone}} H's: two on each of the five CH₂ corners, none on the C=O carbon."
-    scene: { id: h-fill, state: { molecule: cyclohexanone }, on: answer }
+    scene: { id: h-fill, state: { molecule: cyclohexanone }, on: answered }
     sourceNote: "Cyclohexanone, PubChem CID 7967 (formula C₆H₁₀O)."
 
   - id: s07
@@ -159,7 +159,7 @@ steps:
       - { match: 5, text: "Carbons with four bonds have no lone pairs. Only O and N carry them here." }
       - { text: "Use the patterns: O with 2 bonds → 2 lone pairs, N with 3 bonds → 1." }
     reveal: "3 lone pairs: 2 on the O, 1 on the N."
-    scene: { id: lone-pair-fill, state: { molecule: acetamide }, on: answer }
+    scene: { id: lone-pair-fill, state: { molecule: acetamide }, on: answered }
     sourceNote: Acetamide, PubChem CID 178.
 
   - { id: s11, phase: check, problem: u1-draw-n2-kekule }

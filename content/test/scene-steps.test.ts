@@ -112,7 +112,7 @@ describe("Scenes shown once the Step is answered (a Reveal Scene)", () => {
     correct: "Ten.",
     hints: [{ text: "Count." }],
     reveal: "Ten.",
-    scene: { id: "twist", state: { view: "end" }, on: "answer" },
+    scene: { id: "twist", state: { view: "end" }, on: "answered" },
     ...extra,
   });
   function buildWith(problem: object) {
@@ -123,16 +123,16 @@ describe("Scenes shown once the Step is answered (a Reveal Scene)", () => {
   }
 
   it("a Step's Scene can wait for the answer", () => {
-    const result = build(manipulate(), { type: "explain", text: "Watch.", scene: { id: "twist", on: "answer" } });
+    const result = build(manipulate(), { type: "explain", text: "Watch.", scene: { id: "twist", on: "answered" } });
     expect(result.errors).toEqual([]);
-    expect(stepsOf(result)[1].scene).toMatchObject({ id: "twist", on: "answer" });
+    expect(stepsOf(result)[1].scene).toMatchObject({ id: "twist", on: "answered" });
   });
 
   it("a Check Problem can carry a Scene; it reaches the Check Step with its cited data", () => {
     const result = buildWith(numericProblem());
     expect(result.errors).toEqual([]);
     const check = stepsOf(result)[7];
-    expect(check).toMatchObject({ problemId: "p1", scene: { id: "twist", state: { twist: 0, view: "end" }, on: "answer" } });
+    expect(check).toMatchObject({ problemId: "p1", scene: { id: "twist", state: { twist: 0, view: "end" }, on: "answered" } });
     expect(check.citations?.map((c) => c.ref)).toEqual(["elements/C.colour"]);
   });
 

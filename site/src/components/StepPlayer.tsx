@@ -124,6 +124,9 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   const sceneState =
     step.type === "manipulate" && setting !== undefined ? { ...step.scene.state, [step.control]: setting } : step.scene?.state;
 
+  /** A Reveal Scene (`on: answered`) shows once the Step is answered: right, or revealed. */
+  const revealScene = step.scene?.on === "answered" && (feedback?.kind === "correct" || feedback?.kind === "reveal");
+
   const answer: Answer | null =
     step.type === "multiple-choice" || step.type === "tap-to-identify"
       ? chosen.length > 0 ? { choice: chosen } : null
@@ -195,11 +198,12 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           />
         )}
 
-        {(step.type === "multiple-choice" || step.type === "numeric") && step.structure?.drawn && (
+        {(step.type === "multiple-choice" || step.type === "numeric") && step.structure?.drawn && !revealScene && (
+          // Once a Reveal Scene shows, it draws the same molecule, filled in, in the drawing's place.
           <StructureFigure view={step.structure} />
         )}
 
-        {step.scene && sceneState && step.scene.on !== "answer" && (
+        {step.scene && sceneState && step.scene.on !== "answered" && (
           // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
           <ScenePlayer
             key={`scene-${step.id}`}
@@ -220,7 +224,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </ScenePlayer>
         )}
 
-        {step.type === "multiple-choice" && (
+        {step.type === "multiple-choice" && !(step.prediction && revealScene) && (
+          // A prediction's choices step aside once its Reveal Scene plays: every choice was accepted.
           <div className="opts" role="group" aria-label="Choices">
             {step.options.map((o) =>
               o.structure ? (
@@ -265,9 +270,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           />
         )}
 
-        {step.scene?.on === "answer" && sceneState && (feedback?.kind === "correct" || feedback?.kind === "reveal") && (
+        {revealScene && step.scene && sceneState && (
           // A Reveal Scene: hidden until the Step is answered, then it plays once.
-          <ScenePlayer key={`reveal-scene-${step.id}`} sceneId={step.scene.id} state={sceneState} cited={step.scene.cited} />
+          <div className="scene-reveal">
+            <ScenePlayer key={`reveal-scene-${step.id}`} sceneId={step.scene.id} state={sceneState} cited={step.scene.cited} />
+          </div>
         )}
 
         {screen.done && (

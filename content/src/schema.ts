@@ -29,17 +29,17 @@ const sceneValue = z.union([z.number(), z.string()]);
 /**
  * The Scene a Step shows: `scene: <id>`, or `{ id, state: { <settable state>: <value> }, on? }`.
  * States left out take the manifest's default. The ids and values are checked
- * against the Scene registry (see scenes.ts). `on: answer` keeps the Scene hidden
+ * against the Scene registry (see scenes.ts). `on: answered` keeps the Scene hidden
  * until the Step is answered (right, or revealed): a Reveal Scene.
  */
 const sceneUse = z.preprocess(
   (v) => (typeof v === "string" ? { id: v } : v),
-  z.strictObject({ id, state: z.record(z.string(), sceneValue).optional(), on: z.literal("answer").optional() }),
+  z.strictObject({ id, state: z.record(z.string(), sceneValue).optional(), on: z.literal("answered").optional() }),
 );
 
 /**
  * A drawing shown under the prompt (a structure file id), and what it hides ("Lone pairs hidden");
- * and the Scene shown with it (Problems too, usually `on: answer`).
+ * and the Scene shown with it (Problems too, usually `on: answered`).
  */
 const figure = { structure: id.optional(), hide, scene: sceneUse.optional() };
 
