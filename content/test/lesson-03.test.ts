@@ -63,3 +63,50 @@ describe("Lesson 3 dipole answers follow from the cited geometry and electronega
     expect(ids.filter(polar)).toEqual(["water", "dichloromethane", "ammonia"]);
   });
 });
+
+describe("Lesson 3 content", () => {
+  const lesson = organic.courses.flatMap((c) => c.units.flatMap((u) => u.lessons)).find((l) => l.id === "u1-l03")!;
+  const step = (id: string) => lesson.steps.find((s) => s.id === id)!;
+
+  it("has 15 Steps: Hook 1, Build 10, Check 3, Wrap 1, with ethanol's page as its signature Rotate-and-identify Step", () => {
+    expect(lesson.phases).toEqual({ hook: 1, build: 10, check: 3, wrap: 1 });
+    expect(lesson.signature).toBe("rotate-and-identify");
+    expect(lesson.steps.filter((s) => s.phase === "check").map((s) => "problemId" in s && s.problemId)).toEqual([
+      "u1-3d-flat-or-pyramid",
+      "u1-3d-perspective",
+      "u1-3d-polar-molecules",
+    ]);
+  });
+
+  it("follows Lesson 1 in Unit 1", () => {
+    const ids = organic.courses[0].units[0].lessons.map((l) => l.id);
+    expect(ids.indexOf("u1-l03")).toBe(ids.indexOf("u1-l01") + 1);
+  });
+
+  it("puts every measured angle through the cited data, with its Source note", () => {
+    const s01 = step("s01");
+    expect(s01.type !== "explain" && s01.reveal).toContain("Bigger: 109.5°");
+    expect(s01.citations!.map((c) => c.ref)).toContain("methane/a.HCH");
+    expect(step("s05").citations!.map((c) => c.ref)).toEqual(expect.arrayContaining(["methane/a.HCH", "ammonia/a.HNH", "water/a.HOH"]));
+    const s09 = step("s09");
+    if (s09.type !== "rotate-and-identify") throw new Error("s09 is Rotate-and-identify");
+    expect(s09.molecule.describe).toContain("The H–C1–H angle is 107.6°");
+    expect(s09.molecule.pageSheet).toEqual([2, 1, 0]);
+    expect(s09.molecule.labels).toEqual({ 0: "C2", 1: "C1" });
+  });
+
+  it("never shows a geometry answer's 3D model on the Step that asks for it", () => {
+    // s07 asks for formaldehyde's shape; its numbers come only in the reveal, with no 3D card or Explore.
+    const s07 = step("s07");
+    expect("molecule" in s07 && s07.molecule).toBeFalsy();
+  });
+
+  it("s11 switches water and CO₂ in one card, each with its bond dipoles; the Source note cites the electronegativities", () => {
+    const s11 = step("s11");
+    if (s11.type !== "rotate-and-identify") throw new Error("s11 is Rotate-and-identify");
+    expect([s11.molecule.label, ...s11.molecule.toggle!.map((m) => m.label)]).toEqual(["H₂O", "CO₂"]);
+    expect(s11.molecule.dipoles!.net.zero).toBe(false);
+    expect(s11.molecule.toggle![0].dipoles!.net.zero).toBe(true);
+    expect(s11.citations!.map((c) => c.ref)).toEqual(expect.arrayContaining(["electronegativity-pauling/O", "carbon-dioxide/r.CO"]));
+  });
+});

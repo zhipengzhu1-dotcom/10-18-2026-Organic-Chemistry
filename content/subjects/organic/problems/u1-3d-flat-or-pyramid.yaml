@@ -1,0 +1,40 @@
+# Lesson 3 Check Problem (#81), from the merged Lesson 3 spec. The spec says "draft"; Check Steps
+# need approved Problems, as for Lesson 1.
+id: u1-3d-flat-or-pyramid
+unit: u1
+lesson: u1-l03
+difficulty: 1
+status: approved
+source: Original
+type: rotate-and-identify
+prompt: "BF₃ and NH₃ each have three atoms around a central atom. Turn both. Which one is flat, with all four atoms in one plane?"
+figures:
+  - { structure: l3-bf3, caption: "BF₃", alt: "Boron trifluoride: boron with three bonds to fluorine and no lone pair." }
+  - { structure: ammonia, caption: "NH₃", alt: "Ammonia: nitrogen with three bonds to hydrogen and one lone pair." }
+molecule:
+  id: boron-trifluoride
+  view: face-on
+  label: BF₃
+  describe: "Boron trifluoride: boron bonded to three fluorines, all four atoms in one plane, F–B–F {{boron-trifluoride/a.FBF}}."
+  toggle:
+    - id: ammonia
+      view: face-on
+      label: NH₃
+      describe: "Ammonia: nitrogen bonded to three hydrogens that sit below it like a tripod, with a lone pair on top; H–N–H {{ammonia/a.HNH}}."
+options:
+  - { id: a, text: BF₃ only }
+  - { id: b, text: NH₃ only }
+  - { id: c, text: both }
+  - { id: d, text: neither }
+answer: [a]
+correct: "Boron has three domains, so they spread into a flat triangle. Nitrogen has four, one a lone pair, so its H's form a tripod below it."
+hints:
+  - match: [b]
+    text: "Count N's domains: three bonds and a lone pair make four, so they spread like methane's. Turn NH₃ side on."
+  - match: [c]
+    text: "Seen from the top they look alike. Turn both side on. NH₃ has something BF₃ doesn't: a lone pair."
+  - match: [d]
+    text: "Boron has three bonds and no lone pair: three domains. How do three domains spread?"
+  - text: Count the domains on B and on N, then turn each model side on.
+reveal: "BF₃: 3 domains, flat, F–B–F {{boron-trifluoride/a.FBF}}. NH₃: 4 domains, pyramid, H–N–H {{ammonia/a.HNH}}."
+sourceNote: "Boron's three bonds follow Lesson 1."
