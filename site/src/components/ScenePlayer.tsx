@@ -43,7 +43,7 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, aspec
       posterT={manifest.poster.t}
       loop={loop}
       aspect={aspect}
-      describe={(t) => manifest.describe(state, t)}
+      describe={(t) => manifest.describe(state, t, cited)}
       announceKey={stateKey}
       render={(t, reducedMotion) => (
         <Component t={t} state={state} aspect={aspect} reducedMotion={reducedMotion} cited={cited} />

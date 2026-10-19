@@ -36,6 +36,11 @@ const manifestSchema = z.strictObject({
     message: "needs screen-reader text: a function (state, t) => string",
   }),
   reducedMotion: z.string().min(1),
+  interact: z
+    .custom<SceneManifest["interact"]>((v) => !!v && typeof v === "object" && typeof (v as { drop?: unknown }).drop === "function" && typeof (v as { next?: unknown }).next === "function", {
+      message: "needs drop(state, move) and next(state) functions",
+    })
+    .optional(),
   data: z.array(z.string().regex(/^[a-z0-9][a-z0-9-]*\/\S+$/, "must be a cited-data ref like methane/r.CH")),
   duration: z.number().positive(),
   poster: z.strictObject({ t: z.number().min(0) }),
