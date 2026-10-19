@@ -74,7 +74,7 @@ export default function AmideCnLengths({ t, state, aspect, cited }: SceneProps<A
             <text x={p.label.x} y={line(0)} fontSize={font} textAnchor={p.label.anchor} fill={INK} fontFamily={TEXT_FONT} fontWeight={700}>
               {name}
             </text>
-            {shown && (
+            {shown && label > 0 && (
             <g opacity={label}>
               <text x={p.label.x} y={line(1)} fontSize={font} textAnchor={p.label.anchor} fill={ELECTRON} fontFamily={DATA_FONT}>
                 {`${value?.label ?? "C–N"} ${value?.display ?? ""}`}
