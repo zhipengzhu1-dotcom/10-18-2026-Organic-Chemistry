@@ -15,6 +15,7 @@ import WatchScenePlayer from "./WatchScenePlayer.tsx";
 import { watchScene } from "@astratron/scenes/watch";
 import SceneControl from "./SceneControl.tsx";
 import StructureTap from "./StructureTap.tsx";
+import ExploreIn3D from "../explore/ExploreIn3D.tsx";
 import DrawArrows from "./DrawArrows.tsx";
 import { PushReplayPlayer } from "./PushReplayPlayer.tsx";
 import "./structure.css";
@@ -318,6 +319,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
             )}
           </div>
         )}
+
+        {step.explore && <ExploreIn3D key={`explore-${step.id}`} molecule={step.explore} />}
 
         {/* Keyed per Step so a new Step opens its Source note collapsed. */}
         <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} />

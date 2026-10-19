@@ -32,9 +32,10 @@ export const PRACTICE_SLUG = "practice";
 import { checkInteraction, checkLessonShape } from "./shape.ts";
 import { citeIn, type Cited, type CitedData } from "./data.ts";
 import { dataFile, resolveDataFile } from "./data-load.ts";
-import type { SceneCatalog, SceneUse } from "./model.ts";
+import type { ExploreMolecule, SceneCatalog, SceneUse } from "./model.ts";
 import { checkStepScene, resolveSceneUse, type SceneUseFile } from "./scenes.ts";
 import { checkStructure, resolveArrows, resolveOptions, resolveTap } from "./structures.ts";
+import { exploreMolecule } from "./explore.ts";
 
 /** What a graded Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
 type StructureFields =
@@ -210,6 +211,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       });
     }
     fillBanks(slug, courses, listed, lessons, problems, structured, problemCitations, errors);
+    exploreMolecules(slug, data, lessons, problems, courses, errors);
     let hero: HeroPush | undefined;
     if (subject?.hero) {
       const found: string[] = [];
@@ -356,7 +358,44 @@ function fillBanks(
   }
 }
 
-/** The named signature Step's type, else the first graded Build Step's, else the first Step's. */
+/**
+ * Explore in 3D (#71): checks every `molecule:` (reported once, in the file that names it)
+ * and swaps it for the resolved molecule on every Step and Bank Problem that carries it.
+ */
+function exploreMolecules(
+  slug: string,
+  data: CitedData,
+  lessons: Map<string, LessonFile | undefined>,
+  problems: Map<string, ProblemFile | undefined>,
+  courses: Course[],
+  errors: string[],
+): void {
+  const resolved = new Map<string, ExploreMolecule | undefined>();
+  const resolve = (id: string, where: string) => {
+    const { molecule, errors: found } = exploreMolecule(data, id);
+    for (const message of found) errors.push(`${where}${message}`);
+    resolved.set(id, molecule);
+  };
+  for (const lesson of lessons.values())
+    for (const step of lesson?.steps ?? [])
+      if ("molecule" in step && step.molecule) resolve(step.molecule, `${slug}/lessons/${lesson!.id}.yaml: step ${step.id}: `);
+  for (const problem of problems.values())
+    if (problem?.molecule) resolve(problem.molecule, `${slug}/problems/${problem.id}.yaml: `);
+
+  const swap = (step: Step) => {
+    const named = step as Step & { molecule?: string };
+    if (!named.molecule) return;
+    const molecule = resolved.get(named.molecule);
+    delete named.molecule;
+    if (molecule) step.explore = molecule;
+  };
+  for (const unit of courses.flatMap((c) => c.units)) {
+    for (const lesson of unit.lessons) lesson.steps.forEach(swap);
+    for (const problem of unit.bank) swap(problem.step);
+  }
+}
+
+/** The named signature Step's type,else the first graded Build Step's, else the first Step's. */
 function signatureType(lesson: LessonFile): Step["type"] {
   const named = lesson.steps.find((s) => s.id === lesson.signature);
   const graded = lesson.steps.find((s) => s.phase === "build" && s.type !== "explain");

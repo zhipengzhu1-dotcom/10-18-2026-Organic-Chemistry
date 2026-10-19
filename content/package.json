@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./data": "./src/data.ts",
+    "./explore": "./src/explore.ts",
     "./arrows": "./src/arrows.ts"
   },
   "scripts": {
