@@ -21,21 +21,24 @@ export const manimDir = "scenes/manim";
 export const recordPath = (id: string) => `${manimDir}/renders/${id}.json`;
 export const publicPath = (file: string) => `site/public/${file}`;
 
-/**
- * Arcade Cosmos colours the videos use, by design-token name (#59's `--at-*`
- * custom properties); design tokens, not element colours.
- */
-export const videoPalette = {
-  "at-space": "#0d0626",
-  "at-neb-1": "#ff4fd8",
-  "at-neb-2": "#b44dff",
-  "at-neb-3": "#2340ff",
-  "at-electron": "#3ee8ff",
-  "at-ignite": "#ff9a1f",
-  "at-ink": "#ffffff", // cited-data: ok, the ink design token, not hydrogen's colour
-  "at-ink-muted": "#b9a8e8",
-  "star-core": "#ffe2a8",
-} as const;
+export const tokensPath = "site/src/styles/tokens.css";
+/** The design tokens the videos draw with, from #59's dark `:root` theme (the videos are always dark). */
+const tokenNames = ["at-space", "at-neb-1", "at-neb-2", "at-neb-3", "at-electron", "at-ignite", "at-ink", "at-ink-muted"];
+
+/** Arcade Cosmos colours for the renderer, read from the site's tokens.css, plus the star's hot core. */
+export function videoPalette(root = repoRoot): Record<string, string> {
+  const css = readFileSync(join(root, tokensPath), "utf8");
+  const start = css.indexOf(":root {");
+  const body = css.slice(start, css.indexOf("}", start));
+  const palette: Record<string, string> = {};
+  for (const name of tokenNames) {
+    const m = body.match(new RegExp(`--${name}:\\s*(#[0-9a-fA-F]{6})\\b`));
+    if (start < 0 || !m) throw new Error(`${tokensPath} has no --${name} colour in :root`);
+    palette[name] = m[1].toLowerCase();
+  }
+  palette["star-core"] = "#ffe2a8"; // the star's pale-gold core (the prototype's glow centre), not a UI token
+  return palette;
+}
 
 export interface ManimProps {
   scene: string;
@@ -51,7 +54,7 @@ export interface ManimProps {
 }
 
 /** What one Manim render of `aspect` is given (written to a JSON file the script reads). */
-export function manimProps(m: WatchSceneManifest, cited: Record<string, Cited>, aspect: Aspect): ManimProps {
+export function manimProps(m: WatchSceneManifest, cited: Record<string, Cited>, aspect: Aspect, root = repoRoot): ManimProps {
   const { width, height } = frameSize(aspect);
   return {
     scene: m.id,
@@ -62,7 +65,7 @@ export function manimProps(m: WatchSceneManifest, cited: Record<string, Cited>, 
     duration: m.duration,
     values: Object.fromEntries(m.data.map((ref) => [ref, cited[ref].value])),
     text: m.text,
-    palette: { ...videoPalette },
+    palette: videoPalette(root),
   };
 }
 
@@ -139,7 +142,7 @@ export function inputsHash(m: WatchSceneManifest, cited: Record<string, Cited>, 
   hash.update(`manim ${MANIM_VERSION} fps ${FPS}\n`);
   const files = [m.render.script, ...readdirSync(join(root, manimDir, "fonts")).sort().map((f) => `fonts/${f}`)];
   for (const file of files) hash.update(`${file}\n`).update(readFileSync(join(root, manimDir, file)));
-  for (const aspect of m.aspects) hash.update(JSON.stringify(manimProps(m, cited, aspect)));
+  for (const aspect of m.aspects) hash.update(JSON.stringify(manimProps(m, cited, aspect, root)));
   return hash.digest("hex");
 }
 

@@ -76,7 +76,7 @@ describe("committed renders", () => {
   it("flag a render whose inputs changed since it was made, and a missing file", () => {
     const root = mkdtempSync(join(tmpdir(), "watch-renders-"));
     try {
-      for (const dir of ["scenes/manim", "site/public/scenes/star-forge"]) cpSync(join(repoRoot, dir), join(root, dir), { recursive: true });
+      for (const dir of ["scenes/manim", "site/public/scenes/star-forge", "site/src/styles/tokens.css"]) cpSync(join(repoRoot, dir), join(root, dir), { recursive: true });
       writeFileSync(join(root, "scenes/manim", starForge.render.script), "# edited\n", { flag: "a" });
       rmSync(join(root, "site/public/scenes/star-forge/star-forge-9x16.poster.jpg"));
       expect(checkWatchRenders([starForge], organic.data, root)).toEqual([
