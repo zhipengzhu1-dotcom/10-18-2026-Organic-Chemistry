@@ -3,6 +3,7 @@
 import { useReducer, useState } from "react";
 import type { Lesson } from "@astratron/content";
 import { act, start, type Action, type Screen } from "../engine/player.ts";
+import SourceNote from "./SourceNote.tsx";
 
 interface Props {
   /** The Lesson with text fields already rendered to HTML at build time. */
@@ -82,6 +83,8 @@ export default function StepPlayer({ lesson, exitHref }: Props) {
             <p {...html(lesson.keyIdea)} />
           </div>
         )}
+
+        <SourceNote key={step.id} cited={step.citations ?? []} />
       </main>
 
       <footer className="player-action">
