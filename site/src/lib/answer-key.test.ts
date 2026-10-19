@@ -15,6 +15,16 @@ it("the page's Lesson carries no answers, Hints, Correct lines or reveals", () =
   expect(page.steps[2]).toMatchObject({ id: "s03", prompt: "Question s03", select: "one" });
 });
 
+it("a reveal Scene shows the answer, so it travels in the key, not the page", () => {
+  const base = lesson();
+  const revealScene = { id: "group-spotlight", state: { view: "amoxicillin", labels: "on" }, cited: {} };
+  const withReveal = { ...base, steps: base.steps.map((s, i) => (i === 2 ? { ...s, revealScene } : s)) };
+  const { page, key } = splitLesson(withReveal);
+  expect(JSON.stringify(page)).not.toContain("group-spotlight");
+  expect(key.s03.revealScene).toEqual(revealScene);
+  expect(withKey(page, key)).toEqual(withReveal);
+});
+
 it("a Rotate-and-identify Step keeps its molecule and choices on the page, its answer in the key", () => {
   const tree = validTree();
   const steps = (tree["chem/lessons/l1.yaml"] as { steps: Record<string, unknown>[] }).steps;

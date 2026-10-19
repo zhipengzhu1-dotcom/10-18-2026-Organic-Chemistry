@@ -46,6 +46,7 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, still
       loop={loop}
       aspect={aspect}
       still={still}
+      bare={manifest.controls === false}
       describe={(t) => manifest.describe(state, t, cited)}
       announceKey={stateKey}
       render={(t, reducedMotion) => (
@@ -71,11 +72,13 @@ interface FrameProps {
   render: (t: number, reducedMotion: boolean) => ReactNode;
   /** A still picture: rests on the poster, drawn as under reduced motion, with no controls. */
   still?: boolean;
+  /** Plays once with no Play/Replay/Scrub row (a Scene whose manifest says `controls: false`: 5 s or less). */
+  bare?: boolean;
   children?: ReactNode;
 }
 
 /** A frame driven by the site clock: autoplays once on entry, or rests on its poster under reduced motion (Play starts it). */
-export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9", describe, announceKey = "", render, still = false, children }: FrameProps) {
+export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9", describe, announceKey = "", render, still = false, bare = false, children }: FrameProps) {
   const config: ClockConfig = { duration, loop, posterT };
   const reducedMotion = useReducedMotion();
   // Until the island knows the motion setting (and on the server) the frame rests on its poster.
@@ -112,7 +115,7 @@ export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9",
   const seconds = (t: number) => `${t.toFixed(1)} of ${duration} seconds`;
 
   return (
-    <figure className="scene">
+    <figure className={still || bare ? "scene scene-bare" : "scene"}>
       <div
         className="scene-frame"
         role="img"
@@ -121,7 +124,7 @@ export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9",
       >
         {render(clock.t, still || (reducedMotion ?? false))}
       </div>
-      {!still && (
+      {!still && !bare && (
       <div className="scene-controls">
         <button
           type="button"
