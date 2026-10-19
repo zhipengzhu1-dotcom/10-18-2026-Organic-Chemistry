@@ -6,6 +6,7 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type { NumericStep, RankStep } from "@astratron/content";
 import { act, start, type Action, type Answer, type Screen } from "../engine/player.ts";
 import { withKey, type AnswerKey, type PageLesson } from "../lib/answer-key.ts";
+import SourceNote from "./SourceNote.tsx";
 
 interface Props {
   /** The Lesson without answers, text fields already rendered to HTML at build time. */
@@ -168,6 +169,9 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref }: Props) {
             <p {...html(lesson.keyIdea)} />
           </div>
         )}
+
+        {/* Keyed per Step so a new Step opens its Source note collapsed. */}
+        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} />
       </main>
 
       <footer className="player-action">

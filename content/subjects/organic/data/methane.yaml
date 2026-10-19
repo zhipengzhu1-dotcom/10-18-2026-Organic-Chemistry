@@ -1,0 +1,43 @@
+# Methane, experimental gas-phase geometry.
+#
+# Data derived from NIST CCCBDB, not covered by the repo's MIT licence or the
+# content's CC BY-NC-SA licence. NIST Computational Chemistry Comparison and
+# Benchmark Database, NIST Standard Reference Database Number 101, Release 22,
+# May 2022, Editor: Russell D. Johnson III, http://cccbdb.nist.gov/,
+# DOI:10.18434/T47C7Z. © U.S. Secretary of Commerce; used with acknowledgement
+# under https://www.nist.gov/open/license.
+#
+# Copied by hand (#60) from https://cccbdb.nist.gov/expgeom2x.asp?casno=74828&charge=0,
+# fetched 2026-10-19: internal coordinates rCH and aHCH with their reference
+# keys (1979Hir:213, 1974sve/kov) and the Cartesian table. The geometry
+# pipeline (#67) may regenerate this file in the same shape.
+id: methane
+kind: molecule
+title: Methane
+geometry: experimental
+sources:
+  cccbdb:
+    kind: experimental
+    citation: NIST CCCBDB, SRD 101, Release 22 (May 2022), doi:10.18434/T47C7Z
+    licence: NIST SRD 101; reuse with acknowledgement (https://www.nist.gov/open/license)
+  hirota1979:
+    kind: experimental
+    citation: Hirota, J. Mol. Spectrosc. 77, 213 (1979), doi:10.1016/0022-2852(79)90103-6
+    via: cccbdb
+    licence: NIST SRD 101; reuse with acknowledgement (https://www.nist.gov/open/license)
+  sverdlov1974:
+    kind: experimental
+    citation: Sverdlov, Kovner and Krainov, Vibrational Spectra of Polyatomic Molecules, Wiley (1974)
+    via: cccbdb
+    licence: NIST SRD 101; reuse with acknowledgement (https://www.nist.gov/open/license)
+values:
+  r.CH: { label: C–H, quantity: bond-length, value: 1.087, unit: Å, source: hirota1979 }
+  a.HCH: { label: H–C–H, quantity: angle, value: 109.471, unit: °, source: sverdlov1974 }
+atoms:
+  source: cccbdb
+  list:
+    - [C, 0.0000, 0.0000, 0.0000]
+    - [H, 0.6276, 0.6276, 0.6276]
+    - [H, 0.6276, -0.6276, -0.6276]
+    - [H, -0.6276, 0.6276, -0.6276]
+    - [H, -0.6276, -0.6276, 0.6276]

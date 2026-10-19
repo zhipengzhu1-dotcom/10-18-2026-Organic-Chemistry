@@ -1,5 +1,6 @@
 // The resolved course model: what the content build hands to the site and the
 // video renderer. Check Steps arrive with their Problem inlined.
+import type { Cited, CitedData } from "./data.ts";
 
 export type Phase = "hook" | "build" | "check" | "wrap";
 
@@ -14,6 +15,7 @@ export interface ExplainStep {
   phase: Phase;
   type: "explain";
   text: string;
+  citations?: Cited[];
 }
 
 export interface MultipleChoiceStep {
@@ -29,6 +31,8 @@ export interface MultipleChoiceStep {
   prediction?: boolean;
   /** Set on Check Steps: the Bank Problem this Step plays. */
   problemId?: string;
+  /** The cited values this Step's text shows (`{{file/key}}`); its Source note is generated from them. */
+  citations?: Cited[];
 }
 
 export interface NumericHint {
@@ -52,6 +56,7 @@ export interface NumericStep {
   hints?: NumericHint[];
   reveal: string;
   problemId?: string;
+  citations?: Cited[];
 }
 
 /** Rank / order: the Student puts the items into one strict order (the prompt names which end is first). */
@@ -69,6 +74,7 @@ export interface RankStep {
   hints?: Hint[];
   reveal: string;
   problemId?: string;
+  citations?: Cited[];
 }
 
 /** A Step the Student answers and the engine grades. */
@@ -126,6 +132,8 @@ export interface Subject {
   /** Path of the Subject's Course map page. */
   url: string;
   courses: Course[];
+  /** The Subject's cited data files, by id; read numbers from it with `cite` (ADR 0002). */
+  data: CitedData;
 }
 
 export interface CourseModel {
