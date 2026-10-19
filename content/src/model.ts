@@ -1,6 +1,6 @@
 // The resolved course model: what the content build hands to the site and the
 // video renderer. Check Steps arrive with their Problem inlined.
-import type { Atom, Bond, Cited, CitedData } from "./data.ts";
+import type { Atom, Bond, Cited, CitedData, Tier } from "./data.ts";
 import type { Matrix3 } from "./molecule.ts";
 
 export type Phase = "hook" | "build" | "check" | "wrap";
@@ -44,14 +44,18 @@ export interface SceneUse {
 }
 
 /**
- * The molecule a Step shows in the 3D Step card, resolved from its cited data file: atoms (Å) and
- * bonds, the start orientation, and each element's Jmol colour and Bondi radius (ADR 0002).
- * The Step's `citations` carry the matching Cited values, so its Source note covers them.
+ * The molecule a Step or Problem names (`molecule:` in its file), resolved from its cited data file:
+ * atoms (Å) and bonds, the start orientation, and each element's Jmol colour and Bondi radius
+ * (ADR 0002). Every Step that names one offers Explore in 3D (#71); the 3D Step card (#68) shows it
+ * inline when `card` is set (always on Rotate-and-identify 3D), and the Step's `citations` then
+ * carry `cited` too, so its own Source note covers the molecule.
  */
 export interface MoleculeUse {
   /** The data file id, e.g. "methane". */
   id: string;
   title: string;
+  /** Geometry tier of the coordinates. */
+  tier: Tier;
   atoms: Atom[];
   bonds: Bond[];
   /** The named start view (views.yaml), when the Step gives one. */
@@ -60,6 +64,12 @@ export interface MoleculeUse {
   orientation: Matrix3;
   /** Per element present: colour "#RRGGBB" and van der Waals radius in Å, from the cited elements table. */
   elements: Record<string, { colour: string; vdw: number }>;
+  /** Everything a Source note for the molecule names: its geometry values, then each element's colour, then radius. */
+  cited: Cited[];
+  /** Licence notice for third-party data (the NIST acknowledgement on CCCBDB-derived geometry). */
+  notice?: string;
+  /** True when the Step shows the 3D card inline. */
+  card: boolean;
   /** The Step's own words, read first by the Describe button. */
   describe?: string;
 }
@@ -161,6 +171,8 @@ export interface ManipulateStep {
   reveal: string;
   problemId?: string;
   citations?: Cited[];
+  /** The molecule the Step names: Explore in 3D (#71). */
+  molecule?: MoleculeUse;
 }
 
 /** Rotate-and-identify 3D: turn the molecule in the 3D card, answer with ordinary choices (graded like Multiple choice). */
@@ -228,6 +240,8 @@ export interface DrawArrowsStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The molecule the Step names: Explore in 3D (#71). */
+  molecule?: MoleculeUse;
 }
 
 /** A Step the Student answers and the engine grades. */
@@ -360,6 +374,8 @@ export interface TapStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
+  /** The molecule the Step names: Explore in 3D (#71). */
+  molecule?: MoleculeUse;
 }
 
 export interface Lesson {
@@ -438,6 +454,16 @@ export interface Subject {
   courses: Course[];
   /** The Subject's cited data files, by id; read numbers from it with `cite` (ADR 0002). */
   data: CitedData;
+  /** The homepage Push hero, ready for `@astratron/content/arrows` (`arrowsStart`/`arrowsAct`/`arrowsView`). */
+  hero?: HeroPush;
+}
+
+/** One live push with its accepted results; the shape of `ArrowsTask`. */
+export interface HeroPush {
+  start: Structure;
+  results: Structure[];
+  answer: Push[];
+  hints?: PushHint[];
 }
 
 export interface CourseModel {

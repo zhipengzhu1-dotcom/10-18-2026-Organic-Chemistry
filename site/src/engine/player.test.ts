@@ -401,6 +401,9 @@ describe("Rotate-and-identify 3D Steps", () => {
     molecule: {
       id: "water",
       title: "Water",
+      tier: "experimental",
+      cited: [],
+      card: true,
       atoms: [],
       bonds: [],
       orientation: [

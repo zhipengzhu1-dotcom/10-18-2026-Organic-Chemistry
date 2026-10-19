@@ -5,7 +5,8 @@
 import type { Cited } from "@astratron/content/data";
 import { sourceNote } from "@astratron/content/data";
 
-export default function SourceNote({ cited }: { cited: Cited[] }) {
+/** `notice`: a licence notice the data asks to travel with it (the NIST acknowledgement). */
+export default function SourceNote({ cited, notice }: { cited: Cited[]; notice?: string }) {
   if (!cited.length) return null;
   return (
     <details className="source-note">
@@ -15,6 +16,7 @@ export default function SourceNote({ cited }: { cited: Cited[] }) {
           {p.lead && <strong>{p.lead}</strong>} {p.text}
         </p>
       ))}
+      {notice && <p>{notice}</p>}
     </details>
   );
 }

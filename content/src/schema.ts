@@ -17,6 +17,18 @@ const hint = z.strictObject({
   text,
 });
 
+/**
+ * The molecule a Step or Problem names: `molecule: <data file id>`, or `{ id, card, view, describe }`.
+ * Every Step that names one offers Explore in 3D (#71). `card: true` also shows it inline in the
+ * 3D Step card (#68; Rotate-and-identify always does); `view` names a start view in the Subject's
+ * views.yaml (default: the file's own axes); `describe` opens what the Describe button reads.
+ */
+const moleculeUse = z.preprocess(
+  (v) => (typeof v === "string" ? { id: v } : v),
+  z.strictObject({ id, card: z.boolean().optional(), view: id.optional(), describe: text.optional() }),
+);
+const molecule = moleculeUse.optional();
+
 /** What a Step may hide in a drawing. */
 const hide = z.array(z.enum(["charges", "lone-pairs"])).optional();
 
@@ -25,16 +37,6 @@ const option = z.strictObject({ id, text, structure: id.optional(), hide });
 
 /** A text-only card (Rank items; structure Rank cards are not resolved yet). */
 const textOption = z.strictObject({ id, text });
-
-/**
- * The 3D Step card (#68): `molecule: <data file id>`, or `{ id, view, describe }`. `view` names a start
- * view in the Subject's views.yaml (default: the file's own axes); `describe` opens what the Describe
- * button reads.
- */
-const moleculeUse = z.preprocess(
-  (v) => (typeof v === "string" ? { id: v } : v),
-  z.strictObject({ id, view: id.optional(), describe: text.optional() }),
-);
 
 /** A named start view; see ViewSpec in molecule.ts. Atoms are 0-based indices in the data file's order. */
 const atomIndex = z.number().int().nonnegative();
@@ -52,8 +54,8 @@ export const viewsFile = z.record(id, z.record(id, viewSpec));
 /** Fields shared by a Multiple choice Step and a Multiple choice Problem. */
 const multipleChoice = {
   type: z.literal("multiple-choice"),
+  molecule,
   prompt: text,
-  molecule: moleculeUse.optional(),
   options: z.array(option).min(2),
   /** The exact set of correct option ids. */
   answer: z.array(id).min(1),
@@ -66,6 +68,7 @@ const multipleChoice = {
 /** Fields shared by a Tap-to-identify Step and Problem. */
 const tapToIdentify = {
   type: z.literal("tap-to-identify"),
+  molecule,
   prompt: text,
   /** The structure file drawn. */
   structure: id,
@@ -91,8 +94,8 @@ const numericHint = z.strictObject({ match: z.number().optional(), text });
 /** Fields shared by a Numeric input Step and a Numeric Problem. The unit is fixed here and shown, never typed. */
 const numeric = {
   type: z.literal("numeric"),
+  molecule,
   prompt: text,
-  molecule: moleculeUse.optional(),
   /** The unit of measure, e.g. "°", "Å", "kJ/mol" (named so it can't be read as a course Unit). */
   unitSymbol: z.string(),
   answer: z.number(),
@@ -106,8 +109,8 @@ const numeric = {
 /** Fields shared by a Rank / order Step and a Rank Problem. */
 const rank = {
   type: z.literal("rank"),
+  molecule,
   prompt: text,
-  molecule: moleculeUse.optional(),
   /** The cards, in the order they start in. */
   items: z.array(textOption).min(2),
   /** The one strict order of item ids, first to last. */
@@ -155,6 +158,7 @@ const manipulateHint = z.strictObject({ match: z.array(sceneValue).min(1).option
  */
 const manipulate = {
   type: z.literal("manipulate"),
+  molecule,
   prompt: text,
   scene: sceneUse,
   /** The settable state the slider drives. */
@@ -178,6 +182,7 @@ const pushHint = z.strictObject({ from: z.array(id).min(1).optional(), to: z.arr
 /** Fields shared by a Draw-arrows Step and Problem. Structures are named by file id; atom ids are the atom map. */
 const drawArrows = {
   type: z.literal("draw-arrows"),
+  molecule,
   prompt: text,
   /** The structure the Student pushes on. */
   start: id,
@@ -201,9 +206,9 @@ const explainStep = z.strictObject({
   id: stepId,
   phase,
   type: z.literal("explain"),
+  molecule,
   text,
   scene: sceneUse.optional(),
-  molecule: moleculeUse.optional(),
 });
 
 const multipleChoiceStep = z.strictObject({
@@ -295,7 +300,18 @@ export const courseFile = z.strictObject({
   units: z.array(unit).min(1),
 });
 
-export const subjectFile = z.strictObject({ title: text });
+/**
+ * The homepage Push hero: one live push a first-time visitor makes before reading anything.
+ * Checked like a Draw-arrows Step (structures exist, the pushes reach a result, Hints name real ids).
+ */
+const heroPush = z.strictObject({
+  start: id,
+  results: z.array(id).min(1),
+  answer: z.array(push).min(1),
+  hints: z.array(pushHint).optional(),
+});
+
+export const subjectFile = z.strictObject({ title: text, hero: heroPush.optional() });
 
 /** A 2D structure, written by `pnpm structure` (RDKit.js layout) and committed. */
 export const structureFile = z.strictObject({

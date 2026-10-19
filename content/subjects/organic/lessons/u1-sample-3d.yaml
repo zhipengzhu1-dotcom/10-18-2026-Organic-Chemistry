@@ -22,7 +22,7 @@ steps:
     phase: build
     type: explain
     text: This is methane at its measured shape. Drag to turn it. Tap the C, then an H, to measure a bond; tap a third atom for an angle.
-    molecule: methane
+    molecule: { id: methane, card: true }
 
   - id: s03
     phase: build
@@ -44,7 +44,7 @@ steps:
     phase: build
     type: explain
     text: Water has two H's on one O. Press **True scale** to see how much room the atoms really take up.
-    molecule: water
+    molecule: { id: water, card: true }
 
   - id: s05
     phase: build
@@ -66,7 +66,7 @@ steps:
     phase: build
     type: multiple-choice
     prompt: Turn ammonia, NH₃, and look from the side. Is the N in the same plane as the three H's?
-    molecule: { id: ammonia, view: face-on }
+    molecule: { id: ammonia, view: face-on, card: true }
     options:
       - { id: a, text: "Yes, it's flat" }
       - { id: b, text: "No, the N sits above them" }

@@ -745,6 +745,33 @@
   .returning .first-visit {
     display: none;
   }
+  /* The Push hero (#73): headline, live push, one button; the Course map follows. */
+  .push-hero-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 8px 0 24px;
+  }
+  .hero-title {
+    margin: 0;
+    font: 700 clamp(30px, 8vw, 44px) / 1.05 var(--at-font-text);
+  }
+  .hero-accent {
+    color: var(--at-ignite);
+  }
+  .push-hero {
+    padding: 12px;
+    border: var(--at-border-strong) solid var(--at-line);
+    background: var(--at-surface);
+    box-shadow: var(--at-drop);
+  }
+  .push-hero-msg {
+    margin: 12px 0 0;
+    min-height: 3em;
+  }
+  .push-hero-done {
+    color: var(--at-electron);
+  }
   .continue-card {
     margin: 12px 0 24px;
     padding: 16px;
@@ -894,7 +921,9 @@
     min-height: 110px;
     border: var(--at-border-strong) solid var(--at-line);
     box-shadow: 6px 6px 0 var(--at-shadow);
-    background: var(--at-surface);
+    /* The same dark ground in both themes, so white hydrogens never sit on white (#71). Text over it
+       uses the fills, which are the same in both themes and read on --at-on-fill. */
+    background: var(--at-on-fill);
     overflow: hidden;
   }
   .molecule-frame {
@@ -916,10 +945,10 @@
     height: 100%;
   }
   .molecule-still line {
-    stroke: var(--at-ink-muted);
+    stroke: #c8c8d0; /* the WebGL layer's bond grey (MoleculeCanvas) */
   }
   .molecule-still circle {
-    stroke: var(--at-space);
+    stroke: var(--at-on-fill);
   }
   .molecule-overlay {
     pointer-events: none;
@@ -937,13 +966,13 @@
   }
   .molecule-cursor {
     fill: none;
-    stroke: var(--at-electron);
+    stroke: var(--at-electron-fill);
     stroke-width: 2;
     stroke-dasharray: 5 4;
   }
   .molecule-tag path {
     fill: none;
-    stroke: var(--at-electron);
+    stroke: var(--at-electron-fill);
     stroke-width: 2;
     stroke-dasharray: 5 4;
   }
@@ -951,8 +980,8 @@
     stroke: var(--at-ignite-fill);
   }
   .molecule-tag rect {
-    fill: var(--at-space);
-    stroke: var(--at-electron);
+    fill: var(--at-on-fill);
+    stroke: var(--at-electron-fill);
     stroke-width: 2;
   }
   .molecule-tag-angle rect {
@@ -960,7 +989,7 @@
   }
   .molecule-tag text {
     font: 700 16px var(--at-font-data);
-    fill: var(--at-ink);
+    fill: var(--at-electron-fill);
     text-anchor: middle;
     dominant-baseline: central;
   }
@@ -972,12 +1001,11 @@
     margin: 0;
     pointer-events: none;
     font: 400 16px/1.25 var(--at-font-data);
-    color: var(--at-ink);
+    color: var(--at-electron-fill);
   }
   .molecule-value {
     font-weight: 700;
     font-size: 20px;
-    color: var(--at-electron);
   }
   .molecule-scalebar {
     position: absolute;
@@ -985,13 +1013,13 @@
     bottom: 6px;
     pointer-events: none;
     font: 400 16px/1 var(--at-font-data);
-    color: var(--at-ink-muted);
+    color: var(--at-electron-fill);
   }
   .molecule-scalebar i {
     display: block;
     height: 4px;
     margin-bottom: 4px;
-    background: var(--at-ink-muted);
+    background: var(--at-electron-fill);
   }
   .molecule-turn {
     position: absolute;

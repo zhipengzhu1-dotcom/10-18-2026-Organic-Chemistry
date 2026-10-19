@@ -27,7 +27,7 @@ import {
   type StructureFile,
 } from "./schema.ts";
 import { checkDeletedSteps, checkFrozenIds, LOCK_FILE } from "./freeze.ts";
-import type { BuildResult, Course, GradedStep, Lesson, Option, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
+import type { BuildResult, Course, GradedStep, HeroPush, Lesson, Option, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
 
 /** The Practice Set page sits at `<unit url>/practice`, so no Lesson may take that slug. */
 export const PRACTICE_SLUG = "practice";
@@ -217,7 +217,17 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       });
     }
     fillBanks(slug, courses, listed, lessons, problems, structured, problemCitations, errors);
-    if (subject) subjects.push({ slug, title: subject.title, url: `/${slug}`, courses, data });
+    let hero: HeroPush | undefined;
+    if (subject?.hero) {
+      const found: string[] = [];
+      const resolved = resolveArrows(subject.hero, structures, found);
+      for (const message of found) errors.push(`${slug}/subject.yaml: hero: ${message}`);
+      if (resolved && !found.length) {
+        const { answer, hints } = subject.hero;
+        hero = { start: resolved.start.structure, results: resolved.results, answer, ...(hints && { hints }) };
+      }
+    }
+    if (subject) subjects.push({ slug, title: subject.title, url: `/${slug}`, courses, data, ...(hero && { hero }) });
   }
 
   return errors.length ? { errors } : { model: { subjects }, errors };
@@ -353,7 +363,7 @@ function fillBanks(
   }
 }
 
-/** The named signature Step's type, else the first graded Build Step's, else the first Step's. */
+/** The named signature Step's type,else the first graded Build Step's, else the first Step's. */
 function signatureType(lesson: LessonFile): Step["type"] {
   const named = lesson.steps.find((s) => s.id === lesson.signature);
   const graded = lesson.steps.find((s) => s.phase === "build" && s.type !== "explain");
@@ -399,9 +409,10 @@ function citeNumbers(
 }
 
 /**
- * Resolves every Step's and Problem's `molecule` (the 3D Step card) in place in the loaded maps,
- * after their numbers are cited: the molecule's Cited values join the Step's (or the Problem's)
- * citations, so its Source note covers the geometry, colours and radii.
+ * Resolves every Step's and Problem's `molecule` (Explore in 3D and the 3D Step card) in place in
+ * the loaded maps, after their numbers are cited (each error is reported once, in the file that
+ * names it). When the Step shows the inline card, the molecule's Cited values join the Step's (or
+ * the Problem's) citations, so its Source note covers the geometry, colours and radii.
  */
 function resolveMolecules(
   slug: string,
@@ -413,11 +424,14 @@ function resolveMolecules(
   errors: string[],
 ): void {
   const merge = (own: Cited[] = [], extra: Cited[]) => [...own, ...extra.filter((c) => !own.some((o) => o.ref === c.ref))];
+  /** The resolved molecule; when the Step shows the inline 3D card, its numbers join the Step's Source note. */
   const resolve = <T extends object>(item: T, where: string): { item: T; cited: Cited[] } => {
     if (!("molecule" in item) || !item.molecule) return { item, cited: [] };
-    const { molecule, cited, errors: broken } = resolveMoleculeUse(item.molecule as MoleculeUseFile, data, views);
+    const card = "type" in item && item.type === "rotate-and-identify";
+    const { molecule, errors: broken } = resolveMoleculeUse(item.molecule as MoleculeUseFile, data, views, card);
     for (const message of broken) errors.push(`${where}${message}`);
-    return molecule ? { item: { ...item, molecule }, cited } : { item, cited: [] };
+    if (!molecule) return { item, cited: [] };
+    return { item: { ...item, molecule }, cited: molecule.card ? molecule.cited : [] };
   };
   for (const [name, lesson] of lessons) {
     if (!lesson) continue;

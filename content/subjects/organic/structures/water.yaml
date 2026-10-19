@@ -1,0 +1,12 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+
+id: water
+style: full
+smiles: "[OH:1][H:2]"
+atoms:
+  - { id: a1, el: O, x: 0, y: 0, lp: 2 }
+  - { id: a2, el: H, x: -1.299, y: -0.75 }
+  - { id: a3, el: H, x: 1.299, y: -0.75 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a1, b: a3, order: 1 }

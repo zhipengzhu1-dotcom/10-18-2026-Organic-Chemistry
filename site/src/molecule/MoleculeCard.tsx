@@ -113,16 +113,27 @@ export default function MoleculeCard({ molecule, children }: MoleculeCardProps) 
   }
 
   function onKeyDown(e: React.KeyboardEvent) {
-    const turns: Record<string, ["x" | "y", number]> = {
-      ArrowLeft: ["y", -TURN_STEP],
-      ArrowRight: ["y", TURN_STEP],
-      ArrowUp: ["x", -TURN_STEP],
-      ArrowDown: ["x", TURN_STEP],
+    const turns: Record<string, ["x" | "y", number, string]> = {
+      ArrowLeft: ["y", -TURN_STEP, "left"],
+      ArrowRight: ["y", TURN_STEP, "right"],
+      ArrowUp: ["x", -TURN_STEP, "up"],
+      ArrowDown: ["x", TURN_STEP, "down"],
     };
-    if (turns[e.key]) spin(...turns[e.key]);
-    else if (e.key === "+" || e.key === "=") setZoom((z) => (turnable ? Math.min(ZOOM_MAX, z * ZOOM_STEP) : z));
-    else if (e.key === "-" || e.key === "−" || e.key === "_") setZoom((z) => (turnable ? Math.max(ZOOM_MIN, z / ZOOM_STEP) : z));
-    else if (e.key === "]") moveCursor(1);
+    const turning = turns[e.key];
+    if (turning) {
+      if (!turnable) return;
+      spin(turning[0], turning[1]);
+      say(`Turned ${turning[2]}.`);
+    } else if (e.key === "+" || e.key === "=" || e.key === "-" || e.key === "−" || e.key === "_") {
+      if (!turnable) return;
+      const zoomIn = e.key === "+" || e.key === "=";
+      setZoom((z) => (zoomIn ? Math.min(ZOOM_MAX, z * ZOOM_STEP) : Math.max(ZOOM_MIN, z / ZOOM_STEP)));
+      say(zoomIn ? "Zoomed in." : "Zoomed out.");
+    } else if (e.key === "0" || e.key === "Home") {
+      setRotation(molecule.orientation);
+      setZoom(1);
+      say("View reset.");
+    } else if (e.key === "]") moveCursor(1);
     else if (e.key === "[") moveCursor(-1);
     else if ((e.key === "Enter" || e.key === " ") && cursor !== null) pick(cursor);
     else if (e.key === "Escape" && picks.length) {
@@ -226,7 +237,7 @@ export default function MoleculeCard({ molecule, children }: MoleculeCardProps) 
         </button>
       </div>
       <p id={`${id}-help`} className="sr">
-        {turnable ? "Drag or use the arrow keys to turn it; plus and minus zoom. " : ""}
+        {turnable ? "Drag or use the arrow keys to turn it; plus and minus zoom; 0 resets the view. " : ""}
         Square brackets move between atoms and Enter picks one: two atoms give a distance, three the angle at the middle
         atom. Describe reads the arrangement.
       </p>
