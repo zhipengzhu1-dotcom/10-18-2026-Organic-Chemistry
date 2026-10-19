@@ -25,11 +25,19 @@ export interface Screen {
   done: boolean;
 }
 
-export function start(lesson: Lesson): Screen {
-  return open(lesson, 0);
+/** What the engine needs from a resolved Lesson. */
+export type PlayableLesson = Pick<Lesson, "steps" | "deletedSteps">;
+
+/**
+ * Opens the Lesson at its first Step, or at the Step a Step link names (ADR 0003): a deleted
+ * Step's id opens the Step its old links now point at; an unknown id opens the first Step.
+ */
+export function start(lesson: PlayableLesson, stepId?: string): Screen {
+  const target = (stepId && lesson.deletedSteps?.[stepId]) || stepId;
+  return open(lesson, Math.max(0, lesson.steps.findIndex((s) => s.id === target)));
 }
 
-export function act(lesson: Lesson, screen: Screen, action: Action): Screen {
+export function act(lesson: PlayableLesson, screen: Screen, action: Action): Screen {
   if (action.type === "continue") {
     if (!screen.canContinue || screen.index + 1 >= lesson.steps.length) return screen;
     return open(lesson, screen.index + 1);
@@ -39,7 +47,7 @@ export function act(lesson: Lesson, screen: Screen, action: Action): Screen {
   return { ...screen, ...grade(step, action.choice, screen.tries) };
 }
 
-function open(lesson: Lesson, index: number): Screen {
+function open(lesson: PlayableLesson, index: number): Screen {
   const step = lesson.steps[index];
   return {
     index,

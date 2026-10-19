@@ -34,6 +34,9 @@ export function checkLessonShape(lesson: LessonFile): string[] {
     if (step.prediction && step.phase !== "hook") errors.push(`step ${step.id}: prediction is allowed only in the Hook`);
     for (const message of checkInteraction(step)) errors.push(`step ${step.id}: ${message}`);
   }
+
+  if (lesson.signature && !steps.some((s) => s.id === lesson.signature))
+    errors.push(`signature Step "${lesson.signature}" is not one of its Steps`);
   return errors;
 }
 

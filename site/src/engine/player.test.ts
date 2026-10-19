@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Lesson, MultipleChoiceStep } from "@astratron/content";
-import { act, start, type Action, type Screen } from "./player.ts";
+import type { MultipleChoiceStep } from "@astratron/content";
+import { act, start, type Action, type PlayableLesson, type Screen } from "./player.ts";
 
 const choice = (id: string, extra: Partial<MultipleChoiceStep> = {}): MultipleChoiceStep => ({
   id,
@@ -22,14 +22,8 @@ const choice = (id: string, extra: Partial<MultipleChoiceStep> = {}): MultipleCh
   ...extra,
 });
 
-const lesson: Lesson = {
-  id: "l1",
-  slug: "first",
-  title: "First",
-  goal: "Goal.",
-  keyIdea: "Key idea.",
-  onRamp: false,
-  url: "/chem/c/u/first",
+const lesson: PlayableLesson = {
+  deletedSteps: { s06: "s03" },
   steps: [
     choice("s01", { phase: "hook", prediction: true, correct: undefined, hints: undefined }),
     { id: "s02", phase: "build", type: "explain", text: "Explain." },
@@ -134,5 +128,19 @@ describe("Step player engine", () => {
     const wrap = act(lesson, beforeWrap, next);
     expect(wrap).toMatchObject({ index: 4, done: true });
     expect(act(lesson, wrap, next)).toEqual(wrap);
+  });
+});
+
+describe("Step links (ADR 0003)", () => {
+  it("a link to a Step id opens that Step", () => {
+    expect(start(lesson, "s04")).toMatchObject({ index: 3, step: { id: "s04" }, tries: 0, feedback: null });
+  });
+
+  it("a link to a deleted Step's id opens the Step its old links now point at", () => {
+    expect(start(lesson, "s06")).toMatchObject({ index: 2, step: { id: "s03" } });
+  });
+
+  it("a link to an unknown id opens the first Step", () => {
+    expect(start(lesson, "s99")).toMatchObject({ index: 0, step: { id: "s01" } });
   });
 });

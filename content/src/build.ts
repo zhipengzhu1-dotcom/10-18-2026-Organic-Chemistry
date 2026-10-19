@@ -69,6 +69,7 @@ export function buildContent(root: string): BuildResult {
     }
 
     const courses: Course[] = [];
+    let unitNumber = 0;
     for (const rel of yamlFiles(root, `${slug}/courses`)) {
       const course = load(rel, courseFile);
       if (!course) continue;
@@ -76,21 +77,28 @@ export function buildContent(root: string): BuildResult {
       courses.push({
         slug: courseSlug,
         title: course.title,
-        units: course.units.map((unit) => ({
-          ...unit,
-          lessons: unit.lessons.flatMap((lessonId) => {
-            const lesson = lessons.get(lessonId);
-            if (!lesson) {
-              if (!lessons.has(lessonId)) errors.push(`${rel}: unit ${unit.id} lists Lesson "${lessonId}", which has no file`);
-              return [];
-            }
-            const url = `/${slug}/${courseSlug}/${unit.slug}/${lesson.slug}`;
-            return [resolveLesson(lesson, url, problems, `${slug}/lessons/${lesson.id}.yaml`, errors)];
-          }),
-        })),
+        units: course.units.map((unit) => {
+          const url = `/${slug}/${courseSlug}/${unit.slug}`;
+          let coreNumber = 0;
+          return {
+            ...unit,
+            number: ++unitNumber,
+            url,
+            lessons: unit.lessons.flatMap((lessonId) => {
+              const lesson = lessons.get(lessonId);
+              if (!lesson) {
+                if (!lessons.has(lessonId)) errors.push(`${rel}: unit ${unit.id} lists Lesson "${lessonId}", which has no file`);
+                return [];
+              }
+              const number = lesson.onRamp ? 0 : ++coreNumber;
+              const lessonRel = `${slug}/lessons/${lesson.id}.yaml`;
+              return [resolveLesson(lesson, `${url}/${lesson.slug}`, number, problems, lessonRel, errors)];
+            }),
+          };
+        }),
       });
     }
-    if (subject) subjects.push({ slug, title: subject.title, courses });
+    if (subject) subjects.push({ slug, title: subject.title, url: `/${slug}`, courses });
   }
 
   return errors.length ? { errors } : { model: { subjects }, errors };
@@ -99,6 +107,7 @@ export function buildContent(root: string): BuildResult {
 function resolveLesson(
   lesson: LessonFile,
   url: string,
+  number: number,
   problems: Map<string, ProblemFile | undefined>,
   rel: string,
   errors: string[],
@@ -117,7 +126,18 @@ function resolveLesson(
     const { type, prompt, options, answer, correct, hints, reveal } = problem;
     return [{ id: step.id, phase: "check", problemId: problem.id, type, prompt, options, answer, correct, hints, reveal }];
   });
-  return { ...lesson, url, steps };
+  const phases = { hook: 0, build: 0, check: 0, wrap: 0 };
+  for (const step of lesson.steps) phases[step.phase]++;
+  const { signature, ...rest } = lesson;
+  return { ...rest, url, number, signature: signatureType(lesson), phases, steps };
+}
+
+/** The named signature Step's type, else the first graded Build Step's, else the first Step's. */
+function signatureType(lesson: LessonFile): Step["type"] {
+  const named = lesson.steps.find((s) => s.id === lesson.signature);
+  const graded = lesson.steps.find((s) => s.phase === "build" && s.type !== "explain");
+  const type = (named ?? graded ?? lesson.steps[0]).type;
+  return type === "check" ? "multiple-choice" : type;
 }
 
 function subdirs(dir: string): string[] {
