@@ -2,7 +2,9 @@
 // docs/specs/lesson-spec-template.md, "Shape checks").
 import type { LessonFile, ProblemFile } from "./schema.ts";
 
-type Interaction = Pick<ProblemFile, "options" | "answer" | "correct" | "hints"> & { prediction?: boolean };
+type MultipleChoice = Extract<ProblemFile, { type: "multiple-choice" }>;
+type Interaction = Pick<MultipleChoice, "options" | "answer" | "correct" | "hints"> & { prediction?: boolean };
+type Graded = Pick<ProblemFile, "answer" | "correct" | "hints"> & { prediction?: boolean };
 
 /** Returns one message per broken rule; empty when the Lesson is well shaped. */
 export function checkLessonShape(lesson: LessonFile): string[] {
@@ -37,18 +39,31 @@ export function checkLessonShape(lesson: LessonFile): string[] {
   return errors;
 }
 
-/** Rules every graded Step and Problem shares. */
+/** The Multiple choice rules: answers and Hints name options. */
 export function checkInteraction(item: Interaction): string[] {
-  const errors: string[] = [];
   const optionIds = new Set(item.options.map((o) => o.id));
-  for (const id of item.answer) if (!optionIds.has(id)) errors.push(`answer names unknown option "${id}"`);
+  return checkGraded(item, optionIds, {
+    answer: (id) => `answer names unknown option "${id}"`,
+    hint: (id) => `a Hint matches unknown option "${id}"`,
+  });
+}
+
+/** Rules every graded Step and Problem shares, whatever its answers name (options, atoms, bonds…). */
+export function checkGraded(
+  item: Graded,
+  ids: Set<string>,
+  unknown: { answer: (id: string) => string; hint: (id: string) => string },
+): string[] {
+  const errors: string[] = [];
+  for (const id of item.answer) if (!ids.has(id)) errors.push(unknown.answer(id));
   if (item.prediction) return errors;
 
   const hints = item.hints ?? [];
   for (const hint of hints)
-    for (const id of hint.match ?? []) if (!optionIds.has(id)) errors.push(`a Hint matches unknown option "${id}"`);
-  const fallbacks = hints.filter((h) => !h.match);
-  if (fallbacks.length !== 1 || hints.at(-1)?.match)
+    for (const id of [...(hint.match ?? []), ...(hint.includes ?? []), ...(hint.misses ?? [])])
+      if (!ids.has(id)) errors.push(unknown.hint(id));
+  const fallbacks = hints.filter((h) => !h.match && !h.includes && !h.misses);
+  if (fallbacks.length !== 1 || fallbacks[0] !== hints.at(-1))
     errors.push("needs exactly one generic fallback Hint (no match), and it must come last");
   if (!item.correct) errors.push("needs a Correct line");
   return errors;

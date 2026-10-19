@@ -1,0 +1,215 @@
+// The site's own 2D structure renderer. It draws every lone pair as two cyan
+// dots and every charged atom as a letter with its sign. RDKit.js only lays
+// structures out (content/src/layout.ts); it never draws. Pure: a structure
+// in, an SVG string out, so it runs at build time (pre-rendered SVG), in the
+// browser, and for Manim's SVG import alike.
+import type { Hidden, Structure, StructureAtom } from "@astratron/content";
+
+/** Drawn length of one bond, in SVG units (≈ CSS px at natural size). */
+export const BOND_PX = 60;
+const PAD = 36;
+const FONT = 20;
+const CHAR_W = FONT * 0.6; // JetBrains Mono advance width
+const LETTER_GAP = 12; // bonds stop this far short of a letter
+const LP_DIST = 17;
+const LP_SPREAD = 4.5;
+const DOT_R = 2.4;
+
+export interface Point {
+  x: number;
+  y: number;
+}
+export interface Segment {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+export interface Drawing {
+  svg: string;
+  viewBox: string;
+  width: number;
+  height: number;
+  /** Atom centres, in the SVG's coordinates. */
+  atoms: Record<string, Point>;
+  /** Bonds centre to centre, in the SVG's coordinates. */
+  bonds: Record<string, Segment>;
+}
+
+const SUB = "₀₁₂₃₄₅₆₇₈₉";
+const sub = (n: number) => (n > 1 ? [...String(n)].map((d) => SUB[+d]).join("") : "");
+const r1 = (n: number) => Math.round(n * 10) / 10;
+
+export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawing {
+  const showCharges = !hide.includes("charges");
+  const showLonePairs = !hide.includes("lone-pairs");
+  const scale = BOND_PX / typicalBondLength(structure);
+
+  const xs = structure.atoms.map((a) => a.x * scale);
+  const ys = structure.atoms.map((a) => a.y * scale);
+  const minX = Math.min(...xs) - PAD - CHAR_W * 2;
+  const minY = Math.min(...ys) - PAD;
+  const maxX = Math.max(...xs) + PAD + CHAR_W * 2;
+  const maxY = Math.max(...ys) + PAD;
+  const width = r1(maxX - minX);
+  const height = r1(maxY - minY);
+
+  const at: Record<string, Point> = {};
+  for (const a of structure.atoms) at[a.id] = { x: r1(a.x * scale - minX), y: r1(a.y * scale - minY) };
+
+  const neighbours = new Map<string, string[]>(structure.atoms.map((a) => [a.id, []]));
+  for (const b of structure.bonds) {
+    neighbours.get(b.a)?.push(b.b);
+    neighbours.get(b.b)?.push(b.a);
+  }
+  const lettered = (a: StructureAtom) =>
+    structure.style === "full" || a.el !== "C" || !!a.charge || !!a.letter || neighbours.get(a.id)!.length === 0;
+  const byId = new Map(structure.atoms.map((a) => [a.id, a]));
+
+  const parts: string[] = [];
+  const bonds: Record<string, Segment> = {};
+
+  for (const b of structure.bonds) {
+    const p = at[b.a];
+    const q = at[b.b];
+    bonds[b.id] = { x1: p.x, y1: p.y, x2: q.x, y2: q.y };
+    const len = Math.hypot(q.x - p.x, q.y - p.y) || 1;
+    const ux = (q.x - p.x) / len;
+    const uy = (q.y - p.y) / len;
+    const trimA = lettered(byId.get(b.a)!) ? LETTER_GAP : 0;
+    const trimB = lettered(byId.get(b.b)!) ? LETTER_GAP : 0;
+    const s = { x: p.x + ux * trimA, y: p.y + uy * trimA };
+    const e = { x: q.x - ux * trimB, y: q.y - uy * trimB };
+    const nx = -uy;
+    const ny = ux;
+
+    if (b.stereo === "wedge") {
+      const w = 4;
+      parts.push(
+        `<polygon class="bond-wedge" points="${r1(s.x)},${r1(s.y)} ${r1(e.x + nx * w)},${r1(e.y + ny * w)} ${r1(e.x - nx * w)},${r1(e.y - ny * w)}" fill="currentColor"/>`,
+      );
+      continue;
+    }
+    if (b.stereo === "hash") {
+      const steps = 6;
+      for (let i = 1; i <= steps; i++) {
+        const t = i / steps;
+        const cx = s.x + (e.x - s.x) * t;
+        const cy = s.y + (e.y - s.y) * t;
+        const w = 4 * t + 0.5;
+        parts.push(
+          `<line class="bond-hash" x1="${r1(cx + nx * w)}" y1="${r1(cy + ny * w)}" x2="${r1(cx - nx * w)}" y2="${r1(cy - ny * w)}" stroke="currentColor" stroke-width="1.5"/>`,
+        );
+      }
+      continue;
+    }
+    const offsets = b.order === 1 ? [0] : b.order === 2 ? [-3.5, 3.5] : [-5.5, 0, 5.5];
+    for (const o of offsets) {
+      parts.push(
+        `<line class="bond-line" x1="${r1(s.x + nx * o)}" y1="${r1(s.y + ny * o)}" x2="${r1(e.x + nx * o)}" y2="${r1(e.y + ny * o)}" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`,
+      );
+    }
+  }
+
+  for (const a of structure.atoms) {
+    const { x, y } = at[a.id];
+    const bondDirs = neighbours.get(a.id)!.map((n) => Math.atan2(at[n].y - y, at[n].x - x));
+    const occupied = [...bondDirs];
+    const hLeft = bondDirs.length > 0 && mean(bondDirs.map(Math.cos)) > 0.1;
+
+    if (lettered(a)) {
+      const hText = a.h ? `H${sub(a.h)}` : "";
+      const label = hLeft ? hText + a.el : a.el + hText;
+      const anchor = !hText ? "middle" : hLeft ? "end" : "start";
+      const tx = !hText ? x : hLeft ? x + (a.el.length * CHAR_W) / 2 : x - (a.el.length * CHAR_W) / 2;
+      parts.push(
+        `<text class="atom" x="${r1(tx)}" y="${r1(y)}" text-anchor="${anchor}" dominant-baseline="central" font-size="${FONT}" fill="currentColor">${label}</text>`,
+      );
+      if (hText) occupied.push(hLeft ? Math.PI : 0);
+    }
+
+    const lonePairs = showLonePairs ? lonePairDirections(occupied, a.lp ?? 0) : [];
+
+    if (showCharges && a.charge) {
+      const mag = Math.abs(a.charge);
+      const sign = (mag > 1 ? String(mag) : "") + (a.charge > 0 ? "+" : "−");
+      // Upper right when clear of bonds and lone pairs, else the widest gap left.
+      const taken = [...occupied, ...lonePairs];
+      const preferred = -Math.PI / 4;
+      const free = taken.every((d) => angleBetween(d, preferred) >= (35 * Math.PI) / 180);
+      const dir = free ? preferred : lonePairDirections(taken, 1)[0];
+      const dist = free ? 16 : 22;
+      const right = a.h && !hLeft && free ? CHAR_W * (1 + String(a.h).length) : 0;
+      parts.push(
+        `<text class="charge" x="${r1(x + Math.cos(dir) * dist + right)}" y="${r1(y + Math.sin(dir) * dist)}" text-anchor="middle" dominant-baseline="central" font-size="${FONT * 0.7}" fill="currentColor">${sign}</text>`,
+      );
+    }
+
+    for (const dir of lonePairs) {
+      const cx = x + Math.cos(dir) * LP_DIST;
+      const cy = y + Math.sin(dir) * LP_DIST;
+      const px = -Math.sin(dir) * LP_SPREAD;
+      const py = Math.cos(dir) * LP_SPREAD;
+      for (const sgn of [1, -1]) {
+        parts.push(
+          `<circle class="lone-pair-dot" cx="${r1(cx + px * sgn)}" cy="${r1(cy + py * sgn)}" r="${DOT_R}" fill="var(--lone-pair, #0e9fbf)"/>`,
+        );
+      }
+    }
+  }
+
+  const viewBox = `0 0 ${width} ${height}`;
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" class="structure" viewBox="${viewBox}" width="${width}" height="${height}" aria-hidden="true" font-family="'JetBrains Mono', ui-monospace, monospace">` +
+    parts.join("") +
+    `</svg>`;
+  return { svg, viewBox, width, height, atoms: at, bonds };
+}
+
+/** Places each lone pair in the middle of the widest free angle around the atom. */
+function lonePairDirections(occupied: number[], count: number): number[] {
+  const dirs = [...occupied];
+  const out: number[] = [];
+  for (let i = 0; i < count; i++) {
+    let dir: number;
+    if (dirs.length === 0) dir = -Math.PI / 2;
+    else {
+      const sorted = dirs.map(norm).sort((p, q) => p - q);
+      let best = 0;
+      let bestGap = -1;
+      for (let j = 0; j < sorted.length; j++) {
+        const next = j + 1 < sorted.length ? sorted[j + 1] : sorted[0] + 2 * Math.PI;
+        const gap = next - sorted[j];
+        if (gap > bestGap + 1e-6) {
+          bestGap = gap;
+          best = sorted[j] + gap / 2;
+        }
+      }
+      dir = best;
+    }
+    dirs.push(dir);
+    out.push(dir);
+  }
+  return out;
+}
+
+const angleBetween = (p: number, q: number) => {
+  const d = norm(p - q);
+  return Math.min(d, 2 * Math.PI - d);
+};
+const norm = (a: number) => ((a % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+const mean = (xs: number[]) => xs.reduce((s, x) => s + x, 0) / (xs.length || 1);
+
+function typicalBondLength(s: Structure): number {
+  const pos = new Map(s.atoms.map((a) => [a.id, a]));
+  const lengths = s.bonds
+    .map((b) => {
+      const p = pos.get(b.a);
+      const q = pos.get(b.b);
+      return p && q ? Math.hypot(q.x - p.x, q.y - p.y) : 0;
+    })
+    .filter((l) => l > 0)
+    .sort((p, q) => p - q);
+  return lengths.length ? lengths[Math.floor(lengths.length / 2)] : 1.5;
+}

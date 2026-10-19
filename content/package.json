@@ -7,10 +7,14 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "build": "node src/cli.ts"
+    "build": "node src/cli.ts",
+    "structure": "node src/structure-cli.ts"
   },
   "dependencies": {
     "yaml": "^2.9.1",
     "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@rdkit/rdkit": "2026.9.1"
   }
 }

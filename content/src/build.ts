@@ -7,13 +7,31 @@
 //   <subject>/courses/<course>.yaml   one course manifest per Course; file name is its slug
 //   <subject>/lessons/<lesson id>.yaml
 //   <subject>/problems/<problem id>.yaml
+//   <subject>/structures/<structure id>.yaml   2D structures, written by `pnpm structure`
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 import { parse } from "yaml";
 import type { z } from "zod";
-import { courseFile, lessonFile, problemFile, subjectFile, type LessonFile, type ProblemFile } from "./schema.ts";
-import type { BuildResult, Course, Lesson, Step, Subject } from "./model.ts";
+import {
+  courseFile,
+  lessonFile,
+  problemFile,
+  structureFile,
+  subjectFile,
+  type LessonFile,
+  type ProblemFile,
+  type StructureFile,
+} from "./schema.ts";
+import type { BuildResult, Course, Lesson, Step, Structure, Subject } from "./model.ts";
 import { checkInteraction, checkLessonShape } from "./shape.ts";
+import { checkStructure, resolveOptions, resolveTap } from "./structures.ts";
+
+type StepFile = LessonFile["steps"][number];
+/** A graded Step or Problem as written, before its structures are resolved. */
+type Interactive = Extract<StepFile | ProblemFile, { type: "multiple-choice" | "tap-to-identify" }>;
+/** The resolved interaction fields of a graded Step or Problem. */
+type Resolved = DistributiveOmit<Extract<Step, { type: "multiple-choice" | "tap-to-identify" }>, "id" | "phase" | "problemId">;
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 
 export function buildContent(root: string): BuildResult {
   const errors: string[] = [];
@@ -58,14 +76,43 @@ export function buildContent(root: string): BuildResult {
     const subject = load(`${slug}/subject.yaml`, subjectFile);
     const lessons = loadDir<LessonFile>(`${slug}/lessons`, lessonFile);
     const problems = loadDir<ProblemFile>(`${slug}/problems`, problemFile);
+    const structures = new Map<string, Structure | undefined>();
+    for (const [name, file] of loadDir<StructureFile>(`${slug}/structures`, structureFile)) {
+      const problems = file ? checkStructure(file) : [];
+      for (const message of problems) errors.push(`${slug}/structures/${name}.yaml: ${message}`);
+      structures.set(name, file && !problems.length ? file : undefined);
+    }
+
+    /** Resolves each graded Step and Problem once, so its errors are reported once. */
+    const resolved = new Map<Interactive, Resolved | undefined>();
+    function resolveInteractive(item: Interactive, where: string): void {
+      const found: string[] = [];
+      let out: Resolved | undefined;
+      const { type, prompt, answer, correct, hints, reveal } = item;
+      if (type === "multiple-choice") {
+        const options = resolveOptions(item.options, structures, found);
+        const prediction = "prediction" in item && item.prediction ? { prediction: true } : {};
+        out = { type, prompt, options, answer, correct, hints, reveal, ...prediction };
+      } else {
+        const tap = resolveTap(item, structures, found);
+        if (tap) out = { type, prompt, ...tap, answer, correct, hints, reveal, ...(item.tapOnly && { tapOnly: item.tapOnly }) };
+      }
+      for (const message of found) errors.push(`${where}${message}`);
+      resolved.set(item, found.length ? undefined : out);
+    }
 
     for (const lesson of lessons.values()) {
-      if (lesson)
-        for (const message of checkLessonShape(lesson)) errors.push(`${slug}/lessons/${lesson.id}.yaml: ${message}`);
+      if (!lesson) continue;
+      const rel = `${slug}/lessons/${lesson.id}.yaml`;
+      for (const message of checkLessonShape(lesson)) errors.push(`${rel}: ${message}`);
+      for (const step of lesson.steps)
+        if (step.type === "multiple-choice" || step.type === "tap-to-identify") resolveInteractive(step, `${rel}: step ${step.id}: `);
     }
     for (const problem of problems.values()) {
-      if (problem)
-        for (const message of checkInteraction(problem)) errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
+      if (!problem) continue;
+      const rel = `${slug}/problems/${problem.id}.yaml: `;
+      if (problem.type === "multiple-choice") for (const message of checkInteraction(problem)) errors.push(rel + message);
+      resolveInteractive(problem, rel);
     }
 
     const courses: Course[] = [];
@@ -85,7 +132,7 @@ export function buildContent(root: string): BuildResult {
               return [];
             }
             const url = `/${slug}/${courseSlug}/${unit.slug}/${lesson.slug}`;
-            return [resolveLesson(lesson, url, problems, `${slug}/lessons/${lesson.id}.yaml`, errors)];
+            return [resolveLesson(lesson, url, problems, resolved, `${slug}/lessons/${lesson.id}.yaml`, errors)];
           }),
         })),
       });
@@ -100,11 +147,16 @@ function resolveLesson(
   lesson: LessonFile,
   url: string,
   problems: Map<string, ProblemFile | undefined>,
+  resolved: Map<Interactive, Resolved | undefined>,
   rel: string,
   errors: string[],
 ): Lesson {
   const steps: Step[] = lesson.steps.flatMap((step): Step[] => {
-    if (step.type !== "check") return [step];
+    if (step.type === "explain") return [step];
+    if (step.type !== "check") {
+      const fields = resolved.get(step);
+      return fields ? [{ id: step.id, phase: step.phase, ...fields } as Step] : [];
+    }
     const problem = problems.get(step.problem);
     if (!problem) {
       if (!problems.has(step.problem)) errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" not found`);
@@ -114,8 +166,8 @@ function resolveLesson(
       errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" is ${problem.status}, not approved`);
       return [];
     }
-    const { type, prompt, options, answer, correct, hints, reveal } = problem;
-    return [{ id: step.id, phase: "check", problemId: problem.id, type, prompt, options, answer, correct, hints, reveal }];
+    const fields = resolved.get(problem);
+    return fields ? [{ id: step.id, phase: "check", problemId: problem.id, ...fields } as Step] : [];
   });
   return { ...lesson, url, steps };
 }
