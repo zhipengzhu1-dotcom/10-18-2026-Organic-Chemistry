@@ -195,10 +195,14 @@ function clauses(values: Cited[]): string {
     .join(" ");
 }
 
+/** Groups by the source's id and citation, not object identity: values reach browser islands as JSON copies. */
 function bySource(values: Cited[]): [Source, Cited[]][] {
-  const groups = new Map<Source, Cited[]>();
-  for (const v of values) (groups.get(v.source) ?? groups.set(v.source, []).get(v.source)!).push(v);
-  return [...groups];
+  const groups = new Map<string, [Source, Cited[]]>();
+  for (const v of values) {
+    const key = `${v.source.id}\n${v.source.citation}`;
+    (groups.get(key) ?? groups.set(key, [v.source, []]).get(key)!)[1].push(v);
+  }
+  return [...groups.values()];
 }
 
 function named(values: Cited[]): string {
