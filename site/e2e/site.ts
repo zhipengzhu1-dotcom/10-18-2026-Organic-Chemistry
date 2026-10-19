@@ -27,13 +27,17 @@ export async function allPages(page: Page): Promise<string[]> {
   return [...seen].sort();
 }
 
+/** The Lesson pages among `paths` (/<subject>/<course>/<unit>/<lesson>). */
+export const lessonPaths = (paths: string[]) => paths.filter((p) => p.split("/").filter(Boolean).length === 4);
+
 /** Pick a theme the way a Student does: the site's switch, stored in the browser. */
 export async function useTheme(page: Page, theme: Theme) {
   await page.addInitScript((t) => localStorage.setItem("at-theme", t), theme);
 }
 
 /**
- * Plays a Lesson from the current Step to the Wrap: picks the first option,
+ * Plays a Lesson from the current Step to the Wrap: picks the first option
+ * (or types 1, or keeps the Rank order),
  * Checks until resolved, then Continues. Calls `each` on every screen state
  * worth inspecting (each new Step and each feedback panel).
  */
@@ -45,7 +49,11 @@ export async function playThrough(page: Page, each: (label: string) => Promise<v
     if (await page.getByRole("link", { name: "Finish" }).isVisible()) return;
     const checkBtn = page.getByRole("button", { name: "Check" });
     while (await checkBtn.isVisible()) {
-      await page.getByRole("group", { name: "Choices" }).getByRole("button").first().click();
+      const choices = page.getByRole("group", { name: "Choices" });
+      const box = page.getByRole("textbox", { name: "Answer" });
+      if (await choices.isVisible()) await choices.getByRole("button").first().click();
+      else if (await box.isVisible()) await box.fill("1");
+      // A Rank / order Step can be checked in its starting order.
       await checkBtn.click();
       await expect(page.getByRole("status")).not.toBeEmpty();
       await each(`${label} feedback`);

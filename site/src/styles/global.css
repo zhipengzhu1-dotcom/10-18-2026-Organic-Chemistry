@@ -336,6 +336,41 @@
     color: var(--at-ink-muted);
   }
 
+  .rank {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .rank .opt {
+    width: 100%;
+  }
+  .opt.dragging {
+    border-color: var(--at-electron);
+    box-shadow: var(--at-drop);
+  }
+
+  /* Numeric input: the number box and its fixed unit, both in the data face. */
+  .numeric {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .numeric-box {
+    width: 8em;
+    min-height: var(--at-tap);
+    padding: 0 12px;
+    font: 400 20px/1 var(--at-font-data);
+    color: var(--at-ink);
+    background: var(--at-surface);
+    border: var(--at-border) solid var(--at-line);
+  }
+  .numeric-box:disabled {
+    color: var(--at-ink-muted);
+  }
+  .numeric-unit {
+    font: 400 20px/1 var(--at-font-data);
+  }
+
   /* Feedback panel: icon + words, never colour alone, never red, no sound.
      ✓ solid cyan · ✗ dashed magenta + Hint · → plain border + the answer. */
   .fb {

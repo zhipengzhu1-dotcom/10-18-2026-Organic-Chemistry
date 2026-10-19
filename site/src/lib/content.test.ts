@@ -10,6 +10,7 @@ describe("md marks numbers and formulas as data", () => {
     expect(md("A bond of 1.54 Å and 4 bonds")).toBe(`A bond of ${d("1.54")} Å and ${d("4")} bonds`);
     expect(md("an option of just 2")).toBe(`an option of just ${d("2")}`);
     expect(md("pKa −1.7")).toBe(`pKa ${d("−1.7")}`);
+    expect(md("in 3D, sp3 carbon")).toBe(`in ${d("3")}D, sp${d("3")} carbon`);
   });
 
   it("wraps formulas with subscripts or charges and bond notation", () => {

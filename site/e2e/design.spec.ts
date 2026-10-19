@@ -3,7 +3,7 @@
 // panel, motion rules, and the axe gate on every page in both themes.
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { allPages, playThrough, SAMPLE_LESSON, THEMES, useTheme } from "./site.ts";
+import { allPages, lessonPaths, playThrough, SAMPLE_LESSON, THEMES, useTheme } from "./site.ts";
 
 const PHONE = { width: 390, height: 844 };
 
@@ -64,7 +64,9 @@ const motion = (page: Page) =>
         const props = cs.transitionProperty.split(",").map((p) => p.trim());
         secs(cs.transitionDuration).forEach((d, i) => d > 0 && out.push([what, props[i % props.length], d, "1"]));
         if (cs.animationName !== "none")
-          secs(cs.animationDuration).forEach((d) => out.push([what, `@${cs.animationName}`, d, cs.animationIterationCount]));
+          secs(cs.animationDuration).forEach((d) =>
+            out.push([what, `@${cs.animationName}`, d, cs.animationIterationCount]),
+          );
       }
     return out;
   });
@@ -109,28 +111,36 @@ for (const theme of THEMES) {
           return [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family.replace(/["']/g, ""));
         });
         expect(faces, `${path}: self-hosted fonts load`).toEqual(expect.arrayContaining(["Space Grotesk Variable"]));
-        const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
+        const axe = await new AxeBuilder({ page })
+          .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+          .analyze();
         expect(axe.violations.map((v) => `${path}: ${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);
         expect(await typeViolations(page), path).toEqual([]);
         expect(await smallTargets(page), path).toEqual([]);
       }
     });
 
-    test("every Step and feedback panel of a Lesson passes axe and the type rules", async ({ page }) => {
-      await page.goto(SAMPLE_LESSON);
-      await playThrough(page, async (label) => {
-        await page.waitForTimeout(250); // let the panel's entry finish before axe reads colours
-        const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
-        expect(axe.violations.map((v) => `${label}: ${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);
-        expect(await typeViolations(page), label).toEqual([]);
-        expect(await smallTargets(page), label).toEqual([]);
-      });
+    test("every Step and feedback panel of every Lesson passes axe and the type rules", async ({ page }) => {
+      for (const lesson of lessonPaths(await allPages(page))) {
+        await page.goto(lesson);
+        await playThrough(page, async (step) => {
+          const label = `${lesson} ${step}`;
+          await page.waitForTimeout(250); // let the panel's entry finish before axe reads colours
+          const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
+          expect(axe.violations.map((v) => `${label}: ${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);
+          expect(await typeViolations(page), label).toEqual([]);
+          expect(await smallTargets(page), label).toEqual([]);
+        });
+      }
     });
 
-    test("feedback is icon + words: ✓ solid cyan, ✗ dashed magenta + Hint, → plain border + answer", async ({ page }) => {
+    test("feedback is icon + words: ✓ solid cyan, ✗ dashed magenta + Hint, → plain border + answer", async ({
+      page,
+    }) => {
       await page.goto(SAMPLE_LESSON);
       const panel = page.getByRole("status").locator(".fb");
-      const choose = (name: string) => page.getByRole("group", { name: "Choices" }).getByRole("button", { name, exact: true }).click();
+      const choose = (name: string) =>
+        page.getByRole("group", { name: "Choices" }).getByRole("button", { name, exact: true }).click();
       const check = () => page.getByRole("button", { name: "Check" }).click();
       const next = () => page.getByRole("button", { name: "Continue" }).click();
       const looks = async (style: string, colour: string, icon: string, words: string) => {
@@ -172,17 +182,25 @@ test.describe("Step player on a phone", () => {
     await expect(page.locator(".player-foot").locator("button, a")).toHaveCount(1);
   });
 
-  test("every Step, with its feedback, fits one phone screen with the button in view", async ({ page }) => {
-    await page.goto(SAMPLE_LESSON);
-    await playThrough(page, async (label) => {
-      const fit = await page.evaluate(() => {
-        const body = document.querySelector(".player-body")!;
-        return { page: document.documentElement.scrollHeight <= innerHeight, body: body.scrollHeight <= body.clientHeight };
+  test("every Step of every Lesson, with its feedback, fits one phone screen with the button in view", async ({
+    page,
+  }) => {
+    for (const lesson of lessonPaths(await allPages(page))) {
+      await page.goto(lesson);
+      await playThrough(page, async (step) => {
+        const label = `${lesson} ${step}`;
+        const fit = await page.evaluate(() => {
+          const body = document.querySelector(".player-body")!;
+          return {
+            page: document.documentElement.scrollHeight <= innerHeight,
+            body: body.scrollHeight <= body.clientHeight,
+          };
+        });
+        expect(fit, label).toEqual({ page: true, body: true });
+        await expect(page.locator(".player-foot").locator("button, a")).toBeInViewport({ ratio: 1 });
+        await expect(page.locator(".player-foot").locator("button, a")).toHaveCount(1);
       });
-      expect(fit, label).toEqual({ page: true, body: true });
-      await expect(page.locator(".player-foot").locator("button, a")).toBeInViewport({ ratio: 1 });
-      await expect(page.locator(".player-foot").locator("button, a")).toHaveCount(1);
-    });
+    }
   });
 });
 
@@ -204,9 +222,19 @@ test.describe("motion", () => {
     await page.goto(SAMPLE_LESSON);
     await playThrough(page, async (label) => {
       const moves = await motion(page);
-      expect(moves.filter(([, , , n]) => n !== "1"), `${label}: loops`).toEqual([]);
-      expect(moves.filter(([, , s]) => ![0.09, 0.18, 0.42].includes(Math.round(s * 1000) / 1000)), label).toEqual([]);
-      expect(await page.evaluate(() => document.getAnimations().filter((a) => a.effect?.getTiming().iterations === Infinity).length)).toBe(0);
+      expect(
+        moves.filter(([, , , n]) => n !== "1"),
+        `${label}: loops`,
+      ).toEqual([]);
+      expect(
+        moves.filter(([, , s]) => ![0.09, 0.18, 0.42].includes(Math.round(s * 1000) / 1000)),
+        label,
+      ).toEqual([]);
+      expect(
+        await page.evaluate(
+          () => document.getAnimations().filter((a) => a.effect?.getTiming().iterations === Infinity).length,
+        ),
+      ).toBe(0);
     });
     expect(await page.evaluate(() => (window as unknown as { __sound: boolean }).__sound)).toBe(false);
     await expect(page.locator("audio, video")).toHaveCount(0);

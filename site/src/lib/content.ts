@@ -43,7 +43,7 @@ const EL = "(?:Cl|Br|Na|Mg|Al|Si|Li|Ca|Fe|Zn|Cu|Mn|Cr|Pd|Pt|Sn|Hg|Se|Os|Ni|Ag|Au
 const CHUNK = `(?:${EL}[₀-₉]*|\\((?:${EL}[₀-₉]*)+\\)[₀-₉]*)+[⁺⁻]*`;
 const DATA = new RegExp(
   `(?<![A-Za-z])${CHUNK}(?:[–=≡]${CHUNK})*(?![a-z])` + // formula: CH₄, H₃C–CH₃, C=O, OH⁻
-    `|(?<![\\w.])[−+]?\\d+(?:\\.\\d+)?(?![\\w])`, // number: 4, 1.54, −1.7
+    `|(?<![\\d.])[−+]?\\d+(?:\\.\\d+)?`, // number: 4, 1.54, −1.7, the 3 of 3D and sp3
   "g",
 );
 /** A formula needs a subscript, a charge or a bond; a lone capital (I, C) stays prose. */
@@ -71,16 +71,18 @@ function markData(html: string): string {
 
 /** The Lesson with every text field turned from Markdown into HTML. */
 export function renderLesson(lesson: Lesson): Lesson {
-  const step = (s: Step): Step =>
-    s.type === "explain"
-      ? { ...s, text: md(s.text) }
-      : {
-          ...s,
-          prompt: md(s.prompt),
-          options: s.options.map((o) => ({ ...o, text: md(o.text) })),
-          correct: s.correct && md(s.correct),
-          hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
-          reveal: md(s.reveal),
-        };
+  const step = (s: Step): Step => {
+    if (s.type === "explain") return { ...s, text: md(s.text) };
+    const shared = { prompt: md(s.prompt), correct: s.correct && md(s.correct), reveal: md(s.reveal) };
+    const choices = (list: { id: string; text: string }[]) => list.map((o) => ({ ...o, text: md(o.text) }));
+    switch (s.type) {
+      case "multiple-choice":
+        return { ...s, ...shared, options: choices(s.options), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
+      case "numeric":
+        return { ...s, ...shared, hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
+      case "rank":
+        return { ...s, ...shared, items: choices(s.items), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
+    }
+  };
   return { ...lesson, keyIdea: md(lesson.keyIdea), steps: lesson.steps.map(step) };
 }
