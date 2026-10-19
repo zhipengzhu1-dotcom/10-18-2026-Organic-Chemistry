@@ -7,7 +7,7 @@
    "kind": "computed",
    "citation": "Our calculation: canonical molecular orbitals with PySCF 2.14.0, B3LYP/cc-pVTZ, each molecule computed on its own at the geometry optimised with the same method and then placed together for the picture, 2026-10-19",
    "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
-   "note": "The two molecules are computed separately and placed together for the picture; the distance between them is not computed.",
+   "note": "The two molecules are computed separately and placed together for the picture; the distance between them is not computed. Computed orbital energies are model values: compare them with each other, not with measured energies.",
    "method": {
     "program": "PySCF",
     "version": "2.14.0",

@@ -488,7 +488,8 @@ def run(s: OrbitalSet) -> dict:
     if s.kind == "pair":
         citation = (f"Our calculation: canonical molecular orbitals with PySCF {pyscf.__version__}, {LEVEL}, each molecule computed on its own "
                     f"at the geometry optimised with the same method and then placed together for the picture, {date}")
-        note = "The two molecules are computed separately and placed together for the picture; the distance between them is not computed."
+        note = ("The two molecules are computed separately and placed together for the picture; the distance between them is not computed. "
+                "Computed orbital energies are model values: compare them with each other, not with measured energies.")
     elif s.kind == "ibo":
         citation =(f"Our calculation: intrinsic bond orbitals ({KNIZIA}) from a {LEVEL} single point with PySCF {pyscf.__version__} "
                     f"at the experimental geometry, {date}")

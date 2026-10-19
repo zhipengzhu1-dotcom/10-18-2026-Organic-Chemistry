@@ -1,0 +1,33 @@
+# Laid out by RDKit.js (`pnpm structure`), then placed by hand for Lesson 8's u1-mo-ether-bf3 (#86): BF₃ on
+# the left with its F's pointing away, dimethyl ether on the right with both O lone pairs facing boron.
+# Drawn by the site's own renderer.
+
+id: ether-bf3
+style: full
+smiles: "[CH3:1][O:2][CH3:3].[B:4]([F:5])([F:6])[F:7]"
+atoms:
+  - { id: a1, el: C, x: 3.75, y: -1.299 }
+  - { id: a2, el: O, x: 3, y: 0, lp: 2 }
+  - { id: a3, el: C, x: 3.75, y: 1.299 }
+  - { id: a4, el: B, x: 0, y: 0 }
+  - { id: a5, el: F, x: -1.5, y: 0, lp: 3 }
+  - { id: a6, el: F, x: -0.75, y: -1.299, lp: 3 }
+  - { id: a7, el: F, x: -0.75, y: 1.299, lp: 3 }
+  - { id: a8, el: H, x: 5.25, y: -1.299 }
+  - { id: a9, el: H, x: 4.5, y: -2.598 }
+  - { id: a10, el: H, x: 3, y: -2.598 }
+  - { id: a11, el: H, x: 5.25, y: 1.299 }
+  - { id: a12, el: H, x: 4.5, y: 2.598 }
+  - { id: a13, el: H, x: 3, y: 2.598 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a4, b: a5, order: 1 }
+  - { id: b4, a: a4, b: a6, order: 1 }
+  - { id: b5, a: a4, b: a7, order: 1 }
+  - { id: b6, a: a1, b: a8, order: 1 }
+  - { id: b7, a: a1, b: a9, order: 1 }
+  - { id: b8, a: a1, b: a10, order: 1 }
+  - { id: b9, a: a3, b: a11, order: 1 }
+  - { id: b10, a: a3, b: a12, order: 1 }
+  - { id: b11, a: a3, b: a13, order: 1 }

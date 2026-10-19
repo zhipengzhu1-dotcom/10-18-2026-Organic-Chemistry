@@ -19,6 +19,8 @@ const L8 = {
   "ethylene-b3lyp-orbitals": ["homo", "lumo"],
   "ammonia-b3lyp-orbitals": ["homo"],
   "boron-trifluoride-b3lyp-orbitals": ["lumo"],
+  // Lesson 8 s09 (#86): the two placed together in one frame.
+  "ammonia-bf3-pair-orbitals": ["nh3-homo", "bf3-lumo"],
 };
 
 describe("orbital data files", () => {

@@ -30,3 +30,15 @@ ethanol:
   as-left-drawing: { plane: [3, 1, 0], up: 3, front: 8 }
   # Its right drawing: F (2) upper right and H (8) down, both in the page.
   as-right-drawing: { plane: [8, 1, 2], up: 2, rotate: [0, 0, -58] }
+
+hydrogen-b3lyp:
+  # Lesson 8 s03: side-on, the H–H axis level across the screen (the file lays it along z).
+  side-on: { rotate: [0, 90, 0] }
+ethylene-b3lyp:
+  # Lesson 8 s06 and u1-mo-ethylene-lumo: face-on, looking down on the flat molecule (the file lays it in
+  # the yz plane, C=C along z), so the lobes sit over the atoms until the Student turns it edge-on.
+  face-on: { rotate: [0, 90, 0] }
+ammonia-bf3-b3lyp-pair:
+  # Lesson 8 s09: straight down from N onto B, BF₃'s plane facing the screen, so both orbitals' lobes are
+  # seen end-on; an F points up.
+  top-down: { look: [0, 4], up: 5 }
