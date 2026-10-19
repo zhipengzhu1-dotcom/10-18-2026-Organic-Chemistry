@@ -19,3 +19,25 @@ it("the answer key puts the Lesson back together", () => {
   const { page, key } = splitLesson(lesson());
   expect(withKey(page, JSON.parse(JSON.stringify(key)))).toEqual(lesson());
 });
+
+it("a Draw-arrows Step keeps its start and shown target on the page; results, pushes and in-between copy go in the key", () => {
+  const step = {
+    id: "s05",
+    phase: "build" as const,
+    type: "draw-arrows" as const,
+    prompt: "Push.",
+    start: { structure: { id: "start", style: "full" as const, atoms: [], bonds: [] }, hide: [] },
+    target: { structure: { id: "shown-target", style: "full" as const, atoms: [], bonds: [] }, hide: [] },
+    results: [{ id: "secret-result", style: "full" as const, atoms: [], bonds: [] }],
+    answer: [{ from: "b1", to: "a2" }],
+    inBetween: { over: "Secret over copy." },
+    correct: "Secret correct.",
+    hints: [{ text: "Secret hint." }],
+    reveal: "Secret reveal.",
+  };
+  const whole = { ...lesson(), steps: [step] };
+  const { page, key } = splitLesson(whole);
+  expect(Object.keys(page.steps[0]).sort()).toEqual(["id", "phase", "prompt", "start", "target", "type"]);
+  expect(JSON.stringify(page)).not.toMatch(/secret|Secret/);
+  expect(withKey(page, JSON.parse(JSON.stringify(key)))).toEqual(whole);
+});
