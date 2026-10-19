@@ -43,6 +43,9 @@ const { title, description, bare = false } = Astro.props;
       .report a { display: inline-flex; align-items: center; min-height: 48px; }
       .site-footer { max-width: 40rem; margin: 2rem auto 0; padding: 1rem; border-top: 2px solid #3a3560; }
       .site-footer a { display: inline-flex; align-items: center; min-height: 48px; }
+      .player-bar .back { min-width: 48px; min-height: 48px; font: inherit; background: none; border: 0; color: inherit; }
+      .player-bar .back:disabled { opacity: 0.3; }
+      .button-secondary { display: block; min-height: 48px; margin-top: 0.5rem; padding: 0.5rem 1rem; text-align: center; border: 2px solid #8b7bff; box-sizing: border-box; }
     </style>
   </head>
   <body>

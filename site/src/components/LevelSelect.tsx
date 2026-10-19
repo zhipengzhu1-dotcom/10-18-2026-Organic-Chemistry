@@ -48,8 +48,12 @@ function LessonRow({ lesson, firstCore }: { lesson: Lesson; firstCore?: Lesson }
     : `Lesson ${lesson.number}${lesson.capstone ? " · boss level" : ""}`;
   const steps = lesson.steps.length;
   return (
-    <li className={`level level-${kind}`}>
+    <li className={`level level-${kind}`} data-lesson-id={lesson.id} data-on-ramp={lesson.onRamp || undefined}>
       <span className="level-number">{number}</span>
+      {/* Filled in from the browser's progress record (progress/unit-page.ts). */}
+      <span className="level-status" data-status="not-started">
+        Not started
+      </span>
       <h3 className="level-title">
         <a href={lesson.url}>{lesson.title}</a>
       </h3>
@@ -69,8 +73,13 @@ function LessonRow({ lesson, firstCore }: { lesson: Lesson; firstCore?: Lesson }
 export default function LevelSelect({ unit }: { unit: Unit }) {
   const firstCore = unit.lessons.find((l) => !l.onRamp);
   const groups = acts(unit.lessons);
+  const core = unit.lessons.filter((l) => !l.onRamp).length;
   return (
     <div className="level-select">
+      {/* The On-ramp doesn't count toward the Unit; the browser fills in n from the progress record. */}
+      <p className="unit-progress" data-unit-progress>
+        0 of {core} Lessons
+      </p>
       {groups.map((group, i) => (
         <section key={i} className="act">
           {group.title && <h2 className="act-title">{group.title}</h2>}

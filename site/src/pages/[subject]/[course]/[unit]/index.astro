@@ -3,6 +3,7 @@
 import type { GetStaticPaths } from "astro";
 import Base from "../../../../layouts/Base.astro";
 import LevelSelect from "../../../../components/LevelSelect.tsx";
+import TopBar from "../../../../components/TopBar.astro";
 import { unitPages, type UnitPage } from "../../../../lib/content.ts";
 import { suggestProblemHref } from "../../../../lib/submit-links.ts";
 
@@ -16,6 +17,7 @@ const { subject, course, unit } = Astro.props as UnitPage;
 ---
 
 <Base title={`${unit.title} · AstraTron`} description={unit.summary}>
+  <TopBar />
   <main class="page">
     <p><a href={`/${subject}`}>Course map</a> · {course.title}</p>
     <h1><span class="unit-number">Unit {unit.number}</span> {unit.title}</h1>
@@ -26,6 +28,11 @@ const { subject, course, unit } = Astro.props as UnitPage;
     </p>
   </main>
 </Base>
+
+<script>
+  import { showUnitProgress } from "../../../../progress/pages.ts";
+  showUnitProgress();
+</script>
 
 <style is:global>
   /* Placeholder Level select styles; the design system (#59) replaces them. */
@@ -52,5 +59,7 @@ const { subject, course, unit } = Astro.props as UnitPage;
   .level-select .level-boss { border-color: #ff5fd8; border-width: 4px; box-shadow: 5px 5px 0 #ff5fd8; }
   .level-select .level-boss .level-number { color: #ff5fd8; }
   .level-select .level-practice { border-color: #ff9d3c; }
+  .level-select .level-status { grid-column: 1 / -1; font-size: 0.85rem; }
+  .level-select .level-status[data-status="done"] { color: #5ee7ff; }
   .level-select .level-soon { grid-column: 1 / -1; color: #ff9d3c; font-size: 0.85rem; }
 </style>
