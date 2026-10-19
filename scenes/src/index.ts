@@ -38,6 +38,10 @@ import { outerElectrons } from "./outer-electrons/manifest.ts";
 import OuterElectrons from "./outer-electrons/OuterElectrons.tsx";
 import { waterPush } from "./water-push/manifest.ts";
 import WaterPush from "./water-push/WaterPush.tsx";
+import { fourDomainFamily } from "./four-domain-family/manifest.ts";
+import FourDomainFamily from "./four-domain-family/FourDomainFamily.tsx";
+import { dipoleSum } from "./dipole-sum/manifest.ts";
+import DipoleSum from "./dipole-sum/DipoleSum.tsx";
 // Lesson 4 (#82)
 import { hybridSets } from "./hybrid-sets/manifest.ts";
 import HybridSets from "./hybrid-sets/HybridSets.tsx";
@@ -67,6 +71,8 @@ export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [giveOrTake.id]: { manifest: giveOrTake, Component: GiveOrTake },
   [waterPush.id]: { manifest: waterPush, Component: WaterPush },
   [buildBySharing.id]: { manifest: buildBySharing, Component: BuildBySharing },
+  [fourDomainFamily.id]: { manifest: fourDomainFamily, Component: FourDomainFamily },
+  [dipoleSum.id]: { manifest: dipoleSum, Component: DipoleSum },
   // Lesson 4 (#82)
   [hybridSets.id]: { manifest: hybridSets, Component: HybridSets },
   [piTwist.id]: { manifest: piTwist, Component: PiTwist },

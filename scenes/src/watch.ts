@@ -4,10 +4,12 @@
 // Adding one: see scenes/manim/README.md.
 import type { Aspect, WatchSceneManifest } from "./types.ts";
 import { starForge } from "./star-forge/manifest.ts";
+import { domainSpread, methaneUnflatten, wedgeDashMethane } from "./lesson-03-watch/manifests.ts";
+
 // Lesson 4 (#82)
 import { hybridMixing } from "./hybrid-mixing/manifest.ts";
 
-export const watchSceneManifests: readonly WatchSceneManifest[] = [starForge, hybridMixing];
+export const watchSceneManifests: readonly WatchSceneManifest[] = [starForge, methaneUnflatten, domainSpread, wedgeDashMethane, hybridMixing];
 
 export const watchScene = (id: string): WatchSceneManifest | undefined => watchSceneManifests.find((m) => m.id === id);
 

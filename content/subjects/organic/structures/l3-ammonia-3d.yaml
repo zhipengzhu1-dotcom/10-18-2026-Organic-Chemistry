@@ -1,0 +1,16 @@
+# Lesson 3 (#81): u1-3d-polar-molecules card e, ammonia with its lone pair up. Drawn by hand: a line lies in the page, a wedge comes toward you, a hash goes away.
+# Coordinates as drawn: x right, y down.
+
+id: l3-ammonia-3d
+style: full
+smiles: "N"
+source: "PubChem CID 222"
+atoms:
+  - { id: a1, el: "N", x: 0, y: 0, lp: 1 }
+  - { id: a2, el: "H", x: -1.4, y: 0.6 }
+  - { id: a3, el: "H", x: 0.3, y: 1.45 }
+  - { id: a4, el: "H", x: 1.4, y: 0.6 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a1, b: a3, order: 1, stereo: wedge }
+  - { id: b3, a: a1, b: a4, order: 1, stereo: hash }
