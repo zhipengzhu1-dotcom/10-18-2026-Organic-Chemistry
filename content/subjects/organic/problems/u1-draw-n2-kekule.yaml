@@ -1,0 +1,23 @@
+# Lesson 2 Check Problem (lesson-02-drawing-molecules.md). Approved for play as a Check Step (#80).
+id: u1-draw-n2-kekule
+unit: u1
+lesson: u1-l02
+difficulty: 1
+status: approved
+source: Adapted from MIT OCW 5.12 PS1 Q3a with the key
+sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q3a, Berkowski, Spring 2005, CC BY-NC-SA 4.0. N₂: PubChem CID 947."
+type: multiple-choice
+prompt: Nitrogen gas, N₂. Each N brings 5 outer electrons. Which card is its Kekulé structure?
+options:
+  - { id: a, structure: n2-kekule, text: "N triple-bonded to N; one lone pair on each N" }
+  - { id: b, structure: n2-no-lone-pairs, text: "N triple-bonded to N; no lone pairs" }
+  - { id: c, structure: n2-double-bond, text: "N double-bonded to N; two lone pairs on each N" }
+  - { id: d, structure: n2-too-many-pairs, text: "N triple-bonded to N; two lone pairs on each N" }
+answer: [a]
+correct: "Three bonds plus one lone pair: each N has 8 electrons around it, and the drawing uses all 10."
+hints:
+  - { match: [b], text: "Count the electrons around one N: just the 6 in the triple bond. It needs an octet." }
+  - { match: [c], text: "Count all the electrons on the card: 4 in the double bond and 8 in lone pairs is 12, but N₂ has only 10." }
+  - { match: [d], text: "Count around one N: 6 in the triple bond plus 4 in lone pairs is 10. That's over the octet." }
+  - { text: "Each N needs 8 around it, and the whole drawing has 10 electrons. Lines count 2, each lone pair 2." }
+reveal: "**a**, with each N's octet counted: 6 shared + 2 own = 8."

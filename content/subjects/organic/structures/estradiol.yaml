@@ -1,60 +1,57 @@
-# Standard steroid view, laid out by hand (#78): rings A–C regular
-# hexagons and D a regular pentagon, 8β-H wedged up, 9α-H and 14α-H hashed down, the methyls
-# and 17β-OH wedged. Estradiol and testosterone share every coordinate they have in common.
-# Atom ids name steroid numbering (c3 = C3, h8 = the H on C8).
+# Lesson 0 s06's estradiol (RDKit.js layout from prototype/lesson-00-why-carbon, mirrored with wedges inverted and turned so C3 → C17 runs up-right), plus the lone pairs on both O.
 
 id: estradiol
 style: line-angle
 smiles: "C[C@]12CC[C@H]3[C@@H](CCc4cc(O)ccc34)[C@@H]1CC[C@@H]2O"
 source: PubChem CID 5757
 atoms:
-  - { id: c1, el: C, x: 0.0, y: -1.5 }
-  - { id: c2, el: C, x: -1.299, y: -0.75 }
-  - { id: c3, el: C, x: -1.299, y: 0.75 }
-  - { id: c4, el: C, x: 0.0, y: 1.5 }
-  - { id: c5, el: C, x: 1.299, y: 0.75 }
-  - { id: c6, el: C, x: 2.598, y: 1.5 }
-  - { id: c7, el: C, x: 3.897, y: 0.75 }
-  - { id: c8, el: C, x: 3.897, y: -0.75 }
-  - { id: c9, el: C, x: 2.598, y: -1.5 }
-  - { id: c10, el: C, x: 1.299, y: -0.75 }
-  - { id: c11, el: C, x: 2.598, y: -3.0 }
-  - { id: c12, el: C, x: 3.897, y: -3.75 }
-  - { id: c13, el: C, x: 5.196, y: -3.0 }
-  - { id: c14, el: C, x: 5.196, y: -1.5 }
-  - { id: c15, el: C, x: 6.623, y: -1.036 }
-  - { id: c16, el: C, x: 7.504, y: -2.25 }
-  - { id: c17, el: C, x: 6.623, y: -3.464 }
-  - { id: c18, el: C, x: 5.196, y: -4.5, label: "the CH₃ at the top" }
-  - { id: o3, el: O, x: -2.598, y: 1.5, h: 1, label: "the O on the left-hand ring (an OH)" }
-  - { id: o17, el: O, x: 7.086, y: -4.89, h: 1, label: "the OH at the top right" }
-  - { id: h8, el: H, x: 3.897, y: -1.65 }
-  - { id: h9, el: H, x: 2.598, y: -0.6 }
-  - { id: h14, el: H, x: 5.196, y: -0.6 }
+  - { id: a1, el: C, x: 5.794, y: -3.907 }
+  - { id: a2, el: C, x: 5.482, y: -2.44 }
+  - { id: a3, el: C, x: 4.268, y: -3.321 }
+  - { id: a4, el: C, x: 2.898, y: -2.712 }
+  - { id: a5, el: C, x: 2.741, y: -1.22 }
+  - { id: a6, el: C, x: 3.954, y: -0.338 }
+  - { id: a7, el: C, x: 3.797, y: 1.154 }
+  - { id: a8, el: C, x: 2.427, y: 1.764 }
+  - { id: a9, el: C, x: 1.213, y: 0.882 }
+  - { id: a10, el: C, x: -0.157, y: 1.492 }
+  - { id: a11, el: C, x: -1.37, y: 0.61 }
+  - { id: a12, el: O, x: -2.741, y: 1.22, h: 1, lp: 2 }
+  - { id: a13, el: C, x: -1.213, y: -0.882 }
+  - { id: a14, el: C, x: 0.157, y: -1.492 }
+  - { id: a15, el: C, x: 1.37, y: -0.61 }
+  - { id: a16, el: C, x: 5.325, y: -0.948 }
+  - { id: a17, el: C, x: 6.695, y: -0.338 }
+  - { id: a18, el: C, x: 7.699, y: -1.452 }
+  - { id: a19, el: C, x: 6.949, y: -2.751 }
+  - { id: a20, el: O, x: 7.559, y: -4.122, h: 1, lp: 2 }
+  - { id: a21, el: H, x: 2.636, y: -0.225 }
+  - { id: a22, el: H, x: 4.763, y: 0.25 }
+  - { id: a23, el: H, x: 5.324, y: 0.052 }
 bonds:
-  - { id: b1, a: c1, b: c2, order: 2 }
-  - { id: b2, a: c2, b: c3, order: 1 }
-  - { id: b3, a: c3, b: c4, order: 2 }
-  - { id: b4, a: c4, b: c5, order: 1 }
-  - { id: b5, a: c5, b: c10, order: 2 }
-  - { id: b6, a: c10, b: c1, order: 1 }
-  - { id: b7, a: c5, b: c6, order: 1 }
-  - { id: b8, a: c6, b: c7, order: 1 }
-  - { id: b9, a: c7, b: c8, order: 1 }
-  - { id: b10, a: c8, b: c9, order: 1 }
-  - { id: b11, a: c9, b: c10, order: 1 }
-  - { id: b12, a: c9, b: c11, order: 1 }
-  - { id: b13, a: c11, b: c12, order: 1 }
-  - { id: b14, a: c12, b: c13, order: 1 }
-  - { id: b15, a: c13, b: c14, order: 1 }
-  - { id: b16, a: c14, b: c8, order: 1 }
-  - { id: b17, a: c14, b: c15, order: 1 }
-  - { id: b18, a: c15, b: c16, order: 1 }
-  - { id: b19, a: c16, b: c17, order: 1 }
-  - { id: b20, a: c17, b: c13, order: 1 }
-  - { id: b21, a: c13, b: c18, order: 1, stereo: wedge }
-  - { id: b22, a: c3, b: o3, order: 1 }
-  - { id: b23, a: c17, b: o17, order: 1, stereo: wedge }
-  - { id: b24, a: c8, b: h8, order: 1, stereo: wedge }
-  - { id: b25, a: c9, b: h9, order: 1, stereo: hash }
-  - { id: b26, a: c14, b: h14, order: 1, stereo: hash }
+  - { id: b1, a: a2, b: a1, order: 1, stereo: wedge }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a3, b: a4, order: 1 }
+  - { id: b4, a: a4, b: a5, order: 1 }
+  - { id: b5, a: a5, b: a6, order: 1 }
+  - { id: b6, a: a6, b: a7, order: 1 }
+  - { id: b7, a: a7, b: a8, order: 1 }
+  - { id: b8, a: a8, b: a9, order: 1 }
+  - { id: b9, a: a9, b: a10, order: 2 }
+  - { id: b10, a: a10, b: a11, order: 1 }
+  - { id: b11, a: a11, b: a12, order: 1 }
+  - { id: b12, a: a11, b: a13, order: 2 }
+  - { id: b13, a: a13, b: a14, order: 1 }
+  - { id: b14, a: a14, b: a15, order: 2 }
+  - { id: b15, a: a6, b: a16, order: 1 }
+  - { id: b16, a: a16, b: a17, order: 1 }
+  - { id: b17, a: a17, b: a18, order: 1 }
+  - { id: b18, a: a18, b: a19, order: 1 }
+  - { id: b19, a: a19, b: a20, order: 1, stereo: wedge }
+  - { id: b20, a: a16, b: a2, order: 1 }
+  - { id: b21, a: a19, b: a2, order: 1 }
+  - { id: b22, a: a15, b: a5, order: 1 }
+  - { id: b23, a: a15, b: a9, order: 1 }
+  - { id: b24, a: a5, b: a21, order: 1, stereo: hash }
+  - { id: b25, a: a6, b: a22, order: 1, stereo: wedge }
+  - { id: b26, a: a16, b: a23, order: 1, stereo: hash }

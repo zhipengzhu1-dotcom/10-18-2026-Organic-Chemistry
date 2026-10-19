@@ -11,6 +11,7 @@ units:
     lessons:
       - u1-l00
       - u1-l01
+      - u1-l02
       - u1-sample
       - u1-sample-step-types
       - u1-sample-structures

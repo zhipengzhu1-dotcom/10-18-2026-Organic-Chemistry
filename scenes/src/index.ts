@@ -21,6 +21,12 @@ import GroupCards from "./group-cards/GroupCards.tsx";
 import { carbonylNeighbours } from "./carbonyl-neighbours/manifest.ts";
 import CarbonylNeighbours from "./carbonyl-neighbours/CarbonylNeighbours.tsx";
 
+import { hFill } from "./h-fill/manifest.ts";
+import HFill from "./h-fill/HFill.tsx";
+import { ethanolThreeWays } from "./ethanol-three-ways/manifest.ts";
+import EthanolThreeWays from "./ethanol-three-ways/EthanolThreeWays.tsx";
+import { lonePairFill } from "./lone-pair-fill/manifest.ts";
+import LonePairFill from "./lone-pair-fill/LonePairFill.tsx";
 // Lesson 0 (#78)
 import { buildBySharing } from "./build-by-sharing/manifest.ts";
 import BuildBySharing from "./build-by-sharing/BuildBySharing.tsx";
@@ -43,6 +49,9 @@ export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [groupSpotlight.id]: { manifest: groupSpotlight, Component: GroupSpotlight },
   [groupCards.id]: { manifest: groupCards, Component: GroupCards },
   [carbonylNeighbours.id]: { manifest: carbonylNeighbours, Component: CarbonylNeighbours },
+  [hFill.id]: { manifest: hFill, Component: HFill },
+  [ethanolThreeWays.id]: { manifest: ethanolThreeWays, Component: EthanolThreeWays },
+  [lonePairFill.id]: { manifest: lonePairFill, Component: LonePairFill },
   // Lesson 0 (#78)
   [crustVsBody.id]: { manifest: crustVsBody, Component: CrustVsBody },
   [outerElectrons.id]: { manifest: outerElectrons, Component: OuterElectrons },
@@ -57,6 +66,7 @@ export { clamp, easeInOut, easeOut, lerp, progress, pulse, seededRandom } from "
 export { stateAt } from "./timeline.ts";
 export { defaultState } from "./state.ts";
 
-export { BOND_PX, drawStructure, type Drawing, type Highlight, type Point, type Segment } from "./structure/render.ts";
+export { BOND_PX, drawStructure, type Drawing, type DrawOptions, type Highlight, type Point, type Segment } from "./structure/render.ts";
+export { withHydrogens } from "./structure/hydrogens.ts";
 
 export { default as PushReplay, describeReplay, replayDuration, PUSH_SECONDS } from "./push-replay/PushReplay.tsx";

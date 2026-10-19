@@ -379,7 +379,8 @@ export interface StructureBond {
 export interface Structure {
   id: string;
   /** full = every atom a letter (Lewis/Kekulé); line-angle = carbons are corners unless charged or `letter`. */
-  style: "full" | "line-angle";
+  /** lewis = every atom a letter and each shared pair two dots between its atoms (no lines). */
+  style: "full" | "lewis" | "line-angle";
   /** The SMILES it was laid out from (provenance). */
   smiles?: string;
   /** Where the structure comes from, e.g. "PubChem CID 750". */

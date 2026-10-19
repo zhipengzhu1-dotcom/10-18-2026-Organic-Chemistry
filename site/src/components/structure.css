@@ -6,6 +6,9 @@
 .opts:has(.structure-card) { grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); }
 .opts .structure-card { display: grid; place-items: center; padding: 8px; }
 .structure-card .structure { max-height: 7rem; }
+/* Under a drawing, four structure cards share one row so the Step still fits one phone screen (Lesson 2 s08, s12). */
+.player-body:has(.figures) .opts:has(> .structure-card:nth-child(4):last-child) { grid-template-columns: repeat(4, 1fr); }
+.player-body:has(.figures) .structure-card .structure { max-height: 6rem; }
 /* Short text choices two to a row (under a figure); one-word choices as many to a row as fit
    (Lesson 5's capsaicin: eight group names). */
 .opts.opts-chips { grid-template-columns: 1fr 1fr; }
@@ -16,6 +19,9 @@
   /* On a phone the Lesson-end screen keeps the Wrap text and the Key idea card on one screen; the
      Wrap's recap Scene (Lesson 5's group cards) shows from tablet width up. */
   .player:has(.player-end) .player-body .scene { display: none; }
+  /* A tall Tap drawing keeps to about a third of the screen (never below natural size, so hit areas stay
+     48 px), so the Step fits one phone screen (Lesson 2 s05). */
+  .tap-structure { max-width: max(var(--tap-natural, 100%), calc(34vh * var(--tap-aspect, 10))); margin-inline: auto; }
 }
 .tap-only-cue { margin: 0; padding: 8px 12px; color: var(--at-ink-muted); border: var(--at-border) dashed var(--at-line); }
 .tap-structure { position: relative; touch-action: manipulation; }
