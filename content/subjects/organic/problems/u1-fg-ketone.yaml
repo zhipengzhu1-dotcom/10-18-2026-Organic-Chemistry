@@ -1,0 +1,29 @@
+# Lesson 5 Check Problem 1 (docs/specs/unit-1/lesson-05-functional-groups.md).
+id: u1-fg-ketone
+unit: u1
+lesson: u1-l05
+difficulty: 1
+status: approved
+source: Original (groups from the MIT OCW 5.12 Functional Groups sheet)
+type: multiple-choice
+prompt: Same CH₃–C=O, different neighbour. Which one is a **ketone**?
+options:
+  - { id: a, structure: fg-acetaldehyde, hide: [lone-pairs], text: "Acetaldehyde: CH₃–C=O with nothing drawn on the other side of the C=O carbon, so an H." }
+  - { id: b, structure: fg-acetone, hide: [lone-pairs], text: "Acetone: CH₃–C=O with a CH₃ on the other side of the C=O carbon." }
+  - { id: c, structure: fg-acetic-acid, hide: [lone-pairs], text: "Acetic acid: CH₃–C=O with OH on the other side of the C=O carbon." }
+  - { id: d, structure: fg-methyl-acetate, hide: [lone-pairs], text: "Methyl acetate: CH₃–C=O with O–CH₃ on the other side of the C=O carbon." }
+  - { id: e, structure: fg-acetamide, hide: [lone-pairs], text: "Acetamide: CH₃–C=O with NH₂ on the other side of the C=O carbon." }
+answer: [b]
+correct: "Carbon on both sides of the C=O: a ketone."
+hints:
+  - match: [a]
+    text: "That C=O carbon carries an H (drawn as the end of the line). H beside a C=O makes an aldehyde."
+  - match: [c]
+    text: OH beside the C=O makes a carboxylic acid.
+  - match: [d]
+    text: O–C beside the C=O makes an ester.
+  - match: [e]
+    text: N beside the C=O makes an amide.
+  - text: A ketone's C=O carbon has a carbon on each side.
+reveal: "Acetone, the ketone. The others: acetaldehyde, aldehyde; acetic acid, carboxylic acid; methyl acetate, ester; acetamide, amide."
+sourceNote: "Groups from the MIT OCW 5.12 *Functional Groups* sheet, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Structures: PubChem CIDs 177, 180, 176, 6584, 178."

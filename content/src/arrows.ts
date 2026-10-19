@@ -53,7 +53,9 @@ export function moleculeOf(s: Structure): Molecule {
   for (const b of s.bonds) bonds.set(pairKey(b.a, b.b), { id: b.id, a: b.a, b: b.b, order: b.order });
   const sum = bondSums(s.bonds);
   const atoms = s.atoms.map((a) => {
-    const implied = s.style === "line-angle" && a.el === "C" ? Math.max(0, 4 - Math.abs(a.charge ?? 0) - (sum.get(a.id) ?? 0)) : 0;
+    // A carbon that writes its H's (a lettered CH₂, `h: 2`) has exactly those; a corner has the implied ones.
+    const implied =
+      s.style === "line-angle" && a.el === "C" && a.h === undefined ? Math.max(0, 4 - Math.abs(a.charge ?? 0) - (sum.get(a.id) ?? 0)) : 0;
     return { id: a.id, el: a.el, x: a.x, y: a.y, h: (a.h ?? 0) + implied, lp: a.lp ?? 0 };
   });
   return { base: s, atoms, bonds };

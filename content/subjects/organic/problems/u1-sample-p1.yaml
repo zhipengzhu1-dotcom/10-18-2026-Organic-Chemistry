@@ -6,6 +6,7 @@ difficulty: 1
 status: approved
 source: Original
 type: multiple-choice
+molecule: ethylene
 prompt: In ethene, H₂C=CH₂, each carbon bonds to two hydrogens and to the other carbon. How many of carbon's four bonds does the C=C double bond use?
 options:
   - { id: a, text: "1" }

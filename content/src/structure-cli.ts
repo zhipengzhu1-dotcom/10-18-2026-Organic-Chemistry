@@ -1,4 +1,4 @@
-// `pnpm structure <subject> <id> "<SMILES>" [--style full|line-angle] [--source "PubChem CID 750"]`
+// `pnpm structure <subject> <id> "<SMILES>" [--style full|lewis|line-angle] [--source "PubChem CID 750"]`
 // Lays a structure out with RDKit.js and writes <subject>/structures/<id>.yaml,
 // then prints its atom and bond ids, which Tap answers and Hints name.
 // Edit the written file to add screen-reader `label`s or `letter: true`.
@@ -14,12 +14,13 @@ const { values, positionals } = parseArgs({
   options: { style: { type: "string", default: "full" }, source: { type: "string" } },
 });
 const [subject, id, smiles] = positionals;
-if (!subject || !id || !smiles || (values.style !== "full" && values.style !== "line-angle")) {
-  console.error('usage: pnpm structure <subject> <id> "<SMILES>" [--style full|line-angle] [--source "…"]');
+const style = values.style as "full" | "lewis" | "line-angle";
+if (!subject || !id || !smiles || !["full", "lewis", "line-angle"].includes(style)) {
+  console.error('usage: pnpm structure <subject> <id> "<SMILES>" [--style full|lewis|line-angle] [--source "…"]');
   process.exit(1);
 }
 
-const structure = await layoutStructure({ id, smiles, style: values.style, source: values.source });
+const structure = await layoutStructure({ id, smiles, style, source: values.source });
 const doc = new Document(structure);
 for (const key of ["atoms", "bonds"]) {
   const seq = doc.get(key);

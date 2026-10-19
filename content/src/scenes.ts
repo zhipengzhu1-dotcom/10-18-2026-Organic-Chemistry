@@ -1,13 +1,13 @@
 // Scenes in Steps (ADR 0001): checks each Scene a Step uses against the Scene
 // catalog (built by the scenes module from the registered manifests) and
 // resolves it to a full state plus its cited values.
-import type { LessonFile } from "./schema.ts";
+import type { LessonFile, ProblemFile } from "./schema.ts";
 import type { SceneCatalog, SceneStateSpec, SceneUse, SceneValue } from "./model.ts";
 import { find, type CitedData } from "./data.ts";
 
 type StepFile = LessonFile["steps"][number];
 /** A Step's `scene` as written in the Lesson file. */
-export type SceneUseFile = { id: string; state?: Record<string, SceneValue>; onAnswer?: Record<string, SceneValue>; still?: boolean };
+export type SceneUseFile = { id: string; state?: Record<string, SceneValue>; still?: boolean };
 
 /** Why `value` can't be taken by the settable state, or undefined if it can. */
 export function invalidValue(spec: SceneStateSpec, value: SceneValue): string | undefined {
@@ -24,15 +24,13 @@ export function invalidValue(spec: SceneStateSpec, value: SceneValue): string | 
 export const sameValue = (a: SceneValue, b: SceneValue) =>
   typeof a === "number" && typeof b === "number" ? Math.abs(a - b) < 1e-9 : a === b;
 
-/** Messages for a Step's Scene and, for a Manipulate Step, its control, answer and Hints. */
-export function checkStepScene(step: StepFile, catalog: SceneCatalog, data: CitedData): string[] {
-  const use = "scene" in step ? (step.scene as SceneUseFile | undefined) : undefined;
-  if (!use) return [];
+/** Messages for one Scene use: its id, settable states and cited data. */
+function checkUse(use: SceneUseFile, catalog: SceneCatalog, data: CitedData): string[] {
   const entry = catalog[use.id];
   if (!entry) return [`Scene "${use.id}" is not in the Scene registry`];
   const errors: string[] = [];
   const scene = `Scene "${use.id}"`;
-  for (const [name, value] of [...Object.entries(use.state ?? {}), ...Object.entries(use.onAnswer ?? {})]) {
+  for (const [name, value] of Object.entries(use.state ?? {})) {
     const spec = entry.states[name];
     if (!spec) errors.push(`${scene} has no settable state "${name}"`);
     else {
@@ -41,6 +39,27 @@ export function checkStepScene(step: StepFile, catalog: SceneCatalog, data: Cite
     }
   }
   for (const ref of entry.data) if (!find(data, ref)) errors.push(`${scene} cites "${ref}", which is not in the cited data`);
+  return errors;
+}
+
+type SceneFields = { scene?: unknown; revealScene?: SceneUseFile; aside?: { scene?: SceneUseFile } };
+
+/**
+ * Messages for every Scene a Step or Problem uses (its `scene`, its `revealScene` and its
+ * aside's), and, for a Manipulate Step, its control, answer and Hints.
+ */
+export function checkStepScene(step: StepFile | ProblemFile, catalog: SceneCatalog, data: CitedData): string[] {
+  const item = step as SceneFields;
+  const errors: string[] = [];
+  if (item.revealScene) errors.push(...checkUse(item.revealScene, catalog, data).map((m) => `revealScene: ${m}`));
+  if (item.aside?.scene) errors.push(...checkUse(item.aside.scene, catalog, data).map((m) => `aside: ${m}`));
+  const use = item.scene as SceneUseFile | undefined;
+  if (!use) return errors;
+  const own = checkUse(use, catalog, data);
+  errors.unshift(...own);
+  const entry = catalog[use.id];
+  if (!entry) return errors;
+  const scene = `Scene "${use.id}"`;
 
   if (step.type !== "manipulate") return errors;
   const spec = entry.states[step.control];
@@ -65,11 +84,5 @@ export function resolveSceneUse(use: SceneUseFile, catalog: SceneCatalog | undef
     const value = find(data, ref);
     if (value) cited[ref] = value;
   }
-  return {
-    id: use.id,
-    state: { ...defaults, ...use.state },
-    cited,
-    ...(use.onAnswer && { onAnswer: use.onAnswer }),
-    ...(use.still && { still: true }),
-  };
+  return { id: use.id, state: { ...defaults, ...use.state }, cited, ...(use.still ? { still: true } : {}) };
 }

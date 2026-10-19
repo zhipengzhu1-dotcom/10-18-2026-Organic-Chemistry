@@ -5,8 +5,9 @@
 import type { GradedStep, Lesson, Step } from "@astratron/content";
 
 // Draw arrows: `results` (accepted results) and `inBetween` (flag copy) grade pushes, so they are secret too;
-// the start and the target the Step shows stay on the page. A Tap Step's `replay` and a Rank Step's `revealTags` give the answer away, so they are secret too.
-const SECRET_FIELDS = ["answer", "tolerance", "correct", "hints", "reveal", "results", "inBetween", "replay", "revealTags"] as const;
+// the start and the target the Step shows stay on the page. A reveal Scene, a Tap Step's `replay` and a Rank
+// Step's `revealTags` show the answer.
+const SECRET_FIELDS = ["answer", "tolerance", "correct", "hints", "reveal", "results", "inBetween", "revealScene", "replay", "revealTags"] as const;
 type Secret = (typeof SECRET_FIELDS)[number];
 type Shown<S> = S extends GradedStep ? Omit<S, Extract<Secret, keyof S>> : S;
 
@@ -37,7 +38,7 @@ export function splitSteps(all: Step[]): { steps: PageStep[]; key: AnswerKey } {
       delete shown[field];
     }
     key[step.id] = secrets;
-    if (step.type === "multiple-choice") shown.select = step.answer.length === 1 ? "one" : "many";
+    if (step.type === "multiple-choice" || step.type === "rotate-and-identify") shown.select = step.answer.length === 1 ? "one" : "many";
     return shown as PageStep;
   });
   return { steps, key };

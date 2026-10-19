@@ -4,6 +4,22 @@
 import { describe, expect, it } from "vitest";
 import { buildContent, type DrawArrowsStep, type Lesson } from "../src/index.ts";
 import { lesson, problem, sampleSteps, validTree, writeTree, type Tree } from "./tree.ts";
+import { electrons, moleculeOf } from "../src/arrows.ts";
+
+it("a lettered line-angle carbon that writes its H's (CH₂) gets no implied H's on top (Lesson 7)", () => {
+  const vinyl = {
+    id: "ethylene",
+    style: "line-angle" as const,
+    atoms: [
+      { id: "a1", el: "C", x: 0, y: 0, letter: true, h: 2 },
+      { id: "a2", el: "C", x: 1.5, y: 0 },
+    ],
+    bonds: [{ id: "b1", a: "a1", b: "a2", order: 2 as const }],
+  };
+  const m = moleculeOf(vinyl);
+  expect(m.atoms.map((a) => a.h)).toEqual([2, 2]);
+  expect(electrons(m).get("a1")).toBe(8);
+});
 
 const L = "chem/lessons/l1.yaml";
 

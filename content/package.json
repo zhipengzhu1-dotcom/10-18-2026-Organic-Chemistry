@@ -6,13 +6,16 @@
   "exports": {
     ".": "./src/index.ts",
     "./data": "./src/data.ts",
+    "./valence": "./src/valence.ts",
+    "./molecule": "./src/molecule.ts",
     "./arrows": "./src/arrows.ts"
   },
   "scripts": {
     "build": "node src/cli.ts",
     "freeze": "node src/freeze-cli.ts",
     "lint:numbers": "node src/number-lint-cli.ts",
-    "structure": "node src/structure-cli.ts"
+    "structure": "node src/structure-cli.ts",
+    "structures:json": "node src/structures-json-cli.ts"
   },
   "dependencies": {
     "yaml": "^2.9.1",

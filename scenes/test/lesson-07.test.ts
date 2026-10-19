@@ -4,7 +4,7 @@
 // Scene screen-reader text is read from the spec and compared with the build.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { buildContent, contentRoot, type Lesson, type Step } from "@astratron/content";
+import { buildContent, contentRoot, type GradedStep, type Lesson, type Step } from "@astratron/content";
 import { cite } from "@astratron/content/data";
 import { sceneManifests } from "../src/manifests.ts";
 import { watchSceneManifests } from "../src/watch.ts";
@@ -123,11 +123,11 @@ describe("Lesson 7 matches its spec", () => {
       }
 
       const note = fields["Source note"];
-      if (note.startsWith("n/a")) expect(step.source).toBeUndefined();
+      if (note.startsWith("n/a")) expect(step.sourceNote).toBeUndefined();
       else {
         const wanted = [...quotes(note), ...(/Geometry/.test(note) ? [geometryNote] : [])];
         expect(wanted.length).toBeGreaterThan(0);
-        for (const quote of wanted) expect(step.source).toContain(quote);
+        for (const quote of wanted) expect(step.sourceNote).toContain(quote);
       }
     });
   }
@@ -136,7 +136,7 @@ describe("Lesson 7 matches its spec", () => {
     for (const id of ["s03", "s05"]) {
       const step = lesson.steps.find((s) => s.id === id)!;
       const note = spec.get(`${lesson.id}-${id}`)!.fields["Source note"];
-      for (const quote of quotes(note)) expect(step.source).toContain(quote);
+      for (const quote of quotes(note)) expect(step.sourceNote).toContain(quote);
     }
   });
 
@@ -152,14 +152,14 @@ describe("Lesson 7 matches its spec", () => {
 
   it("each Scene's screen-reader text is the spec's", () => {
     const describeAt = (id: string, state: Record<string, string | number>, t: number) =>
-      sceneManifests.find((m) => m.id === id)!.describe(state, t);
+      sceneManifests.find((m) => m.id === id)!.describe(state, t, {});
     const screenReader = (stepId: string) => quotes(spec.get(`${lesson.id}-${stepId}`)!.fields.Scene.split("Screen reader:")[1])[0];
     const at = (stepId: string) => lesson.steps.find((s) => s.id === stepId)!.scene!;
     const posterOf = (id: string) => sceneManifests.find((m) => m.id === id)!.poster.t;
 
     const s01 = at("s01");
     expect(s01.id).toBe("amide-cn-lengths");
-    expect(describeAt(s01.id, { ...s01.state, ...s01.onAnswer }, posterOf(s01.id))).toBe(screenReader("s01"));
+    expect(describeAt(s01.id, (lesson.steps[0] as GradedStep).revealScene!.state, posterOf(s01.id))).toBe(screenReader("s01"));
     expect(at("s03").id).toBe("amide-hybrid");
     expect(describeAt("amide-hybrid", {}, 0)).toBe(screenReader("s03"));
     expect(at("s15")).toMatchObject({ id: "amide-hybrid", still: true });
@@ -172,9 +172,10 @@ describe("Lesson 7 matches its spec", () => {
 
   it("the Hook's Scene hides the lengths until the Student answers (the spec's 'plays on reveal')", () => {
     const s01 = lesson.steps[0].scene!;
-    expect(s01).toMatchObject({ state: { molecule: "all", labels: "hidden" }, onAnswer: { labels: "shown" } });
+    expect(s01).toMatchObject({ state: { molecule: "all", labels: "hidden" } });
+    expect((lesson.steps[0] as GradedStep).revealScene).toMatchObject({ id: "amide-cn-lengths", state: { molecule: "all", labels: "shown" } });
     const manifest = sceneManifests.find((m) => m.id === "amide-cn-lengths")!;
-    expect(manifest.describe(s01.state, manifest.poster.t)).not.toMatch(/Å|\d/);
+    expect(manifest.describe(s01.state, manifest.poster.t, {})).not.toMatch(/Å|\d/);
     expect(stateAt(manifest, 0)).toBeDefined();
   });
 });

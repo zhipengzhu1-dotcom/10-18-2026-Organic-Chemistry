@@ -1,0 +1,11 @@
+# Lesson 1 (#79): full Lewis structure, drawn by hand.
+
+id: hydrogen-fluoride
+style: full
+smiles: "F"
+source: PubChem CID 14917
+atoms:
+  - { id: a1, el: "F", x: 1.5, y: 0, lp: 3 }
+  - { id: a2, el: "H", x: 0, y: 0 }
+bonds:
+  - { id: b1, a: a2, b: a1, order: 1 }

@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 527,
+        "MolecularFormula": "C3H6O",
+        "SMILES": "CCC=O",
+        "ConnectivitySMILES": "CCC=O",
+        "Title": "Propanal"
+      }
+    ]
+  }
+}

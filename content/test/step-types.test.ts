@@ -93,7 +93,22 @@ describe("Numeric input and Rank / order Steps", () => {
     ]);
   });
 
-  it("a Rank Hint can match any order with one card above another (Lesson 7: “`b` or `c` above `a`”)", () => {
+  it("a Rank Hint may name a pattern, but only with the Step's items", () => {
+    const ok = [
+      { notLast: "single", text: "Longest last." },
+      { notFirst: "triple", text: "Shortest first." },
+      { before: ["single", "double"], text: "Swapped." },
+      { text: "Count shared pairs." },
+    ];
+    expect(build(numeric(), rank({ hints: ok })).errors).toEqual([]);
+    const bad = [{ notFirst: "quadruple", text: "?" }, { before: ["single", "nope"], text: "?" }, { text: "Fallback." }];
+    expect(build(numeric(), rank({ hints: bad })).errors).toEqual([
+      `${L}: step s06: a Hint names unknown item "quadruple"`,
+      `${L}: step s06: a Hint names unknown item "nope"`,
+    ]);
+  });
+
+  it("a Rank Hint can match any order with one card above another (Lesson 7: “`c` or `d` above `a` or `b`”)", () => {
     const hints = [
       { above: [["single", "triple"], ["double", "triple"]], text: "C≡C is shortest." },
       { above: [["single", "double"]], text: "C=C before C–C." },

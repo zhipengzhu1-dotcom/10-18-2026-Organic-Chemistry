@@ -105,8 +105,8 @@ async function playLesson(page: Page, phone: boolean) {
 
   // s11 Tap (tap-only): C1 and C3.
   await expect(page.locator(".tap-only-cue")).toHaveText("Just tap, no pushing on this Step.");
-  await tap(page, "Carbon: double bond to C.");
-  await tap(page, "Carbon: double bond to O, single bond to C.");
+  await tap(page, "Carbon with 2 H: double bond to C.");
+  await tap(page, "Carbon with 1 H: double bond to O, single bond to C.");
   await check(page);
   await expect(status(page)).toContainText("Two δ+ carbons");
   await next(page, 12);
@@ -118,7 +118,7 @@ async function playLesson(page: Page, phone: boolean) {
   await next(page, 13);
 
   // s13 Check: the enamine's δ− carbon; the reveal replays the two pushes.
-  await tap(page, "Carbon: double bond to C.");
+  await tap(page, "Carbon with 2 H: double bond to C.");
   await check(page);
   await expect(status(page)).toContainText("C1 is the electron-rich carbon.");
   await expect(page.getByRole("img", { name: /^Arrows: lone pair on N3/ })).toBeVisible();
@@ -138,7 +138,8 @@ async function playLesson(page: Page, phone: boolean) {
   if (phone) await expect(wrapScene).toBeHidden();
   else {
     await expect(wrapScene).toBeVisible();
-    await expect(button(page, "Play")).toBeVisible();
+    // A still picture: no Play row.
+    await expect(button(page, "Play")).toHaveCount(0);
   }
   await expect(page.getByRole("heading", { name: "Key idea" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Back to Unit" })).toBeVisible();
@@ -158,6 +159,6 @@ test("Lesson 7's page carries no answers, and its Source notes credit MIT OCW", 
   const html = await (await request.get(LESSON)).text();
   for (const secret of ["No charges beats two.", "Neutral on top (rules 1 and 2)", '"answer"', "dimethylvinylamine-polar"]) expect(html).not.toContain(secret);
   await page.goto(`${LESSON}#s05`);
-  await page.getByText("ⓘ Source").click();
+  await page.getByText("ⓘ Sources").click();
   await expect(page.locator(".source-note")).toContainText("Lecture 2 p. 4, 'Predicting Energies of Resonance Structures', Berkowski, Spring 2005, CC BY-NC-SA 4.0.");
 });

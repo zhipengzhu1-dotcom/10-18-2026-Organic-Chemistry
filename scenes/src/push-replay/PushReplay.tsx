@@ -60,7 +60,8 @@ export default function PushReplay({ t, start, pushes, hide = [], reducedMotion 
           <path d="M0,0 L10,5 L0,10 z" fill="var(--at-electron, #5ee7ff)" />
         </marker>
       </defs>
-      <g dangerouslySetInnerHTML={{ __html: inner }} />
+      {/* The renderer's own svg sets the data face; its inner drawing keeps it here. */}
+      <g fontFamily="var(--at-font-data, 'JetBrains Mono'), ui-monospace, monospace" dangerouslySetInnerHTML={{ __html: inner }} />
       {arrows.map((a) => {
         const current = a.i === k;
         const length = current ? p : 1;

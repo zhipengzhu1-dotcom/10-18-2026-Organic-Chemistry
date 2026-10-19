@@ -1,0 +1,20 @@
+# acrylonitrile-kekule without N's lone pair: a card drawn wrong on purpose (Lesson 2, u1-draw-acrylonitrile b).
+
+id: acrylonitrile-no-lone-pair
+style: full
+source: Drawn wrong on purpose (Lesson 2 card)
+atoms:
+  - { id: a1, el: C, x: -1.299, y: -2.25 }
+  - { id: a2, el: C, x: 0, y: -1.5 }
+  - { id: a3, el: C, x: 0, y: 0 }
+  - { id: a4, el: N, x: 0, y: 1.5 }
+  - { id: a5, el: H, x: -1.299, y: -3.75 }
+  - { id: a6, el: H, x: -2.598, y: -1.5 }
+  - { id: a7, el: H, x: 1.299, y: -2.25 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 2 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a3, b: a4, order: 3 }
+  - { id: b4, a: a1, b: a5, order: 1 }
+  - { id: b5, a: a1, b: a6, order: 1 }
+  - { id: b6, a: a2, b: a7, order: 1 }

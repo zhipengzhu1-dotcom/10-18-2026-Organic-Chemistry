@@ -57,9 +57,20 @@ export function checkInteraction(item: Interaction): string[] {
   return errors;
 }
 
-type Condition = { match?: unknown; includes?: string[]; misses?: string[]; from?: string[]; to?: string[]; above?: unknown };
+type Condition = {
+  match?: unknown;
+  includes?: string[];
+  misses?: string[];
+  notFirst?: string;
+  notLast?: string;
+  before?: string[];
+  above?: string[][];
+  from?: string[];
+  to?: string[];
+};
 /** The generic fallback Hint has no condition. */
-const isFallback = (h: Condition) => h.match === undefined && !h.includes && !h.misses && !h.from && !h.to && !h.above;
+const isFallback = (h: Condition) =>
+  h.match === undefined && !h.includes && !h.misses && !h.notFirst && !h.notLast && !h.before && !h.above && !h.from && !h.to;
 
 /** Every id a set Hint names: its exact `match`, and its `includes` / `misses` conditions. */
 export const hintIds = (h: { match?: string[]; includes?: string[]; misses?: string[] }) => [
@@ -74,7 +85,8 @@ const isPrediction = (item: Interaction) => "prediction" in item && item.predict
 function answerRules(item: Interaction): string[] {
   const errors: string[] = [];
   switch (item.type) {
-    case "multiple-choice": {
+    case "multiple-choice":
+    case "rotate-and-identify": {
       const optionIds = new Set(item.options.map((o) => o.id));
       for (const id of item.answer) if (!optionIds.has(id)) errors.push(`answer names unknown option "${id}"`);
       if (isPrediction(item)) return errors;
@@ -96,6 +108,9 @@ function answerRules(item: Interaction): string[] {
         errors.push("the items start in the answer order; list them in a different order");
       if (item.hints?.some((h) => h.match && !wholeOrder(h.match)))
         errors.push("a Hint's match must list every item exactly once");
+      for (const h of item.hints ?? [])
+        for (const id of [h.notFirst, h.notLast, ...(h.before ?? [])])
+          if (id !== undefined && !itemIds.includes(id)) errors.push(`a Hint names unknown item "${id}"`);
       for (const [upper, lower] of item.hints?.flatMap((h) => h.above ?? []) ?? []) {
         const unknown = [upper, lower].filter((id) => !itemIds.includes(id));
         for (const id of unknown) errors.push(`a Hint names unknown item "${id}"`);

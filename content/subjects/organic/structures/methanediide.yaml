@@ -1,0 +1,13 @@
+# Lesson 1 (#79): full Lewis structure, drawn by hand (bent, lone pairs above).
+
+id: methanediide
+style: full
+smiles: "[CH2-2]"
+source: "Impossible on purpose: carbon with charge −2 (Lesson 1 s09)"
+atoms:
+  - { id: a1, el: "C", x: 0, y: 0, charge: -2, lp: 2 }
+  - { id: a2, el: "H", x: -1.299, y: 0.75 }
+  - { id: a3, el: "H", x: 1.299, y: 0.75 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a1, b: a3, order: 1 }

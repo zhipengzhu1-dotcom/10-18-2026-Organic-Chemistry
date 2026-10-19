@@ -28,7 +28,7 @@ export const methylamine: Structure = {
 };
 
 export const acetamide: Structure = {
-  id: "acetamide",
+  id: "acetamide-neutral",
   style: "line-angle",
   smiles: "[CH3:1][C:2](=[O:3])[NH2:4]",
   source: "PubChem CID 178",
@@ -84,7 +84,7 @@ export const methanimine: Structure = {
 };
 
 export const acetone: Structure = {
-  id: "acetone",
+  id: "acetone-neutral",
   style: "line-angle",
   smiles: "[CH3:1][C:2](=[O:3])[CH3:4]",
   source: "PubChem CID 180",

@@ -9,11 +9,15 @@ units:
     summary: Atoms, Lewis structures, formal charge, hybridization, polarity and resonance.
     status: available
     lessons:
+      - u1-l01
+      - u1-l02
       - u1-sample
       - u1-sample-step-types
       - u1-sample-structures
       - u1-sample-scenes
       - u1-sample-arrows
+      - u1-sample-3d
+      - u1-l05
       - u1-l07
   - id: u2
     slug: acids-bases

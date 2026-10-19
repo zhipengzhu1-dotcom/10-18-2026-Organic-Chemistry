@@ -1,0 +1,29 @@
+/* Explore in 3D (#71): a full-screen dialog on the Arcade Cosmos tokens (#59), holding the same
+   3D card as the Step (#68), grown to fill the screen. */
+.explore-open { align-self: flex-start; }
+dialog.explore {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--at-space);
+  color: var(--at-ink);
+}
+dialog.explore::backdrop { background: var(--at-space); }
+.explore-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 100%;
+  padding: 12px var(--at-gutter) 24px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+.explore-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.explore-head h2 { margin: 0; font: 600 22px/1.2 var(--at-font-text); }
+.explore-close { background: transparent; color: var(--at-ink); border-color: var(--at-ink); box-shadow: none; padding: 0; }
+.explore .molecule { flex: 1 1 auto; max-height: none; min-height: min(60dvh, 520px); }
+.explore-words { margin: 0; color: var(--at-ink-muted); font-size: 16px; }

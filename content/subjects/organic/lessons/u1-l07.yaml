@@ -21,14 +21,15 @@ steps:
     answer: [b]
     reveal: "Acetamide's C–N is **{{acetamide/r.CN}}** (computed): shorter than methylamine's single bond ({{methylamine/r.CN}}), longer than methanimine's double bond ({{methanimine/r.CN}}). So a drawing with C=N must count, but only partly. Which drawings count, and how much? That's this Lesson."
     # The three molecules show first with their C–N bonds highlighted; the lengths appear on reveal.
-    scene: { id: amide-cn-lengths, state: { molecule: all, labels: hidden }, onAnswer: { labels: shown } }
-    source: "Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phase. All three molecules use the same method so they can be compared fairly. Structures: PubChem CIDs 6329, 178 and 123139. CCCBDB lists experimental geometries for acetamide and methanimine (for methylamine, internal coordinates only); they are not used here, so that one method covers all three."
+    scene: { id: amide-cn-lengths, state: { molecule: all, labels: hidden } }
+    revealScene: { id: amide-cn-lengths, state: { molecule: all, labels: shown } }
+    sourceNote: "Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phase. All three molecules use the same method so they can be compared fairly. Structures: PubChem CIDs 6329, 178 and 123139. CCCBDB lists experimental geometries for acetamide and methanimine (for methylamine, internal coordinates only); they are not used here, so that one method covers all three."
 
   - id: s02
     phase: build
     type: draw-arrows
     prompt: Find the drawing behind that short bond. Push electrons to turn acetamide into its other contributor.
-    start: acetamide
+    start: acetamide-neutral
     results: [acetamide-polar]
     answer:
       - { from: a4, to: b3 } # lone pair on N4 → bond 2–4
@@ -52,14 +53,14 @@ steps:
 
       Minor still matters. Acetamide's charged drawing is minor, yet it's why the C–N bond is shorter than a single bond.
     scene: amide-hybrid
-    source: "Weighting idea from MIT OCW 5.12, Lecture 2 p. 2, 'Rules for Resonance Structures', Berkowski, Spring 2005, CC BY-NC-SA 4.0. Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phase. All three molecules use the same method so they can be compared fairly. Structures: PubChem CIDs 6329, 178 and 123139."
+    sourceNote: "Weighting idea from MIT OCW 5.12, Lecture 2 p. 2, 'Rules for Resonance Structures', Berkowski, Spring 2005, CC BY-NC-SA 4.0. Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phase. All three molecules use the same method so they can be compared fairly. Structures: PubChem CIDs 6329, 178 and 123139."
 
   - id: s04
     phase: build
     type: multiple-choice
     prompt: "Gut check before the rules: which acetamide drawing is the major contributor?"
     options:
-      - { id: a, structure: acetamide, text: "CH₃–C(=O)–NH₂, no charges: C=O double bond, C–N single bond." }
+      - { id: a, structure: acetamide-neutral, text: "CH₃–C(=O)–NH₂, no charges: C=O double bond, C–N single bond." }
       - { id: b, structure: acetamide-polar, text: "CH₃–C(–O⁻)=N⁺H₂: C–O single bond with O⁻, C=N double bond with N⁺." }
       - { id: c, text: "They count equally" }
     answer: [a]
@@ -81,7 +82,7 @@ steps:
       3. **− on the more electronegative atom.** C < N < O < F, as in Lesson 1.
       4. **Charges close together.** If two drawings tie on 1–3, the one with + and − nearer each other wins.
     scene: { id: rule-ladder, state: { rung: all } }
-    source: "The four guidelines and their order adapted from MIT OCW 5.12, Lecture 2 p. 4, 'Predicting Energies of Resonance Structures', Berkowski, Spring 2005, CC BY-NC-SA 4.0."
+    sourceNote: "The four guidelines and their order adapted from MIT OCW 5.12, Lecture 2 p. 4, 'Predicting Energies of Resonance Structures', Berkowski, Spring 2005, CC BY-NC-SA 4.0."
 
   - id: s06
     phase: build
@@ -152,7 +153,7 @@ steps:
       - text: "Go rule by rule, and stop at the first rule that tells two cards apart."
     reveal: "Top to bottom: `a`, `b`, `c`."
     revealTags: { a: "rule 1: octets", b: "rule 4: charges adjacent", c: "rule 4: charges far apart" }
-    source: "Ranking method adapted from MIT OCW 5.12, Lecture 2 p. 4, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Example ours."
+    sourceNote: "Ranking method adapted from MIT OCW 5.12, Lecture 2 p. 4, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Example ours."
 
   - id: s10
     phase: build

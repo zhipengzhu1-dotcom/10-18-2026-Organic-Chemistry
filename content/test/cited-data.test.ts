@@ -47,6 +47,20 @@ describe("cited-data lookup", () => {
     expect(cite(dataOf(build()), "methane/a.HCH")).toMatchObject({ display: "109.5°", full: "109.471°" });
   });
 
+  it("shows electronegativities to 2 decimals, with no unit", () => {
+    const result = build((t) => {
+      t["chem/data/en.yaml"] = {
+        id: "en",
+        kind: "table",
+        title: "Electronegativity",
+        sources: { allred: { kind: "reference", citation: "Allred (1961)", licence: "Published values" } },
+        values: { C: { label: "C", quantity: "electronegativity", value: 2.5, source: "allred" } },
+      };
+    });
+    expect(result.errors).toEqual([]);
+    expect(cite(dataOf(result), "en/C")).toMatchObject({ display: "2.50", full: "2.5" });
+  });
+
   it("holds unitless counts, such as a nuclide's mass number, as whole numbers", () => {
     const result = build(
       (t) =>
@@ -173,6 +187,14 @@ describe("Source note", () => {
       text: "C colour #909090 and H colour #FFFFFF from the Jmol CPK colour table, Jmol source org/jmol/c/PAL.java.",
     });
     expect(note[1].lead).toBe("Geometry: experimental (gas phase).");
+  });
+
+  it("still names a shared source once after the values cross to the browser as JSON", () => {
+    const data = dataOf(build((t) => (t["chem/data/elements.yaml"] = elements())));
+    const shipped = JSON.parse(JSON.stringify([cite(data, "elements/C.colour"), cite(data, "elements/H.colour")]));
+    expect(sourceNote(shipped)).toEqual([
+      { text: "C colour #909090 and H colour #FFFFFF from the Jmol CPK colour table, Jmol source org/jmol/c/PAL.java." },
+    ]);
   });
 });
 

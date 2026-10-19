@@ -4,8 +4,8 @@ id: dimethylvinylamine
 style: line-angle
 smiles: "[CH2:1]=[CH:2][N:3]([CH3:4])[CH3:5]"
 atoms:
-  - { id: a1, el: C, x: 0, y: 0, letter: true }
-  - { id: a2, el: C, x: 1.299, y: -0.75, letter: true }
+  - { id: a1, el: C, x: 0, y: 0, letter: true, h: 2 }
+  - { id: a2, el: C, x: 1.299, y: -0.75, letter: true, h: 1 }
   - { id: a3, el: N, x: 2.598, y: 0, lp: 1 }
   - { id: a4, el: C, x: 3.897, y: -0.75 }
   - { id: a5, el: C, x: 2.598, y: 1.5 }

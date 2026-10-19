@@ -34,21 +34,6 @@ describe("content build", () => {
   });
 });
 
-describe("Source note text", () => {
-  it("a Step carries its written Source note; a Check Step carries its Problem's source unless it is Original", () => {
-    const tree = validTree();
-    const lessonFile = tree["chem/lessons/l1.yaml"] as { steps: Record<string, unknown>[] };
-    lessonFile.steps[1] = { ...lessonFile.steps[1], source: "Adapted from MIT OCW 5.12, Lecture 2 p. 4." };
-    (tree["chem/problems/p1.yaml"] as Record<string, unknown>).source = "Adapted from MIT OCW 5.12, Problem Set 1 Q6a.";
-    const { model, errors } = buildContent(writeTree(tree));
-    expect(errors).toEqual([]);
-    const steps = model!.subjects[0].courses[0].units[0].lessons[0].steps;
-    expect(steps[1].source).toBe("Adapted from MIT OCW 5.12, Lecture 2 p. 4.");
-    expect(steps[7].source).toBe("Adapted from MIT OCW 5.12, Problem Set 1 Q6a.");
-    expect(steps[8].source).toBeUndefined(); // p2's source is "Original"
-  });
-});
-
 function errorsFor(edit: (tree: ReturnType<typeof validTree>) => void): string[] {
   const tree = validTree();
   edit(tree);

@@ -6,6 +6,7 @@ lesson: u1-l07
 difficulty: 3
 status: approved
 source: "Adapted from MIT OCW 5.12, Lecture 2 p. 4, 'Predicting Relative Energies' (contributors B–E), Berkowski, Spring 2005, CC BY-NC-SA 4.0."
+sourceNote: "Adapted from MIT OCW 5.12, Lecture 2 p. 4, 'Predicting Relative Energies' (contributors B–E), Berkowski, Spring 2005, CC BY-NC-SA 4.0."
 type: rank
 prompt: "Four minor contributors of 3-methoxyacrylonitrile (the neutral, major one isn't shown). Rank them, most important at the top."
 items:

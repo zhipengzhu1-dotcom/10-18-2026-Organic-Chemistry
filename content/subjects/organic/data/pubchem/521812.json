@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 521812,
+        "MolecularFormula": "C4H9N",
+        "SMILES": "CN(C)C=C",
+        "ConnectivitySMILES": "CN(C)C=C",
+        "Title": "N,N-dimethylethenamine"
+      }
+    ]
+  }
+}

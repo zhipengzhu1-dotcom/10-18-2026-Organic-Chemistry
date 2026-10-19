@@ -8,11 +8,11 @@ atoms:
   - { id: a2, el: N, x: 3, y: 0, charge: 1 }
   - { id: a3, el: C, x: 3.75, y: -1.299 }
   - { id: a4, el: C, x: 1.5, y: 0, letter: true }
-  - { id: a5, el: C, x: 0.75, y: -1.299, letter: true }
-  - { id: a6, el: C, x: -0.75, y: -1.299, letter: true }
-  - { id: a7, el: C, x: -1.5, y: 0, charge: -1, lp: 1, letter: true }
-  - { id: a8, el: C, x: -0.75, y: 1.299, letter: true }
-  - { id: a9, el: C, x: 0.75, y: 1.299, letter: true }
+  - { id: a5, el: C, x: 0.75, y: -1.299, letter: true, h: 1 }
+  - { id: a6, el: C, x: -0.75, y: -1.299, letter: true, h: 1 }
+  - { id: a7, el: C, x: -1.5, y: 0, charge: -1, lp: 1, letter: true, h: 1 }
+  - { id: a8, el: C, x: -0.75, y: 1.299, letter: true, h: 1 }
+  - { id: a9, el: C, x: 0.75, y: 1.299, letter: true, h: 1 }
 bonds:
   - { id: b1, a: a1, b: a2, order: 1 }
   - { id: b2, a: a2, b: a3, order: 1 }

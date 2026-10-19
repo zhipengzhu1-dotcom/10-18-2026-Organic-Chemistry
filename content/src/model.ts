@@ -1,21 +1,12 @@
 // The resolved course model: what the content build hands to the site and the
 // video renderer. Check Steps arrive with their Problem inlined.
-import type { Cited, CitedData } from "./data.ts";
+import type { Atom, Bond, Cited, CitedData, Tier } from "./data.ts";
+import type { Matrix3 } from "./molecule.ts";
 
 export type Phase = "hook" | "build" | "check" | "wrap";
 
 /** A Hint; see HintRule. */
 export type Hint = HintRule;
-
-/**
- * A Rank Hint. Every condition given must hold: `match` = this whole wrong order; `above` = at
- * least one [upper, lower] pair has its first card above its second. The fallback has neither.
- */
-export interface RankHint {
-  match?: string[];
-  above?: [string, string][];
-  text: string;
-}
 
 /** A value a Scene's settable state takes: a number (range state) or an option id (choice state). */
 export type SceneValue = number | string;
@@ -50,24 +41,83 @@ export interface SceneUse {
   state: Record<string, SceneValue>;
   /** The Scene's cited values by ref; the Scene reads its numbers from here (ADR 0002). */
   cited: Record<string, Cited>;
-  /** States that change once the Step is answered; the Scene then plays again (a Hook's reveal). */
-  onAnswer?: Record<string, SceneValue>;
-  /** Opens paused on the poster frame (a Wrap's final frame). */
+  /** Shown on its poster frame only, with no playback controls (a still picture). */
   still?: boolean;
 }
 
-export interface ExplainStep {
+/**
+ * The molecule a Step or Problem names (`molecule:` in its file), resolved from its cited data file:
+ * atoms (Å) and bonds, the start orientation, and each element's Jmol colour and Bondi radius
+ * (ADR 0002). Every Step that names one offers Explore in 3D (#71); the 3D Step card (#68) shows it
+ * inline when `card` is set (always on Rotate-and-identify 3D), and the Step's `citations` then
+ * carry `cited` too, so its own Source note covers the molecule.
+ */
+export interface MoleculeUse {
+  /** The data file id, e.g. "methane". */
+  id: string;
+  title: string;
+  /** Geometry tier of the coordinates. */
+  tier: Tier;
+  atoms: Atom[];
+  bonds: Bond[];
+  /** The named start view (views.yaml), when the Step gives one. */
+  view?: string;
+  /** The start rotation: rows are the screen's right, up and toward-the-viewer axes (molecule.ts). */
+  orientation: Matrix3;
+  /** Per element present: colour "#RRGGBB" and van der Waals radius in Å, from the cited elements table. */
+  elements: Record<string, { colour: string; vdw: number }>;
+  /** Everything a Source note for the molecule names: its geometry values, then each element's colour, then radius. */
+  cited: Cited[];
+  /** Licence notice for third-party data (the NIST acknowledgement on CCCBDB-derived geometry). */
+  notice?: string;
+  /** True when the Step shows the 3D card inline. */
+  card: boolean;
+  /** The Step's own words, read first by the Describe button. */
+  describe?: string;
+}
+
+
+/** A structure drawn with a Step, static. */
+export interface Figure {
+  view: StructureView;
+  /** Shown under the drawing (Markdown). */
+  caption?: string;
+  /** Screen-reader text for the drawing. */
+  alt: string;
+}
+
+/** Something one tap away from a Step: a Scene, or a reference table of drawings. */
+export interface Aside {
+  /** Names the button that opens it. */
+  label: string;
+  scene?: SceneUse;
+  table?: { columns: string[]; rows: { head: string; cells: (Figure | null)[] }[]; caption?: string };
+}
+
+/** What any Step may show besides its interaction. */
+export interface Visuals {
+  figures?: Figure[];
+  aside?: Aside;
+  /** A written Source note (Markdown) for what isn't a cited number: structures, wording, ideas. */
+  sourceNote?: string;
+}
+
+/** A graded Step's visuals, plus the Scene that plays once it is answered (it may show the answer). */
+export interface GradedVisuals extends Visuals {
+  revealScene?: SceneUse;
+}
+
+export interface ExplainStep extends Visuals {
   id: string;
   phase: Phase;
   type: "explain";
   text: string;
   scene?: SceneUse;
+  molecule?: MoleculeUse;
   citations?: Cited[];
-  /** The written Source note (credits, licences); a Check Step's is its Problem's `source`. */
-  source?: string;
 }
 
-export interface MultipleChoiceStep {
+export interface MultipleChoiceStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "multiple-choice";
@@ -82,10 +132,9 @@ export interface MultipleChoiceStep {
   /** Set on Check Steps: the Bank Problem this Step plays. */
   problemId?: string;
   scene?: SceneUse;
+  molecule?: MoleculeUse;
   /** The cited values this Step's text shows (`{{file/key}}`); its Source note is generated from them. */
   citations?: Cited[];
-  /** The written Source note (credits, licences); a Check Step's is its Problem's `source`. */
-  source?: string;
 }
 
 export interface NumericHint {
@@ -95,13 +144,15 @@ export interface NumericHint {
 }
 
 /** Numeric input: the Student types a number; the unit is fixed and shown beside the box, never typed. */
-export interface NumericStep {
+export interface NumericStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "numeric";
   prompt: string;
   /** The unit of measure shown beside the box, e.g. "°" or "Å". */
   unitSymbol: string;
+  /** A ± key beside the box flips the sign of what is typed. */
+  signKey?: boolean;
   answer: number;
   /** Absolute: a value within answer ± tolerance is right. */
   tolerance: number;
@@ -110,31 +161,45 @@ export interface NumericStep {
   reveal: string;
   problemId?: string;
   scene?: SceneUse;
+  molecule?: MoleculeUse;
   citations?: Cited[];
-  /** The written Source note (credits, licences); a Check Step's is its Problem's `source`. */
-  source?: string;
 }
 
 /** Rank / order: the Student puts the items into one strict order (the prompt names which end is first). */
-export interface RankStep {
+export interface RankStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "rank";
   prompt: string;
-  /** In the order the cards start in; a structure card's text is its screen-reader label. */
+  /** In the order the cards start in; a structure card's text is its screen-reader label (Lesson 7). */
   items: Option[];
   /** The one correct order of item ids, first to last. */
   answer: string[];
   correct?: string;
+  /** A Hint's `match` is one whole wrong order; or it names a pattern (see RankHint). */
   hints?: RankHint[];
   reveal: string;
   /** Once answered, each card's note on why it sits there; secret (it gives the order away). */
   revealTags?: Record<string, string>;
   problemId?: string;
   scene?: SceneUse;
+  molecule?: MoleculeUse;
   citations?: Cited[];
-  /** The written Source note (credits, licences); a Check Step's is its Problem's `source`. */
-  source?: string;
+}
+
+/**
+ * A Rank Hint. Every condition given must hold: `match` = this whole order; `notFirst` /
+ * `notLast` = that item isn't at that end; `before: [x, y]` = x is placed before y; `above` = any one of its [x, y] pairs is.
+ * The generic fallback has no condition.
+ */
+export interface RankHint {
+  match?: string[];
+  notFirst?: string;
+  notLast?: string;
+  before?: [string, string];
+  /** At least one of these [upper, lower] pairs has its first item above its second. */
+  above?: [string, string][];
+  text: string;
 }
 
 export interface ManipulateHint {
@@ -144,7 +209,7 @@ export interface ManipulateHint {
 }
 
 /** Manipulate a Scene: the Student works a slider (one settable state of the Scene) and presses Check on a value. */
-export interface ManipulateStep {
+export interface ManipulateStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "manipulate";
@@ -158,8 +223,26 @@ export interface ManipulateStep {
   reveal: string;
   problemId?: string;
   citations?: Cited[];
-  /** The written Source note (credits, licences); a Check Step's is its Problem's `source`. */
-  source?: string;
+  /** The molecule the Step names: Explore in 3D (#71). */
+  molecule?: MoleculeUse;
+}
+
+/** Rotate-and-identify 3D: turn the molecule in the 3D card, answer with ordinary choices (graded like Multiple choice). */
+export interface RotateAndIdentifyStep extends GradedVisuals {
+  id: string;
+  phase: Phase;
+  type: "rotate-and-identify";
+  prompt: string;
+  molecule: MoleculeUse;
+  options: { id: string; text: string }[];
+  /** The exact set of correct option ids. */
+  answer: string[];
+  correct?: string;
+  hints?: Hint[];
+  reveal: string;
+  problemId?: string;
+  scene?: SceneUse;
+  citations?: Cited[];
 }
 
 /**
@@ -188,7 +271,7 @@ export interface PushHint {
  * is applied to our own molecule graph and accepted when it moves toward an accepted result
  * (`@astratron/content/arrows`). Two tries per push; the Step is done when the drawing is a result.
  */
-export interface DrawArrowsStep {
+export interface DrawArrowsStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "draw-arrows";
@@ -209,12 +292,19 @@ export interface DrawArrowsStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
-  /** The written Source note (credits, licences); a Check Step's is its Problem's `source`. */
-  source?: string;
+  /** The molecule the Step names: Explore in 3D (#71). */
+  molecule?: MoleculeUse;
 }
 
 /** A Step the Student answers and the engine grades. */
-export type GradedStep = MultipleChoiceStep | NumericStep | RankStep | TapStep | ManipulateStep | DrawArrowsStep;
+export type GradedStep =
+  | MultipleChoiceStep
+  | NumericStep
+  | RankStep
+  | TapStep
+  | ManipulateStep
+  | RotateAndIdentifyStep
+  | DrawArrowsStep;
 
 export type Step = ExplainStep | GradedStep;
 
@@ -256,7 +346,8 @@ export interface StructureBond {
 export interface Structure {
   id: string;
   /** full = every atom a letter (Lewis/Kekulé); line-angle = carbons are corners unless charged or `letter`. */
-  style: "full" | "line-angle";
+  /** lewis = every atom a letter and each shared pair two dots between its atoms (no lines). */
+  style: "full" | "lewis" | "line-angle";
   /** The SMILES it was laid out from (provenance). */
   smiles?: string;
   /** Where the structure comes from, e.g. "PubChem CID 750". */
@@ -272,6 +363,8 @@ export type Hidden = "charges" | "lone-pairs";
 export interface StructureView {
   structure: Structure;
   hide: Hidden[];
+  /** Atoms ringed and bonds outlined to point the Student at them. */
+  highlight?: { ring: string[]; outline: string[] };
   /** Added at site build time by the renderer; absent in the raw course model. */
   drawn?: DrawnStructure;
 }
@@ -319,12 +412,14 @@ export interface HintRule {
   text: string;
 }
 
-export interface TapStep {
+export interface TapStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "tap-to-identify";
   prompt: string;
   structure: StructureView;
+  /** Screen-reader text for the whole drawing. */
+  alt?: string;
   targets: TapTarget[];
   /** The exact set of target ids to pick. */
   answer: string[];
@@ -333,13 +428,13 @@ export interface TapStep {
   reveal: string;
   /** Shown when the Step sits among Draw-arrows Steps: it is tap-only. */
   tapOnly?: { idle: string; drag: string };
-  /** Played (push-replay) once the Step is answered: pushes on `start` that make the δ site (Lesson 7). Secret: it shows the answer. */
+  /** Played (push-replay) in place of the drawing once the Step is answered: pushes on `start` that make the δ site (Lesson 7). Secret. */
   replay?: { start: Structure; pushes: Push[] };
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
-  /** The written Source note (credits, licences); a Check Step's is its Problem's `source`. */
-  source?: string;
+  /** The molecule the Step names: Explore in 3D (#71). */
+  molecule?: MoleculeUse;
 }
 
 export interface Lesson {
@@ -418,6 +513,16 @@ export interface Subject {
   courses: Course[];
   /** The Subject's cited data files, by id; read numbers from it with `cite` (ADR 0002). */
   data: CitedData;
+  /** The homepage Push hero, ready for `@astratron/content/arrows` (`arrowsStart`/`arrowsAct`/`arrowsView`). */
+  hero?: HeroPush;
+}
+
+/** One live push with its accepted results; the shape of `ArrowsTask`. */
+export interface HeroPush {
+  start: Structure;
+  results: Structure[];
+  answer: Push[];
+  hints?: PushHint[];
 }
 
 export interface CourseModel {

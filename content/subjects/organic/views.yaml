@@ -1,0 +1,22 @@
+# Named start views for the 3D Step card (#68): molecule id → view name → view.
+# A Step uses one as `molecule: { id: water, view: end-on }`. Atoms are 0-based indices in the
+# data file's atom order. Fields (see content/src/molecule.ts, ViewSpec):
+#   look: [a, b]       look along a → b (a nearest you)
+#   plane: [a, b, c]   those atoms lie in the screen plane; front: d puts atom d on your side
+#   up: k              atom k points straight up (from a for look, from b for plane)
+#   rotate: [x, y, z]  then turn about the screen's x, y and z axes, in degrees
+# Each view is checked against what its Step's drawing needs in content/test/molecule.test.ts.
+methane:
+  # Lesson 3 s03: no two H's in an obvious line with the C.
+  tilted: { rotate: [20, 30, 0] }
+water:
+  # Lesson 3 s06: down the H···H line, so the bend is hidden until the Student turns it.
+  end-on: { look: [1, 2], up: 0 }
+boron-trifluoride:
+  # Lesson 3 Check Problem u1-3d-flat-or-pyramid: down the threefold axis, where BF₃ and NH₃ look alike.
+  face-on: {}
+ammonia:
+  face-on: {}
+ethanol:
+  # Lesson 3 s09: the O–C–C plane turned well away from the screen plane.
+  off-page: { plane: [2, 1, 0], up: 2, rotate: [70, 0, 0] }
