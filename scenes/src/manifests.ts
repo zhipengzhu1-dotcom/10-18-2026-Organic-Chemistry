@@ -22,6 +22,12 @@ import { giveOrTake } from "./give-or-take/manifest.ts";
 import { outerElectrons } from "./outer-electrons/manifest.ts";
 import { waterPush } from "./water-push/manifest.ts";
 
+// Lesson 4 (#82)
+import { hybridSets } from "./hybrid-sets/manifest.ts";
+import { piTwist } from "./pi-twist/manifest.ts";
+import { methaneUnmixedVsReal } from "./methane-unmixed-vs-real/manifest.ts";
+import { orbitalSum } from "./orbital-sum/manifest.ts";
+
 export const sceneManifests: readonly SceneManifest<any>[] = [
   sampleTwist,
   streamBend,
@@ -41,4 +47,9 @@ export const sceneManifests: readonly SceneManifest<any>[] = [
   giveOrTake,
   waterPush,
   buildBySharing,
+  // Lesson 4 (#82)
+  hybridSets,
+  methaneUnmixedVsReal,
+  orbitalSum,
+  piTwist,
 ];

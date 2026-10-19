@@ -38,6 +38,15 @@ import { outerElectrons } from "./outer-electrons/manifest.ts";
 import OuterElectrons from "./outer-electrons/OuterElectrons.tsx";
 import { waterPush } from "./water-push/manifest.ts";
 import WaterPush from "./water-push/WaterPush.tsx";
+// Lesson 4 (#82)
+import { hybridSets } from "./hybrid-sets/manifest.ts";
+import HybridSets from "./hybrid-sets/HybridSets.tsx";
+import { piTwist } from "./pi-twist/manifest.ts";
+import PiTwist from "./pi-twist/PiTwist.tsx";
+import { methaneUnmixedVsReal } from "./methane-unmixed-vs-real/manifest.ts";
+import MethaneUnmixedVsReal from "./methane-unmixed-vs-real/MethaneUnmixedVsReal.tsx";
+import { orbitalSum } from "./orbital-sum/manifest.ts";
+import OrbitalSum from "./orbital-sum/OrbitalSum.tsx";
 
 export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [sampleTwist.id]: { manifest: sampleTwist, Component: SampleTwist },
@@ -58,6 +67,11 @@ export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [giveOrTake.id]: { manifest: giveOrTake, Component: GiveOrTake },
   [waterPush.id]: { manifest: waterPush, Component: WaterPush },
   [buildBySharing.id]: { manifest: buildBySharing, Component: BuildBySharing },
+  // Lesson 4 (#82)
+  [hybridSets.id]: { manifest: hybridSets, Component: HybridSets },
+  [piTwist.id]: { manifest: piTwist, Component: PiTwist },
+  [methaneUnmixedVsReal.id]: { manifest: methaneUnmixedVsReal, Component: MethaneUnmixedVsReal },
+  [orbitalSum.id]: { manifest: orbitalSum, Component: OrbitalSum },
 };
 
 export type * from "./types.ts";
