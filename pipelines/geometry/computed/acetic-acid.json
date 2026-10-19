@@ -1,0 +1,97 @@
+{
+ "id": "acetic-acid",
+ "smiles": "CC(=O)O",
+ "charge": 0,
+ "multiplicity": 1,
+ "method": {
+  "program": "PySCF",
+  "version": "2.14.0",
+  "level": "B3LYP/cc-pVTZ",
+  "xc": "b3lyp",
+  "xc_definition": "((0, 0, 0), ((402, 1),))",
+  "basis": "cc-pvtz",
+  "grid_level": 4,
+  "optimizer": "geomeTRIC 1.1.1, GAU_TIGHT",
+  "phase": "gas (isolated molecule)"
+ },
+ "date": "2026-10-19",
+ "start": "syn conformer (O=C–O–H dihedral 0°), start from the Lesson 6 prototype",
+ "input_sha256": "30f0fc2f04c9822d69acb50a349e42ebb017a3d47e9cd1f4d21d82ff8e5d0e8b",
+ "converged": {
+  "optimiser": true,
+  "scf": true
+ },
+ "energy_hartree": -229.1811775371793,
+ "atoms": [
+  [
+   "C",
+   -1.459661,
+   -0.000515,
+   0.0
+  ],
+  [
+   "C",
+   0.041023,
+   0.07116,
+   0.0
+  ],
+  [
+   "O",
+   0.702098,
+   1.076168,
+   -0.0
+  ],
+  [
+   "O",
+   0.597952,
+   -1.165707,
+   0.0
+  ],
+  [
+   "H",
+   -1.871483,
+   1.0033,
+   0.0
+  ],
+  [
+   "H",
+   -1.804401,
+   -0.546914,
+   0.877975
+  ],
+  [
+   "H",
+   -1.804401,
+   -0.546914,
+   -0.877975
+  ],
+  [
+   "H",
+   1.557997,
+   -1.037621,
+   0.0
+  ]
+ ],
+ "frequencies_cm1": [
+  78.7,
+  423.4,
+  547.4,
+  585.1,
+  670.7,
+  859.2,
+  998.7,
+  1070.5,
+  1204.6,
+  1341.6,
+  1409.7,
+  1473.1,
+  1478.8,
+  1825.3,
+  3052.1,
+  3108.7,
+  3159.7,
+  3742.1
+ ],
+ "imaginary_modes": 0,
+ "seconds": 478
+}

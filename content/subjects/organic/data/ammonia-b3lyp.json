@@ -1,0 +1,107 @@
+{
+  "id": "ammonia-b3lyp",
+  "kind": "molecule",
+  "title": "Ammonia, B3LYP",
+  "geometry": "computed",
+  "sources": {
+    "ours": {
+      "kind": "computed",
+      "citation": "Our calculation: PySCF 2.14.0, B3LYP/cc-pVTZ, isolated molecule, optimised with geomeTRIC 1.1.1, GAU_TIGHT and checked as a true minimum (all harmonic frequencies real), 2026-10-19",
+      "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+      "method": {
+        "program": "PySCF",
+        "version": "2.14.0",
+        "level": "B3LYP/cc-pVTZ",
+        "date": "2026-10-19",
+        "maxDeviation": 0.039
+      }
+    }
+  },
+  "values": {
+    "r.NH": {
+      "label": "N–H",
+      "quantity": "bond-length",
+      "value": 1.0138,
+      "unit": "Å",
+      "source": "ours",
+      "atoms": [
+        0,
+        1
+      ]
+    },
+    "a.HNH": {
+      "label": "H–N–H",
+      "quantity": "angle",
+      "value": 106.5,
+      "unit": "°",
+      "source": "ours",
+      "atoms": [
+        1,
+        0,
+        2
+      ]
+    }
+  },
+  "atoms": {
+    "source": "ours",
+    "list": [
+      [
+        "N",
+        -0.0,
+        0.0,
+        0.0024
+      ],
+      [
+        "H",
+        -0.0,
+        -0.9379,
+        -0.3824
+      ],
+      [
+        "H",
+        0.8123,
+        0.469,
+        -0.3824
+      ],
+      [
+        "H",
+        -0.8123,
+        0.469,
+        -0.3824
+      ]
+    ]
+  },
+  "bonds": [
+    [
+      0,
+      1,
+      1
+    ],
+    [
+      0,
+      2,
+      1
+    ],
+    [
+      0,
+      3,
+      1
+    ]
+  ],
+  "provenance": {
+    "pipeline": "pipelines/geometry (#67)",
+    "start": "CCCBDB experimental Cartesians (CAS 7664-41-7)",
+    "inputSha256": "8271cce03a7ee8bb9119794f82b7dbb4f888fbc6d258d91e39845881c15d81b3",
+    "optimiser": "geomeTRIC 1.1.1, GAU_TIGHT",
+    "basis": "cc-pvtz",
+    "gridLevel": 4,
+    "xcDefinition": "((0, 0, 0), ((402, 1),))",
+    "energyHartree": -56.5847258934187,
+    "lowestFrequency": 1064.1,
+    "imaginaryModes": 0,
+    "charge": 0,
+    "note": "Computed on purpose: Lesson 8 compares orbital energies, so geometry and orbitals come from one method.",
+    "cccbdb": "not looked up (not a neutral CCCBDB species)",
+    "usedBy": "L8"
+  }
+}

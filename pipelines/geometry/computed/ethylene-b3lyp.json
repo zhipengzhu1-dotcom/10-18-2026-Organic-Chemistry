@@ -1,0 +1,79 @@
+{
+ "id": "ethylene-b3lyp",
+ "smiles": "C=C",
+ "charge": 0,
+ "multiplicity": 1,
+ "method": {
+  "program": "PySCF",
+  "version": "2.14.0",
+  "level": "B3LYP/cc-pVTZ",
+  "xc": "b3lyp",
+  "xc_definition": "((0, 0, 0), ((402, 1),))",
+  "basis": "cc-pvtz",
+  "grid_level": 4,
+  "optimizer": "geomeTRIC 1.1.1, GAU_TIGHT",
+  "phase": "gas (isolated molecule)"
+ },
+ "date": "2026-10-19",
+ "start": "CCCBDB experimental Cartesians (CAS 74-85-1)",
+ "input_sha256": "a4c17f3a53170d1bbdf57bef31e05188b0ec9f17568999bc2189ee3f9959a84a",
+ "converged": {
+  "optimiser": true,
+  "scf": true
+ },
+ "energy_hartree": -78.62318014100018,
+ "atoms": [
+  [
+   "C",
+   -0.0,
+   -0.0,
+   0.66206
+  ],
+  [
+   "C",
+   -0.0,
+   -0.0,
+   -0.66206
+  ],
+  [
+   "H",
+   -0.0,
+   0.92067,
+   1.231582
+  ],
+  [
+   "H",
+   -0.0,
+   -0.920671,
+   1.231583
+  ],
+  [
+   "H",
+   -0.0,
+   0.92067,
+   -1.231582
+  ],
+  [
+   "H",
+   -0.0,
+   -0.920671,
+   -1.231583
+  ]
+ ],
+ "frequencies_cm1": [
+  835.9,
+  979.0,
+  983.4,
+  1067.1,
+  1246.3,
+  1381.9,
+  1478.7,
+  1692.1,
+  3125.2,
+  3139.0,
+  3194.4,
+  3222.8
+ ],
+ "imaginary_modes": 0,
+ "seconds": 93
+}

@@ -1,0 +1,60 @@
+{
+ "id": "methane",
+ "smiles": "C",
+ "charge": 0,
+ "multiplicity": 1,
+ "method": {
+  "program": "PySCF",
+  "version": "2.14.0",
+  "level": "B3LYP/cc-pVTZ",
+  "xc": "b3lyp",
+  "xc_definition": "((0, 0, 0), ((402, 1),))",
+  "basis": "cc-pvtz",
+  "grid_level": 4,
+  "optimizer": "geomeTRIC 1.1.1, GAU_TIGHT",
+  "phase": "gas (isolated molecule)"
+ },
+ "date": "2026-10-19",
+ "start": "CCCBDB experimental Cartesians (CAS 74-82-8)",
+ "input_sha256": "dd68d53133df04b6d30925bd35c81c08a60934a432be42176a49e3c2fa414e85",
+ "converged": {
+  "optimiser": true,
+  "scf": true
+ },
+ "energy_hartree": -40.53823773217867,
+ "atoms": [
+  [
+   "C",
+   -0.0,
+   0.0,
+   0.0
+  ],
+  [
+   "H",
+   0.628338,
+   0.628338,
+   0.628338
+  ],
+  [
+   "H",
+   0.628338,
+   -0.628338,
+   -0.628338
+  ],
+  [
+   "H",
+   -0.628338,
+   0.628338,
+   -0.628338
+  ],
+  [
+   "H",
+   -0.628338,
+   -0.628338,
+   0.628338
+  ]
+ ],
+ "frequencies_cm1": null,
+ "imaginary_modes": null,
+ "seconds": 9
+}

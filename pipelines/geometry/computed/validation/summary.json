@@ -1,0 +1,22 @@
+{
+  "level": "B3LYP/cc-pVTZ",
+  "maxDeviationAngstrom": 0.039,
+  "perMolecule": {
+    "methane": 0.0013,
+    "ammonia": 0.0014,
+    "water": 0.0036,
+    "formaldehyde": 0.006,
+    "carbon-dioxide": 0.0017,
+    "boron-trifluoride": 0.0077,
+    "carbon-tetrachloride": 0.0181,
+    "dichloromethane": 0.0191,
+    "ethane": 0.0089,
+    "ethylene": 0.0149,
+    "acetylene": 0.0066,
+    "ketene": 0.0063,
+    "chloroform": 0.0382,
+    "hydrogen-cyanide": 0.0097,
+    "allene": 0.008
+  },
+  "notReoptimised": []
+}

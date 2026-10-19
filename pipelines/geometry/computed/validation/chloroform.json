@@ -1,0 +1,60 @@
+{
+ "id": "chloroform",
+ "smiles": "ClC(Cl)Cl",
+ "charge": 0,
+ "multiplicity": 1,
+ "method": {
+  "program": "PySCF",
+  "version": "2.14.0",
+  "level": "B3LYP/cc-pVTZ",
+  "xc": "b3lyp",
+  "xc_definition": "((0, 0, 0), ((402, 1),))",
+  "basis": "cc-pvtz",
+  "grid_level": 4,
+  "optimizer": "geomeTRIC 1.1.1, GAU_TIGHT",
+  "phase": "gas (isolated molecule)"
+ },
+ "date": "2026-10-19",
+ "start": "CCCBDB experimental Cartesians (CAS 67-66-3)",
+ "input_sha256": "ab8004d4afa36dd12eb5a54751c3ff655dca8fe3a01145f946ee8a5c242081af",
+ "converged": {
+  "optimiser": true,
+  "scf": true
+ },
+ "energy_hartree": -1419.410971362453,
+ "atoms": [
+  [
+   "C",
+   -0.0,
+   -4.7e-05,
+   0.47611
+  ],
+  [
+   "H",
+   -0.0,
+   -0.000179,
+   1.555791
+  ],
+  [
+   "Cl",
+   -0.0,
+   1.697361,
+   -0.064129
+  ],
+  [
+   "Cl",
+   1.469938,
+   -0.84864,
+   -0.06447
+  ],
+  [
+   "Cl",
+   -1.469938,
+   -0.84864,
+   -0.06447
+  ]
+ ],
+ "frequencies_cm1": null,
+ "imaginary_modes": null,
+ "seconds": 123
+}
