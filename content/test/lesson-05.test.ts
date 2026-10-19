@@ -9,7 +9,7 @@ const step = (id: string) => lesson.steps.find((s) => s.id === id)!;
 
 /** Every structure a Step draws: its figure, its cards, its Tap structure. */
 function views(s: Step): StructureView[] {
-  if (s.type === "multiple-choice") return [...(s.figure ?? []).map((f) => f.structure), ...s.options.flatMap((o) => (o.structure ? [o.structure] : []))];
+  if (s.type === "multiple-choice") return [...(s.figures ?? []).map((f) => f.view), ...s.options.flatMap((o) => (o.structure ? [o.structure] : []))];
   if (s.type === "tap-to-identify") return [s.structure];
   return [];
 }

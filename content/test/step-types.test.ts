@@ -93,6 +93,21 @@ describe("Numeric input and Rank / order Steps", () => {
     ]);
   });
 
+  it("a Rank Hint may name a pattern, but only with the Step's items", () => {
+    const ok = [
+      { notLast: "single", text: "Longest last." },
+      { notFirst: "triple", text: "Shortest first." },
+      { before: ["single", "double"], text: "Swapped." },
+      { text: "Count shared pairs." },
+    ];
+    expect(build(numeric(), rank({ hints: ok })).errors).toEqual([]);
+    const bad = [{ notFirst: "quadruple", text: "?" }, { before: ["single", "nope"], text: "?" }, { text: "Fallback." }];
+    expect(build(numeric(), rank({ hints: bad })).errors).toEqual([
+      `${L}: step s06: a Hint names unknown item "quadruple"`,
+      `${L}: step s06: a Hint names unknown item "nope"`,
+    ]);
+  });
+
   it("a Rank Step can't start in the right order", () => {
     const items = [
       { id: "triple", text: "C≡C" },

@@ -26,12 +26,6 @@ const hide = z.array(z.enum(["charges", "lone-pairs"])).optional();
 /** A text option, or a structure card: `structure` names a structure file and `text` is then its screen-reader label. */
 const option = z.strictObject({ id, text, structure: id.optional(), hide });
 
-/**
- * The Step's written Source note: who the idea, wording or structures are credited to (the spec's
- * "Source note" line). Cited numbers add their own sentences to it automatically.
- */
-const sourceNote = text.optional();
-
 /** A text-only card (Rank items; structure Rank cards are not resolved yet). */
 const textOption = z.strictObject({ id, text });
 
@@ -45,36 +39,81 @@ const sceneValue = z.union([z.number(), z.string()]);
  */
 const sceneUse = z.preprocess(
   (v) => (typeof v === "string" ? { id: v } : v),
-  z.strictObject({ id, state: z.record(z.string(), sceneValue).optional() }),
+  z.strictObject({ id, state: z.record(z.string(), sceneValue).optional(), still: z.boolean().optional() }),
 );
+
+/**
+ * A structure drawn with a Step (static): atoms it rings and bonds it outlines point the
+ * Student at them; `alt` is its screen-reader text; `caption` (Markdown) is shown under it.
+ */
+const figure = z.strictObject({
+  structure: id,
+  hide,
+  ring: z.array(id).min(1).optional(),
+  outline: z.array(id).min(1).optional(),
+  caption: text.optional(),
+  alt: text,
+});
+
+/**
+ * Something one tap away from the Step (a button named `label` opens it): a Scene (e.g. the
+ * values to look up) or a reference table of drawings (column heads, then rows of cells; a
+ * cell may be empty).
+ */
+const aside = z
+  .strictObject({
+    label: text,
+    scene: sceneUse.optional(),
+    table: z
+      .strictObject({
+        columns: z.array(text).min(1),
+        /** Shown under the table (Markdown), e.g. where the table comes from. */
+        caption: text.optional(),
+        rows: z.array(z.strictObject({ head: text, cells: z.array(figure.nullable()).min(1) })).min(1),
+      })
+      .optional(),
+  })
+  .refine((a) => !!a.scene !== !!a.table, { message: "an aside holds a scene or a table" });
+
+/** What any Step or Problem may show besides its interaction. */
+const visuals = {
+  figures: z.array(figure).min(1).optional(),
+  aside: aside.optional(),
+  /** A written Source note (Markdown): credits for structures, wording or ideas; cited numbers add their own. */
+  sourceNote: text.optional(),
+};
+
+/** A graded Step's or Problem's visuals, plus a Scene that plays once it is answered (it can show the answer). */
+const gradedVisuals = { ...visuals, revealScene: sceneUse.optional() };
 
 /** Fields shared by a Multiple choice Step and a Multiple choice Problem. */
 const multipleChoice = {
+  ...gradedVisuals,
   type: z.literal("multiple-choice"),
   molecule,
   prompt: text,
   options: z.array(option).min(2),
-  /** Structures drawn above the choices (the spec's "Visual"); each `text` is its screen-reader label. */
-  figure: z.array(z.strictObject({ structure: id, text, hide })).min(1).optional(),
   /** The exact set of correct option ids. */
   answer: z.array(id).min(1),
   /** The Correct line: the short "why" shown on a right answer. */
   correct: text.optional(),
   hints: z.array(hint).optional(),
   reveal: text,
-  sourceNote,
-  /** A Scene that appears with the answer (right, or revealed after the second try); secret until then. */
-  revealScene: sceneUse.optional(),
 };
 
 /** Fields shared by a Tap-to-identify Step and Problem. */
 const tapToIdentify = {
+  ...gradedVisuals,
   type: z.literal("tap-to-identify"),
   molecule,
   prompt: text,
   /** The structure file drawn. */
   structure: id,
   hide,
+  /** Bonds drawn with a thick outline (not colour alone), e.g. the bond each tap is about. */
+  outline: z.array(id).min(1).optional(),
+  /** Screen-reader text for the whole drawing. */
+  alt: text.optional(),
   /** What can be tapped: atom and bond ids of the structure ("all" for every one), and named regions (fixed atom sets). */
   tappable: z.strictObject({
     atoms: z.union([z.literal("all"), z.array(id).min(1)]).optional(),
@@ -86,9 +125,6 @@ const tapToIdentify = {
   correct: text.optional(),
   hints: z.array(hint).optional(),
   reveal: text,
-  sourceNote,
-  /** A Scene that appears with the answer (right, or revealed after the second try); secret until then. */
-  revealScene: sceneUse.optional(),
   /** The tap-only cue, required when the Step sits among Draw-arrows Steps: the idle callout and the message on a drag. */
   tapOnly: z.strictObject({ idle: text, drag: text }).optional(),
 };
@@ -98,22 +134,34 @@ const numericHint = z.strictObject({ match: z.number().optional(), text });
 
 /** Fields shared by a Numeric input Step and a Numeric Problem. The unit is fixed here and shown, never typed. */
 const numeric = {
+  ...gradedVisuals,
   type: z.literal("numeric"),
   molecule,
   prompt: text,
   /** The unit of measure, e.g. "°", "Å", "kJ/mol" (named so it can't be read as a course Unit). */
   unitSymbol: z.string(),
+  /** Show a ± key beside the box (answers that may be negative, e.g. a formal charge). */
+  signKey: z.boolean().optional(),
   answer: z.number(),
   /** Absolute: answer ± tolerance is right. */
   tolerance: z.number().min(0),
   correct: text.optional(),
   hints: z.array(numericHint).optional(),
   reveal: text,
-  sourceNote,
 };
+
+/** A Rank Hint: a whole wrong order, or a pattern (an item not first / not last, one item before another). */
+const rankHint = z.strictObject({
+  match: z.array(id).min(1).optional(),
+  notFirst: id.optional(),
+  notLast: id.optional(),
+  before: z.tuple([id, id]).optional(),
+  text,
+});
 
 /** Fields shared by a Rank / order Step and a Rank Problem. */
 const rank = {
+  ...gradedVisuals,
   type: z.literal("rank"),
   molecule,
   prompt: text,
@@ -122,10 +170,9 @@ const rank = {
   /** The one strict order of item ids, first to last. */
   answer: z.array(id).min(2),
   correct: text.optional(),
-  /** A Rank Hint's `match` is one whole wrong order. */
-  hints: z.array(hint).optional(),
+  /** A Rank Hint's `match` is one whole wrong order; `notFirst`, `notLast` and `before` name a pattern. */
+  hints: z.array(rankHint).optional(),
   reveal: text,
-  sourceNote,
 };
 
 /** A Manipulate Hint: `match` lists the wrong control values it answers. */
@@ -136,6 +183,7 @@ const manipulateHint = z.strictObject({ match: z.array(sceneValue).min(1).option
  * states, drawn as a slider under the Scene) and presses Check on a value.
  */
 const manipulate = {
+  ...gradedVisuals,
   type: z.literal("manipulate"),
   molecule,
   prompt: text,
@@ -147,7 +195,6 @@ const manipulate = {
   correct: text.optional(),
   hints: z.array(manipulateHint).optional(),
   reveal: text,
-  sourceNote,
 };
 
 /** One curved arrow: `from` an atom id (its lone pair) or a bond id; `to` an atom id or a bond id. */
@@ -161,6 +208,7 @@ const pushHint = z.strictObject({ from: z.array(id).min(1).optional(), to: z.arr
 
 /** Fields shared by a Draw-arrows Step and Problem. Structures are named by file id; atom ids are the atom map. */
 const drawArrows = {
+  ...gradedVisuals,
   type: z.literal("draw-arrows"),
   molecule,
   prompt: text,
@@ -177,7 +225,6 @@ const drawArrows = {
   correct: text.optional(),
   hints: z.array(pushHint).optional(),
   reveal: text,
-  sourceNote,
 };
 
 const stepId = z.string().regex(/^s\d{2,}$/, 'must look like "s01"');
@@ -190,7 +237,7 @@ const explainStep = z.strictObject({
   molecule,
   text,
   scene: sceneUse.optional(),
-  sourceNote,
+  ...visuals,
 });
 
 const multipleChoiceStep = z.strictObject({
@@ -303,7 +350,7 @@ export const structureFile = z.strictObject({
     .array(
       z.strictObject({
         id,
-        el: z.string().regex(/^[A-Z][a-z]?$/, "must be an element symbol"),
+        el: z.string().regex(/^([A-Z][a-z]?|\*)$/, "must be an element symbol, or * for a loose bond end"),
         x: z.number(),
         y: z.number(),
         charge: z.number().int().optional(),

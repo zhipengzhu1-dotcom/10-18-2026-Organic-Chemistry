@@ -15,6 +15,7 @@ import WatchScenePlayer from "./WatchScenePlayer.tsx";
 import { watchScene } from "@astratron/scenes/watch";
 import SceneControl from "./SceneControl.tsx";
 import StructureTap from "./StructureTap.tsx";
+import { AsideButton, Figures } from "./StepVisuals.tsx";
 import ExploreIn3D from "../explore/ExploreIn3D.tsx";
 import DrawArrows from "./DrawArrows.tsx";
 import { PushReplayPlayer } from "./PushReplayPlayer.tsx";
@@ -139,6 +140,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         : manipulated?.stepId === step.id
           ? manipulated.value
           : step.scene.state[step.control];
+  const revealScene = step.type !== "explain" && screen.canContinue ? step.revealScene : undefined;
   const sceneState =
     step.type === "manipulate" && setting !== undefined ? { ...step.scene.state, [step.control]: setting } : step.scene?.state;
 
@@ -174,14 +176,6 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     setDraft("");
   }
 
-  // A reveal Scene arrives with the answer, plays once, and takes the place of what was answered
-  // (the Tap structure, or the figure and choices): it shows the molecule with the answer lit, and the
-  // feedback panel says it in words. Bare, so the Step still fits one phone screen.
-  const revealUse = screen.canContinue && step.type !== "explain" && "revealScene" in step ? step.revealScene : undefined;
-  const revealing = revealUse && (
-    <ScenePlayer key={`reveal-scene-${step.id}`} sceneId={revealUse.id} state={revealUse.state} cited={revealUse.cited} bare />
-  );
-
   const icon = feedback && { correct: "✓", hint: "✗", reveal: "→", shown: "→" }[feedback.kind];
   // Draw arrows' shown push already reads "Here is that push: …".
   const words = feedback && { correct: "Correct.", hint: "Not quite.", reveal: "Answer:", shown: "" }[feedback.kind];
@@ -189,7 +183,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   // Single focus: no site chrome, only the ✕, story bars, Step count and one
   // fixed bottom button. The feedback panel sits above that button.
   return (
-    <div className="player" id={step.id}>
+    <div className={revealScene ? "player revealing" : "player"} id={step.id}>
       <div className="player-top">
         <a href={exitHref} aria-label={practice ? "Leave the Practice Set" : "Leave the Lesson"} className="player-exit">
           ✕
@@ -214,9 +208,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <p className="player-prompt" {...html(step.prompt)} />
         )}
 
-        {revealing}
+        {/* Once a reveal Scene plays, it shows the answer in place of the question's widgets. */}
+        {step.figures && !revealScene && <Figures figures={step.figures} />}
 
-        {step.type === "tap-to-identify" && !revealing && (
+        {step.type === "tap-to-identify" && step.alt && <p className="sr">{step.alt}</p>}
+        {step.type === "tap-to-identify" && !revealScene && (
           <StructureTap
             step={step}
             picked={chosen}
@@ -247,21 +243,33 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <PushReplayPlayer key={`replay-${step.id}`} start={step.start.structure} hide={step.start.hide} pushes={screen.arrows.pushes.map((p) => p.push)} />
         )}
 
-        {step.scene && watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
+        {revealScene &&
+          // Once the Step is answered its reveal Scene takes the Scene's place and plays.
+          (watchScene(revealScene.id) ? (
+            <WatchScenePlayer key={`reveal-scene-${step.id}`} sceneId={revealScene.id} cited={revealScene.cited} />
+          ) : (
+            <ScenePlayer
+              key={`reveal-scene-${step.id}`}
+              sceneId={revealScene.id}
+              state={revealScene.state}
+              cited={revealScene.cited}
+            />
+          ))}
+
+        {!revealScene && step.scene && watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
           // A watch-only Scene (#66): the committed video, keyed per Step so it autoplays on entry.
           <WatchScenePlayer key={`scene-${step.id}`} sceneId={step.scene.id} cited={step.scene.cited} />
         )}
 
-        {step.scene && sceneState && !watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
+        {!revealScene && step.scene && sceneState && !watchScene(step.scene.id) && (step.type !== "draw-arrows" || screen.canContinue) && (
           // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
-          // On the Lesson-end screen (the Wrap) it sits beside the Key idea card; see structure.css.
-          <div className={screen.done ? "scene-at-end" : "scene-in-step"} key={`scene-${step.id}`}>
           <ScenePlayer
             key={`scene-${step.id}`}
             sceneId={step.scene.id}
             state={sceneState}
             cited={step.scene.cited}
             loop={step.type === "manipulate"}
+            still={step.scene.still}
           >
             {step.type === "manipulate" && setting !== undefined && (
               <SceneControl
@@ -273,28 +281,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
               />
             )}
           </ScenePlayer>
-          </div>
         )}
 
-        {step.type === "multiple-choice" && step.figure && !revealing && (
-          // The structures the question is about: pre-rendered SVG, each named for screen readers.
-          <div className="step-figure">
-            {step.figure.map((f, i) => (
-              <figure key={`figure-${i}`} role="img" aria-label={f.text} className="structure-figure">
-                <span aria-hidden="true" {...html(f.structure.drawn?.svg ?? "")} />
-              </figure>
-            ))}
-          </div>
-        )}
-
-        {step.type === "multiple-choice" && !revealing && (
-          // Short text choices sit in two columns as chips when there are many of them, or when a
-          // figure shares the screen (Lesson 5's capsaicin and its "which group?" Steps).
-          <div
-            className={["opts", chips(step)].filter(Boolean).join(" ")}
-            role="group"
-            aria-label="Choices"
-          >
+        {step.type === "multiple-choice" && !revealScene && (
+          // Short text choices sit as chips: many to a row for one-word choices, two to a row under a figure.
+          <div className={["opts", chips(step)].filter(Boolean).join(" ")} role="group" aria-label="Choices">
             {step.options.map((o) =>
               o.structure ? (
                 // A structure card: the drawing is pre-rendered SVG; its text is the screen-reader label.
@@ -324,11 +315,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </div>
         )}
 
-        {step.type === "numeric" && (
+        {step.type === "numeric" && !revealScene && (
           <NumericBox step={step} value={draft} onChange={setDraft} onSubmit={check} locked={screen.canContinue} />
         )}
 
-        {step.type === "rank" && (
+        {step.type === "rank" && !revealScene && (
           <RankCards
             key={step.id}
             step={step}
@@ -352,12 +343,17 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
 
         {step.explore && <ExploreIn3D key={`explore-${step.id}`} molecule={step.explore} />}
 
-        {/* Keyed per Step so a new Step opens its Source note collapsed. */}
-        <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} note={step.sourceNote} />
+        {/* The aside, Source note and report link share rows at the bottom, so a Step fits a phone. */}
+        <div className="step-meta">
+          {step.aside && <AsideButton key={`aside-${step.id}`} aside={step.aside} stepId={step.id} />}
 
-        <p className="report">
-          <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>
-        </p>
+          {/* Keyed per Step so a new Step opens its Source note collapsed. */}
+          <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} note={step.sourceNote} />
+
+          <p className="report">
+            <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>
+          </p>
+        </div>
       </main>
 
       <div className="player-foot">
@@ -421,11 +417,11 @@ const WORD_TEXT = 12;
  * How text choices are laid out: as word chips, as many to a row as fit (six or more one-word choices,
  * e.g. group names), or two to a row (short choices under a figure); else one to a row.
  */
-function chips(step: { options: { text: string; structure?: unknown }[]; figure?: unknown[] }): string | undefined {
+function chips(step: { options: { text: string; structure?: unknown }[]; figures?: unknown[] }): string | undefined {
   if (step.options.some((o) => o.structure)) return undefined;
-  const longest = Math.max(...step.options.map((o) => plain(o.text).length));
+  const longest = Math.max(...step.options.map((o) => o.text.replace(/<[^>]*>/g, "").length));
   if (step.options.length >= 6 && longest < WORD_TEXT) return "opts-words";
-  if (step.options.length >= 6 || (step.figure && longest < CHIP_TEXT)) return "opts-chips";
+  if (step.options.length >= 6 || (step.figures && longest < CHIP_TEXT)) return "opts-chips";
   return undefined;
 }
 
@@ -433,6 +429,13 @@ function chips(step: { options: { text: string; structure?: unknown }[]; figure?
 function parseNumber(text: string): number {
   const t = text.trim().replace(/−/g, "-").replace(",", ".");
   return /^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(t) ? Number(t) : Number.NaN;
+}
+
+/** "+1" ↔ "−1", "1" → "−1", "" → "−". */
+export function flipSign(text: string): string {
+  const t = text.trim();
+  if (/^[-−]/.test(t)) return t.slice(1);
+  return `−${t.replace(/^\+/, "")}`;
 }
 
 interface NumericBoxProps {
@@ -465,6 +468,18 @@ function NumericBox({ step, value, onChange, onSubmit, locked }: NumericBoxProps
         className="numeric-box"
       />
       {step.unitSymbol && <span className="numeric-unit">{step.unitSymbol}</span>}
+      {step.signKey && (
+        // Phone number pads have no minus sign: the ± key flips the sign of what is typed.
+        <button
+          type="button"
+          className="btn btn-secondary numeric-sign"
+          aria-label="Change sign"
+          disabled={locked}
+          onClick={() => onChange(flipSign(value))}
+        >
+          ±
+        </button>
+      )}
     </form>
   );
 }

@@ -15,14 +15,10 @@ interface Props {
   /** True in Manipulate Steps only. */
   loop?: boolean;
   aspect?: Aspect;
+  /** A still picture: the poster frame, no playback controls. */
+  still?: boolean;
   /** Controls drawn under the Scene (a Manipulate Step's slider). */
   children?: ReactNode;
-  /**
-   * No Play/Replay/Scrub row: for a short reveal Scene (5 s or less, so WCAG 2.2.2 needs no pause)
-   * that must fit a phone screen beside its feedback. It still plays once, or rests on its poster frame.
-   * A Scene whose manifest says `controls: false` is always bare.
-   */
-  bare?: boolean;
 }
 
 /** Reduced motion from the OS setting or the site's switch (`<html data-motion="reduced">`). */
@@ -40,7 +36,7 @@ export function useReducedMotion(): boolean | undefined {
 
 type Action = ClockAction | { type: "open"; reducedMotion: boolean };
 
-export default function ScenePlayer({ sceneId, state, cited, loop = false, aspect = "16:9", children, bare = false }: Props) {
+export default function ScenePlayer({ sceneId, state, cited, loop = false, still = false, aspect = "16:9", children }: Props) {
   const { manifest, Component } = sceneRegistry[sceneId];
   const stateKey = JSON.stringify(state);
   return (
@@ -49,9 +45,10 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, aspec
       posterT={manifest.poster.t}
       loop={loop}
       aspect={aspect}
-      describe={(t) => manifest.describe(state, t)}
+      still={still}
+      bare={manifest.controls === false}
+      describe={(t) => manifest.describe(state, t, cited)}
       announceKey={stateKey}
-      bare={bare || manifest.controls === false}
       render={(t, reducedMotion) => (
         <Component t={t} state={state} aspect={aspect} reducedMotion={reducedMotion} cited={cited} />
       )}
@@ -73,13 +70,15 @@ interface FrameProps {
   /** When this changes after entry, the description is read aloud (a Student changed the state). */
   announceKey?: string;
   render: (t: number, reducedMotion: boolean) => ReactNode;
-  children?: ReactNode;
-  /** No Play/Replay/Scrub row (see ScenePlayer's `bare`). */
+  /** A still picture: rests on the poster, drawn as under reduced motion, with no controls. */
+  still?: boolean;
+  /** Plays once with no Play/Replay/Scrub row (a Scene whose manifest says `controls: false`: 5 s or less). */
   bare?: boolean;
+  children?: ReactNode;
 }
 
 /** A frame driven by the site clock: autoplays once on entry, or rests on its poster under reduced motion (Play starts it). */
-export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9", describe, announceKey = "", render, children, bare = false }: FrameProps) {
+export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9", describe, announceKey = "", render, still = false, bare = false, children }: FrameProps) {
   const config: ClockConfig = { duration, loop, posterT };
   const reducedMotion = useReducedMotion();
   // Until the island knows the motion setting (and on the server) the frame rests on its poster.
@@ -89,8 +88,8 @@ export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9",
   );
 
   useEffect(() => {
-    if (reducedMotion !== undefined) dispatch({ type: "open", reducedMotion });
-  }, [reducedMotion]);
+    if (reducedMotion !== undefined) dispatch({ type: "open", reducedMotion: reducedMotion || still });
+  }, [reducedMotion, still]);
 
   // The site's own clock: animation-frame ticks while playing.
   useEffect(() => {
@@ -116,40 +115,40 @@ export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9",
   const seconds = (t: number) => `${t.toFixed(1)} of ${duration} seconds`;
 
   return (
-    <figure className={bare ? "scene scene-bare" : "scene"}>
+    <figure className={still || bare ? "scene scene-bare" : "scene"}>
       <div
         className="scene-frame"
         role="img"
         aria-label={description}
         style={{ aspectRatio: `${w} / ${h}` }}
       >
-        {render(clock.t, reducedMotion ?? false)}
+        {render(clock.t, still || (reducedMotion ?? false))}
       </div>
-      {!bare && (
-        <div className="scene-controls">
-          <button
-            type="button"
-            aria-label={clock.playing ? "Pause" : "Play"}
-            className="scene-btn"
-            onClick={() => dispatch({ type: clock.playing ? "pause" : "play" })}
-          >
-            {clock.playing ? "❚❚" : "▶"}
-          </button>
-          <button type="button" aria-label="Replay" className="scene-btn" onClick={() => dispatch({ type: "replay" })}>
-            ↺
-          </button>
-          <input
-            type="range"
-            aria-label="Scrub"
-            min={0}
-            max={duration}
-            step={0.01}
-            value={clock.t}
-            aria-valuetext={seconds(clock.t)}
-            className="scene-range"
-            onChange={(e) => dispatch({ type: "seek", t: Number(e.target.value) })}
-          />
-        </div>
+      {!still && !bare && (
+      <div className="scene-controls">
+        <button
+          type="button"
+          aria-label={clock.playing ? "Pause" : "Play"}
+          className="scene-btn"
+          onClick={() => dispatch({ type: clock.playing ? "pause" : "play" })}
+        >
+          {clock.playing ? "❚❚" : "▶"}
+        </button>
+        <button type="button" aria-label="Replay" className="scene-btn" onClick={() => dispatch({ type: "replay" })}>
+          ↺
+        </button>
+        <input
+          type="range"
+          aria-label="Scrub"
+          min={0}
+          max={duration}
+          step={0.01}
+          value={clock.t}
+          aria-valuetext={seconds(clock.t)}
+          className="scene-range"
+          onChange={(e) => dispatch({ type: "seek", t: Number(e.target.value) })}
+        />
+      </div>
       )}
       {children}
       <p aria-live="polite" className="sr">

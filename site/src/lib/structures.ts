@@ -13,7 +13,7 @@ const ATOM_HIT = 24;
 const REGION_HIT = 28;
 
 export function drawView(view: StructureView, targets: TapTarget[] = []): StructureView {
-  const drawing = drawStructure(view.structure, view.hide);
+  const drawing = drawStructure(view.structure, view.hide, view.highlight);
   const hits: Record<string, HitShape> = {};
   const bondsOf = new Map(view.structure.bonds.map((b) => [b.id, b]));
 

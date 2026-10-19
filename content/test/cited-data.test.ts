@@ -47,6 +47,20 @@ describe("cited-data lookup", () => {
     expect(cite(dataOf(build()), "methane/a.HCH")).toMatchObject({ display: "109.5°", full: "109.471°" });
   });
 
+  it("shows electronegativities to 2 decimals, with no unit", () => {
+    const result = build((t) => {
+      t["chem/data/en.yaml"] = {
+        id: "en",
+        kind: "table",
+        title: "Electronegativity",
+        sources: { allred: { kind: "reference", citation: "Allred (1961)", licence: "Published values" } },
+        values: { C: { label: "C", quantity: "electronegativity", value: 2.5, source: "allred" } },
+      };
+    });
+    expect(result.errors).toEqual([]);
+    expect(cite(dataOf(result), "en/C")).toMatchObject({ display: "2.50", full: "2.5" });
+  });
+
   it("holds unitless counts, such as a nuclide's mass number, as whole numbers", () => {
     const result = build(
       (t) =>

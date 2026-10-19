@@ -7,8 +7,8 @@ status: approved
 source: Original
 type: multiple-choice
 prompt: Capsaicin makes chili peppers hot. Which groups does it contain? Pick all that apply.
-figure:
-  - { structure: fg-capsaicin, hide: [lone-pairs], text: "Capsaicin: a long carbon tail with one double bond, joined through a C=O and an NH to a CH₂ on a benzene ring; the ring carries an OH and, beside it, an O–CH₃." }
+figures:
+  - { structure: fg-capsaicin, hide: [lone-pairs], alt: "Capsaicin: a long carbon tail with one double bond, joined through a C=O and an NH to a CH₂ on a benzene ring; the ring carries an OH and, beside it, an O–CH₃." }
 options:
   - { id: a, text: alkene }
   - { id: b, text: phenol }

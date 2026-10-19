@@ -1,7 +1,7 @@
-// What a Lesson spec gives a Step besides its interaction (#83, Lesson 5):
-// a written Source note (credits for wording and structures), a figure (the
-// structures a Multiple choice Step shows above its choices), and a reveal
-// Scene (a Scene that plays only once the answer is out).
+// What Lesson 5 (#83) relies on besides its interaction: a written Source note
+// (credits for wording and structures), a reveal Scene (a Scene that plays only
+// once the answer is out, also in the Practice Set), and a signature that may be
+// a Check Step. Figures and asides are #79's (see their tests).
 import { describe, expect, it } from "vitest";
 import { buildContent, type SceneCatalog } from "../src/index.ts";
 import { lesson, problem, sampleSteps, validTree, writeTree } from "./tree.ts";
@@ -96,29 +96,6 @@ describe("signature Step", () => {
   });
 });
 
-describe("figures", () => {
-  it("a Multiple choice Step shows its figure's structures, resolved", () => {
-    const result = build({
-      figure: [{ structure: "ethanol", hide: ["lone-pairs"], text: "Ethanol: CH₃–CH₂–OH." }],
-    });
-    expect(result.errors).toEqual([]);
-    expect(stepsOf(result)[2]).toMatchObject({
-      figure: [{ text: "Ethanol: CH₃–CH₂–OH.", structure: { structure: { id: "ethanol" }, hide: ["lone-pairs"] } }],
-    });
-  });
-
-  it("a Problem's figure is resolved for its Check Step", () => {
-    const result = build({}, { figure: [{ structure: "ethanol", text: "Ethanol." }] });
-    expect(result.errors).toEqual([]);
-    expect(stepsOf(result)[7]).toMatchObject({ figure: [{ text: "Ethanol.", structure: { structure: { id: "ethanol" }, hide: [] } }] });
-  });
-
-  it("a figure naming a missing structure is an error", () => {
-    const result = build({ figure: [{ structure: "nope", text: "Missing." }] });
-    expect(result.errors).toEqual([`${L}: step s03: structure "nope" not found`]);
-  });
-});
-
 describe("reveal Scenes", () => {
   it("a Step's reveal Scene is resolved like its Scene", () => {
     const result = build({ revealScene: { id: "spotlight", state: { view: "ethanol" } } });
@@ -141,8 +118,8 @@ describe("reveal Scenes", () => {
   it("an unknown reveal Scene or state value is an error, in a Lesson or a Problem", () => {
     const result = build({ revealScene: { id: "spotlight", state: { view: "ice" } } }, { revealScene: "nope" });
     expect(result.errors).toEqual([
-      `${L}: step s03: reveal Scene "spotlight" state "view" must be one of ethanol, water`,
-      `chem/problems/p1.yaml: reveal Scene "nope" is not in the Scene registry`,
+      `${L}: step s03: revealScene: Scene "spotlight" state "view" must be one of ethanol, water`,
+      `chem/problems/p1.yaml: revealScene: Scene "nope" is not in the Scene registry`,
     ]);
   });
 });

@@ -8,7 +8,7 @@
 
 export type Tier = "experimental" | "computed";
 export type SourceKind = Tier | "reference";
-export type Quantity = "bond-length" | "angle" | "dihedral" | "radius" | "colour" | "energy" | "pka" | "count";
+export type Quantity = "bond-length" | "angle" | "dihedral" | "radius" | "colour" | "energy" | "pka" | "count" | "electronegativity";
 
 /** Quantities that make up a molecule's geometry; a molecule never mixes tiers across them. */
 export const geometryQuantities: readonly Quantity[] = ["bond-length", "angle", "dihedral"];
@@ -49,7 +49,7 @@ export interface Cited {
   licence: string;
   /** For a molecule's values: its geometry tier. */
   tier?: Tier;
-  /** What a Student sees: bond lengths and radii to 2 decimals in Å, angles to 1 decimal. */
+  /** What a Student sees: bond lengths and radii to 2 decimals in Å, angles to 1 decimal, electronegativities to 2 decimals. */
   display: string;
   /** The full stored value with its unit, for the Source note. */
   full: string;
@@ -215,6 +215,6 @@ export function format(quantity: Quantity, value: number | string, unit?: string
   const withUnit = (v: string) => (!unit ? v : unit === "°" ? `${v}°` : `${v} ${unit}`);
   if (typeof value === "string") return { display: withUnit(value), full: withUnit(value) };
   const decimals =
-    quantity === "bond-length" || quantity === "radius" ? 2 : quantity === "angle" || quantity === "dihedral" ? 1 : undefined;
+    quantity === "bond-length" || quantity === "radius" || quantity === "electronegativity" ? 2 : quantity === "angle" || quantity === "dihedral" ? 1 : undefined;
   return { display: withUnit(decimals === undefined ? String(value) : value.toFixed(decimals)), full: withUnit(String(value)) };
 }

@@ -1,0 +1,25 @@
+# Pauling-scale electronegativities (ADR 0002) for Lesson 1 (#79): the revised
+# values of A. L. Allred (1961), as tabulated in the CRC Handbook of Chemistry
+# and Physics, table "Electronegativity". Shown to 2 decimals.
+#
+# Build-time sanity checks (content/test/lesson-01.test.ts): the ΔEN order of the
+# s04 bonds is C–H < N–H < O–H < C–F; of the u1-bond-polarity-rank bonds
+# C–H < C–Cl < C–O < O–H; and C is above H. If a check fails, the Step is
+# rewritten, never the data.
+id: electronegativity-pauling
+kind: table
+title: Electronegativity (Pauling scale)
+sources:
+  allred1961:
+    kind: reference
+    citation: A. L. Allred, J. Inorg. Nucl. Chem. 17, 215 (1961), doi:10.1016/0022-1902(61)80142-5, via the CRC Handbook of Chemistry and Physics, table "Electronegativity"
+    licence: Published values, cited (facts from the literature)
+values:
+  H: { label: H electronegativity (Pauling), quantity: electronegativity, value: 2.20, source: allred1961 }
+  B: { label: B electronegativity (Pauling), quantity: electronegativity, value: 2.04, source: allred1961 }
+  C: { label: C electronegativity (Pauling), quantity: electronegativity, value: 2.55, source: allred1961 }
+  N: { label: N electronegativity (Pauling), quantity: electronegativity, value: 3.04, source: allred1961 }
+  O: { label: O electronegativity (Pauling), quantity: electronegativity, value: 3.44, source: allred1961 }
+  F: { label: F electronegativity (Pauling), quantity: electronegativity, value: 3.98, source: allred1961 }
+  Cl: { label: Cl electronegativity (Pauling), quantity: electronegativity, value: 3.16, source: allred1961 }
+  Br: { label: Br electronegativity (Pauling), quantity: electronegativity, value: 2.96, source: allred1961 }

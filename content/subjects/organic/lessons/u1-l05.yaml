@@ -15,9 +15,9 @@ steps:
     type: multiple-choice
     prediction: true
     prompt: Vinegar tastes sour because acetic acid can give away H⁺ from its –COOH end. Amoxicillin, an antibiotic, is far bigger. Can it do the same trick?
-    figure:
-      - { structure: fg-acetic-acid, hide: [lone-pairs], text: "Acetic acid: CH₃ joined to a carbon that is double-bonded to O and single-bonded to OH." }
-      - { structure: fg-amoxicillin, hide: [lone-pairs], text: "Amoxicillin: a benzene ring with OH, a chain with NH₂ and a C=O–NH, a four-membered ring fused to a five-membered ring containing S, and a C(=O)OH at the bottom right." }
+    figures:
+      - { structure: fg-acetic-acid, hide: [lone-pairs], alt: "Acetic acid: CH₃ joined to a carbon that is double-bonded to O and single-bonded to OH." }
+      - { structure: fg-amoxicillin, hide: [lone-pairs], alt: "Amoxicillin: a benzene ring with OH, a chain with NH₂ and a C=O–NH, a four-membered ring fused to a five-membered ring containing S, and a C(=O)OH at the bottom right." }
     options:
       - { id: a, text: "No: a bigger molecule behaves differently all over" }
       - { id: b, text: "Yes: it carries the same –COOH piece" }
@@ -143,8 +143,8 @@ steps:
     phase: build
     type: multiple-choice
     prompt: Ethyl acetate is the sweet smell of some nail-polish removers. Which group is it?
-    figure:
-      - { structure: fg-ethyl-acetate, hide: [lone-pairs], text: "Ethyl acetate: CH₃ joined to a C=O carbon, whose other side is an O, then a two-carbon chain." }
+    figures:
+      - { structure: fg-ethyl-acetate, hide: [lone-pairs], alt: "Ethyl acetate: CH₃ joined to a C=O carbon, whose other side is an O, then a two-carbon chain." }
     options:
       - { id: a, text: a ketone and an ether }
       - { id: b, text: an ester }
@@ -200,8 +200,8 @@ steps:
     phase: build
     type: multiple-choice
     prompt: Every penicillin, amoxicillin included, has this four-membered ring. What group is the C=O inside it?
-    figure:
-      - { structure: fg-azetidinone, hide: [lone-pairs], text: "2-Azetidinone: a four-membered ring of three carbons and an NH, with a C=O on the carbon next to the N." }
+    figures:
+      - { structure: fg-azetidinone, hide: [lone-pairs], alt: "2-Azetidinone: a four-membered ring of three carbons and an NH, with a C=O on the carbon next to the N." }
     options:
       - { id: a, text: a ketone and an amine }
       - { id: b, text: an amide }

@@ -28,7 +28,7 @@ describe("the Scenes' own copy of the structures", () => {
 });
 
 describe("group-spotlight", () => {
-  const says = (view: string) => groupSpotlight.describe({ view, labels: "on" }, groupSpotlight.poster.t);
+  const says = (view: string) => groupSpotlight.describe({ view, labels: "on" }, groupSpotlight.poster.t, {});
 
   it("tells screen readers what each Step's reveal shows, as the spec words it", () => {
     expect(says("acid-pair")).toBe(
@@ -85,7 +85,7 @@ describe("group-spotlight", () => {
 });
 
 describe("group-cards", () => {
-  const says = (family: string) => groupCards.describe({ family, start: "deal" }, groupCards.poster.t);
+  const says = (family: string) => groupCards.describe({ family, start: "deal" }, groupCards.poster.t, {});
 
   it("tells screen readers every card of the family, as the spec words it", () => {
     expect(says("hydrocarbon")).toBe(
@@ -114,7 +114,7 @@ describe("group-cards", () => {
 
 describe("carbonyl-neighbours", () => {
   it("tells screen readers the swap, as the spec words it", () => {
-    expect(carbonylNeighbours.describe({}, 0)).toBe(
+    expect(carbonylNeighbours.describe({}, 0, {})).toBe(
       "One C=O stays put. Its neighbour changes: H, aldehyde. Carbon, ketone. OH, carboxylic acid. Oxygen then carbon, ester. Nitrogen, amide.",
     );
   });
