@@ -1,46 +1,53 @@
-/* Structure drawings, structure cards and Tap targets (#62). Placeholder
-   colours until the design system (#59) supplies tokens. */
-.structure { display: block; max-width: 100%; height: auto; color: currentColor; --lone-pair: #5ee7ff; }
-.options .structure-card { display: grid; place-items: center; padding: 0.5rem; }
-.structure-card .structure { max-height: 10rem; }
-.tap-only-cue { margin: 0.5rem 0; padding: 0.5rem 0.75rem; border: 2px dashed #8b7bff; }
+/* Structure drawings, structure cards and Tap targets (#62), on the Arcade
+   Cosmos tokens (#59). Drawings use currentColor (ink); lone pairs are cyan. */
+.structure { display: block; max-width: 100%; height: auto; color: var(--at-ink); --lone-pair: var(--at-electron); }
+.structure .atom, .structure .charge { font-family: var(--at-font-data); }
+/* Structure cards sit side by side so a Step of cards still fits one phone screen. */
+.opts:has(.structure-card) { grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); }
+.opts .structure-card { display: grid; place-items: center; padding: 8px; }
+.structure-card .structure { max-height: 7rem; }
+.tap-only-cue { margin: 0; padding: 8px 12px; color: var(--at-ink-muted); border: var(--at-border) dashed var(--at-line); }
 .tap-structure { position: relative; touch-action: manipulation; }
 .tap-structure .structure-svg .structure { width: 100%; }
 .tap-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
 .tap-layer .target { cursor: pointer; outline: none; }
 .tap-layer .target[aria-disabled="true"] { cursor: default; }
-.tap-layer .target:focus-visible .hit { stroke: #ff9d3c; stroke-dasharray: 3 3; stroke-width: 2px; }
-.picked-ring circle, .picked-ring line { stroke: #5ee7ff; stroke-width: 3px; fill: none; }
+.tap-layer .target:focus-visible .hit { stroke: var(--at-electron); stroke-dasharray: 3 3; stroke-width: 3px; }
+/* Picked: solid cyan ring + ✓ (never colour alone). */
+.picked-ring circle, .picked-ring line { stroke: var(--at-electron); stroke-width: 3px; fill: none; }
 .picked-ring line { stroke-width: 14px; stroke-opacity: 0.45; stroke-linecap: round; }
-.picked-ring text { fill: #5ee7ff; font-weight: 700; }
-.answer-ring circle, .answer-ring line { stroke: #ffd23c; stroke-width: 3px; stroke-dasharray: 5 3; fill: none; }
+.picked-ring text { fill: var(--at-electron); font-family: var(--at-font-text); font-weight: 700; }
+/* Revealed answer: dashed plain ring, like the → reveal panel. */
+.answer-ring circle, .answer-ring line { stroke: var(--at-ink-muted); stroke-width: 3px; stroke-dasharray: 5 3; fill: none; }
 .answer-ring line { stroke-width: 12px; stroke-opacity: 0.5; }
 
-/* Draw arrows (#72). Placeholder colours until #59 tokens; never colour alone: shown arrows are dashed, flags carry ⚠ text. */
-.push-line { min-height: 1.5em; margin: 0.25rem 0; font-family: var(--at-font-data, "JetBrains Mono", ui-monospace, monospace); }
-.arrows-cards { display: grid; gap: 0.75rem; grid-template-columns: 1fr; }
+
+/* Draw arrows (#72). Never colour alone: shown arrows and flag rings are dashed, flags carry ⚠ words.
+   Sized so a Step (target strip, start, flags, feedback, button) fits one phone screen. */
+.arrows { position: relative; display: flex; flex-direction: column; gap: 8px; outline: none; }
+.push-line { position: absolute; z-index: 1; top: 0; left: 0; right: 0; margin: 0; pointer-events: none; text-align: center; font: 400 16px/1.4 var(--at-font-data); color: var(--at-ink); }
+.push-line:empty { display: none; }
+.push-line span { padding: 2px 8px; background: var(--at-space); border: var(--at-border) solid var(--at-line); }
+.arrows-cards { display: grid; gap: 8px; grid-template-columns: 1fr; }
 @media (min-width: 640px) { .arrows-cards.with-target { grid-template-columns: 1fr 1fr; align-items: center; } .arrows-target { order: 2; } }
-.arrows-target { margin: 0; opacity: 0.55; max-height: 30vh; }
-.arrows-target figcaption { font-size: 0.85rem; }
-.arrows-target .structure { max-height: 24vh; margin: 0 auto; }
+.arrows-target { margin: 0; display: flex; align-items: center; gap: 8px; }
+.arrows-target figcaption { font: 400 16px/1 var(--at-font-text); color: var(--at-ink-muted); }
+.arrows-target .structure-svg { flex: 1; opacity: 0.6; }
+.arrows-target .structure { max-height: 10vh; width: 100%; }
 .arrows-structure { position: relative; touch-action: none; user-select: none; -webkit-user-select: none; }
-.arrows-structure .structure-svg .structure { width: 100%; }
+.arrows-structure .structure-svg .structure { width: 100%; max-height: 24vh; }
 .arrows-layer { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .arrows-layer .source { cursor: grab; outline: none; }
-.arrows-layer .source .hit { fill: transparent; stroke: transparent; pointer-events: all; }
-.arrows-layer .source:focus-visible .hit, .arrows-layer .source.active .hit { stroke: #ff9d3c; stroke-dasharray: 3 3; stroke-width: 2px; }
-.arrows-layer .source.bond:focus-visible .hit, .arrows-layer .source.bond.active .hit { stroke-opacity: 0.35; stroke-width: 14px; }
+.arrows-layer .hit, .arrows-layer .spot-hit { fill: transparent; stroke: none; pointer-events: all; }
+.arrows-layer .source:focus-visible .hit, .arrows-layer .source.active .hit { stroke: var(--at-electron); stroke-dasharray: 3 3; stroke-width: 3px; }
 .arrows-layer .source[aria-disabled="true"] { cursor: default; }
-.drop-spot circle { fill: rgba(94, 231, 255, 0.12); stroke: #5ee7ff; stroke-width: 2px; stroke-dasharray: 4 3; cursor: pointer; }
-.drop-spot.over circle, .drop-spot:focus-visible circle { fill: rgba(94, 231, 255, 0.35); stroke-width: 3px; }
-.drop-spot { outline: none; }
-.push-arrow { fill: none; stroke: #5ee7ff; stroke-width: 2.5px; pointer-events: none; }
-.push-arrow.shown { stroke: #ff9d3c; stroke-dasharray: 6 3; }
-.push-arrow.dragging { stroke-opacity: 0.8; }
-.arrowhead.ink { fill: #5ee7ff; }
-.arrowhead.shown { fill: #ff9d3c; }
-.riding-electron { fill: #5ee7ff; pointer-events: none; }
-.flag-ring { fill: none; stroke: #ff9d3c; stroke-width: 3px; stroke-dasharray: 5 3; pointer-events: none; }
-.arrow-flags { list-style: none; padding: 0.5rem 0.75rem; margin: 0.5rem 0; border-left: 4px solid #ff9d3c; }
-.arrows-help { font-size: 0.85rem; opacity: 0.8; }
-.arrows-tools button { min-height: 44px; }
+.drop-spot { outline: none; cursor: pointer; }
+.drop-spot .spot { fill: var(--at-electron-fill, transparent); fill-opacity: 0.25; stroke: var(--at-electron); stroke-width: 2px; stroke-dasharray: 4 3; }
+.drop-spot.over .spot, .drop-spot:focus-visible .spot { fill-opacity: 0.6; stroke-width: 3px; }
+.push-arrow { fill: none; stroke: var(--at-electron); stroke-width: 2.5px; pointer-events: none; }
+.push-arrow.shown { stroke: var(--at-boss); stroke-dasharray: 6 3; }
+.arrowhead.ink { fill: var(--at-electron); }
+.arrowhead.shown { fill: var(--at-boss); }
+.riding-electron { fill: var(--at-electron); pointer-events: none; }
+.flag-ring { fill: none; stroke: var(--at-boss); stroke-width: 3px; stroke-dasharray: 5 3; pointer-events: none; }
+.arrow-flags { list-style: none; margin: 0; padding: 8px 12px; border: var(--at-border) dashed var(--at-boss); font: 400 16px/1.4 var(--at-font-data); }

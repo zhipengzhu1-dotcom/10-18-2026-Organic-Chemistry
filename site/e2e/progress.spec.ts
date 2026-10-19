@@ -3,6 +3,7 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 import { buildContent, contentRoot } from "@astratron/content";
+import { CURRENT_VERSION } from "../src/progress/record.ts";
 
 /** Core Lessons in Unit 1 (the On-ramp doesn't count). */
 const UNIT_1_CORE = buildContent(contentRoot).model!.subjects[0].courses[0].units[0].lessons.filter((l) => !l.onRamp).length;
@@ -118,7 +119,7 @@ test("progress exports to a file and imports in another browser", async ({ page,
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export progress" }).click();
   const file = await (await download).path();
-  expect(JSON.parse(await readFile(file, "utf8"))).toMatchObject({ version: 1, last: "u1-sample" });
+  expect(JSON.parse(await readFile(file, "utf8"))).toMatchObject({ version: CURRENT_VERSION, last: "u1-sample" });
 
   const other = await browser.newPage();
   await other.goto("/");

@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   CURRENT_VERSION,
   emptyRecord,
+  finishPractice,
+  practiceOf,
+  startPractice,
   exportRecord,
   importRecord,
   lessonStatus,
@@ -31,6 +34,18 @@ const PAST_RECORDS: Record<number, { stored: unknown; lessons: Record<string, st
     },
     lessons: { "u1-l1": "in-progress" },
   },
+  2: {
+    stored: {
+      version: 2,
+      lessons: { "u1-l1": { step: "s10", answers: { s03: [{ choice: ["a"] }] }, done: true } },
+      problems: { "u1-p1": { tries: 1, correct: true } },
+      practice: { u1: { draw: ["u1-p1"], done: true } },
+      last: "u1-l1",
+      streak: { count: 1, lastDay: "2026-10-19", freezes: 2, sinceFreeze: 1 },
+      today: { day: "2026-10-19", lessons: ["u1-l1"], problems: [] },
+    },
+    lessons: { "u1-l1": "done" },
+  },
 };
 
 describe("Progress record", () => {
@@ -51,7 +66,12 @@ describe("Progress record", () => {
       const record = loadRecord(JSON.stringify(past.stored));
       expect(record.version).toBe(CURRENT_VERSION);
       for (const [id, status] of Object.entries(past.lessons)) expect(lessonStatus(record, id)).toBe(status);
+      expect(record.practice).toBeTypeOf("object");
     }
+  });
+
+  it("a version 1 record gains an empty Practice Set history", () => {
+    expect(loadRecord(JSON.stringify(PAST_RECORDS[1].stored)).practice).toEqual({});
   });
 
   it("Lessons are keyed by their stable id and show not started, in progress or done", () => {
@@ -87,6 +107,23 @@ describe("Progress record", () => {
       { id: "u1-l3", onRamp: false },
     ];
     expect(unitCount(record, unit)).toEqual({ done: 2, total: 3 });
+  });
+
+  it("keeps each Unit's last Practice Set draw, for the next retake to avoid", () => {
+    let record = startPractice(emptyRecord(), "u1", ["p1", "p2"]);
+    expect(practiceOf(record, "u1")).toEqual({ draw: ["p1", "p2"], done: false });
+    record = startPractice(record, "u1", ["p3"]);
+    expect(practiceOf(record, "u1").draw).toEqual(["p3"]);
+    expect(practiceOf(record, "u2")).toEqual({ draw: [], done: false });
+  });
+
+  it("a finished Practice Set counts toward the Unit and stays done on a retake", () => {
+    let record = finishPractice(startPractice(emptyRecord(), "u1", ["p1"]), "u1");
+    record = startPractice(record, "u1", ["p2"]);
+    expect(practiceOf(record, "u1")).toEqual({ draw: ["p2"], done: true });
+    const unit = [{ id: "u1-l1", onRamp: false }];
+    expect(unitCount(record, unit, "u1")).toEqual({ done: 0, total: 1, practice: true });
+    expect(unitCount(emptyRecord(), unit, "u1")).toEqual({ done: 0, total: 1, practice: false });
   });
 
   it("export and import round-trip the whole record", () => {

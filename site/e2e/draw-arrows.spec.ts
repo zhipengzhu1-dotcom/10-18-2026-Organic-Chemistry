@@ -58,12 +58,9 @@ test("drag a bond with the pointer: wrong push gets its Hint, the right one redr
 
   await drag(page, "b1", "a2", "π bond C1=O2 → O2");
   await expect(status(page)).toContainText("✓ Correct. The π pair is now a lone pair on O");
-  // Live redraw: C⁺ and O⁻, three lone pairs on O, one arrow left behind.
-  await expect(drawing(page).locator(".charge")).toHaveCount(2);
-  await expect(drawing(page).locator(".lone-pair-dot")).toHaveCount(6);
-  await expect(page.locator(".push-arrow")).toHaveCount(1);
-  // The Step's Scene plays in place.
+  // The Step's own Scene plays in place of the card.
   await expect(page.locator(".scene-frame")).toBeVisible();
+  await expect(sources(page)).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();
 });
 
@@ -99,12 +96,34 @@ test("keyboard: Tab to a source, Enter, Tab to a target, Enter; Esc cancels; Del
   await expect(toO3).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.locator(".arrow-flags")).toContainText("C2 has only 6 e⁻");
+  // The structure is redrawn live: C2⁺ and O3⁻ next to the start's O4⁻, one arrow drawn.
+  await expect(drawing(page).locator(".charge")).toHaveCount(3);
+  await expect(page.locator(".push-arrow")).toHaveCount(1);
 
   await page.getByRole("button", { name: "lone pair on O4" }).focus();
   await page.keyboard.press("Enter");
   await page.keyboard.press("Enter");
   await expect(status(page)).toContainText("✓ Correct. The charge moved from one O to the other");
-  await expect(page.locator(".push-arrow")).toHaveCount(2);
+  // No Scene on this Step: push-replay plays the two arrows in place of the card.
+  await expect(page.getByRole("img", { name: /^Arrows: π bond C2=O3 → O3; lone pair on O4 → C2–O4 bond\./ })).toBeVisible();
+});
+
+test("two wrong tries on one push of a multi-push Step: that push is shown, and the Step goes on", async ({ page }) => {
+  await open(page, "s06");
+  const push = async (from: string, to: string) => {
+    await page.getByRole("button", { name: from, exact: true }).focus();
+    await page.keyboard.press("Enter");
+    await page.getByRole("button", { name: `Push to ${to}`, exact: true }).focus();
+    await page.keyboard.press("Enter");
+  };
+  await push("π bond C2=O3", "C2");
+  await expect(status(page)).toContainText("✗ Not quite. Oxygen is the electronegative sink.");
+  await push("lone pair on O3", "C2=O3 bond");
+  await expect(status(page)).toContainText("Here is that push: lone pair on O4 → C2–O4 bond.");
+  await expect(page.locator(".push-arrow.shown")).toHaveCount(1);
+  // Fresh tries for the next push; it finishes the Step, which then ends on the reveal.
+  await push("π bond C2=O3", "O3");
+  await expect(status(page)).toContainText("→ Answer:");
 });
 
 test.describe("touch", () => {
@@ -125,7 +144,6 @@ test.describe("touch", () => {
     await tap(`[data-source="b1"] .hit`);
     await tap(`[data-spot="a1"] circle`);
     await expect(status(page)).toContainText("→ Answer: The C1=C2 π pair slides into the C2–C3 bond.");
-    await expect(page.locator(".push-arrow.shown")).toHaveCount(1);
     await expect(page.getByRole("img", { name: /^Arrow: π bond C1=C2 → C2–C3 bond\./ })).toBeVisible();
   });
 });
@@ -134,7 +152,7 @@ test("a lone pair pushed across the gap makes a new bond to another molecule (NH
   await open(page, "s08");
   await drag(page, "a1", "a2", "lone pair on N1 → B2");
   await expect(status(page)).toContainText("✓ Correct. A new N–B bond");
-  await expect(drawing(page).locator(".charge")).toHaveCount(2);
+  await expect(page.getByRole("img", { name: /^Arrow: lone pair on N1 → B2\./ })).toBeVisible();
 });
 
 test.describe("reduced motion", () => {

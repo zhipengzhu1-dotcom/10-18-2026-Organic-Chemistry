@@ -28,7 +28,7 @@ export default function SceneControl({ sceneId, control, value, onChange, locked
   const read = (raw: string): SceneValue => (spec.kind === "range" ? Number(raw) : spec.options[Number(raw)].id);
 
   return (
-    <div className="scene-control" style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginTop: "0.75rem" }}>
+    <div className="scene-control">
       <span aria-hidden="true">{spec.label}</span>
       <input
         type="range"
@@ -39,10 +39,10 @@ export default function SceneControl({ sceneId, control, value, onChange, locked
         aria-label={spec.label}
         aria-valuetext={range.text}
         disabled={locked}
+        className="scene-range"
         onChange={(e) => onChange(read(e.target.value))}
-        style={{ flex: 1, minHeight: 44 }}
       />
-      <span aria-hidden="true" style={{ fontFamily: "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)", minWidth: "4ch" }}>
+      <span aria-hidden="true" className="scene-value">
         {range.text}
       </span>
     </div>

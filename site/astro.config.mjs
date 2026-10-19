@@ -1,10 +1,12 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   integrations: [react()],
   vite: {
+    plugins: [tailwindcss()],
     // The content build is bundled into the build-time server code, which
     // moves it away from the content tree, so the tree's path is fixed here.
     define: {

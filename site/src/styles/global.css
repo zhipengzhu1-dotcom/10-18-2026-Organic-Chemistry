@@ -1,0 +1,948 @@
+/* Arcade Cosmos: the site's one style sheet. Tokens live in tokens.css; this
+   file maps them into Tailwind, sets the base type rules and holds the shared
+   components. See SCRATCH notes 59-design-system.md for how to use them. */
+@import "tailwindcss";
+@import "@fontsource-variable/space-grotesk/index.css";
+@import "@fontsource-variable/jetbrains-mono/index.css";
+@import "@fontsource/pixelify-sans/latin-500.css";
+@import "@fontsource/pixelify-sans/latin-700.css";
+@import "@fontsource/silkscreen/latin-400.css";
+@import "./tokens.css";
+
+/* Tailwind reads only our tokens: no default palette (so no red), square
+   corners, our four faces, and no stock animations (they all loop). */
+@theme inline {
+  --color-*: initial;
+  --color-space: var(--at-space);
+  --color-surface: var(--at-surface);
+  --color-raised: var(--at-raised);
+  --color-line: var(--at-line);
+  --color-ink: var(--at-ink);
+  --color-ink-muted: var(--at-ink-muted);
+  --color-electron: var(--at-electron);
+  --color-ignite: var(--at-ignite);
+  --color-boss: var(--at-boss);
+  --color-shadow: var(--at-shadow);
+  --color-electron-fill: var(--at-electron-fill);
+  --color-ignite-fill: var(--at-ignite-fill);
+  --color-boss-fill: var(--at-boss-fill);
+  --color-on-fill: var(--at-on-fill);
+  --color-fill-edge: var(--at-fill-edge);
+  --color-transparent: transparent;
+
+  --font-*: initial;
+  --font-pixel: var(--at-font-pixel);
+  --font-label: var(--at-font-label);
+  --font-text: var(--at-font-text);
+  --font-data: var(--at-font-data);
+
+  --radius-*: initial;
+  --shadow-drop: var(--at-drop);
+  --shadow-drop-sm: var(--at-drop-sm);
+  --spacing-gutter: var(--at-gutter);
+  --spacing-tap: var(--at-tap);
+  --ease-snap: var(--at-ease-snap);
+  --ease-pixel: var(--at-ease-pixel);
+  --animate-*: initial;
+}
+
+@layer base {
+  html,
+  body {
+    margin: 0;
+    background: var(--at-space);
+    color: var(--at-ink);
+  }
+  body {
+    font: 400 var(--at-body-size) / 1.5 var(--at-font-text);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--at-font-text);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  a {
+    color: var(--at-electron);
+    text-underline-offset: 3px;
+  }
+  :focus-visible {
+    outline: 3px solid var(--at-electron);
+    outline-offset: 3px;
+  }
+  /* Element symbols, formulas and numbers: md() wraps them in .data; code too. */
+  .data,
+  code,
+  kbd,
+  samp {
+    font-family: var(--at-font-data);
+    font-size: 1em;
+  }
+}
+
+@layer components {
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px var(--at-gutter) 48px;
+  }
+
+  /* Wordmark: Pixelify at 32px and up only. */
+  .wordmark {
+    font: 700 32px/1 var(--at-font-pixel);
+    letter-spacing: 0.04em;
+    color: var(--at-ignite);
+    text-shadow: 2px 2px 0 var(--at-shadow);
+  }
+  /* Fixed UI words: Silkscreen, 16px, uppercase, nowhere else. */
+  .label {
+    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* Buttons: the arcade press collapses the hard shadow into the button. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: var(--at-tap);
+    min-width: var(--at-tap);
+    padding: 12px 20px;
+    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    border: var(--at-border) solid var(--at-fill-edge);
+    box-shadow: var(--at-drop);
+    transition:
+      transform var(--at-dur-press) linear,
+      box-shadow var(--at-dur-press) linear;
+  }
+  .btn:active:not(:disabled) {
+    transform: translate(5px, 5px);
+    box-shadow: 0 0 0 var(--at-shadow);
+  }
+  .btn-primary {
+    background: var(--at-ignite-fill);
+    color: var(--at-on-fill);
+  }
+  .btn-electron {
+    background: var(--at-electron-fill);
+    color: var(--at-on-fill);
+  }
+  .btn-boss {
+    background: var(--at-boss-fill);
+    color: var(--at-on-fill);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--at-ink);
+    border-color: var(--at-ink);
+    box-shadow: 5px 5px 0 var(--at-line);
+  }
+  .btn:disabled {
+    background: var(--at-raised);
+    color: var(--at-ink-muted);
+    box-shadow: none;
+    border: var(--at-border) dashed var(--at-line);
+    cursor: not-allowed;
+  }
+  .btn-block {
+    display: flex;
+    width: 100%;
+  }
+
+  /* Toggles: segmented (pick one of few) and switch (on/off). */
+  .seg {
+    display: inline-flex;
+    border: var(--at-border) solid var(--at-line);
+    padding: 2px;
+    gap: 2px;
+  }
+  .seg button {
+    min-height: var(--at-tap);
+    min-width: var(--at-tap);
+    padding: 0 14px;
+    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    text-transform: uppercase;
+    color: var(--at-ink-muted);
+    cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] {
+    background: var(--at-electron-fill);
+    color: var(--at-on-fill);
+  }
+  .switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-height: var(--at-tap);
+    cursor: pointer;
+  }
+  .switch [role="switch"] {
+    width: 56px;
+    height: var(--at-tap);
+    position: relative;
+    cursor: pointer;
+  }
+  .switch [role="switch"]::before {
+    content: "";
+    position: absolute;
+    inset: 10px 0;
+    border: var(--at-border) solid var(--at-line);
+    background: var(--at-surface);
+  }
+  .switch [role="switch"]::after {
+    content: "";
+    position: absolute;
+    top: 15px;
+    left: 5px;
+    width: 18px;
+    height: 18px;
+    background: var(--at-ink-muted);
+    transition: left var(--at-dur-ui) var(--at-ease-pixel);
+  }
+  .switch [role="switch"][aria-checked="true"]::before {
+    border-color: var(--at-electron);
+  }
+  .switch [role="switch"][aria-checked="true"]::after {
+    left: 33px;
+    background: var(--at-electron-fill);
+  }
+
+  /* Story bars: one motif for story cards and the Step player. */
+  .bars {
+    display: flex;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .bars li {
+    flex: 1;
+    height: 6px;
+    background: color-mix(in srgb, var(--at-ink) 22%, transparent);
+  }
+  .bars li.done {
+    background: var(--at-ink);
+  }
+  .bars li.cur {
+    background: var(--at-ignite-fill);
+  }
+
+  /* Step player: full screen, single focus, no site chrome. Nothing loops here. */
+  .player {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--at-space);
+  }
+  .player-top {
+    display: grid;
+    grid-template-columns: var(--at-tap) var(--at-tap) 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 8px var(--at-gutter);
+    max-width: 640px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .player-exit,
+  .player-back {
+    width: var(--at-tap);
+    height: var(--at-tap);
+    display: grid;
+    place-items: center;
+    font: 700 22px/1 var(--at-font-text);
+    color: var(--at-ink);
+    text-decoration: none;
+    border: var(--at-border) solid var(--at-line);
+  }
+  .player-back {
+    cursor: pointer;
+  }
+  .player-back:disabled {
+    color: var(--at-ink-muted);
+    border-style: dashed;
+    cursor: default;
+  }
+  .player-end {
+    display: grid;
+    gap: 12px;
+  }
+  .player-body .report {
+    margin-top: auto;
+  }
+  .report a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--at-tap);
+  }
+  .card .streak-tick {
+    margin-top: 8px;
+    color: var(--at-electron);
+  }
+  .player-count {
+    font: 400 16px/1 var(--at-font-data);
+    color: var(--at-ink-muted);
+    white-space: nowrap;
+  }
+  .player-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 12px var(--at-gutter) 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 640px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .player-body p {
+    margin: 0;
+  }
+  .player-prompt {
+    font: 700 20px/1.3 var(--at-font-text);
+  }
+  .player-foot {
+    padding: 12px var(--at-gutter) calc(16px + env(safe-area-inset-bottom));
+    border-top: var(--at-border) solid var(--at-line);
+    background: var(--at-space);
+  }
+  .player-foot > * {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Answer options */
+  .opts {
+    display: grid;
+    gap: 10px;
+  }
+  .opt {
+    min-height: var(--at-tap);
+    padding: 10px 14px;
+    text-align: left;
+    font: 500 var(--at-body-size) / 1.35 var(--at-font-text);
+    color: var(--at-ink);
+    border: var(--at-border) solid var(--at-line);
+    background: var(--at-surface);
+    box-shadow: 3px 3px 0 var(--at-line);
+    cursor: pointer;
+    transition:
+      transform var(--at-dur-press) linear,
+      box-shadow var(--at-dur-press) linear;
+  }
+  .opt[aria-pressed="true"] {
+    border-color: var(--at-ignite-fill);
+    box-shadow: var(--at-drop-sm);
+    outline: 2px solid var(--at-ignite-fill);
+    outline-offset: -6px;
+  }
+  .opt:disabled {
+    cursor: default;
+    color: var(--at-ink-muted);
+  }
+
+  .rank {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .rank .opt {
+    width: 100%;
+  }
+  .opt.dragging {
+    border-color: var(--at-electron);
+    box-shadow: var(--at-drop);
+  }
+
+  /* Numeric input: the number box and its fixed unit, both in the data face. */
+  .numeric {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .numeric-box {
+    width: 8em;
+    min-height: var(--at-tap);
+    padding: 0 12px;
+    font: 400 20px/1 var(--at-font-data);
+    color: var(--at-ink);
+    background: var(--at-surface);
+    border: var(--at-border) solid var(--at-line);
+  }
+  .numeric-box:disabled {
+    color: var(--at-ink-muted);
+  }
+  .numeric-unit {
+    font: 400 20px/1 var(--at-font-data);
+  }
+
+  /* Feedback panel: icon + words, never colour alone, never red, no sound.
+     ✓ solid cyan · ✗ dashed magenta + Hint · → plain border + the answer. */
+  .fb {
+    border: var(--at-border-strong) solid;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 10px;
+    align-items: start;
+    animation: fb-in var(--at-dur-ui) var(--at-ease-snap);
+  }
+  .fb p {
+    margin: 0;
+  }
+  .fb .ic {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    font: 700 18px/1 var(--at-font-text);
+  }
+  .fb strong {
+    font-weight: 700;
+  }
+  .fb-correct {
+    border-color: var(--at-electron);
+    background: color-mix(in srgb, var(--at-electron-fill) 12%, var(--at-space));
+  }
+  .fb-correct .ic {
+    background: var(--at-electron-fill);
+    color: var(--at-on-fill);
+  }
+  .fb-correct strong {
+    color: var(--at-electron);
+  }
+  .fb-hint {
+    border-color: var(--at-boss);
+    border-style: dashed;
+    background: color-mix(in srgb, var(--at-boss-fill) 10%, var(--at-space));
+  }
+  .fb-hint .ic {
+    border: var(--at-border) solid var(--at-boss);
+    color: var(--at-boss);
+  }
+  .fb-hint strong {
+    color: var(--at-boss);
+  }
+  .fb-reveal {
+    border-color: var(--at-ink-muted);
+    background: var(--at-surface);
+  }
+  .fb-reveal .ic {
+    background: var(--at-ink-muted);
+    color: var(--at-space);
+  }
+
+  /* Source note: one tap away; the numbers inside are data. */
+  .source-note summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: var(--at-tap);
+    padding: 0 12px;
+    font: 500 16px/1.2 var(--at-font-text);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--at-ink-muted);
+    border: var(--at-border) dashed var(--at-line);
+    cursor: pointer;
+    list-style: none;
+  }
+  .source-note summary::-webkit-details-marker {
+    display: none;
+  }
+  .source-note[open] summary {
+    border-style: solid;
+    color: var(--at-ink);
+  }
+  .source-note p {
+    margin: 0;
+    padding: 8px 12px;
+    font: 400 16px/1.55 var(--at-font-data);
+    color: var(--at-ink-muted);
+    border: var(--at-border) dashed var(--at-line);
+    border-top: 0;
+  }
+  .source-note strong {
+    color: var(--at-ink);
+    font-weight: 600;
+  }
+
+  /* Key idea card at the Wrap */
+  .card {
+    border: var(--at-border-strong) solid var(--at-ignite-fill);
+    box-shadow: var(--at-drop);
+    padding: 16px;
+    background: var(--at-surface);
+  }
+  .card h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+  }
+
+  /* Practice Set summary: the results card, its stats in the data face. */
+  .practice-summary h1 {
+    margin: 0 0 12px;
+    font-size: 24px;
+  }
+  .practice-stats {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+    font-size: 20px;
+    color: var(--at-electron);
+  }
+}
+
+@layer components {
+  /* Course map: each Course a strip of Unit tiles. */
+  .course-map {
+    display: grid;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .course h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+  }
+  .tiles {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    list-style: none;
+    margin: 0 calc(-1 * var(--at-gutter));
+    padding: 6px var(--at-gutter) 16px;
+    scroll-snap-type: x proximity;
+    scroll-padding: 0 var(--at-gutter);
+  }
+  .tile {
+    flex: 0 0 min(58vw, 200px);
+    scroll-snap-align: start;
+    border: var(--at-border-strong) solid var(--at-line);
+    background: var(--at-surface);
+    box-shadow: 5px 5px 0 var(--at-line);
+  }
+  .tile > a,
+  .tile > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    height: 100%;
+    min-height: 200px;
+    padding: 14px;
+    color: var(--at-ink);
+    text-decoration: none;
+  }
+  .tile.open {
+    border-color: var(--at-ignite-fill);
+    box-shadow: var(--at-drop);
+  }
+  .tile.soon {
+    border-style: dashed;
+    box-shadow: none;
+  }
+  .tile-number {
+    font: 600 16px/1 var(--at-font-data);
+    text-transform: uppercase;
+    color: var(--at-ink-muted);
+  }
+  .tile.open .tile-number {
+    color: var(--at-ignite);
+  }
+  .tile-title {
+    font: 700 19px/1.15 var(--at-font-text);
+  }
+  .tile-summary {
+    color: var(--at-ink-muted);
+  }
+  .tile-soon {
+    margin-top: auto;
+    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    text-transform: uppercase;
+    color: var(--at-ink-muted);
+  }
+
+  /* Unit page and its Level select */
+  .crumbs a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--at-tap);
+  }
+  .unit-number {
+    display: block;
+    font: 600 16px/1.2 var(--at-font-data);
+    text-transform: uppercase;
+    color: var(--at-ignite);
+  }
+  .level-select .act-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 24px 0 10px;
+    font: 600 16px/1.2 var(--at-font-text);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--at-electron);
+  }
+  .level-select .act-title::after {
+    content: "";
+    flex: 1;
+    height: 2px;
+    background: var(--at-line);
+  }
+  .level-select .levels {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+  }
+  .level-select .level {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    gap: 6px 8px;
+    padding: 12px;
+    border: var(--at-border) solid var(--at-line);
+    background: var(--at-surface);
+    box-shadow: 3px 3px 0 var(--at-line);
+  }
+  .level-select .level > :not(.chip) {
+    grid-column: 1 / -1;
+  }
+  .level-select .level-number {
+    font: 600 16px/1.2 var(--at-font-data);
+    color: var(--at-ink-muted);
+  }
+  .level-select .level-title {
+    margin: 0;
+    font-size: 19px;
+  }
+  .level-select .level-title a {
+    display: flex;
+    align-items: center;
+    min-height: var(--at-tap);
+    color: var(--at-ink);
+  }
+  .level-select .level-goal {
+    margin: 0;
+    color: var(--at-ink-muted);
+  }
+  .level-select .chip {
+    justify-self: start;
+    padding: 2px 8px;
+    font: 500 16px/1.3 var(--at-font-text);
+    color: var(--at-ink-muted);
+    border: var(--at-border) solid currentColor;
+  }
+  .level-select .chip.count {
+    font-family: var(--at-font-data);
+  }
+  .level-select .phase-bar {
+    display: flex;
+    gap: 2px;
+    height: 8px;
+  }
+  .level-select .phase {
+    min-width: 4px;
+  }
+  .level-select .phase-hook {
+    background: var(--at-ignite-fill);
+  }
+  .level-select .phase-build {
+    background: var(--at-electron-fill);
+  }
+  .level-select .phase-check {
+    background: var(--at-boss-fill);
+  }
+  .level-select .phase-wrap {
+    background: var(--at-ink-muted);
+  }
+  .level-select .skip {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--at-tap);
+  }
+  .level-select .level-on-ramp {
+    border-style: dashed;
+    box-shadow: none;
+  }
+  .level-select .level-boss {
+    border-color: var(--at-boss-fill);
+    border-width: var(--at-border-strong);
+    box-shadow: 3px 3px 0 var(--at-boss-fill);
+  }
+  .level-select .level-boss .level-number {
+    color: var(--at-boss);
+  }
+  .level-select .level-practice {
+    border-color: var(--at-ignite-fill);
+  }
+  .level-select .level-soon {
+    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    text-transform: uppercase;
+    color: var(--at-ignite);
+  }
+}
+
+@layer components {
+  /* Top bar (outside the Step player): wordmark + Streak. */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 12px var(--at-gutter) 0;
+  }
+  .topbar .wordmark {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--at-tap);
+    text-decoration: none;
+  }
+  .streak {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: 600 16px var(--at-font-text);
+  }
+  .streak b {
+    font: 700 20px var(--at-font-data);
+    color: var(--at-ignite);
+  }
+
+  /* Home: first visit vs the returning Student's Hub. */
+  .hub {
+    display: none;
+  }
+  .returning .hub {
+    display: block;
+  }
+  .returning .first-visit {
+    display: none;
+  }
+  .continue-card {
+    margin: 12px 0 24px;
+    padding: 16px;
+    border: var(--at-border-strong) solid var(--at-ignite-fill);
+    background: var(--at-surface);
+    box-shadow: var(--at-drop);
+  }
+  .continue-card h2 {
+    margin: 6px 0 4px;
+    font-size: 22px;
+  }
+  .continue-card p {
+    margin: 0 0 12px;
+    color: var(--at-ink-muted);
+  }
+  .continue-card .continue-unit {
+    margin: 0;
+    font: 600 16px/1.2 var(--at-font-data);
+    text-transform: uppercase;
+    color: var(--at-ignite);
+  }
+  .your-progress {
+    margin-top: 40px;
+    display: grid;
+    gap: 12px;
+    justify-items: start;
+  }
+  .your-progress h2,
+  .your-progress p {
+    margin: 0;
+  }
+  .your-progress .import {
+    display: grid;
+    gap: 6px;
+    min-height: var(--at-tap);
+  }
+  .your-progress [role="alert"]:empty {
+    display: none;
+  }
+  .suggest a,
+  .site-footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--at-tap);
+  }
+  .site-footer {
+    max-width: 640px;
+    margin: 32px auto 0;
+    padding: 16px var(--at-gutter) 40px;
+    border-top: var(--at-border) solid var(--at-line);
+  }
+  .level-select .level-status {
+    font: 500 16px/1.2 var(--at-font-text);
+    color: var(--at-ink-muted);
+  }
+  .level-select .level-status[data-status="done"] {
+    color: var(--at-electron);
+  }
+
+  /* The submission form (/submit). */
+  .submit-page fieldset {
+    margin: 0 0 16px;
+    padding: 8px 16px;
+    border: var(--at-border) solid var(--at-line);
+  }
+  .submit-page fieldset label,
+  .submit-page .consent {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: var(--at-tap);
+  }
+  .submit-page .field[hidden] {
+    display: none;
+  }
+  .submit-page .field {
+    margin-bottom: 16px;
+    display: grid;
+    gap: 6px;
+  }
+  .submit-page input[type="text"],
+  .submit-page input[type="email"],
+  .submit-page select,
+  .submit-page textarea {
+    width: 100%;
+    min-height: var(--at-tap);
+    padding: 8px 12px;
+    font: inherit;
+    color: var(--at-ink);
+    background: var(--at-surface);
+    border: var(--at-border) solid var(--at-line);
+  }
+  .submit-page input[type="checkbox"],
+  .submit-page input[type="radio"] {
+    width: 24px;
+    height: 24px;
+    flex: none;
+    accent-color: var(--at-electron-fill);
+  }
+  .submit-page .hint {
+    margin: 0;
+    color: var(--at-ink-muted);
+  }
+  .submit-page .field-error {
+    margin: 0;
+    color: var(--at-boss);
+  }
+  .submit-page .field-error:empty,
+  .submit-page #form-errors:empty {
+    display: none;
+  }
+  .submit-page #form-errors {
+    margin-bottom: 16px;
+    padding: 12px;
+    border: var(--at-border) dashed var(--at-boss);
+  }
+  .submit-page .note {
+    padding-left: 12px;
+    border-left: 4px solid var(--at-electron-fill);
+  }
+}
+
+/* Lines that #61's script fills with numbers (Streak, "Step 3 of 10", "0 of 3 Lessons"). */
+[data-streak-text],
+[data-continue="where"],
+[data-unit-progress] {
+  font-family: var(--at-font-data);
+}
+
+@layer components {
+  /* Scene frame and its controls (#64). */
+  .scene {
+    margin: 0;
+  }
+  .scene-frame {
+    width: 100%;
+    max-height: 45dvh; /* leaves room for the prompt, controls and button on one screen */
+    overflow: hidden;
+    border: var(--at-border-strong) solid var(--at-line);
+    box-shadow: 6px 6px 0 var(--at-shadow);
+    background: var(--at-surface);
+  }
+  .scene-controls,
+  .scene-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .scene-btn {
+    display: grid;
+    place-items: center;
+    width: var(--at-tap);
+    height: var(--at-tap);
+    font: 700 18px/1 var(--at-font-text);
+    color: var(--at-ink);
+    background: var(--at-surface);
+    border: var(--at-border) solid var(--at-line);
+    box-shadow: var(--at-drop-sm);
+    cursor: pointer;
+  }
+  .scene-range {
+    flex: 1;
+    min-height: var(--at-tap);
+    accent-color: var(--at-electron-fill);
+  }
+  .scene-value {
+    min-width: 5ch;
+    font-family: var(--at-font-data);
+  }
+}
+
+@keyframes fb-in {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+}
+
+/* Reduced motion (the OS setting or the site's switch): no transforms, no
+   loops, only crossfades of 120ms or less. The media query covers no-JS. */
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after {
+  animation: none !important;
+  transition: opacity var(--at-dur-fade) linear !important;
+  scroll-behavior: auto !important;
+}
+:root[data-motion="reduced"] .btn:active:not(:disabled) {
+  transform: none;
+  box-shadow: 0 0 0 3px var(--at-electron);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: opacity var(--at-dur-fade) linear !important;
+    scroll-behavior: auto !important;
+  }
+}

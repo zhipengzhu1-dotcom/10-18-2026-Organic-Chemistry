@@ -43,6 +43,7 @@ export interface DrawArrowsProps {
   /** No more pushes: done, or grading isn't ready yet. */
   locked: boolean;
   onPush: (push: Push) => void;
+  /** Delete undoes the last arrow; the parent also shows an "Undo arrow" button (the Step player puts it in its footer). */
   onUndo: () => void;
 }
 
@@ -52,6 +53,8 @@ const GRAB_BOND = 14;
 /** How close the finger must come to a drop spot to land on it. */
 const LAND = 30;
 const SPOT_R = 13;
+/** Every source and drop target is at least this wide at natural size (the 48 px tap-target rule). */
+const TARGET = 50;
 /** Movement that turns a press into a drag. */
 const DRAG_PX = 8;
 
@@ -74,6 +77,22 @@ export default function DrawArrows({ start, pushes, structure, hide = [], flags,
   const root = useRef<HTMLDivElement>(null);
   const uid = `arrows${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
+  // Drawing units per screen pixel once the drawing is scaled down to fit (never below 1), so
+  // grab radii and 48 px targets stay that size on screen.
+  const [k, setK] = useState(1);
+  useEffect(() => {
+    const svg = layer.current;
+    if (!svg) return;
+    const measure = () => {
+      const scale = svg.getScreenCTM()?.a;
+      setK(scale ? Math.max(1, 1 / scale) : 1);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(svg);
+    return () => observer.disconnect();
+  }, [drawing.viewBox]);
+
   const active = drag?.from ?? picked;
   const spots: Spot[] = useMemo(() => {
     if (!active) return [];
@@ -82,7 +101,7 @@ export default function DrawArrows({ start, pushes, structure, hide = [], flags,
       return p ? [{ ...t, ...p }] : [];
     });
   }, [active, molecule, drawing, structure]);
-  const hovered = drag?.moved ? nearest(spots, drag.at) : undefined;
+  const hovered = drag?.moved ? nearest(spots, drag.at, k) : undefined;
 
   // The arrows already placed, each drawn on the drawing as it was before that push.
   const placed = useMemo(() => {
@@ -154,7 +173,7 @@ export default function DrawArrows({ start, pushes, structure, hide = [], flags,
     if (locked || e.button !== 0) return;
     const at = point(e);
     if (picked) {
-      const spot = nearest(spots, at);
+      const spot = nearest(spots, at, k);
       if (spot) {
         e.preventDefault();
         push(spot.id);
@@ -182,9 +201,9 @@ export default function DrawArrows({ start, pushes, structure, hide = [], flags,
     if (!drag) return;
     const at = point(e);
     const startAt = anchor(drawing, structure, drag.from)!;
-    const moved = drag.moved || Math.hypot(at.x - startAt.x, at.y - startAt.y) > DRAG_PX * 2;
+    const moved = drag.moved || Math.hypot(at.x - startAt.x, at.y - startAt.y) > DRAG_PX * 2 * k;
     setDrag({ ...drag, at, moved });
-    const over = moved ? nearest(spots, at) : undefined;
+    const over = moved ? nearest(spots, at, k) : undefined;
     setLine(`${labelOf(drag.from)} → ${over ? over.label : "…"}`);
   }
   function up() {
@@ -205,12 +224,12 @@ export default function DrawArrows({ start, pushes, structure, hide = [], flags,
     for (const a of molecule.atoms) {
       const p = drawing.atoms[a.id];
       const d = Math.hypot(p.x - at.x, p.y - at.y);
-      if (d <= GRAB_ATOM && (!best || d < best.d)) best = { id: a.id, d };
+      if (d <= GRAB_ATOM * k && (!best || d < best.d)) best = { id: a.id, d };
     }
     if (best) return molecule.atoms.find((a) => a.id === best!.id)!.lp > 0 ? best.id : "empty-atom";
     for (const b of structure.bonds) {
       const s = drawing.bonds[b.id];
-      if (s && toSegment(at, { x: s.x1, y: s.y1 }, { x: s.x2, y: s.y2 }) <= GRAB_BOND) return b.id;
+      if (s && toSegment(at, { x: s.x1, y: s.y1 }, { x: s.x2, y: s.y2 }) <= GRAB_BOND * k) return b.id;
     }
     return undefined;
   }
@@ -239,9 +258,6 @@ export default function DrawArrows({ start, pushes, structure, hide = [], flags,
 
   return (
     <div className="arrows" ref={root} onKeyDown={keys} tabIndex={-1}>
-      <p className="push-line" aria-hidden="true">
-        {line || " "}
-      </p>
       <div className={`arrows-cards${target ? " with-target" : ""}`}>
         {target?.drawn && (
           <figure className="arrows-target" aria-label="Target">
@@ -250,6 +266,12 @@ export default function DrawArrows({ start, pushes, structure, hide = [], flags,
           </figure>
         )}
         <div className="arrows-structure">
+          {/* The line above the drawing: names source → target while dragging, readable beside the finger. */}
+          {line && (
+            <p className="push-line" aria-hidden="true">
+              <span>{line}</span>
+            </p>
+          )}
           <div className="structure-svg" dangerouslySetInnerHTML={{ __html: drawing.svg }} />
           <svg
             ref={layer}
@@ -257,6 +279,7 @@ export default function DrawArrows({ start, pushes, structure, hide = [], flags,
             viewBox={drawing.viewBox}
             role="group"
             aria-label="Electron sources: lone pairs and bonds"
+            aria-describedby={`${uid}-help`}
             onPointerDown={down}
             onPointerMove={move}
             onPointerUp={up}
@@ -317,10 +340,11 @@ export default function DrawArrows({ start, pushes, structure, hide = [], flags,
                     }
                   }}
                 >
+                  {/* 48 px targets at natural size; what a press grabs is decided in grab(), atoms first. */}
                   {seg ? (
-                    <line className="hit" x1={seg.x1} y1={seg.y1} x2={seg.x2} y2={seg.y2} strokeWidth={GRAB_BOND} />
+                    <polygon className="hit" points={band(seg, (TARGET / 2) * k)} />
                   ) : (
-                    <circle className="hit" cx={p.x} cy={p.y} r={GRAB_ATOM - 4} />
+                    <circle className="hit" cx={p.x} cy={p.y} r={(TARGET / 2) * k} />
                   )}
                 </g>
               );
@@ -341,7 +365,8 @@ export default function DrawArrows({ start, pushes, structure, hide = [], flags,
                   }
                 }}
               >
-                <circle cx={t.x} cy={t.y} r={SPOT_R} />
+                <circle className="spot-hit" cx={t.x} cy={t.y} r={(TARGET / 2) * k} />
+                <circle className="spot" cx={t.x} cy={t.y} r={SPOT_R} />
               </g>
             ))}
           </svg>
@@ -354,27 +379,43 @@ export default function DrawArrows({ start, pushes, structure, hide = [], flags,
           ))}
         </ul>
       )}
-      <p className="arrows-help" id="arrows-help">
-        Drag a lone pair or a bond to where the electrons go. Keyboard: Tab to a source, Enter, Tab to a target, Enter. Esc
-        cancels; Delete undoes the last arrow.
+      <p className="sr" id={`${uid}-help`}>
+        Drag a lone pair or a bond; each arrow is checked as you draw it. Keys: Tab, Enter, Tab, Enter, Esc,
+        Delete.
       </p>
-      <div className="arrows-tools">
-        <button type="button" onClick={onUndo} disabled={locked || pushes.length === 0}>
-          Undo arrow
-        </button>
-      </div>
-      <p aria-live="polite" className="visually-hidden" style={visuallyHidden}>
+      <p aria-live="polite" className="sr">
         {said}
       </p>
     </div>
   );
 }
 
-function nearest(spots: Spot[], at: Point): Spot | undefined {
+/** A band of half-width `w` around a segment (a bond's hit area). */
+function band(seg: { x1: number; y1: number; x2: number; y2: number }, w: number): string {
+  // At least 2w long too, centred on the bond, so a short (scaled-down) bond is still a 48 px target.
+  const len0 = Math.hypot(seg.x2 - seg.x1, seg.y2 - seg.y1) || 1;
+  const grow = Math.max(0, w - len0 / 2) / len0;
+  const dx = (seg.x2 - seg.x1) * grow;
+  const dy = (seg.y2 - seg.y1) * grow;
+  const s = { x1: seg.x1 - dx, y1: seg.y1 - dy, x2: seg.x2 + dx, y2: seg.y2 + dy };
+  const len = Math.hypot(s.x2 - s.x1, s.y2 - s.y1) || 1;
+  const nx = (-(s.y2 - s.y1) / len) * w;
+  const ny = ((s.x2 - s.x1) / len) * w;
+  return [
+    [s.x1 + nx, s.y1 + ny],
+    [s.x2 + nx, s.y2 + ny],
+    [s.x2 - nx, s.y2 - ny],
+    [s.x1 - nx, s.y1 - ny],
+  ]
+    .map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`)
+    .join(" ");
+}
+
+function nearest(spots: Spot[], at: Point, k: number): Spot | undefined {
   let best: { spot: Spot; d: number } | undefined;
   for (const spot of spots) {
     const d = Math.hypot(spot.x - at.x, spot.y - at.y);
-    if (d <= LAND && (!best || d < best.d)) best = { spot, d };
+    if (d <= LAND * k && (!best || d < best.d)) best = { spot, d };
   }
   return best?.spot;
 }
@@ -388,12 +429,3 @@ function dragCurve(drawing: ReturnType<typeof drawStructure>, structure: Structu
   const tail = isAtom ? { x: at.x + ((head.x - at.x) / len) * 16, y: at.y + ((head.y - at.y) / len) * 16 } : at;
   return { head, ...curve(tail, head) };
 }
-
-const visuallyHidden = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-} as const;
