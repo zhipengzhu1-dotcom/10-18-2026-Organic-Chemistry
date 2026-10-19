@@ -2,14 +2,15 @@
 // gets only what a Student sees before answering; the answer key is a separate
 // built file (/answers/<subject>/<lesson id>.json) that the Step player fetches.
 // A new Step type whose grading needs other fields adds them to SECRET_FIELDS.
-import type { GradedStep, Lesson, Step } from "@astratron/content";
+import type { GoalStep, GradedStep, Lesson, Step } from "@astratron/content";
 
 // Draw arrows: `results` (accepted results) and `inBetween` (flag copy) grade pushes, so they are secret too;
-// the start and the target the Step shows stay on the page. A reveal Scene, a Tap Step's `replay` and a Rank
-// Step's `revealTags` show the answer.
-const SECRET_FIELDS = ["answer", "tolerance", "correct", "hints", "reveal", "results", "inBetween", "revealScene", "replay", "revealTags"] as const;
+// the start and the target the Step shows stay on the page.
+// A goal-state Manipulate Step's `stages` hold its goals, Correct lines and Hints; a `revealScene`, a Tap
+// Step's `replay` and a Rank Step's `revealTags` show the answer, so all are secret too.
+const SECRET_FIELDS = ["answer", "tolerance", "correct", "hints", "reveal", "results", "inBetween", "stages", "revealScene", "replay", "revealTags"] as const;
 type Secret = (typeof SECRET_FIELDS)[number];
-type Shown<S> = S extends GradedStep ? Omit<S, Extract<Secret, keyof S>> : S;
+type Shown<S> = S extends GradedStep | GoalStep ? Omit<S, Extract<Secret, keyof S>> : S;
 
 /**
  * A Step as the page carries it: graded Steps lose their secrets. A Multiple choice Step
@@ -48,6 +49,7 @@ export function splitSteps(all: Step[]): { steps: PageStep[]; key: AnswerKey } {
 export function withKey(page: PageLesson, key: AnswerKey = {}): Lesson {
   const steps = page.steps.map((step): Step => {
     if (step.type === "explain") return step;
+    if (step.type === "manipulate-goal") return { stages: [], ...step, ...key[step.id] } as GoalStep;
     const { select: _select, ...shown } = step;
     return { answer: [], reveal: "", ...shown, ...key[step.id] } as GradedStep;
   });

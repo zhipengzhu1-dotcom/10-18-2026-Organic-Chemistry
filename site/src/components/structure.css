@@ -42,6 +42,8 @@
 .figure { margin: 0; display: grid; justify-items: center; gap: 4px; }
 .figure-drawing { display: block; }
 .figure-drawing .structure { max-height: 4.5rem; width: auto; }
+.figure.large .figure-drawing .structure { max-height: 8rem; }
+@media (max-width: 600px) { .figure.large .figure-drawing .structure { max-height: 5.5rem; } }
 .figure figcaption { font-size: 16px; color: var(--at-ink-muted); text-align: center; }
 .structure .atom-ring { color: var(--at-electron); }
 /* An aside (values to look up, a reference card) opens in a modal dialog. */

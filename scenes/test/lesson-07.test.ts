@@ -109,7 +109,7 @@ describe("Lesson 7 matches its spec", () => {
       const { fields, hints } = spec.get(sectionOf(step))!;
       const prompt = quotes(fields.Prompt.replace(/\n/g, " "))[0];
       expect(flat(step.type === "explain" ? step.text : step.prompt)).toBe(flat(prompt));
-      if (step.type === "explain") return;
+      if (step.type === "explain" || step.type === "manipulate-goal") return;
 
       if (fields["Correct line"]) expect(step.correct).toBe(quotes(fields["Correct line"])[0]);
       expect(step.hints?.map((h) => h.text) ?? []).toEqual(hints);

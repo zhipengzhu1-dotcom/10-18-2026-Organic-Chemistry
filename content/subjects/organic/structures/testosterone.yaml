@@ -1,0 +1,61 @@
+# Lesson 0 s06's testosterone (#78): #80's estradiol.yaml layout atom for atom (same view, same
+# stereo H's at C8, C9 and C14), with ring A as the enone (C3=O, C4=C5) and the C19 methyl on C10,
+# wedged the way C18 is. Atom ids name steroid numbering (c3 = C3, h8 = the H on C8).
+
+id: testosterone
+style: line-angle
+smiles: "C[C@]12CC[C@H]3[C@@H](CCC4=CC(=O)CC[C@]34C)[C@@H]1CC[C@@H]2O"
+source: PubChem CID 6013
+atoms:
+  - { id: c1, el: C, x: 0.157, y: -1.492 }
+  - { id: c2, el: C, x: -1.213, y: -0.882 }
+  - { id: c3, el: C, x: -1.37, y: 0.61 }
+  - { id: c4, el: C, x: -0.157, y: 1.492 }
+  - { id: c5, el: C, x: 1.213, y: 0.882 }
+  - { id: c6, el: C, x: 2.427, y: 1.764 }
+  - { id: c7, el: C, x: 3.797, y: 1.154 }
+  - { id: c8, el: C, x: 3.954, y: -0.338 }
+  - { id: c9, el: C, x: 2.741, y: -1.22 }
+  - { id: c10, el: C, x: 1.37, y: -0.61 }
+  - { id: c11, el: C, x: 2.898, y: -2.712 }
+  - { id: c12, el: C, x: 4.268, y: -3.321 }
+  - { id: c13, el: C, x: 5.482, y: -2.44 }
+  - { id: c14, el: C, x: 5.325, y: -0.948 }
+  - { id: c15, el: C, x: 6.695, y: -0.338 }
+  - { id: c16, el: C, x: 7.699, y: -1.452 }
+  - { id: c17, el: C, x: 6.949, y: -2.751 }
+  - { id: c18, el: C, x: 5.794, y: -3.907, label: "the CH₃ at the top" }
+  - { id: c19, el: C, x: 1.682, y: -2.077, label: "the CH₃ on the left-hand ring junction" }
+  - { id: o3, el: O, x: -2.741, y: 1.22, lp: 2, label: "the O on the left-hand ring (a C=O)" }
+  - { id: o17, el: O, x: 7.559, y: -4.122, h: 1, lp: 2, label: "the OH at the top right" }
+  - { id: h8, el: H, x: 4.763, y: 0.25 }
+  - { id: h9, el: H, x: 2.636, y: -0.225 }
+  - { id: h14, el: H, x: 5.324, y: 0.052 }
+bonds:
+  - { id: b1, a: c13, b: c18, order: 1, stereo: wedge }
+  - { id: b2, a: c13, b: c12, order: 1 }
+  - { id: b3, a: c12, b: c11, order: 1 }
+  - { id: b4, a: c11, b: c9, order: 1 }
+  - { id: b5, a: c9, b: c8, order: 1 }
+  - { id: b6, a: c8, b: c7, order: 1 }
+  - { id: b7, a: c7, b: c6, order: 1 }
+  - { id: b8, a: c6, b: c5, order: 1 }
+  - { id: b9, a: c5, b: c4, order: 2 }
+  - { id: b10, a: c4, b: c3, order: 1 }
+  - { id: b11, a: c3, b: o3, order: 2 }
+  - { id: b12, a: c3, b: c2, order: 1 }
+  - { id: b13, a: c2, b: c1, order: 1 }
+  - { id: b14, a: c1, b: c10, order: 1 }
+  - { id: b15, a: c8, b: c14, order: 1 }
+  - { id: b16, a: c14, b: c15, order: 1 }
+  - { id: b17, a: c15, b: c16, order: 1 }
+  - { id: b18, a: c16, b: c17, order: 1 }
+  - { id: b19, a: c17, b: o17, order: 1, stereo: wedge }
+  - { id: b20, a: c14, b: c13, order: 1 }
+  - { id: b21, a: c17, b: c13, order: 1 }
+  - { id: b22, a: c10, b: c9, order: 1 }
+  - { id: b23, a: c10, b: c5, order: 1 }
+  - { id: b24, a: c10, b: c19, order: 1, stereo: wedge }
+  - { id: b25, a: c9, b: h9, order: 1, stereo: hash }
+  - { id: b26, a: c8, b: h8, order: 1, stereo: wedge }
+  - { id: b27, a: c14, b: h14, order: 1, stereo: hash }

@@ -160,6 +160,12 @@ function renderVisuals(s: Step): Step {
 
 function renderText(s: Step): Step {
   if (s.type === "explain") return { ...s, text: mdBlocks(s.text) };
+  if (s.type === "manipulate-goal")
+    return {
+      ...s,
+      prompt: md(s.prompt),
+      stages: s.stages.map((g) => ({ ...g, prompt: md(g.prompt), correct: md(g.correct), blocked: md(g.blocked), idle: md(g.idle) })),
+    };
   const shared = { prompt: md(s.prompt), correct: s.correct && md(s.correct), reveal: md(s.reveal) };
   const choices = (list: { id: string; text: string }[]) => list.map((o) => ({ ...o, text: md(o.text) }));
   // A structure card's text is its screen-reader label: kept plain; its drawing is pre-rendered SVG.

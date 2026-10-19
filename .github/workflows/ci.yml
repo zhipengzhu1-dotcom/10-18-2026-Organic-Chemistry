@@ -30,6 +30,8 @@ jobs:
         run: pnpm lint:numbers
       - name: Scene purity lint (no timers, frame hooks, CSS animation or unseeded randomness)
         run: pnpm lint:scenes
+      - name: Blender renders are current (re-hashes each render's recorded inputs; Blender is not installed here)
+        run: pnpm blender check
       - name: Unit tests (content build + Step player engine)
         run: pnpm test
       - name: Install Playwright browser

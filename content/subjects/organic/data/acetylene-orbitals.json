@@ -1,0 +1,150 @@
+{
+ "id": "acetylene-orbitals",
+ "kind": "table",
+ "title": "Acetylene bond orbitals",
+ "sources": {
+  "ours": {
+   "kind": "computed",
+   "citation": "Our calculation: intrinsic bond orbitals (Knizia, J. Chem. Theory Comput. 9, 4834 (2013), doi:10.1021/ct400687b) from a B3LYP/cc-pVTZ single point with PySCF 2.14.0 at the experimental geometry, 2026-10-19",
+   "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+   "note": "Drawn at the isosurface value given. Bond orbitals are one honest way to divide a molecule's electrons into bonds; Lesson 8 shows another.",
+   "method": {
+    "program": "PySCF",
+    "version": "2.14.0",
+    "level": "B3LYP/cc-pVTZ",
+    "date": "2026-10-19"
+   }
+  }
+ },
+ "values": {
+  "iso": {
+   "label": "Isosurface value",
+   "quantity": "isovalue",
+   "value": 0.05,
+   "unit": "a.u.",
+   "source": "ours"
+  }
+ },
+ "orbitals": {
+  "molecule": "acetylene",
+  "kind": "ibo",
+  "iso": "iso",
+  "list": {
+   "sigma": {
+    "label": "C–C σ bond orbital",
+    "chip": "σ",
+    "style": "sigma",
+    "mesh": "/orbitals/acetylene-orbitals/sigma.glb",
+    "sha256": "293b0d2423f9a2cc741d8f76f9a429661193effe288fecd5f9a1dd21a2b4a509",
+    "triangles": 2840,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     {
+      "sign": "-",
+      "at": [
+       0.0,
+       0.0,
+       -0.709
+      ]
+     }
+    ]
+   },
+   "pi1": {
+    "label": "π bond orbital 1 (xz plane)",
+    "chip": "π",
+    "style": "pi",
+    "mesh": "/orbitals/acetylene-orbitals/pi1.glb",
+    "sha256": "3d814c72da772d37cfda00e1e80ade9ec2d48f58f7ba7f3bfebd56227f972ad5",
+    "triangles": 4576,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       0.753,
+       0.0,
+       0.0
+      ]
+     },
+     {
+      "sign": "-",
+      "at": [
+       -0.753,
+       0.0,
+       0.0
+      ]
+     }
+    ]
+   },
+   "pi2": {
+    "label": "π bond orbital 2 (yz plane)",
+    "chip": "π",
+    "style": "pi",
+    "mesh": "/orbitals/acetylene-orbitals/pi2.glb",
+    "sha256": "ae072dc1f302bf296cc1bcd8b01fab6612953c3ece86a7a6394c9e2c1a58e311",
+    "triangles": 4576,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       0.0,
+       0.753,
+       0.0
+      ]
+     },
+     {
+      "sign": "-",
+      "at": [
+       0.0,
+       -0.753,
+       0.0
+      ]
+     }
+    ]
+   },
+   "pi-both": {
+    "label": "both π bond orbitals, summed density",
+    "chip": "π",
+    "style": "pi",
+    "density": true,
+    "mesh": "/orbitals/acetylene-orbitals/pi-both.glb",
+    "sha256": "bfd22d55cfe67e9866c7da510f6fea98d97b9188b5d1e70e123b014cfe93a57d",
+    "triangles": 5152,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "provenance": {
+  "pipeline": "pipelines/orbitals (#70)",
+  "inputSha256": "2292749930d94e1f446c7a2d9382e7711ab2cc439f51d186943fc7a85a8e1510",
+  "scfEnergyHartree": -77.36346418999356,
+  "grid": {
+   "step": 0.14,
+   "pad": 4.5,
+   "shape": [
+    67,
+    67,
+    91
+   ]
+  },
+  "checks": [
+   "two π IBOs rotated into the xz and yz planes; summed π density uniform within 2% around the axis"
+  ],
+  "seconds": 2
+ }
+}

@@ -14,7 +14,7 @@ dependencies = [
 [dependency-groups]
 dev = ["pytest>=8"]
 # Heavy: only for `python -m geometry.compute` (PySCF optimisations). Not needed to parse or assemble.
-compute = ["pyscf==2.14.0", "geometric==1.1.1", "rdkit==2026.9.1"]
+compute = ["pyscf==2.14.0", "geometric==1.1.1", "rdkit==2026.9.1", "scikit-image==0.26.0"]
 
 [tool.uv]
 package = false

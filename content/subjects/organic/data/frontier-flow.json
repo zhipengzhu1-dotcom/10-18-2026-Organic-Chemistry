@@ -1,0 +1,46 @@
+{
+ "id": "frontier-flow",
+ "kind": "table",
+ "title": "HOMO → LUMO gaps between NH₃ and BF₃",
+ "sources": {
+  "ours": {
+   "kind": "computed",
+   "citation": "Our calculation: canonical molecular orbitals and their energies with PySCF 2.14.0, B3LYP/cc-pVTZ, isolated molecule at the geometry optimised with the same method, 2026-10-19; hartree to eV with CODATA 2018 (Tiesinga et al., Rev. Mod. Phys. 93, 025010 (2021), doi:10.1103/RevModPhys.93.025010)",
+   "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+   "note": "Computed orbital energies are model values: compare them with each other, not with measured energies.",
+   "method": {
+    "program": "PySCF",
+    "version": "2.14.0",
+    "level": "B3LYP/cc-pVTZ",
+    "date": "2026-10-19"
+   }
+  }
+ },
+ "values": {
+  "nh3_bf3": {
+   "label": "BF₃ LUMO − NH₃ HOMO",
+   "quantity": "energy",
+   "value": 7.7068,
+   "unit": "eV",
+   "source": "ours"
+  },
+  "bf3_nh3": {
+   "label": "NH₃ LUMO − BF₃ HOMO",
+   "quantity": "energy",
+   "value": 12.6379,
+   "unit": "eV",
+   "source": "ours"
+  }
+ },
+ "provenance": {
+  "pipeline": "pipelines/orbitals (#70)",
+  "from": [
+   "ammonia-b3lyp-orbitals",
+   "boron-trifluoride-b3lyp-orbitals"
+  ],
+  "checks": [
+   "ethylene HOMO above ethane's, gap smaller",
+   "NH₃→BF₃ gap smaller than BF₃→NH₃"
+  ]
+ }
+}

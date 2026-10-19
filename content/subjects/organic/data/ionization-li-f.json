@@ -1,0 +1,321 @@
+{
+  "id": "ionization-li-f",
+  "kind": "table",
+  "title": "Ionization energies, Li to F",
+  "sources": {
+    "asd": {
+      "kind": "reference",
+      "citation": "Kramida, A., Ralchenko, Yu., Reader, J., and NIST ASD Team (2024). NIST Atomic Spectra Database (ver. 5.12), https://physics.nist.gov/asd (retrieved 2026-10-19), doi:10.18434/T4W30F",
+      "licence": "NIST Standard Reference Data; reuse with acknowledgement (https://www.nist.gov/open/license)"
+    }
+  },
+  "values": {
+    "Li.valence": {
+      "label": "lithium outer electrons",
+      "quantity": "count",
+      "value": 1,
+      "source": "asd"
+    },
+    "Li.1": {
+      "label": "lithium first ionization energy",
+      "quantity": "energy",
+      "value": 5.391714996,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "Li.give": {
+      "label": "lithium, energy to remove all 1 outer electrons",
+      "quantity": "energy",
+      "value": 5.391715,
+      "unit": "eV",
+      "decimals": 1,
+      "source": "asd",
+      "note": "sum of the first 1 ionization energies"
+    },
+    "Be.valence": {
+      "label": "beryllium outer electrons",
+      "quantity": "count",
+      "value": 2,
+      "source": "asd"
+    },
+    "Be.1": {
+      "label": "beryllium first ionization energy",
+      "quantity": "energy",
+      "value": 9.322699,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "Be.2": {
+      "label": "beryllium second ionization energy",
+      "quantity": "energy",
+      "value": 18.21115,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "Be.give": {
+      "label": "beryllium, energy to remove all 2 outer electrons",
+      "quantity": "energy",
+      "value": 27.533849,
+      "unit": "eV",
+      "decimals": 1,
+      "source": "asd",
+      "note": "sum of the first 2 ionization energies"
+    },
+    "B.valence": {
+      "label": "boron outer electrons",
+      "quantity": "count",
+      "value": 3,
+      "source": "asd"
+    },
+    "B.1": {
+      "label": "boron first ionization energy",
+      "quantity": "energy",
+      "value": 8.298019,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "B.2": {
+      "label": "boron second ionization energy",
+      "quantity": "energy",
+      "value": 25.15483,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "B.3": {
+      "label": "boron third ionization energy",
+      "quantity": "energy",
+      "value": 37.93059,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "B.give": {
+      "label": "boron, energy to remove all 3 outer electrons",
+      "quantity": "energy",
+      "value": 71.383439,
+      "unit": "eV",
+      "decimals": 1,
+      "source": "asd",
+      "note": "sum of the first 3 ionization energies"
+    },
+    "C.valence": {
+      "label": "carbon outer electrons",
+      "quantity": "count",
+      "value": 4,
+      "source": "asd"
+    },
+    "C.1": {
+      "label": "carbon first ionization energy",
+      "quantity": "energy",
+      "value": 11.260288,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "C.2": {
+      "label": "carbon second ionization energy",
+      "quantity": "energy",
+      "value": 24.383143,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "C.3": {
+      "label": "carbon third ionization energy",
+      "quantity": "energy",
+      "value": 47.88778,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "C.4": {
+      "label": "carbon fourth ionization energy",
+      "quantity": "energy",
+      "value": 64.49352,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "C.give": {
+      "label": "carbon, energy to remove all 4 outer electrons",
+      "quantity": "energy",
+      "value": 148.024731,
+      "unit": "eV",
+      "decimals": 1,
+      "source": "asd",
+      "note": "sum of the first 4 ionization energies"
+    },
+    "N.valence": {
+      "label": "nitrogen outer electrons",
+      "quantity": "count",
+      "value": 5,
+      "source": "asd"
+    },
+    "N.1": {
+      "label": "nitrogen first ionization energy",
+      "quantity": "energy",
+      "value": 14.53413,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "N.2": {
+      "label": "nitrogen second ionization energy",
+      "quantity": "energy",
+      "value": 29.60125,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "N.3": {
+      "label": "nitrogen third ionization energy",
+      "quantity": "energy",
+      "value": 47.4453,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "N.4": {
+      "label": "nitrogen fourth ionization energy",
+      "quantity": "energy",
+      "value": 77.4735,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "N.5": {
+      "label": "nitrogen fifth ionization energy",
+      "quantity": "energy",
+      "value": 97.8901,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "N.give": {
+      "label": "nitrogen, energy to remove all 5 outer electrons",
+      "quantity": "energy",
+      "value": 266.94428,
+      "unit": "eV",
+      "decimals": 1,
+      "source": "asd",
+      "note": "sum of the first 5 ionization energies"
+    },
+    "O.valence": {
+      "label": "oxygen outer electrons",
+      "quantity": "count",
+      "value": 6,
+      "source": "asd"
+    },
+    "O.1": {
+      "label": "oxygen first ionization energy",
+      "quantity": "energy",
+      "value": 13.618055,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "O.2": {
+      "label": "oxygen second ionization energy",
+      "quantity": "energy",
+      "value": 35.12112,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "O.3": {
+      "label": "oxygen third ionization energy",
+      "quantity": "energy",
+      "value": 54.93554,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "O.4": {
+      "label": "oxygen fourth ionization energy",
+      "quantity": "energy",
+      "value": 77.4135,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "O.5": {
+      "label": "oxygen fifth ionization energy",
+      "quantity": "energy",
+      "value": 113.899,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "O.6": {
+      "label": "oxygen sixth ionization energy",
+      "quantity": "energy",
+      "value": 138.1189,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "O.give": {
+      "label": "oxygen, energy to remove all 6 outer electrons",
+      "quantity": "energy",
+      "value": 433.106115,
+      "unit": "eV",
+      "decimals": 1,
+      "source": "asd",
+      "note": "sum of the first 6 ionization energies"
+    },
+    "F.valence": {
+      "label": "fluorine outer electrons",
+      "quantity": "count",
+      "value": 7,
+      "source": "asd"
+    },
+    "F.1": {
+      "label": "fluorine first ionization energy",
+      "quantity": "energy",
+      "value": 17.42282,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "F.2": {
+      "label": "fluorine second ionization energy",
+      "quantity": "energy",
+      "value": 34.97081,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "F.3": {
+      "label": "fluorine third ionization energy",
+      "quantity": "energy",
+      "value": 62.70798,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "F.4": {
+      "label": "fluorine fourth ionization energy",
+      "quantity": "energy",
+      "value": 87.175,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "F.5": {
+      "label": "fluorine fifth ionization energy",
+      "quantity": "energy",
+      "value": 114.249,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "F.6": {
+      "label": "fluorine sixth ionization energy",
+      "quantity": "energy",
+      "value": 157.16311,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "F.7": {
+      "label": "fluorine seventh ionization energy",
+      "quantity": "energy",
+      "value": 185.1868,
+      "unit": "eV",
+      "source": "asd"
+    },
+    "F.give": {
+      "label": "fluorine, energy to remove all 7 outer electrons",
+      "quantity": "energy",
+      "value": 658.87552,
+      "unit": "eV",
+      "decimals": 1,
+      "source": "asd",
+      "note": "sum of the first 7 ionization energies"
+    }
+  },
+  "provenance": {
+    "fetched": "2026-10-19",
+    "query": "physics.nist.gov/cgi-bin/ASD/ie.pl?spectra=Li-F&units=1&format=2",
+    "valence": "electrons in the n = 2 shell of the ASD ground configuration",
+    "script": "pipelines/atoms/build.py"
+  }
+}

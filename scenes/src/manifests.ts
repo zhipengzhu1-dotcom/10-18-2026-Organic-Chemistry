@@ -19,4 +19,35 @@ import { amideHybrid } from "./amide-hybrid/manifest.ts";
 import { ruleLadder } from "./rule-ladder/manifest.ts";
 import { carbonylSites } from "./carbonyl-sites/manifest.ts";
 
-export const sceneManifests: readonly SceneManifest<any>[] = [sampleTwist, streamBend, enStrip, bondDipoles, dotsAndSticks, bf3Sextet, groupSpotlight, groupCards, carbonylNeighbours, hFill, ethanolThreeWays, lonePairFill, amideCnLengths, amideHybrid, ruleLadder, carbonylSites];
+// Lesson 0 (#78)
+import { buildBySharing } from "./build-by-sharing/manifest.ts";
+import { crustVsBody } from "./crust-vs-body/manifest.ts";
+import { giveOrTake } from "./give-or-take/manifest.ts";
+import { outerElectrons } from "./outer-electrons/manifest.ts";
+import { waterPush } from "./water-push/manifest.ts";
+
+export const sceneManifests: readonly SceneManifest<any>[] = [
+  sampleTwist,
+  streamBend,
+  enStrip,
+  bondDipoles,
+  dotsAndSticks,
+  bf3Sextet,
+  groupSpotlight,
+  groupCards,
+  carbonylNeighbours,
+  hFill,
+  ethanolThreeWays,
+  lonePairFill,
+  // Lesson 0 (#78)
+  crustVsBody,
+  outerElectrons,
+  giveOrTake,
+  waterPush,
+  buildBySharing,
+  // Lesson 7 (#85)
+  amideCnLengths,
+  amideHybrid,
+  ruleLadder,
+  carbonylSites,
+];

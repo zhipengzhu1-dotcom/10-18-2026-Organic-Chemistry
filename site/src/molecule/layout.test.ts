@@ -4,7 +4,7 @@
 import { describe, expect, it } from "vitest";
 import { buildContent, contentRoot } from "@astratron/content";
 import { viewMatrix } from "@astratron/content/molecule";
-import { atomAt, BALL, fitScale, placeAtoms } from "./layout.ts";
+import { atomAt, BALL, fitScale, placeAtoms, placePoints } from "./layout.ts";
 
 const data = buildContent(contentRoot).model!.subjects.find((s) => s.slug === "organic")!.data;
 const elements = { C: { colour: "#909090", vdw: 1.7 }, H: { colour: "#FFFFFF", vdw: 1.2 } };
@@ -44,6 +44,16 @@ describe("the 3D card's screen layout", () => {
     expect(hidden).toEqual([0, 2, 3]);
     const ball = placeAtoms(methane, facing, { width: 300, height: 300, scale: 50, trueScale: false });
     expect(ball.every((a) => a.labelled)).toBe(true);
+  });
+
+  it("places a point given in the molecule file's frame (an orbital lobe's label) with the atoms' projection", () => {
+    const frame = { width: 300, height: 200, scale: 50, trueScale: false };
+    const [onCarbon, offset] = placePoints(methane, facing, frame, [
+      [0, 0, 0],
+      [0.5, -1, 0.25],
+    ]);
+    expect(onCarbon).toMatchObject({ x: 150, y: 100, z: 0 });
+    expect(offset).toMatchObject({ x: 150 + 0.5 * 50, y: 100 + 1 * 50, z: 0.25 });
   });
 
   it("a tap picks the nearest atom drawn under it, or none", () => {

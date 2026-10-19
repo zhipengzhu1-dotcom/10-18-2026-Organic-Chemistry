@@ -2,8 +2,8 @@
 // Subject's named start views (views.yaml), and resolves it to what the 3D viewer draws, for both
 // the inline 3D Step card (#68) and Explore in 3D (#71).
 import type { z } from "zod";
-import { find, geometryQuantities, type CitedData } from "./data.ts";
-import type { MoleculeUse } from "./model.ts";
+import { find, geometryQuantities, type Cited, type CitedData } from "./data.ts";
+import type { MoleculeUse, OrbitalUse } from "./model.ts";
 import { viewErrors, viewMatrix, type ViewSpec } from "./molecule.ts";
 import type { viewsFile } from "./schema.ts";
 
@@ -13,6 +13,7 @@ export interface MoleculeUseFile {
   card?: boolean;
   view?: string;
   describe?: string;
+  orbitals?: string[];
 }
 export type Views = z.infer<typeof viewsFile>;
 
@@ -73,6 +74,9 @@ export function resolveMoleculeUse(
   }
   if (errors.length) return { errors };
 
+  const resolved = resolveOrbitals(use, data, card || !!use.card);
+  if (resolved.errors.length) return { errors: resolved.errors.map((m) => `${named}: ${m}`) };
+
   const geometry = Object.values(set.values).filter((v) => geometryQuantities.includes(v.quantity));
   return {
     molecule: {
@@ -84,11 +88,59 @@ export function resolveMoleculeUse(
       ...(use.view ? { view: use.view } : {}),
       orientation: viewMatrix(atoms, spec as ViewSpec),
       elements,
-      cited: [...geometry, ...styles.map((s) => s.colour), ...styles.map((s) => s.vdw)],
+      cited: [...geometry, ...styles.map((s) => s.colour), ...styles.map((s) => s.vdw), ...resolved.cited],
       ...(set.notice ? { notice: set.notice } : {}),
       card: card || !!use.card,
       ...(use.describe ? { describe: use.describe } : {}),
+      ...(resolved.orbitals.length ? { orbitals: resolved.orbitals } : {}),
     },
     errors,
   };
+}
+
+/**
+ * A Step's `orbitals` (#70): each `<orbital data file>/<orbital id>` must be computed on the
+ * Step's molecule file (so the lobes sit on these very atoms) and shown on the inline card.
+ * `cited` is what the Source note adds: each set's isovalue, then the energies shown.
+ */
+function resolveOrbitals(use: MoleculeUseFile, data: CitedData, card: boolean): { orbitals: OrbitalUse[]; cited: Cited[]; errors: string[] } {
+  const orbitals: OrbitalUse[] = [];
+  const cited: Cited[] = [];
+  const errors: string[] = [];
+  if (!use.orbitals?.length) return { orbitals, cited, errors };
+  if (!card) return { orbitals, cited, errors: ["orbitals show only on the inline card (card: true)"] };
+  const add = (c: Cited | undefined) => c && !cited.some((x) => x.ref === c.ref) && cited.push(c);
+  for (const ref of use.orbitals) {
+    const [fid, oid] = ref.split("/");
+    const set = data[fid]?.orbitals;
+    if (!set) {
+      errors.push(`"${fid}" is not an orbital data file`);
+      continue;
+    }
+    if (set.molecule !== use.id) {
+      errors.push(`orbitals "${fid}" were computed on "${set.molecule}", so they don't sit on these atoms`);
+      continue;
+    }
+    const entry = set.list[oid];
+    if (!entry) {
+      errors.push(`no orbital "${ref}"`);
+      continue;
+    }
+    const energy = entry.energy ? data[fid].values[entry.energy] : undefined;
+    add(data[fid].values[set.iso]);
+    add(energy);
+    orbitals.push({
+      ref,
+      label: entry.label,
+      chip: entry.chip,
+      style: entry.style,
+      ...(entry.density ? { density: true } : {}),
+      mesh: entry.mesh,
+      lobes: entry.lobes,
+      ...(energy ? { energy } : {}),
+    });
+  }
+  // Energies first (the numbers a Student reads), then the isovalue.
+  cited.sort((a, b) => Number(b.quantity === "energy") - Number(a.quantity === "energy"));
+  return { orbitals, cited, errors };
 }

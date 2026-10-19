@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ManipulateStep, MultipleChoiceStep, NumericStep, RankStep, RotateAndIdentifyStep } from "@astratron/content";
+import type { GoalStep, ManipulateStep, MultipleChoiceStep, NumericStep, RankStep, RotateAndIdentifyStep } from "@astratron/content";
 import { act, start, type Action, type PlayableLesson, type Screen } from "./player.ts";
 
 const choice = (id: string, extra: Partial<MultipleChoiceStep> = {}): MultipleChoiceStep => ({
@@ -469,5 +469,75 @@ describe("Rotate-and-identify 3D Steps", () => {
   it("ignores answers of another shape", () => {
     const screen = start(rotLesson);
     expect(act(rotLesson, screen, { type: "answer", value: 1 })).toEqual(screen);
+  });
+});
+
+describe("goal-state Manipulate Steps (#78)", () => {
+  const build: GoalStep = {
+    id: "s01",
+    phase: "build",
+    type: "manipulate-goal",
+    prompt: "Give carbon a full shell.",
+    scene: { id: "build-by-sharing", state: { stage: "1", bonded: 0, joined: "no" }, cited: {} },
+    idleSeconds: 30,
+    stages: [
+      { prompt: "Give carbon a full shell.", goal: { bonded: 4 }, correct: "CH₄, methane.", blocked: "Count the dots.", idle: "Drop each H on a dot." },
+      { prompt: "Join these two pieces.", start: { stage: "2" }, goal: { joined: "yes" }, correct: "C₂H₆, ethane.", blocked: "Join the pieces first.", idle: "Drag one CH₃ on." },
+    ],
+  };
+  const goalLesson: PlayableLesson = { ...lesson, steps: [build, wrapStep] };
+  const move = (state: Record<string, number | string>): Action => ({ type: "answer", state });
+  const run = (...actions: Action[]) => actions.reduce((s, a) => act(goalLesson, s, a), start(goalLesson));
+
+  it("opens on stage 1 with the Scene's state, locked until the last goal", () => {
+    expect(start(goalLesson)).toMatchObject({
+      canContinue: false,
+      feedback: null,
+      goal: { stage: 0, state: { stage: "1", bonded: 0, joined: "no" }, idle: 0, prompt: "Give carbon a full shell." },
+    });
+  });
+
+  it("a move that doesn't reach the goal just updates the state", () => {
+    expect(run(move({ bonded: 1 }))).toMatchObject({ canContinue: false, feedback: null, goal: { stage: 0, state: { bonded: 1 } } });
+  });
+
+  it("reaching a stage's goal shows its Correct line and opens the next stage from its start", () => {
+    const screen = run(move({ bonded: 1 }), move({ bonded: 2 }), move({ bonded: 3 }), move({ bonded: 4 }));
+    expect(screen).toMatchObject({
+      canContinue: false,
+      feedback: { kind: "correct", text: "CH₄, methane." },
+      goal: { stage: 1, state: { stage: "2", bonded: 4 }, prompt: "Join these two pieces." },
+    });
+  });
+
+  it("the last goal opens Continue with its Correct line", () => {
+    const screen = run(move({ bonded: 4 }), move({ joined: "yes" }));
+    expect(screen).toMatchObject({ canContinue: true, feedback: { kind: "correct", text: "C₂H₆, ethane." } });
+    expect(act(goalLesson, screen, { type: "continue" }).step.id).toBe("s09");
+  });
+
+  it("Continue before the stage is done shows that stage's Hint and stays", () => {
+    expect(run({ type: "continue" })).toMatchObject({ index: 0, feedback: { kind: "hint", text: "Count the dots." } });
+    expect(run(move({ bonded: 4 }), { type: "continue" })).toMatchObject({
+      index: 0,
+      feedback: { kind: "hint", text: "Join the pieces first." },
+    });
+  });
+
+  it("idle shows the stage's idle Hint; a second idle also asks for the nudge; a move resets it", () => {
+    expect(run({ type: "idle" })).toMatchObject({ feedback: { kind: "hint", text: "Drop each H on a dot." }, goal: { idle: 1 } });
+    expect(run({ type: "idle" }, { type: "idle" })).toMatchObject({ goal: { idle: 2 } });
+    expect(run({ type: "idle" }, { type: "idle" }, move({ bonded: 1 }))).toMatchObject({ goal: { idle: 0 }, feedback: null });
+  });
+
+  it("moves are saved and replayed on resume; Hints and idles are not", () => {
+    const screen = run(move({ bonded: 4 }), { type: "idle" }, move({ joined: "yes" }));
+    expect(screen.progress.answers.s01).toEqual([{ state: { bonded: 4 } }, { state: { joined: "yes" } }]);
+    expect(start(goalLesson, "s01", screen.progress)).toMatchObject({ canContinue: true, goal: { stage: 1 } });
+  });
+
+  it("ignores answers of other shapes", () => {
+    const screen = start(goalLesson);
+    expect(act(goalLesson, screen, { type: "answer", choice: ["a"] })).toEqual(screen);
   });
 });

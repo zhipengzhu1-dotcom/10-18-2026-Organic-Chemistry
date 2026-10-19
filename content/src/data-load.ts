@@ -24,11 +24,36 @@ const source = z.strictObject({
   /** Id of another source in this file that the value was taken from (e.g. NIST CCCBDB). */
   via: key.optional(),
   method: method.optional(),
+  /** A sentence the Source note adds after this source's values (e.g. the model caveat on orbital energies). */
+  note: text.optional(),
+});
+
+const point = z.tuple([z.number(), z.number(), z.number()]);
+
+/** Orbital data files (pipelines/orbitals, #70): the orbitals computed on one molecule and their meshes. */
+const orbitalSet = z.strictObject({
+  molecule: id,
+  kind: z.enum(["ibo", "canonical"]),
+  iso: key,
+  list: z.record(
+    id,
+    z.strictObject({
+      label: text,
+      chip: text,
+      style: z.enum(["sigma", "pi", "phase"]),
+      energy: key.optional(),
+      density: z.literal(true).optional(),
+      mesh: z.string().regex(/^\/orbitals\/[a-z0-9-]+\/[a-z0-9-]+\.glb$/, "must be /orbitals/<set>/<orbital>.glb"),
+      sha256: z.string().regex(/^[0-9a-f]{64}$/),
+      triangles: z.number().int().positive(),
+      lobes: z.array(z.strictObject({ sign: z.enum(["+", "-"]), at: point })).min(1),
+    }),
+  ),
 });
 
 const value = z.strictObject({
   label: text,
-  quantity: z.enum(["bond-length", "angle", "dihedral", "radius", "colour", "energy", "pka", "count", "electronegativity"]),
+  quantity: z.enum(["bond-length", "angle", "dihedral", "radius", "colour", "energy", "pka", "count", "electronegativity", "isovalue", "fraction"]),
   value: z.union([z.number(), z.string().min(1)]),
   unit: text.optional(),
   source: key,
@@ -36,6 +61,8 @@ const value = z.strictObject({
   atoms: z.array(z.number().int().nonnegative()).min(2).max(4).optional(),
   /** The source's own remark on the value, e.g. "re", "from symmetry". */
   note: text.optional(),
+  /** Decimals a Student sees (the Source note keeps the full value); bond lengths and angles have fixed defaults. */
+  decimals: z.number().int().min(0).max(6).optional(),
 });
 
 const atom = z.tuple([z.string().regex(/^[A-Z][a-z]?$/, "must be an element symbol"), z.number(), z.number(), z.number()]);
@@ -52,6 +79,7 @@ export const dataFile = z.strictObject({
   bonds: z.array(z.tuple([z.number().int().nonnegative(), z.number().int().nonnegative(), z.union([z.literal(1), z.literal(2), z.literal(3)])])).optional(),
   /** Licence notice for third-party data (e.g. the NIST acknowledgement on CCCBDB-derived files). */
   notice: text.optional(),
+  orbitals: orbitalSet.optional(),
   /** How the pipeline made the file (start geometry, checks, what CCCBDB has). Kept in the file, not passed to pages. */
   provenance: z.record(z.string(), z.unknown()).optional(),
 });
@@ -64,6 +92,7 @@ const units: Partial<Record<DataFile["values"][string]["quantity"], string[]>> =
   angle: ["°"],
   dihedral: ["°"],
   energy: ["eV", "kJ/mol", "kcal/mol"],
+  fraction: ["%"],
 };
 
 /** Resolves one data file into a DataSet; `errors` lists every broken rule (messages without the file name). */
@@ -127,7 +156,7 @@ export function resolveDataFile(file: DataFile): { set: DataSet; errors: string[
       source: src,
       licence: src.licence,
       ...(file.geometry ? { tier: file.geometry } : {}),
-      ...format(v.quantity, v.value, v.unit),
+      ...format(v.quantity, v.value, v.unit, v.decimals),
     };
   }
 
@@ -140,6 +169,13 @@ export function resolveDataFile(file: DataFile): { set: DataSet; errors: string[
     }
   }
   if (file.notice) set.notice = file.notice;
+  if (file.orbitals) {
+    const o = file.orbitals;
+    if (!set.values[o.iso]) errors.push(`orbitals.iso: "${o.iso}" is not a value in this file`);
+    for (const [oid, entry] of Object.entries(o.list))
+      if (entry.energy && !set.values[entry.energy]) errors.push(`orbitals.list.${oid}.energy: "${entry.energy}" is not a value in this file`);
+    set.orbitals = o;
+  }
   if (file.bonds) {
     const n = file.atoms?.list.length ?? 0;
     set.bonds = file.bonds.map(([a, b, order]) => ({ a, b, order }));

@@ -1,0 +1,132 @@
+# Lesson 0: Why Carbon? (#78), Unit 1's On-ramp. Built from the merged Lesson spec
+# docs/specs/unit-1/lesson-00-why-carbon.md: every Prompt, Hint, Correct line, Reveal and
+# Source note follows it. Numbers come from data/carbon-abundance.yaml,
+# data/ionization-li-f.json (NIST ASD) and data/electron-affinity-li-f.json (Andersen,
+# Haugen & Hotop 1999), all cited; outer-electron counts are counts, not measurements.
+id: u1-l00
+slug: why-carbon
+title: Why Carbon?
+onRamp: true
+act: On-ramp
+signature: s03
+goal: Explain why carbon shares electrons instead of gaining or losing them, and count the electrons around an atom to see that its outer shell is full.
+keyIdea: "Carbon sits in the middle of its row: gaining or losing four electrons costs too much, so it shares. Four shared pairs fill its shell, and carbon sharing with carbon builds endless molecules."
+steps:
+  - id: s01
+    phase: hook
+    type: multiple-choice
+    prediction: true
+    prompt: "Carbon is only {{carbon-abundance/crust.C}} of Earth's crust. Roughly how much of *your* body's mass is carbon?"
+    # star-forge plays first and ends on the star-line card; it shrinks to the top while the choices are up.
+    scene: star-forge
+    options:
+      - { id: a, text: less than 1% }
+      - { id: b, text: about 5% }
+      - { id: c, text: about 20% }
+      - { id: d, text: about 50% }
+    answer: [a, b, c, d]
+    reveal: "About **{{carbon-abundance/body.C}}** of you is carbon, over a thousand times more than the rock under your feet. Life is built from carbon, and this Lesson is about why."
+    revealScene: crust-vs-body
+    sourceNote: "Carbon is made in stars by the triple-alpha process: OpenStax *Astronomy 2e* §22.4, CC BY 4.0."
+
+  - id: s02
+    phase: build
+    type: explain
+    text: "Atoms trade and share their **outer electrons**, the ones farthest out. An atom is most stable when its outer shell is **full**: **8 electrons** for carbon, nitrogen, oxygen and their neighbours (the **octet**), **2** for hydrogen.<br>Carbon has **4** outer electrons. It needs 4 more, or 4 fewer, or another way."
+    scene: { id: outer-electrons, still: true }
+    sourceNote: "Filled-shell idea adapted from MIT OCW 5.12, Lecture 1 p. 8, Berkowski, Spring 2005, CC BY-NC-SA 4.0."
+
+  - id: s03
+    phase: build
+    type: manipulate
+    prompt: "Give or take? Slide through the row from Li to F. Each atom can fill its shell by giving away its outer electrons or by taking extra ones. Find the atom that has to move the **most** electrons, even the cheaper way, then press Check."
+    scene: { id: give-or-take, state: { atom: Li }, still: true }
+    control: atom
+    answer: C
+    correct: "Carbon has to move 4 either way, the most in the row. That's too many, so it shares."
+    hints:
+      - match: [B, N]
+        text: "Close. B gives 3 and N takes 3. Its neighbour in the middle has it worse."
+      - match: [Li, F]
+        text: "Look at the counter: this one moves just one electron. That's the easy end."
+      - match: [Be, O]
+        text: This one moves two. Keep sliding toward the middle.
+      - text: "Watch the 'electrons to move' counter. Which atom has the biggest number?"
+    reveal: "4 to give: {{ionization-li-f/C.give}}. 4 to take: carbon holds 1 extra electron, but not 4."
+    sourceNote: "Ionization energies: NIST Atomic Spectra Database. Electron affinities: Andersen, Haugen & Hotop, *J. Phys. Chem. Ref. Data* 28, 1511 (1999). 'Middle of the second row' after MIT OCW 5.12, Lecture 1 p. 4, CC BY-NC-SA 4.0."
+
+  - id: s04
+    phase: build
+    type: explain
+    text: "So carbon does the third thing: it **shares**. Two atoms each count a shared pair of electrons toward their own shell. **A shared pair is a bond.**<br>Here's a pair becoming a bond: hydroxide's electron pair swings onto H⁺, and now oxygen and hydrogen share it. (If you tried the push on the homepage, this is the same one.)<br>Carbon, with 4 outer electrons, makes **4 shared pairs, 4 bonds**, and its shell is full."
+    scene: water-push
+    sourceNote: "Sharing as carbon's route: MIT OCW 5.12, Lecture 1 p. 4, CC BY-NC-SA 4.0."
+
+  - id: s05
+    phase: build
+    type: manipulate-goal
+    scene: build-by-sharing
+    idleSeconds: 30
+    stages:
+      - prompt: Give carbon a full shell. Drag H atoms onto it.
+        goal: { n: H, e: H, s: H, w: H }
+        correct: "CH₄, methane: 8 around carbon, 2 around each H."
+        blocked: "Count the dots around carbon. A full shell is 8; each H you add brings one more."
+        idle: Drop each H on one of carbon's single dots.
+      - prompt: Carbon can share with carbon too. Join these two pieces.
+        start: { stage: "2" }
+        goal: { joined: "yes" }
+        correct: "C₂H₆, ethane: a carbon–carbon bond. Chain enough of these and you get fuels, plastics, you."
+        blocked: "Join the two pieces first: each carbon still has one single dot."
+        idle: Drag one CH₃ onto the other's single dot.
+
+  - id: s06
+    phase: build
+    type: tap-to-identify
+    prompt: "Same atoms, different life. Estradiol (an estrogen) and testosterone are built from the same carbon skeleton. Every corner is a carbon; you'll learn to read these drawings in Lesson 2. Tap the **two** parts of testosterone that differ from estradiol, then press Check."
+    figures:
+      - structure: estradiol
+        hide: [lone-pairs]
+        caption: Estradiol
+        large: true
+        alt: "Estradiol: four fused rings. The left-hand ring is flat, with an OH; a CH₃ at the top; an OH at the top right."
+    structure: testosterone
+    hide: [lone-pairs]
+    alt: "Testosterone, below: the same four rings. The left-hand ring has a C=O; a CH₃ on the left-hand ring junction; a CH₃ at the top; an OH at the top right."
+    tappable:
+      regions:
+        - { id: ring-a, atoms: [c1, c2, c3, c4, c5, c10, o3], label: "The left-hand ring, with its C=O" }
+        - { id: ring-b, atoms: [c6, c7, c8, c9], label: The second ring from the left }
+        - { id: ring-c, atoms: [c11, c12, c13, c14], label: The upper middle ring }
+        - { id: ring-d, atoms: [c15, c16, c17], label: "The five-membered ring, on the right" }
+        - { id: c19, atoms: [c19], label: "The CH₃ on the left-hand ring junction" }
+        - { id: c18, atoms: [c18], label: The CH₃ at the top }
+        - { id: oh17, atoms: [o17], label: The OH at the top right }
+    answer: [ring-a, c19]
+    correct: "Two small changes, the left ring and one extra CH₃, turn one hormone into the other. Carbon frameworks are that sensitive."
+    hints:
+      - includes: [oh17, c18]
+        text: "Both hormones have that one, top. Look at the left side."
+      - includes: [ring-b, ring-c, ring-d]
+        text: That ring is the same in both. Look at the far left.
+      - match: [ring-a]
+        text: "That's one. There's a small CH₃ that only testosterone has."
+      - match: [c19]
+        text: "That's one. Compare the left-hand rings."
+      - text: "Cover one drawing, then the other. Two spots change."
+    reveal: "The left-hand ring and the CH₃ on its junction: ring with OH ↔ ring with C=O, and no CH₃ ↔ CH₃."
+    sourceNote: "Pair from MIT OCW 5.12, Lecture 1 p. 5 ('Subtleties in Structure'), CC BY-NC-SA 4.0. Structures: PubChem CIDs 5757 and 6013."
+
+  - id: s07
+    phase: check
+    problem: u1-onramp-why-share
+
+  - id: s08
+    phase: check
+    problem: u1-onramp-octet-count
+
+  - id: s09
+    phase: wrap
+    type: explain
+    text: "**Carbon can't easily win electrons or give them up, so it shares, and sharing builds everything.**<br>Full shell: 8 (2 for H).<br>A shared pair is a bond; carbon makes 4.<br>Carbon bonds to carbon, so its frameworks can grow endlessly."
+    scene: { id: build-by-sharing, state: { stage: "2", n: H, e: H, s: H, w: H, joined: "yes", count: hidden }, still: true }
