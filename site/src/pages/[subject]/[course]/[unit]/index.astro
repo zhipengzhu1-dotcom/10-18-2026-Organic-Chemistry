@@ -1,0 +1,52 @@
+---
+// The Unit page: Level select. Static HTML; LevelSelect renders without client JS.
+import type { GetStaticPaths } from "astro";
+import Base from "../../../../layouts/Base.astro";
+import LevelSelect from "../../../../components/LevelSelect.tsx";
+import { unitPages, type UnitPage } from "../../../../lib/content.ts";
+
+export const getStaticPaths = (() =>
+  unitPages().map((page) => ({
+    params: { subject: page.subject, course: page.course.slug, unit: page.unit.slug },
+    props: page,
+  }))) satisfies GetStaticPaths;
+
+const { subject, course, unit } = Astro.props as UnitPage;
+---
+
+<Base title={`${unit.title} · AstraTron`} description={unit.summary}>
+  <main class="page">
+    <p><a href={`/${subject}`}>Course map</a> · {course.title}</p>
+    <h1><span class="unit-number">Unit {unit.number}</span> {unit.title}</h1>
+    {unit.summary && <p>{unit.summary}</p>}
+    <LevelSelect unit={unit} />
+  </main>
+</Base>
+
+<style is:global>
+  /* Placeholder Level select styles; the design system (#59) replaces them. */
+  .unit-number { display: block; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .level-select .act-title { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; color: #5ee7ff; margin: 1.5rem 0 0.5rem; }
+  .level-select .levels { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+  .level-select .level {
+    display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 0.25rem 0.5rem;
+    padding: 0.75rem; border: 2px solid #8b7bff; background: #1b1840; box-shadow: 4px 4px 0 #8b7bff;
+  }
+  .level-select .level-number { grid-column: 1 / -1; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .level-select .level-title { grid-column: 1 / -1; margin: 0; font-size: 1.15rem; }
+  .level-select .level-title a { color: inherit; }
+  .level-select .level-goal { grid-column: 1 / -1; margin: 0; opacity: 0.85; }
+  .level-select .chip { border: 1px solid currentColor; padding: 0 0.4rem; font-size: 0.85rem; justify-self: start; }
+  .level-select .phase-bar { grid-column: 1 / -1; display: flex; gap: 2px; height: 8px; }
+  .level-select .phase { min-width: 4px; }
+  .level-select .phase-hook { background: #ff9d3c; }
+  .level-select .phase-build { background: #5ee7ff; }
+  .level-select .phase-check { background: #ff5fd8; }
+  .level-select .phase-wrap { background: #8b7bff; }
+  .level-select .level-on-ramp { border-style: dashed; box-shadow: none; }
+  .level-select .skip { grid-column: 1 / -1; justify-self: start; min-height: 48px; display: inline-flex; align-items: center; }
+  .level-select .level-boss { border-color: #ff5fd8; border-width: 4px; box-shadow: 5px 5px 0 #ff5fd8; }
+  .level-select .level-boss .level-number { color: #ff5fd8; }
+  .level-select .level-practice { border-color: #ff9d3c; }
+  .level-select .level-soon { grid-column: 1 / -1; color: #ff9d3c; font-size: 0.85rem; }
+</style>

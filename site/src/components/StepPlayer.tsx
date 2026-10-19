@@ -1,22 +1,64 @@
 // The Step player island: renders the engine's Screen and turns clicks into
 // engine Actions. All rules live in the engine; this file only draws.
-import { useReducer, useState } from "react";
-import type { Lesson } from "@astratron/content";
+// The page carries the Lesson without its answers (spec story 99); the answer
+// key is fetched from its own built file, and nothing is checked until it arrives.
+import { useEffect, useMemo, useReducer, useState } from "react";
 import { act, start, type Action, type Screen } from "../engine/player.ts";
+import { withKey, type AnswerKey, type PageLesson } from "../lib/answer-key.ts";
 
 interface Props {
-  /** The Lesson with text fields already rendered to HTML at build time. */
-  lesson: Lesson;
+  /** The Lesson without answers, text fields already rendered to HTML at build time. */
+  lesson: PageLesson;
+  /** URL of the Lesson's answer key. */
+  keyUrl: string;
   exitHref: string;
 }
 
+/** Island-only action: open the Step a Step link names (ADR 0003). */
+type PlayerAction = Action | { type: "open"; stepId: string };
+
 const html = (text: string) => ({ dangerouslySetInnerHTML: { __html: text } });
 
-export default function StepPlayer({ lesson, exitHref }: Props) {
-  const [screen, dispatch] = useReducer((s: Screen, a: Action) => act(lesson, s, a), lesson, start);
+export default function StepPlayer({ lesson: page, keyUrl, exitHref }: Props) {
+  const [key, setKey] = useState<AnswerKey>();
+  const lesson = useMemo(() => withKey(page, key), [page, key]);
+  const [screen, dispatch] = useReducer(
+    (s: Screen, a: PlayerAction) =>
+      a.type === "open" ? start(lesson, a.stepId) : act(lesson, { ...s, step: lesson.steps[s.index] }, a),
+    lesson,
+    (l) => start(l),
+  );
+  const [linked, setLinked] = useState(false);
   const [chosen, setChosen] = useState<string[]>([]);
   const { step, feedback } = screen;
-  const single = step.type === "multiple-choice" && step.answer.length === 1;
+  const pageStep = page.steps[screen.index];
+  const single = pageStep.type === "multiple-choice" && pageStep.select === "one";
+
+  useEffect(() => {
+    let live = true;
+    fetch(keyUrl)
+      .then((r) => r.json() as Promise<AnswerKey>)
+      .then((k) => live && setKey(k));
+    return () => {
+      live = false;
+    };
+  }, [keyUrl]);
+
+  // A Step link opens its Step; the address then follows the Step on screen.
+  useEffect(() => {
+    const openLinked = () => {
+      if (location.hash.length > 1) dispatch({ type: "open", stepId: decodeURIComponent(location.hash.slice(1)) });
+      setChosen([]);
+    };
+    openLinked();
+    setLinked(true);
+    addEventListener("hashchange", openLinked);
+    return () => removeEventListener("hashchange", openLinked);
+  }, []);
+  useEffect(() => {
+    const moved = location.hash || screen.index > 0;
+    if (linked && moved && location.hash !== `#${step.id}`) history.replaceState(null, "", `#${step.id}`);
+  }, [linked, step.id, screen.index]);
 
   function pick(id: string) {
     setChosen((c) => (single ? [id] : c.includes(id) ? c.filter((x) => x !== id) : [...c, id]));
@@ -94,7 +136,7 @@ export default function StepPlayer({ lesson, exitHref }: Props) {
             Continue
           </button>
         ) : (
-          <button type="button" className="button" onClick={check} disabled={chosen.length === 0}>
+          <button type="button" className="button" onClick={check} disabled={!key || chosen.length === 0}>
             Check
           </button>
         )}
