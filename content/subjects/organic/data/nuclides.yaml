@@ -1,0 +1,17 @@
+# Nuclide numbers (ADR 0002) for Scenes that show nuclei, such as Lesson 0's
+# star-forge ("3 ⁴He → ¹²C"). Z is the proton count and A the mass number
+# (protons + neutrons); both name the nuclide, so they are exact. Checked
+# 2026-10-19 against NUBASE2020 (He-4: Z 2, A 4; C-12: Z 6, A 12).
+id: nuclides
+kind: table
+title: Nuclides
+sources:
+  nubase2020:
+    kind: reference
+    citation: Kondev et al., "The NUBASE2020 evaluation of nuclear physics properties", Chinese Phys. C 45, 030001 (2021), doi:10.1088/1674-1137/abddae
+    licence: Published values, cited (facts from the literature)
+values:
+  He-4.Z: { label: helium-4 protons, quantity: count, value: 2, source: nubase2020 }
+  He-4.A: { label: helium-4 mass number, quantity: count, value: 4, source: nubase2020 }
+  C-12.Z: { label: carbon-12 protons, quantity: count, value: 6, source: nubase2020 }
+  C-12.A: { label: carbon-12 mass number, quantity: count, value: 12, source: nubase2020 }

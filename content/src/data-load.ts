@@ -28,7 +28,7 @@ const source = z.strictObject({
 
 const value = z.strictObject({
   label: text,
-  quantity: z.enum(["bond-length", "angle", "dihedral", "radius", "colour", "energy", "pka"]),
+  quantity: z.enum(["bond-length", "angle", "dihedral", "radius", "colour", "energy", "pka", "count"]),
   value: z.union([z.number(), z.string().min(1)]),
   unit: text.optional(),
   source: key,
@@ -99,6 +99,10 @@ export function resolveDataFile(file: DataFile): { set: DataSet; errors: string[
     const allowed = units[v.quantity];
     if (allowed && !allowed.includes(v.unit ?? "")) {
       errors.push(`values.${k}.unit: a ${v.quantity} needs one of ${allowed.join(", ")}; found ${v.unit ?? "none"}`);
+      continue;
+    }
+    if (v.quantity === "count" && !(typeof v.value === "number" && Number.isInteger(v.value) && v.unit === undefined)) {
+      errors.push(`values.${k}.value: a count must be a whole number`);
       continue;
     }
     if (geometryQuantities.includes(v.quantity)) mixes(`values.${k}`, src);

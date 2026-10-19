@@ -47,6 +47,40 @@ describe("cited-data lookup", () => {
     expect(cite(dataOf(build()), "methane/a.HCH")).toMatchObject({ display: "109.5°", full: "109.471°" });
   });
 
+  it("holds unitless counts, such as a nuclide's mass number, as whole numbers", () => {
+    const result = build(
+      (t) =>
+        (t["chem/data/nuclides.yaml"] = [
+          "id: nuclides",
+          "kind: table",
+          "title: Nuclides",
+          "sources:",
+          "  nubase: { kind: reference, citation: NUBASE2020, licence: Published values }",
+          "values:",
+          "  C-12.A: { label: carbon-12 mass number, quantity: count, value: 12, source: nubase }",
+          "  He-4.A: { label: helium-4 mass number, quantity: count, value: 4.5, source: nubase }",
+        ].join("\n")),
+    );
+    expect(result.errors).toEqual(["chem/data/nuclides.yaml: values.He-4.A.value: a count must be a whole number"]);
+  });
+
+  it("shows a count as the plain whole number", () => {
+    const result = build(
+      (t) =>
+        (t["chem/data/nuclides.yaml"] = [
+          "id: nuclides",
+          "kind: table",
+          "title: Nuclides",
+          "sources:",
+          "  nubase: { kind: reference, citation: NUBASE2020, licence: Published values }",
+          "values:",
+          "  C-12.A: { label: carbon-12 mass number, quantity: count, value: 12, source: nubase }",
+        ].join("\n")),
+    );
+    expect(result.errors).toEqual([]);
+    expect(cite(dataOf(result), "nuclides/C-12.A")).toMatchObject({ quantity: "count", value: 12, display: "12", full: "12" });
+  });
+
   it("throws on a value that isn't in the data", () => {
     expect(() => cite(dataOf(build()), "methane/r.CC")).toThrow('No cited value "methane/r.CC"');
   });

@@ -1,7 +1,8 @@
 // Build-time access to the course model. A content error fails the site build.
 import { buildContent, type Course, type CourseModel, type Lesson, type Step, type Unit } from "@astratron/content";
-import { checkManifests, sceneCatalog } from "@astratron/scenes/check";
+import { checkManifests, checkWatchManifests, sceneCatalog } from "@astratron/scenes/check";
 import { sceneManifests } from "@astratron/scenes/manifests";
+import { watchSceneManifests } from "@astratron/scenes/watch";
 import { marked } from "marked";
 import { drawView } from "./structures.ts";
 import { setSize } from "./practice.ts";
@@ -14,8 +15,8 @@ let cached: CourseModel | undefined;
 export function courseModel(): CourseModel {
   if (cached) return cached;
   // Every Scene manifest must be complete, and every Step's Scene is checked against the registry.
-  const sceneErrors = checkManifests(sceneManifests);
-  const { model, errors } = buildContent(__CONTENT_ROOT__, { scenes: sceneCatalog(sceneManifests) });
+  const sceneErrors = [...checkManifests(sceneManifests), ...checkWatchManifests(watchSceneManifests, sceneManifests)];
+  const { model, errors } = buildContent(__CONTENT_ROOT__, { scenes: sceneCatalog(sceneManifests, watchSceneManifests) });
   if (!model || sceneErrors.length) throw new Error(`Content build failed:\n  ${[...sceneErrors, ...errors].join("\n  ")}`);
   return (cached = model);
 }
