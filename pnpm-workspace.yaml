@@ -4,3 +4,6 @@ packages:
   - video
   - content
   - pipelines
+allowBuilds:
+  esbuild: true
+  workerd: true
