@@ -7,6 +7,7 @@
 //   <subject>/courses/<course>.yaml   one course manifest per Course; file name is its slug
 //   <subject>/lessons/<lesson id>.yaml
 //   <subject>/problems/<problem id>.yaml
+//   <subject>/data/<data id>.yaml|.json  cited data (ADR 0002); see data-load.ts
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 import { parse } from "yaml";
@@ -14,6 +15,8 @@ import type { z } from "zod";
 import { courseFile, lessonFile, problemFile, subjectFile, type LessonFile, type ProblemFile } from "./schema.ts";
 import type { BuildResult, Course, Lesson, Step, Subject } from "./model.ts";
 import { checkInteraction, checkLessonShape } from "./shape.ts";
+import { citeIn, type Cited, type CitedData } from "./data.ts";
+import { dataFile, resolveDataFile } from "./data-load.ts";
 
 export function buildContent(root: string): BuildResult {
   const errors: string[] = [];
@@ -52,10 +55,28 @@ export function buildContent(root: string): BuildResult {
     return out;
   }
 
+  /** Loads and checks a Subject's cited data files. */
+  function loadData(dir: string): CitedData {
+    const data: CitedData = {};
+    for (const rel of yamlFiles(root, dir, [".yaml", ".json"])) {
+      const file = load(rel, dataFile);
+      if (!file) continue;
+      if (file.id !== basename(rel).replace(/\.(yaml|json)$/, "")) {
+        errors.push(`${rel}: id "${file.id}" must match the file name`);
+        continue;
+      }
+      const { set, errors: broken } = resolveDataFile(file);
+      for (const message of broken) errors.push(`${rel}: ${message}`);
+      data[file.id] = set;
+    }
+    return data;
+  }
+
   const subjects: Subject[] = [];
   for (const slug of subdirs(root)) {
     if (!existsSync(join(root, slug, "subject.yaml"))) continue;
     const subject = load(`${slug}/subject.yaml`, subjectFile);
+    const data = loadData(`${slug}/data`);
     const lessons = loadDir<LessonFile>(`${slug}/lessons`, lessonFile);
     const problems = loadDir<ProblemFile>(`${slug}/problems`, problemFile);
 
@@ -67,6 +88,7 @@ export function buildContent(root: string): BuildResult {
       if (problem)
         for (const message of checkInteraction(problem)) errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
     }
+    const problemCitations = citeNumbers(slug, data, lessons, problems, errors);
 
     const courses: Course[] = [];
     for (const rel of yamlFiles(root, `${slug}/courses`)) {
@@ -85,12 +107,17 @@ export function buildContent(root: string): BuildResult {
               return [];
             }
             const url = `/${slug}/${courseSlug}/${unit.slug}/${lesson.slug}`;
-            return [resolveLesson(lesson, url, problems, `${slug}/lessons/${lesson.id}.yaml`, errors)];
+            const resolved = resolveLesson(lesson, url, problems, `${slug}/lessons/${lesson.id}.yaml`, errors);
+            for (const step of resolved.steps) {
+              const cited = "problemId" in step && step.problemId && problemCitations.get(step.problemId);
+              if (cited) step.citations = cited;
+            }
+            return [resolved];
           }),
         })),
       });
     }
-    if (subject) subjects.push({ slug, title: subject.title, courses });
+    if (subject) subjects.push({ slug, title: subject.title, courses, data });
   }
 
   return errors.length ? { errors } : { model: { subjects }, errors };
@@ -120,16 +147,53 @@ function resolveLesson(
   return { ...lesson, url, steps };
 }
 
+/**
+ * Swaps every `{{file/key}}` in Lesson Steps and Problems for its cited
+ * display value (ADR 0002), in place in the loaded maps. A Step keeps what it
+ * cited as `citations`; Problems' citations are returned by id for their
+ * Check Steps.
+ */
+function citeNumbers(
+  slug: string,
+  data: CitedData,
+  lessons: Map<string, LessonFile | undefined>,
+  problems: Map<string, ProblemFile | undefined>,
+  errors: string[],
+): Map<string, Cited[]> {
+  const missing = (where: string, refs: string[]) => {
+    for (const ref of refs) errors.push(`${where}cites "${ref}", which is not in the cited data`);
+  };
+  for (const [name, lesson] of lessons) {
+    if (!lesson) continue;
+    const steps = lesson.steps.map((step) => {
+      if (step.type === "check") return step;
+      const { item, cited, missing: refs } = citeIn(step, data);
+      missing(`${slug}/lessons/${name}.yaml: step ${step.id}: `, refs);
+      return cited.length ? { ...item, citations: cited } : item;
+    });
+    lessons.set(name, { ...lesson, steps });
+  }
+  const byProblem = new Map<string, Cited[]>();
+  for (const [name, problem] of problems) {
+    if (!problem) continue;
+    const { item, cited, missing: refs } = citeIn(problem, data);
+    missing(`${slug}/problems/${name}.yaml: `, refs);
+    problems.set(name, item);
+    if (cited.length) byProblem.set(name, cited);
+  }
+  return byProblem;
+}
+
 function subdirs(dir: string): string[] {
   return readdirSync(dir)
     .filter((name) => !name.startsWith(".") && statSync(join(dir, name)).isDirectory())
     .sort();
 }
 
-function yamlFiles(root: string, dir: string): string[] {
+function yamlFiles(root: string, dir: string, extensions = [".yaml"]): string[] {
   if (!existsSync(join(root, dir))) return [];
   return readdirSync(join(root, dir))
-    .filter((name) => name.endsWith(".yaml"))
+    .filter((name) => extensions.some((ext) => name.endsWith(ext)))
     .sort()
     .map((name) => `${dir}/${name}`);
 }
