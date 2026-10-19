@@ -1,0 +1,11 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+
+id: hydroxide-proton
+style: full
+smiles: "[OH-:1].[H+:2]"
+atoms:
+  - { id: a1, el: O, x: 0, y: 0, charge: -1, lp: 3 }
+  - { id: a2, el: H, x: -2.4, y: -0.75, charge: 1 }
+  - { id: a3, el: H, x: 1.299, y: -0.75 }
+bonds:
+  - { id: b1, a: a1, b: a3, order: 1 }

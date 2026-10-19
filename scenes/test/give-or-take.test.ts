@@ -54,7 +54,7 @@ describe("give-or-take screen-reader text", () => {
   });
 
   it("still describes a stop without the cited values (the manifest check)", () => {
-    expect(giveOrTake.describe({ atom: "C" }, 0)).toMatch(/^Carbon/);
+    expect(giveOrTake.describe({ atom: "C" }, 0, {})).toMatch(/^Carbon/);
   });
 });
 

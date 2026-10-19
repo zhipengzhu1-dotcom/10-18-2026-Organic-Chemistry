@@ -5,7 +5,7 @@
 // Navigation: back is allowed, answered Steps stay locked, Continue never passes
 // an unanswered Step, and the Lesson is done on reaching Wrap. Every Screen
 // carries the Lesson's progress (answers by Step id), from which it resumes.
-import type { DrawArrowsStep, GoalStep, GradedStep, HintRule, Lesson, Push, SceneValue, Step, Structure } from "@astratron/content";
+import type { DrawArrowsStep, GoalStep, GradedStep, HintRule, Lesson, Push, RankHint, SceneValue, Step, Structure } from "@astratron/content";
 import { arrowsAct, arrowsStart, arrowsView, type ArrowsState, type Flag } from "@astratron/content/arrows";
 
 export type Feedback =
@@ -244,7 +244,13 @@ function judge(step: GradedStep, answer: Answer): { right: boolean; hint?: { tex
     case "rank": {
       if (!("order" in answer)) return undefined;
       const { order } = answer;
-      return { right: sameOrder(order, step.answer), hint: step.hints?.find((h) => !h.match || sameOrder(h.match, order)) };
+      const at = (id: string) => order.indexOf(id);
+      const fits = (h: RankHint) =>
+        (!h.match || sameOrder(h.match, order)) &&
+        (!h.notFirst || at(h.notFirst) !== 0) &&
+        (!h.notLast || at(h.notLast) !== order.length - 1) &&
+        (!h.before || at(h.before[0]) < at(h.before[1]));
+      return { right: sameOrder(order, step.answer), hint: step.hints?.find(fits) };
     }
     case "manipulate": {
       if (!("setting" in answer)) return undefined;

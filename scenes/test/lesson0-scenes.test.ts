@@ -42,7 +42,7 @@ describe("crust-vs-body", () => {
 
 describe("water-push", () => {
   it("speaks the spec's screen-reader text", () => {
-    expect(waterPush.describe({}, 0)).toBe(
+    expect(waterPush.describe({}, 0, {})).toBe(
       "Hydroxide, an oxygen with three lone pairs and one bond to hydrogen, and a hydrogen ion. One lone pair on oxygen swings over to the hydrogen ion and becomes a bond. The result is water: oxygen shares two pairs and keeps two lone pairs, so its shell holds 8. Each hydrogen holds 2.",
     );
   });
@@ -59,7 +59,7 @@ describe("water-push", () => {
 
 describe("outer-electrons", () => {
   it("speaks the spec's screen-reader text", () => {
-    expect(outerElectrons.describe({}, 0)).toBe(
+    expect(outerElectrons.describe({}, 0, {})).toBe(
       "Hydrogen has 1 outer electron, carbon 4, nitrogen 5, oxygen 6, fluorine 7. Neon has 8, a full shell, and reacts with almost nothing.",
     );
   });

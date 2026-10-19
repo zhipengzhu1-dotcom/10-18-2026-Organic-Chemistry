@@ -230,7 +230,7 @@ describe("Scenes on reveal and in Problems (#78)", () => {
 
   it("checks reveal Scenes and Problem Scenes against the registry", () => {
     expect(buildWith({ revealScene: "nope" }, { scene: { id: "twist", state: { spin: 1 } } }).errors).toEqual([
-      `${L}: step s03: Scene "nope" is not in the Scene registry`,
+      `${L}: step s03: revealScene: Scene "nope" is not in the Scene registry`,
       `chem/problems/p1.yaml: Scene "twist" has no settable state "spin"`,
     ]);
   });

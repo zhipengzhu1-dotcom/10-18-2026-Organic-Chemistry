@@ -184,13 +184,6 @@ describe("Tap-to-identify Steps", () => {
     ]);
   });
 
-  it("may draw a second structure to compare against, untappable (#78)", () => {
-    const { lesson, errors } = build(treeWith({ 5: tapStep({ compare: "methoxide" }) }));
-    expect(errors).toEqual([]);
-    expect(lesson!.steps[5]).toMatchObject({ compare: { hide: [], structure: { id: "methoxide" } } });
-    expect(build(treeWith({ 5: tapStep({ compare: "nope" }) })).errors).toEqual([`${L}: step s06: structure "nope" not found`]);
-  });
-
   it("carries its tap-only cue", () => {
     const cue = { idle: "Just tap, no pushing on this Step.", drag: "No pushing yet: tap each source." };
     const step = build(treeWith({ 5: tapStep({ tapOnly: cue }) })).lesson!.steps[5];

@@ -1,1 +1,9 @@
 title: Organic Chemistry
+# The homepage Push hero (#73): the OH⁻ lone pair onto H⁺ makes water.
+hero:
+  start: hydroxide-proton
+  results: [water]
+  answer:
+    - { from: a1, to: a2 }
+  hints:
+    - text: "Almost: let go on top of H⁺, the dashed circle."

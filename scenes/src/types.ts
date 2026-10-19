@@ -72,11 +72,8 @@ export interface SceneManifest<S extends SceneState = SceneState> {
   title: string;
   /** Settable states: what a Step, a slider or the video timeline can set. May be empty. */
   states: { [K in keyof S]: SceneStateSpec };
-  /**
-   * Screen-reader text for what the Scene shows at this state and time. Never empty. `cited` is
-   * the Scene's cited values (absent in the manifest check, so the text must not need them).
-   */
-  describe: (state: S, t: number, cited?: Record<string, Cited>) => string;
+  /** Screen-reader text for what the Scene shows at this state and time (its cited values passed in, as to the Scene). Never empty. */
+  describe: (state: S, t: number, cited: Record<string, Cited>) => string;
   /** Interactive Scenes only: the rules for moving their handles (goal-state Manipulate Steps). */
   interact?: SceneInteraction<S>;
   /** What the Scene does under reduced motion, in a sentence (it always opens paused on its poster frame). */

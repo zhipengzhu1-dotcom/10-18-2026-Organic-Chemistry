@@ -8,7 +8,17 @@
 
 export type Tier = "experimental" | "computed";
 export type SourceKind = Tier | "reference";
-export type Quantity = "bond-length" | "angle" | "dihedral" | "radius" | "colour" | "energy" | "pka" | "count" | "fraction";
+export type Quantity =
+  | "bond-length"
+  | "angle"
+  | "dihedral"
+  | "radius"
+  | "colour"
+  | "energy"
+  | "pka"
+  | "count"
+  | "electronegativity"
+  | "fraction";
 
 /** Quantities that make up a molecule's geometry; a molecule never mixes tiers across them. */
 export const geometryQuantities: readonly Quantity[] = ["bond-length", "angle", "dihedral"];
@@ -49,7 +59,7 @@ export interface Cited {
   licence: string;
   /** For a molecule's values: its geometry tier. */
   tier?: Tier;
-  /** What a Student sees: bond lengths and radii to 2 decimals in Å, angles to 1 decimal. */
+  /** What a Student sees: bond lengths and radii to 2 decimals in Å, angles to 1 decimal, electronegativities to 2 decimals. */
   display: string;
   /** The full stored value with its unit, for the Source note. */
   full: string;
@@ -195,10 +205,14 @@ function clauses(values: Cited[]): string {
     .join(" ");
 }
 
+/** Groups by the source's id and citation, not object identity: values reach browser islands as JSON copies. */
 function bySource(values: Cited[]): [Source, Cited[]][] {
-  const groups = new Map<Source, Cited[]>();
-  for (const v of values) (groups.get(v.source) ?? groups.set(v.source, []).get(v.source)!).push(v);
-  return [...groups];
+  const groups = new Map<string, [Source, Cited[]]>();
+  for (const v of values) {
+    const key = `${v.source.id}\n${v.source.citation}`;
+    (groups.get(key) ?? groups.set(key, [v.source, []]).get(key)!)[1].push(v);
+  }
+  return [...groups.values()];
 }
 
 function named(values: Cited[]): string {
@@ -216,6 +230,7 @@ export function format(
   const withUnit = (v: string) => (!unit ? v : unit === "°" || unit === "%" ? `${v}${unit}` : `${v} ${unit}`);
   if (typeof value === "string") return { display: withUnit(value), full: withUnit(value) };
   const decimals =
-    places ?? (quantity === "bond-length" || quantity === "radius" ? 2 : quantity === "angle" || quantity === "dihedral" ? 1 : undefined);
+    places ??
+    (quantity === "bond-length" || quantity === "radius" || quantity === "electronegativity" ? 2 : quantity === "angle" || quantity === "dihedral" ? 1 : undefined);
   return { display: withUnit(decimals === undefined ? String(value) : value.toFixed(decimals)), full: withUnit(String(value)) };
 }

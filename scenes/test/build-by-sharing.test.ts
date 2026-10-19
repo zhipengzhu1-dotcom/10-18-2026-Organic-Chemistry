@@ -55,7 +55,7 @@ describe("build-by-sharing rules", () => {
 });
 
 describe("build-by-sharing screen-reader text", () => {
-  const say = (state: SharingState) => buildBySharing.describe(state, 0);
+  const say = (state: SharingState) => buildBySharing.describe(state, 0, {});
 
   it("counts the electrons around carbon live", () => {
     expect(say(start)).toBe(

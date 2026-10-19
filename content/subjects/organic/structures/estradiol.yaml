@@ -58,5 +58,3 @@ bonds:
   - { id: b24, a: c8, b: h8, order: 1, stereo: wedge }
   - { id: b25, a: c9, b: h9, order: 1, stereo: hash }
   - { id: b26, a: c14, b: h14, order: 1, stereo: hash }
-captions:
-  - { text: Estradiol, x: 0.15, y: -4.125 }

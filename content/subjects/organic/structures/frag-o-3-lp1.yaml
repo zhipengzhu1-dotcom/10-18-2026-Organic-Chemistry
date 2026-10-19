@@ -1,0 +1,13 @@
+# Lesson 1 (#79): a single atom with loose bond ends (`*`), as in MIT 5.12 PS1 Q1. Drawn by hand.
+
+id: frag-o-3-lp1
+style: full
+atoms:
+  - { id: a1, el: "O", x: 0, y: 0, charge: 1, lp: 1 }
+  - { id: a2, el: "*", x: 0, y: -1.5 }
+  - { id: a3, el: "*", x: 1.299, y: 0.75 }
+  - { id: a4, el: "*", x: -1.299, y: 0.75 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a1, b: a3, order: 1 }
+  - { id: b3, a: a1, b: a4, order: 1 }
