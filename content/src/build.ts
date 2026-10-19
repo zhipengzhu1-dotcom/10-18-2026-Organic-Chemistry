@@ -32,13 +32,26 @@ export const PRACTICE_SLUG = "practice";
 import { checkInteraction, checkLessonShape } from "./shape.ts";
 import { citeIn, type Cited, type CitedData } from "./data.ts";
 import { dataFile, resolveDataFile } from "./data-load.ts";
+import type { SceneCatalog, SceneUse } from "./model.ts";
+import { checkStepScene, resolveSceneUse, type SceneUseFile } from "./scenes.ts";
 import { checkStructure, resolveOptions, resolveTap } from "./structures.ts";
 
 /** What a graded Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
 type StructureFields = { options: Option[] } | { structure: StructureView; targets: TapTarget[] };
 type Structured = Map<string, StructureFields | undefined>;
 
-export function buildContent(root: string): BuildResult {
+export interface BuildOptions {
+  /**
+   * The registered Scenes (from the scenes module's manifests). With it, every
+   * Scene a Step uses is checked (id, settable states, cited data, a
+   * Manipulate Step's control and answer) and resolved; without it, Scene ids
+   * go unchecked and states get no defaults. The site build and
+   * `pnpm content:build` always pass it.
+   */
+  scenes?: SceneCatalog;
+}
+
+export function buildContent(root: string, options: BuildOptions = {}): BuildResult {
   const errors: string[] = [];
 
   function load<T>(rel: string, schema: z.ZodType<T>): T | undefined {
@@ -111,6 +124,11 @@ export function buildContent(root: string): BuildResult {
         ...(frozen ? checkFrozenIds(lesson, frozen) : []),
         ...checkDeletedSteps(lesson),
         ...(lesson.slug === PRACTICE_SLUG ? [`slug "${PRACTICE_SLUG}" is reserved for the Practice Set page`] : []),
+        ...(options.scenes
+          ? lesson.steps.flatMap((step) =>
+              checkStepScene(step, options.scenes!, data).map((message) => `step ${step.id}: ${message}`),
+            )
+          : []),
       ];
       for (const message of messages) errors.push(`${slug}/lessons/${lesson.id}.yaml: ${message}`);
     }
@@ -173,7 +191,8 @@ export function buildContent(root: string): BuildResult {
               }
               const number = lesson.onRamp ? 0 : ++coreNumber;
               const lessonRel = `${slug}/lessons/${lesson.id}.yaml`;
-              const resolved = resolveLesson(lesson, `${url}/${lesson.slug}`, number, problems, structured, lessonRel, errors);
+              const scene = (use: SceneUseFile) => resolveSceneUse(use, options.scenes, data);
+              const resolved = resolveLesson(lesson, `${url}/${lesson.slug}`, number, problems, structured, scene, lessonRel, errors);
               for (const step of resolved.steps) {
                 const cited = "problemId" in step && step.problemId && problemCitations.get(step.problemId);
                 if (cited) step.citations = cited;
@@ -198,11 +217,20 @@ function resolveLesson(
   number: number,
   problems: Map<string, ProblemFile | undefined>,
   structured: Structured,
+  scene: (use: SceneUseFile) => SceneUse,
   rel: string,
   errors: string[],
 ): Lesson {
+  /** Resolves the Step's Scene; the Scene's cited numbers join the Step's Source note. */
+  const withScene = (step: Step): Step => {
+    if (!step.scene) return step;
+    const use = scene(step.scene);
+    const own = step.citations ?? [];
+    const extra = Object.values(use.cited).filter((c) => !own.some((o) => o.ref === c.ref));
+    return { ...step, scene: use, ...(own.length + extra.length ? { citations: [...own, ...extra] } : {}) } as Step;
+  };
   const steps: Step[] = lesson.steps.flatMap((step): Step[] => {
-    if (step.type !== "check") return withStructures(step, `${lesson.id}#${step.id}`, structured);
+    if (step.type !== "check") return withStructures(step, `${lesson.id}#${step.id}`, structured).map(withScene);
     const problem = problems.get(step.problem);
     if (!problem) {
       if (!problems.has(step.problem)) errors.push(`${rel}: step ${step.id}: Check Problem "${step.problem}" not found`);

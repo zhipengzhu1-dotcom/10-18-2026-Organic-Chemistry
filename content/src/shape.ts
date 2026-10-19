@@ -1,6 +1,7 @@
 // Lesson shape rules and interactive-Step rules (GLOSSARY: Lesson;
 // docs/specs/lesson-spec-template.md, "Shape checks").
 import type { LessonFile, ProblemFile } from "./schema.ts";
+import { sameValue } from "./scenes.ts";
 
 type GradedStepFile = Exclude<LessonFile["steps"][number], { type: "explain" } | { type: "check" }>;
 /** A graded Step or a Problem: anything the Student answers. */
@@ -97,6 +98,11 @@ function answerRules(item: Interaction): string[] {
         errors.push("a Hint's match must list every item exactly once");
       break;
     }
+    case "manipulate":
+      // Values are checked against the Scene's settable states in scenes.ts.
+      if (item.hints?.some((h) => h.match?.some((v) => sameValue(v, item.answer))))
+        errors.push(`a Hint matches the answer ${item.answer}`);
+      break;
     // tap-to-identify: answer and Hint ids are checked against the structure's targets (structures.ts).
   }
   return errors;
