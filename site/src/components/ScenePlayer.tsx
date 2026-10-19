@@ -15,6 +15,8 @@ interface Props {
   /** True in Manipulate Steps only. */
   loop?: boolean;
   aspect?: Aspect;
+  /** A still picture: the poster frame, no playback controls. */
+  still?: boolean;
   /** Controls drawn under the Scene (a Manipulate Step's slider). */
   children?: ReactNode;
 }
@@ -34,7 +36,7 @@ export function useReducedMotion(): boolean | undefined {
 
 type Action = ClockAction | { type: "open"; reducedMotion: boolean };
 
-export default function ScenePlayer({ sceneId, state, cited, loop = false, aspect = "16:9", children }: Props) {
+export default function ScenePlayer({ sceneId, state, cited, loop = false, still = false, aspect = "16:9", children }: Props) {
   const { manifest, Component } = sceneRegistry[sceneId];
   const stateKey = JSON.stringify(state);
   return (
@@ -43,7 +45,8 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, aspec
       posterT={manifest.poster.t}
       loop={loop}
       aspect={aspect}
-      describe={(t) => manifest.describe(state, t)}
+      still={still}
+      describe={(t) => manifest.describe(state, t, cited)}
       announceKey={stateKey}
       render={(t, reducedMotion) => (
         <Component t={t} state={state} aspect={aspect} reducedMotion={reducedMotion} cited={cited} />
@@ -66,11 +69,13 @@ interface FrameProps {
   /** When this changes after entry, the description is read aloud (a Student changed the state). */
   announceKey?: string;
   render: (t: number, reducedMotion: boolean) => ReactNode;
+  /** A still picture: rests on the poster, drawn as under reduced motion, with no controls. */
+  still?: boolean;
   children?: ReactNode;
 }
 
 /** A frame driven by the site clock: autoplays once on entry, or rests on its poster under reduced motion (Play starts it). */
-export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9", describe, announceKey = "", render, children }: FrameProps) {
+export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9", describe, announceKey = "", render, still = false, children }: FrameProps) {
   const config: ClockConfig = { duration, loop, posterT };
   const reducedMotion = useReducedMotion();
   // Until the island knows the motion setting (and on the server) the frame rests on its poster.
@@ -80,8 +85,8 @@ export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9",
   );
 
   useEffect(() => {
-    if (reducedMotion !== undefined) dispatch({ type: "open", reducedMotion });
-  }, [reducedMotion]);
+    if (reducedMotion !== undefined) dispatch({ type: "open", reducedMotion: reducedMotion || still });
+  }, [reducedMotion, still]);
 
   // The site's own clock: animation-frame ticks while playing.
   useEffect(() => {
@@ -114,8 +119,9 @@ export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9",
         aria-label={description}
         style={{ aspectRatio: `${w} / ${h}` }}
       >
-        {render(clock.t, reducedMotion ?? false)}
+        {render(clock.t, still || (reducedMotion ?? false))}
       </div>
+      {!still && (
       <div className="scene-controls">
         <button
           type="button"
@@ -140,6 +146,7 @@ export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9",
           onChange={(e) => dispatch({ type: "seek", t: Number(e.target.value) })}
         />
       </div>
+      )}
       {children}
       <p aria-live="polite" className="sr">
         {said}

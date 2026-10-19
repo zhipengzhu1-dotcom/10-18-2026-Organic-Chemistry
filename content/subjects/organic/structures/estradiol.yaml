@@ -4,7 +4,6 @@ id: estradiol
 style: line-angle
 smiles: "C[C@]12CC[C@H]3[C@@H](CCc4cc(O)ccc34)[C@@H]1CC[C@@H]2O"
 source: PubChem CID 5757
-label: "Estradiol, line-angle drawing: four fused rings, the left ring flat with alternating double bonds and an OH, an OH top right, a methyl wedge and three stereo H's at the ring fusions."
 atoms:
   - { id: a1, el: C, x: 5.794, y: -3.907 }
   - { id: a2, el: C, x: 5.482, y: -2.44 }

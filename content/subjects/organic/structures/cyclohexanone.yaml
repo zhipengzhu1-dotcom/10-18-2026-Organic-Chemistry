@@ -20,4 +20,3 @@ bonds:
   - { id: b6, a: a6, b: a7, order: 1 }
   - { id: b7, a: a7, b: a2, order: 1 }
 source: PubChem CID 7967
-label: "Cyclohexanone, line-angle drawing: a hexagon of lines with a double-bonded O on the top corner; O has two lone pairs."

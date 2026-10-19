@@ -16,7 +16,8 @@ steps:
     type: multiple-choice
     prediction: true
     prompt: Lesson 0's estradiol again. The drawing shows only a handful of its hydrogens. How many does the molecule really have?
-    structure: estradiol
+    figures:
+      - { structure: estradiol, alt: "Estradiol, line-angle drawing: four fused rings, the left ring flat with alternating double bonds and an OH, an OH top right, a methyl wedge and three stereo H's at the ring fusions." }
     options:
       - { id: a, text: just the ones you can see }
       - { id: b, text: about 10 }
@@ -24,7 +25,7 @@ steps:
       - { id: d, text: about 50 }
     answer: [c]
     reveal: "**{{h-counts/estradiol}}.** The drawing leaves most of them out, on purpose: every one can be worked out from the corners. By the end of this Lesson you'll find them all without seeing them."
-    scene: { id: h-fill, state: { molecule: estradiol }, on: answered }
+    revealScene: { id: h-fill, state: { molecule: estradiol } }
     sourceNote: "Estradiol, PubChem CID 5757 (formula C₁₈H₂₄O₂). Full drawing beside line drawing after MIT OCW 5.12, Lecture 1 p. 12, Berkowski, Spring 2005, CC BY-NC-SA 4.0."
 
   - id: s02
@@ -38,7 +39,8 @@ steps:
     phase: build
     type: multiple-choice
     prompt: This is formaldehyde as a Lewis structure. Which card is its Kekulé structure?
-    structure: formaldehyde-lewis
+    figures:
+      - { structure: formaldehyde-lewis, alt: "Formaldehyde as a Lewis structure: two H's each share a pair of dots with C; four dots between C and O; two more pairs of dots on O." }
     options:
       - { id: a, structure: formaldehyde-kekule, text: "C double-bonded to O; O has two lone pairs" }
       - { id: b, structure: formaldehyde-single-bond, text: "C single-bonded to O; O has two lone pairs" }
@@ -66,6 +68,7 @@ steps:
     type: tap-to-identify
     prompt: Cyclohexanone, as a line-angle drawing. Tap every carbon, then press Check.
     structure: cyclohexanone
+    alt: "Cyclohexanone, line-angle drawing: a hexagon of lines with a double-bonded O on the top corner; O has two lone pairs."
     tappable: { atoms: all }
     answer: [a2, a3, a4, a5, a6, a7]
     correct: Six corners, six carbons, including the one under the C=O.
@@ -81,7 +84,8 @@ steps:
     phase: build
     type: numeric
     prompt: Same molecule. None of its hydrogens are drawn. How many H's does cyclohexanone have in all?
-    structure: cyclohexanone
+    figures:
+      - { structure: cyclohexanone, alt: "Cyclohexanone, line-angle drawing: a hexagon of lines with a double-bonded O on the top corner; O has two lone pairs." }
     unitSymbol: H atoms
     answer: 10
     tolerance: 0
@@ -93,7 +97,7 @@ steps:
       - { match: 11, text: "Close. The C=O carbon has no H's, and each other corner has exactly two." }
       - { text: "For each corner: 4 minus the bonds you can see is the number of H's. Then add them up." }
     reveal: "{{h-counts/cyclohexanone}} H's: two on each of the five CH₂ corners, none on the C=O carbon."
-    scene: { id: h-fill, state: { molecule: cyclohexanone }, on: answered }
+    revealScene: { id: h-fill, state: { molecule: cyclohexanone } }
     sourceNote: "Cyclohexanone, PubChem CID 7967 (formula C₆H₁₀O)."
 
   - id: s07
@@ -107,7 +111,8 @@ steps:
     phase: build
     type: multiple-choice
     prompt: Here's a Kekulé structure. Which card is the same molecule as a line-angle drawing?
-    structure: acetone-kekule
+    figures:
+      - { structure: acetone-kekule, alt: "Acetone as a Kekulé structure: a central C double-bonded to O, single-bonded to two CH₃ carbons with all six H's drawn; O has two lone pairs." }
     options:
       - { id: a, structure: acetone, text: "three carbons in a V; oxygen double-bonded to the middle carbon" }
       - { id: b, structure: propanal, text: "three carbons in a zigzag; oxygen double-bonded to the end carbon" }
@@ -146,8 +151,8 @@ steps:
     phase: build
     type: numeric
     prompt: "Acetamide, drawn the way most books do: no lone pairs. How many lone pairs does it have in all?"
-    structure: acetamide
-    hide: [lone-pairs]
+    figures:
+      - { structure: acetamide, hide: [lone-pairs], alt: "Acetamide, line-angle drawing: a line to a corner with a double-bonded O up and NH₂ down.", caption: "Lone pairs hidden" }
     unitSymbol: lone pairs
     answer: 3
     tolerance: 0
@@ -159,7 +164,7 @@ steps:
       - { match: 5, text: "Carbons with four bonds have no lone pairs. Only O and N carry them here." }
       - { text: "Use the patterns: O with 2 bonds → 2 lone pairs, N with 3 bonds → 1." }
     reveal: "3 lone pairs: 2 on the O, 1 on the N."
-    scene: { id: lone-pair-fill, state: { molecule: acetamide }, on: answered }
+    revealScene: { id: lone-pair-fill, state: { molecule: acetamide } }
     sourceNote: Acetamide, PubChem CID 178.
 
   - { id: s11, phase: check, problem: u1-draw-n2-kekule }
@@ -171,4 +176,4 @@ steps:
     phase: wrap
     type: explain
     text: "**Chemists draw only what you can't work out.**<br>Lewis: every electron a dot. Kekulé: every shared pair a line.<br>Line-angle: every end and corner is a carbon with enough H's to make 4 bonds; every other atom is written out.<br>Lone pairs follow the pattern: O 2, N 1, halogen 3."
-    scene: { id: h-fill, state: { molecule: estradiol, show: final } }
+    scene: { id: h-fill, state: { molecule: estradiol, show: final }, still: true }

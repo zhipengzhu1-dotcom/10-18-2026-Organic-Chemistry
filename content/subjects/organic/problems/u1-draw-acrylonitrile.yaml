@@ -5,10 +5,11 @@ lesson: u1-l02
 difficulty: 2
 status: approved
 source: Original
-credit: "Acrylonitrile, PubChem CID 7855 (formula C₃H₃N)."
+sourceNote: "Acrylonitrile, PubChem CID 7855 (formula C₃H₃N)."
 type: multiple-choice
 prompt: Acrylonitrile, used to make acrylic fibres, as a line-angle drawing. Which card is its Kekulé structure?
-structure: acrylonitrile
+figures:
+  - { structure: acrylonitrile, alt: "Acrylonitrile, line-angle drawing: a double line up to a corner, then one line into a straight triple line ending in N with one lone pair." }
 options:
   - { id: a, structure: acrylonitrile-kekule, text: "CH₂ double-bonded to CH, single-bonded to C, triple-bonded to N; one lone pair on N" }
   - { id: b, structure: acrylonitrile-no-lone-pair, text: "same bonds; no lone pair on N" }

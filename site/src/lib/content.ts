@@ -1,5 +1,5 @@
 // Build-time access to the course model. A content error fails the site build.
-import { buildContent, type Course, type CourseModel, type Lesson, type Step, type Unit } from "@astratron/content";
+import { buildContent, type Course, type CourseModel, type Figure, type Lesson, type Step, type Unit } from "@astratron/content";
 import { checkManifests, checkWatchManifests, sceneCatalog } from "@astratron/scenes/check";
 import { sceneManifests } from "@astratron/scenes/manifests";
 import { watchSceneManifests } from "@astratron/scenes/watch";
@@ -133,11 +133,29 @@ export function renderLesson(lesson: Lesson): Lesson {
 
 /** One Step (or a Practice Set Problem) with its Markdown turned into HTML and its structures pre-rendered. */
 export function renderStep(s: Step): Step {
-  const rendered = renderBody(s);
-  return s.sourceNote ? { ...rendered, sourceNote: md(s.sourceNote) } : rendered;
+  return renderVisuals(renderText(s));
 }
 
-function renderBody(s: Step): Step {
+const renderFigure = (f: Figure): Figure => ({ ...f, view: drawView(f.view), ...(f.caption ? { caption: md(f.caption) } : {}) });
+
+/** A Step's figures and aside table drawn, their captions and its written Source note rendered. */
+function renderVisuals(s: Step): Step {
+  const out = { ...s };
+  if (s.figures) out.figures = s.figures.map(renderFigure);
+  if (s.sourceNote) out.sourceNote = md(s.sourceNote);
+  if (s.aside?.table)
+    out.aside = {
+      ...s.aside,
+      table: {
+        columns: s.aside.table.columns.map(md),
+        ...(s.aside.table.caption ? { caption: md(s.aside.table.caption) } : {}),
+        rows: s.aside.table.rows.map((r) => ({ head: md(r.head), cells: r.cells.map((c) => c && renderFigure(c)) })),
+      },
+    };
+  return out;
+}
+
+function renderText(s: Step): Step {
   if (s.type === "explain") return { ...s, text: md(s.text) };
   const shared = { prompt: md(s.prompt), correct: s.correct && md(s.correct), reveal: md(s.reveal) };
   const choices = (list: { id: string; text: string }[]) => list.map((o) => ({ ...o, text: md(o.text) }));
@@ -149,7 +167,6 @@ function renderBody(s: Step): Step {
         // A structure card's text is its screen-reader label: kept plain; its drawing is pre-rendered SVG.
         options: s.options.map((o) => (o.structure ? { ...o, structure: drawView(o.structure) } : { ...o, text: md(o.text) })),
         hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
-        ...(s.structure && { structure: drawView(s.structure) }),
       };
     case "tap-to-identify":
       return {
@@ -159,12 +176,7 @@ function renderBody(s: Step): Step {
         hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
       };
     case "numeric":
-      return {
-        ...s,
-        ...shared,
-        hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
-        ...(s.structure && { structure: drawView(s.structure) }),
-      };
+      return { ...s, ...shared, hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
     case "rank":
       return { ...s, ...shared, items: choices(s.items), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
     case "manipulate":

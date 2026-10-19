@@ -49,7 +49,7 @@ describe("h-fill", () => {
   });
 
   it("describes the count for a screen reader", () => {
-    expect(sceneRegistry["h-fill"].manifest.describe({ molecule: "limonene", show: "fill" }, 0)).toContain("ends at 16");
+    expect(sceneRegistry["h-fill"].manifest.describe({ molecule: "limonene", show: "fill" }, 0, {})).toContain("ends at 16");
   });
 
   for (const aspect of ["16:9", "9:16"] as Aspect[])

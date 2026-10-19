@@ -1,7 +1,7 @@
 // Structures in the content build: checking structure files, resolving
 // structure cards and Tap-to-identify targets, and writing the screen-reader
 // label of every tappable atom and bond.
-import type { Hidden, Option, Structure, StructureAtom, StructureView, TapTarget } from "./model.ts";
+import type { Figure, Hidden, Option, Structure, StructureAtom, StructureView, TapTarget } from "./model.ts";
 import type { ProblemFile, StructureFile } from "./schema.ts";
 import { hintIds } from "./shape.ts";
 import { expectedLonePairs, hydrogenCount } from "./valence.ts";
@@ -19,23 +19,11 @@ import {
 } from "./arrows.ts";
 
 type TapFile = Extract<ProblemFile, { type: "tap-to-identify" }>;
-type TapFields = Pick<TapFile, "structure" | "hide" | "tappable" | "answer" | "hints">;
+type TapFields = Pick<TapFile, "structure" | "hide" | "outline" | "tappable" | "answer" | "hints">;
+type FigureFile = NonNullable<TapFile["figures"]>[number];
 type OptionFile = Extract<ProblemFile, { type: "multiple-choice" }>["options"][number];
 
 /** Internal consistency of one structure file. */
-export function checkStructure(file: StructureFile): string[] {
-  const errors: string[] = [];
-  const seen = new Set<string>();
-  for (const { id } of [...file.atoms, ...file.bonds]) {
-    if (seen.has(id)) errors.push(`id "${id}" is used twice`);
-    seen.add(id);
-  }
-  const atoms = new Set(file.atoms.map((a) => a.id));
-  for (const b of file.bonds)
-    for (const end of [b.a, b.b]) if (!atoms.has(end)) errors.push(`bond ${b.id} joins "${end}", which is not an atom`);
-  return errors;
-}
-
 /** The PubChem compound a structure file names in its `source` ("PubChem CID 7967"), if any. */
 export const pubchemCid = (s: Pick<Structure, "source">): number | undefined => {
   const m = s.source?.match(/PubChem CID (\d+)/);
@@ -49,11 +37,11 @@ const countIn = (formula: string, el: string) =>
 /**
  * A drawing that names a PubChem compound must stand for that compound's H's
  * (counted from the cached PubChem record's formula), and every lone pair it
- * draws must follow from valence. `formula` is undefined when the record is missing.
+ * draws must follow from valence.
  */
-export function checkAgainstPubChem(s: Structure, formula: string | undefined): string[] {
+export function checkAgainstPubChem(s: Structure, formula: string): string[] {
   const cid = pubchemCid(s);
-  if (cid === undefined || formula === undefined) return [];
+  if (cid === undefined) return [];
   const errors: string[] = [];
   const drawn = hydrogenCount(s);
   const real = countIn(formula, "H");
@@ -67,21 +55,54 @@ export function checkAgainstPubChem(s: Structure, formula: string | undefined): 
   return errors;
 }
 
-const view = (structure: Structure, hide: Hidden[] | undefined): StructureView => ({ structure, hide: hide ?? [] });
+export function checkStructure(file: StructureFile): string[] {
+  const errors: string[] = [];
+  const seen = new Set<string>();
+  for (const { id } of [...file.atoms, ...file.bonds]) {
+    if (seen.has(id)) errors.push(`id "${id}" is used twice`);
+    seen.add(id);
+  }
+  const atoms = new Set(file.atoms.map((a) => a.id));
+  for (const b of file.bonds)
+    for (const end of [b.a, b.b]) if (!atoms.has(end)) errors.push(`bond ${b.id} joins "${end}", which is not an atom`);
+  return errors;
+}
 
-/** Resolves the drawing a Multiple choice or Numeric Step shows under its prompt, if it has one. */
+const view = (structure: Structure, hide: Hidden[] | undefined, ring?: string[], outline?: string[]): StructureView => ({
+  structure,
+  hide: hide ?? [],
+  ...(ring || outline ? { highlight: { ring: ring ?? [], outline: outline ?? [] } } : {}),
+});
+
+/** Messages for ringed atoms and outlined bonds the structure doesn't have. */
+function checkHighlight(structure: Structure, ring: string[] = [], outline: string[] = []): string[] {
+  const atoms = new Set(structure.atoms.map((a) => a.id));
+  const bonds = new Set(structure.bonds.map((b) => b.id));
+  return [
+    ...ring.filter((id) => !atoms.has(id)).map((id) => `structure "${structure.id}" has no atom "${id}"`),
+    ...outline.filter((id) => !bonds.has(id)).map((id) => `structure "${structure.id}" has no bond "${id}"`),
+  ];
+}
+
+/** Resolves a figure (a structure drawn with a Step) and checks what it rings and outlines. */
 export function resolveFigure(
-  item: { structure?: string; hide?: Hidden[] },
+  figure: FigureFile,
   structures: Map<string, Structure | undefined>,
   errors: string[],
-): { structure?: StructureView } {
-  if (!item.structure) return {};
-  const found = structures.get(item.structure);
+): Figure | undefined {
+  const found = structures.get(figure.structure);
   if (!found) {
-    if (!structures.has(item.structure)) errors.push(`structure "${item.structure}" not found`);
-    return {};
+    if (!structures.has(figure.structure)) errors.push(`structure "${figure.structure}" not found`);
+    return undefined;
   }
-  return { structure: view(found, item.hide) };
+  const broken = checkHighlight(found, figure.ring, figure.outline);
+  errors.push(...broken);
+  if (broken.length) return undefined;
+  return {
+    view: view(found, figure.hide, figure.ring, figure.outline),
+    alt: figure.alt,
+    ...(figure.caption ? { caption: figure.caption } : {}),
+  };
 }
 
 /** Resolves structure cards; text options pass through. */
@@ -113,6 +134,7 @@ export function resolveTap(
     return undefined;
   }
   const hide = item.hide ?? [];
+  errors.push(...checkHighlight(structure, [], item.outline));
   const atomById = new Map(structure.atoms.map((a) => [a.id, a]));
   const bondById = new Map(structure.bonds.map((b) => [b.id, b]));
   const missing = (kind: string, id: string) => errors.push(`structure "${structure.id}" has no ${kind} "${id}"`);
@@ -158,7 +180,7 @@ export function resolveTap(
   for (const id of item.answer) if (!tappable.has(id)) errors.push(`answer names "${id}", which can't be tapped`);
   for (const hint of item.hints ?? [])
     for (const id of hintIds(hint)) if (!tappable.has(id)) errors.push(`a Hint names "${id}", which can't be tapped`);
-  return { structure: view(structure, item.hide), targets };
+  return { structure: view(structure, item.hide, undefined, item.outline), targets };
 }
 
 type ArrowsFile = Extract<ProblemFile, { type: "draw-arrows" }>;

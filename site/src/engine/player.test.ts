@@ -304,6 +304,31 @@ describe("Rank / order Steps", () => {
     });
   });
 
+  it("a Hint can answer a pattern: an item not first, not last, or one item placed before another", () => {
+    const patterned: RankStep = {
+      ...rank,
+      hints: [
+        { notLast: "single", text: "C–C is the longest." },
+        { notFirst: "triple", text: "C≡C is the shortest." },
+        { before: ["single", "double"], text: "C=C is shorter than C–C." },
+        { text: "Fallback." },
+      ],
+    };
+    const play = (order: string[]) =>
+      act({ ...lesson, steps: [patterned, wrapStep] }, start({ ...lesson, steps: [patterned, wrapStep] }), { type: "answer", order });
+    expect(play(["triple", "single", "double"]).feedback?.text).toBe("C–C is the longest.");
+    expect(play(["double", "triple", "single"]).feedback?.text).toBe("C≡C is the shortest.");
+    expect(play(["triple", "double", "single"]).feedback?.kind).toBe("correct");
+    const swapped: RankStep = { ...rank, hints: [{ before: ["single", "double"], text: "Swapped." }, { text: "Fallback." }] };
+    const steps = [swapped, wrapStep];
+    expect(act({ ...lesson, steps }, start({ ...lesson, steps }), { type: "answer", order: ["triple", "single", "double"] }).feedback?.text).toBe(
+      "Swapped.",
+    );
+    expect(act({ ...lesson, steps }, start({ ...lesson, steps }), { type: "answer", order: ["double", "triple", "single"] }).feedback?.text).toBe(
+      "Fallback.",
+    );
+  });
+
   it("each wrong order can carry its own Hint", () => {
     expect(run(["single", "double", "triple"])).toMatchObject({
       tries: 1,

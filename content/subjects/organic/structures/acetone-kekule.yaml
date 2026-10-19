@@ -25,4 +25,3 @@ bonds:
   - { id: b8, a: a3, b: a9, order: 1 }
   - { id: b9, a: a3, b: a10, order: 1 }
 source: PubChem CID 180
-label: "Acetone as a Kekulé structure: a central C double-bonded to O, single-bonded to two CH₃ carbons with all six H's drawn; O has two lone pairs."

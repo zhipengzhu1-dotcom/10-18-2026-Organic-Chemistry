@@ -40,8 +40,8 @@ export interface SceneUse {
   state: Record<string, SceneValue>;
   /** The Scene's cited values by ref; the Scene reads its numbers from here (ADR 0002). */
   cited: Record<string, Cited>;
-  /** "answered": hidden until the Step is answered (right or revealed), then shown and played: a Reveal Scene. */
-  on?: "answered";
+  /** Shown on its poster frame only, with no playback controls (a still picture). */
+  still?: boolean;
 }
 
 /**
@@ -66,20 +66,49 @@ export interface ExploreMolecule {
   notice?: string;
 }
 
-export interface ExplainStep {
+
+/** A structure drawn with a Step, static. */
+export interface Figure {
+  view: StructureView;
+  /** Shown under the drawing (Markdown). */
+  caption?: string;
+  /** Screen-reader text for the drawing. */
+  alt: string;
+}
+
+/** Something one tap away from a Step: a Scene, or a reference table of drawings. */
+export interface Aside {
+  /** Names the button that opens it. */
+  label: string;
+  scene?: SceneUse;
+  table?: { columns: string[]; rows: { head: string; cells: (Figure | null)[] }[]; caption?: string };
+}
+
+/** What any Step may show besides its interaction. */
+export interface Visuals {
+  figures?: Figure[];
+  aside?: Aside;
+  /** A written Source note (Markdown) for what isn't a cited number: structures, wording, ideas. */
+  sourceNote?: string;
+}
+
+/** A graded Step's visuals, plus the Scene that plays once it is answered (it may show the answer). */
+export interface GradedVisuals extends Visuals {
+  revealScene?: SceneUse;
+}
+
+export interface ExplainStep extends Visuals {
   id: string;
   phase: Phase;
   type: "explain";
   text: string;
   scene?: SceneUse;
   citations?: Cited[];
-  /** Written attribution shown in the Source note (MIT OCW credit, PubChem CIDs); a Check Step gets its Problem's credit. */
-  sourceNote?: string;
   /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
   explore?: ExploreMolecule;
 }
 
-export interface MultipleChoiceStep {
+export interface MultipleChoiceStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "multiple-choice";
@@ -91,15 +120,11 @@ export interface MultipleChoiceStep {
   hints?: Hint[];
   reveal: string;
   prediction?: boolean;
-  /** A drawing shown under the prompt. */
-  structure?: StructureView;
   /** Set on Check Steps: the Bank Problem this Step plays. */
   problemId?: string;
   scene?: SceneUse;
   /** The cited values this Step's text shows (`{{file/key}}`); its Source note is generated from them. */
   citations?: Cited[];
-  /** Written attribution shown in the Source note (MIT OCW credit, PubChem CIDs); a Check Step gets its Problem's credit. */
-  sourceNote?: string;
   /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
   explore?: ExploreMolecule;
 }
@@ -111,32 +136,30 @@ export interface NumericHint {
 }
 
 /** Numeric input: the Student types a number; the unit is fixed and shown beside the box, never typed. */
-export interface NumericStep {
+export interface NumericStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "numeric";
   prompt: string;
   /** The unit of measure shown beside the box, e.g. "°" or "Å". */
   unitSymbol: string;
+  /** A ± key beside the box flips the sign of what is typed. */
+  signKey?: boolean;
   answer: number;
   /** Absolute: a value within answer ± tolerance is right. */
   tolerance: number;
-  /** A drawing shown under the prompt. */
-  structure?: StructureView;
   correct?: string;
   hints?: NumericHint[];
   reveal: string;
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
-  /** Written attribution shown in the Source note (MIT OCW credit, PubChem CIDs); a Check Step gets its Problem's credit. */
-  sourceNote?: string;
   /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
   explore?: ExploreMolecule;
 }
 
 /** Rank / order: the Student puts the items into one strict order (the prompt names which end is first). */
-export interface RankStep {
+export interface RankStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "rank";
@@ -146,16 +169,27 @@ export interface RankStep {
   /** The one correct order of item ids, first to last. */
   answer: string[];
   correct?: string;
-  /** A Hint's `match` is one whole wrong order. */
-  hints?: Hint[];
+  /** A Hint's `match` is one whole wrong order; or it names a pattern (see RankHint). */
+  hints?: RankHint[];
   reveal: string;
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
-  /** Written attribution shown in the Source note (MIT OCW credit, PubChem CIDs); a Check Step gets its Problem's credit. */
-  sourceNote?: string;
   /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
   explore?: ExploreMolecule;
+}
+
+/**
+ * A Rank Hint. Every condition given must hold: `match` = this whole order; `notFirst` /
+ * `notLast` = that item isn't at that end; `before: [x, y]` = x is placed before y.
+ * The generic fallback has no condition.
+ */
+export interface RankHint {
+  match?: string[];
+  notFirst?: string;
+  notLast?: string;
+  before?: [string, string];
+  text: string;
 }
 
 export interface ManipulateHint {
@@ -165,7 +199,7 @@ export interface ManipulateHint {
 }
 
 /** Manipulate a Scene: the Student works a slider (one settable state of the Scene) and presses Check on a value. */
-export interface ManipulateStep {
+export interface ManipulateStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "manipulate";
@@ -179,8 +213,6 @@ export interface ManipulateStep {
   reveal: string;
   problemId?: string;
   citations?: Cited[];
-  /** Written attribution shown in the Source note (MIT OCW credit, PubChem CIDs); a Check Step gets its Problem's credit. */
-  sourceNote?: string;
   /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
   explore?: ExploreMolecule;
 }
@@ -211,7 +243,7 @@ export interface PushHint {
  * is applied to our own molecule graph and accepted when it moves toward an accepted result
  * (`@astratron/content/arrows`). Two tries per push; the Step is done when the drawing is a result.
  */
-export interface DrawArrowsStep {
+export interface DrawArrowsStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "draw-arrows";
@@ -222,8 +254,6 @@ export interface DrawArrowsStep {
   target?: StructureView;
   /** Every accepted result (same atom ids as the start). */
   results: Structure[];
-  /** Written attribution shown in the Source note (MIT OCW credit, PubChem CIDs); a Check Step gets its Problem's credit. */
-  sourceNote?: string;
   /** The correct pushes, in an order that works: shown on a second wrong try and in the reveal. */
   answer: Push[];
   /** Copy for in-between states; `{atom}` and `{electrons}` are filled in. Defaults apply when absent. */
@@ -280,17 +310,13 @@ export interface StructureBond {
 
 export interface Structure {
   id: string;
-  /**
-   * full = every atom a letter, each shared pair a line (Kekulé); lewis = every atom a letter, each shared
-   * pair two dots between its atoms; line-angle = carbons are corners unless charged or `letter`.
-   */
+  /** full = every atom a letter (Lewis/Kekulé); line-angle = carbons are corners unless charged or `letter`. */
+  /** lewis = every atom a letter and each shared pair two dots between its atoms (no lines). */
   style: "full" | "lewis" | "line-angle";
   /** The SMILES it was laid out from (provenance). */
   smiles?: string;
   /** Where the structure comes from, e.g. "PubChem CID 750". */
   source?: string;
-  /** Screen-reader description of the whole drawing, used when a Step shows it under its prompt. */
-  label?: string;
   atoms: StructureAtom[];
   bonds: StructureBond[];
 }
@@ -302,6 +328,8 @@ export type Hidden = "charges" | "lone-pairs";
 export interface StructureView {
   structure: Structure;
   hide: Hidden[];
+  /** Atoms ringed and bonds outlined to point the Student at them. */
+  highlight?: { ring: string[]; outline: string[] };
   /** Added at site build time by the renderer; absent in the raw course model. */
   drawn?: DrawnStructure;
 }
@@ -349,12 +377,14 @@ export interface HintRule {
   text: string;
 }
 
-export interface TapStep {
+export interface TapStep extends GradedVisuals {
   id: string;
   phase: Phase;
   type: "tap-to-identify";
   prompt: string;
   structure: StructureView;
+  /** Screen-reader text for the whole drawing. */
+  alt?: string;
   targets: TapTarget[];
   /** The exact set of target ids to pick. */
   answer: string[];
@@ -366,8 +396,6 @@ export interface TapStep {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
-  /** Written attribution shown in the Source note (MIT OCW credit, PubChem CIDs); a Check Step gets its Problem's credit. */
-  sourceNote?: string;
   /** Explore in 3D: the molecule the Step names (`molecule:` in its file). */
   explore?: ExploreMolecule;
 }
@@ -448,6 +476,16 @@ export interface Subject {
   courses: Course[];
   /** The Subject's cited data files, by id; read numbers from it with `cite` (ADR 0002). */
   data: CitedData;
+  /** The homepage Push hero, ready for `@astratron/content/arrows` (`arrowsStart`/`arrowsAct`/`arrowsView`). */
+  hero?: HeroPush;
+}
+
+/** One live push with its accepted results; the shape of `ArrowsTask`. */
+export interface HeroPush {
+  start: Structure;
+  results: Structure[];
+  answer: Push[];
+  hints?: PushHint[];
 }
 
 export interface CourseModel {

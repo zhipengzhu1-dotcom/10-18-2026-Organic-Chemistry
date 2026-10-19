@@ -201,45 +201,6 @@ describe("Tap-to-identify Steps", () => {
   });
 });
 
-describe("a drawing shown with a Multiple choice or Numeric Step", () => {
-  const numericStep = (extra: object = {}) => ({
-    id: "s06",
-    phase: "build",
-    type: "numeric",
-    prompt: "How many lone pairs?",
-    structure: "formaldehyde",
-    hide: ["lone-pairs"],
-    unitSymbol: "lone pairs",
-    answer: 2,
-    tolerance: 0,
-    correct: "O with 2 bonds keeps 2.",
-    hints: [{ text: "Use the pattern." }],
-    reveal: "2.",
-    ...extra,
-  });
-
-  it("resolves the drawing, with what it hides", () => {
-    const { lesson, errors } = build(treeWith({ 2: cardStep({ structure: "methoxide" }), 5: numericStep() }));
-    expect(errors).toEqual([]);
-    expect(lesson!.steps[2]).toMatchObject({ structure: { hide: [], structure: { id: "methoxide" } } });
-    expect(lesson!.steps[5]).toMatchObject({ structure: { hide: ["lone-pairs"], structure: { id: "formaldehyde" } } });
-  });
-
-  it("rejects a drawing with no file", () => {
-    expect(build(treeWith({ 5: numericStep({ structure: "nope" }) })).errors).toEqual([`${L}: step s06: structure "nope" not found`]);
-  });
-
-  it("carries the drawing on a Check Problem", () => {
-    const { phase: _p, id: _i, ...interaction } = numericStep();
-    const tree = treeWith({}, (t) => {
-      t["chem/problems/p1.yaml"] = { ...problem("p1"), ...interaction, options: undefined };
-    });
-    const { lesson, errors } = build(tree);
-    expect(errors).toEqual([]);
-    expect(lesson!.steps[7]).toMatchObject({ problemId: "p1", type: "numeric", structure: { hide: ["lone-pairs"] } });
-  });
-});
-
 describe("structure files", () => {
   it("rejects a bond to a missing atom and a duplicate id", () => {
     const broken = {

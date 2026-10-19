@@ -86,6 +86,44 @@ describe("2D structure renderer", () => {
     expect(Math.hypot(atoms.a2.x - atoms.a1.x, atoms.a2.y - atoms.a1.y)).toBeCloseTo(60);
     expect(bonds.b1).toEqual({ x1: atoms.a1.x, y1: atoms.a1.y, x2: atoms.a2.x, y2: atoms.a2.y });
   });
+
+  it("draws a dangling bond line to a `*` end, which gets no letter (a fragment, as in a problem set)", () => {
+    // Oxygen with one single and one double bond to the rest of a molecule, one lone pair: O⁺ in PS1 Q1.
+    const fragment: Structure = {
+      id: "o-three-bonds",
+      style: "full",
+      atoms: [
+        { id: "a1", el: "O", x: 0, y: 0, lp: 1, charge: 1 },
+        { id: "a2", el: "*", x: -1.5, y: 0 },
+        { id: "a3", el: "*", x: 1.5, y: 0 },
+      ],
+      bonds: [
+        { id: "b1", a: "a1", b: "a2", order: 1 },
+        { id: "b2", a: "a1", b: "a3", order: 2 },
+      ],
+    };
+    const { svg, atoms } = drawStructure(fragment);
+    expect(letters(svg)).toEqual(["O"]);
+    expect(count(svg, "bond-line")).toBe(3);
+    // The single bond runs all the way to its loose end.
+    expect(svg).toContain(`x2="${atoms.a2.x}" y2="${atoms.a2.y}"`);
+    // Loose ends carry no letter, so the drawing keeps no letter margin past them: it stays legible when small.
+    expect(drawStructure(fragment).width).toBeLessThan(2 * 60 + 20);
+  });
+
+  it("rings an atom and outlines a bond a Step points at (shape, not colour alone)", () => {
+    const { svg, atoms } = drawStructure(methoxide, [], { ring: ["a2"], outline: ["b1"] });
+    expect(svg).toMatch(new RegExp(`<circle class="atom-ring" cx="${atoms.a2.x}" cy="${atoms.a2.y}"`));
+    expect(count(svg, "bond-outline")).toBe(1);
+    expect(drawStructure(methoxide).svg).not.toContain("atom-ring");
+  });
+
+  it("says where each lone pair is drawn, for Scenes that point at them", () => {
+    const { lonePairs, atoms } = drawStructure(methoxide);
+    expect(lonePairs.map((p) => p.atom)).toEqual(["a2", "a2", "a2"]);
+    for (const p of lonePairs) expect(Math.hypot(p.x - atoms.a2.x, p.y - atoms.a2.y)).toBeGreaterThan(10);
+    expect(drawStructure(methoxide, ["lone-pairs"]).lonePairs).toEqual([]);
+  });
 });
 
 /** Formaldehyde as a Lewis structure: H:C::O with two lone pairs on O, all dots, no lines. */

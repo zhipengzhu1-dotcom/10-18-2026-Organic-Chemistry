@@ -4,7 +4,6 @@ id: formaldehyde-lewis
 style: lewis
 smiles: "C=O"
 source: PubChem CID 712
-label: "Formaldehyde as a Lewis structure: two H's each share a pair of dots with C; four dots between C and O; two more pairs of dots on O."
 atoms:
   - { id: a1, el: C, x: 0, y: 0 }
   - { id: a2, el: O, x: 1.5, y: 0, lp: 2 }

@@ -5,7 +5,7 @@ lesson: u1-l02
 difficulty: 1
 status: approved
 source: Adapted from MIT OCW 5.12 PS1 Q3a with the key
-credit: "Adapted from MIT OCW 5.12, Problem Set 1 Q3a, Berkowski, Spring 2005, CC BY-NC-SA 4.0. N₂: PubChem CID 947."
+sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q3a, Berkowski, Spring 2005, CC BY-NC-SA 4.0. N₂: PubChem CID 947."
 type: multiple-choice
 prompt: Nitrogen gas, N₂. Each N brings 5 outer electrons. Which card is its Kekulé structure?
 options:

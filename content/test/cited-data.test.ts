@@ -47,6 +47,20 @@ describe("cited-data lookup", () => {
     expect(cite(dataOf(build()), "methane/a.HCH")).toMatchObject({ display: "109.5°", full: "109.471°" });
   });
 
+  it("shows electronegativities to 2 decimals, with no unit", () => {
+    const result = build((t) => {
+      t["chem/data/en.yaml"] = {
+        id: "en",
+        kind: "table",
+        title: "Electronegativity",
+        sources: { allred: { kind: "reference", citation: "Allred (1961)", licence: "Published values" } },
+        values: { C: { label: "C", quantity: "electronegativity", value: 2.5, source: "allred" } },
+      };
+    });
+    expect(result.errors).toEqual([]);
+    expect(cite(dataOf(result), "en/C")).toMatchObject({ display: "2.50", full: "2.5" });
+  });
+
   it("holds unitless counts, such as a nuclide's mass number, as whole numbers", () => {
     const result = build(
       (t) =>
@@ -113,18 +127,6 @@ describe("Lessons and Problems cite numbers as {{file/key}}", () => {
     const s08 = steps(result)[7];
     expect(s08).toMatchObject({ reveal: "The angle is 109.5°." });
     expect(s08.citations?.map((c) => c.ref)).toEqual(["methane/a.HCH"]);
-  });
-
-  it("a Step carries its written Source note (attribution); a Check Step its Problem's credit", () => {
-    const result = build((t) => {
-      const lesson = t["chem/lessons/l1.yaml"] as { steps: Record<string, unknown>[] };
-      lesson.steps[1].sourceNote = "Ethanol: PubChem CID 702.";
-      (t["chem/problems/p1.yaml"] as Record<string, unknown>).credit = "Adapted from MIT OCW 5.12, PS1 Q3a, CC BY-NC-SA 4.0.";
-    });
-    expect(result.errors).toEqual([]);
-    expect(steps(result)[1]).toMatchObject({ sourceNote: "Ethanol: PubChem CID 702." });
-    expect(steps(result)[7]).toMatchObject({ sourceNote: "Adapted from MIT OCW 5.12, PS1 Q3a, CC BY-NC-SA 4.0." });
-    expect(steps(result)[8]).not.toHaveProperty("sourceNote");
   });
 
   it("a Step with no cited numbers has no citations", () => {

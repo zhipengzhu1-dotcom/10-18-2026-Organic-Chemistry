@@ -26,4 +26,3 @@ bonds:
   - { id: b9, a: a8, b: a10, order: 2 }
   - { id: b10, a: a7, b: a2, order: 1 }
 source: PubChem CID 22311
-label: "Limonene, line-angle drawing: a six-membered ring with one double bond and a methyl end, and on the opposite corner a branch carbon with a double bond to an end CH₂ and a methyl end."

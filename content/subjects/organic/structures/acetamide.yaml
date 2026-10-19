@@ -13,4 +13,3 @@ bonds:
   - { id: b2, a: a2, b: a3, order: 1 }
   - { id: b3, a: a2, b: a4, order: 2 }
 source: PubChem CID 178
-label: "Acetamide, line-angle drawing: a line to a corner with a double-bonded O up and NH₂ down."

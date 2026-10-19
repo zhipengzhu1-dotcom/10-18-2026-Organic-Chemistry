@@ -28,4 +28,3 @@ bonds:
   - { id: b10, a: a10, b: a11, order: 1 }
   - { id: b11, a: a11, b: a5, order: 2 }
 source: PubChem CID 1983
-label: "Acetaminophen, line-angle drawing: a six-membered ring with alternating double lines, OH on one side, NH on the other leading to a carbon with a double-bonded O and a CH₃ end."

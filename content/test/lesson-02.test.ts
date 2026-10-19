@@ -46,9 +46,10 @@ describe("Lesson 2: Drawing Molecules", () => {
       expect(counts[name].value, name).toBe(pubchemH(cid));
       const structure = organic!.courses
         .flatMap((c) => c.units.flatMap((u) => u.lessons.flatMap((l) => l.steps)))
-        .flatMap((s) => ("structure" in s && s.structure ? [s.structure.structure as Structure] : []))
+        .flatMap((s) => [...("structure" in s && s.structure ? [s.structure.structure as Structure] : []), ...(s.figures ?? []).map((f) => f.view.structure)])
         .find((st) => st.id === name);
-      if (structure) expect(hydrogenCount(structure), name).toBe(pubchemH(cid));
+      expect(structure, `${name} is drawn in the Lesson`).toBeDefined();
+      expect(hydrogenCount(structure!), name).toBe(pubchemH(cid));
     }
   });
 
@@ -63,6 +64,7 @@ describe("Lesson 2: Drawing Molecules", () => {
   it("has a cached PubChem record for every drawing that names a PubChem compound, so the build checks it", () => {
     const named = lesson.steps.flatMap((s) => [
       ...("structure" in s && s.structure ? [s.structure.structure] : []),
+      ...(s.figures ?? []).map((f) => f.view.structure),
       ...(s.type === "multiple-choice" ? s.options.flatMap((o) => (o.structure ? [o.structure.structure] : [])) : []),
     ]);
     expect(named.length).toBeGreaterThan(10);

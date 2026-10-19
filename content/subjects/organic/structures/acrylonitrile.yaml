@@ -13,4 +13,3 @@ bonds:
   - { id: b2, a: a2, b: a3, order: 1 }
   - { id: b3, a: a3, b: a4, order: 3 }
 source: PubChem CID 7855
-label: "Acrylonitrile, line-angle drawing: a double line up to a corner, then one line into a straight triple line ending in N with one lone pair."

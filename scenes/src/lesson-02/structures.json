@@ -4,7 +4,6 @@
   "style": "line-angle",
   "smiles": "CC(=O)Nc1ccc(O)cc1",
   "source": "PubChem CID 1983",
-  "label": "Acetaminophen, line-angle drawing: a six-membered ring with alternating double lines, OH on one side, NH on the other leading to a carbon with a double-bonded O and a CH₃ end.",
   "atoms": [
    {
     "id": "a1",
@@ -152,7 +151,6 @@
   "style": "line-angle",
   "smiles": "CC(N)=O",
   "source": "PubChem CID 178",
-  "label": "Acetamide, line-angle drawing: a line to a corner with a double-bonded O up and NH₂ down.",
   "atoms": [
    {
     "id": "a1",
@@ -249,7 +247,6 @@
   "style": "line-angle",
   "smiles": "O=C1CCCCC1",
   "source": "PubChem CID 7967",
-  "label": "Cyclohexanone, line-angle drawing: a hexagon of lines with a double-bonded O on the top corner; O has two lone pairs.",
   "atoms": [
    {
     "id": "a1",
@@ -345,7 +342,6 @@
   "style": "line-angle",
   "smiles": "C[C@]12CC[C@H]3[C@@H](CCc4cc(O)ccc34)[C@@H]1CC[C@@H]2O",
   "source": "PubChem CID 5757",
-  "label": "Estradiol, line-angle drawing: four fused rings, the left ring flat with alternating double bonds and an OH, an OH top right, a methyl wedge and three stereo H's at the ring fusions.",
   "atoms": [
    {
     "id": "a1",
@@ -701,7 +697,6 @@
   "style": "lewis",
   "smiles": "CCO",
   "source": "PubChem CID 702",
-  "label": "Ethanol as a Lewis structure: two carbons and an oxygen in a row, six hydrogens, every shared pair two dots, two more pairs of dots on oxygen.",
   "atoms": [
    {
     "id": "a1",
@@ -857,7 +852,6 @@
   "style": "line-angle",
   "smiles": "CC1=CCC(CC1)C(C)=C",
   "source": "PubChem CID 22311",
-  "label": "Limonene, line-angle drawing: a six-membered ring with one double bond and a methyl end, and on the opposite corner a branch carbon with a double bond to an end CH₂ and a methyl end.",
   "atoms": [
    {
     "id": "a1",

@@ -1,0 +1,43 @@
+# Lesson 1 (#79) s03: four small molecules in a 2 × 2 grid, full Lewis,
+# drawn by hand: hydrogen fluoride (PubChem CID 14917), water (CID 962),
+# chloromethane (CID 6327) and methanol (CID 887). The Step outlines one bond
+# in each (b1 H–F, b2 O–H, b4 C–Cl, b8 C–O); only those bonds' atoms are tappable.
+
+id: polar-bonds-grid
+style: full
+smiles: "F.O.CCl.CO"
+source: PubChem CIDs 14917, 962, 6327, 887
+atoms:
+  # Hydrogen fluoride, top left
+  - { id: a1, el: "H", x: 0, y: 0, label: "Hydrogen fluoride: the H of the outlined H–F bond." }
+  - { id: a2, el: "F", x: 1.5, y: 0, lp: 3, label: "Hydrogen fluoride: the F of the outlined H–F bond." }
+  # Water, top right
+  - { id: a3, el: "O", x: 6, y: 0, lp: 2, label: "Water: the O of the outlined O–H bond." }
+  - { id: a4, el: "H", x: 4.701, y: 0.75, label: "Water: the H of the outlined O–H bond." }
+  - { id: a5, el: "H", x: 7.299, y: 0.75 }
+  # Chloromethane, bottom left
+  - { id: a6, el: "C", x: 0, y: 3.5, label: "Chloromethane: the C of the outlined C–Cl bond." }
+  - { id: a7, el: "Cl", x: 1.5, y: 3.5, lp: 3, label: "Chloromethane: the Cl of the outlined C–Cl bond." }
+  - { id: a8, el: "H", x: 0, y: 2 }
+  - { id: a9, el: "H", x: 0, y: 5 }
+  - { id: a10, el: "H", x: -1.5, y: 3.5 }
+  # Methanol, bottom right
+  - { id: a11, el: "C", x: 5.25, y: 3.5, label: "Methanol: the C of the outlined C–O bond." }
+  - { id: a12, el: "O", x: 6.75, y: 3.5, lp: 2, label: "Methanol: the O of the outlined C–O bond." }
+  - { id: a13, el: "H", x: 7.5, y: 4.799 }
+  - { id: a14, el: "H", x: 5.25, y: 2 }
+  - { id: a15, el: "H", x: 5.25, y: 5 }
+  - { id: a16, el: "H", x: 3.75, y: 3.5 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a3, b: a4, order: 1 }
+  - { id: b3, a: a3, b: a5, order: 1 }
+  - { id: b4, a: a6, b: a7, order: 1 }
+  - { id: b5, a: a6, b: a8, order: 1 }
+  - { id: b6, a: a6, b: a9, order: 1 }
+  - { id: b7, a: a6, b: a10, order: 1 }
+  - { id: b8, a: a11, b: a12, order: 1 }
+  - { id: b9, a: a12, b: a13, order: 1 }
+  - { id: b10, a: a11, b: a14, order: 1 }
+  - { id: b11, a: a11, b: a15, order: 1 }
+  - { id: b12, a: a11, b: a16, order: 1 }

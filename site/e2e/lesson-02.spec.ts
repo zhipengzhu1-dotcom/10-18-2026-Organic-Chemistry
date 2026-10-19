@@ -103,7 +103,7 @@ test("keyboard only, laptop width: every Step answered right, start to Wrap", as
 
   // s10: lone pairs hidden, with the chip.
   await at(10);
-  await expect(page.locator(".structure-figure .chip", { hasText: "Lone pairs hidden" })).toBeVisible();
+  await expect(page.locator(".figure figcaption", { hasText: "Lone pairs hidden" })).toBeVisible();
   await type("3");
   await correct();
   await press("Continue");
@@ -183,8 +183,8 @@ test("phone width: drawings fit, a wrong answer gets its Hint, Reveal Scenes wai
   // s13 Check Problem: lone pairs hidden, then the lone-pair-fill Reveal Scene.
   await page.goto(`${LESSON}#s13`);
   await expect(page.getByText("Step 13 of 15")).toBeVisible();
-  await expect(page.locator(".structure-figure .chip", { hasText: "Lone pairs hidden" })).toBeVisible();
-  await expect(page.locator(".structure-figure .lone-pair-dot")).toHaveCount(0);
+  await expect(page.locator(".figure figcaption", { hasText: "Lone pairs hidden" })).toBeVisible();
+  await expect(page.locator(".figures .lone-pair-dot")).toHaveCount(0);
   await box.fill("5");
   await expect(page.getByRole("button", { name: "Check" })).toBeEnabled();
   await check();

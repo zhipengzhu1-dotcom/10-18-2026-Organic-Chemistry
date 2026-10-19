@@ -78,7 +78,7 @@ function checkSemantics(m: SceneManifest, at: (where: string, message: string) =
   const defaults = defaultState(m);
   let text = "";
   try {
-    text = m.describe(defaults, m.poster.t);
+    text = m.describe(defaults, m.poster.t, {});
   } catch (e) {
     at("describe", `throws for the default state: ${(e as Error).message}`);
   }
