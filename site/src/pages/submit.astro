@@ -69,19 +69,19 @@ const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? "1x00000000000000000
       <div class="field">
         <label for="reply_email">Reply email (optional)</label>
         <input id="reply_email" name="reply_email" type="email" maxlength={MAX_LENGTH.reply_email} autocomplete="email" aria-describedby="reply_email-hint" />
-        <p class="hint" id="reply_email-hint">Only if you want one reply. We delete the address after replying, or after 90 days.</p>
+        <p class="hint" id="reply_email-hint">Only if you want one reply. We delete the address after replying, or after <span class="data">90</span> days.</p>
         <p class="field-error" id="reply_email-error"></p>
       </div>
 
       <div class="field">
-        <label class="consent"><input id="consent" name="consent" type="checkbox" /> I agree that if my Problem is accepted, it is published under CC BY-NC-SA 4.0.</label>
+        <label class="consent"><input id="consent" name="consent" type="checkbox" /> I agree that if my Problem is accepted, it is published under CC BY-NC-SA <span class="data">4.0</span>.</label>
         <p class="field-error" id="consent-error"></p>
       </div>
 
       <div class="cf-turnstile" data-sitekey={sitekey} data-appearance="interaction-only"></div>
       <p class="field-error" id="turnstile-error"></p>
 
-      <button type="submit" class="button">Send</button>
+      <button type="submit" class="btn btn-primary">Send</button>
     </form>
   </main>
 </Base>
@@ -160,20 +160,3 @@ const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? "1x00000000000000000
   });
 </script>
 
-<style is:global>
-  /* Placeholder form styles; the design system (#59) replaces them. */
-  .submit-page fieldset { border: 2px solid #3a3560; margin: 0 0 1rem; padding: 0.5rem 1rem; }
-  .submit-page fieldset label, .submit-page .consent { display: flex; align-items: center; gap: 0.5rem; min-height: 48px; }
-  .submit-page .field[hidden] { display: none; }
-  .submit-page .field { margin-bottom: 1rem; display: grid; gap: 0.25rem; }
-  .submit-page input[type="text"], .submit-page input[type="email"], .submit-page select, .submit-page textarea {
-    font: inherit; min-height: 48px; padding: 0.5rem; box-sizing: border-box; width: 100%;
-    background: #1b1840; color: inherit; border: 2px solid #8b7bff;
-  }
-  .submit-page input[type="checkbox"], .submit-page input[type="radio"] { width: 24px; height: 24px; }
-  .submit-page .hint { margin: 0; font-size: 0.9rem; opacity: 0.85; }
-  .submit-page .field-error { margin: 0; color: #ff9d3c; }
-  .submit-page .field-error:empty, .submit-page #form-errors:empty { display: none; }
-  .submit-page #form-errors { border: 2px solid #ff9d3c; padding: 0.75rem; margin-bottom: 1rem; }
-  .submit-page .note { border-left: 4px solid #5ee7ff; padding-left: 0.75rem; }
-</style>

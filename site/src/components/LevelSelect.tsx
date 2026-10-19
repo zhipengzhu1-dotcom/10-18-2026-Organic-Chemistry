@@ -126,7 +126,7 @@ function PracticeRow({ unit }: { unit: Unit }) {
         <a href={practiceUrl(unit)}>Practice Set</a>
       </h3>
       <p className="level-goal">
-        {size} {goal}
+        <span className="data">{size}</span> {goal}
       </p>
       <span className="chip">Mixed</span>
       <span className="chip count">{plural(size, "Problem")}</span>

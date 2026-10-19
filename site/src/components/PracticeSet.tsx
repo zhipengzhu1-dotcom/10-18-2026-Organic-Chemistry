@@ -41,9 +41,11 @@ export default function PracticeSet({ unitId, problems, coreLessons, keyUrl, uni
 
   if (phase.kind === "drawing") {
     return (
-      <main className="player">
-        <p role="status">Drawing your Problems…</p>
-      </main>
+      <div className="player">
+        <main className="player-body">
+          <p role="status">Drawing your Problems…</p>
+        </main>
+      </div>
     );
   }
 
@@ -72,50 +74,56 @@ export default function PracticeSet({ unitId, problems, coreLessons, keyUrl, uni
 
   const { summary } = phase;
   const { total, firstTry, firstTryPercent, eventuallyCorrect, missed } = summary;
+  // The summary keeps the player's shape: the results card in the body, the actions in the foot.
   return (
-    <main className="player practice-summary">
-      <section className="step" aria-labelledby="practice-results">
-        <h1 id="practice-results">Practice Set results</h1>
-        <p className="stat" style={dataFont}>
-          First try: {firstTry}/{total} ({firstTryPercent}%)
-        </p>
-        <p className="stat" style={dataFont}>
-          Eventually correct: {eventuallyCorrect}/{total}
-        </p>
-        {missed.length === 0 ? (
-          <p>Nothing missed. Nice work.</p>
-        ) : (
+    <section className="player practice-summary" aria-labelledby="practice-results">
+      <main className="player-body">
+        <div className="card">
+          <h1 id="practice-results">Practice Set results</h1>
+          <ul className="practice-stats">
+            <li className="data">
+              First try: {firstTry}/{total} ({firstTryPercent}%)
+            </li>
+            <li className="data">
+              Eventually correct: {eventuallyCorrect}/{total}
+            </li>
+          </ul>
           <p>
-            {missed.length} missed. Retry them now, or come back later for a fresh Set.
+            {missed.length === 0 ? (
+              "Nothing missed. Nice work."
+            ) : (
+              <>
+                <span className="data">{missed.length}</span> missed. Retry them now, or come back later for a fresh Set.
+              </>
+            )}
           </p>
-        )}
+        </div>
         <p className="suggest">
           Know a good Problem for this Unit? <a href={suggestProblemHref(unitId)}>Suggest a Problem</a>
         </p>
-        <footer className="player-action">
+      </main>
+      <div className="player-foot">
+        <div className="player-end">
           {missed.length > 0 && (
             <button
               type="button"
-              className="button"
+              className="btn btn-primary btn-block"
               onClick={() => setPhase({ kind: "playing", ids: missed, round: phase.round + 1 })}
             >
-              Retry missed ({missed.length})
+              Retry missed <span className="data">({missed.length})</span>
             </button>
           )}
-          <a className={missed.length > 0 ? "button-secondary" : "button"} href={nextUnitHref}>
+          <a className={`btn btn-block ${missed.length > 0 ? "btn-secondary" : "btn-primary"}`} href={nextUnitHref}>
             Next Unit
           </a>
-          <a className="button-secondary" href={unitHref}>
+          <a className="btn btn-secondary btn-block" href={unitHref}>
             Back to Unit
           </a>
-        </footer>
-      </section>
-    </main>
+        </div>
+      </div>
+    </section>
   );
 }
-
-/** Every number is set in JetBrains Mono (design token --at-font-data). */
-const dataFont = { fontFamily: "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)" };
 
 /** The Lesson fields the Step player doesn't use for a Practice Set round. */
 const PRACTICE_LESSON: Omit<PageLesson, "id" | "steps"> = {
