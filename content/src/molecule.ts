@@ -1,0 +1,251 @@
+// The 3D molecule module (#68): pure geometry behind the 3D Step card, Rotate-and-identify Steps
+// and Explore in 3D. Atom names, what a Student measures by tapping atoms, named start views,
+// turning, projection to the screen and the Describe text. Every number comes from the
+// molecule's cited coordinates (ADR 0002); nothing here draws.
+//
+// Browser-safe and dependency-free ("@astratron/content/molecule").
+import type { Atom, Bond } from "./data.ts";
+
+export type Vec3 = [number, number, number];
+/** A rotation: its rows are the screen's right, up and toward-the-viewer axes, in the molecule's frame. */
+export type Matrix3 = [Vec3, Vec3, Vec3];
+
+/** What the module needs of a molecule: its cited atoms (Å) and bonds. */
+export interface Molecule {
+  title: string;
+  atoms: Atom[];
+  bonds: Bond[];
+  /** The Step's own words for the arrangement; Describe reads them first. */
+  describe?: string;
+}
+
+/**
+ * A named start view (`views.yaml`), built from atom indices (0-based, file order):
+ * - `look: [a, b]`: look along a → b, a nearest the viewer; or
+ * - `plane: [a, b, c]`: those three atoms lie in the screen plane; `front: d` puts atom d on the viewer's side.
+ * - `up: k`: atom k points straight up from a (look) or b (plane).
+ * - `rotate: [x, y, z]`: then turn that many degrees about the screen's x, y and z axes, in that order.
+ * With neither look nor plane, the file's own axes face the screen.
+ */
+export interface ViewSpec {
+  look?: [number, number];
+  plane?: [number, number, number];
+  front?: number;
+  up?: number;
+  rotate?: Vec3;
+}
+
+export type Measurement =
+  | { kind: "distance"; atoms: [number, number]; value: number; bonded: boolean; order?: 1 | 2 | 3 }
+  | { kind: "angle"; atoms: [number, number, number]; value: number };
+
+const IDENTITY: Matrix3 = [
+  [1, 0, 0],
+  [0, 1, 0],
+  [0, 0, 1],
+];
+/** Atoms closer than this in depth (Å) count as level with each other. */
+const LEVEL = 0.05;
+
+const pos = (a: Atom): Vec3 => [a.x, a.y, a.z];
+const sub = (a: Vec3, b: Vec3): Vec3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+const scale = (a: Vec3, k: number): Vec3 => [a[0] * k, a[1] * k, a[2] * k];
+const dot = (a: Vec3, b: Vec3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const cross = (a: Vec3, b: Vec3): Vec3 => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const length = (a: Vec3) => Math.sqrt(dot(a, a));
+const unit = (a: Vec3) => scale(a, 1 / length(a));
+const deg = (r: number) => (r * 180) / Math.PI;
+const rad = (d: number) => (d * Math.PI) / 180;
+const apply = (m: Matrix3, v: Vec3): Vec3 => [dot(m[0], v), dot(m[1], v), dot(m[2], v)];
+const multiply = (a: Matrix3, b: Matrix3): Matrix3 =>
+  a.map((row) => [0, 1, 2].map((j) => row[0] * b[0][j] + row[1] * b[1][j] + row[2] * b[2][j])) as Matrix3;
+
+/** "C1", "H1", "H2", …: atoms numbered per element in file order. */
+export function atomNames(atoms: Atom[]): string[] {
+  const seen: Record<string, number> = {};
+  return atoms.map((a) => `${a.element}${(seen[a.element] = (seen[a.element] ?? 0) + 1)}`);
+}
+
+export function centroid(atoms: Atom[]): Vec3 {
+  const sum = atoms.reduce<Vec3>((s, a) => [s[0] + a.x, s[1] + a.y, s[2] + a.z], [0, 0, 0]);
+  return scale(sum, 1 / Math.max(1, atoms.length));
+}
+
+export function bondBetween(bonds: Bond[], i: number, j: number): Bond | undefined {
+  return bonds.find((b) => (b.a === i && b.b === j) || (b.a === j && b.b === i));
+}
+
+/** Two picks: their distance (bonded or not); three: the angle at the middle atom; otherwise nothing. */
+export function measure(m: Molecule, picks: number[]): Measurement | undefined {
+  const p = picks.map((i) => pos(m.atoms[i]));
+  if (picks.length === 2) {
+    const bond = bondBetween(m.bonds, picks[0], picks[1]);
+    return {
+      kind: "distance",
+      atoms: [picks[0], picks[1]],
+      value: length(sub(p[0], p[1])),
+      bonded: !!bond,
+      ...(bond ? { order: bond.order } : {}),
+    };
+  }
+  if (picks.length === 3) {
+    const u = sub(p[0], p[1]);
+    const v = sub(p[2], p[1]);
+    const cos = Math.min(1, Math.max(-1, dot(u, v) / (length(u) * length(v))));
+    return { kind: "angle", atoms: [picks[0], picks[1], picks[2]], value: deg(Math.acos(cos)) };
+  }
+  return undefined;
+}
+
+/** Tapping an atom: a picked atom is un-picked; a fourth atom starts a new measurement from itself. */
+export function togglePick(picks: number[], atom: number): number[] {
+  if (picks.includes(atom)) return picks.filter((i) => i !== atom);
+  return picks.length >= 3 ? [atom] : [...picks, atom];
+}
+
+const BOND_SIGN = { 1: "–", 2: "=", 3: "≡" } as const;
+
+/** The measurement as drawn (value + what it is) and as read aloud. Lengths to 2 decimals, angles to 1. */
+export function readout(m: Measurement, names: string[]): { value: string; what: string; spoken: string } {
+  if (m.kind === "distance") {
+    const [a, b] = m.atoms.map((i) => names[i]);
+    const value = m.value.toFixed(2);
+    return {
+      value: `${value} Å`,
+      what: m.bonded ? `${a}${BOND_SIGN[m.order ?? 1]}${b} bond` : `${a}···${b} not bonded`,
+      spoken: `${a} to ${b}: ${value} ångströms, ${m.bonded ? "a bond" : "not bonded"}.`,
+    };
+  }
+  const [a, v, b] = m.atoms.map((i) => names[i]);
+  const value = m.value.toFixed(1);
+  return { value: `${value}°`, what: `${a}–${v}–${b} angle at ${v}`, spoken: `Angle ${a}, ${v}, ${b}: ${value} degrees, at ${v}.` };
+}
+
+/** Why a view can't be built on these atoms ([] when it can). */
+export function viewErrors(atoms: Atom[], spec: ViewSpec): string[] {
+  const errors: string[] = [];
+  const last = atoms.length - 1;
+  const inRange = (field: string, list: number[]) => {
+    for (const i of list)
+      if (!Number.isInteger(i) || i < 0 || i > last) errors.push(`${field}: atom ${i} is not in the molecule (0–${last})`);
+  };
+  if (spec.look && spec.plane) return ["give look or plane, not both"];
+  if (spec.look) inRange("look", spec.look);
+  if (spec.plane) inRange("plane", spec.plane);
+  if (spec.up !== undefined) inRange("up", [spec.up]);
+  if (spec.front !== undefined) inRange("front", [spec.front]);
+  if (errors.length) return errors;
+  if (spec.look && spec.look[0] === spec.look[1]) return ["look: needs two different atoms"];
+  if (spec.plane && length(planeNormal(atoms, spec.plane)) < 1e-6) return ["plane: the three atoms are in a line"];
+  if (spec.front !== undefined && !spec.plane) return ["front: only goes with plane"];
+  if ((spec.look || spec.plane) && spec.up !== undefined) {
+    const { back, from } = sight(atoms, spec);
+    const u = sub(pos(atoms[spec.up]), from);
+    if (length(sub(u, scale(back, dot(u, back)))) < 1e-6) errors.push(`up: atom ${spec.up} lies on the line of sight`);
+  }
+  return errors;
+}
+
+function planeNormal(atoms: Atom[], [a, b, c]: [number, number, number]): Vec3 {
+  return cross(sub(pos(atoms[a]), pos(atoms[b])), sub(pos(atoms[c]), pos(atoms[b])));
+}
+
+/** The direction toward the viewer, and the atom "up" is measured from. */
+function sight(atoms: Atom[], spec: ViewSpec): { back: Vec3; from: Vec3 } {
+  if (spec.look) {
+    const [a, b] = spec.look.map((i) => pos(atoms[i]));
+    return { back: unit(sub(a, b)), from: a };
+  }
+  const [a, b] = spec.plane!;
+  let back = unit(planeNormal(atoms, spec.plane!));
+  if (spec.front !== undefined && dot(sub(pos(atoms[spec.front]), pos(atoms[b])), back) < 0) back = scale(back, -1);
+  return { back, from: pos(atoms[b]) };
+}
+
+/** The rotation a view puts the molecule in. Throws on a view `viewErrors` rejects. */
+export function viewMatrix(atoms: Atom[], spec: ViewSpec = {}): Matrix3 {
+  const errors = viewErrors(atoms, spec);
+  if (errors.length) throw new Error(errors.join("; "));
+  let r = IDENTITY;
+  if (spec.look || spec.plane) {
+    const { back, from } = sight(atoms, spec);
+    const perpendicular = (v: Vec3) => sub(v, scale(back, dot(v, back)));
+    let up =
+      spec.up !== undefined
+        ? perpendicular(sub(pos(atoms[spec.up]), from))
+        : [perpendicular([0, 1, 0]), perpendicular([0, 0, 1])].find((v) => length(v) > 1e-6)!;
+    up = unit(up);
+    r = [cross(up, back), up, back];
+  }
+  const [x, y, z] = spec.rotate ?? [0, 0, 0];
+  return turn(turn(turn(r, "x", x), "y", y), "z", z);
+}
+
+/** Turns a rotation about one of the screen's axes by `degrees` (x tilts, y spins, z rolls). */
+export function turn(r: Matrix3, axis: "x" | "y" | "z", degrees: number): Matrix3 {
+  if (!degrees) return r;
+  const c = Math.cos(rad(degrees));
+  const s = Math.sin(rad(degrees));
+  const about: Matrix3 =
+    axis === "x"
+      ? [
+          [1, 0, 0],
+          [0, c, -s],
+          [0, s, c],
+        ]
+      : axis === "y"
+        ? [
+            [c, 0, s],
+            [0, 1, 0],
+            [-s, 0, c],
+          ]
+        : [
+            [c, -s, 0],
+            [s, c, 0],
+            [0, 0, 1],
+          ];
+  return multiply(about, r);
+}
+
+/** Screen coordinates in Å about the molecule's centre: x right, y up, z toward the viewer. */
+export function project(atoms: Atom[], r: Matrix3): Vec3[] {
+  const c = centroid(atoms);
+  return atoms.map((a) => apply(r, sub(pos(a), c)));
+}
+
+const list = (words: string[]) => (words.length < 2 ? words.join("") : `${words.slice(0, -1).join(", ")} and ${words.at(-1)}`);
+
+/**
+ * What the Describe button reads: the Step's own words (if any), the atoms and their bonds,
+ * then what the current view shows: atoms level with the screen, and the nearest and farthest atoms.
+ */
+export function describeMolecule(m: Molecule, r: Matrix3): string {
+  const names = atomNames(m.atoms);
+  const parts = m.describe ? [m.describe] : [];
+  parts.push(`${m.title}: ${m.atoms.length} atoms.`);
+  m.atoms.forEach((_, i) => {
+    const later = m.bonds
+      .filter((b) => b.a === i || b.b === i)
+      .map((b) => ({ j: b.a === i ? b.b : b.a, order: b.order }))
+      .filter(({ j }) => j > i)
+      .sort((x, y) => x.j - y.j)
+      .map(({ j, order }) => `${names[j]}${order === 2 ? " (double)" : order === 3 ? " (triple)" : ""}`);
+    if (later.length) parts.push(`${names[i]} is bonded to ${list(later)}.`);
+  });
+
+  const depth = project(m.atoms, r).map((p) => p[2]);
+  const near = Math.max(...depth);
+  const far = Math.min(...depth);
+  if (near - far < LEVEL) {
+    parts.push("All atoms lie in the screen plane.");
+    return parts.join(" ");
+  }
+  const level = depth
+    .map((d) => depth.flatMap((e, j) => (Math.abs(e - d) < LEVEL ? [j] : [])))
+    .filter((group) => group.length >= 3)
+    .sort((a, b) => b.length - a.length)[0];
+  if (level) parts.push(`${list(level.map((i) => names[i]))} lie in the screen plane.`);
+  const at = (d: number) => list(names.filter((_, i) => Math.abs(depth[i] - d) < LEVEL));
+  parts.push(`Nearest you: ${at(near)}. Farthest: ${at(far)}.`);
+  return parts.join(" ");
+}

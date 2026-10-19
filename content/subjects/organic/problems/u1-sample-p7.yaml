@@ -1,0 +1,20 @@
+# Sample Rotate-and-identify 3D Problem (#68).
+id: u1-sample-p7
+unit: u1
+lesson: u1-sample-3d
+difficulty: 1
+status: approved
+source: Original
+type: rotate-and-identify
+prompt: Turn formaldehyde, H₂C=O. Is it flat or a pyramid?
+molecule: formaldehyde
+options:
+  - { id: flat, text: Flat }
+  - { id: pyramid, text: A pyramid }
+answer: [flat]
+correct: Flat. From the side, all four atoms line up.
+hints:
+  - match: [pyramid]
+    text: Turn it to look from the side. Does the C stick out?
+  - text: Look at it from the side.
+reveal: "Flat: all four atoms lie in one plane."

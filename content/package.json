@@ -7,7 +7,7 @@
     ".": "./src/index.ts",
     "./data": "./src/data.ts",
     "./valence": "./src/valence.ts",
-    "./explore": "./src/explore.ts",
+    "./molecule": "./src/molecule.ts",
     "./arrows": "./src/arrows.ts"
   },
   "scripts": {

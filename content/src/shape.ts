@@ -84,7 +84,8 @@ const isPrediction = (item: Interaction) => "prediction" in item && item.predict
 function answerRules(item: Interaction): string[] {
   const errors: string[] = [];
   switch (item.type) {
-    case "multiple-choice": {
+    case "multiple-choice":
+    case "rotate-and-identify": {
       const optionIds = new Set(item.options.map((o) => o.id));
       for (const id of item.answer) if (!optionIds.has(id)) errors.push(`answer names unknown option "${id}"`);
       if (isPrediction(item)) return errors;

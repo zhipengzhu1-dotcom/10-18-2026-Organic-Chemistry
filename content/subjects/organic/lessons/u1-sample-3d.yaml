@@ -1,0 +1,97 @@
+# Sample Lesson for the 3D Step card and Rotate-and-identify 3D (#68). Not from a Lesson spec; it
+# exists so the smoke tests can drive the 3D card (turn, measure, true scale, Describe, no-WebGL
+# still) and Rotate-and-identify Steps. Remove it with the other samples (#88).
+id: u1-sample-3d
+slug: sample-3d
+title: "Sample: Turn a Molecule"
+goal: Turn real molecules, measure their bonds and angles, and tell their shapes apart.
+keyIdea: Molecules are 3D. Turn one before you judge its shape, because one view can hide a bend or a pyramid.
+steps:
+  - id: s01
+    phase: hook
+    type: multiple-choice
+    prediction: true
+    prompt: Methane, CH₄, is one carbon with four hydrogens. Do the four H's lie flat around the C?
+    options:
+      - { id: a, text: "Yes, flat like a plus sign" }
+      - { id: b, text: "No, they spread out in 3D" }
+    answer: [b]
+    reveal: They spread out in 3D, as far from each other as they can get. Turn it and see.
+
+  - id: s02
+    phase: build
+    type: explain
+    text: This is methane at its measured shape. Drag to turn it. Tap the C, then an H, to measure a bond; tap a third atom for an angle.
+    molecule: { id: methane, card: true }
+
+  - id: s03
+    phase: build
+    type: rotate-and-identify
+    prompt: Turn methane and measure. Are all four C–H bonds the same length?
+    molecule: { id: methane, view: tilted, describe: "One carbon in the middle, bonded to four hydrogens." }
+    options:
+      - { id: a, text: "Yes, all four are the same" }
+      - { id: b, text: "No, one is longer" }
+    answer: [a]
+    correct: All four bonds are the same length, so all four H's are alike.
+    hints:
+      - match: [b]
+        text: Tap the C, then each H in turn, and compare the numbers.
+      - text: Measure each C–H bond.
+    reveal: All four are the same length.
+
+  - id: s04
+    phase: build
+    type: explain
+    text: Water has two H's on one O. Press **True scale** to see how much room the atoms really take up.
+    molecule: { id: water, card: true }
+
+  - id: s05
+    phase: build
+    type: rotate-and-identify
+    prompt: Turn water. Is the molecule bent or straight?
+    molecule: { id: water, view: end-on }
+    options:
+      - { id: a, text: Bent }
+      - { id: b, text: Straight }
+    answer: [a]
+    correct: Bent. From the side you see the angle at the O.
+    hints:
+      - match: [b]
+        text: From this side the two H's line up. Turn it a quarter turn and look again.
+      - text: Turn it until you can see both H's.
+    reveal: Bent, with the angle at the O.
+
+  - id: s06
+    phase: build
+    type: multiple-choice
+    prompt: Turn ammonia, NH₃, and look from the side. Is the N in the same plane as the three H's?
+    molecule: { id: ammonia, view: face-on, card: true }
+    options:
+      - { id: a, text: "Yes, it's flat" }
+      - { id: b, text: "No, the N sits above them" }
+    answer: [b]
+    correct: The N sits above the three H's, like the top of a pyramid.
+    hints:
+      - match: [a]
+        text: From the top it looks flat. Turn it to look from the side.
+      - text: Turn it to look from the side.
+    reveal: The N sits above the H's.
+
+  - id: s07
+    phase: build
+    type: explain
+    text: One view can hide a shape. Turn first, then judge.
+
+  - id: s08
+    phase: check
+    problem: u1-sample-p7
+
+  - id: s09
+    phase: check
+    problem: u1-sample-p8
+
+  - id: s10
+    phase: wrap
+    type: explain
+    text: You turned and measured real molecules. Their shapes come from where their atoms really are.
