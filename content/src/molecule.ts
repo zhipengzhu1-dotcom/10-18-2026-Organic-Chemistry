@@ -337,3 +337,6 @@ export function describeMolecule(m: Molecule, r: Matrix3): string {
   parts.push(`Nearest you: ${at(near)}. Farthest: ${at(far)}.`);
   return parts.join(" ");
 }
+
+/** Where an orbital shown only as A or B (Lesson 8, #86) loads its mesh: by the first 16 hex digits of its sha256, not its file name. */
+export const blindMesh = (sha256: string) => `/orbitals/m/${sha256.slice(0, 16)}.glb`;

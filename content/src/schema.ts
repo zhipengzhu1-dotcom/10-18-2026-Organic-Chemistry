@@ -37,17 +37,22 @@ const moleculeFields = {
   /** Bond-dipole arrows (from the cited Pauling electronegativities) and an Add button that sums them. */
   dipoles: z.boolean().optional(),
 };
+/** Computed orbitals drawn as lobes on the card (#70): `<orbital data file>/<orbital id>`. */
+const orbitals = z
+  .array(z.string().regex(/^[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9-]*$/, "must be <orbital data file>/<orbital id>"))
+  .min(1)
+  .optional();
 const moleculeUse = z.preprocess(
   (v) => (typeof v === "string" ? { id: v } : v),
   z.strictObject({
     ...moleculeFields,
-    /** Computed orbitals drawn as lobes on the card (#70): `<orbital data file>/<orbital id>`. */
-    orbitals: z
-      .array(z.string().regex(/^[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9-]*$/, "must be <orbital data file>/<orbital id>"))
-      .min(1)
-      .optional(),
+    orbitals,
+    /** Lesson 8 (#86): `hide` names each orbital only by its molecule's `label` (the spec's "labels: hide", shown as A/B). */
+    orbitalLabels: z.literal("hide").optional(),
+    /** Lesson 8 (#86): false switches tap-measuring off on the card. */
+    measure: z.literal(false).optional(),
     /** More molecules shown in the same card, switched with a segmented toggle (every molecule needs a `label`). */
-    toggle: z.array(z.strictObject(moleculeFields)).min(1).optional(),
+    toggle: z.array(z.strictObject({ ...moleculeFields, orbitals })).min(1).optional(),
   }),
 );
 const molecule = moleculeUse.optional();

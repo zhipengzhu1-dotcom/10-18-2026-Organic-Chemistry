@@ -1191,6 +1191,36 @@
     font: 500 16px/1 var(--at-font-data);
     text-transform: none;
   }
+  /* Orbitals A and B (Lesson 8, #86): a toggle on phones, side by side from 720px. */
+  .molecule-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1 1 260px;
+    min-height: 0;
+  }
+  .molecule-pair-cards {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    gap: 12px;
+  }
+  .molecule-pair-card {
+    display: none;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .molecule-pair-card.shown {
+    display: flex;
+  }
+  @media (min-width: 720px) {
+    .molecule-pair-toggle {
+      display: none;
+    }
+    .molecule-pair-card {
+      display: flex;
+    }
+  }
   .molecule-sheet {
     fill: var(--at-electron-fill);
     fill-opacity: 0.1;

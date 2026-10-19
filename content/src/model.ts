@@ -86,6 +86,10 @@ export interface MoleculeUse {
   dipoles?: { arrows: BondDipole[]; net: { vector: Vec3; size: number; zero: boolean } };
   /** The other molecules of a segmented toggle (this one is first). */
   toggle?: MoleculeUse[];
+  /** Lesson 8 (#86): orbitals named only by the molecule's label (A, B…), shown side by side on wide screens. */
+  orbitalLabels?: "hide";
+  /** Lesson 8 (#86): false = no tap-measuring on this card. */
+  measure?: false;
   /** Computed orbitals drawn as translucent lobes over the atoms (#70), in the order the Step lists them. */
   orbitals?: OrbitalUse[];
 }
