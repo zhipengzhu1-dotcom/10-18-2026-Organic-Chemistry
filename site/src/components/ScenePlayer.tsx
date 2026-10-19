@@ -16,6 +16,11 @@ interface Props {
   aspect?: Aspect;
   /** Controls drawn under the Scene (a Manipulate Step's slider). */
   children?: ReactNode;
+  /**
+   * No Play/Replay/Scrub row: for a short reveal Scene (5 s or less, so WCAG 2.2.2 needs no pause)
+   * that must fit a phone screen beside its feedback. It still plays once, or rests on its poster frame.
+   */
+  bare?: boolean;
 }
 
 /** Reduced motion from the OS setting or the site's switch (`<html data-motion="reduced">`). */
@@ -33,8 +38,9 @@ export function useReducedMotion(): boolean | undefined {
 
 type Action = ClockAction | { type: "open"; reducedMotion: boolean };
 
-export default function ScenePlayer({ sceneId, state, cited, loop = false, aspect = "16:9", children }: Props) {
+export default function ScenePlayer({ sceneId, state, cited, loop = false, aspect = "16:9", children, bare: asked = false }: Props) {
   const { manifest, Component } = sceneRegistry[sceneId];
+  const bare = asked || manifest.controls === false;
   const config: ClockConfig = { duration: manifest.duration, loop, posterT: manifest.poster.t };
   const reducedMotion = useReducedMotion();
   // Until the island knows the motion setting (and on the server) the Scene rests on its poster frame.
@@ -72,7 +78,7 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, aspec
   const seconds = (t: number) => `${t.toFixed(1)} of ${manifest.duration} seconds`;
 
   return (
-    <figure className="scene">
+    <figure className={bare ? "scene scene-bare" : "scene"}>
       <div
         className="scene-frame"
         role="img"
@@ -81,30 +87,32 @@ export default function ScenePlayer({ sceneId, state, cited, loop = false, aspec
       >
         <Component t={clock.t} state={state} aspect={aspect} reducedMotion={reducedMotion ?? false} cited={cited} />
       </div>
-      <div className="scene-controls">
-        <button
-          type="button"
-          aria-label={clock.playing ? "Pause" : "Play"}
-          className="scene-btn"
-          onClick={() => dispatch({ type: clock.playing ? "pause" : "play" })}
-        >
-          {clock.playing ? "❚❚" : "▶"}
-        </button>
-        <button type="button" aria-label="Replay" className="scene-btn" onClick={() => dispatch({ type: "replay" })}>
-          ↺
-        </button>
-        <input
-          type="range"
-          aria-label="Scrub"
-          min={0}
-          max={manifest.duration}
-          step={0.01}
-          value={clock.t}
-          aria-valuetext={seconds(clock.t)}
-          className="scene-range"
-          onChange={(e) => dispatch({ type: "seek", t: Number(e.target.value) })}
-        />
-      </div>
+      {!bare && (
+        <div className="scene-controls">
+          <button
+            type="button"
+            aria-label={clock.playing ? "Pause" : "Play"}
+            className="scene-btn"
+            onClick={() => dispatch({ type: clock.playing ? "pause" : "play" })}
+          >
+            {clock.playing ? "❚❚" : "▶"}
+          </button>
+          <button type="button" aria-label="Replay" className="scene-btn" onClick={() => dispatch({ type: "replay" })}>
+            ↺
+          </button>
+          <input
+            type="range"
+            aria-label="Scrub"
+            min={0}
+            max={manifest.duration}
+            step={0.01}
+            value={clock.t}
+            aria-valuetext={seconds(clock.t)}
+            className="scene-range"
+            onChange={(e) => dispatch({ type: "seek", t: Number(e.target.value) })}
+          />
+        </div>
+      )}
       {children}
       <p aria-live="polite" className="sr">
         {said}

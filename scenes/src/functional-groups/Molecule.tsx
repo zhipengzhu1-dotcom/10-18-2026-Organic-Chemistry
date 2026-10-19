@@ -29,6 +29,12 @@ export interface Placed {
   bounds: Box;
 }
 
+/** A structure's drawing size, in drawing units. */
+export function drawingSize(structure: Structure): { width: number; height: number } {
+  const { width, height } = drawStructure(structure, ["lone-pairs"]);
+  return { width, height };
+}
+
 /** The scale that fits a structure's drawing into a box. */
 export function fitScale(structure: Structure, box: Box): number {
   const drawing = drawStructure(structure, ["lone-pairs"]);

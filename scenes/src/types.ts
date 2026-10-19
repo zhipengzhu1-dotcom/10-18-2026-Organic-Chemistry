@@ -45,6 +45,11 @@ export interface SceneManifest<S extends SceneState = SceneState> {
   data: string[];
   /** Seconds one autoplay run lasts on the site (a Manipulate Step loops it). */
   duration: number;
+  /**
+   * false: the site shows no Play/Replay/Scrub row; the Scene plays once on entry (or rests on its
+   * poster frame) and must run 5 s or less (WCAG 2.2.2). Omitted: the controls show.
+   */
+  controls?: false;
   /** The frame shown paused under reduced motion and as the still: a time within `duration`. */
   poster: { t: number };
   /** How the video module renders the Scene with no input (#65). */

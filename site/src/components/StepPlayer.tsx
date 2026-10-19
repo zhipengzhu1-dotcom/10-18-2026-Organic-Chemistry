@@ -167,6 +167,14 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     setDraft("");
   }
 
+  // A reveal Scene arrives with the answer, plays once, and takes the place of what was answered
+  // (the Tap structure, or the figure and choices): it shows the molecule with the answer lit, and the
+  // feedback panel says it in words. Bare, so the Step still fits one phone screen.
+  const revealUse = screen.canContinue && step.type !== "explain" && "revealScene" in step ? step.revealScene : undefined;
+  const revealing = revealUse && (
+    <ScenePlayer key={`reveal-scene-${step.id}`} sceneId={revealUse.id} state={revealUse.state} cited={revealUse.cited} bare />
+  );
+
   const icon = feedback && { correct: "✓", hint: "✗", reveal: "→" }[feedback.kind];
   const words = feedback && { correct: "Correct.", hint: "Not quite.", reveal: "Answer:" }[feedback.kind];
 
@@ -198,7 +206,9 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <p className="player-prompt" {...html(step.prompt)} />
         )}
 
-        {step.type === "tap-to-identify" && (
+        {revealing}
+
+        {step.type === "tap-to-identify" && !revealing && (
           <StructureTap
             step={step}
             picked={chosen}
@@ -210,6 +220,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
 
         {step.scene && sceneState && (
           // Keyed per Step so entering a Step starts its Scene afresh (autoplay on entry).
+          // On the Lesson-end screen (the Wrap) it sits beside the Key idea card; see structure.css.
+          <div className={screen.done ? "scene-at-end" : "scene-in-step"} key={`scene-${step.id}`}>
           <ScenePlayer
             key={`scene-${step.id}`}
             sceneId={step.scene.id}
@@ -227,9 +239,10 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
               />
             )}
           </ScenePlayer>
+          </div>
         )}
 
-        {step.type === "multiple-choice" && step.figure && (
+        {step.type === "multiple-choice" && step.figure && !revealing && (
           // The structures the question is about: pre-rendered SVG, each named for screen readers.
           <div className="step-figure">
             {step.figure.map((f, i) => (
@@ -240,8 +253,14 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           </div>
         )}
 
-        {step.type === "multiple-choice" && (
-          <div className="opts" role="group" aria-label="Choices">
+        {step.type === "multiple-choice" && !revealing && (
+          // Short text choices sit in two columns as chips when there are many of them, or when a
+          // figure shares the screen (Lesson 5's capsaicin and its "which group?" Steps).
+          <div
+            className={["opts", chips(step)].filter(Boolean).join(" ")}
+            role="group"
+            aria-label="Choices"
+          >
             {step.options.map((o) =>
               o.structure ? (
                 // A structure card: the drawing is pre-rendered SVG; its text is the screen-reader label.
@@ -282,16 +301,6 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
             order={order}
             onChange={(o) => setRanked({ stepId: step.id, order: o })}
             locked={screen.canContinue}
-          />
-        )}
-
-        {screen.canContinue && step.type !== "explain" && "revealScene" in step && step.revealScene && (
-          // The reveal Scene arrives with the answer and plays once.
-          <ScenePlayer
-            key={`reveal-scene-${step.id}`}
-            sceneId={step.revealScene.id}
-            state={step.revealScene.state}
-            cited={step.revealScene.cited}
           />
         )}
 
@@ -356,6 +365,22 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
       </div>
     </div>
   );
+}
+
+/** Short text for a chip, and a single word or two: under this many characters (HTML tags aside). */
+const CHIP_TEXT = 42;
+const WORD_TEXT = 12;
+
+/**
+ * How text choices are laid out: as word chips, as many to a row as fit (six or more one-word choices,
+ * e.g. group names), or two to a row (short choices under a figure); else one to a row.
+ */
+function chips(step: { options: { text: string; structure?: unknown }[]; figure?: unknown[] }): string | undefined {
+  if (step.options.some((o) => o.structure)) return undefined;
+  const longest = Math.max(...step.options.map((o) => plain(o.text).length));
+  if (step.options.length >= 6 && longest < WORD_TEXT) return "opts-words";
+  if (step.options.length >= 6 || (step.figure && longest < CHIP_TEXT)) return "opts-chips";
+  return undefined;
 }
 
 /** Reads what the Student typed: accepts a comma decimal and a typographic minus; NaN when it isn't a number. */

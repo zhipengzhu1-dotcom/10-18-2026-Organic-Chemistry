@@ -143,6 +143,8 @@ export const groupSpotlight: SceneManifest<SpotlightState> = {
   reducedMotion: "Opens paused on the poster frame with every group lit and labelled at once.",
   data: [],
   duration: DURATION,
+  // A short one-shot deal / light-up: no Play/Replay/Scrub, so the Step fits a phone screen.
+  controls: false,
   poster: { t: DURATION },
   video: {
     duration: 6,

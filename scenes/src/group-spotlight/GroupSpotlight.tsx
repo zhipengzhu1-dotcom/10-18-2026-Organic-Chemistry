@@ -1,18 +1,19 @@
 // group-spotlight: a pure function of (t, state); see manifest.ts.
 import { frameSize, safeArea, type Box } from "../frame.ts";
 import { fgStructures } from "../functional-groups/structures.ts";
-import { centreOf, CYAN, fitScale, FONT_DATA, FONT_TEXT, HALO, INK, Molecule, MUTED, placeMolecule, type Placed } from "../functional-groups/Molecule.tsx";
+import { centreOf, CYAN, drawingSize, fitScale, FONT_DATA, FONT_TEXT, HALO, INK, Molecule, MUTED, placeMolecule, type Placed } from "../functional-groups/Molecule.tsx";
 import type { Aspect, SceneProps } from "../types.ts";
 import { litAmount, views, type SpotlightState } from "./manifest.ts";
 
-const NAME_PX = 34;
-const PIECE_PX = 28;
-const CHIP_PAD = 14;
+// Chips are large for the frame because the site shows the 16:9 frame at phone width too.
+const NAME_PX = 48;
+const PIECE_PX = 38;
+const CHIP_PAD = 12;
 const CHIP_GAP = 10;
 /** Room kept around the molecules for label chips, as a share of the area. */
-const CHIP_ROOM = 0.14;
+const CHIP_ROOM = 0.1;
 /** Small molecules stop growing here (frame px per drawing unit). */
-const MAX_SCALE = 2.2;
+const MAX_SCALE = 3;
 
 interface Layout {
   placed: Placed[];
@@ -26,11 +27,18 @@ function layout(view: string, aspect: Aspect): Layout {
   const n = molecules.length;
   const across = aspect === "16:9";
   const inset = { x: area.w * CHIP_ROOM * (across ? 0.6 : 0.3), y: area.h * CHIP_ROOM * (across ? 1 : 0.5) };
+  // Each molecule's slot is in proportion to its drawing (its width side by side, its height stacked).
+  const sizes = molecules.map((m) => drawingSize(fgStructures[m.id]));
+  const shares = sizes.map((s) => (across ? s.width : s.height));
+  const total = shares.reduce((a, b) => a + b, 0);
+  let start = 0;
   const slots = molecules.map((_, i): Box => {
+    const share = shares[i] / total;
     const slot: Box = across
-      ? { x: area.x + (area.w / n) * i, y: area.y, w: area.w / n, h: area.h }
-      : { x: area.x, y: area.y + (area.h / n) * i, w: area.w, h: area.h / n };
-    return { x: slot.x + inset.x, y: slot.y + inset.y, w: slot.w - 2 * inset.x, h: slot.h - 2 * inset.y };
+      ? { x: area.x + area.w * start, y: area.y, w: area.w * share, h: area.h }
+      : { x: area.x, y: area.y + area.h * start, w: area.w, h: area.h * share };
+    start += share;
+    return { x: slot.x + inset.x / n, y: slot.y + inset.y, w: slot.w - (2 * inset.x) / n, h: slot.h - 2 * inset.y };
   });
   // Side by side, molecules share one scale so their sizes compare honestly.
   const scale = Math.min(MAX_SCALE, ...molecules.map((m, i) => fitScale(fgStructures[m.id], slots[i])));
