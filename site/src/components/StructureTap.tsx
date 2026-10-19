@@ -57,6 +57,15 @@ export default function StructureTap({ step, picked, answer, locked, onToggle }:
           {dragged ? step.tapOnly.drag : step.tapOnly.idle}
         </p>
       )}
+      {step.compare?.drawn && (
+        // The structure to compare against: drawn smaller above, not tappable.
+        <div
+          className="structure-svg tap-compare"
+          role="img"
+          aria-label={`${step.compare.structure.captions?.[0]?.text ?? "Another structure"}, drawn above to compare`}
+          dangerouslySetInnerHTML={{ __html: step.compare.drawn.svg }}
+        />
+      )}
       <div
         className="tap-structure"
         onPointerDown={(e) => (downAt.current = { x: e.clientX, y: e.clientY })}

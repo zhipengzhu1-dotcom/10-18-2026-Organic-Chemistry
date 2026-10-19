@@ -81,6 +81,16 @@ describe("2D structure renderer", () => {
     expect(count(drawStructure(lineAngle).svg, "bond-wedge")).toBe(1);
   });
 
+  it("writes a structure's captions (names under or over a drawing) inside its frame", () => {
+    const named: Structure = { ...methoxide, captions: [{ text: "Methoxide", x: 0, y: 3 }] };
+    const drawing = drawStructure(named);
+    const caption = drawing.svg.match(/<text class="caption" x="([\d.]+)" y="([\d.]+)"[^>]*>Methoxide<\/text>/);
+    expect(caption).not.toBeNull();
+    expect(Number(caption![1])).toBeCloseTo(drawing.atoms.a1.x);
+    expect(Number(caption![2])).toBeLessThan(drawing.height);
+    expect(drawing.height).toBeGreaterThan(drawStructure(methoxide).height);
+  });
+
   it("gives each atom and bond a position for hit areas, scaled so a bond is 60 px", () => {
     const { atoms, bonds } = drawStructure(methoxide);
     expect(Math.hypot(atoms.a2.x - atoms.a1.x, atoms.a2.y - atoms.a1.y)).toBeCloseTo(60);

@@ -7,6 +7,10 @@
 .opts .structure-card { display: grid; place-items: center; padding: 8px; }
 .structure-card .structure { max-height: 7rem; }
 .tap-only-cue { margin: 0; padding: 8px 12px; color: var(--at-ink-muted); border: var(--at-border) dashed var(--at-line); }
+/* A structure drawn above a Tap structure to compare against (#78): smaller, not tappable. */
+.tap-compare { width: 62%; margin: 0 auto 4px; }
+.tap-compare .structure { width: 100%; }
+.structure .caption { font-family: var(--at-font-text); }
 .tap-structure { position: relative; touch-action: manipulation; }
 .tap-structure .structure-svg .structure { width: 100%; }
 .tap-layer { position: absolute; inset: 0; width: 100%; height: 100%; }

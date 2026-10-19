@@ -5,6 +5,11 @@ import { drawStructure, type Segment } from "@astratron/scenes";
 
 /** Hit radius around an atom: a 48 px tap target at natural size. */
 const ATOM_HIT = 24;
+/**
+ * Hit radius of a region of one atom: still 48 px when a drawing about 500 px wide (a steroid)
+ * scales to a phone's column, and clear of a neighbour's 24 px circle one 60 px bond away.
+ */
+const LONE_REGION_HIT = 34;
 
 export function drawView(view: StructureView, targets: TapTarget[] = []): StructureView {
   const drawing = drawStructure(view.structure, view.hide);
@@ -20,7 +25,8 @@ export function drawView(view: StructureView, targets: TapTarget[] = []): Struct
     } else {
       const inRegion = new Set(t.atoms);
       hits[t.id] = {
-        circles: (t.atoms ?? []).map((a) => ({ ...drawing.atoms[a], r: ATOM_HIT })),
+        // A one-atom region (a methyl) is a small target in a wide drawing: give it more room.
+        circles: (t.atoms ?? []).map((a) => ({ ...drawing.atoms[a], r: t.atoms?.length === 1 ? LONE_REGION_HIT : ATOM_HIT })),
         segments: [...bondsOf.values()]
           .filter((b) => inRegion.has(b.a) && inRegion.has(b.b))
           .map((b) => drawing.bonds[b.id]),

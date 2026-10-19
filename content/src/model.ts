@@ -276,6 +276,8 @@ export interface Structure {
   source?: string;
   atoms: StructureAtom[];
   bonds: StructureBond[];
+  /** Names written on the drawing (e.g. "Estradiol" over one of two molecules), in layout units. */
+  captions?: { text: string; x: number; y: number }[];
 }
 
 /** What a Step may hide in a drawing (e.g. "The charges have been hidden"). */
@@ -338,6 +340,8 @@ export interface TapStep {
   type: "tap-to-identify";
   prompt: string;
   structure: StructureView;
+  /** A second structure drawn above to compare against; not tappable. */
+  compare?: StructureView;
   targets: TapTarget[];
   /** The exact set of target ids to pick. */
   answer: string[];

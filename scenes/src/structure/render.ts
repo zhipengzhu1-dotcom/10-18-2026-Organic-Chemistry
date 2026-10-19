@@ -52,8 +52,9 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
   const showLonePairs = !hide.includes("lone-pairs");
   const scale = BOND_PX / typicalBondLength(structure);
 
-  const xs = structure.atoms.map((a) => a.x * scale);
-  const ys = structure.atoms.map((a) => a.y * scale);
+  const captions = structure.captions ?? [];
+  const xs = [...structure.atoms, ...captions].map((a) => a.x * scale);
+  const ys = [...structure.atoms, ...captions].map((a) => a.y * scale);
   const minX = Math.min(...xs) - PAD - CHAR_W * 2;
   const minY = Math.min(...ys) - PAD;
   const maxX = Math.max(...xs) + PAD + CHAR_W * 2;
@@ -164,6 +165,12 @@ export function drawStructure(structure: Structure, hide: Hidden[] = []): Drawin
       }
     }
   }
+
+  // Captions name a drawing (e.g. two molecules shown together); set in the text face.
+  for (const c of captions)
+    parts.push(
+      `<text class="caption" x="${r1(c.x * scale - minX)}" y="${r1(c.y * scale - minY)}" text-anchor="middle" dominant-baseline="central" font-size="${FONT}" fill="currentColor" style="font-family: var(--at-font-text, system-ui, sans-serif)">${c.text}</text>`,
+    );
 
   const viewBox = `0 0 ${width} ${height}`;
   const svg =

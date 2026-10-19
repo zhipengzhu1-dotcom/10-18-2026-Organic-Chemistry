@@ -18,7 +18,7 @@ import {
 } from "./arrows.ts";
 
 type TapFile = Extract<ProblemFile, { type: "tap-to-identify" }>;
-type TapFields = Pick<TapFile, "structure" | "hide" | "tappable" | "answer" | "hints">;
+type TapFields = Pick<TapFile, "structure" | "compare" | "hide" | "tappable" | "answer" | "hints">;
 type OptionFile = Extract<ProblemFile, { type: "multiple-choice" }>["options"][number];
 
 /** Internal consistency of one structure file. */
@@ -59,8 +59,13 @@ export function resolveTap(
   item: TapFields,
   structures: Map<string, Structure | undefined>,
   errors: string[],
-): { structure: StructureView; targets: TapTarget[] } | undefined {
+): { structure: StructureView; targets: TapTarget[]; compare?: StructureView } | undefined {
   const structure = structures.get(item.structure);
+  const compare = item.compare === undefined ? undefined : structures.get(item.compare);
+  if (item.compare !== undefined && !compare) {
+    if (!structures.has(item.compare)) errors.push(`structure "${item.compare}" not found`);
+    return undefined;
+  }
   if (!structure) {
     if (!structures.has(item.structure)) errors.push(`structure "${item.structure}" not found`);
     return undefined;
@@ -111,7 +116,7 @@ export function resolveTap(
   for (const id of item.answer) if (!tappable.has(id)) errors.push(`answer names "${id}", which can't be tapped`);
   for (const hint of item.hints ?? [])
     for (const id of hintIds(hint)) if (!tappable.has(id)) errors.push(`a Hint names "${id}", which can't be tapped`);
-  return { structure: view(structure, item.hide), targets };
+  return { structure: view(structure, item.hide), targets, ...(compare && { compare: view(compare, item.hide) }) };
 }
 
 type ArrowsFile = Extract<ProblemFile, { type: "draw-arrows" }>;

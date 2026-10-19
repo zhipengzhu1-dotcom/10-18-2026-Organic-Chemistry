@@ -39,7 +39,7 @@ import { checkStructure, resolveArrows, resolveOptions, resolveTap } from "./str
 /** What a graded Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
 type StructureFields =
   | { options: Option[] }
-  | { structure: StructureView; targets: TapTarget[] }
+  | { structure: StructureView; targets: TapTarget[]; compare?: StructureView }
   | { start: StructureView; target?: StructureView; results: Structure[] };
 type Structured = Map<string, StructureFields | undefined>;
 

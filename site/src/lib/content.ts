@@ -156,6 +156,7 @@ export function renderStep(s: Step): Step {
         ...s,
         ...shared,
         structure: drawView(s.structure, s.targets),
+        ...(s.compare && { compare: drawView(s.compare) }),
         hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
       };
     case "numeric":

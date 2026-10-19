@@ -45,6 +45,8 @@ const tapToIdentify = {
   prompt: text,
   /** The structure file drawn. */
   structure: id,
+  /** A second structure drawn above it to compare against (not tappable), e.g. estradiol over testosterone. */
+  compare: id.optional(),
   hide,
   /** What can be tapped: atom and bond ids of the structure ("all" for every one), and named regions (fixed atom sets). */
   tappable: z.strictObject({
@@ -324,6 +326,8 @@ export const structureFile = z.strictObject({
       }),
     )
     .default([]),
+  /** Names written on the drawing, in layout units (e.g. above each of two molecules drawn together). */
+  captions: z.array(z.strictObject({ text, x: z.number(), y: z.number() })).optional(),
 });
 
 export type LessonFile = z.infer<typeof lessonFile>;
