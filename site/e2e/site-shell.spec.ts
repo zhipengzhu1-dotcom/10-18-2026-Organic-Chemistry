@@ -81,7 +81,11 @@ test.describe("without scripts", () => {
       for (const step of lesson.steps) {
         for (const shown of shownText(step)) expect(text, `${lesson.url}#${step.id}`).toContain(plain(shown));
         if (step.type === "explain") continue;
-        const secrets = [step.correct, step.reveal, ...(step.hints ?? []).map((h) => h.text)].filter(Boolean) as string[];
+        const secrets = (
+          step.type === "manipulate-goal"
+            ? step.stages.flatMap((s) => [s.correct, s.blocked, s.idle])
+            : [step.correct, step.reveal, ...(step.hints ?? []).map((h) => h.text)]
+        ).filter(Boolean) as string[];
         for (const secret of secrets.map(plain).filter((s) => !shownEverywhere.includes(s)))
           expect(text, `${lesson.url}#${step.id} leaks`).not.toContain(secret);
       }
