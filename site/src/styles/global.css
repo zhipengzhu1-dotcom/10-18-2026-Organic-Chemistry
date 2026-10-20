@@ -386,6 +386,22 @@
   .player-body p {
     margin: 0;
   }
+  /* Explain text is block Markdown: space its paragraphs and lists. */
+  .explain-text > * + * {
+    margin-top: 10px;
+  }
+  .explain-text ol,
+  .explain-text ul {
+    margin: 0;
+    padding-left: 1.4em;
+  }
+  /* On a phone the Lesson-end screen (Wrap text, key idea, two buttons) has no room left for the
+     Wrap's still final frame, so the key idea card stands in for it there; wider screens show both. */
+  @media (max-width: 480px) {
+    .player-body:has(> .card) .scene-still {
+      display: none;
+    }
+  }
   .player-prompt {
     font: 700 20px/1.3 var(--at-font-text);
   }

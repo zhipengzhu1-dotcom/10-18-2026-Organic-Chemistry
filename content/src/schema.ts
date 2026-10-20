@@ -58,7 +58,7 @@ const hide = z.array(z.enum(["charges", "lone-pairs"])).optional();
 /** A text option, or a structure card: `structure` names a structure file and `text` is then its screen-reader label. */
 const option = z.strictObject({ id, text, structure: id.optional(), hide });
 
-/** A text-only card (Rank items; structure Rank cards are not resolved yet). */
+/** A text-only card (Rotate-and-identify choices). */
 const textOption = z.strictObject({ id, text });
 
 /** A named start view; see ViewSpec in molecule.ts. Atoms are 0-based indices in the data file's order. */
@@ -149,6 +149,9 @@ const multipleChoice = {
   reveal: text,
 };
 
+/** One curved arrow: `from` an atom id (its lone pair) or a bond id; `to` an atom id or a bond id. */
+const push = z.strictObject({ from: id, to: id });
+
 /** Fields shared by a Tap-to-identify Step and Problem. */
 const tapToIdentify = {
   ...gradedVisuals,
@@ -175,6 +178,8 @@ const tapToIdentify = {
   reveal: text,
   /** The tap-only cue, required when the Step sits among Draw-arrows Steps: the idle callout and the message on a drag. */
   tapOnly: z.strictObject({ idle: text, drag: text }).optional(),
+  /** Pushes played (push-replay) once the Step is answered, in place of the drawing: they turn `start` into `result`. Secret. */
+  replay: z.strictObject({ start: id, result: id, pushes: z.array(push).min(1) }).optional(),
 };
 
 /** A Numeric Hint: `match` is a common wrong value, matched within the Step's tolerance. */
@@ -204,6 +209,8 @@ const rankHint = z.strictObject({
   notFirst: id.optional(),
   notLast: id.optional(),
   before: z.tuple([id, id]).optional(),
+  /** At least one of these [upper, lower] pairs has its first item above its second (Lesson 7: "`c` or `d` above `a` or `b`"). */
+  above: z.array(z.tuple([id, id])).min(1).optional(),
   text,
 });
 
@@ -213,14 +220,16 @@ const rank = {
   type: z.literal("rank"),
   molecule,
   prompt: text,
-  /** The cards, in the order they start in. */
-  items: z.array(textOption).min(2),
+  /** The cards, in the order they start in: text, or structure cards (Lesson 7). */
+  items: z.array(option).min(2),
   /** The one strict order of item ids, first to last. */
   answer: z.array(id).min(2),
   correct: text.optional(),
   /** A Rank Hint's `match` is one whole wrong order; `notFirst`, `notLast` and `before` name a pattern. */
   hints: z.array(rankHint).optional(),
   reveal: text,
+  /** Shown on each card once the Step is answered, in the right order: why it sits there (secret: it gives the order away). */
+  revealTags: z.record(id, text).optional(),
 };
 
 /**
@@ -274,9 +283,6 @@ const goalStage = z.strictObject({
   /** The Hint after `idleSeconds` with no move (a second idle shows the next move as a nudge). */
   idle: text,
 });
-
-/** One curved arrow: `from` an atom id (its lone pair) or a bond id; `to` an atom id or a bond id. */
-const push = z.strictObject({ from: id, to: id });
 
 /**
  * A Draw-arrows Hint, matched on the wrong push: `from` = it starts at one of these (atom ids =

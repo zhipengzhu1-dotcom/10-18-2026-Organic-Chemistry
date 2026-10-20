@@ -6,9 +6,9 @@ import type { GoalStep, GradedStep, Lesson, Step } from "@astratron/content";
 
 // Draw arrows: `results` (accepted results) and `inBetween` (flag copy) grade pushes, so they are secret too;
 // the start and the target the Step shows stay on the page.
-// A goal-state Manipulate Step's `stages` hold its goals, Correct lines and Hints; a `revealScene`
-// shows the answer (e.g. the Hook's reveal), so both are secret too.
-const SECRET_FIELDS = ["answer", "tolerance", "correct", "hints", "reveal", "results", "inBetween", "stages", "revealScene"] as const;
+// A goal-state Manipulate Step's `stages` hold its goals, Correct lines and Hints; a `revealScene`, a Tap
+// Step's `replay` and a Rank Step's `revealTags` show the answer, so all are secret too.
+const SECRET_FIELDS = ["answer", "tolerance", "correct", "hints", "reveal", "results", "inBetween", "stages", "revealScene", "replay", "revealTags"] as const;
 type Secret = (typeof SECRET_FIELDS)[number];
 type Shown<S> = S extends GradedStep | GoalStep ? Omit<S, Extract<Secret, keyof S>> : S;
 

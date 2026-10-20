@@ -204,14 +204,16 @@ export interface RankStep extends GradedVisuals {
   phase: Phase;
   type: "rank";
   prompt: string;
-  /** In the order the cards start in. */
-  items: { id: string; text: string }[];
+  /** In the order the cards start in; a structure card's text is its screen-reader label (Lesson 7). */
+  items: Option[];
   /** The one correct order of item ids, first to last. */
   answer: string[];
   correct?: string;
   /** A Hint's `match` is one whole wrong order; or it names a pattern (see RankHint). */
   hints?: RankHint[];
   reveal: string;
+  /** Once answered, each card's note on why it sits there; secret (it gives the order away). */
+  revealTags?: Record<string, string>;
   problemId?: string;
   scene?: SceneUse;
   molecule?: MoleculeUse;
@@ -220,7 +222,7 @@ export interface RankStep extends GradedVisuals {
 
 /**
  * A Rank Hint. Every condition given must hold: `match` = this whole order; `notFirst` /
- * `notLast` = that item isn't at that end; `before: [x, y]` = x is placed before y.
+ * `notLast` = that item isn't at that end; `before: [x, y]` = x is placed before y; `above` = any one of its [x, y] pairs is.
  * The generic fallback has no condition.
  */
 export interface RankHint {
@@ -228,6 +230,8 @@ export interface RankHint {
   notFirst?: string;
   notLast?: string;
   before?: [string, string];
+  /** At least one of these [upper, lower] pairs has its first item above its second. */
+  above?: [string, string][];
   text: string;
 }
 
@@ -492,6 +496,8 @@ export interface TapStep extends GradedVisuals {
   reveal: string;
   /** Shown when the Step sits among Draw-arrows Steps: it is tap-only. */
   tapOnly?: { idle: string; drag: string };
+  /** Played (push-replay) in place of the drawing once the Step is answered: pushes on `start` that make the δ site (Lesson 7). Secret. */
+  replay?: { start: Structure; pushes: Push[] };
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];

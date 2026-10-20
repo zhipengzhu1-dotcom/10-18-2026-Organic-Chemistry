@@ -4,6 +4,22 @@
 import { describe, expect, it } from "vitest";
 import { buildContent, type DrawArrowsStep, type Lesson } from "../src/index.ts";
 import { lesson, problem, sampleSteps, validTree, writeTree, type Tree } from "./tree.ts";
+import { electrons, moleculeOf } from "../src/arrows.ts";
+
+it("a lettered line-angle carbon that writes its H's (CH₂) gets no implied H's on top (Lesson 7)", () => {
+  const vinyl = {
+    id: "ethylene",
+    style: "line-angle" as const,
+    atoms: [
+      { id: "a1", el: "C", x: 0, y: 0, letter: true, h: 2 },
+      { id: "a2", el: "C", x: 1.5, y: 0 },
+    ],
+    bonds: [{ id: "b1", a: "a1", b: "a2", order: 2 as const }],
+  };
+  const m = moleculeOf(vinyl);
+  expect(m.atoms.map((a) => a.h)).toEqual([2, 2]);
+  expect(electrons(m).get("a1")).toBe(8);
+});
 
 const L = "chem/lessons/l1.yaml";
 
@@ -217,5 +233,28 @@ describe("The tap-only cue among Draw-arrows Steps", () => {
 
   it("a Lesson without Draw-arrows Steps needs no cue", () => {
     expect(build(treeWith({ 2: tapStep() })).errors).toEqual([]);
+  });
+});
+
+describe("A Tap-to-identify reveal can replay pushes (Lesson 7 u1-res-enamine-site)", () => {
+  const replay = { start: "formaldehyde", result: "formaldehyde-polar", pushes: [{ from: "b1", to: "a2" }] };
+
+  it("resolves the replay's start and pushes", () => {
+    const tree = treeWith({ 2: tapStep({ replay }) });
+    expect(build(tree).errors).toEqual([]);
+    const step = lessonOf(tree).steps[2];
+    if (step.type !== "tap-to-identify") throw new Error(step.type);
+    expect(step.replay?.start.id).toBe("formaldehyde");
+    expect(step.replay?.pushes).toEqual([{ from: "b1", to: "a2" }]);
+  });
+
+  it("checks the replay's pushes reach its result, as a Draw-arrows answer is checked", () => {
+    const wrong = { ...replay, pushes: [{ from: "b1", to: "a1" }] };
+    expect(build(treeWith({ 2: tapStep({ replay: wrong }) })).errors).toEqual([
+      `${L}: step s03: replay: push 1 (π bond C1=O2 → C1) is not a step toward an accepted result`,
+    ]);
+    expect(build(treeWith({ 2: tapStep({ replay: { ...replay, result: "nope" } }) })).errors).toEqual([
+      `${L}: step s03: replay: structure "nope" not found`,
+    ]);
   });
 });

@@ -18,6 +18,10 @@ import { acetateBondLengths } from "./acetate-bond-lengths/manifest.ts";
 import { formaldehydePiShift } from "./formaldehyde-pi-shift/manifest.ts";
 import { threeMoves } from "./three-moves/manifest.ts";
 import { acetateHybrid } from "./acetate-hybrid/manifest.ts";
+import { amideCnLengths } from "./amide-cn-lengths/manifest.ts";
+import { amideHybrid } from "./amide-hybrid/manifest.ts";
+import { ruleLadder } from "./rule-ladder/manifest.ts";
+import { carbonylSites } from "./carbonyl-sites/manifest.ts";
 
 // Lesson 0 (#78)
 import { buildBySharing } from "./build-by-sharing/manifest.ts";
@@ -56,4 +60,9 @@ export const sceneManifests: readonly SceneManifest<any>[] = [
   formaldehydePiShift,
   threeMoves,
   acetateHybrid,
+  // Lesson 7 (#85)
+  amideCnLengths,
+  amideHybrid,
+  ruleLadder,
+  carbonylSites,
 ];

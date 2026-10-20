@@ -250,7 +250,8 @@ function judge(step: GradedStep, answer: Answer): { right: boolean; hint?: { tex
         (!h.match || sameOrder(h.match, order)) &&
         (!h.notFirst || at(h.notFirst) !== 0) &&
         (!h.notLast || at(h.notLast) !== order.length - 1) &&
-        (!h.before || at(h.before[0]) < at(h.before[1]));
+        (!h.before || at(h.before[0]) < at(h.before[1])) &&
+        (!h.above || h.above.some(([upper, lower]) => at(upper) < at(lower)));
       return { right: sameOrder(order, step.answer), hint: step.hints?.find(fits) };
     }
     case "manipulate": {
