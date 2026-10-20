@@ -25,9 +25,16 @@ function write(key: string, value: string | null) {
 /** A model and effort pair, as the picker's option value: `model|effort`. */
 export const pairOf = (model: string, effort: string) => `${model}|${effort}`;
 
+/** The model and effort in a picker value; none for an empty one (the route then runs its default). */
+export function parsePick(pair: string): { model?: string; effort?: string } {
+  if (!pair) return {};
+  const [model, effort] = pair.split("|");
+  return { model, effort };
+}
+
 /** The remembered pair if the route still offers it, else the route's default. */
 export function storedPick(choices: TutorChoices): string {
-  const [model, effort] = (read(PICK) ?? "").split("|");
+  const { model = "", effort = "" } = parsePick(read(PICK) ?? "");
   return model in choices.models && choices.efforts.includes(effort) ? pairOf(model, effort) : pairOf(choices.model, choices.effort);
 }
 export const storePick = (pair: string) => write(PICK, pair);

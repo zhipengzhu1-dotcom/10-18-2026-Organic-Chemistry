@@ -2,9 +2,9 @@
    from the bottom on phones and a side panel from 720px. Arcade Cosmos tokens only, so both
    themes follow. Motion: 420ms snap slide plus a fade; reduced motion (global.css) leaves the fade. */
 
-/* The Ask button takes a column of its own in the top bar. */
-/* Its own column in the top bar; a tighter gap keeps the story bars visible on a 390px phone. */
-.player-top:has(.tutor-ask) {
+/* The Ask button (or, switched off, the header's switch alone, unchecked) takes a column of its own
+   in the top bar; a tighter gap keeps the story bars visible on a 390px phone. */
+.player-top:is(:has(.tutor-ask), :has(.tutor-wake)) {
   grid-template-columns: var(--at-tap) var(--at-tap) minmax(0, 1fr) auto max-content;
   gap: 8px;
 }
@@ -32,9 +32,10 @@
   pointer-events: none;
   transition: opacity var(--at-dur-ui) linear;
 }
-/* Opened from the keyboard: no slide, no fade. */
+/* Opened from the keyboard: no slide, no fade. Swiped: the sheet follows the finger. */
 .tutor-scrim[data-instant="true"],
-.tutor-panel[data-instant="true"] {
+.tutor-panel[data-instant="true"],
+.tutor-panel[data-dragging="true"] {
   transition: none;
 }
 .tutor-scrim[data-open="true"] {
@@ -42,7 +43,8 @@
   pointer-events: auto;
 }
 
-/* Phones: a sheet over the bottom of the Step; the Step stays visible above it. */
+/* Phones: a sheet over the bottom of the Step; the Step stays visible above it. A swipe down its
+   header closes it (TutorPanel), so the header takes no browser panning. */
 .tutor-panel {
   position: fixed;
   left: 0;
@@ -69,37 +71,28 @@
   pointer-events: auto;
 }
 
-/* From 720px: a side panel beside the Step, which moves over to make room. */
-@media (min-width: 720px) {
-  :root {
-    --tutor-width: min(400px, 45vw);
-  }
-  .tutor-scrim {
-    display: none;
-  }
-  .tutor-panel {
-    left: auto;
-    top: 0;
-    width: var(--tutor-width);
-    height: auto;
-    border-top: 0;
-    border-left: var(--at-border-strong) solid var(--at-line);
-    transform: translateX(100%);
-  }
-  :root[data-tutor="open"] .player {
-    padding-right: var(--tutor-width);
-  }
-}
-
+/* The header: title, the on/off switch and close on one row, the model and effort picker on its
+   own row under them; on phones a grip bar above says it can be swiped down. */
 .tutor-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 8px var(--at-gutter);
   border-bottom: var(--at-border) solid var(--at-line);
+  touch-action: none;
+}
+.tutor-head::before {
+  content: "";
+  order: -1;
+  flex: 0 0 100%;
+  height: 4px;
+  margin-bottom: -6px;
+  background: linear-gradient(var(--at-line), var(--at-line)) center / 40px 4px no-repeat;
 }
 .tutor-head h2 {
+  flex: 1;
   margin: 0;
   color: var(--at-electron);
 }
@@ -113,6 +106,32 @@
   background: transparent;
   border: var(--at-border) solid var(--at-line);
   cursor: pointer;
+}
+
+/* From 720px: a side panel beside the Step, which moves over to make room. */
+@media (min-width: 720px) {
+  :root {
+    --tutor-width: min(400px, 45vw);
+  }
+  .tutor-scrim,
+  .tutor-head::before {
+    display: none;
+  }
+  .tutor-panel {
+    left: auto;
+    top: 0;
+    width: var(--tutor-width);
+    height: auto;
+    border-top: 0;
+    border-left: var(--at-border-strong) solid var(--at-line);
+    transform: translateX(100%);
+  }
+  .tutor-head {
+    touch-action: auto;
+  }
+  :root[data-tutor="open"] .player {
+    padding-right: var(--tutor-width);
+  }
 }
 
 .tutor-thread {
@@ -168,6 +187,13 @@
 .tutor-who {
   color: var(--at-ink-muted);
 }
+/* The meta line under a finished reply (#106): model, effort and seconds. */
+.tutor-meta {
+  display: block;
+  margin-top: 6px;
+  font-size: 16px;
+  color: var(--at-ink-muted);
+}
 .tutor-end {
   height: 0;
 }
@@ -179,37 +205,48 @@
   padding: 10px var(--at-gutter) 0;
   border-top: var(--at-border) solid var(--at-line);
 }
-.tutor-chip {
-  min-height: var(--at-tap);
-  padding: 0 12px;
-  font: 400 var(--at-body-size) / 1.2 var(--at-font-text);
-  color: var(--at-electron);
-  background: transparent;
-  border: var(--at-border) solid var(--at-electron);
-  cursor: pointer;
-}
-.tutor-chip:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
 .tutor-form {
   display: flex;
   gap: 10px;
   padding: 10px var(--at-gutter) 14px;
 }
-.tutor-form input {
-  flex: 1;
-  min-width: 0;
+/* Chips, the field and the picker share the body face at body size. The picker's options name
+   models with version numbers ("Sonnet 5.5"), and an option can't hold a span, so it takes the data face. */
+.tutor-chip,
+.tutor-form input,
+.tutor-pick {
   min-height: var(--at-tap);
   padding: 0 12px;
   font: 400 var(--at-body-size) / 1.2 var(--at-font-text);
+}
+.tutor-pick {
+  font-family: var(--at-font-data);
+}
+.tutor-chip {
+  color: var(--at-electron);
+  background: transparent;
+  border: var(--at-border) solid var(--at-electron);
+  cursor: pointer;
+}
+.tutor-form input,
+.tutor-pick {
   color: var(--at-ink);
   background: var(--at-space);
   border: var(--at-border) solid var(--at-line);
 }
+.tutor-form input {
+  flex: 1;
+  min-width: 0;
+}
 .tutor-form input::placeholder {
   color: var(--at-ink-muted);
 }
+.tutor-pick {
+  order: 1;
+  flex-basis: 100%;
+  cursor: pointer;
+}
+.tutor-chip:disabled,
 .tutor-form .btn:disabled {
   opacity: 0.6;
   cursor: default;
@@ -224,35 +261,4 @@
   stroke-width: 3px;
   stroke-linecap: round;
   pointer-events: none;
-}
-
-/* Settings (#106): the model and effort picker on its own row under the header, the on/off
-   switch beside the close control, and the meta line under each finished reply. */
-.tutor-head {
-  flex-wrap: wrap;
-}
-.tutor-head h2 {
-  flex: 1;
-}
-.tutor-pick {
-  order: 1;
-  flex-basis: 100%;
-  min-height: var(--at-tap);
-  padding: 0 10px;
-  font: 400 var(--at-body-size) / 1.2 var(--at-font-text);
-  color: var(--at-ink);
-  background: var(--at-space);
-  border: var(--at-border) solid var(--at-line);
-  cursor: pointer;
-}
-.tutor-meta {
-  display: block;
-  margin-top: 6px;
-  font-size: 16px;
-  color: var(--at-ink-muted);
-}
-/* Switched off: only the header's switch is left, unchecked, in the Ask button's column. */
-.player-top:has(.tutor-wake) {
-  grid-template-columns: var(--at-tap) var(--at-tap) minmax(0, 1fr) auto max-content;
-  gap: 8px;
 }

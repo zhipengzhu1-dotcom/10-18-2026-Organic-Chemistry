@@ -1,5 +1,6 @@
-// Asks the Tutor route and hands each NDJSON line to `onEvent` as it arrives.
-import { TUTOR_PATH, type TutorEvent, type TutorRequest } from "./contract.ts";
+// Asks the Tutor route and hands each NDJSON line to `onEvent` as it arrives. A refusal the route
+// explains in NDJSON (a body over 64 KB) arrives as its `error` line, like any other failure.
+import { lineSplitter, TUTOR_PATH, type TutorEvent, type TutorRequest } from "./contract.ts";
 
 export async function askTutor(request: TutorRequest, onEvent: (e: TutorEvent) => void): Promise<void> {
   const res = await fetch(TUTOR_PATH, {
@@ -7,17 +8,15 @@ export async function askTutor(request: TutorRequest, onEvent: (e: TutorEvent) =
     headers: { "Content-Type": "application/json", Accept: "application/x-ndjson" },
     body: JSON.stringify(request),
   });
-  if (!res.ok || !res.body) throw new Error(`The Tutor route answered ${res.status}.`);
+  const ndjson = res.headers.get("Content-Type")?.startsWith("application/x-ndjson");
+  if (!res.body || (!res.ok && !ndjson)) throw new Error(`The Tutor route answered ${res.status}.`);
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
-  let buffer = "";
+  const lines = lineSplitter((line) => onEvent(JSON.parse(line) as TutorEvent));
   for (;;) {
     const { value, done } = await reader.read();
     if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    for (let i; (i = buffer.indexOf("\n")) >= 0; buffer = buffer.slice(i + 1)) {
-      const line = buffer.slice(0, i);
-      if (line) onEvent(JSON.parse(line) as TutorEvent);
-    }
+    lines.push(decoder.decode(value, { stream: true }));
   }
+  lines.end();
 }

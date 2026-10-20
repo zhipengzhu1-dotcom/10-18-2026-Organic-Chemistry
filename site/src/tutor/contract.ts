@@ -8,6 +8,32 @@ export const TUTOR_PATH = "/__tutor";
 /** The Tutor panel's class (the built-site check looks for it). */
 export const PANEL_CLASS = "tutor-panel";
 
+/** The Student's message is cut to this many characters (the field's `maxLength` and the route). */
+export const MAX_MESSAGE = 2000;
+/** The route passes on this many recent turns; the panel sends no more. */
+export const HISTORY_TURNS = 10;
+
+/**
+ * Splits a text stream into its non-empty lines (NDJSON on both sides: the route reading
+ * `claude`, the panel reading the route). `end` hands over a last line with no newline.
+ */
+export function lineSplitter(onLine: (line: string) => void) {
+  let pending = "";
+  return {
+    push(chunk: string) {
+      pending += chunk;
+      for (let i; (i = pending.indexOf("\n")) >= 0; pending = pending.slice(i + 1)) {
+        const line = pending.slice(0, i);
+        if (line) onLine(line);
+      }
+    },
+    end() {
+      if (pending) onLine(pending);
+      pending = "";
+    },
+  };
+}
+
 export interface Turn {
   role: "student" | "tutor";
   text: string;
