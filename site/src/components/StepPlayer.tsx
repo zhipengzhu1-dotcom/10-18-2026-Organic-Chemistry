@@ -35,6 +35,8 @@ interface Props {
   unitId: string;
   /** The next Lesson in the Unit, for the Lesson-end screen. */
   nextHref?: string;
+  /** Its words: "Next Lesson", or the capstone's "Unit 1 Practice Set". */
+  nextLabel?: string;
   /**
    * Set when playing a Practice Set round: Problems instead of Steps, no resume, no Step links,
    * and after the last Problem a "See results" button hands the round's progress back.
@@ -50,7 +52,7 @@ type PlayerAction = Action | { type: "open"; stepId?: string; saved?: LessonProg
 
 const html = (text: string) => ({ dangerouslySetInnerHTML: { __html: text } });
 
-export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nextHref, practice }: Props) {
+export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nextHref, nextLabel = "Next Lesson", practice }: Props) {
   const [key, setKey] = useState<AnswerKey>();
   const lesson = useMemo(() => withKey(page, key), [page, key]);
   const [screen, dispatch] = useReducer(
@@ -458,7 +460,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <div className="player-end">
             {nextHref && (
               <a className="btn btn-primary btn-block" href={nextHref}>
-                Next Lesson
+                {nextLabel}
               </a>
             )}
             <a className={`btn btn-block ${nextHref ? "btn-secondary" : "btn-primary"}`} href={exitHref}>

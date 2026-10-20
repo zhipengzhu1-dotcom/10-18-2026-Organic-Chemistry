@@ -40,7 +40,7 @@ describe("mo-filler: electrons fill the lowest level with room, two per level", 
 
   it("draws the live counter, the half-arrow electrons and the not-to-scale label", () => {
     const svg = renderToStaticMarkup(createElement(MoFiller, { t: 0, state: { electrons: 3, show: "one" }, aspect: "16:9", reducedMotion: false, cited: {} }));
-    expect(svg).toContain("bonding 2 · antibonding 1 · bond order (2 − 1) ÷ 2 = ½");
+    expect(svg.replace(/<[^>]+>/g, " ")).toMatch(/bonding 2 · antibonding 1\s+bond order \(2 − 1\) ÷ 2 = ½/);
     expect(svg).toContain("not to scale");
     expect(svg.match(/class="electron /g)).toHaveLength(3);
   });

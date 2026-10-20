@@ -83,8 +83,8 @@ export default function MoFiller({ state, aspect }: SceneProps<MoFillerState>) {
 
   const f = fill(n);
   const size = wide ? 64 : 60;
-  const mid = { x: width / 2, y: wide ? height / 2 - 40 : height / 2 - 120 };
-  const gap = wide ? 420 : 640;
+  const mid = { x: width / 2, y: wide ? height / 2 - 90 : height / 2 - 120 };
+  const gap = wide ? 400 : 640;
   const side = wide ? 600 : 360;
   const w = wide ? 260 : 240;
   const sigmaStar = { x: mid.x, y: mid.y - gap / 2, w };
@@ -136,16 +136,11 @@ export default function MoFiller({ state, aspect }: SceneProps<MoFillerState>) {
       <text x={width - area.x} y={area.y + size * 0.6} fill={muted} fontSize={size * 0.6} textAnchor="end" style={{ fontFamily: TEXT_FONT }}>
         not to scale
       </text>
-      {wide ? (
-        <text x={mid.x} y={height - area.y - 10} fill={ink} fontSize={50} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
-          {`bonding ${f.bonding} · antibonding ${f.antibonding} · bond order (${f.bonding} − ${f.antibonding}) ÷ ${PER_LEVEL} = ${f.order}`}
-        </text>
-      ) : (
-        <text x={mid.x} y={height - area.y - 160} fill={ink} fontSize={52} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
-          <tspan x={mid.x}>{`bonding ${f.bonding} · antibonding ${f.antibonding}`}</tspan>
-          <tspan x={mid.x} dy={lineGap}>{`bond order (${f.bonding} − ${f.antibonding}) ÷ ${PER_LEVEL} = ${f.order}`}</tspan>
-        </text>
-      )}
+      {/* The live counter, on two lines so it reads on a phone. */}
+      <text className="counter" x={mid.x} y={height - area.y - (wide ? 75 : 160)} fill={ink} fontSize={wide ? 58 : 52} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
+        <tspan x={mid.x}>{`bonding ${f.bonding} · antibonding ${f.antibonding}`}</tspan>
+        <tspan x={mid.x} dy={lineGap}>{`bond order (${f.bonding} − ${f.antibonding}) ÷ ${PER_LEVEL} = ${f.order}`}</tspan>
+      </text>
     </svg>
   );
 }

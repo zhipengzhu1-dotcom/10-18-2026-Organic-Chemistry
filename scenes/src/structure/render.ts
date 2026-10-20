@@ -327,11 +327,15 @@ export function drawStructure(structure: Structure, hide: Hidden[] = [], highlig
         `<ellipse class="empty-p" cx="${cx}" cy="${cy}" rx="${LOBE_LONG}" ry="${LOBE_WIDE}" transform="rotate(${deg} ${cx} ${cy})" fill="none" stroke="var(--lone-pair, #0e9fbf)" stroke-opacity="0.7" stroke-width="${HASH_STROKE}" stroke-dasharray="4 3"/>`,
       );
     }
-    // The label past the upper lobe.
+    // The label beside the upper lobe, on the side away from the atom's bonds.
     const up = u.y <= 0 ? 1 : -1;
-    const reach = LOBE_OFFSET + LOBE_LONG + 10;
+    const meanBond = bondDirs.reduce((s, d) => ({ x: s.x + Math.cos(d), y: s.y + Math.sin(d) }), { x: 0, y: 0 });
+    let n = { x: -u.y, y: u.x };
+    if (n.x * meanBond.x + n.y * meanBond.y > 0) n = { x: -n.x, y: -n.y };
+    const lx = p.x + u.x * LOBE_OFFSET * up + n.x * (LOBE_WIDE + 6);
+    const ly = p.y + u.y * LOBE_OFFSET * up + n.y * (LOBE_WIDE + 6);
     parts.push(
-      `<text class="orbital-mark" x="${r1(p.x + u.x * reach * up)}" y="${r1(p.y + u.y * reach * up)}" text-anchor="middle" dominant-baseline="central" font-size="${MARK_FONT}" fill="var(--lone-pair, #0e9fbf)">${mark.text}</text>`,
+      `<text class="orbital-mark" x="${r1(lx)}" y="${r1(ly)}" text-anchor="${n.x < 0 ? "end" : "start"}" dominant-baseline="central" font-size="${MARK_FONT}" fill="var(--lone-pair, #0e9fbf)">${mark.text}</text>`,
     );
   }
 
