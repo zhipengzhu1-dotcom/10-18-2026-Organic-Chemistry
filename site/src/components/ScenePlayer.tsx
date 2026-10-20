@@ -6,7 +6,8 @@
 import { useEffect, useReducer, useState, type ReactNode } from "react";
 import { sceneRegistry, type Aspect, type SceneState } from "@astratron/scenes";
 import type { Cited } from "@astratron/content/data";
-import { clockStep, openClock, type Clock, type ClockAction, type ClockConfig } from "../engine/scene-clock.ts";
+import { clockStep, frameRatio, openClock, scrubText, type Clock, type ClockAction, type ClockConfig } from "../engine/scene-clock.ts";
+import { useReducedMotion } from "./use-reduced-motion.ts";
 
 interface Props {
   sceneId: string;
@@ -19,19 +20,6 @@ interface Props {
   still?: boolean;
   /** Controls drawn under the Scene (a Manipulate Step's slider). */
   children?: ReactNode;
-}
-
-/** Reduced motion from the OS setting or the site's switch (`<html data-motion="reduced">`). */
-export function useReducedMotion(): boolean | undefined {
-  const [reduced, setReduced] = useState<boolean>();
-  useEffect(() => {
-    const query = matchMedia("(prefers-reduced-motion: reduce)");
-    const read = () => setReduced(query.matches || document.documentElement.dataset.motion === "reduced");
-    read();
-    query.addEventListener("change", read);
-    return () => query.removeEventListener("change", read);
-  }, []);
-  return reduced;
 }
 
 type Action = ClockAction | { type: "open"; reducedMotion: boolean };
@@ -111,16 +99,13 @@ export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9",
     if (announceKey !== firstKey) setSaid(describe(clock.t));
   }, [announceKey]);
 
-  const [w, h] = aspect === "16:9" ? [16, 9] : [9, 16];
-  const seconds = (t: number) => `${t.toFixed(1)} of ${duration} seconds`;
-
   return (
     <figure className={still ? "scene scene-bare scene-still" : bare ? "scene scene-bare" : "scene"}>
       <div
         className="scene-frame"
         role="img"
         aria-label={description}
-        style={{ aspectRatio: `${w} / ${h}` }}
+        style={{ aspectRatio: frameRatio(aspect) }}
       >
         {/* The frame's description says what it shows; the drawing's own labels would be read twice. */}
         <div aria-hidden="true" style={{ display: "contents" }}>
@@ -147,7 +132,7 @@ export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9",
           max={duration}
           step={0.01}
           value={clock.t}
-          aria-valuetext={seconds(clock.t)}
+          aria-valuetext={scrubText(clock.t, duration)}
           className="scene-range"
           onChange={(e) => dispatch({ type: "seek", t: Number(e.target.value) })}
         />

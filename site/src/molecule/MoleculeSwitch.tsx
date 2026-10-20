@@ -6,7 +6,7 @@
 // wide screens, an A | B toggle on phones (CSS `.molecule-pair`).
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { MoleculeUse } from "@astratron/content";
-import { useReducedMotion } from "../components/ScenePlayer.tsx";
+import { useReducedMotion } from "../components/use-reduced-motion.ts";
 import MoleculeCard, { type MoleculeCardProps } from "./MoleculeCard.tsx";
 
 /** Lesson 4's autoplay (#82): seconds each toggle entry shows before the next. */

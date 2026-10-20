@@ -2,6 +2,13 @@
 // ScenePlayer island feeds it animation-frame ticks; Scenes only see `t`.
 // A Scene autoplays once on entry (loops only in Manipulate Steps); under
 // reduced motion it opens paused on its poster frame.
+import type { Aspect } from "@astratron/scenes";
+
+/** A Scene frame's CSS aspect ratio (both Scene players). */
+export const frameRatio = (aspect: Aspect) => (aspect === "16:9" ? "16 / 9" : "9 / 16");
+
+/** The scrubber's spoken time: "1.5 of 8 seconds". */
+export const scrubText = (t: number, duration: number) => `${t.toFixed(1)} of ${duration} seconds`;
 
 export interface Clock {
   /** Seconds into the Scene. */

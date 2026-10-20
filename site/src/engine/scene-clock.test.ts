@@ -1,11 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { clockStep, openClock, type ClockAction, type ClockConfig } from "./scene-clock.ts";
+import { clockStep, frameRatio, openClock, scrubText, type ClockAction, type ClockConfig } from "./scene-clock.ts";
 
 const once: ClockConfig = { duration: 4, loop: false, posterT: 1 };
 const looping: ClockConfig = { ...once, loop: true };
 const run = (config: ClockConfig, reducedMotion: boolean, ...actions: ClockAction[]) =>
   actions.reduce((c, a) => clockStep(c, a, config), openClock(config, reducedMotion));
 const tick = (dt: number): ClockAction => ({ type: "tick", dt });
+
+describe("Scene frame words", () => {
+  it("gives a frame's CSS aspect ratio", () => {
+    expect(frameRatio("16:9")).toBe("16 / 9");
+    expect(frameRatio("9:16")).toBe("9 / 16");
+  });
+
+  it("reads the scrubber's time as seconds of the whole, to a tenth", () => {
+    expect(scrubText(1.25, 8)).toBe("1.3 of 8 seconds");
+    expect(scrubText(0, 10)).toBe("0.0 of 10 seconds");
+  });
+});
 
 describe("Scene clock", () => {
   it("autoplays from the start on entry", () => {
