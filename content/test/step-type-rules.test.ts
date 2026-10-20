@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { buildContent, type Step } from "../src/index.ts";
 import {
   act,
+  answerOf,
   ANSWER_ORDER,
   joinStep,
   splitStep,
@@ -100,6 +101,11 @@ describe("Numeric", () => {
 
   it("wrong twice reveals the number", () => {
     expect(play(step, { value: 120 }, { value: 100 })[1]?.feedback).toEqual({ kind: "reveal", text: "This.", answer: 109.5 });
+  });
+
+  it("reads typed text as a number (comma decimal, typographic minus); anything else is no answer yet", () => {
+    expect(["109,5", " −1 ", "+.5", "1e2"].map((t) => answerOf("numeric", t))).toEqual([{ value: 109.5 }, { value: -1 }, { value: 0.5 }, { value: 100 }]);
+    expect(["", "−", "1.2.3", "12°"].map((t) => answerOf("numeric", t))).toEqual([null, null, null, null]);
   });
 });
 

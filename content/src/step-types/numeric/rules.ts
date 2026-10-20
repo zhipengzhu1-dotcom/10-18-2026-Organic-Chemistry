@@ -2,7 +2,7 @@
 // the box, never typed. Right within answer ± tolerance.
 import type { Cited } from "../../data.ts";
 import type { GradedVisuals, MoleculeUse, Phase, SceneUse } from "../../model.ts";
-import { gradedText, hintText, oneShot, oneShotStart, type PlayState, type Played, type StepRules } from "../play.ts";
+import { gradedText, hintText, oneShot, oneShotStart, promptOutline, type PlayState, type Played, type StepRules } from "../play.ts";
 
 /** A Numeric Hint: `match` is a common wrong value, matched within the Step's tolerance. */
 export interface NumericHint {
@@ -36,6 +36,12 @@ export type NumericAnswer = { value: number };
 
 const takesValue = (answer: object): answer is NumericAnswer => "value" in answer;
 
+/** What the Student typed, read as a number: a comma decimal and a typographic minus count; anything else is no answer yet. */
+export function typedAnswer(text: string): NumericAnswer | null {
+  const t = text.trim().replace(/−/g, "-").replace(",", ".");
+  return /^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(t) ? { value: Number(t) } : null;
+}
+
 type Graded = Pick<NumericStep, "answer" | "tolerance" | "hints" | "correct" | "reveal">;
 
 export function actNumeric(step: Graded, state: PlayState, input: object): Played<PlayState> | undefined {
@@ -48,7 +54,9 @@ export const numeric = {
   secret: ["answer", "tolerance", "correct", "hints", "reveal", "revealScene"] as const,
   blank: { answer: Number.NaN, tolerance: 0, reveal: "" },
   render: (s, { md }) => ({ ...s, ...gradedText(s, md), hints: hintText(s.hints, md) }),
+  outline: promptOutline,
+  answer: typedAnswer,
   start: oneShotStart,
   takes: takesValue,
   act: actNumeric,
-} satisfies StepRules<NumericStep, PlayState, NumericAnswer>;
+} satisfies StepRules<NumericStep, PlayState, NumericAnswer, string>;

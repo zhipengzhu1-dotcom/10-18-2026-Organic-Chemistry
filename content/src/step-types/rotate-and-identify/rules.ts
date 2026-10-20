@@ -2,7 +2,7 @@
 // answers with ordinary choices, graded exactly like Multiple choice.
 import type { Cited } from "../../data.ts";
 import type { GradedVisuals, MoleculeUse, Phase, SceneUse } from "../../model.ts";
-import { judgeChoice, selectOf, takesChoice, type ChoiceAnswer, type HintRule } from "../choice.ts";
+import { choiceAnswer, judgeChoice, selectOf, takesChoice, type ChoiceAnswer, type HintRule } from "../choice.ts";
 import { gradedText, hintText, oneShot, oneShotStart, type PlayState, type Played, type StepRules } from "../play.ts";
 
 export interface RotateAndIdentifyStep extends GradedVisuals {
@@ -38,7 +38,9 @@ export const rotateAndIdentify = {
     options: s.options.map((o) => ({ ...o, text: md(o.text) })),
     hints: hintText(s.hints, md),
   }),
+  outline: (s) => ({ lead: s.prompt, choices: s.options.map((o) => o.text) }),
+  answer: choiceAnswer,
   start: oneShotStart,
   takes: takesChoice,
   act: actRotate,
-} satisfies StepRules<RotateAndIdentifyStep, PlayState, ChoiceAnswer, { select: "one" | "many" }>;
+} satisfies StepRules<RotateAndIdentifyStep, PlayState, ChoiceAnswer, string[], { select: "one" | "many" }>;

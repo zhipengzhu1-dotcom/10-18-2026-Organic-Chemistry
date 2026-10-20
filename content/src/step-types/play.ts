@@ -43,12 +43,21 @@ export interface Renderer {
   draw: (view: StructureView, targets?: TapTarget[]) => StructureView;
 }
 
+/** What the Lesson's plain HTML copy shows of a Step before it is answered (LessonText.astro). */
+export interface Outline {
+  /** Its text or prompt (HTML). */
+  lead: string;
+  /** Its choices (HTML; a structure card's plain label). */
+  choices: string[];
+}
+
 /**
  * One Step type's rules: the half of its module the browser gets (its file shape and build
  * checks are the other half, `schema.ts`). `S` is the resolved Step, `St` its play state, `A`
- * what a Student submits, `P` what the page adds before the answer key arrives.
+ * what a Student submits, `C` what the Student chooses on screen before it is an answer (picked
+ * ids, typed text, a card order…), `P` what the page adds before the answer key arrives.
  */
-export interface StepRules<S extends { id: string; type: string }, St extends PlayState, A extends object, P extends object = object> {
+export interface StepRules<S extends { id: string; type: string }, St extends PlayState, A extends object, C, P extends object = object> {
   /**
    * Fields that give the answer away: they ship in the answer key, never in the page's HTML
    * (story 99), and numbers cited only in them travel as `answerCitations`. Listed in
@@ -61,6 +70,10 @@ export interface StepRules<S extends { id: string; type: string }, St extends Pl
   page?: (step: S) => P;
   /** The Step with every text field's Markdown turned into HTML and its structures pre-rendered. */
   render: (step: S, r: Renderer) => S;
+  /** Its text or prompt and choices, for the plain HTML copy; reads only fields the page carries. */
+  outline: (step: S) => Outline;
+  /** The answer a choice makes, or null while it isn't one yet (nothing picked, not a number). */
+  answer: (choice: C) => A | null;
   /** The state a Step opens in, before any answer. */
   start: (step: S) => St;
   /** Whether a saved or submitted answer has this type's shape (saved progress may predate an edit). */
@@ -113,6 +126,9 @@ export const gradedText = (s: { prompt: string; correct?: string; reveal: string
   correct: s.correct && md(s.correct),
   reveal: md(s.reveal),
 });
+
+/** A Step that shows only its prompt in the plain HTML copy: nothing to pick from. */
+export const promptOutline = (s: { prompt: string }): Outline => ({ lead: s.prompt, choices: [] });
 
 /** Inline Markdown on each Hint's text. */
 export const hintText = <H extends { text: string }>(hints: H[] | undefined, md: Renderer["md"]) =>

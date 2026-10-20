@@ -1,5 +1,6 @@
 // Build-time access to the course model. A content error fails the site build.
-import { buildContent, type Course, type CourseModel, type Figure, type Lesson, type Option, type Step, type Unit } from "@astratron/content";
+import { buildContent, type Course, type CourseModel, type Figure, type Lesson, type Step, type Unit } from "@astratron/content";
+import { renderText } from "@astratron/content/step-types";
 import { checkManifests, checkWatchManifests, sceneCatalog } from "@astratron/scenes/check";
 import { sceneManifests } from "@astratron/scenes/manifests";
 import { watchSceneManifests } from "@astratron/scenes/watch";
@@ -139,7 +140,8 @@ export function renderLesson(lesson: Lesson): Lesson {
 
 /** One Step (or a Practice Set Problem) with its Markdown turned into HTML and its structures pre-rendered. */
 export function renderStep(s: Step): Step {
-  return renderVisuals(renderText(s));
+  // Each Step type's `render` names its own Markdown fields and structures.
+  return renderVisuals(renderText(s, { md, mdBlocks, draw: drawView }));
 }
 
 const renderFigure = (f: Figure): Figure => ({ ...f, view: drawView(f.view), ...(f.caption ? { caption: md(f.caption) } : {}) });
@@ -159,55 +161,4 @@ function renderVisuals(s: Step): Step {
       },
     };
   return out;
-}
-
-/** Markdown → HTML on a Step's text fields; its structures pre-rendered. (#99 moves this onto each Step type's `render`.) */
-export function renderText(s: Step): Step {
-  if (s.type === "explain") return { ...s, text: mdBlocks(s.text) };
-  if (s.type === "manipulate-goal")
-    return {
-      ...s,
-      prompt: md(s.prompt),
-      stages: s.stages.map((g) => ({ ...g, prompt: md(g.prompt), correct: md(g.correct), blocked: md(g.blocked), idle: md(g.idle) })),
-    };
-  const shared = { prompt: md(s.prompt), correct: s.correct && md(s.correct), reveal: md(s.reveal) };
-  const choices = (list: { id: string; text: string }[]) => list.map((o) => ({ ...o, text: md(o.text) }));
-  // A structure card's text is its screen-reader label: kept plain; its drawing is pre-rendered SVG.
-  const cards = (list: Option[]) => list.map((o) => (o.structure ? { ...o, structure: drawView(o.structure) } : { ...o, text: md(o.text) }));
-  switch (s.type) {
-    case "multiple-choice":
-      return {
-        ...s,
-        ...shared,
-        // A structure card's text is its screen-reader label: kept plain; its drawing is pre-rendered SVG.
-        options: s.options.map((o) => (o.structure ? { ...o, structure: drawView(o.structure) } : { ...o, text: md(o.text) })),
-        hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
-      };
-    case "tap-to-identify":
-      return {
-        ...s,
-        ...shared,
-        structure: drawView(s.structure, s.targets),
-        hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
-      };
-    case "numeric":
-      return { ...s, ...shared, hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
-    case "rank":
-      return { ...s, ...shared, items: cards(s.items), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
-    case "manipulate":
-      return { ...s, ...shared, hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
-    case "rotate-and-identify":
-      // The molecule's `describe` stays plain text: it is read aloud, not shown.
-      return { ...s, ...shared, options: choices(s.options), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
-    case "draw-arrows":
-      // The start is redrawn live in the browser as pushes land; its first drawing and the
-      // target are pre-rendered. In-between copy stays plain: it is also read aloud.
-      return {
-        ...s,
-        ...shared,
-        start: drawView(s.start),
-        ...(s.target && { target: drawView(s.target) }),
-        hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })),
-      };
-  }
 }

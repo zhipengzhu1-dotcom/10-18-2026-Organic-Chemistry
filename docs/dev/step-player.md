@@ -1,6 +1,6 @@
 # Step player
 
-Engine: `site/src/engine/player.ts` (pure, no DOM; its header comment states the play rules). It has no per-type code: each Step plays through its Step type's `start`/`act` (`@astratron/content/step-types`), and the Screen's `tries`, `canContinue`, `arrows` and `goal` are read from that play state (`screen.state`). View: `site/src/components/StepPlayer.tsx` (an island that draws the engine's `Screen`). Progress: `site/src/progress/`. Practice Set: `site/src/engine/practice-set.ts` + `components/PracticeSet.tsx`.
+Engine: `site/src/engine/player.ts` (pure, no DOM; its header comment states the play rules). It has no per-type code: each Step plays through its Step type's `start`/`act` (`@astratron/content/step-types`), and the Screen's `tries`, `canContinue`, `arrows` and `goal` are read from that play state (`screen.state`). View: `site/src/components/StepPlayer.tsx` (an island that draws the engine's `Screen`) draws what every Step shares and takes the rest from the Step's view, one per Step type (`site/src/components/steps/`). Progress: `site/src/progress/`. Practice Set: `site/src/engine/practice-set.ts` + `components/PracticeSet.tsx`.
 
 ## Engine conventions
 
@@ -9,6 +9,14 @@ Engine: `site/src/engine/player.ts` (pure, no DOM; its header comment states the
 - `progress.done` latches on reaching Wrap in order; `screen.done` means "on the Wrap now".
 - The answer key arrives after first render. Until then graded Steps carry empty secrets and grade nothing; StepPlayer reopens the Screen (`{type: "open"}`) when the key lands, and draws from the keyed Lesson (`lesson.steps[screen.index]`), not `screen.step`, to avoid a one-render flicker that once hung CI.
 - `tries` is the number the Practice Set summary reads: `tries === 1` ⇔ first try. Draw arrows counts wrong pushes plus one when done, so the same rule holds.
+
+## Step views (`site/src/components/steps/`)
+
+- `steps/index.ts` holds `views`, one entry per Step type (a missing one fails to compile); `steps/view.tsx` says what a view is. Each part (`Lead`, `Drawing`, `Scene`, `Answer`, `Foot`) is drawn in its fixed place among the shared parts (figures, reveal Scene, video, 3D card, Source note), so the page order stays the same for every type.
+- A view never builds an Answer: it reports a choice (picked ids, typed text, a card order, a push, a Scene move) and the type's `answer` (`rules.ts`) turns it into one. Check submits the view's `choice`; Draw arrows and goal-state Manipulate `submit` each choice as it is made.
+- What the Student has chosen lives in StepPlayer, per Step, until Check (`fresh` clears it after a try), Continue, back or a Step link.
+- Adding a Step type: one content folder plus one view file (`docs/dev/content.md`).
+- `step.type` checks left in StepPlayer: none. Per-Lesson code stays there (known gaps).
 
 ## Draw arrows (`@astratron/content/arrows`)
 

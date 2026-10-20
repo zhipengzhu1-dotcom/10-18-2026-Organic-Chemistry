@@ -19,6 +19,9 @@ export type ChoiceAnswer = { choice: string[] };
 
 export const takesChoice = (answer: object): answer is ChoiceAnswer => "choice" in answer;
 
+/** The ids picked so far; nothing picked is no answer yet. */
+export const choiceAnswer = (choice: string[]): ChoiceAnswer | null => (choice.length ? { choice } : null);
+
 export function judgeChoice(step: { answer: string[]; hints?: HintRule[] }, choice: string[]): Judged {
   return { right: sameSet(choice, step.answer), hint: step.hints?.find((h) => hintFits(h, choice)) };
 }

@@ -4,7 +4,7 @@
 // Continue opens when the last stage is done. Never a Problem.
 import type { Cited } from "../../data.ts";
 import type { GradedVisuals, MoleculeUse, Phase, SceneUse, SceneValue } from "../../model.ts";
-import { reached, type PlayState, type Played, type StepRules } from "../play.ts";
+import { promptOutline, reached, type PlayState, type Played, type StepRules } from "../play.ts";
 
 /** One stage of a goal-state Manipulate Step: work the Scene until its state reaches `goal`. */
 export interface GoalStage {
@@ -94,7 +94,10 @@ export const manipulateGoal = {
     prompt: md(s.prompt),
     stages: s.stages.map((g) => ({ ...g, prompt: md(g.prompt), correct: md(g.correct), blocked: md(g.blocked), idle: md(g.idle) })),
   }),
+  outline: promptOutline,
+  // A move the Scene accepted: the states it changed.
+  answer: (state) => ({ state }),
   start: startGoal,
   takes: takesState,
   act: actGoal,
-} satisfies StepRules<GoalStep, GoalState, GoalAnswer>;
+} satisfies StepRules<GoalStep, GoalState, GoalAnswer, Record<string, SceneValue>>;

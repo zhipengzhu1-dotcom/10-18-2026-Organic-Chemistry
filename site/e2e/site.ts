@@ -3,6 +3,7 @@
 import type { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 import { buildContent, contentRoot } from "@astratron/content";
+import type { StepType } from "@astratron/content/step-types";
 
 /** Lesson 0 (the On-ramp, 9 Steps, a watch-only Scene first) and Lesson 1 (no video Scenes). */
 export const LESSON_0 = "/organic/orgo-1/structure-bonding/why-carbon";
@@ -58,40 +59,45 @@ export async function useTheme(page: Page, theme: Theme) {
   await page.addInitScript((t) => localStorage.setItem("at-theme", t), theme);
 }
 
-/**
- * Plays a Lesson from the current Step to the Wrap (a Practice Set to its summary): picks the first option
- * (or types 1, or keeps the Rank order),
- * Checks until resolved, then Continues. Calls `each` on every screen state
- * worth inspecting (each new Step and each feedback panel).
- */
-export async function playThrough(page: Page, each: (label: string) => Promise<void>) {
-  const count = page.locator(".player-count");
-  // Settle first: until the answer key is in, a graded Step's shape (its Source note, its Check) can still
-  // change on its own, so a locator counted now may be gone by the next call.
-  await expect(page.locator(".player")).toHaveAttribute("data-key", "loaded");
-  for (let guard = 0; guard < 40; guard++) {
-    const label = (await count.textContent()) ?? "";
-    await each(label);
-    if (await page.getByRole("link", { name: "Back to Unit" }).isVisible()) return;
+/** Answers the Step on screen; `feedback` inspects a feedback panel worth a look. */
+type Answerer = (page: Page, feedback: () => Promise<void>) => Promise<void>;
+
+/** Picks (`pick`; else the Step stays as dealt) and Checks until the Step is resolved. */
+const checkUntilResolved =
+  (pick: (page: Page) => Promise<void> = async () => {}): Answerer =>
+  async (page, feedback) => {
     const checkBtn = page.getByRole("button", { name: "Check" });
     while (await checkBtn.isVisible()) {
-      const choices = page.getByRole("group", { name: "Choices" });
-      const box = page.getByRole("textbox", { name: "Answer" });
-      const taps = page.getByRole("group", { name: "Tappable atoms and bonds" });
-      if (await choices.isVisible()) await choices.getByRole("button").first().click();
-      else if (await taps.isVisible()) {
-        // Tap-to-identify: pick the first target from the keyboard (Enter toggles).
-        await taps.getByRole("button").first().focus();
-        await page.keyboard.press("Enter");
-      }
-      else if (await box.isVisible()) await box.fill("1");
-      // A Rank / order Step can be checked in its starting order.
+      await pick(page);
       await checkBtn.click();
       await expect(page.getByRole("status")).not.toBeEmpty();
-      await each(`${label} feedback`);
+      await feedback();
     }
-    // Draw arrows has no Check button: push the first source onto its first target from the
-    // keyboard until the Step is done (two wrong tries on a push show it, so this always ends).
+  };
+
+const firstChoice = (page: Page) => page.getByRole("group", { name: "Choices" }).getByRole("button").first().click();
+
+/**
+ * How `playThrough` answers each Step type; a new type fails to compile until it has an entry.
+ * The first choice, typing 1, the Rank order as dealt, the first Tap target, the first push,
+ * the goal Scene by keyboard.
+ */
+const answerers: Record<StepType, Answerer> = {
+  explain: async () => {},
+  "multiple-choice": checkUntilResolved(firstChoice),
+  "rotate-and-identify": checkUntilResolved(firstChoice),
+  numeric: checkUntilResolved((page) => page.getByRole("textbox", { name: "Answer" }).fill("1")),
+  rank: checkUntilResolved(),
+  // The control where the Scene starts it.
+  manipulate: checkUntilResolved(),
+  "tap-to-identify": checkUntilResolved(async (page) => {
+    // The first target, from the keyboard (Enter toggles).
+    await page.getByRole("group", { name: "Tappable atoms and bonds" }).getByRole("button").first().focus();
+    await page.keyboard.press("Enter");
+  }),
+  // No Check: push the first source onto its first target from the keyboard until the Step is
+  // done (two wrong tries on a push show it, so this always ends).
+  "draw-arrows": async (page, feedback) => {
     const arrows = page.getByRole("group", { name: "Electron sources: lone pairs and bonds" });
     let pushed = false;
     for (let i = 0; i < 20 && (await arrows.isVisible()) && !(await page.getByRole("button", { name: "Continue" }).isVisible()); i++) {
@@ -102,11 +108,13 @@ export async function playThrough(page: Page, each: (label: string) => Promise<v
       await page.keyboard.press("Enter");
       if (!pushed && ((await page.getByRole("status").textContent()) ?? "").trim()) {
         pushed = true;
-        await each(`${label} feedback`);
+        await feedback();
       }
     }
-    // A goal-state Manipulate Step has no Check: work its Scene from the keyboard (pick up the
-    // first handle, try each target in turn) until its last goal opens Continue.
+  },
+  // No Check: work the Scene from the keyboard (pick up the first handle, try each target in
+  // turn) until its last goal opens Continue.
+  "manipulate-goal": async (page, feedback) => {
     const goal = page.locator(".scene-goal");
     const blocked = page.locator(".player-foot button[aria-disabled='true']", { hasText: "Continue" });
     for (let i = 0; i < 40 && (await goal.isVisible()) && (await blocked.isVisible()); i++) {
@@ -119,8 +127,27 @@ export async function playThrough(page: Page, each: (label: string) => Promise<v
         await page.keyboard.press("Enter");
         if ((await goal.getAttribute("aria-label")) !== before) break;
       }
-      if (!(await blocked.isVisible())) await each(`${label} feedback`);
+      if (!(await blocked.isVisible())) await feedback();
     }
+  },
+};
+
+/**
+ * Plays a Lesson from the current Step to the Wrap (a Practice Set to its summary): answers each
+ * Step by its type (`answerers`), then Continues. Calls `each` on every screen state worth
+ * inspecting (each new Step and each feedback panel).
+ */
+export async function playThrough(page: Page, each: (label: string) => Promise<void>) {
+  const count = page.locator(".player-count");
+  // Settle first: until the answer key is in, a graded Step's shape (its Source note, its Check) can still
+  // change on its own, so a locator counted now may be gone by the next call.
+  await expect(page.locator(".player")).toHaveAttribute("data-key", "loaded");
+  for (let guard = 0; guard < 40; guard++) {
+    const label = (await count.textContent()) ?? "";
+    await each(label);
+    if (await page.getByRole("link", { name: "Back to Unit" }).isVisible()) return;
+    const type = (await page.locator(".player").getAttribute("data-type")) as StepType;
+    await answerers[type](page, () => each(`${label} feedback`));
     // A Practice Set ends on its summary instead of a Wrap.
     const results = page.getByRole("button", { name: "See results" });
     if (await results.isVisible()) {

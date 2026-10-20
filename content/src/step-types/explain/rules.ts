@@ -18,7 +18,9 @@ export const explain = {
   secret: [] as const,
   blank: {},
   render: (s, { mdBlocks }) => ({ ...s, text: mdBlocks(s.text) }),
+  outline: (s) => ({ lead: s.text, choices: [] }),
+  answer: () => null,
   start: () => ({ tries: 0, done: true }),
   takes: (_answer): _answer is never => false,
   act: () => undefined,
-} satisfies StepRules<ExplainStep, PlayState, never>;
+} satisfies StepRules<ExplainStep, PlayState, never, never>;

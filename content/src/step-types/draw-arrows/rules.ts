@@ -6,7 +6,7 @@
 import { arrowsAct, arrowsStart, arrowsView, type ArrowsAction, type ArrowsState, type Flag } from "../../arrows.ts";
 import type { Cited } from "../../data.ts";
 import type { GradedVisuals, MoleculeUse, Phase, SceneUse, Structure, StructureView } from "../../model.ts";
-import { gradedText, hintText, reveal, type Feedback, type PlayState, type Played, type StepRules } from "../play.ts";
+import { gradedText, hintText, promptOutline, reveal, type Feedback, type PlayState, type Played, type StepRules } from "../play.ts";
 
 /** One curved arrow: `from` an atom id (its lone pair) or a bond id; `to` an atom id or a bond id. */
 export interface Push {
@@ -110,7 +110,10 @@ export const drawArrows = {
     ...(s.target && { target: draw(s.target) }),
     hints: hintText(s.hints, md),
   }),
+  outline: promptOutline,
+  // Each push is an answer the moment it is drawn; so is taking the last one back.
+  answer: (choice) => (choice === "undo" ? { undo: true } : { push: choice }),
   start: startArrows,
   takes: takesPush,
   act: actArrows,
-} satisfies StepRules<DrawArrowsStep, DrawArrowsState, DrawArrowsAnswer>;
+} satisfies StepRules<DrawArrowsStep, DrawArrowsState, DrawArrowsAnswer, Push | "undo">;

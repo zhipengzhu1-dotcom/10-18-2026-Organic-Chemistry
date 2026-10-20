@@ -6,6 +6,7 @@ export { freezeStepIds } from "./freeze.ts";
 export { parseProblem, readBank } from "./bank.ts";
 export { readStructure } from "./structure-file.ts";
 export type * from "./model.ts";
+export type { ProblemType } from "./step-types/schemas.ts";
 
 /** The real content tree: one folder per Subject. */
 export const contentRoot = fileURLToPath(new URL("../subjects", import.meta.url));
