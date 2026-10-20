@@ -8,6 +8,7 @@ Spec #104. Runs under `pnpm dev` only, on the owner's signed-in `claude` command
 - **Tutor route** (`route.ts`, tested): Connect middleware mounted at `TUTOR_PATH` by the `tutorRoute()` Vite plugin (`apply: "serve"`, registered in `site/astro.config.mjs`). Loopback only; model and effort allowlisted (default Sonnet 5.5 · low); `claude -p` in an empty temp folder with no tools, settings, MCP or session, `--json-schema`, `stream-json`; Student and history text escaped in `<student>`/`<tutor>`, history in `<conversation>`, the context in `<step>`. `ASTRATRON_TUTOR_CLAUDE` replaces the binary (tests use `test/fake-claude.mjs`).
 - **Contract** (`contract.ts`): `TUTOR_PATH`, `PANEL_CLASS`, the request and the NDJSON events (`reply`… `done` | `error`).
 - **Tutor panel** (`TutorPanel.tsx` + `tutor.css`, by hand): the Ask button in the top bar and the panel, portalled to `<body>`: a sheet below 720 px, a side panel from 720 px (the player pads right while it is open, via `html[data-tutor="open"]`). Kept mounted and `inert` when closed so it can fade/slide. Finished replies go to a polite live region once (the streaming text isn't announced). Stream reading: `stream.ts`. Stage reading: `stage.ts`.
+- **Settings** (#106): the route's `GET` returns `TutorChoices` (models, efforts, default pair); the panel builds its picker from it and sends the chosen `model`/`effort` with each question. `settings.ts` remembers the pair (`at-tutor-pick`, `model|effort`, falling back to the default when the route no longer offers it) and the on/off switch (`at-tutor-switch` = `off`), reads and writes wrapped in try/catch. Each finished reply shows `done`'s model, effort and seconds (seconds in `.data`). Off leaves only the header's switch, unchecked (`.tutor-wake`, labelled "Tutor"), in the Ask button's column: no panel, no portal. A text label there pushes the story bars out at 390 px.
 - **Build check** (`absent.ts`): run by `pnpm budget:js`.
 
 ## Gotchas
@@ -17,6 +18,5 @@ Spec #104. Runs under `pnpm dev` only, on the owner's signed-in `claude` command
 
 ## Left for the sibling tickets
 
-- #106: `GET` on the route (models, efforts, default), the picker, the meta line, the on/off switch (`at-tutor-*` keys).
 - #107: stage summary in `stage.ts` (control, labelled atoms), `actions` in the schema, the rules and the `done` line (sent as `[]` today), the moves on the page.
 - #108: per-Step divider and intro, chips, ⌘K, failure lines and route-limit tests (busy, timeout, body and message caps are in `route.ts` already, untested).
