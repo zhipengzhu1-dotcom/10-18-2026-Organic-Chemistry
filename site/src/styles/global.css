@@ -327,10 +327,6 @@
       font-size: 17px;
       line-height: 1.25;
     }
-    /* The inline card is the same viewer Explore opens, so on a phone it stands in for the button. */
-    .player.has-card .explore-open {
-      display: none;
-    }
     .player.has-card .opt,
     .opts:has(> :nth-child(4)) .opt {
       padding-block: 6px;
@@ -375,6 +371,10 @@
     }
   }
   @media (max-width: 600px) {
+    /* The inline card is the same viewer Explore opens, so on a phone it stands in for the button. */
+    .player.has-card .explore-open {
+      display: none;
+    }
     /* A watch-only video and its controls, or a drawing over four choices, fill most of the
        screen: the Step sits tighter. */
     .player-body:has(.scene video),

@@ -459,7 +459,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           {/* Keyed per Step so a new Step opens its Source note collapsed. Numbers cited only in the answer
               (its Hints, reveal or reveal Scene) join the note once it's answered. A Step whose reveal Scene
               prints numbers (Lesson 7's C–N lengths) shows its note only then, which also keeps it on one phone screen. */}
-          {!(step.type !== "explain" && step.revealScene && Object.keys(step.revealScene.cited).length && !screen.canContinue) && (
+          {/* A graded Step's note waits for the answer key, which says whether it has a reveal Scene (no flicker). */}
+          {(step.type === "explain" || key) && !(step.type !== "explain" && step.revealScene && Object.keys(step.revealScene.cited).length && !screen.canContinue) && (
             <SourceNote key={`source-note-${step.id}`} cited={screen.canContinue ? answeredCitations(step) : (step.citations ?? [])} note={step.sourceNote} />
           )}
 
