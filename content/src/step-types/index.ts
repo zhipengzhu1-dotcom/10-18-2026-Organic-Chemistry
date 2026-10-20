@@ -43,7 +43,7 @@ export type GradedStep = Exclude<Step, StepOfType<"explain" | "manipulate-goal">
 /** The play state of a Step of one type (`PlayState` plus the type's own). */
 export type StateOf<T extends StepType> = ReturnType<Table[T]["start"]>;
 /** What a Student submits on a Step of one type. */
-export type AnswerOf<T extends StepType> = Table[T]["takes"] extends (a: any) => a is infer A ? A : never; // eslint-disable-line @typescript-eslint/no-explicit-any
+export type AnswerOf<T extends StepType> = Table[T]["takes"] extends (a: any) => a is infer A ? A : never;
 /** What a Student submits, on any Step type; answers are JSON, so saved progress replays them. */
 export type Answer = { [T in StepType]: AnswerOf<T> }[StepType];
 /** The fields of a Step of one type that ship in the answer key. */

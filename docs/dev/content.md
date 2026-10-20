@@ -1,12 +1,14 @@
 # Content module (`content/`)
 
-Terms follow `GLOSSARY.md`. Numbers: ADR 0002. Step ids: ADR 0003. Field-by-field shapes live as comments in `content/src/schema.ts`; read them there.
+Terms follow `GLOSSARY.md`. Numbers: ADR 0002. Step ids: ADR 0003. Field-by-field shapes live as comments in `content/src/step-types/<type>/schema.ts` (Step types) and `content/src/schema.ts` (everything else); read them there.
 
 ## Layout and build
 
 - Tree: `content/subjects/<subject>/{subject.yaml, courses/, lessons/, problems/, structures/, data/, views.yaml, step-ids.lock.yaml}`. File name = `id` everywhere (build error otherwise).
 - `buildContent(root)` returns every error at once as `<file relative to content root>: <message>`; a broken file is reported once, not again by the files that reference it. The site build calls it and fails on any error.
-- Resolved types (`model.ts`) are hand-written beside the zod file shapes (`schema.ts`): the built shape differs from the file shape (Check Steps become their Problem, Scenes and molecules resolve). Leaf types (Hints, Push, GoalStage) come from `z.infer`, so a leaf field added in the schema reaches the engine for free; a new Step-level field needs both files.
+- Step type modules (`content/src/step-types/<type>/`, Explain included): `schema.ts` (Node only, zod: Step and Problem file shapes, build checks, structure hooks) and `rules.ts` (browser-safe, no zod, not even through an import: the resolved Step type, `secret` fields and their `blank`s, `render` for its Markdown fields, `start`/`takes`/`act`). Two tables tie them: `step-types/index.ts` (`@astratron/content/step-types`; the `Step` union, `Answer`, `PageStep`, `act`, `splitStep`/`joinStep` are worked out from it) and `step-types/schemas.ts` (zod, must have the same keys, so a missing entry fails to compile). `model.ts`, `schema.ts`, `shape.ts` and `build.ts` reach type knowledge only through them.
+- The resolved Step type is hand-written beside its file shape: the built shape differs (Check Steps become their Problem, structures, Scenes and molecules resolve). Leaf types (Hints, Push, GoalStage) are hand-written too, and each `schema.ts` checks them against its zod shape (`true satisfies Agrees<…>`), so the two can't drift.
+- Validation goes through the type's own `act` (`step-types/checks.ts`): the declared answer must be marked right, and each Hint with a condition must show on some wrong answer where the answers can be listed (choices, Rank orders, Numeric and Manipulate Hint values). A Hint shadowed by an earlier one is a build error. "Goal reached" is one `reached` (`sameValue` semantics) for the build and the player.
 - Markdown: `md` (inline) for every text field; Explain `text` alone is block Markdown (`mdBlocks`, so lists work). Hard line breaks elsewhere: `<br>` or a trailing `\`. Numbers and formulas get the data face automatically.
 
 ## Lessons and Problems
@@ -29,13 +31,13 @@ Terms follow `GLOSSARY.md`. Numbers: ADR 0002. Step ids: ADR 0003. Field-by-fiel
 
 ## Answers out of the page (story 99)
 
-- `ANSWER_FIELDS` in `content/src/model.ts` is the one list of secret fields. `site/src/lib/answer-key.ts` strips them (plus `answerCitations`) into `/answers/<subject>/<lesson id>.json`; the player fetches the key and grades only once it arrives.
-- A new field that reveals the answer goes in `ANSWER_FIELDS`; a new Step shape may also need `withKey` defaults. `site/e2e/course-map.spec.ts` and `site-shell.spec.ts` fail on a leak. `content/test/answer-fields.test.ts` fails earlier, in `pnpm check`, on a schema field named like an answer (`correct*`, `hint*`, `reveal*`, `answer*`, …) that isn't in `ANSWER_FIELDS` or its `PUBLIC_ON_PURPOSE` list.
+- Each Step type's `secret` list (`rules.ts`, in `ANSWER_ORDER`) says what goes in the answer key. `splitStep`/`joinStep` (`@astratron/content/step-types`) split and rejoin through it (plus `answerCitations`); `site/src/lib/answer-key.ts` writes `/answers/<subject>/<lesson id>.json`, and the player fetches the key and grades only once it arrives (until then the type's `blank`s stand in). A type with no secrets (Explain) ships whole.
+- A new field that reveals the answer goes on its type's `secret` list. `content/test/answer-fields.test.ts` fails in `pnpm check` on a schema field named like an answer (`correct*`, `hint*`, `reveal*`, `answer*`, …) that isn't on it or its `PUBLIC_ON_PURPOSE` list; `site/src/lib/step-types.test.ts` checks every built Step and Problem rejoins whole and leaks no key words; `site/e2e/course-map.spec.ts` and `site-shell.spec.ts` check the built HTML.
 - Values cited only in answer fields travel in the key and join the Source note after answering. Anything cited in a shown field is on the page before answering, so a Step whose answer is a number must not cite (or name a formula containing) that number in its prompt, written `sourceNote`, figures or an Explore molecule. `real-content.test.ts` guards H-count leaks.
 
 ## Shared Step fields (reuse before adding)
 
-Before adding a field or renderer feature: `git fetch`, grep `content/src/schema.ts` on the default branch, and reuse what is there.
+Before adding a field or renderer feature: `git fetch`, grep `content/src/step-types/` (shared fields: `fields.ts`) on the default branch, and reuse what is there.
 
 - Every Step/Problem: `figures` (static structure with `ring`, `outline`, `corner`, `caption`, `alt`, `large`), `aside` (button → dialog with a Scene or a figure table), written `sourceNote`, `molecule` (Explore in 3D; `card: true` inline 3D card; see `docs/dev/3d.md`).
 - Graded: `revealScene` (secret; replaces the question's widgets once resolved), `scene` with `state` and `still: true` (poster, no controls).
@@ -47,4 +49,10 @@ Before adding a field or renderer feature: `git fetch`, grep `content/src/schema
 
 ## Adding a Step type
 
-Touch points, in order: `schema.ts` (field object, Step union, `problemFile` union) → `model.ts` (interface, `GradedStep`, `ANSWER_FIELDS`) → `shape.ts` `answerRules` → `site/src/engine/player.ts` (`Answer` shape, `judge` case; answers must be JSON and grading deterministic so resume replays them) → `site/src/lib/content.ts` `renderText` case → `answer-key.ts` `withKey` if needed → a view in `StepPlayer.tsx` → `site/e2e/site.ts` `playThrough` and a solver in `practice-set.spec.ts` if Problems use it.
+Content side: one folder plus one entry in each table.
+
+1. `content/src/step-types/<type>/rules.ts`: the resolved Step interface, its answer shape, and a `StepRules` entry (`secret`, `blank`, `render`, `start`, `takes`, `act`; `page` for page-only fields). Answers must be JSON and `act` deterministic, so resume replays them. Reuse `oneShot` (`play.ts`) and `judgeChoice` (`choice.ts`) where they fit.
+2. `content/src/step-types/<type>/schema.ts`: `step` (and `problem` if it can be a Problem), `check` (its own rules, then grading through its `act` via `actChecks`, then `gradedRules`), and `fileOnly`/`structures`/`open`/`card` if it needs them.
+3. One entry in `step-types/index.ts` and one in `step-types/schemas.ts`.
+
+Site side (until #98/#99 land): `site/src/engine/player.ts` `judge` case, `site/src/lib/content.ts` `renderText` case, a view in `StepPlayer.tsx`, `site/e2e/site.ts` `playThrough` and a solver in `practice-set.spec.ts` if Problems use it.

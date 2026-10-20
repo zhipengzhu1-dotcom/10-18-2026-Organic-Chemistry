@@ -30,20 +30,25 @@ export function withKey(page: PageLesson, key: AnswerKey = {}): Lesson {
   return { ...page, steps: page.steps.map((step) => joinStep(step, key[step.id])) };
 }
 
+/** Key fields that hold values, not words: answers and Hint conditions (ids, numbers, Scene values), Scenes, citations, structures, goals. */
+const VALUES = new Set([
+  "answer", "tolerance", "results", "revealScene", "replay", "answerCitations",
+  "match", "includes", "misses", "notFirst", "notLast", "before", "above", "from", "to", "start", "goal",
+  // A stage's prompt is a question, not an answer (the first is the Step's own prompt).
+  "prompt",
+]);
+
 /**
- * The words a key entry carries (Hints, Correct lines, reveals, reveal tags, in-between copy, later
- * stages): what must never be on the page. Ids, numbers and structured data (Scenes, citations,
- * structures, pushes) are left out, and so are stage prompts (the first is the Step's own prompt).
+ * The words a key entry carries (Correct lines, Hints, reveals, reveal tags, in-between copy, stage
+ * Hints): what must never be on the page.
  */
 export function keyText(secrets: Record<string, unknown>): string[] {
   const out: string[] = [];
-  const walk = (value: unknown, field?: string) => {
-    if (typeof value === "string") {
-      if (field !== "prompt" && !/^[a-z0-9][a-z0-9-]*$/.test(value)) out.push(value);
-    } else if (Array.isArray(value)) value.forEach((v) => walk(v, field));
-    else if (value && typeof value === "object") for (const [k, v] of Object.entries(value)) walk(v, k);
+  const walk = (value: unknown) => {
+    if (typeof value === "string") out.push(value);
+    else if (Array.isArray(value)) value.forEach(walk);
+    else if (value && typeof value === "object") for (const [k, v] of Object.entries(value)) if (!VALUES.has(k)) walk(v);
   };
-  for (const [field, value] of Object.entries(secrets))
-    if (!["revealScene", "answerCitations", "results", "replay"].includes(field)) walk(value, field);
+  walk(secrets);
   return out;
 }

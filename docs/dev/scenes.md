@@ -27,7 +27,7 @@ A Step's Scene cites join the Step's Source note automatically. Before building 
 
 - `type: manipulate`: one settable state is the control; graded by equality on `{ setting }`. The build rejects an answer or Hint value off the state's grid and a control that starts on the answer.
 - `type: manipulate-goal`: the Student works the Scene itself through `stages` (`goal`, `blocked`, `idle` Hints; `idleSeconds`, default 30). The Scene declares `manifest.interact` (`drop`, `next`) and draws handles/targets as `<g role=button tabIndex=0 data-handle|data-target aria-label>` (pattern: `scenes/src/dots/dots.tsx` `Hit`). `site/src/components/GoalScene.tsx` owns pointer drag, tap-tap and keyboard; idle timers live in the player, never in the Scene.
-- Problems take no Manipulate type (`problemFile` in `content/src/schema.ts`).
+- Problems take no Manipulate type (no `problem` in `content/src/step-types/manipulate*/schema.ts`).
 
 ## Push replay
 

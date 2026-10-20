@@ -70,6 +70,10 @@ _Avoid_: Question bank, item pool
 Feedback written for a specific wrong answer, shown after a first wrong try; a second wrong try reveals the answer.
 _Avoid_: Clue, tip
 
+**Answer key**:
+The part of a Lesson or Practice Set kept off the page (answers, Hints, reveals, and the numbers cited only in them), fetched by the Step player when grading.
+_Avoid_: solutions file, secrets
+
 **Streak**:
 The count of consecutive days on which a Student finished one Lesson or three Problems.
 _Avoid_: Chain, combo

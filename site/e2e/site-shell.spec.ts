@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import { buildContent, contentRoot, type Step } from "@astratron/content";
 import { allPages, lessonPaths } from "./site.ts";
 import { KOFI_URL, SITE_ADDRESS } from "../src/lib/site.ts";
+import { keyText, splitLesson } from "../src/lib/answer-key.ts";
 
 const UNIT_1 = "/organic/orgo-1/structure-bonding";
 const DONATE_LINE =
@@ -120,17 +121,11 @@ test.describe("without scripts", () => {
         .flatMap(shownText)
         .map((t) => squash(t.replace(/<[^>]+>/g, " ").replace(/[*_`]/g, "")))
         .join(" ");
-      for (const step of lesson.steps) {
-        for (const shown of shownText(step)) expect(text, `${lesson.url}#${step.id}`).toContain(plain(shown));
-        if (step.type === "explain") continue;
-        const secrets = (
-          step.type === "manipulate-goal"
-            ? step.stages.flatMap((s) => [s.correct, s.blocked, s.idle])
-            : [step.correct, step.reveal, ...(step.hints ?? []).map((h) => h.text)]
-        ).filter(Boolean) as string[];
-        for (const secret of secrets.map(plain).filter((s) => !shownEverywhere.includes(s)))
-          expect(text, `${lesson.url}#${step.id} leaks`).not.toContain(secret);
-      }
+      for (const step of lesson.steps) for (const shown of shownText(step)) expect(text, `${lesson.url}#${step.id}`).toContain(plain(shown));
+      // No word of the answer key is in the built HTML.
+      for (const [id, secrets] of Object.entries(splitLesson(lesson).key))
+        for (const secret of keyText(secrets).map(plain).filter((s) => !shownEverywhere.includes(s)))
+          expect(text, `${lesson.url}#${id} leaks`).not.toContain(secret);
       expect(text).toContain(plain(lesson.keyIdea));
     }
   });
