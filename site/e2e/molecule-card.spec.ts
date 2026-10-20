@@ -22,9 +22,8 @@ async function showAllAtoms(page: Page) {
 }
 
 test.describe("the 3D Step card", () => {
-  // At 1280x720 the card is squeezed to about 100 px tall to fit the Step on one screen (a #88
-  // hand-check item); a taller laptop window shows it at a size you can tap.
-  test.use({ viewport: { width: 1280, height: 1000 } });
+  // A short laptop window (1280 × 720): the Step sits tighter so the card stays big enough to tap.
+  test.use({ viewport: { width: 1280, height: 720 } });
 
   test("draws the molecule with WebGL, every atom lettered, a 1 Å scale bar and its Source note", async ({ page }) => {
     await page.goto(`${LESSON}#s03`);
