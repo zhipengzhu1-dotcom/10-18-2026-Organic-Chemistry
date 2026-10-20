@@ -388,6 +388,7 @@
   .opts.opts-pairs {
     grid-template-columns: 1fr 1fr;
   }
+  .soon-link a,
   .report a {
     display: inline-flex;
     align-items: center;

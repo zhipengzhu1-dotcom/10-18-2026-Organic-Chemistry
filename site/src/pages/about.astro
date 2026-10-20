@@ -36,10 +36,10 @@ const unit1 = courseModel().subjects[0]?.courses[0]?.units.find((u) => u.status 
 
     <h2>Who makes it</h2>
     <p>
-      AstraTron is a personal project, not a registered charity. Donations on <a href={KOFI_URL}>Ko-fi</a> pay for hosting and new
-      Units. Seen a mistake, or have a good Problem? <a href={suggestProblemHref()}>Tell us</a>.
+      AstraTron is a personal project, not a registered charity. If it helped you, you can <a href={KOFI_URL}>chip in on Ko-fi</a>;
+      donations pay for hosting and new Units. Seen a mistake, or have a good Problem? <a href={suggestProblemHref()}>Tell us</a>.
     </p>
 
-    {unit1 && <p><a class="btn btn-primary" href={unit1.url}>Start Unit 1 ▸</a></p>}
+    {unit1 && <p><a class="btn btn-primary" href={unit1.url}>Start Unit <span class="data">1</span> ▸</a></p>}
   </main>
 </Base>
