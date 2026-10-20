@@ -2,9 +2,14 @@
 // video renderer. Check Steps arrive with their Problem inlined.
 import type { Atom, Bond, Cited, CitedData, Tier } from "./data.ts";
 import type { BondDipole, Matrix3, Vec3 } from "./molecule.ts";
-import type { GoalStage, HintRule, ManipulateHint, NumericHint, Push, PushHint, RankHint } from "./schema.ts";
+import type { GradedStep, HintRule, Push, PushHint, Step } from "./step-types/index.ts";
 
-export type { GoalStage, HintRule, ManipulateHint, NumericHint, Push, PushHint, RankHint };
+// Each Step type's resolved shape lives in its module (content/src/step-types/<type>/rules.ts);
+// the unions are worked out from the Step type table.
+export type {
+  DrawArrowsStep, ExplainStep, GoalStage, GoalStep, GradedStep, HintRule, ManipulateHint, ManipulateStep, MultipleChoiceStep,
+  NumericHint, NumericStep, Push, PushHint, RankHint, RankStep, RotateAndIdentifyStep, Step, StepType, TapStep,
+} from "./step-types/index.ts";
 
 export type Phase = "hook" | "build" | "check" | "wrap";
 
@@ -172,187 +177,6 @@ export function answeredCitations(step: { citations?: Cited[]; answerCitations?:
   return [...shown, ...(step.answerCitations ?? []).filter((c) => !shown.some((s) => s.ref === c.ref))];
 }
 
-/**
- * The fields of a graded Step or Problem that give its answer away: they ship in the answer key,
- * never in the Lesson page's HTML (story 99). Numbers cited only here travel as `answerCitations`.
- * `content/test/answer-fields.test.ts` fails on a schema field named like an answer that isn't here.
- */
-export const ANSWER_FIELDS = ["answer", "tolerance", "correct", "hints", "reveal", "results", "inBetween", "stages", "revealScene", "replay", "revealTags"] as const;
-
-export interface ExplainStep extends Visuals {
-  id: string;
-  phase: Phase;
-  type: "explain";
-  text: string;
-  scene?: SceneUse;
-  molecule?: MoleculeUse;
-  citations?: Cited[];
-}
-
-export interface MultipleChoiceStep extends GradedVisuals {
-  id: string;
-  phase: Phase;
-  type: "multiple-choice";
-  prompt: string;
-  /** Text options or structure cards. */
-  options: Option[];
-  answer: string[];
-  correct?: string;
-  hints?: Hint[];
-  reveal: string;
-  prediction?: boolean;
-  /** Set on Check Steps: the Bank Problem this Step plays. */
-  problemId?: string;
-  scene?: SceneUse;
-  molecule?: MoleculeUse;
-  /** The cited values this Step's text shows (`{{file/key}}`); its Source note is generated from them. */
-  citations?: Cited[];
-}
-
-/** Numeric input: the Student types a number; the unit is fixed and shown beside the box, never typed. */
-export interface NumericStep extends GradedVisuals {
-  id: string;
-  phase: Phase;
-  type: "numeric";
-  prompt: string;
-  /** The unit of measure shown beside the box, e.g. "°" or "Å". */
-  unitSymbol: string;
-  /** A ± key beside the box flips the sign of what is typed. */
-  signKey?: boolean;
-  answer: number;
-  /** Absolute: a value within answer ± tolerance is right. */
-  tolerance: number;
-  correct?: string;
-  hints?: NumericHint[];
-  reveal: string;
-  problemId?: string;
-  scene?: SceneUse;
-  molecule?: MoleculeUse;
-  citations?: Cited[];
-}
-
-/** Rank / order: the Student puts the items into one strict order (the prompt names which end is first). */
-export interface RankStep extends GradedVisuals {
-  id: string;
-  phase: Phase;
-  type: "rank";
-  prompt: string;
-  /** In the order the cards start in; a structure card's text is its screen-reader label (Lesson 7). */
-  items: Option[];
-  /** The one correct order of item ids, first to last. */
-  answer: string[];
-  correct?: string;
-  /** A Hint's `match` is one whole wrong order; or it names a pattern (see RankHint). */
-  hints?: RankHint[];
-  reveal: string;
-  /** Once answered, each card's note on why it sits there; secret (it gives the order away). */
-  revealTags?: Record<string, string>;
-  problemId?: string;
-  scene?: SceneUse;
-  molecule?: MoleculeUse;
-  citations?: Cited[];
-}
-
-/** Manipulate a Scene: the Student works a slider (one settable state of the Scene) and presses Check on a value. */
-export interface ManipulateStep extends GradedVisuals {
-  id: string;
-  phase: Phase;
-  type: "manipulate";
-  prompt: string;
-  scene: SceneUse;
-  /** The settable state the slider drives; it starts at `scene.state[control]`. */
-  control: string;
-  answer: SceneValue;
-  correct?: string;
-  hints?: ManipulateHint[];
-  reveal: string;
-  problemId?: string;
-  citations?: Cited[];
-  /** The molecule the Step names: Explore in 3D (#71). */
-  molecule?: MoleculeUse;
-}
-
-/** Rotate-and-identify 3D: turn the molecule in the 3D card, answer with ordinary choices (graded like Multiple choice). */
-export interface RotateAndIdentifyStep extends GradedVisuals {
-  id: string;
-  phase: Phase;
-  type: "rotate-and-identify";
-  prompt: string;
-  molecule: MoleculeUse;
-  options: { id: string; text: string }[];
-  /** The exact set of correct option ids. */
-  answer: string[];
-  correct?: string;
-  hints?: Hint[];
-  reveal: string;
-  problemId?: string;
-  scene?: SceneUse;
-  citations?: Cited[];
-}
-
-/**
- * Draw arrows: the Student pushes electrons on the atom-mapped start, one arrow at a time. Each push
- * is applied to our own molecule graph and accepted when it moves toward an accepted result
- * (`@astratron/content/arrows`). Two tries per push; the Step is done when the drawing is a result.
- */
-export interface DrawArrowsStep extends GradedVisuals {
-  id: string;
-  phase: Phase;
-  type: "draw-arrows";
-  prompt: string;
-  /** The atom-mapped start the Student pushes on (atom ids are the map). */
-  start: StructureView;
-  /** The target drawn dimmed beside (or above) the start; absent when the Step hides it (open or "no target"). */
-  target?: StructureView;
-  /** Every accepted result (same atom ids as the start). */
-  results: Structure[];
-  /** The correct pushes, in an order that works: shown on a second wrong try and in the reveal. */
-  answer: Push[];
-  /** Copy for in-between states; `{atom}` and `{electrons}` are filled in. Defaults apply when absent. */
-  inBetween?: { over?: string; short?: string };
-  correct?: string;
-  hints?: PushHint[];
-  reveal: string;
-  problemId?: string;
-  scene?: SceneUse;
-  citations?: Cited[];
-  /** The molecule the Step names: Explore in 3D (#71). */
-  molecule?: MoleculeUse;
-}
-
-/** A Step the Student answers and the engine grades. */
-export type GradedStep =
-  | MultipleChoiceStep
-  | NumericStep
-  | RankStep
-  | TapStep
-  | ManipulateStep
-  | RotateAndIdentifyStep
-  | DrawArrowsStep;
-
-/**
- * A goal-state Manipulate a Scene Step: the Student works the Scene itself (its handles, e.g.
- * atoms to drag) until its state reaches each stage's goal. Nothing is graded: the Scene's own
- * rules refuse impossible moves, and Continue opens when the last stage is done.
- */
-export interface GoalStep extends GradedVisuals {
-  id: string;
-  phase: Phase;
-  type: "manipulate-goal";
-  /** The first stage's prompt. */
-  prompt: string;
-  scene: SceneUse;
-  idleSeconds: number;
-  stages: GoalStage[];
-  /** Nothing is graded, so there is no reveal; never a Problem. */
-  reveal?: undefined;
-  problemId?: undefined;
-  citations?: Cited[];
-  molecule?: MoleculeUse;
-}
-
-export type Step = ExplainStep | GoalStep | GradedStep;
-
 // ── Structures (2D drawings) ────────────────────────────────────────────────
 // A structure file is laid out once by RDKit.js (content/src/layout.ts) and
 // committed; the site's own renderer (@astratron/scenes) draws it. RDKit never draws.
@@ -452,31 +276,6 @@ export interface TapTarget {
   label: string;
   /** For a region: the atoms it covers. */
   atoms?: string[];
-}
-
-export interface TapStep extends GradedVisuals {
-  id: string;
-  phase: Phase;
-  type: "tap-to-identify";
-  prompt: string;
-  structure: StructureView;
-  /** Screen-reader text for the whole drawing. */
-  alt?: string;
-  targets: TapTarget[];
-  /** The exact set of target ids to pick. */
-  answer: string[];
-  correct?: string;
-  hints?: HintRule[];
-  reveal: string;
-  /** Shown when the Step sits among Draw-arrows Steps: it is tap-only. */
-  tapOnly?: { idle: string; drag: string };
-  /** Played (push-replay) in place of the drawing once the Step is answered: pushes on `start` that make the δ site (Lesson 7). Secret. */
-  replay?: { start: Structure; pushes: Push[] };
-  problemId?: string;
-  scene?: SceneUse;
-  citations?: Cited[];
-  /** The molecule the Step names: Explore in 3D (#71). */
-  molecule?: MoleculeUse;
 }
 
 export interface Lesson {

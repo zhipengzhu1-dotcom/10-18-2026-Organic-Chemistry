@@ -2,8 +2,11 @@
 // structure cards and Tap-to-identify targets, and writing the screen-reader
 // label of every tappable atom and bond.
 import type { Figure, Hidden, Option, Push, Structure, StructureAtom, StructureView, TapTarget } from "./model.ts";
-import type { ProblemFile, StructureFile } from "./schema.ts";
-import { hintIds } from "./shape.ts";
+import type { StructureFile } from "./schema.ts";
+import { hintIds } from "./step-types/choice.ts";
+import type { DrawArrowsFile } from "./step-types/draw-arrows/schema.ts";
+import type { MultipleChoiceFile } from "./step-types/multiple-choice/schema.ts";
+import type { TapFile } from "./step-types/tap-to-identify/schema.ts";
 import { expectedLonePairs, hydrogenCount, VALENCE } from "./valence.ts";
 import {
   arrowsAct,
@@ -17,10 +20,9 @@ import {
   type ArrowsTask,
 } from "./arrows.ts";
 
-type TapFile = Extract<ProblemFile, { type: "tap-to-identify" }>;
 type TapFields = Pick<TapFile, "structure" | "hide" | "outline" | "tappable" | "answer" | "hints" | "replay">;
 type FigureFile = NonNullable<TapFile["figures"]>[number];
-type OptionFile = Extract<ProblemFile, { type: "multiple-choice" }>["options"][number];
+type OptionFile = MultipleChoiceFile["options"][number];
 
 /** Internal consistency of one structure file. */
 /** The PubChem compound a structure file names in its `source` ("PubChem CID 7967"), if any. */
@@ -196,8 +198,7 @@ export function resolveTap(
   return { structure: drawn, targets, ...(resolved && { replay: { start: resolved.start.structure, pushes } }) };
 }
 
-type ArrowsFile = Extract<ProblemFile, { type: "draw-arrows" }>;
-type ArrowsFields = Pick<ArrowsFile, "start" | "results" | "hideTarget" | "answer" | "hints" | "inBetween" | "marks">;
+type ArrowsFields = Pick<DrawArrowsFile, "start" | "results" | "hideTarget" | "answer" | "hints" | "inBetween" | "marks">;
 
 /**
  * Resolves a Draw-arrows item's start, target and results, and checks them: every structure's

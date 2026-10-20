@@ -10,6 +10,7 @@
     "./molecule": "./src/molecule.ts",
     "./model": "./src/model.ts",
     "./arrows": "./src/arrows.ts",
+    "./step-types": "./src/step-types/index.ts",
     "./sidecar": "./src/sidecar.ts"
   },
   "scripts": {

@@ -27,7 +27,7 @@ import {
   type StructureFile,
 } from "./schema.ts";
 import { checkDeletedSteps, checkFrozenIds, LOCK_FILE } from "./freeze.ts";
-import { ANSWER_FIELDS, type Aside, type BuildResult, type Course, type Figure, type GradedStep, type HeroPush, type Lesson, type Option, type Push, type Step, type Structure, type StructureView, type Subject, type TapTarget } from "./model.ts";
+import { type Aside, type BuildResult, type Course, type Figure, type GradedStep, type HeroPush, type Lesson, type Option, type Push, type Step, type Structure, type StructureView, type Subject, type TapTarget } from "./model.ts";
 
 /** The Practice Set page sits at `<unit url>/practice`, so no Lesson may take that slug. */
 export const PRACTICE_SLUG = "practice";
@@ -36,8 +36,10 @@ import { citeIn, type Cited, type CitedData } from "./data.ts";
 import { dataFile, resolveDataFile } from "./data-load.ts";
 import type { SceneCatalog, SceneUse } from "./model.ts";
 import { checkStepScene, resolveSceneUse, type SceneUseFile } from "./scenes.ts";
+import { secretFields, type StepType } from "./step-types/index.ts";
+import { schemaOf } from "./step-types/schemas.ts";
 import { checkViews, resolveMoleculeUse, type MoleculeUseFile, type Views } from "./molecule-use.ts";
-import { checkAgainstPubChem, pubchemCid, checkStructure, resolveArrows, resolveFigure, resolveOptions, resolveTap } from "./structures.ts";
+import { checkAgainstPubChem, pubchemCid, checkStructure, resolveArrows, resolveFigure } from "./structures.ts";
 
 /** What a Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
 type StructureFields = {
@@ -192,10 +194,8 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       if (item.type === "check") return;
       const found: string[] = [];
       const fields: StructureFields = {};
-      if (item.type === "multiple-choice") fields.options = resolveOptions(item.options, structures, found);
-      else if (item.type === "rank") fields.items = resolveOptions(item.items, structures, found);
-      else if (item.type === "tap-to-identify") Object.assign(fields, resolveTap(item, structures, found));
-      else if (item.type === "draw-arrows") Object.assign(fields, resolveArrows(item, structures, found));
+      // Structure cards, Tap targets, Draw-arrows starts and results: each Step type resolves its own.
+      Object.assign(fields, schemaOf(item.type).structures?.(item, structures, found));
       if (item.figures) fields.figures = item.figures.flatMap((f) => resolveFigure(f, structures, found) ?? []);
       if (item.aside) {
         const { table, ...aside } = item.aside;
@@ -268,7 +268,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
                 const cited = problemId && problemCitations.get(problemId);
                 if (cited) step.citations = mergeCitations(cited, step.citations ?? []);
                 const answered = problemId && problemAnswers.get(problemId);
-                if (answered && step.type !== "explain") step.answerCitations = mergeCitations(answered, step.answerCitations ?? []);
+                if (answered) (step as GradedStep).answerCitations = mergeCitations(answered, (step as GradedStep).answerCitations ?? []);
               }
               return [resolved];
             }),
@@ -305,8 +305,8 @@ function resolveLesson(
   errors: string[],
 ): Lesson {
   const steps: Step[] = lesson.steps.flatMap((step): Step[] => {
-    // A goal-state Manipulate Step opens on its first stage's prompt.
-    const opening = (st: Step): Step => (st.type === "manipulate-goal" ? { ...st, prompt: st.stages[0].prompt } : st);
+    // Some types finish their resolved Step (a goal-state Manipulate Step opens on its first stage's prompt).
+    const opening = (st: Step): Step => schemaOf(st.type).open?.(st) ?? st;
     if (step.type !== "check")
       return withStructures(step, `${lesson.id}#${step.id}`, structured).map((st) => withScene(opening(st), scene));
     const problem = problems.get(step.problem);
@@ -358,7 +358,8 @@ function checkTapOnly(
 function withStructures(step: Record<string, unknown> & { type: string }, key: string, structured: Structured): Step[] {
   const fields = structured.get(key);
   if (!fields) return [];
-  const { tappable: _t, hide: _h, outline: _o, start: _s, results: _r, hideTarget: _ht, ...rest } = step;
+  const rest = { ...step };
+  for (const field of schemaOf(step.type as StepType).fileOnly ?? []) delete rest[field];
   return [{ ...rest, ...fields } as unknown as Step];
 }
 
@@ -505,11 +506,11 @@ function citeNumbers(
 }
 
 /**
- * Cites an item's text, keeping apart the values cited only in its answer fields (ANSWER_FIELDS):
+ * Cites an item's text, keeping apart the values cited only in its answer fields (its Step type's `secret`):
  * those ship in the answer key and join the Source note once the Step is answered (story 99).
  */
-function citeSplit<T extends object>(item: T, data: CitedData): { item: T; cited: Cited[]; answerCited: Cited[]; missing: string[] } {
-  const secret = new Set<string>(ANSWER_FIELDS);
+function citeSplit<T extends { type: StepType }>(item: T, data: CitedData): { item: T; cited: Cited[]; answerCited: Cited[]; missing: string[] } {
+  const secret = new Set(secretFields(item.type));
   const split = (keep: boolean) => Object.fromEntries(Object.entries(item).filter(([k]) => secret.has(k) === keep));
   const shown = citeIn(split(false), data);
   const answer = citeIn(split(true), data);
@@ -540,7 +541,7 @@ function resolveMolecules(
   /** The resolved molecule; when the Step shows the inline 3D card, its numbers join the Step's Source note. */
   const resolve = <T extends object>(item: T, where: string): { item: T; cited: Cited[] } => {
     if (!("molecule" in item) || !item.molecule) return { item, cited: [] };
-    const card = "type" in item && item.type === "rotate-and-identify";
+    const card = "type" in item && item.type !== "check" && !!schemaOf(item.type as StepType).card;
     const { molecule, errors: broken } = resolveMoleculeUse(item.molecule as MoleculeUseFile, data, views, card);
     for (const message of broken) errors.push(`${where}${message}`);
     if (!molecule) return { item, cited: [] };
