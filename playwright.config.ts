@@ -7,6 +7,10 @@ const port = Number(process.env.E2E_PORT ?? 4329);
 export default defineConfig({
   testDir: "site/e2e",
   forbidOnly: !!process.env.CI,
+  // Room for a busy machine (several walks run in parallel): a short test that passes in seconds alone
+  // could pass 30 s under load (structure-steps Tab reach, Lesson 0's keyboard walk, molecule-card).
+  timeout: 60_000,
+  expect: { timeout: 10_000 },
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: { baseURL: `http://localhost:${port}`, trace: "retain-on-failure" },
