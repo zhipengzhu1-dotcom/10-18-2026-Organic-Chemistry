@@ -18,7 +18,7 @@ const method = z.strictObject({
 });
 
 const source = z.strictObject({
-  kind: z.enum(["experimental", "computed", "reference"]),
+  kind: z.enum(["experimental", "computed", "reference", "model"]),
   citation: text,
   licence: text,
   /** Id of another source in this file that the value was taken from (e.g. NIST CCCBDB). */

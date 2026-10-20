@@ -1,7 +1,7 @@
 // Lesson 3's three watch-only Scenes (#81): silent, plain Manim CE renders (scenes/manim/lesson_03.py),
 // 60 fps, the last frame the poster. Methane's geometry comes from its cited bond length and angle
-// (CCCBDB, experimental); the only typed angles are the VSEPR model's predictions, always captioned
-// "model:", as the Lesson spec allows.
+// (CCCBDB, experimental); the VSEPR model's predictions come from vsepr-model.yaml (cited as a model,
+// not a measurement) and are always captioned "model:".
 import type { Cited } from "@astratron/content/data";
 import type { WatchSceneManifest } from "../types.ts";
 
@@ -26,23 +26,24 @@ export const methaneUnflatten: WatchSceneManifest = {
   aspects: ["16:9", "9:16"],
 };
 
-/** The VSEPR model's predictions (Lesson 3 spec: the only typed angles, always named as the model's). */
-const MODEL = { line: "180", triangle: "120", tetrahedron: "109.5" }; // cited-data: ok, the VSEPR model's predictions
+/** The VSEPR model's predictions, always named as the model's. */
+const MODEL = { line: "vsepr-model/linear.angle", triangle: "vsepr-model/trigonal-planar.angle", tetrahedron: "vsepr-model/tetrahedral.angle" };
 
 /** s02: two, three and four electron domains push apart into a line, a flat triangle and a tetrahedron. */
 export const domainSpread: WatchSceneManifest = {
   id: "domain-spread",
   title: "Electron domains push apart",
   render: { engine: "manim", script: "lesson_03.py", sceneClass: "DomainSpread" },
-  describe: () =>
-    `Three panels. Two balloons on a centre push apart until they point in opposite directions: a line, model angle ${MODEL.line} degrees. ` +
-    `Three balloons spread into a flat triangle, model angle ${MODEL.triangle} degrees. ` +
-    `Four balloons spread to the corners of a tetrahedron, model angle ${MODEL.tetrahedron} degrees.`,
+  describe: (cited) =>
+    `Three panels. Two balloons on a centre push apart until they point in opposite directions: a line, model angle ${degrees(cited[MODEL.line])} degrees. ` +
+    `Three balloons spread into a flat triangle, model angle ${degrees(cited[MODEL.triangle])} degrees. ` +
+    `Four balloons spread to the corners of a tetrahedron, model angle ${degrees(cited[MODEL.tetrahedron])} degrees.`,
   reducedMotion: "Opens paused on the last frame: all three panels settled, with their names and model angles; Play starts the video.",
-  data: [],
+  // In panel order; the renderer prints each after its "model:" caption.
+  data: [MODEL.line, MODEL.triangle, MODEL.tetrahedron],
   text: {
     names: ["line", "flat triangle", "tetrahedron"],
-    captions: [`model: ${MODEL.line}°`, `model: ${MODEL.triangle}°`, `model: ${MODEL.tetrahedron}°`],
+    captions: ["model:", "model:", "model:"],
   },
   duration: 10,
   poster: 10,

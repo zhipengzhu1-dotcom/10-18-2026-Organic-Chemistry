@@ -69,7 +69,7 @@ export default function FourDomainFamily({ t, state, aspect, reducedMotion, cite
       })}
       <line x1={area.x} y1={modelY} x2={area.x + area.w * (portrait ? 0.45 : 0.62)} y2={modelY} stroke={MUTED} strokeWidth={3} strokeDasharray="14 10" />
       <text x={area.x + area.w * (portrait ? 0.47 : 0.64)} y={modelY} fill={MUTED} fontSize={font * 0.8} dominantBaseline="central">
-        {`model: ${MODEL_ANGLE}°`}
+        {`model: ${cited[MODEL_ANGLE]?.display ?? ""}`}
       </text>
       <ScaleBar x={area.x + area.w * (portrait ? 0.03 : 0.84)} y={modelY - (portrait ? font * 1.4 : 0)} px={px} font={font * 0.7} />
     </svg>

@@ -226,6 +226,29 @@ describe("Source note", () => {
     expect(note[1].lead).toBe("Geometry: experimental (gas phase).");
   });
 
+  it('labels a model\'s values (a geometric ideal, e.g. VSEPR) "model, not measured"', () => {
+    const result = build(
+      (t) =>
+        (t["chem/data/vsepr.yaml"] = [
+          "id: vsepr",
+          "kind: table",
+          "title: VSEPR ideal angles",
+          "sources:",
+          "  gh: { kind: model, citation: Gillespie and Hargittai (1991), licence: Geometric definitions }",
+          "values:",
+          "  tetrahedral.angle: { label: tetrahedral, quantity: angle, value: 109.47, unit: °, source: gh }",
+          "  linear.angle: { label: linear, quantity: angle, value: 180, unit: °, source: gh, decimals: 0 }",
+        ].join("\n")),
+    );
+    expect(result.errors).toEqual([]);
+    const data = dataOf(result);
+    expect(cite(data, "vsepr/tetrahedral.angle")).toMatchObject({ display: "109.5°", source: { kind: "model" } });
+    expect(cite(data, "vsepr/linear.angle").display).toBe("180°");
+    expect(sourceNote([cite(data, "vsepr/tetrahedral.angle")])).toEqual([
+      { lead: "Model, not measured.", text: "tetrahedral 109.47° from Gillespie and Hargittai (1991)." },
+    ]);
+  });
+
   it("still names a shared source once after the values cross to the browser as JSON", () => {
     const data = dataOf(build((t) => (t["chem/data/elements.yaml"] = elements())));
     const shipped = JSON.parse(JSON.stringify([cite(data, "elements/C.colour"), cite(data, "elements/H.colour")]));

@@ -71,7 +71,9 @@ describe("Lesson 3's watch-only Scenes (Manim)", () => {
     expect(read("domain-spread")).toBe(
       "Three panels. Two balloons on a centre push apart until they point in opposite directions: a line, model angle 180 degrees. Three balloons spread into a flat triangle, model angle 120 degrees. Four balloons spread to the corners of a tetrahedron, model angle 109.5 degrees.",
     );
-    expect(watchScene("domain-spread")!.text.captions).toEqual(["model: 180°", "model: 120°", "model: 109.5°"]);
+    // The renderer prints each caption's model angle from the cited model value (ADR 0002), not typed text.
+    expect(watchScene("domain-spread")!.data).toEqual(["vsepr-model/linear.angle", "vsepr-model/trigonal-planar.angle", "vsepr-model/tetrahedral.angle"]);
+    expect(watchScene("domain-spread")!.text.captions).toEqual(["model:", "model:", "model:"]);
   });
 
   it("wedge-dash-methane reads the spec's words, and every one has a poster at its last frame", () => {

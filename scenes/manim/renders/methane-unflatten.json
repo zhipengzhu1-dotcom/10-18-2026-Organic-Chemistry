@@ -2,7 +2,7 @@
   "scene": "methane-unflatten",
   "manim": "0.22.0",
   "fps": 60,
-  "inputs": "af9dd594351329e03c5450483b57b9da5dec6052ef0e0e253a413371522c76d8",
+  "inputs": "6d1afa3b1513d43d2e77f376af66e415db1b492507970ebc9d68e2d57995c419",
   "aspects": {
     "16:9": {
       "frames": 480,

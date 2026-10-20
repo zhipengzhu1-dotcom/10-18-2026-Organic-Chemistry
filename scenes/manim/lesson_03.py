@@ -10,7 +10,7 @@
   finished drawing sits beside the model.
 
 Methane is rebuilt from its cited C-H length and H-C-H angle (SCENE_PROPS values); colours are the
-cited Jmol colours; the only typed angles are the model's, passed in as on-screen text. 3D is drawn
+cited Jmol colours; the model angles are cited too (vsepr-model.yaml, a model, not a measurement). 3D is drawn
 by projecting coordinates ourselves (orthographic), so frames are plain 2D Cairo shapes. Silent,
 60 fps, the last frame is the poster. Render with `pnpm scenes:render <id>`, never by hand.
 """
@@ -234,6 +234,9 @@ class DomainSpread(Timed):
         tet = [rot([1, 0, 0], 18) @ rot([0, 1, 0], 25) @ (R @ d) for d in tetra_dirs()]
         sets = [line, tri, tet]
         names, caps = TEXT["names"], TEXT["captions"]
+        # The model angles are cited (vsepr-model.yaml), in panel order: one decimal, no ".0".
+        refs = list(VALUES.keys())
+        angles = [f"{round(float(VALUES[r]), 1):g}°" for r in refs]
         if PORTRAIT:
             centres = [np.array([0, FH * 0.3, 0]), np.array([0, 0.0, 0]), np.array([0, -FH * 0.3, 0])]
         else:
@@ -269,9 +272,12 @@ class DomainSpread(Timed):
         for i in range(3):
             off = DOWN * (FH * 0.22 if not PORTRAIT else FH * 0.095)
             n = Text(names[i], font=SANS, font_size=40, color=INK, weight=BOLD).move_to(centres[i] + off)
-            c = Text(caps[i], font=MONO, font_size=32, color=MUTED).next_to(n, DOWN, buff=0.18)
+            c = Text(f"{caps[i]} {angles[i]}", font=MONO, font_size=32, color=MUTED).next_to(n, DOWN, buff=0.18)
             labels.add(VGroup(n, c))
+        t0 = self.now()
         self.play(LaggedStart(*[FadeIn(l, shift=UP * 0.1) for l in labels], lag_ratio=0.3), run_time=1.6)
+        for r in refs:
+            self.mark(r, t0, PROPS["duration"])
 
 
 # ---- wedge-dash-methane --------------------------------------------------------------

@@ -1,0 +1,16 @@
+# The VSEPR model's ideal angles between electron domains (Lessons 3 and 4). These are
+# geometry definitions, not measurements: the angles of a line, an equilateral triangle
+# and a regular tetrahedron (arccos(-1/3) = 109.4712°). Always shown as the model's
+# ("model:"), next to the measured angles from the molecule data files.
+id: vsepr-model
+kind: table
+title: VSEPR model angles
+sources:
+  vsepr:
+    kind: model
+    citation: "Gillespie, R. J. and Hargittai, I., The VSEPR Model of Molecular Geometry, Allyn and Bacon (1991): ideal electron-domain arrangements (two domains linear, three trigonal planar, four tetrahedral)"
+    licence: Geometric definitions (the angles of regular shapes), not third-party data; cited for traceability
+values:
+  linear.angle: { label: "model angle, linear (2 domains)", quantity: angle, value: 180, unit: °, source: vsepr, decimals: 0 }
+  trigonal-planar.angle: { label: "model angle, trigonal planar (3 domains)", quantity: angle, value: 120, unit: °, source: vsepr, decimals: 0 }
+  tetrahedral.angle: { label: "model angle, tetrahedral (4 domains)", quantity: angle, value: 109.4712, unit: °, source: vsepr, note: "arccos(-1/3)" }
