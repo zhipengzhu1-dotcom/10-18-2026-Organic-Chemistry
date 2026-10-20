@@ -74,6 +74,19 @@ test("the coming-soon page lists every Unit still to come, by Course, with a way
   await expect(page.getByRole("main").getByRole("link", { name: "Course map" })).toHaveAttribute("href", "/organic");
 });
 
+test("every page has the AstraTron icon as its favicon and touch icon", async ({ page, request }) => {
+  for (const path of ["/", UNIT_1, lessons[0]!.lesson.url]) {
+    await page.goto(path);
+    for (const rel of ["icon", "apple-touch-icon"]) {
+      const href = await page.locator(`link[rel="${rel}"]`).getAttribute("href");
+      expect(href, `${path} ${rel}`).toBeTruthy();
+      const response = await request.get(href!);
+      expect(response.status()).toBe(200);
+      expect(response.headers()["content-type"]).toContain("image/png");
+    }
+  }
+});
+
 test("Lesson pages have no footer and no Donate", async ({ page }) => {
   await page.goto(lessons[0]!.lesson.url);
   await expect(page.getByRole("contentinfo")).toHaveCount(0);

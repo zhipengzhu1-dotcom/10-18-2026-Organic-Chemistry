@@ -26,6 +26,9 @@ const meta = pageMeta({ path: Astro.url.pathname, unitId });
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={meta.canonical} />
+    <!-- The icon, from the repo's "AstraTron Icon.jpg" (sips -z 32 32 / 180 180). -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <meta property="og:site_name" content="AstraTron" />
     <meta property="og:type" content="website" />
