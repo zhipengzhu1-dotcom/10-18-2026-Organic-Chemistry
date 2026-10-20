@@ -66,6 +66,9 @@ export async function useTheme(page: Page, theme: Theme) {
  */
 export async function playThrough(page: Page, each: (label: string) => Promise<void>) {
   const count = page.locator(".player-count");
+  // Settle first: until the answer key is in, a graded Step's shape (its Source note, its Check) can still
+  // change on its own, so a locator counted now may be gone by the next call.
+  await expect(page.locator(".player")).toHaveAttribute("data-key", "loaded");
   for (let guard = 0; guard < 40; guard++) {
     const label = (await count.textContent()) ?? "";
     await each(label);

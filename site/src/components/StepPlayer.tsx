@@ -73,7 +73,12 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   const [manipulated, setManipulated] = useState<{ stepId: string; value: SceneValue } | null>(null);
   /** The graded Step whose watch-only video is playing now (its prompt waits until it stops). */
   const [introPlaying, setIntroPlaying] = useState<string | null>(null);
-  const { step, feedback } = screen;
+  const { feedback } = screen;
+  // Drawn from the keyed Lesson, not `screen.step`: when the key arrives, `screen` still holds the
+  // keyless Step for one render (until the "open" effect below replays it), and a keyless graded Step
+  // has no reveal Scene, so its Source note would mount for that render and unmount on the next.
+  // (That flicker hung CI's design walk: it saw the note, then clicked a note that was gone.)
+  const step = lesson.steps[screen.index];
   const pageStep = page.steps[screen.index];
   const single = (pageStep.type === "multiple-choice" || pageStep.type === "rotate-and-identify") && pageStep.select === "one";
 
@@ -226,6 +231,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         answered: (!!feedback && step.type === "tap-to-identify" && !!step.figures) || (hasCard && screen.canContinue),
       })}
       id={step.id}
+      // "loaded" once the answer key is in and nothing more will change a Step's shape on its own.
+      data-key={key ? "loaded" : "loading"}
     >
       <div className="player-top">
         <a href={exitHref} aria-label={practice ? "Leave the Practice Set" : "Leave the Lesson"} className="player-exit">

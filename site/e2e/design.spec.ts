@@ -136,7 +136,8 @@ for (const theme of THEMES) {
         await page.goto(lesson);
         await playThrough(page, async (step) => {
           const label = `${lesson} ${step}`;
-          // Open the Source note (if the Step has one) so its numbers are checked too.
+          // Open the Source note (if the Step has one) so its numbers are checked too. The Step is settled
+          // (playThrough waits for the answer key), so what is counted here is what gets clicked.
           const note = page.locator("details.source-note:not([open]) summary");
           if (await note.count()) await note.click();
           await page.waitForTimeout(250); // let the panel's entry finish before axe reads colours
