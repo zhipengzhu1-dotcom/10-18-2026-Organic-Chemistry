@@ -1,32 +1,32 @@
 // What the video module renders: every registered Scene at both aspect ratios, 60 fps.
 import { describe, expect, it } from "vitest";
 import { sceneManifests } from "@astratron/scenes/manifests";
-import { sampleTwist } from "../../scenes/src/sample-twist/manifest.ts";
+import { piTwist } from "../../scenes/src/pi-twist/manifest.ts";
 import { videoJobs } from "../src/jobs.ts";
 
 describe("videoJobs", () => {
-  it("renders the sample Scene at 1920×1080 and 1080×1920, 60 fps, for its video duration", () => {
-    const jobs = videoJobs([sampleTwist]);
+  it("renders a Scene (Lesson 4's pi-twist) at 1920×1080 and 1080×1920, 60 fps, for its video duration", () => {
+    const jobs = videoJobs([piTwist]);
     expect(jobs).toEqual([
       {
-        id: "sample-twist-16x9",
-        sceneId: "sample-twist",
+        id: "pi-twist-16x9",
+        sceneId: "pi-twist",
         aspect: "16:9",
         width: 1920,
         height: 1080,
         fps: 60,
         durationInFrames: 480, // 8 s × 60
-        posterFrame: 240, // poster at 4 s
+        posterFrame: 0, // poster at 0 s
       },
       {
-        id: "sample-twist-9x16",
-        sceneId: "sample-twist",
+        id: "pi-twist-9x16",
+        sceneId: "pi-twist",
         aspect: "9:16",
         width: 1080,
         height: 1920,
         fps: 60,
         durationInFrames: 480,
-        posterFrame: 240,
+        posterFrame: 0,
       },
     ]);
   });
@@ -38,7 +38,7 @@ describe("videoJobs", () => {
   });
 
   it("keeps the poster frame inside the video", () => {
-    const [job] = videoJobs([{ ...sampleTwist, video: { ...sampleTwist.video, poster: 8 } }]);
+    const [job] = videoJobs([{ ...piTwist, video: { ...piTwist.video, poster: 8 } }]);
     expect(job!.posterFrame).toBe(479);
   });
 });

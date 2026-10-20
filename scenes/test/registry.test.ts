@@ -11,7 +11,6 @@ import { sceneManifests } from "../src/manifests.ts";
 import { watchSceneManifests } from "../src/watch.ts";
 import { checkManifests, defaultState, sceneCatalog } from "../src/manifest-check.ts";
 import { frameSize } from "../src/frame.ts";
-import { layoutTwist } from "../src/sample-twist/layout.ts";
 import type { Aspect, SceneProps } from "../src/types.ts";
 
 const organic = buildContent(contentRoot).model!.subjects.find((s) => s.slug === "organic")!;
@@ -49,27 +48,5 @@ describe("Scene registry", () => {
         expect(once).toContain(`viewBox="0 0 ${width} ${height}"`);
       }
     }
-  });
-});
-
-describe("sample-twist layout", () => {
-  for (const aspect of ["16:9", "9:16"] as Aspect[]) {
-    it(`fits the molecule and the overlap bar inside the ${aspect} frame without overlapping`, () => {
-      const { width, height } = frameSize(aspect);
-      const { stage, bar } = layoutTwist(aspect);
-      for (const box of [stage, bar]) {
-        expect(box.x).toBeGreaterThanOrEqual(0);
-        expect(box.y).toBeGreaterThanOrEqual(0);
-        expect(box.x + box.w).toBeLessThanOrEqual(width);
-        expect(box.y + box.h).toBeLessThanOrEqual(height);
-      }
-      const apart = stage.x + stage.w <= bar.x || bar.y >= stage.y + stage.h;
-      expect(apart).toBe(true);
-    });
-  }
-
-  it("is a landscape row at 16:9 and a portrait column at 9:16", () => {
-    expect(layoutTwist("16:9").bar.x).toBeGreaterThan(layoutTwist("16:9").stage.x);
-    expect(layoutTwist("9:16").bar.y).toBeGreaterThan(layoutTwist("9:16").stage.y);
   });
 });

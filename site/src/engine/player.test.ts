@@ -379,7 +379,7 @@ describe("Manipulate a Scene Steps", () => {
     phase: "build",
     type: "manipulate",
     prompt: "Twist until the overlap is gone, then press Check.",
-    scene: { id: "sample-twist", state: { twist: 0 }, cited: {} },
+    scene: { id: "pi-twist", state: { twist: 0 }, cited: {} },
     control: "twist",
     answer: 90,
     correct: "At 90° the p orbitals are at right angles.",

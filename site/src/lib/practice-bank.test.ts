@@ -1,14 +1,13 @@
 // Unit 1's real Problem Bank (#87): with the 24 Practice Problems, every draw covers each core
 // Lesson, easy → hard, from Practice Problems alone (no On-ramp or Check Problem needed to reach 10).
-// The sample Lessons (`u1-sample*`) are left out of the core list: #88 removes them.
 import { describe, expect, it } from "vitest";
 import { buildContent, contentRoot } from "@astratron/content";
 import { drawSet } from "../engine/practice-set.ts";
 import { coreLessons, drawableBank } from "./practice.ts";
 
 const unit = buildContent(contentRoot).model!.subjects.find((s) => s.slug === "organic")!.courses[0].units[0];
-const core = coreLessons(unit).filter((id) => !id.startsWith("u1-sample"));
-const bank = drawableBank(unit).filter((p) => core.includes(p.lesson));
+const core = coreLessons(unit);
+const bank = drawableBank(unit);
 
 /** A small seeded random source (mulberry32), so each draw can be replayed. */
 function seeded(seed: number): () => number {

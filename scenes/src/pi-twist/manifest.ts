@@ -2,7 +2,7 @@
 // lengths and H–C–C angle, with one model p orbital per carbon. The `twist` slider turns the
 // right-hand CH₂ about the C–C axis, and its p turns with it; a bar labelled "π overlap (model)"
 // shows how much side-on overlap is left: full, none at 90°, full again (flipped) at 180°. The bar
-// is the model (|cos twist|), not a calculation, and shows no numbers. Grown from sample-twist (#64).
+// is the model (|cos twist|), not a calculation, and shows no numbers.
 import type { SceneManifest } from "../types.ts";
 
 export type PiTwistState = { twist: number };

@@ -5,38 +5,38 @@ import { buildContent, contentRoot } from "@astratron/content";
 import { formatLinks, lessonLinks, promptOpening } from "../src/links.ts";
 
 const model = buildContent(contentRoot).model!;
-const base = "/organic/orgo-1/structure-bonding/sample-carbons-four-bonds";
+const base = "/organic/orgo-1/structure-bonding/why-carbon";
 
 describe("lessonLinks", () => {
   it("lists every Step of a Lesson, found by id, with its phase, Prompt opening and deep link", () => {
-    const { lesson, links } = lessonLinks(model, "u1-sample");
-    expect(lesson.title).toBe("Sample: Carbon's Four Bonds");
+    const { lesson, links } = lessonLinks(model, "u1-l00");
+    expect(lesson.title).toBe("Why Carbon?");
     expect(links.length).toBe(lesson.steps.length);
     expect(links[0]).toEqual({
       id: "s01",
       phase: "hook",
-      opening: "Carbon sits at the centre of almost every molecule in your body.",
+      opening: "Carbon is only 0.02% of Earth's crust.",
       link: `${base}#s01`,
     });
     // Explain Steps open with their text, Markdown stripped and cited numbers filled in.
-    expect(links[1]).toMatchObject({ id: "s02", phase: "build", opening: "A covalent bond is a pair of electrons shared between two atoms." });
+    expect(links[1]).toMatchObject({ id: "s02", phase: "build", opening: "Atoms trade and share their outer electrons, the ones farthest out." });
   });
 
   it("finds a Lesson by its slug too, and prefixes the site origin when given", () => {
-    const { links } = lessonLinks(model, "sample-carbons-four-bonds", "https://example.org/");
+    const { links } = lessonLinks(model, "why-carbon", "https://example.org/");
     expect(links[0]!.link).toBe(`https://example.org${base}#s01`);
   });
 
   it("names the Lessons it knows when the Lesson isn't found", () => {
-    expect(() => lessonLinks(model, "nope")).toThrow(/No Lesson "nope".*u1-sample/s);
+    expect(() => lessonLinks(model, "nope")).toThrow(/No Lesson "nope".*u1-l00/s);
   });
 
   it("prints one tab-separated line per Step under a header", () => {
-    const text = formatLinks(lessonLinks(model, "u1-sample"));
+    const text = formatLinks(lessonLinks(model, "u1-l00"));
     const lines = text.split("\n");
-    expect(lines[0]).toBe("Sample: Carbon's Four Bonds (u1-sample)");
+    expect(lines[0]).toBe("Why Carbon? (u1-l00)");
     expect(lines[1]).toBe("id\tphase\tprompt\tlink");
-    expect(lines[2]).toBe(`s01\thook\tCarbon sits at the centre of almost every molecule in your body.\t${base}#s01`);
+    expect(lines[2]).toBe(`s01\thook\tCarbon is only 0.02% of Earth's crust.\t${base}#s01`);
   });
 });
 

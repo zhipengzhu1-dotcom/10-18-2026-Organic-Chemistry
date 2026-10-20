@@ -2,8 +2,6 @@
 // Each entry pairs a manifest (also listed in manifests.ts) with its pure
 // component. Lesson files name Scenes by id.
 import type { RegisteredScene } from "./types.ts";
-import { sampleTwist } from "./sample-twist/manifest.ts";
-import SampleTwist from "./sample-twist/SampleTwist.tsx";
 import { streamBend } from "./stream-bend/manifest.ts";
 import StreamBend from "./stream-bend/StreamBend.tsx";
 import { enStrip } from "./en-strip/manifest.ts";
@@ -75,7 +73,6 @@ import { frontierLadder } from "./frontier-ladder/manifest.ts";
 import FrontierLadder from "./frontier-ladder/FrontierLadder.tsx";
 
 export const sceneRegistry: Record<string, RegisteredScene<any>> = {
-  [sampleTwist.id]: { manifest: sampleTwist, Component: SampleTwist },
   [streamBend.id]: { manifest: streamBend, Component: StreamBend },
   [enStrip.id]: { manifest: enStrip, Component: EnStrip },
   [bondDipoles.id]: { manifest: bondDipoles, Component: BondDipoles },
