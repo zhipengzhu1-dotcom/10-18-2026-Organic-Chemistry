@@ -11,3 +11,11 @@ Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 ### Domain docs
 
 Single-context: one `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+### Module notes
+
+Before changing a module, read its notes in `docs/dev/` (conventions, gotchas, known gaps).
+
+### Implementing specs
+
+Running `/implement-spec` or `/implement`: follow `docs/agents/implementing-specs.md` (PR per ticket, merge on green CI).

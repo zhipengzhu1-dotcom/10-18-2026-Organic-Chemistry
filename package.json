@@ -10,6 +10,8 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
+    "check": "pnpm typecheck && pnpm content:build && pnpm lint:numbers && pnpm lint:scenes && pnpm blender check && pnpm test && pnpm build && pnpm budget:js && pnpm video check-site",
+    "check:full": "pnpm check && pnpm test:e2e && pnpm video stills",
     "typecheck": "tsc -p .",
     "content:build": "pnpm --filter @astratron/content run build && pnpm --filter @astratron/scenes run check",
     "content:freeze": "pnpm --filter @astratron/content run freeze",
@@ -26,12 +28,14 @@
     "structures:json": "pnpm --filter @astratron/content run structures:json",
     "triage": "node site/src/submissions/triage-cli.ts",
     "video": "pnpm --filter @astratron/video run cli",
-    "blender": "pnpm --filter @astratron/pipelines run blender"
+    "blender": "pnpm --filter @astratron/pipelines run blender",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "1.64.1",
     "@types/node": "^26.6.5",
+    "husky": "^9.1.7",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"
   }

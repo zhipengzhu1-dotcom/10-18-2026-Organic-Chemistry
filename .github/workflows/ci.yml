@@ -23,24 +23,9 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Typecheck
-        run: pnpm typecheck
-      - name: Content build
-        run: pnpm content:build
-      - name: Chemistry-number lint (Scene code, the 3D viewer and the content module read numbers from cited data)
-        run: pnpm lint:numbers
-      - name: Scene purity lint (no timers, frame hooks, CSS animation or unseeded randomness)
-        run: pnpm lint:scenes
-      - name: Blender renders are current (re-hashes each render's recorded inputs; Blender is not installed here)
-        run: pnpm blender check
-      - name: Unit tests (content build + Step player engine)
-        run: pnpm test
-      - name: Build the site
-        run: pnpm build
-      - name: First-load JS budget (at most 200 KB compressed per Lesson page; 3D and meshes load lazily)
-        run: pnpm budget:js
-      - name: The site ships no Remotion code
-        run: pnpm video check-site
+      # The same gates, in the same order, as `pnpm check` locally (package.json).
+      - name: pnpm check (typecheck, content, lints, Blender staleness, unit tests, build, JS budget, no Remotion in the site)
+        run: pnpm check
 
   e2e:
     runs-on: ubuntu-latest

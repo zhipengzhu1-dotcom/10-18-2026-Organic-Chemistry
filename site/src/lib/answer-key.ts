@@ -1,7 +1,7 @@
 // Keeps answers out of the Lesson page's static HTML (spec story 99). The page
 // gets only what a Student sees before answering; the answer key is a separate
 // built file (/answers/<subject>/<lesson id>.json) that the Step player fetches.
-// A new Step type whose grading needs other fields adds them to SECRET_FIELDS.
+// A new Step type whose grading needs other fields adds them to ANSWER_FIELDS (content/src/model.ts).
 import type { GoalStep, GradedStep, Lesson, Step } from "@astratron/content";
 import { ANSWER_FIELDS } from "@astratron/content/model";
 

@@ -1,0 +1,4 @@
+# Fast checks only (a few seconds); `pnpm check` and CI run the rest.
+pnpm typecheck
+pnpm lint:numbers
+pnpm content:build
