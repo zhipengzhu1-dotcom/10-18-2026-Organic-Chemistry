@@ -2,7 +2,7 @@
 // renderer, and its licence stays inside video/. Two checks: no module the
 // site ships depends on a Remotion package, and the built site contains no
 // trace of it (`pnpm video check-site`, run in CI after the site build).
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const isRemotion = (name: string) => name === "remotion" || name.startsWith("@remotion/");
@@ -28,4 +28,12 @@ export function remotionDependencies(repo: string, modules: string[]): string[] 
     const names = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"].flatMap((k) => Object.keys(pkg[k] ?? {}));
     return names.filter(isRemotion).map((n) => `${m}/package.json: ${n}`);
   });
+}
+
+/** site/dist, built first with `build` when it isn't there yet (so check-site doesn't depend on CI step order). */
+export function builtSite(repo: string, build: () => void): string {
+  const dist = join(repo, "site/dist");
+  if (!existsSync(dist)) build();
+  if (!existsSync(dist)) throw new Error("site/dist still missing after pnpm build");
+  return dist;
 }
