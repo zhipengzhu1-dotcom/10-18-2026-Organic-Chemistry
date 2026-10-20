@@ -122,7 +122,10 @@ export function ClockedFrame({ duration, posterT, loop = false, aspect = "16:9",
         aria-label={description}
         style={{ aspectRatio: `${w} / ${h}` }}
       >
-        {render(clock.t, still || (reducedMotion ?? false))}
+        {/* The frame's description says what it shows; the drawing's own labels would be read twice. */}
+        <div aria-hidden="true" style={{ display: "contents" }}>
+          {render(clock.t, still || (reducedMotion ?? false))}
+        </div>
       </div>
       {!still && !bare && (
       <div className="scene-controls">

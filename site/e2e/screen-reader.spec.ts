@@ -42,6 +42,8 @@ test("a screen reader meets a name on every control and picture, and hears every
       // The Step as a screen reader's reading order meets it: the whole page (the player has no site chrome).
       const tree = await page.locator("body").ariaSnapshot();
       for (const line of tree.split("\n")) if (UNNAMED.test(line)) problems.push(`${lesson.url} ${label}: unnamed ${line.trim()}`);
+      // A picture's description is the whole story: nothing inside it should be read again.
+      if (/^(\s*)- '?img\b[^\n]*:\n\1\s+- /m.test(tree)) problems.push(`${lesson.url} ${label}: a picture exposes what's drawn inside it`);
       out.push(`### ${label}`, "", "```yaml", tree, "```", "");
     });
   }

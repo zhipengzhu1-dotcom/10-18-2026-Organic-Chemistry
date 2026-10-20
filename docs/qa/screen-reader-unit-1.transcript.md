@@ -1727,6 +1727,7 @@ Page title: "Hybridization & Orbitals · Structure & Bonding · AstraTron"
     - button "four identical C–H bonds in a perfect tetrahedron"
     - button "three H's at right angles to each other, plus a fourth one that's different"
     - button "a flat square of four H's"
+  - group: ⓘ Where these numbers come from
   - paragraph:
     - link "Report a mistake":
       - /url: /submit?kind=mistake&unit=u1&target=u1-l04%23s01
@@ -2310,8 +2311,7 @@ Announced (live region): "→ Answer: Yes. The same –COOH sits on both, and it
     - strong: alkyl halide
     - text: C–F, C–Cl, C–Br or C–I (on an arene ring it's an aryl halide).
   - figure:
-    - 'img "Four cards. Alkene: two carbons joined by a double bond. Alkyne: two carbons joined by a triple bond. Arene: a benzene ring with alternating double bonds. Alkyl halide: a carbon single-bonded to a halogen, X, which is F, Cl, Br or I."':
-      - img: alkene alkyne arene X X alkyl halide
+    - 'img "Four cards. Alkene: two carbons joined by a double bond. Alkyne: two carbons joined by a triple bond. Arene: a benzene ring with alternating double bonds. Alkyl halide: a carbon single-bonded to a halogen, X, which is F, Cl, Br or I."'
     - paragraph
   - group: ⓘ Sources
   - paragraph:
@@ -2373,8 +2373,7 @@ Announced (live region): "✓ Correct. Hexane is all skeleton: only C–C and C�
     - strong: amine
     - text: C–N, with N carrying H's or more carbons (NH₂, NH or N)
   - figure:
-    - 'img "Five cards. Alcohol: a skeleton carbon with OH. Phenol: an OH on a benzene ring. Ether: an oxygen between two carbons. Sulfide: a sulfur between two carbons. Amine: a carbon bonded to nitrogen, which also carries hydrogens or carbons."':
-      - img: OH OH alcohol HO HO phenol O O ether S S sulfide H₃C NH₂ H₃C NH₂ amine
+    - 'img "Five cards. Alcohol: a skeleton carbon with OH. Phenol: an OH on a benzene ring. Ether: an oxygen between two carbons. Sulfide: a sulfur between two carbons. Amine: a carbon bonded to nitrogen, which also carries hydrogens or carbons."'
     - paragraph
   - group: ⓘ Sources
   - paragraph:
@@ -2476,8 +2475,7 @@ Announced (live region): "→ Answer: The phenol (left ring with its OH), the al
     - strong: one
     - text: group. A C=O next to OH is a carboxylic acid, not a ketone plus an alcohol.
   - figure:
-    - 'img "One C=O stays put. Its neighbour changes: H, aldehyde. Carbon, ketone. OH, carboxylic acid. Oxygen then carbon, ester. Nitrogen, amide."':
-      - img: O H aldehyde O ketone O OH carboxylic acid O O ester O NH₂ amide
+    - 'img "One C=O stays put. Its neighbour changes: H, aldehyde. Carbon, ketone. OH, carboxylic acid. Oxygen then carbon, ester. Nitrogen, amide."'
     - button "Play": ▶
     - button "Replay": ↺
     - slider "Scrub": "12"
@@ -2696,8 +2694,7 @@ Announced (live region): "→ Answer: Phenol, amine, the side-chain amide, the r
     - strong: Skip the skeleton. Read the neighbours.
     - text: Groups live where there's a π bond or a heteroatom. Name an O, N or S by what it touches; read a C=O with the atom beside its carbon. A group behaves the same in any molecule, so a few groups let you read thousands of molecules.
   - figure:
-    - 'img "All fourteen group cards in three families: alkene, alkyne, arene, alkyl halide; alcohol, phenol, ether, sulfide, amine; aldehyde, ketone, carboxylic acid, ester, amide."':
-      - img: alkene alkyne arene X X alkyl halide OH OH alcohol HO HO phenol O O ether S S sulfide H₃C NH₂ H₃C NH₂ amine O O aldehyde O O ketone O OH O OH carboxylic acid O O O O ester O NH₂ O NH₂ amide
+    - 'img "All fourteen group cards in three families: alkene, alkyne, arene, alkyl halide; alcohol, phenol, ether, sulfide, amine; aldehyde, ketone, carboxylic acid, ester, amide."'
     - paragraph
   - heading "Key idea" [level=2]
   - paragraph: A functional group is a small cluster of heteroatoms or π bonds that behaves the same in any molecule. Find them by skipping the C–H skeleton, and name each one by what its heteroatom or C=O touches.

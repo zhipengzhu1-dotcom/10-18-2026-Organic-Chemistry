@@ -17,7 +17,7 @@ That is the same information VoiceOver, NVDA and TalkBack read. A live screen re
 
 - Full transcript: [`screen-reader-unit-1.transcript.md`](screen-reader-unit-1.transcript.md) (127 Step screens, 135 announcements).
 - Regenerate it: `pnpm sr:transcript` (needs the site built; it runs `site/e2e/screen-reader.spec.ts`).
-- The same spec runs in CI without writing the file. It fails if any button, picture, slider, text box, link, 3D view or dialog has no name, or if any Check announces nothing.
+- The same spec runs in CI without writing the file. It fails if any button, picture, slider, text box, link, 3D view or dialog has no name, if any picture exposes the drawing inside it, or if any Check announces nothing.
 
 ## What passed
 
@@ -30,6 +30,8 @@ That is the same information VoiceOver, NVDA and TalkBack read. A live screen re
 ## Found and fixed in this pass
 
 1. **Lesson 0, Step 5 (build-by-sharing):** the drawing that holds the carbon and the tray of H atoms was exposed as a picture with no name, wrapping its own buttons. Screen readers treat a picture's insides as decoration, so some would skip every button in it. Fixed: the drawing is now no picture at all, and its buttons sit straight inside the named Scene group (`scenes/src/build-by-sharing/BuildBySharing.tsx`).
+
+2. **Lesson 5, Steps 2, 4, 7 and 14 (the group cards and carbonyl Scenes):** inside the Scene's picture, the drawing's own labels ("alkene alkyne arene X X alkyl halide") were exposed as a second, unnamed picture, so a screen reader could read them after the description, and before the cards dealt in, as a picture with no name at all. Fixed for every Scene: the drawing inside a Scene frame is now hidden from screen readers, and the frame's description is the one thing read (`site/src/components/ScenePlayer.tsx`). The spec now also fails if any picture exposes what's drawn inside it.
 
 ## Found, not fixed (for the fix pass)
 
