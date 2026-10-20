@@ -21,6 +21,14 @@ export interface TutorRequest {
   context: TutorContext;
 }
 
+/** What `GET` returns, for the picker: model ids to labels, the efforts, and the default pair. */
+export interface TutorChoices {
+  models: Record<string, string>;
+  efforts: string[];
+  model: string;
+  effort: string;
+}
+
 /** One NDJSON line: the reply so far (repeated as it grows), then `done`, or `error`. */
 export type TutorEvent =
   | { type: "reply"; text: string }
