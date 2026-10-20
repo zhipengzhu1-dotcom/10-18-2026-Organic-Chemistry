@@ -125,9 +125,9 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
 
   if (!on)
     return (
-      <button ref={askButton} type="button" role="switch" aria-checked="false" className="tutor-wake label" onClick={() => switchTo(true)}>
-        Tutor off
-      </button>
+      <span className="switch tutor-wake">
+        <button ref={askButton} type="button" role="switch" aria-checked="false" aria-label="Tutor" title="Switch the Tutor on" onClick={() => switchTo(true)} />
+      </span>
     );
 
   return (
