@@ -2,6 +2,7 @@
 // spec asks of the cited electronegativities. If one fails, the Step is
 // rewritten, never the data.
 import { describe, expect, it } from "vitest";
+import { answeredCitations } from "../src/model.ts";
 import { buildContent, contentRoot } from "../src/index.ts";
 import { cite } from "../src/data.ts";
 
@@ -61,7 +62,7 @@ describe("Lesson 1 content", () => {
   it("shows every electronegativity from the cited table, with its Source note", () => {
     // (Scene values join the Source note only in a build with the Scene catalog: see the scenes tests.)
     const s03 = lesson.steps.find((s) => s.id === "s03")!;
-    expect(s03.citations?.map((c) => c.ref)).toContain("electronegativity-pauling/F");
+    expect(answeredCitations(s03).map((c) => c.ref)).toContain("electronegativity-pauling/F");
     expect(s03.type !== "explain" && s03.reveal).toContain("F 3.98 (H 2.20)");
   });
 });

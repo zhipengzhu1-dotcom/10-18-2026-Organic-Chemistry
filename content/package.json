@@ -8,6 +8,7 @@
     "./data": "./src/data.ts",
     "./valence": "./src/valence.ts",
     "./molecule": "./src/molecule.ts",
+    "./model": "./src/model.ts",
     "./arrows": "./src/arrows.ts"
   },
   "scripts": {

@@ -4,6 +4,7 @@
 // grading engine (the answer pushes finish; each spec wrong push gets its Hint).
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { answeredCitations } from "@astratron/content/model";
 import { arrowsAct, arrowsStart, arrowsView, type ArrowsState, type ArrowsTask } from "@astratron/content/arrows";
 import { buildContent, contentRoot, type DrawArrowsStep, type GradedStep, type Lesson, type Step } from "@astratron/content";
 import { sceneCatalog } from "@astratron/scenes/check";
@@ -136,14 +137,14 @@ describe("Lesson 6 text matches its spec", () => {
 
   it("the bond-length Steps cite the computed geometry; their Source note adds the spec's same-method line", () => {
     for (const n of [1, 7]) {
-      const refs = (step(n).citations ?? []).map((c) => c.ref);
+      const refs = answeredCitations(step(n)).map((c) => c.ref);
       expect(refs).toEqual(expect.arrayContaining(["acetate/r.CO.a", "acetate/r.CO.b"]));
-      expect(step(n).citations!.every((c) => c.tier === "computed")).toBe(true);
+      expect(answeredCitations(step(n)).every((c) => c.tier === "computed")).toBe(true);
       expect(step(n).sourceNote).toContain(
         "Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phase. Both molecules use the same method so they can be compared fairly.",
       );
     }
-    expect((step(1).citations ?? []).map((c) => c.ref)).toEqual(expect.arrayContaining(["acetic-acid/r.CO.double", "acetic-acid/r.CO.single"]));
+    expect(answeredCitations(step(1)).map((c) => c.ref)).toEqual(expect.arrayContaining(["acetic-acid/r.CO.double", "acetic-acid/r.CO.single"]));
     expect(step(7).sourceNote).toContain("The hybrid idea follows MIT OCW 5.12, Lecture 1 p. 17, CC BY-NC-SA 4.0.");
   });
 

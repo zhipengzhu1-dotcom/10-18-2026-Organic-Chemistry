@@ -159,7 +159,24 @@ export interface Visuals {
 /** A graded Step's visuals, plus the Scene that plays once it is answered (it may show the answer). */
 export interface GradedVisuals extends Visuals {
   revealScene?: SceneUse;
+  /**
+   * Values cited only in the answer fields (correct, Hints, reveal, a reveal Scene): secret like
+   * them, so the Source note adds them once the Step is answered (story 99).
+   */
+  answerCitations?: Cited[];
 }
+
+/**
+ * The fields of a graded Step or Problem that give its answer away: they ship in the answer key,
+ * never in the Lesson page's HTML (story 99). Numbers cited only here travel as `answerCitations`.
+ */
+/** What the Source note cites once the Step is answered: its own citations, then its answer-only ones. */
+export function answeredCitations(step: { citations?: Cited[]; answerCitations?: Cited[] }): Cited[] {
+  const shown = step.citations ?? [];
+  return [...shown, ...(step.answerCitations ?? []).filter((c) => !shown.some((s) => s.ref === c.ref))];
+}
+
+export const ANSWER_FIELDS = ["answer", "tolerance", "correct", "hints", "reveal", "results", "inBetween", "stages", "revealScene", "replay", "revealTags"] as const;
 
 export interface ExplainStep extends Visuals {
   id: string;

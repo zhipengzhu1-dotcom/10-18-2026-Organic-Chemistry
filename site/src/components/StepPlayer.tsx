@@ -5,6 +5,7 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type { NumericStep, RankStep, SceneValue, Structure } from "@astratron/content";
 import { act, start, type Action, type Answer, type LessonProgress, type PlayableLesson, type Screen } from "../engine/player.ts";
+import { answeredCitations } from "@astratron/content/model";
 import { withKey, type AnswerKey, type PageLesson } from "../lib/answer-key.ts";
 import { mistakeTarget, reportMistakeHref } from "../lib/submit-links.ts";
 import { recordProblem, saveLesson, streakOn } from "../progress/record.ts";
@@ -447,11 +448,9 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         <div className="step-meta">
           {step.aside && <AsideButton key={`aside-${step.id}`} aside={step.aside} stepId={step.id} />}
 
-          {/* Keyed per Step so a new Step opens its Source note collapsed. A reveal Scene that prints numbers
-              (Lesson 7's C–N lengths) would give the answer away in the note, so the note waits for the answer. */}
-          {!(step.type !== "explain" && step.revealScene && Object.keys(step.revealScene.cited).length && !screen.canContinue) && (
-            <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} note={step.sourceNote} />
-          )}
+          {/* Keyed per Step so a new Step opens its Source note collapsed. Numbers cited only in the answer
+              (its Hints, reveal or reveal Scene, e.g. Lesson 7's C–N lengths) join the note once it's answered. */}
+          <SourceNote key={`source-note-${step.id}`} cited={screen.canContinue ? answeredCitations(step) : (step.citations ?? [])} note={step.sourceNote} />
 
           <p className="report">
             <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>

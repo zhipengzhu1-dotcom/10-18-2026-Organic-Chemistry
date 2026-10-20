@@ -157,13 +157,29 @@ describe("Lessons and Problems cite numbers as {{file/key}}", () => {
     expect(s02.citations?.map((c) => c.full)).toEqual(["1.087 Å"]);
   });
 
-  it("a Check Step carries its Problem's citations", () => {
+  it("a Check Step carries its Problem's citations, an answer-only one apart from the rest", () => {
     const result = build((t) => {
       (t["chem/problems/p1.yaml"] as { reveal: string }).reveal = "The angle is {{methane/a.HCH}}.";
+      (t["chem/problems/p1.yaml"] as { prompt: string }).prompt = "C–H is {{methane/r.CH}}. What is the angle?";
     });
     const s08 = steps(result)[7];
     expect(s08).toMatchObject({ reveal: "The angle is 109.5°." });
-    expect(s08.citations?.map((c) => c.ref)).toEqual(["methane/a.HCH"]);
+    expect(s08.citations?.map((c) => c.ref)).toEqual(["methane/r.CH"]);
+    expect("answerCitations" in s08 && s08.answerCitations?.map((c) => c.ref)).toEqual(["methane/a.HCH"]);
+  });
+
+  it("a number cited only in a Step's answer fields (correct, Hints, reveal) is kept apart, to show after answering", () => {
+    type Choice = { prompt: string; correct: string; hints: { text: string }[]; reveal: string };
+    const result = build((t) => {
+      const s03 = (t["chem/lessons/l1.yaml"] as { steps: Choice[] }).steps[2];
+      s03.prompt = "C–H is {{methane/r.CH}}. Which angle?";
+      s03.correct = "Yes: {{methane/a.HCH}}, and C–H {{methane/r.CH}}.";
+      s03.hints[1].text = "Think {{methane/a.HCH}}.";
+    });
+    expect(result.errors).toEqual([]);
+    const s03 = steps(result)[2];
+    expect(s03.citations?.map((c) => c.ref)).toEqual(["methane/r.CH"]);
+    expect("answerCitations" in s03 && s03.answerCitations?.map((c) => c.ref)).toEqual(["methane/a.HCH"]);
   });
 
   it("a Step with no cited numbers has no citations", () => {

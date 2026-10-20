@@ -27,7 +27,7 @@ import {
   type StructureFile,
 } from "./schema.ts";
 import { checkDeletedSteps, checkFrozenIds, LOCK_FILE } from "./freeze.ts";
-import type { Aside, BuildResult, Course, Figure, GradedStep, HeroPush, Lesson, Option, Push, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
+import { ANSWER_FIELDS, type Aside, type BuildResult, type Course, type Figure, type GradedStep, type HeroPush, type Lesson, type Option, type Push, type Step, type Structure, type StructureView, type Subject, type TapTarget } from "./model.ts";
 
 /** The Practice Set page sits at `<unit url>/practice`, so no Lesson may take that slug. */
 export const PRACTICE_SLUG = "practice";
@@ -165,7 +165,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       for (const message of messages) errors.push(`${slug}/problems/${problem.id}.yaml: ${message}`);
     }
     for (const message of checkTapOnly(slug, lessons, problems)) errors.push(message);
-    const problemCitations = citeNumbers(slug, data, lessons, problems, errors);
+    const { citations: problemCitations, answers: problemAnswers } = citeNumbers(slug, data, lessons, problems, errors);
     const viewsRel = `${slug}/views.yaml`;
     const views = (existsSync(join(root, viewsRel)) && load(viewsRel, viewsFile)) || {};
     for (const message of checkViews(views, data)) errors.push(`${viewsRel}: ${message}`);
@@ -252,8 +252,11 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
               const scene = (use: SceneUseFile) => resolveSceneUse(use, options.scenes, data);
               const resolved = resolveLesson(lesson, `${url}/${lesson.slug}`, number, problems, structured, scene, lessonRel, errors);
               for (const step of resolved.steps) {
-                const cited = "problemId" in step && step.problemId && problemCitations.get(step.problemId);
+                const problemId = "problemId" in step ? step.problemId : undefined;
+                const cited = problemId && problemCitations.get(problemId);
                 if (cited) step.citations = mergeCitations(cited, step.citations ?? []);
+                const answered = problemId && problemAnswers.get(problemId);
+                if (answered && step.type !== "explain") step.answerCitations = mergeCitations(answered, step.answerCitations ?? []);
               }
               return [resolved];
             }),
@@ -263,7 +266,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       });
     }
     const sceneFor = (use: SceneUseFile) => resolveSceneUse(use, options.scenes, data);
-    fillBanks(slug, courses, listed, lessons, problems, structured, problemCitations, sceneFor, errors);
+    fillBanks(slug, courses, listed, lessons, problems, structured, { citations: problemCitations, answers: problemAnswers }, sceneFor, errors);
     let hero: HeroPush | undefined;
     if (subject?.hero) {
       const found: string[] = [];
@@ -358,10 +361,16 @@ function withScene(step: Step, scene: (use: SceneUseFile) => SceneUse): Step {
     return resolved;
   };
   if (step.scene) out.scene = resolve(step.scene);
-  if ("revealScene" in step && step.revealScene) out.revealScene = resolve(step.revealScene);
   if (step.aside?.scene) out.aside = { ...step.aside, scene: resolve(step.aside.scene) };
-  if (!uses.length) return step;
-  out.citations = mergeCitations(step.citations ?? [], uses.flatMap((u) => Object.values(u.cited)));
+  if (uses.length) out.citations = mergeCitations(step.citations ?? [], uses.flatMap((u) => Object.values(u.cited)));
+  // A reveal Scene shows the answer, so its numbers are answer citations (story 99).
+  if ("revealScene" in step && step.revealScene) {
+    const reveal = scene(step.revealScene);
+    out.revealScene = reveal;
+    const shown = out.citations ?? [];
+    const extra = Object.values(reveal.cited).filter((c) => !shown.some((s) => s.ref === c.ref));
+    if (extra.length) (out as GradedStep).answerCitations = mergeCitations((step as GradedStep).answerCitations ?? [], extra);
+  }
   return out;
 }
 
@@ -391,7 +400,7 @@ function fillBanks(
   lessons: Map<string, LessonFile | undefined>,
   problems: Map<string, ProblemFile | undefined>,
   structured: Structured,
-  citations: Map<string, Cited[]>,
+  { citations, answers }: { citations: Map<string, Cited[]>; answers: Map<string, Cited[]> },
   scene: (use: SceneUseFile) => SceneUse,
   errors: string[],
 ): void {
@@ -418,6 +427,8 @@ function fillBanks(
     if (!step) continue;
     const cited = citations.get(problem.id);
     if (cited) step.citations = mergeCitations(cited, step.citations ?? []);
+    const answered = answers.get(problem.id);
+    if (answered) step.answerCitations = mergeCitations(answered, step.answerCitations ?? []);
     const { id, difficulty, status, source, credit } = problem;
     unit.bank.push({
       id,
@@ -455,7 +466,7 @@ function citeNumbers(
   lessons: Map<string, LessonFile | undefined>,
   problems: Map<string, ProblemFile | undefined>,
   errors: string[],
-): Map<string, Cited[]> {
+): { citations: Map<string, Cited[]>; answers: Map<string, Cited[]> } {
   const missing = (where: string, refs: string[]) => {
     for (const ref of refs) errors.push(`${where}cites "${ref}", which is not in the cited data`);
   };
@@ -463,21 +474,40 @@ function citeNumbers(
     if (!lesson) continue;
     const steps = lesson.steps.map((step) => {
       if (step.type === "check") return step;
-      const { item, cited, missing: refs } = citeIn(step, data);
+      const { item, cited, answerCited, missing: refs } = citeSplit(step, data);
       missing(`${slug}/lessons/${name}.yaml: step ${step.id}: `, refs);
-      return cited.length ? { ...item, citations: cited } : item;
+      return { ...item, ...(cited.length && { citations: cited }), ...(answerCited.length && { answerCitations: answerCited }) };
     });
     lessons.set(name, { ...lesson, steps });
   }
-  const byProblem = new Map<string, Cited[]>();
+  const citations = new Map<string, Cited[]>();
+  const answers = new Map<string, Cited[]>();
   for (const [name, problem] of problems) {
     if (!problem) continue;
-    const { item, cited, missing: refs } = citeIn(problem, data);
+    const { item, cited, answerCited, missing: refs } = citeSplit(problem, data);
     missing(`${slug}/problems/${name}.yaml: `, refs);
     problems.set(name, item);
-    if (cited.length) byProblem.set(name, cited);
+    if (cited.length) citations.set(name, cited);
+    if (answerCited.length) answers.set(name, answerCited);
   }
-  return byProblem;
+  return { citations, answers };
+}
+
+/**
+ * Cites an item's text, keeping apart the values cited only in its answer fields (ANSWER_FIELDS):
+ * those ship in the answer key and join the Source note once the Step is answered (story 99).
+ */
+function citeSplit<T extends object>(item: T, data: CitedData): { item: T; cited: Cited[]; answerCited: Cited[]; missing: string[] } {
+  const secret = new Set<string>(ANSWER_FIELDS);
+  const split = (keep: boolean) => Object.fromEntries(Object.entries(item).filter(([k]) => secret.has(k) === keep));
+  const shown = citeIn(split(false), data);
+  const answer = citeIn(split(true), data);
+  return {
+    item: { ...item, ...shown.item, ...answer.item },
+    cited: shown.cited,
+    answerCited: answer.cited.filter((c) => !shown.cited.some((s) => s.ref === c.ref)),
+    missing: [...new Set([...shown.missing, ...answer.missing])],
+  };
 }
 
 /**

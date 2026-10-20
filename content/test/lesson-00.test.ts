@@ -3,6 +3,7 @@
 // rewritten, never the data. (give-or-take's electrons-to-move check lives with the
 // Scene: scenes/test/give-or-take.test.ts.)
 import { describe, expect, it } from "vitest";
+import { answeredCitations } from "../src/model.ts";
 import { buildContent, contentRoot } from "../src/index.ts";
 import { cite } from "../src/data.ts";
 import type { Step } from "../src/model.ts";
@@ -37,7 +38,7 @@ describe("Lesson 0: Why Carbon?", () => {
     expect(step("s01").prompt).toBe("Carbon is only 0.02% of Earth's crust. Roughly how much of *your* body's mass is carbon?");
     expect(step("s01").reveal).toContain("About **23%** of you is carbon");
     expect(step("s03").reveal).toBe("4 to give: 148.0 eV. 4 to take: carbon holds 1 extra electron, but not 4.");
-    const refs = (id: string) => (step(id).citations ?? []).map((c) => c.ref);
+    const refs = (id: string) => answeredCitations(step(id)).map((c) => c.ref);
     expect(refs("s01")).toEqual(["carbon-abundance/crust.C", "carbon-abundance/body.C"]);
     expect(refs("s03")).toEqual(["ionization-li-f/C.give"]);
     // (Scene values join the Source note in a build with the Scene catalog: scenes/test/registry.test.ts.)

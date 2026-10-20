@@ -4,6 +4,7 @@
 // Also: the start views, the orbitals on each card, and the Draw-arrows Steps played on the engine.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { answeredCitations } from "@astratron/content/model";
 import { arrowsAct, arrowsStart, type ArrowsTask } from "@astratron/content/arrows";
 import { project } from "@astratron/content/molecule";
 import { cite } from "@astratron/content/data";
@@ -132,9 +133,9 @@ describe("Lesson 8 text matches its spec", () => {
         expect(plain(s.sourceNote), id).toBe(plain(/adding: "([^"]+)"/.exec(text)![1]));
       else expect(s.sourceNote, id).toBeUndefined();
       if (/\*\*Source note:\*\* the computed-orbital note/.test(text)) {
-        const notes = (s.citations ?? []).map((c) => c.source.note ?? "");
+        const notes = answeredCitations(s).map((c) => c.source.note ?? "");
         expect(notes.join(" "), id).toContain("Computed orbital energies are model values: compare them with each other, not with measured energies.");
-        expect((s.citations ?? []).some((c) => c.quantity === "isovalue" || c.quantity === "energy"), id).toBe(true);
+        expect(answeredCitations(s).some((c) => c.quantity === "isovalue" || c.quantity === "energy"), id).toBe(true);
       }
     }
   });
@@ -142,7 +143,7 @@ describe("Lesson 8 text matches its spec", () => {
 
 describe("Lesson 8's computed numbers", () => {
   it("s07 cites both HOMOs and both gaps; s10 both flows and all four energies (the Scene's Source note)", () => {
-    const refs = (n: number) => (step(n).citations ?? []).map((c) => c.ref);
+    const refs = (n: number) => answeredCitations(step(n)).map((c) => c.ref);
     expect(refs(7)).toEqual(expect.arrayContaining(["ethylene-b3lyp-orbitals/homo", "ethane-b3lyp-orbitals/homo", "ethylene-b3lyp-orbitals/gap", "ethane-b3lyp-orbitals/gap"]));
     expect(refs(10)).toEqual(
       expect.arrayContaining(["frontier-flow/nh3_bf3", "frontier-flow/bf3_nh3", "ammonia-b3lyp-orbitals/homo", "boron-trifluoride-b3lyp-orbitals/lumo"]),
@@ -150,7 +151,7 @@ describe("Lesson 8's computed numbers", () => {
   });
 
   it("every energy shows to 1 decimal in eV", () => {
-    for (const c of lesson.steps.flatMap((s) => s.citations ?? []).filter((c) => c.quantity === "energy")) expect(c.display).toMatch(/^−?\d+\.\d eV$/);
+    for (const c of lesson.steps.flatMap((s) => answeredCitations(s)).filter((c) => c.quantity === "energy")) expect(c.display).toMatch(/^−?\d+\.\d eV$/);
   });
 
   it("the spec's sanity checks 3 and 5 hold on the data the Lesson cites", () => {

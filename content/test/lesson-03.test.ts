@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";
 import { describe, expect, it } from "vitest";
+import { answeredCitations } from "../src/model.ts";
 import { buildContent, contentRoot } from "../src/index.ts";
 import { bondDipoles, netDipole, project, viewMatrix, type Molecule, type Vec3, type ViewSpec } from "../src/molecule.ts";
 
@@ -86,8 +87,8 @@ describe("Lesson 3 content", () => {
   it("puts every measured angle through the cited data, with its Source note", () => {
     const s01 = step("s01");
     expect(s01.type !== "explain" && s01.reveal).toContain("Bigger: 109.5°");
-    expect(s01.citations!.map((c) => c.ref)).toContain("methane/a.HCH");
-    expect(step("s05").citations!.map((c) => c.ref)).toEqual(expect.arrayContaining(["methane/a.HCH", "ammonia/a.HNH", "water/a.HOH"]));
+    expect(answeredCitations(s01).map((c) => c.ref)).toContain("methane/a.HCH");
+    expect(answeredCitations(step("s05")).map((c) => c.ref)).toEqual(expect.arrayContaining(["methane/a.HCH", "ammonia/a.HNH", "water/a.HOH"]));
     const s09 = step("s09");
     if (s09.type !== "rotate-and-identify") throw new Error("s09 is Rotate-and-identify");
     expect(s09.molecule.describe).toContain("The H–C1–H angle is 107.6°");
@@ -107,6 +108,6 @@ describe("Lesson 3 content", () => {
     expect([s11.molecule.label, ...s11.molecule.toggle!.map((m) => m.label)]).toEqual(["H₂O", "CO₂"]);
     expect(s11.molecule.dipoles!.net.zero).toBe(false);
     expect(s11.molecule.toggle![0].dipoles!.net.zero).toBe(true);
-    expect(s11.citations!.map((c) => c.ref)).toEqual(expect.arrayContaining(["electronegativity-pauling/O", "carbon-dioxide/r.CO"]));
+    expect(answeredCitations(s11).map((c) => c.ref)).toEqual(expect.arrayContaining(["electronegativity-pauling/O", "carbon-dioxide/r.CO"]));
   });
 });
