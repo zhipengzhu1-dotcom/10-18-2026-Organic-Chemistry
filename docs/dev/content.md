@@ -30,7 +30,7 @@ Terms follow `GLOSSARY.md`. Numbers: ADR 0002. Step ids: ADR 0003. Field-by-fiel
 ## Answers out of the page (story 99)
 
 - `ANSWER_FIELDS` in `content/src/model.ts` is the one list of secret fields. `site/src/lib/answer-key.ts` strips them (plus `answerCitations`) into `/answers/<subject>/<lesson id>.json`; the player fetches the key and grades only once it arrives.
-- A new field that reveals the answer goes in `ANSWER_FIELDS`; a new Step shape may also need `withKey` defaults. `site/e2e/course-map.spec.ts` and `site-shell.spec.ts` fail on a leak.
+- A new field that reveals the answer goes in `ANSWER_FIELDS`; a new Step shape may also need `withKey` defaults. `site/e2e/course-map.spec.ts` and `site-shell.spec.ts` fail on a leak. `content/test/answer-fields.test.ts` fails earlier, in `pnpm check`, on a schema field named like an answer (`correct*`, `hint*`, `reveal*`, `answer*`, …) that isn't in `ANSWER_FIELDS` or its `PUBLIC_ON_PURPOSE` list.
 - Values cited only in answer fields travel in the key and join the Source note after answering. Anything cited in a shown field is on the page before answering, so a Step whose answer is a number must not cite (or name a formula containing) that number in its prompt, written `sourceNote`, figures or an Explore molecule. `real-content.test.ts` guards H-count leaks.
 
 ## Shared Step fields (reuse before adding)
