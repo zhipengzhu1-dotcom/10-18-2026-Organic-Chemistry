@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 6327,
+        "MolecularFormula": "CH3Cl",
+        "SMILES": "CCl",
+        "ConnectivitySMILES": "CCl",
+        "Title": "Methyl Chloride"
+      }
+    ]
+  }
+}

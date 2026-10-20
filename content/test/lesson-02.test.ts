@@ -57,7 +57,8 @@ describe("Lesson 2: Drawing Molecules", () => {
     const bundled = JSON.parse(readFileSync(join(contentRoot, "../../scenes/src/lesson-02/structures.json"), "utf8"));
     expect(bundled).toEqual(readStructures(contentRoot, "organic", Object.keys(bundled)));
     expect(Object.keys(bundled).sort()).toEqual(
-      ["acetaminophen", "acetamide", "chloroethane", "cyclohexanone", "estradiol", "ethanol", "ethanol-lewis", "ethylamine", "limonene"].sort(),
+      // furan and caffeine: the Practice Problems' reveals (#87).
+      ["acetaminophen", "acetamide", "chloroethane", "cyclohexanone", "estradiol", "ethanol", "ethanol-lewis", "ethylamine", "limonene", "furan", "caffeine"].sort(),
     );
   });
 

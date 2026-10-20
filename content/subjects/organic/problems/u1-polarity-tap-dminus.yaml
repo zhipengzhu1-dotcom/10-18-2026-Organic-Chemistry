@@ -1,0 +1,32 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). The answer (H is δ− in
+# B–H) rests on the cited values: content/test/practice-problems.test.ts checks B < H and N < O.
+id: u1-polarity-tap-dminus
+unit: u1
+lesson: u1-l01
+difficulty: 2
+status: approved
+source: Adapted from LibreTexts Wade 1-10 (b, c, d, f) and its solution
+credit: "LibreTexts, Map: Organic Chemistry (Wade), CC BY-NC-SA 4.0"
+type: tap-to-identify
+prompt: "In each highlighted bond, tap the **δ−** atom, then press Check. One of them may surprise you."
+structure: polarity-dminus-grid
+outline: [b1, b5, b6, b9]
+alt: "Four molecules: ammonia, one N–H highlighted; hydrogen cyanide, the C≡N highlighted; borane, one B–H highlighted; hydroxylamine, the N–O highlighted."
+tappable: { atoms: [a1, a2, a6, a7, a8, a9, a12, a13] }
+aside: { label: Show values, scene: { id: en-strip, state: { highlight: h-b-c-n-o } } }
+answer: [a1, a7, a9, a13]
+correct: "N, N, H, O. The surprise is borane: boron is a weaker puller than hydrogen, so here H is the δ− end."
+hints:
+  - includes: [a8]
+    text: "Boron sits left of carbon, and it pulls even less than hydrogen. Open the values: which number is bigger?"
+  - includes: [a2]
+    text: Nitrogen pulls much harder than hydrogen. Its partner wins this one.
+  - includes: [a6]
+    text: Nitrogen sits right of carbon in the same row, so it pulls harder.
+  - includes: [a12]
+    text: "Both pull hard, but oxygen sits one place further right."
+  - misses: [a1, a7, a9, a13]
+    text: Pick one atom in **each** of the four highlighted bonds.
+  - text: "Open the values: in each bond, the atom with the bigger number is δ−."
+reveal: "δ− on N {{electronegativity-pauling/N}} (H {{electronegativity-pauling/H}}), N {{electronegativity-pauling/N}} (C {{electronegativity-pauling/C}}), H in borane and O {{electronegativity-pauling/O}} (N {{electronegativity-pauling/N}}); their partners are δ+. B {{electronegativity-pauling/B}} < H {{electronegativity-pauling/H}}: hydrogen is δ− here."
+sourceNote: "Adapted from LibreTexts, *Map: Organic Chemistry (Wade)*, §1.16 exercise 1-10 and its solution in §1.17, CC BY-NC-SA 4.0. Wording and drawing ours. Electronegativity, Pauling scale: Allred (1961), via the CRC Handbook. Structures: PubChem CIDs 222, 768, 6331, 787."

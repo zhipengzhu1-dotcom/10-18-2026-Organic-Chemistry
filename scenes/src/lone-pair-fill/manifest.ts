@@ -15,6 +15,7 @@ export const PANELS: Record<string, string[]> = {
   "pattern-strip": ["ethanol", "ethylamine", "chloroethane"],
   acetamide: ["acetamide"],
   acetaminophen: ["acetaminophen"],
+  caffeine: ["caffeine"],
 };
 
 /** Seconds: the hidden drawing rests, then the atoms light in turn, then everything holds. */
@@ -34,6 +35,8 @@ const words: Record<string, string> = {
     "Three line drawings with their lone pairs hidden: ethanol, ethylamine and chloroethane. Oxygen with two bonds gains two lone pairs. Nitrogen with three bonds gains one. Chlorine with one bond gains three.",
   acetamide: "Oxygen, two bonds, gains two lone pairs. Nitrogen, three bonds, gains one. Three lone pairs in all.",
   acetaminophen: "The carbonyl oxygen gains two lone pairs, the nitrogen one, and the OH oxygen two. Five in all.",
+  // Practice Problem u1-draw-caffeine-lone-pairs (#87).
+  caffeine: "Each oxygen, two bonds, gains two lone pairs. Each of the four nitrogens, three bonds, gains one. Eight lone pairs in all.",
 };
 
 export const lonePairFill: SceneManifest<LonePairState> = {
@@ -47,6 +50,7 @@ export const lonePairFill: SceneManifest<LonePairState> = {
         { id: "pattern-strip", label: "Ethanol, ethylamine, chloroethane" },
         { id: "acetamide", label: "Acetamide" },
         { id: "acetaminophen", label: "Acetaminophen" },
+        { id: "caffeine", label: "Caffeine" },
       ],
       default: "pattern-strip",
     },

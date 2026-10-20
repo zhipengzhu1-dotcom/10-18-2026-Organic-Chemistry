@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 6212,
+        "MolecularFormula": "CHCl3",
+        "SMILES": "C(Cl)(Cl)Cl",
+        "ConnectivitySMILES": "C(Cl)(Cl)Cl",
+        "Title": "Chloroform"
+      }
+    ]
+  }
+}

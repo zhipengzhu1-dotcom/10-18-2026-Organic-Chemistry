@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 10486,
+        "MolecularFormula": "C4H9Cl",
+        "SMILES": "CC(C)(C)Cl",
+        "ConnectivitySMILES": "CC(C)(C)Cl",
+        "Title": "tert-BUTYL CHLORIDE"
+      }
+    ]
+  }
+}

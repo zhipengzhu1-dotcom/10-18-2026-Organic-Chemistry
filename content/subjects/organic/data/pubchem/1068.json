@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 1068,
+        "MolecularFormula": "C2H6S",
+        "SMILES": "CSC",
+        "ConnectivitySMILES": "CSC",
+        "Title": "Dimethyl Sulfide"
+      }
+    ]
+  }
+}

@@ -11,7 +11,7 @@ import { molecule } from "../lesson-02/molecules.ts";
 
 export type HFillState = { molecule: string; show: string };
 
-export const H_FILL_MOLECULES = ["estradiol", "cyclohexanone", "limonene"] as const;
+export const H_FILL_MOLECULES = ["estradiol", "cyclohexanone", "limonene", "furan"] as const;
 
 /** Seconds: the drawing rests, then the carbons fill in, then the full drawing holds. */
 export const FILL = { start: 1, end: 9 };
@@ -33,6 +33,9 @@ const words: Record<string, (total: number) => string> = {
     `Cyclohexanone fills in. The carbon bonded to oxygen has four bonds already and gets no hydrogens. Each of the other five carbons has two bonds and gains two hydrogens. Total: ${n} hydrogens.`,
   limonene: (n) =>
     `Limonene fills in, carbon by carbon. The two carbons that already have four bonds to other carbons get none; the other two double-bond carbons get one and two; the ring CH₂ corners two each; the two methyls three each. The counter ends at ${n}.`,
+  // Practice Problem u1-draw-furan-h (#87).
+  furan: (n) =>
+    `Furan fills in. Each of the four carbons has a double bond and a single bond in the ring, and gains one hydrogen. Total: ${n} hydrogens.`,
 };
 
 export const hFill: SceneManifest<HFillState> = {
@@ -46,6 +49,7 @@ export const hFill: SceneManifest<HFillState> = {
         { id: "estradiol", label: "Estradiol" },
         { id: "cyclohexanone", label: "Cyclohexanone" },
         { id: "limonene", label: "Limonene" },
+        { id: "furan", label: "Furan" },
       ],
       default: "estradiol",
     },

@@ -1,0 +1,42 @@
+# Practice Problem u1-polarity-tap-dminus (#87): four small molecules in a 2 × 2 grid, full Lewis, drawn by hand:
+# ammonia (PubChem CID 222), hydrogen cyanide (CID 768), borane (BH₃, CID 6331) and hydroxylamine (CID 787).
+# The Problem outlines one bond in each (b1 N–H, b5 C≡N, b6 B–H, b9 N–O); only those bonds' atoms are tappable.
+
+id: polarity-dminus-grid
+style: full
+smiles: "N.C#N.B.NO"
+source: PubChem CIDs 222, 768, 6331, 787
+atoms:
+  # Ammonia, top left
+  - { id: a1, el: "N", x: 0, y: 0, lp: 1, label: "Ammonia: the N of the outlined N–H bond." }
+  - { id: a2, el: "H", x: 1.5, y: 0, label: "Ammonia: the H of the outlined N–H bond." }
+  - { id: a3, el: "H", x: -0.75, y: 1.299 }
+  - { id: a4, el: "H", x: -0.75, y: -1.299 }
+  # Hydrogen cyanide, top right
+  - { id: a5, el: "H", x: 4.5, y: 0 }
+  - { id: a6, el: "C", x: 6, y: 0, label: "Hydrogen cyanide: the C of the outlined C≡N bond." }
+  - { id: a7, el: "N", x: 7.5, y: 0, lp: 1, label: "Hydrogen cyanide: the N of the outlined C≡N bond." }
+  # Borane, bottom left
+  - { id: a8, el: "B", x: 0, y: 3.8, label: "Borane: the B of the outlined B–H bond." }
+  - { id: a9, el: "H", x: 1.5, y: 3.8, label: "Borane: the H of the outlined B–H bond." }
+  - { id: a10, el: "H", x: -0.75, y: 2.501 }
+  - { id: a11, el: "H", x: -0.75, y: 5.099 }
+  # Hydroxylamine, bottom right
+  - { id: a12, el: "N", x: 5.25, y: 3.8, lp: 1, label: "Hydroxylamine: the N of the outlined N–O bond." }
+  - { id: a13, el: "O", x: 6.75, y: 3.8, lp: 2, label: "Hydroxylamine: the O of the outlined N–O bond." }
+  - { id: a14, el: "H", x: 7.5, y: 5.099 }
+  - { id: a15, el: "H", x: 4.5, y: 2.501 }
+  - { id: a16, el: "H", x: 4.5, y: 5.099 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a1, b: a3, order: 1 }
+  - { id: b3, a: a1, b: a4, order: 1 }
+  - { id: b4, a: a5, b: a6, order: 1 }
+  - { id: b5, a: a6, b: a7, order: 3 }
+  - { id: b6, a: a8, b: a9, order: 1 }
+  - { id: b7, a: a8, b: a10, order: 1 }
+  - { id: b8, a: a8, b: a11, order: 1 }
+  - { id: b9, a: a12, b: a13, order: 1 }
+  - { id: b10, a: a13, b: a14, order: 1 }
+  - { id: b11, a: a12, b: a15, order: 1 }
+  - { id: b12, a: a12, b: a16, order: 1 }

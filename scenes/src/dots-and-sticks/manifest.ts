@@ -57,11 +57,21 @@ const oxygenThreeBonds = example("oxygen-three-bonds", "O", 1, [LOOSE_SINGLE, LO
   `Oxygen: ${c.valence} valence electrons, minus ${c.lonePairElectrons} in one lone pair, minus ${c.bonds} bonds, equals ${signedWords(c.charge)}.`,
 );
 
+// Practice Problems (#87): the PS1 Q1 bromine and boron fragments.
+const bromineTwoBonds = example("bromine-two-bonds", "Br", 2, [LOOSE_SINGLE, LOOSE_SINGLE], 0, (c) =>
+  `Bromine: ${c.valence} valence electrons, minus ${c.lonePairElectrons} in two lone pairs, minus ${c.bonds} bonds, equals ${signedWords(c.charge)}.`,
+);
+const boronFourBonds = example("boron-four-bonds", "B", 0, [LOOSE_SINGLE, LOOSE_SINGLE, LOOSE_DOUBLE], Math.PI / 2, (c) =>
+  `Boron: ${c.valence} valence electrons, no lone pairs, ${c.bonds} bonds. ${c.valence} minus ${c.lonePairElectrons} minus ${c.bonds} equals ${signedWords(c.charge)}.`,
+);
+
 /** Each choice of the `example` state: the counts it runs, in order. */
 export const examples: Record<string, Example[]> = {
   "hydronium-hydroxide": [hydronium, hydroxide],
   ammonium: [ammonium],
   "oxygen-three-bonds": [oxygenThreeBonds],
+  "bromine-two-bonds": [bromineTwoBonds],
+  "boron-four-bonds": [boronFourBonds],
 };
 
 export const dotsAndSticks: SceneManifest<DotsAndSticksState> = {
@@ -75,6 +85,8 @@ export const dotsAndSticks: SceneManifest<DotsAndSticksState> = {
         { id: "hydronium-hydroxide", label: "H₃O⁺ then OH⁻" },
         { id: "ammonium", label: "NH₄⁺" },
         { id: "oxygen-three-bonds", label: "O with 3 bonds" }, // cited-data: ok, a count of bonds
+        { id: "bromine-two-bonds", label: "Br with 2 bonds" }, // cited-data: ok, a count of bonds
+        { id: "boron-four-bonds", label: "B with 4 bonds" }, // cited-data: ok, a count of bonds
       ],
       default: "hydronium-hydroxide",
     },
