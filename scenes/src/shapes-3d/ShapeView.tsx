@@ -7,8 +7,8 @@ import type { Box } from "../frame.ts";
 import { CYAN, DATA_FONT, INK } from "../lewis.ts";
 import { colourRef, onScreen, type Shape } from "./shapes.ts";
 
-/** Ball size as a fraction of 1 Å on screen (ball and stick). */
-export const BALL = 0.3;
+/** Every ball's size (its radius) in Å on screen, the same for all elements: a sketch, unlike the 3D card's 30% of Bondi radii. */
+export const BALL_SIZE = 0.3;
 /** Lone-pair lobes reach this far from the centre, in Å on screen (a sketch). */
 const LOBE = 0.95;
 
@@ -17,7 +17,7 @@ const LOBE = 0.95;
 
 /** Pixels per Å that fit the shape (and lobes) in the box at any turn. */
 export function fitScale(shape: Shape, box: Box, room = 1.25): number {
-  const reach = Math.max(LOBE, ...shape.atoms.map((a) => Math.hypot(...a.pos))) + BALL * 2;
+  const reach = Math.max(LOBE, ...shape.atoms.map((a) => Math.hypot(...a.pos))) + BALL_SIZE * 2;
   return Math.min(box.w, box.h) / 2 / (reach * room);
 }
 
@@ -56,7 +56,7 @@ export function ShapeView({ shape, view, cx, cy, px, cited, lonePairs, font, id 
   const lobes = lonePairs ? place(shape.lonePairs.map((d) => [d[0] * LOBE, d[1] * LOBE, d[2] * LOBE] as Vec3), view, cx, cy, px) : [];
   const colour = (el: string) => String(cited[colourRef(el)]?.value ?? "#888888");
   const order = shape.atoms.map((_, i) => i).sort((a, b) => at[a].z - at[b].z);
-  const ball = BALL * px;
+  const ball = BALL_SIZE * px;
   return (
     <g>
       <defs>
