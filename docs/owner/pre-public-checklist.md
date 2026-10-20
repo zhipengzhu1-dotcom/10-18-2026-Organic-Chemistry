@@ -37,7 +37,7 @@ Give the agent the domain, the Ko-fi address and the Turnstile site key, then as
 
 ## 5. GitHub settings
 
-- [ ] **Make the checks required.** In the repository's settings on GitHub, add a branch protection rule for the main branch that requires the CI checks named `test` and `pipelines` to pass before anything can merge. CI already runs them on every pull request; this setting makes a red check actually block the merge. An agent can do it with you, or you click Settings → Branches → Add rule.
+- [ ] **Make the checks required.** In the repository's settings on GitHub, add a branch protection rule for the main branch that requires the CI checks named `test`, `e2e` (all four shards), `video` and `pipelines` to pass before anything can merge. CI already runs them on every pull request; this setting makes a red check actually block the merge. An agent can do it with you, or you click Settings → Branches → Add rule.
 
 ## 6. Last look
 

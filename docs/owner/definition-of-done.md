@@ -16,7 +16,7 @@ Going public is not part of v1. When you're ready, follow `pre-public-checklist.
 
 ## The automatic checks
 
-CI runs these on every pull request (the `test` and `pipelines` jobs in `.github/workflows/ci.yml`). Any red one means the change can't be trusted to merge. (To make GitHub actually refuse the merge, turn on branch protection: it's on the pre-public checklist.)
+CI runs these on every pull request (the `test`, `e2e`, `video` and `pipelines` jobs in `.github/workflows/ci.yml`; the browser tests run in four parallel shards). Any red one means the change can't be trusted to merge. (To make GitHub actually refuse the merge, turn on branch protection: it's on the pre-public checklist.)
 
 - **Type check:** the code fits together.
 - **Content build:** every Lesson, Problem, Scene and course file is well formed; every number shown comes from cited data with a Source note; every picture has screen-reader text; every Scene has its video block; Step ids that links point to never change.
