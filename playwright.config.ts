@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { defineConfig, devices } from "@playwright/test";
+import { CLAUDE_ENV } from "./site/src/tutor/route.ts";
 
 // The servers' ports: E2E_PORT / E2E_DEV_PORT if set, else free ports picked once by the runner.
 // Workers load this config again but inherit the runner's env, so they see the same ports.
@@ -49,7 +50,7 @@ export default defineConfig({
     {
       command: `pnpm --filter @astratron/site run dev --port ${devPort} --ignore-lock`,
       url: `http://localhost:${devPort}`,
-      env: { ASTRATRON_TUTOR_CLAUDE: tutorClaude },
+      env: { [CLAUDE_ENV]: tutorClaude },
       reuseExistingServer: false,
       timeout: 180_000,
     },
