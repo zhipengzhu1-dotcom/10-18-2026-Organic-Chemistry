@@ -2,7 +2,7 @@
 // draw), plays it in the Step player, then shows the summary with Retry missed,
 // Next Unit and Suggest a Problem. The rules live in engine/practice-set.ts.
 import { useEffect, useState } from "react";
-import { drawSet, roundOf, summarize, type Summary } from "../engine/practice-set.ts";
+import { drawSet, pinnedSet, roundOf, summarize, type Summary } from "../engine/practice-set.ts";
 import type { PageLesson } from "../lib/answer-key.ts";
 import type { PageProblem } from "../lib/practice.ts";
 import { suggestProblemHref } from "../lib/submit-links.ts";
@@ -31,10 +31,13 @@ type Phase =
 export default function PracticeSet({ unitId, problems, coreLessons, keyUrl, unitHref, nextUnitHref }: Props) {
   const [phase, setPhase] = useState<Phase>({ kind: "drawing" });
 
-  // The draw is random and avoids the last one, so it happens in the browser.
+  // The draw is random and avoids the last one, so it happens in the browser. `?problems=…` pins it.
   useEffect(() => {
     const record = readRecord();
-    const ids = drawSet(problems.map((p) => p.entry), coreLessons, { previous: practiceOf(record, unitId).draw });
+    const entries = problems.map((p) => p.entry);
+    const ids =
+      pinnedSet(window.location.search, entries.map((e) => e.id)) ??
+      drawSet(entries, coreLessons, { previous: practiceOf(record, unitId).draw });
     writeRecord(startPractice(record, unitId, ids));
     setPhase({ kind: "playing", ids, round: 1 });
   }, [problems, coreLessons, unitId]);

@@ -59,6 +59,17 @@ export function drawSet(bank: BankEntry[], coreLessons: string[], options: DrawO
     .map((p) => p.id);
 }
 
+/**
+ * A pinned Set from the page's query, `?problems=<id>,<id>…`: exactly those Problems, in that order
+ * (repeats dropped, at most a Set's worth), to replay a given Problem and for the browser tests (#87).
+ * No pin (undefined) when the query names none or names one the Bank can't draw.
+ */
+export function pinnedSet(search: string, drawableIds: string[], size = SET_SIZE): string[] | undefined {
+  const ids = [...new Set((new URLSearchParams(search).get("problems") ?? "").split(",").filter(Boolean))];
+  if (!ids.length || ids.some((id) => !drawableIds.includes(id))) return undefined;
+  return ids.slice(0, size);
+}
+
 /** A round of the Practice Set as the Step player plays it: the named Problems, in that order. */
 export function roundOf<S extends { id: string }>(steps: S[], ids: string[]): { steps: S[] } {
   const byId = new Map(steps.map((s) => [s.id, s]));

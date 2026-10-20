@@ -93,7 +93,8 @@ describe("Lesson 7 builds", () => {
   it("its Check Steps play the spec's three Problems, each approved and tagged with this Lesson", () => {
     const checks = lesson.steps.filter((s) => s.phase === "check").map((s) => ("problemId" in s ? s.problemId : undefined));
     expect(checks).toEqual(["u1-res-major-dimethylaniline", "u1-res-enamine-site", "u1-res-rank-methoxyacrylonitrile"]);
-    const bank = organic!.courses[0].units[0].bank.filter((p) => p.lesson === lesson.id);
+    // Its Practice Problems (#87) share the Lesson tag but are no Check Step.
+    const bank = organic!.courses[0].units[0].bank.filter((p) => p.lesson === lesson.id && p.check);
     expect(bank.map((p) => [p.id, p.status, p.difficulty, p.check])).toEqual([
       ["u1-res-enamine-site", "approved", 2, true],
       ["u1-res-major-dimethylaniline", "approved", 1, true],
