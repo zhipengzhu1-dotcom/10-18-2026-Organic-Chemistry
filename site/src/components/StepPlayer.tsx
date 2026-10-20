@@ -460,7 +460,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           <div className="player-end">
             {nextHref && (
               <a className="btn btn-primary btn-block" href={nextHref}>
-                {nextLabel}
+                {/* Numbers in the data face ("Unit 1 Practice Set"). */}
+                {nextLabel.split(/(\d+)/).map((part, i) => (i % 2 ? <span key={i} className="data">{part}</span> : part))}
               </a>
             )}
             <a className={`btn btn-block ${nextHref ? "btn-secondary" : "btn-primary"}`} href={exitHref}>

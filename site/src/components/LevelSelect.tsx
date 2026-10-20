@@ -42,7 +42,7 @@ function PhaseBar({ phases }: { phases: Lesson["phases"] }) {
   );
 }
 
-function LessonRow({ lesson, firstCore }: { lesson: Lesson; firstCore?: Lesson }) {
+function LessonRow({ lesson, firstCore, renderText }: { lesson: Lesson; firstCore?: Lesson; renderText?: (text: string) => string }) {
   const kind = lesson.onRamp ? "on-ramp" : lesson.capstone ? "boss" : "core";
   const number = lesson.onRamp
     ? "On-ramp · optional"
@@ -58,7 +58,7 @@ function LessonRow({ lesson, firstCore }: { lesson: Lesson; firstCore?: Lesson }
       <h3 className="level-title">
         <a href={lesson.url}>{lesson.title}</a>
       </h3>
-      <p className="level-goal">{lesson.goal}</p>
+      {renderText ? <p className="level-goal" dangerouslySetInnerHTML={{ __html: renderText(lesson.goal) }} /> : <p className="level-goal">{lesson.goal}</p>}
       <span className="chip">{stepTypeName(lesson.signature)}</span>
       <span className="chip count">{plural(steps, "Step")}</span>
       <PhaseBar phases={lesson.phases} />
@@ -71,7 +71,8 @@ function LessonRow({ lesson, firstCore }: { lesson: Lesson; firstCore?: Lesson }
   );
 }
 
-export default function LevelSelect({ unit }: { unit: Unit }) {
+/** `renderText`: the page's build-time Markdown renderer for each goal (numbers and formulas in the data face). */
+export default function LevelSelect({ unit, renderText }: { unit: Unit; renderText?: (text: string) => string }) {
   const firstCore = unit.lessons.find((l) => !l.onRamp);
   const groups = acts(unit.lessons);
   const core = unit.lessons.filter((l) => !l.onRamp).length;
@@ -86,7 +87,7 @@ export default function LevelSelect({ unit }: { unit: Unit }) {
           {group.title && <h2 className="act-title">{group.title}</h2>}
           <ol className="levels">
             {group.lessons.map((lesson) => (
-              <LessonRow key={lesson.id} lesson={lesson} firstCore={firstCore} />
+              <LessonRow key={lesson.id} lesson={lesson} firstCore={firstCore} renderText={renderText} />
             ))}
           </ol>
         </section>

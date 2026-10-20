@@ -34,10 +34,10 @@ steps:
     phase: build
     type: explain
     text: >-
-      In a molecule, electrons don't belong to one atom. They live in **molecular orbitals** spread over the molecule.<br>
+      In a molecule, electrons don't belong to one atom. They live in **molecular orbitals** spread over the molecule.
       Bring two H atoms together and their 1s orbitals combine two ways:<br>
       **In phase** (same sign): they add up between the nuclei. That's **σ**, a **bonding** orbital, lower in energy than either 1s.<br>
-      **Out of phase** (opposite signs): they cancel in the middle, leaving a **node**, where the orbital is zero. That's **σ\***, **antibonding**, higher in energy.<br>
+      **Out of phase** (opposite signs): they cancel in the middle, leaving a **node**, where the orbital is zero. That's **σ\***, **antibonding**, higher in energy.
       Two atomic orbitals in, two molecular orbitals out. **+ and − are the sign of the wave, not charges.**
     scene: mo-from-overlap-h2
     sourceNote: "Bonding and antibonding orbitals of H₂: facts as in OpenStax *Organic Chemistry* §1.11, CC BY-NC-SA 4.0; wording and pictures ours."
@@ -156,10 +156,10 @@ steps:
     phase: build
     type: explain
     text: >-
-      Now the payoff. A reaction starts when electrons move from where they're held loosely to where there's room.<br>
+      Now the payoff. A reaction starts when electrons move from where they're held loosely to where there's room.
       **Tail of the arrow: a filled orbital**, usually the **HOMO**, whose electrons are the easiest to give.<br>
       **Head: an empty orbital**, usually the **LUMO**, the lowest-energy room there is.<br>
-      The smaller the gap between them, and the better they overlap in space, the easier the flow.<br>
+      The smaller the gap between them, and the better they overlap in space, the easier the flow.
       Lesson 6's sources, lone pairs and π bonds, are high filled orbitals. Its sinks are atoms with low empty ones. **Every curved arrow is HOMO → LUMO.**
     scene: arrow-is-flow
 

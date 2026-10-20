@@ -18,6 +18,8 @@ describe("md marks numbers and formulas as data", () => {
     expect(md("In methane, CH₄, and water, H₂O.")).toBe(`In methane, ${d("CH₄")}, and water, ${d("H₂O")}.`);
     expect(md("ethane, H₃C–CH₃, has a C–C bond and C=O")).toBe(`ethane, ${d("H₃C–CH₃")}, has a ${d("C–C")} bond and ${d("C=O")}`);
     expect(md("OH⁻ takes H⁺")).toBe(`${d("OH⁻")} takes ${d("H⁺")}`);
+    // The electron's symbol (Lesson 8: "He₂ (4 e⁻)").
+    expect(md("He₂ (4 e⁻)")).toBe(`${d("He₂")} (${d("4")} ${d("e⁻")})`);
   });
 
   it("leaves ordinary words and capitals alone", () => {

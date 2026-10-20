@@ -103,7 +103,8 @@ const EL = "(?:Cl|Br|Na|Mg|Al|Si|Li|Ca|Fe|Zn|Cu|Mn|Cr|Pd|Pt|Sn|Hg|Se|Os|Ni|Ag|Au
 const CHUNK = `(?:${EL}[₀-₉]*|\\((?:${EL}[₀-₉]*)+\\)[₀-₉]*)+[⁺⁻]*`;
 const DATA = new RegExp(
   `(?<![A-Za-z])${CHUNK}(?:[–=≡]${CHUNK})*(?![a-z])` + // formula: CH₄, H₃C–CH₃, C=O, OH⁻
-    `|(?<![\\d.])[−+]?\\d+(?:\\.\\d+)?`, // number: 4, 1.54, −1.7, the 3 of 3D and sp3
+    `|(?<![\\d.])[−+]?\\d+(?:\\.\\d+)?` + // number: 4, 1.54, −1.7, the 3 of 3D and sp3
+    `|(?<![A-Za-z])e⁻`, // the electron: 6 e⁻
   "g",
 );
 /** A formula needs a subscript, a charge or a bond; a lone capital (I, C) stays prose. */

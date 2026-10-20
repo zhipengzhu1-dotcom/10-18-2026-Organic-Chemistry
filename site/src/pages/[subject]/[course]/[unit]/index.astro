@@ -22,7 +22,7 @@ const { subject, course, unit } = Astro.props as UnitPage;
     <p class="crumbs"><a href={`/${subject}`}>Course map</a> · {course.title}</p>
     <h1><span class="unit-number">Unit {unit.number}</span> {unit.title}</h1>
     {unit.summary && <p set:html={md(unit.summary)} />}
-    <LevelSelect unit={unit} />
+    <LevelSelect unit={unit} renderText={md} />
     <p class="suggest">
       Know a good Problem for this Unit? <a href={suggestProblemHref(unit.id)}>Suggest a Problem</a>
     </p>
