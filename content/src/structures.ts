@@ -4,7 +4,7 @@
 import type { Figure, Hidden, Option, Push, Structure, StructureAtom, StructureView, TapTarget } from "./model.ts";
 import type { ProblemFile, StructureFile } from "./schema.ts";
 import { hintIds } from "./shape.ts";
-import { expectedLonePairs, hydrogenCount } from "./valence.ts";
+import { expectedLonePairs, hydrogenCount, VALENCE } from "./valence.ts";
 import {
   arrowsAct,
   arrowsStart,
@@ -14,7 +14,6 @@ import {
   electrons,
   moleculeOf,
   pushLabel,
-  VALENCE,
   type ArrowsTask,
 } from "./arrows.ts";
 

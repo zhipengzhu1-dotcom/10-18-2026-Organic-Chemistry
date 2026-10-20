@@ -3,10 +3,19 @@
 // Scene that fills in H's) and the content build's checks share one rule.
 // Browser import: "@astratron/content/valence".
 import type { Structure } from "./model.ts";
-import { VALENCE } from "./arrows.ts";
+import valenceElectrons from "../subjects/organic/data/valence-electrons.json" with { type: "json" };
 
-/** Valence electrons of the elements a drawing can hold (one table, shared with Draw arrows). */
-export { VALENCE };
+/**
+ * Valence electrons of the elements a drawing can hold: the one table drawings, Draw arrows and
+ * Scenes share, read from the cited data file valence-electrons.json (ADR 0002; the content build
+ * checks it and its source like any data file).
+ */
+export const VALENCE: Record<string, number> = Object.fromEntries(
+  Object.entries(valenceElectrons.values).map(([key, v]) => [key.replace(/\.valence$/, ""), v.value]),
+);
+
+/** Bonds a neutral carbon makes (its 4 valence electrons, each shared once). */
+const CARBON_BONDS = VALENCE.C;
 
 /** Sum of bond orders at each atom. */
 function bondOrders(s: Structure): Map<string, number> {
@@ -25,7 +34,7 @@ export function impliedHydrogens(s: Structure): Record<string, number> {
   const out: Record<string, number> = {};
   for (const a of s.atoms) {
     if (a.el !== "C" || s.style !== "line-angle" || a.letter) continue;
-    out[a.id] = Math.max(0, 4 - (orders.get(a.id) ?? 0) - (a.h ?? 0) - Math.abs(a.charge ?? 0));
+    out[a.id] = Math.max(0, CARBON_BONDS - (orders.get(a.id) ?? 0) - (a.h ?? 0) - Math.abs(a.charge ?? 0));
   }
   return out;
 }

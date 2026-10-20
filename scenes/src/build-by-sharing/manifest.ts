@@ -4,7 +4,7 @@
 // each carbon with one single dot, join into ethane. A live count of the electrons around each
 // carbon. A model drawing: electron counts only, no measured numbers.
 import type { SceneManifest, SceneMove } from "../types.ts";
-import { OUTER } from "../dots/outer.ts";
+import { VALENCE } from "@astratron/content/valence";
 
 /** Each of carbon's four sides holds a single dot or a bonded H. */
 export type Side = "n" | "e" | "s" | "w";
@@ -23,11 +23,11 @@ export const SIDES: Side[] = ["n", "e", "s", "w"];
 export const SIDE_NAMES: Record<Side, string> = { n: "top", e: "right", s: "bottom", w: "left" };
 /** H atoms in the tray at the start: more than carbon can take. */
 export const TRAY = 6;
-const CARBON = OUTER.C;
+const CARBON = VALENCE.C;
 /** A full outer shell: carbon's own electrons plus one more for each of its single dots. */
 const FULL = 2 * CARBON;
 /** Hydrogen's shell is full with two electrons. */
-const H_FULL = 2 * OUTER.H;
+const H_FULL = 2 * VALENCE.H;
 
 const bonded = (s: SharingState) => SIDES.filter((side) => s[side] === "H");
 const free = (s: SharingState) => SIDES.filter((side) => s[side] !== "H");

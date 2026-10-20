@@ -8,7 +8,7 @@ import { buildContent, contentRoot } from "@astratron/content";
 import { find } from "@astratron/content/data";
 import { ATOMS, giveOrTake, routes } from "../src/give-or-take/manifest.ts";
 import GiveOrTake from "../src/give-or-take/GiveOrTake.tsx";
-import { OUTER } from "../src/dots/outer.ts";
+import { VALENCE } from "@astratron/content/valence";
 
 const data = buildContent(contentRoot).model!.subjects.find((s) => s.slug === "organic")!.data;
 const cited = Object.fromEntries(giveOrTake.data.map((ref) => [ref, find(data, ref)!]));
@@ -37,7 +37,7 @@ describe("give-or-take sanity check (spec: Data notes)", () => {
   });
 
   it("the dot drawings' outer-electron counts agree with the cited data", () => {
-    for (const el of ["C", "N", "O", "F"]) expect(cited[`ionization-li-f/${el}.valence`].value).toBe(OUTER[el]);
+    for (const el of ["C", "N", "O", "F"]) expect(cited[`ionization-li-f/${el}.valence`].value).toBe(VALENCE[el]);
   });
 });
 

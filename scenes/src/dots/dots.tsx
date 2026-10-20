@@ -11,8 +11,6 @@ export const line = "var(--at-line, #6b6890)";
 export const boss = "var(--at-boss, #ff4fd8)";
 export const panel = "var(--at-panel, #1b1838)";
 
-export { OUTER } from "./outer.ts";
-
 /** Element symbols, formulas and numbers are set in the data face (design rule); body words in the text face. */
 export const DATA_FONT = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
 export const TEXT_FONT = "var(--at-font-text, 'Space Grotesk', system-ui, sans-serif)";

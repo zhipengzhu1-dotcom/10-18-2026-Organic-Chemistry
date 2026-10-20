@@ -3,10 +3,10 @@
 // swinging over to H⁺, where it becomes a second O–H shared pair: water, every shell full.
 // Watched, not worked, here (the homepage makes the push live). Electron counts only.
 import type { SceneManifest } from "../types.ts";
-import { OUTER } from "../dots/outer.ts";
+import { VALENCE } from "@astratron/content/valence";
 
-const OCTET = 2 * OUTER.C;
-const H_FULL = 2 * OUTER.H;
+const OCTET = 2 * VALENCE.C;
+const H_FULL = 2 * VALENCE.H;
 
 export const waterPush: SceneManifest<Record<string, never>> = {
   id: "water-push",

@@ -3,11 +3,9 @@
 // drawing: no measured geometry, so no cited numbers; positions only space the
 // letters out. No React here, so manifests can import it (see embed.tsx).
 import type { Structure, StructureAtom } from "@astratron/content";
+import { VALENCE } from "@astratron/content/valence";
 import type { Drawing } from "./structure/render.ts";
 import type { Box } from "./frame.ts";
-
-/** Outer-shell (valence) electrons of the neutral atom: counts, not measured data. */
-export const VALENCE: Record<string, number> = { H: 1, B: 3, C: 4, N: 5, O: 6, F: 7, Cl: 7, Br: 7 };
 
 /** A partner of the centre atom; `el: "*"` is a loose bond end (the rest of a molecule). */
 export interface Partner {

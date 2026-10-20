@@ -2,7 +2,7 @@
 // dots, then neon with eight, "already full". The spec calls it a static picture; it is a Scene
 // so it draws with the same dot renderer, appearing atom by atom, and posts as its last frame.
 import type { SceneManifest } from "../types.ts";
-import { OUTER } from "../dots/outer.ts";
+import { VALENCE } from "@astratron/content/valence";
 
 export const ROW = ["H", "C", "N", "O", "F"] as const;
 const NAMES: Record<string, string> = { H: "Hydrogen", C: "carbon", N: "nitrogen", O: "oxygen", F: "fluorine" };
@@ -16,8 +16,8 @@ export const outerElectrons: SceneManifest<Record<string, never>> = {
   describe: () => {
     const [first, ...rest] = ROW;
     return (
-      `${NAMES[first]} has ${OUTER[first]} outer electron, ${rest.map((el) => `${NAMES[el]} ${OUTER[el]}`).join(", ")}. ` +
-      `Neon has ${OUTER.Ne}, a full shell, and reacts with almost nothing.`
+      `${NAMES[first]} has ${VALENCE[first]} outer electron, ${rest.map((el) => `${NAMES[el]} ${VALENCE[el]}`).join(", ")}. ` +
+      `Neon has ${VALENCE.Ne}, a full shell, and reacts with almost nothing.`
     );
   },
   reducedMotion: "Opens paused on the poster frame with every atom and dot drawn; Play shows them appear once.",
