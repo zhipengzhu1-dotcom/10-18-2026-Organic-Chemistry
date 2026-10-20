@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { absoluteUrl, pageMeta, sitemapXml } from "./site.ts";
+import { absoluteUrl, pageMeta, PUBLIC, robots, sitemapXml } from "./site.ts";
 
 const SITE = "https://example.org";
 
@@ -45,5 +45,17 @@ describe("sitemapXml", () => {
 
   it("escapes characters XML reserves", () => {
     expect(sitemapXml(["/a&b"], SITE)).toContain("<loc>https://example.org/a&amp;b</loc>");
+  });
+});
+
+describe("robots (noindex until going public, story 101)", () => {
+  it("is noindex while the site isn't public, and nothing once it is", () => {
+    expect(robots(false)).toBe("noindex");
+    expect(robots(true)).toBeUndefined();
+  });
+
+  it("is not public yet, so every page is noindex", () => {
+    expect(PUBLIC).toBe(false);
+    expect(robots()).toBe("noindex");
   });
 });

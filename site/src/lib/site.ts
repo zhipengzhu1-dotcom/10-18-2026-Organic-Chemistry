@@ -1,9 +1,15 @@
-// The site shell's settings (#77). Going public means changing SITE_ADDRESS (and removing
-// `noindex` in Base.astro); the sitemap, canonical URLs and share-image tags all follow it.
+// The site shell's settings (#77). Going public means setting SITE_ADDRESS and PUBLIC here;
+// the sitemap, canonical URLs, share-image tags and every page's `noindex` follow them.
 import { shareImageFor, type ShareImage } from "./share-images.ts";
 
 /** The one site-address setting. A placeholder until the owner registers a domain (pre-public checklist). */
 export const SITE_ADDRESS = "https://astratron.pages.dev";
+
+/** False until going public: while false every page carries `noindex` (story 101). */
+export const PUBLIC: boolean = false;
+
+/** The robots meta every page carries: `noindex` until the site is public, then none. */
+export const robots = (isPublic = PUBLIC): string | undefined => (isPublic ? undefined : "noindex");
 
 /** Where Donate goes. The owner publishes the Ko-fi page before going public. */
 export const KOFI_URL = "https://ko-fi.com/astratron";
