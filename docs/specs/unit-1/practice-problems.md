@@ -147,7 +147,7 @@ The Problems reuse the Lessons' Scenes and data files. They add:
 
 - **Reveal:** Scene `h-fill` (`furan`).
 - **Scene:** `h-fill` on reveal. Screen reader: "Furan fills in. Each of the four carbons has a double bond and a single bond in the ring, and gains one hydrogen. Total: 4 hydrogens."
-- **Source note:** "Molecule after LibreTexts, *Map: Organic Chemistry (Wade)*, §1.16 exercise 1-8, CC BY-NC-SA 4.0; our question. Furan, PubChem CID 8029 (formula C₄H₄O)."
+- **Source note:** "Molecule after LibreTexts, *Map: Organic Chemistry (Wade)*, §1.16 exercise 1-8, CC BY-NC-SA 4.0; our question. Furan, PubChem CID 8029."
 
 ### `u1-draw-ibuprofen-bare-carbons` · Tap-to-identify · difficulty 2
 
