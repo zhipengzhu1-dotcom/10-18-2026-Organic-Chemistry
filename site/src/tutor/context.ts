@@ -6,6 +6,9 @@ import { outline, type PageStep } from "@astratron/content/step-types";
 import type { Screen } from "../engine/player.ts";
 import type { PageLesson } from "../lib/answer-key.ts";
 
+/** The drawing a Draw-arrows Step shows as its goal: the Student only looks at it, so the Tutor never rings it. */
+export const LOOK_ONLY = "target (look only)";
+
 /** What is on the stage now, read from the page (the Tutor panel's stage reader). */
 export interface Stage {
   /** The Step shows a Scene (or video) with its own controls. */
@@ -13,7 +16,7 @@ export interface Stage {
   /** The Scene control (a slider or − / + stepper): its label, range and value now. */
   control: { label: string; min: number; max: number; value: number } | null;
   /** Each labelled atom on the drawings, with the drawing it is in; a highlight indexes this list. */
-  atoms: { label: string; in: "working drawing" | "target (look only)" | "figure" }[];
+  atoms: { label: string; in: "working drawing" | typeof LOOK_ONLY | "figure" }[];
 }
 
 export interface TutorContext {

@@ -3,12 +3,14 @@
 // player's own controls (the Scene player's buttons and Scrub, the Scene control), so Scene
 // state and screen-reader text update as if the Student did it. Rings are the one thing the
 // Tutor draws itself. It never dispatches engine Actions: no answer, Check or Continue.
-// By hand only (no DOM in the unit tests); `atomsOnStage` is the one list both sides index.
-import type { Stage } from "./context.ts";
+// DOM by hand (no DOM in the unit tests), `ringable` tested; `atomsOnStage` is the one list both sides index.
+import { LOOK_ONLY, type Stage } from "./context.ts";
 import type { StageAction } from "./contract.ts";
 
 const SVG = "http://www.w3.org/2000/svg";
 const RING = "tutor-ring";
+/** A stepper never needs more presses than this to reach a value (it gives up, rather than loop, if it can't). */
+const MAX_STEPPER_PRESSES = 64;
 
 const scrubOf = (root: ParentNode) => root.querySelector<HTMLInputElement>('.player input[aria-label="Scrub"]');
 const rangeOf = (root: ParentNode) => root.querySelector<HTMLInputElement>(".player .scene-control input[type=range]");
@@ -25,7 +27,9 @@ function atomsOnStage(root: ParentNode): SVGTextElement[] {
 }
 
 const drawingOf = (t: Element): Stage["atoms"][number]["in"] =>
-  t.closest(".arrows-target") ? "target (look only)" : t.closest(".arrows-structure, .tap-structure") ? "working drawing" : "figure";
+  t.closest(".arrows-target") ? LOOK_ONLY : t.closest(".arrows-structure, .tap-structure") ? "working drawing" : "figure";
+
+const atomOf = (t: SVGTextElement): Stage["atoms"][number] => ({ label: t.textContent!.trim(), in: drawingOf(t) });
 
 export function readStage(root: ParentNode = document): Stage {
   const range = rangeOf(root);
@@ -38,7 +42,7 @@ export function readStage(root: ParentNode = document): Stage {
   return {
     scene: !!scrubOf(root),
     control,
-    atoms: atomsOnStage(root).map((t) => ({ label: t.textContent!.trim(), in: drawingOf(t) })),
+    atoms: atomsOnStage(root).map(atomOf),
   };
 }
 
@@ -54,7 +58,7 @@ const nextFrame = () => new Promise((done) => requestAnimationFrame(done));
 
 /** Presses a stepper's − / + until it shows `value` (each press re-renders, so wait a frame between). */
 async function stepTo(stepper: HTMLElement, value: number) {
-  for (let i = 0; i < 64; i++) {
+  for (let i = 0; i < MAX_STEPPER_PRESSES; i++) {
     const now = +stepper.dataset.value!;
     if (!stepper.isConnected || Math.abs(now - value) < 1e-9) return;
     const [minus, plus] = stepper.querySelectorAll<HTMLButtonElement>(".scene-step");
@@ -95,12 +99,26 @@ function ring(t: SVGTextElement) {
   svg.appendChild(g);
 }
 
-/** Carries out a reply's stage actions (already validated by the route) on the page. */
-export async function moveStage(actions: StageAction[], root: ParentNode = document) {
+/**
+ * Whether to ring atom `i`: the atom the Tutor was shown (`sent`, the stage when the question went)
+ * is still there now (`now`), same label and drawing, and it isn't on the look-only target.
+ */
+export function ringable(i: number, sent: Stage["atoms"], now: Stage["atoms"]): boolean {
+  const [was, is] = [sent[i], now[i]];
+  return !!was && !!is && was.label === is.label && was.in === is.in && is.in !== LOOK_ONLY;
+}
+
+/**
+ * Carries out a reply's stage actions (already validated by the route) on the page. `sent` is the
+ * stage the question carried: highlights resolve against it, so a stage that changed while the
+ * reply was written doesn't ring the wrong atom.
+ */
+export async function moveStage(actions: StageAction[], sent: Stage, root: ParentNode = document) {
   // A new set of rings replaces the old one.
   if (actions.some((a) => a.type === "highlight" || a.type === "clear")) clearRings(root);
   const button = (label: string) => root.querySelector<HTMLButtonElement>(`.player .scene-btn[aria-label="${label}"]`);
   const atoms = atomsOnStage(root);
+  const now = atoms.map(atomOf);
   for (const a of actions) {
     if (a.type === "play") button("Play")?.click();
     if (a.type === "pause") button("Pause")?.click();
@@ -115,6 +133,6 @@ export async function moveStage(actions: StageAction[], root: ParentNode = docum
       if (range) slide(range, a.value);
       else if (stepper) await stepTo(stepper, a.value);
     }
-    if (a.type === "highlight" && atoms[a.atom]) ring(atoms[a.atom]);
+    if (a.type === "highlight" && ringable(a.atom, sent.atoms, now)) ring(atoms[a.atom]);
   }
 }

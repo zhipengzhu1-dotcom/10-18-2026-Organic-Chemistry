@@ -13,7 +13,7 @@ process.stdin.setEncoding("utf8");
 process.stdin.on("data", (d) => (stdin += d));
 process.stdin.on("end", () => {
   if (process.env.FAKE_CLAUDE_LOG) {
-    writeFileSync(process.env.FAKE_CLAUDE_LOG, JSON.stringify({ args: process.argv.slice(2), cwd: process.cwd(), files: readdirSync(process.cwd()), stdin }));
+    writeFileSync(process.env.FAKE_CLAUDE_LOG, JSON.stringify({ args: process.argv.slice(2), cwd: process.cwd(), files: readdirSync(process.cwd()), stdin, pid: process.pid }));
   }
   const mode = process.env.FAKE_CLAUDE_MODE ?? "";
   if (mode === "slow") setTimeout(answer, Number(process.env.FAKE_CLAUDE_DELAY ?? 1000));

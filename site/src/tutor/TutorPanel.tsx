@@ -3,16 +3,42 @@
 // dynamic import behind `import.meta.env.DEV`, so the build carries none of it.
 // It sees the Step only through the Tutor context (./context.ts). It moves the stage only through
 // the player's own controls (./stage.ts) and never dispatches engine Actions.
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type PointerEvent } from "react";
 import { createPortal } from "react-dom";
 import type { PageLesson } from "../lib/answer-key.ts";
 import { tutorContext, type TutorScreen } from "./context.ts";
-import { PANEL_CLASS, TUTOR_PATH, type TutorChoices } from "./contract.ts";
-import { chipsFor, enterStep, type Line } from "./flow.ts";
-import { storedOn, storedPick, storeOn, storePick, pairOf } from "./settings.ts";
+import { MAX_MESSAGE, PANEL_CLASS, TUTOR_PATH, type TutorChoices } from "./contract.ts";
+import { chipsFor, digitRuns, enterStep, historyOf, patchLast, type Line } from "./flow.ts";
+import { pairOf, parsePick, storedOn, storedPick, storeOn, storePick } from "./settings.ts";
 import { clearRings, moveStage, readStage } from "./stage.ts";
 import { askTutor } from "./stream.ts";
 import "./tutor.css";
+
+/** Text with each digit run in the data face (testing.md: any text with a digit is JetBrains Mono). */
+const Digits = ({ text }: { text: string }) => (
+  <>
+    {digitRuns(text).map((run, i) =>
+      run.data ? (
+        <span key={i} className="data">
+          {run.text}
+        </span>
+      ) : (
+        run.text
+      ),
+    )}
+  </>
+);
+
+/** A swipe down the sheet's header closes it past this share of its height… */
+const SWIPE_SHARE = 0.3;
+/** …or on a flick faster than this (px per ms) at release. */
+const FLICK_SPEED = 0.5;
+/** A finger still for longer than this (ms) before release isn't a flick. */
+const FLICK_WINDOW = 100;
+
+const reducedMotion = () => document.documentElement.dataset.motion === "reduced" || matchMedia("(prefers-reduced-motion: reduce)").matches;
+/** The sheet is a sheet only on phones; from 720px the panel sits beside the Step and doesn't swipe. */
+const isSheet = () => !matchMedia("(min-width: 720px)").matches;
 
 interface Props {
   /** The Lesson as the page carries it (no Answer key). */
@@ -41,6 +67,9 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
   const askButton = useRef<HTMLButtonElement>(null);
   const field = useRef<HTMLInputElement>(null);
   const threadEnd = useRef<HTMLLIElement>(null);
+  const panel = useRef<HTMLElement>(null);
+  /** A swipe on the sheet's header: the pointer, where it started, how far down it is, its last move. */
+  const swipe = useRef<{ pointer: number; startY: number; dy: number; lastY: number; lastT: number; speed: number } | null>(null);
   const [portal, setPortal] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -110,6 +139,34 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
     askButton.current?.focus({ preventScroll: true });
   }
 
+  /** Swipe-to-close on the phone sheet (spec story 2): the sheet follows the finger down from its header. */
+  function grab(e: PointerEvent<HTMLElement>) {
+    if (!e.isPrimary || e.button !== 0 || !isSheet() || (e.target as Element).closest("button, select, input")) return;
+    swipe.current = { pointer: e.pointerId, startY: e.clientY, dy: 0, lastY: e.clientY, lastT: e.timeStamp, speed: 0 };
+    e.currentTarget.setPointerCapture(e.pointerId);
+    panel.current!.dataset.dragging = "true";
+  }
+  function drag(e: PointerEvent<HTMLElement>) {
+    const s = swipe.current;
+    if (!s || e.pointerId !== s.pointer) return;
+    const dt = e.timeStamp - s.lastT;
+    if (dt > 0) s.speed = (e.clientY - s.lastY) / dt;
+    [s.lastY, s.lastT, s.dy] = [e.clientY, e.timeStamp, Math.max(0, e.clientY - s.startY)];
+    // Reduced motion: the sheet stays put under the finger; past the threshold it fades out.
+    if (!reducedMotion()) panel.current!.style.transform = `translateY(${s.dy}px)`;
+  }
+  /** Releases a swipe: past the threshold or on a downward flick it closes, else it settles back. */
+  function release(e: PointerEvent<HTMLElement>, cancelled = false) {
+    const s = swipe.current;
+    if (!s || e.pointerId !== s.pointer) return;
+    swipe.current = null;
+    const sheet = panel.current!;
+    delete sheet.dataset.dragging;
+    sheet.style.transform = "";
+    const flick = e.timeStamp - s.lastT < FLICK_WINDOW && s.speed > FLICK_SPEED;
+    if (!cancelled && s.dy > 0 && (s.dy > sheet.offsetHeight * SWIPE_SHARE || flick)) close();
+  }
+
   /** Switches the Tutor on or off; off closes it, and focus goes to the switch left in the top bar. */
   function switchTo(next: boolean) {
     setOn(next);
@@ -126,20 +183,21 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
   async function send(asked: string) {
     const message = asked.trim();
     if (!message || busy) return;
-    const history = thread.flatMap((t) => (t.role === "divider" || t.error || t.live ? [] : [{ role: t.role, text: t.text }]));
-    const context = tutorContext({ lesson, screen, draft, stage: readStage() });
+    // The stage as the question shows it: the reply's highlights index this, not the stage when it lands.
+    const stage = readStage();
+    const context = tutorContext({ lesson, screen, draft, stage });
+    const history = historyOf(thread);
     setThread((t) => [...t, { role: "student", text: message }, { role: "tutor", text: "", live: true }]);
     setQuestion("");
     setBusy(true);
-    const patch = (line: Partial<Line>) => setThread((t) => [...t.slice(0, -1), { ...t[t.length - 1], ...line }]);
-    const [model, effort] = pick ? pick.split("|") : [];
+    const patch = (line: Partial<Line>) => setThread((t) => patchLast(t, line));
     try {
-      await askTutor({ model, effort, message, history, context }, (event) => {
+      await askTutor({ ...parsePick(pick), message, history, context }, (event) => {
         if (event.type === "reply") patch({ text: event.text });
         if (event.type === "done") {
           patch({ text: event.reply, live: false, meta: { model: event.model, effort: event.effort, ms: event.ms } });
           setAnnounce(`Tutor: ${event.reply}`);
-          void moveStage(event.actions);
+          void moveStage(event.actions, stage);
         }
         if (event.type === "error") {
           patch({ text: event.message, live: false, error: true });
@@ -182,8 +240,8 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
         createPortal(
           <>
             <div className="tutor-scrim" data-open={open} data-instant={instant} onClick={close} aria-hidden="true" />
-            <section id="tutor" className={PANEL_CLASS} data-open={open} data-instant={instant} inert={!open} aria-label="Tutor">
-              <header className="tutor-head">
+            <section ref={panel} id="tutor" className={PANEL_CLASS} data-open={open} data-instant={instant} inert={!open} aria-label="Tutor">
+              <header className="tutor-head" onPointerDown={grab} onPointerMove={drag} onPointerUp={(e) => release(e)} onPointerCancel={(e) => release(e, true)}>
                 <h2 className="label">Tutor</h2>
                 {choices && (
                   <select
@@ -218,15 +276,17 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
                 {thread.map((t, i) =>
                   t.role === "divider" ? (
                     <li key={i} className="tutor-divider label">
-                      {t.text}
+                      <Digits text={t.text} />
                     </li>
                   ) : (
                     <li key={i} className={`tutor-turn ${t.role}${t.error ? " error" : ""}`}>
                       <span className="tutor-who label">{t.role === "student" ? "You" : t.error ? "! Tutor problem" : "Tutor"}</span>
-                      <p>{t.text || (t.live ? "Writing…" : "")}</p>
+                      <p>
+                        <Digits text={t.text || (t.live ? "Writing…" : "")} />
+                      </p>
                       {t.meta && (
                         <small className="tutor-meta">
-                          {t.meta.model} · {t.meta.effort} effort · <span className="data">{(t.meta.ms / 1000).toFixed(1)}</span> s
+                          <Digits text={t.meta.model} /> · {t.meta.effort} effort · <span className="data">{(t.meta.ms / 1000).toFixed(1)}</span> s
                         </small>
                       )}
                     </li>
@@ -249,7 +309,7 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
                   ref={field}
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
-                  maxLength={2000}
+                  maxLength={MAX_MESSAGE}
                   placeholder="Ask about this Step…"
                   aria-label="Ask the Tutor"
                 />
