@@ -39,6 +39,10 @@ export default function SceneControl({ sceneId, control, value, onChange, locked
         className="scene-control scene-stepper"
         role="group"
         aria-label={spec.label}
+        // Read by the dev-only Tutor's stage summary (the range input carries these itself).
+        data-min={spec.min}
+        data-max={spec.max}
+        data-value={at}
         onKeyDown={(e) => {
           if (e.key === "+" || e.key === "=") by(1);
           else if (e.key === "-" || e.key === "−" || e.key === "_") by(-1);

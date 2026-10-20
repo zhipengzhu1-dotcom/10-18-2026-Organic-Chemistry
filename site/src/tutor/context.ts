@@ -10,7 +10,9 @@ import type { PageLesson } from "../lib/answer-key.ts";
 export interface Stage {
   /** The Step shows a Scene (or video) with its own controls. */
   scene: boolean;
-  control: { label: string; min?: number; max?: number; value: number } | null;
+  /** The Scene control (a slider or − / + stepper): its label, range and value now. */
+  control: { label: string; min: number; max: number; value: number } | null;
+  /** Each labelled atom on the drawings, with the drawing it is in; a highlight indexes this list. */
   atoms: { label: string; in: "working drawing" | "target (look only)" | "figure" }[];
 }
 

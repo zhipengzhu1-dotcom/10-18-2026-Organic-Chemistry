@@ -178,3 +178,14 @@
   opacity: 0.6;
   cursor: default;
 }
+
+/* A Tutor ring on a drawing's atom (#107): solid cyan like Tap's picked ring, plus four crosshair
+   ticks so the cue isn't colour alone (and doesn't read as Tap's ✓ "picked"). */
+.tutor-ring circle,
+.tutor-ring line {
+  fill: none;
+  stroke: var(--at-electron);
+  stroke-width: 3px;
+  stroke-linecap: round;
+  pointer-events: none;
+}
