@@ -1,0 +1,180 @@
+/* The Tutor (dev only, spec #104): the Ask button in the player's top bar, then a sheet rising
+   from the bottom on phones and a side panel from 720px. Arcade Cosmos tokens only, so both
+   themes follow. Motion: 420ms snap slide plus a fade; reduced motion (global.css) leaves the fade. */
+
+/* The Ask button takes a column of its own in the top bar. */
+/* Its own column in the top bar; a tighter gap keeps the story bars visible on a 390px phone. */
+.player-top:has(.tutor-ask) {
+  grid-template-columns: var(--at-tap) var(--at-tap) minmax(0, 1fr) auto max-content;
+  gap: 8px;
+}
+.tutor-ask {
+  min-width: var(--at-tap);
+  height: var(--at-tap);
+  padding: 0 8px;
+  white-space: nowrap;
+  color: var(--at-electron);
+  background: transparent;
+  border: var(--at-border) solid var(--at-electron);
+  cursor: pointer;
+}
+.tutor-ask[aria-expanded="true"] {
+  background: var(--at-electron-fill);
+  color: var(--at-on-fill);
+}
+
+.tutor-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--at-space) 60%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--at-dur-ui) linear;
+}
+.tutor-scrim[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Phones: a sheet over the bottom of the Step; the Step stays visible above it. */
+.tutor-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  height: min(70dvh, 560px);
+  display: flex;
+  flex-direction: column;
+  background: var(--at-surface);
+  color: var(--at-ink);
+  border-top: var(--at-border-strong) solid var(--at-line);
+  box-shadow: var(--at-drop);
+  opacity: 0;
+  transform: translateY(100%);
+  pointer-events: none;
+  transition:
+    transform var(--at-dur-card) var(--at-ease-snap),
+    opacity var(--at-dur-ui) linear;
+}
+.tutor-panel[data-open="true"] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* From 720px: a side panel beside the Step, which moves over to make room. */
+@media (min-width: 720px) {
+  :root {
+    --tutor-width: min(400px, 45vw);
+  }
+  .tutor-scrim {
+    display: none;
+  }
+  .tutor-panel {
+    left: auto;
+    top: 0;
+    width: var(--tutor-width);
+    height: auto;
+    border-top: 0;
+    border-left: var(--at-border-strong) solid var(--at-line);
+    transform: translateX(100%);
+  }
+  :root[data-tutor="open"] .player {
+    padding-right: var(--tutor-width);
+  }
+}
+
+.tutor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px var(--at-gutter);
+  border-bottom: var(--at-border) solid var(--at-line);
+}
+.tutor-head h2 {
+  margin: 0;
+  color: var(--at-electron);
+}
+.tutor-close {
+  width: var(--at-tap);
+  height: var(--at-tap);
+  display: grid;
+  place-items: center;
+  font: 700 22px/1 var(--at-font-text);
+  color: var(--at-ink);
+  background: transparent;
+  border: var(--at-border) solid var(--at-line);
+  cursor: pointer;
+}
+
+.tutor-thread {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 12px var(--at-gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tutor-empty {
+  color: var(--at-ink-muted);
+}
+/* Student and Tutor turns differ by side, surface, edge and their name, never colour alone. */
+.tutor-turn {
+  max-width: 88%;
+  padding: 10px 12px;
+  border: var(--at-border) solid var(--at-line);
+}
+.tutor-turn p {
+  margin: 4px 0 0;
+}
+.tutor-turn.tutor {
+  align-self: flex-start;
+  background: var(--at-raised);
+  border-left: 6px solid var(--at-electron);
+}
+.tutor-turn.student {
+  align-self: flex-end;
+  background: var(--at-space);
+  border-style: dashed;
+}
+.tutor-turn.error {
+  border-left-color: var(--at-boss);
+}
+.tutor-turn.error .tutor-who {
+  color: var(--at-boss);
+}
+.tutor-who {
+  color: var(--at-ink-muted);
+}
+.tutor-end {
+  height: 0;
+}
+
+.tutor-form {
+  display: flex;
+  gap: 10px;
+  padding: 10px var(--at-gutter) 14px;
+  border-top: var(--at-border) solid var(--at-line);
+}
+.tutor-form input {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--at-tap);
+  padding: 0 12px;
+  font: 400 var(--at-body-size) / 1.2 var(--at-font-text);
+  color: var(--at-ink);
+  background: var(--at-space);
+  border: var(--at-border) solid var(--at-line);
+}
+.tutor-form input::placeholder {
+  color: var(--at-ink-muted);
+}
+.tutor-form .btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

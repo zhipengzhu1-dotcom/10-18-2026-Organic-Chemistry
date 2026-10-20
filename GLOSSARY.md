@@ -74,6 +74,10 @@ _Avoid_: Clue, tip
 The part of a Lesson or Practice Set kept off the page (answers, Hints, reveals, and the numbers cited only in them), fetched by the Step player when grading.
 _Avoid_: solutions file, secrets
 
+**Tutor**:
+The dev-only helper in the Step player (opened with Ask) that answers a Student's questions about the Step on screen with a leading question or nudge; it never receives the Answer key, and sees the reveal only once the Step can continue.
+_Avoid_: AI, assistant, chatbot, agent
+
 **Streak**:
 The count of consecutive days on which a Student finished one Lesson or three Problems.
 _Avoid_: Chain, combo
