@@ -20,6 +20,7 @@
     "build": "pnpm --filter @astratron/site run build",
     "test:e2e": "playwright test",
     "budget:js": "node site/src/lib/js-budget-cli.ts",
+    "sr:transcript": "SR_TRANSCRIPT=docs/qa/screen-reader-unit-1.transcript.md playwright test screen-reader",
     "structure": "pnpm --filter @astratron/content run structure",
     "structures:json": "pnpm --filter @astratron/content run structures:json",
     "triage": "node site/src/submissions/triage-cli.ts",

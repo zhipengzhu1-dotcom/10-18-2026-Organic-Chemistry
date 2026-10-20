@@ -128,8 +128,10 @@ export default function BuildBySharing({ t, state, aspect, reducedMotion, input 
       );
   }
 
+  // Live, the drawing holds the Scene's buttons: role "none" keeps it from reading as an unnamed
+  // picture (whose children a screen reader may skip), so the buttons sit in the named Scene group.
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%" aria-hidden={live ? undefined : "true"} style={{ display: "block" }}>
+    <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%" role={live ? "none" : undefined} aria-hidden={live ? undefined : "true"} style={{ display: "block" }}>
       {out}
     </svg>
   );
