@@ -46,6 +46,34 @@ test("the footer carries the Donate line, the motto, licences, credits, privacy 
   await expect(page).toHaveURL("/privacy");
 });
 
+test("the about page says what AstraTron is, who it's for and where its numbers come from (spec §Pages)", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("contentinfo").getByRole("link", { name: "About" }).click();
+  await expect(page).toHaveURL("/about");
+  await expect(page).toHaveTitle("About · AstraTron");
+  const main = page.getByRole("main");
+  await expect(main.getByRole("heading", { level: 1 })).toHaveText("About AstraTron");
+  await expect(main).toContainText("no accounts");
+  await expect(main).toContainText("Source note");
+  await expect(main).toContainText("not a registered charity");
+  await expect(main.getByRole("link", { name: "Start Unit 1" })).toHaveAttribute("href", UNIT_1);
+});
+
+test("the coming-soon page lists every Unit still to come, by Course, with a way back in", async ({ page }) => {
+  const soon = model!.subjects[0].courses.map((c) => ({ course: c.title, units: c.units.filter((u) => u.status === "coming-soon") }));
+  await page.goto("/organic");
+  await page.getByRole("link", { name: /What's coming/ }).click();
+  await expect(page).toHaveURL("/coming-soon");
+  await expect(page).toHaveTitle("Coming soon · AstraTron");
+  for (const { course, units: planned } of soon) {
+    const section = page.getByRole("region", { name: course, exact: true });
+    await expect(section.getByRole("listitem")).toHaveCount(planned.length);
+    for (const unit of planned) await expect(section).toContainText(unit.title.replace(/[*_`]/g, ""));
+  }
+  await expect(page.getByRole("main").getByRole("link", { name: "Start Unit 1" })).toHaveAttribute("href", UNIT_1);
+  await expect(page.getByRole("main").getByRole("link", { name: "Course map" })).toHaveAttribute("href", "/organic");
+});
+
 test("Lesson pages have no footer and no Donate", async ({ page }) => {
   await page.goto(lessons[0]!.lesson.url);
   await expect(page.getByRole("contentinfo")).toHaveCount(0);
