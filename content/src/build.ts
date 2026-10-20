@@ -63,6 +63,8 @@ export interface BuildOptions {
    * `pnpm content:build` always pass it.
    */
   scenes?: SceneCatalog;
+  /** Let Lessons missing from the Step-id lock build: only `pnpm content:freeze` sets it, to freeze them. */
+  unfrozen?: boolean;
 }
 
 export function buildContent(root: string, options: BuildOptions = {}): BuildResult {
@@ -142,7 +144,11 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       const frozen = lock?.[lesson.id];
       const messages = [
         ...checkLessonShape(lesson),
-        ...(frozen ? checkFrozenIds(lesson, frozen) : []),
+        ...(frozen
+          ? checkFrozenIds(lesson, frozen)
+          : options.unfrozen
+            ? []
+            : [`Step ids are not frozen; run \`pnpm content:freeze\` and commit ${lockRel} (ADR 0003)`]),
         ...checkDeletedSteps(lesson),
         ...(lesson.slug === PRACTICE_SLUG ? [`slug "${PRACTICE_SLUG}" is reserved for the Practice Set page`] : []),
         ...(options.scenes

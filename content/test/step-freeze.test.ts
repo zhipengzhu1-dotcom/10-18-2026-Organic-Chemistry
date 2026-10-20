@@ -19,6 +19,19 @@ describe("the Step-id freeze", () => {
     expect(buildContent(writeTree(frozen(tenIds))).errors).toEqual([]);
   });
 
+  it("a Lesson missing from the lock fails the build: every Lesson's Step ids are frozen (ADR 0003)", () => {
+    const tree = { ...validTree(), "chem/step-ids.lock.yaml": { other: ["s01"] } };
+    expect(buildContent(writeTree(tree)).errors).toEqual([
+      `${LESSON}: Step ids are not frozen; run \`pnpm content:freeze\` and commit chem/step-ids.lock.yaml (ADR 0003)`,
+    ]);
+  });
+
+  it("a Subject with Lessons but no lock fails the build", () => {
+    expect(buildContent(writeTree(validTree(), { freeze: false })).errors).toEqual([
+      `${LESSON}: Step ids are not frozen; run \`pnpm content:freeze\` and commit chem/step-ids.lock.yaml (ADR 0003)`,
+    ]);
+  });
+
   it("a renamed Step id fails the build", () => {
     const tree = { ...frozen(tenIds), [LESSON]: renamed("s07", "s11") };
     expect(buildContent(writeTree(tree)).errors).toEqual([
@@ -60,11 +73,11 @@ describe("the Step-id freeze", () => {
   });
 
   it("freezing records every Lesson's Step ids, after which a rename fails", () => {
-    const root = writeTree(validTree());
+    const root = writeTree(validTree(), { freeze: false });
     freezeStepIds(root);
     expect(readFileSync(join(root, "chem/step-ids.lock.yaml"), "utf8")).toContain(`l1: [ ${tenIds.join(", ")} ]`);
 
-    const renamedRoot = writeTree({ ...validTree(), [LESSON]: renamed("s02", "s11") });
+    const renamedRoot = writeTree({ ...validTree(), [LESSON]: renamed("s02", "s11") }, { freeze: false });
     freezeStepIds(renamedRoot);
     expect(buildContent(renamedRoot).errors).toEqual([]);
     const lock = readFileSync(join(renamedRoot, "chem/step-ids.lock.yaml"), "utf8");
