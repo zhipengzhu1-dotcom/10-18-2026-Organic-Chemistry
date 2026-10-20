@@ -158,6 +158,19 @@ describe("the spec's build-time sanity checks", () => {
     const angle = (Math.acos(Math.abs(dot(n1, n3)) / (len(n1) * len(n3))) * 180) / Math.PI;
     expect(Math.abs(angle - 90)).toBeLessThan(0.5);
   });
+
+  it("u1-hyb-allene-planes starts three-quarter: the left plane's CH₂ (C1) on the left, the right one's (C2) on the right", () => {
+    const views = parse(readFileSync(join(contentRoot, "organic", "views.yaml"), "utf8")) as Record<string, Record<string, ViewSpec>>;
+    const atoms = data.allene.atoms!.list;
+    const p = project(atoms, viewMatrix(atoms, views.allene["three-quarter"]));
+    expect(p[1][0]).toBeLessThan(-0.5);
+    expect(p[2][0]).toBeGreaterThan(0.5);
+    const problem = yaml("problems/u1-hyb-allene-planes.yaml");
+    expect(problem.molecule.planes).toEqual([
+      { through: [3, 1, 4], label: "left CH₂ plane" },
+      { through: [5, 2, 6], label: "right CH₂ plane" },
+    ]);
+  });
 });
 
 const sub = (a: Vec3, b: Vec3): Vec3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];

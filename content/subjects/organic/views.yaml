@@ -28,6 +28,10 @@ ethylene:
 acetylene:
   # Lesson 4 s09: the H–C≡C–H line across the screen, turned partly toward the viewer.
   three-quarter: { rotate: [15, 65, 0] }
+allene:
+  # Practice Problem u1-hyb-allene-planes (#87): a three-quarter view, C1's CH₂ (atoms 3, 4) on the left and C2's
+  # (5, 6) on the right, the C=C=C line across the screen and turned partly toward the viewer.
+  three-quarter: { rotate: [20, -60, 0] }
 ketene:
   # Lesson 4 Check u1-hyb-ketene-pi: straight down the C=C=O axis (O nearest), so both π planes are edge-on.
   end-on: { look: [2, 0], up: 3 }

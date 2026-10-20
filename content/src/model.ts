@@ -96,6 +96,8 @@ export interface MoleculeUse {
   autoplay?: boolean;
   /** Lesson 4 (#82): a translucent sheet through three atoms that turns with the molecule; `on` = shown at the start. */
   plane?: { through: [number, number, number]; label: string; on: boolean };
+  /** Practice u1-hyb-allene-planes (#87): several plane sheets, each with its own button (instead of `plane`). */
+  planes?: { through: [number, number, number]; label: string; on: boolean }[];
   /** Lesson 4 (#82): atoms measured on load (two: a length; three: the angle at the middle one). */
   measure?: number[];
   /** Lesson 4 (#82): the start zoom (1 fits the whole true-scale molecule in any rotation). */

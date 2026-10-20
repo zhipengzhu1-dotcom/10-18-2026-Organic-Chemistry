@@ -94,6 +94,26 @@ describe("Lesson 4's 3D card options", () => {
     });
   });
 
+  it("several plane sheets (Practice u1-hyb-allene-planes, #87): each through three atoms, each with its own button", () => {
+    const result = build({
+      id: "methane",
+      card: true,
+      planes: [{ through: [1, 0, 2], label: "left plane" }, { through: [3, 0, 4], label: "right plane", on: true }],
+    });
+    expect(result.errors).toEqual([]);
+    expect(s02(result).molecule!.planes).toEqual([
+      { through: [1, 0, 2], label: "left plane", on: false },
+      { through: [3, 0, 4], label: "right plane", on: true },
+    ]);
+    expect(s02(result).molecule!.plane).toBeUndefined();
+    expect(build({ id: "methane", card: true, planes: [{ through: [1, 0, 2] }, { through: [3, 0, 9] }] }).errors).toEqual([
+      `${L}: step s02: molecule "methane": planes: atom 9 is not in the molecule (0–4)`,
+    ]);
+    expect(build({ id: "methane", card: true, plane: { through: [1, 0, 2] }, planes: [{ through: [1, 0, 2] }, { through: [3, 0, 4] }] }).errors).toEqual([
+      `${L}: step s02: molecule "methane": give plane or planes, not both`,
+    ]);
+  });
+
   it("rejects a plane or measured atom that isn't in the molecule, and a plane in a line", () => {
     expect(build({ id: "methane", card: true, plane: { through: [1, 0, 9] } }).errors).toEqual([
       `${L}: step s02: molecule "methane": plane: atom 9 is not in the molecule (0–4)`,

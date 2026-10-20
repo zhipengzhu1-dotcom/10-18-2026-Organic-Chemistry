@@ -23,6 +23,12 @@ const hint = z.strictObject({
  * 3D Step card (#68; Rotate-and-identify always does); `view` names a start view in the Subject's
  * views.yaml (default: the file's own axes); `describe` opens what the Describe button reads.
  */
+const planeSheet = z.strictObject({
+  through: z.tuple([z.number().int(), z.number().int(), z.number().int()]),
+  label: text.optional(),
+  on: z.boolean().optional(),
+});
+
 const moleculeFields = {
   id,
   card: z.boolean().optional(),
@@ -42,9 +48,9 @@ const moleculeFields = {
     .min(1)
     .optional(),
   /** Lesson 4 (#82): a translucent sheet through three atoms that turns with the molecule, with a button to show it. */
-  plane: z
-    .strictObject({ through: z.tuple([z.number().int(), z.number().int(), z.number().int()]), label: text.optional(), on: z.boolean().optional() })
-    .optional(),
+  plane: planeSheet.optional(),
+  /** Practice u1-hyb-allene-planes (#87): several such sheets, each with its own button (give `plane` or `planes`). */
+  planes: z.array(planeSheet).min(2).optional(),
   /** Lesson 4 (#82): a bond (two atoms) or angle (three) measured and labelled on load. */
   measure: z.array(z.number().int()).min(2).max(3).optional(),
   /** Lesson 4 (#82): the start zoom (1 = the whole true-scale molecule fits in any rotation; at most 3). */
