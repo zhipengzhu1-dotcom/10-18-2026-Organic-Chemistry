@@ -534,8 +534,13 @@ const solvers: Record<string, Solver> = {
       for (const group of ["carboxylic acid", "ester", "arene"]) await choose(p, group);
     },
   ),
+  // Too wide for the column, so it keeps its natural size (every region ≥ 48 px) and scrolls sideways.
   "u1-fg-metenkephalin-amides": hintThenReveal(
-    (p) => tapRegions(p, ["Left end: the NH₂."]),
+    async (p) => {
+      const box = await p.getByRole("button", { name: "Right: the S." }).boundingBox();
+      expect(Math.min(box!.width, box!.height)).toBeGreaterThanOrEqual(48);
+      await tapRegions(p, ["Left end: the NH₂."]);
+    },
     "That NH₂ sits on a carbon with no C=O, so it's an amine.",
     (p) =>
       tapRegions(p, [

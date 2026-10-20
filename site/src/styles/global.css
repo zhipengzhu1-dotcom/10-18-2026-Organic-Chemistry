@@ -383,8 +383,7 @@
     /* Once answered, the long Correct line or reveal takes the card's place too (wider screens keep it). */
     .player.answered.has-card:has(.orbital-chip-phase) :is(.molecule-pair, figure.molecule) {
       display: none;
-    }
-  }
+    }  }
   /* Short choices (one or two words) sit two to a row. */
   .opts.opts-pairs {
     grid-template-columns: 1fr 1fr;
@@ -1212,6 +1211,10 @@
     align-items: center;
     gap: 8px;
     margin-top: 8px;
+  }
+  /* Plane names hold formulas ("left CH₂ plane", "H–C–H plane"): the data face (#87). */
+  .molecule-btn.molecule-plane-toggle {
+    font-family: var(--at-font-data);
   }
   .molecule-seg button {
     padding: 0 10px;

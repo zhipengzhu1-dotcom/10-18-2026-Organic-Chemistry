@@ -23,6 +23,20 @@ const aspect = (viewBox: string) => {
   const [, , w, h] = viewBox.split(" ").map(Number);
   return Math.round((w / h) * 1000) / 1000;
 };
+/** The player's column (global.css). */
+const COLUMN_PX = 640;
+/** The smallest tap target, px (WCAG 2.5.5 as the design gate checks it). */
+const TARGET_PX = 48;
+/**
+ * The width (px) at which the drawing's smallest hit circle is 48 px across, when that is wider than the
+ * column: such a drawing (Met-enkephalin, #87) keeps that width and scrolls sideways. Undefined otherwise.
+ */
+function scrollWidth(viewBox: string, hits: Record<string, HitShape>): number | undefined {
+  const radii = Object.values(hits).flatMap((h) => h.circles.map((c) => c.r));
+  if (!radii.length) return undefined;
+  const width = Math.ceil((Number(viewBox.split(" ")[2]) * TARGET_PX) / (2 * Math.min(...radii)));
+  return width > COLUMN_PX ? width : undefined;
+}
 /** Half-width of a bond's hit band. */
 const BAND = 12;
 
@@ -57,6 +71,46 @@ export default function StructureTap({ step, picked, answer, locked, onToggle }:
     if (step.tapOnly && d && Math.hypot(e.clientX - d.x, e.clientY - d.y) > DRAG_PX) setDragged(true);
   }
 
+  const natural = naturalWidth(drawn.viewBox);
+  const wide = scrollWidth(drawn.viewBox, drawn.hits ?? {});
+  const structure = (
+    <div
+      className="tap-structure"
+      // On phones a tall drawing keeps to about a third of the screen's height (structure.css), so the Step
+      // fits one screen, but never below natural size, where every hit area is 48 px.
+      style={{
+        ["--tap-natural" as string]: `${natural}px`,
+        ["--tap-aspect" as string]: aspect(drawn.viewBox),
+        ...(wide ? { minWidth: `${wide}px` } : {}),
+      }}
+      onPointerDown={(e) => (downAt.current = { x: e.clientX, y: e.clientY })}
+      onPointerMove={move}
+      onPointerUp={() => (downAt.current = null)}
+    >
+      <div className="structure-svg" dangerouslySetInnerHTML={{ __html: drawn.svg }} />
+      <svg className="tap-layer" viewBox={drawn.viewBox} role="group" aria-label="Tappable atoms and bonds">
+        {/* Targets come in reading order, which is also the Tab order. */}
+        {step.targets.map((t) => (
+            <g
+              key={t.id}
+              className={`target ${t.kind}`}
+              role="button"
+              tabIndex={locked ? -1 : 0}
+              aria-label={t.label}
+              aria-pressed={picked.includes(t.id)}
+              aria-disabled={locked || undefined}
+              data-target={t.id}
+              onClick={() => !locked && onToggle(t.id)}
+              onKeyDown={(e) => key(e, t.id)}
+            >
+              <Shape hit={drawn.hits![t.id]} className="hit" />
+              {picked.includes(t.id) && <Ring hit={drawn.hits![t.id]} className="picked-ring" tick />}
+              {answer.includes(t.id) && <Ring hit={drawn.hits![t.id]} className="answer-ring" />}
+            </g>
+        ))}
+      </svg>
+    </div>
+  );
   return (
     <div className="tap">
       {step.tapOnly && (
@@ -64,38 +118,7 @@ export default function StructureTap({ step, picked, answer, locked, onToggle }:
           {dragged ? step.tapOnly.drag : step.tapOnly.idle}
         </p>
       )}
-      <div
-        className="tap-structure"
-        // On phones a tall drawing keeps to about a third of the screen's height (structure.css), so the Step
-        // fits one screen, but never below natural size, where every hit area is 48 px.
-        style={{ ["--tap-natural" as string]: `${naturalWidth(drawn.viewBox)}px`, ["--tap-aspect" as string]: aspect(drawn.viewBox) }}
-        onPointerDown={(e) => (downAt.current = { x: e.clientX, y: e.clientY })}
-        onPointerMove={move}
-        onPointerUp={() => (downAt.current = null)}
-      >
-        <div className="structure-svg" dangerouslySetInnerHTML={{ __html: drawn.svg }} />
-        <svg className="tap-layer" viewBox={drawn.viewBox} role="group" aria-label="Tappable atoms and bonds">
-          {/* Targets come in reading order, which is also the Tab order. */}
-          {step.targets.map((t) => (
-              <g
-                key={t.id}
-                className={`target ${t.kind}`}
-                role="button"
-                tabIndex={locked ? -1 : 0}
-                aria-label={t.label}
-                aria-pressed={picked.includes(t.id)}
-                aria-disabled={locked || undefined}
-                data-target={t.id}
-                onClick={() => !locked && onToggle(t.id)}
-                onKeyDown={(e) => key(e, t.id)}
-              >
-                <Shape hit={drawn.hits![t.id]} className="hit" />
-                {picked.includes(t.id) && <Ring hit={drawn.hits![t.id]} className="picked-ring" tick />}
-                {answer.includes(t.id) && <Ring hit={drawn.hits![t.id]} className="answer-ring" />}
-              </g>
-          ))}
-        </svg>
-      </div>
+      {wide ? <div className="tap-scroll">{structure}</div> : structure}
     </div>
   );
 }

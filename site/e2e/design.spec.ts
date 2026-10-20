@@ -3,7 +3,7 @@
 // panel, motion rules, and the axe gate on every page in both themes.
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { allPages, lessonPaths, playThrough, SAMPLE_LESSON, THEMES, useTheme } from "./site.ts";
+import { allPages, lessonAndBankPaths, playThrough, SAMPLE_LESSON, THEMES, useTheme } from "./site.ts";
 
 const PHONE = { width: 390, height: 844 };
 
@@ -130,8 +130,8 @@ for (const theme of THEMES) {
     });
 
     test("every Step and feedback panel of every Lesson passes axe and the type rules", async ({ page }) => {
-      test.setTimeout(480_000); // axe on every Step of every Lesson (eleven real Lessons with Lesson 8; slow under load)
-      for (const lesson of lessonPaths(await allPages(page))) {
+      test.setTimeout(900_000); // axe on every Step of every Lesson and every Bank Problem (pinned Sets, #87; slow under load)
+      for (const lesson of lessonAndBankPaths(await allPages(page))) {
         await page.goto(lesson);
         await playThrough(page, async (step) => {
           const label = `${lesson} ${step}`;
@@ -200,8 +200,8 @@ test.describe("Step player on a phone", () => {
   test("every Step of every Lesson, with its feedback, fits one phone screen with the button in view", async ({
     page,
   }) => {
-    test.setTimeout(300_000); // every Step of every Lesson
-    for (const lesson of lessonPaths(await allPages(page))) {
+    test.setTimeout(480_000); // every Step of every Lesson and every Bank Problem (#87)
+    for (const lesson of lessonAndBankPaths(await allPages(page))) {
       await page.goto(lesson);
       await playThrough(page, async (step) => {
         const label = `${lesson} ${step}`;

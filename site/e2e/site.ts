@@ -2,6 +2,7 @@
 // and a walk through a Lesson that answers each Step.
 import type { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
+import { buildContent, contentRoot } from "@astratron/content";
 
 export const SAMPLE_LESSON = "/organic/orgo-1/structure-bonding/sample-carbons-four-bonds";
 export const THEMES = ["dark", "light"] as const;
@@ -29,6 +30,22 @@ export async function allPages(page: Page): Promise<string[]> {
 
 /** The Lesson pages (and each Unit's Practice Set page) among `paths` (/<subject>/<course>/<unit>/<lesson>). */
 export const lessonPaths = (paths: string[]) => paths.filter((p) => p.split("/").filter(Boolean).length === 4);
+
+const units = buildContent(contentRoot).model!.subjects.flatMap((s) => s.courses.flatMap((c) => c.units));
+
+/**
+ * `lessonPaths`, with each Practice Set page replaced by pinned Sets (`?problems=…`, ten at a time) that
+ * between them hold every Problem its Unit can draw, so the gates see the whole Bank, not a random draw (#87).
+ */
+export function lessonAndBankPaths(paths: string[]): string[] {
+  return lessonPaths(paths).flatMap((path) => {
+    const unit = units.find((u) => `${u.url}/practice` === path);
+    if (!unit) return [path];
+    const core = unit.lessons.filter((l) => !l.onRamp).map((l) => l.id);
+    const ids = unit.bank.filter((p) => p.status === "approved" && !p.onRamp && core.includes(p.lesson)).map((p) => p.id);
+    return Array.from({ length: Math.ceil(ids.length / 10) }, (_, i) => `${path}?problems=${ids.slice(i * 10, (i + 1) * 10).join(",")}`);
+  });
+}
 
 /** Pick a theme the way a Student does: the site's switch, stored in the browser. */
 export async function useTheme(page: Page, theme: Theme) {

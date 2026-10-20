@@ -28,6 +28,10 @@ describe("md marks numbers and formulas as data", () => {
     expect(md("the electron")).toBe("the electron");
   });
 
+  it("keeps a numbered atom's charge with its number (Practice Problems: C5⁺, C4⁺)", () => {
+    expect(md("C5⁺ is the sink.")).toBe(`C${d("5⁺")} is the sink.`);
+  });
+
   it("leaves ordinary words and capitals alone", () => {
     expect(md("A Carbon atom. I think Of course")).toBe("A Carbon atom. I think Of course");
   });
