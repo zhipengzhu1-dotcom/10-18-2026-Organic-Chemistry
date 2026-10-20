@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 176,
+        "MolecularFormula": "C2H4O2",
+        "SMILES": "CC(=O)O",
+        "ConnectivitySMILES": "CC(=O)O",
+        "Title": "Acetic Acid"
+      }
+    ]
+  }
+}

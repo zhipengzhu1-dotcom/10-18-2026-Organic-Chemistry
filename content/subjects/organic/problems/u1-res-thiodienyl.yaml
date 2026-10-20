@@ -1,0 +1,33 @@
+# Lesson 6 Check Problem (spec: docs/specs/unit-1/lesson-06-resonance.md).
+id: u1-res-thiodienyl
+unit: u1
+lesson: u1-l06
+difficulty: 3
+status: approved
+source: Adapted from MIT OCW 5.12 PS1 Q6d
+credit: Kimberly Berkowski, MIT OCW 5.12 Organic Chemistry I, Spring 2005, CC BY-NC-SA 4.0
+type: draw-arrows
+prompt: Push electrons to move the negative charge from carbon onto sulfur (target shown). It takes three arrows.
+start: thiodienyl-anion
+results: [thiodienyl-thiolate]
+answer:
+  - { from: a6, to: a5 }
+  - { from: b4, to: a2 }
+  - { from: b2, to: a3 }
+inBetween:
+  over: "{atom} would have {electrons} e⁻. Something has to leave."
+  short: "{atom} has only {electrons} e⁻. Not a real structure, keep going."
+correct: The charge travelled down the chain, three atoms over, to the electronegative sulfur.
+hints:
+  - from: [b4]
+    to: [a6]
+    text: C6 already has a lone pair pushing toward C5. The π bond has to flow the other way, toward C2.
+  - from: [b2]
+    to: [a2]
+    text: Sulfur is the electronegative end. Push the C=S electrons onto S.
+  - from: [a3]
+    to: [a2]
+    text: S has no charge to give yet. Start from the carbon with the − charge.
+  - text: "Follow the chain: C6's lone pair → the next π bond → the C=S π bond → onto S."
+reveal: "All three arrows: C6's lone pair into the C5–C6 bond, the C4=C5 π pair into the C2–C4 bond, and the C=S π pair onto S."
+sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q6d, Berkowski, Spring 2005, CC BY-NC-SA 4.0."

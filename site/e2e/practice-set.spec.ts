@@ -244,6 +244,41 @@ const solvers: Record<string, { outcome: Outcome; play: (page: Page) => Promise<
       await correct(page);
     },
   },
+  // Lesson 6's Check Problems: Draw arrows (ozone open), structure-card pairs.
+  "u1-res-ozone": {
+    outcome: "first",
+    play: async (page) => {
+      await push(page, "lone pair on O3", "O2–O3 bond");
+      await push(page, "π bond O1=O2", "O1");
+      await correct(page);
+    },
+  },
+  "u1-res-not-resonance": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, /^Allene/);
+      await choose(page, /^Acetone/);
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-res-oxocarbenium": {
+    outcome: "first",
+    play: async (page) => {
+      await push(page, "π bond C4=C5", "C3–C4 bond");
+      await push(page, "lone pair on O6", "C5–O6 bond");
+      await correct(page);
+    },
+  },
+  "u1-res-thiodienyl": {
+    outcome: "first",
+    play: async (page) => {
+      await push(page, "lone pair on C6", "C5–C6 bond");
+      await push(page, "π bond C4=C5", "C2–C4 bond");
+      await push(page, "π bond C2=S3", "S3");
+      await correct(page);
+    },
+  },
   // Lesson 8's Check Problems (#86). Bond orders start He₂, H₂, He₂⁺.
   "u1-mo-bond-order-rank": {
     outcome: "first",

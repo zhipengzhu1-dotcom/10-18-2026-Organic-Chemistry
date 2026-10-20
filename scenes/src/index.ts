@@ -20,6 +20,14 @@ import { groupCards } from "./group-cards/manifest.ts";
 import GroupCards from "./group-cards/GroupCards.tsx";
 import { carbonylNeighbours } from "./carbonyl-neighbours/manifest.ts";
 import CarbonylNeighbours from "./carbonyl-neighbours/CarbonylNeighbours.tsx";
+import { acetateBondLengths } from "./acetate-bond-lengths/manifest.ts";
+import AcetateBondLengths from "./acetate-bond-lengths/AcetateBondLengths.tsx";
+import { formaldehydePiShift } from "./formaldehyde-pi-shift/manifest.ts";
+import FormaldehydePiShift from "./formaldehyde-pi-shift/FormaldehydePiShift.tsx";
+import { threeMoves } from "./three-moves/manifest.ts";
+import ThreeMoves from "./three-moves/ThreeMoves.tsx";
+import { acetateHybrid } from "./acetate-hybrid/manifest.ts";
+import AcetateHybrid from "./acetate-hybrid/AcetateHybrid.tsx";
 
 import { hFill } from "./h-fill/manifest.ts";
 import HFill from "./h-fill/HFill.tsx";
@@ -70,6 +78,11 @@ export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [buildBySharing.id]: { manifest: buildBySharing, Component: BuildBySharing },
   [fourDomainFamily.id]: { manifest: fourDomainFamily, Component: FourDomainFamily },
   [dipoleSum.id]: { manifest: dipoleSum, Component: DipoleSum },
+  // Lesson 6 (#84)
+  [acetateBondLengths.id]: { manifest: acetateBondLengths, Component: AcetateBondLengths },
+  [formaldehydePiShift.id]: { manifest: formaldehydePiShift, Component: FormaldehydePiShift },
+  [threeMoves.id]: { manifest: threeMoves, Component: ThreeMoves },
+  [acetateHybrid.id]: { manifest: acetateHybrid, Component: AcetateHybrid },
   // Lesson 8 (#86)
   [moFiller.id]: { manifest: moFiller, Component: MoFiller },
   [frontierLadder.id]: { manifest: frontierLadder, Component: FrontierLadder },
@@ -83,5 +96,6 @@ export { defaultState } from "./state.ts";
 
 export { BOND_PX, drawStructure, type Drawing, type DrawOptions, type Highlight, type Point, type Segment } from "./structure/render.ts";
 export { withHydrogens } from "./structure/hydrogens.ts";
+export { drawContributors, type ContributorsDrawing } from "./structure/contributors.ts";
 
 export { default as PushReplay, describeReplay, replayDuration, PUSH_SECONDS } from "./push-replay/PushReplay.tsx";

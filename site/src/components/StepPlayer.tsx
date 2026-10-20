@@ -3,7 +3,7 @@
 // The page carries the Lesson without its answers (spec story 99); the answer
 // key is fetched from its own built file, and nothing is checked until it arrives.
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
-import type { NumericStep, RankStep, SceneValue } from "@astratron/content";
+import type { NumericStep, RankStep, SceneValue, Structure } from "@astratron/content";
 import { act, start, type Action, type Answer, type LessonProgress, type PlayableLesson, type Screen } from "../engine/player.ts";
 import { withKey, type AnswerKey, type PageLesson } from "../lib/answer-key.ts";
 import { mistakeTarget, reportMistakeHref } from "../lib/submit-links.ts";
@@ -376,7 +376,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
                 <button
                   key={o.id}
                   type="button"
-                  className="opt structure-card"
+                  className={`opt structure-card${pairCard(o.structure.structure) ? " structure-card-wide" : ""}`}
                   aria-pressed={chosen.includes(o.id)}
                   disabled={screen.canContinue}
                   onClick={() => pick(o.id)}
@@ -523,6 +523,20 @@ function chips(step: { options: { text: string; structure?: unknown }[]; figures
   if (step.options.length >= 6 && longest < WORD_TEXT) return "opts-words";
   if (step.options.length >= 6 || (step.figures && longest < CHIP_TEXT)) return "opts-chips";
   return undefined;
+}
+
+/** A card that draws two molecules side by side (a "pair" card): such cards get a row each. */
+function pairCard(structure: Structure): boolean {
+  const seen = new Set([structure.atoms[0]?.id]);
+  for (let grew = true; grew; ) {
+    grew = false;
+    for (const b of structure.bonds)
+      if (seen.has(b.a) !== seen.has(b.b)) {
+        seen.add(b.a).add(b.b);
+        grew = true;
+      }
+  }
+  return seen.size < structure.atoms.length;
 }
 
 /** Reads what the Student typed: accepts a comma decimal and a typographic minus; NaN when it isn't a number. */
