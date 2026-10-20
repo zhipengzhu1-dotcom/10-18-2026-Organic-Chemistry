@@ -2,7 +2,7 @@
 // to front as shaded balls in their cited Jmol colours, each with its letter, and optional lone-pair
 // lobes (a sketch). Pure: everything comes from the props. Shared by Lesson 3's Scenes.
 import type { Cited } from "@astratron/content/data";
-import type { Matrix3, Vec3 } from "@astratron/content/molecule";
+import { inkOn, SCALE_BAR_LABEL, type Matrix3, type Vec3 } from "@astratron/content/molecule";
 import type { Box } from "../frame.ts";
 import { CYAN, DATA_FONT, INK } from "../lewis.ts";
 import { colourRef, onScreen, type Shape } from "./shapes.ts";
@@ -14,11 +14,6 @@ const LOBE = 0.95;
 
 
 
-/** Dark or light ink for a letter on a ball of this colour. */
-export function inkOn(hex: string): string {
-  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.5 ? "#140f2b" : "white";
-}
 
 /** Pixels per Å that fit the shape (and lobes) in the box at any turn. */
 export function fitScale(shape: Shape, box: Box, room = 1.25): number {
@@ -141,8 +136,6 @@ export function ShapeView({ shape, view, cx, cy, px, cited, lonePairs, font, id 
   );
 }
 
-const SCALE_LABEL = "1 Å"; // cited-data: ok, the scale bar's unit length (drawn at px per Å), not a measurement
-
 /** A one-ångström scale bar with its label, left-aligned at (x, y). */
 export function ScaleBar({ x, y, px, font }: { x: number; y: number; px: number; font: number }) {
   return (
@@ -151,7 +144,7 @@ export function ScaleBar({ x, y, px, font }: { x: number; y: number; px: number;
       <line x1={x} y1={y - 8} x2={x} y2={y + 8} stroke={INK} strokeWidth={3} />
       <line x1={x + px} y1={y - 8} x2={x + px} y2={y + 8} stroke={INK} strokeWidth={3} />
       <text x={x + px + 12} y={y} fill={INK} fontSize={font} fontFamily={DATA_FONT} dominantBaseline="central">
-        {SCALE_LABEL}
+        {SCALE_BAR_LABEL}
       </text>
     </g>
   );

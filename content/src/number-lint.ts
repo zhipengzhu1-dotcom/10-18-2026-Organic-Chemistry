@@ -1,4 +1,5 @@
-// The chemistry-number lint (ADR 0002): Scene code must read bond lengths,
+// The chemistry-number lint (ADR 0002): Scene code, the 3D viewer (site/src/molecule)
+// and the content module must read bond lengths,
 // angles, radii, energies and element colours from the cited data, never type
 // them in. Heuristic, so it flags what *looks* like chemistry:
 //   - any number (other than 0 and 1) on a line whose identifiers or text
@@ -72,8 +73,8 @@ export function lintChemistryNumbers(files: SourceFile[], elementColours: Record
   return messages;
 }
 
-/** Folders of Scene code the lint covers, relative to the repo root. */
-export const sceneCodeDirs = ["scenes/src"];
+/** Folders the lint covers, relative to the repo root: Scene code, the 3D viewer and the content module. */
+export const sceneCodeDirs = ["scenes/src", "site/src/molecule", "content/src"];
 
 /**
  * Lints every .ts/.tsx/.js/.jsx file (tests excluded) under the Scene code

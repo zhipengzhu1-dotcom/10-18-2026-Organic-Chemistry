@@ -53,8 +53,8 @@ export async function layoutStructure(req: LayoutRequest): Promise<Structure> {
     });
     const bonds: StructureBond[] = bondLines.map((line, i) => {
       const bond: StructureBond = { id: `b${i + 1}`, a: `a${line.a}`, b: `a${line.b}`, order: line.order };
-      if (line.stereo === 1) bond.stereo = "wedge";
-      if (line.stereo === 6) bond.stereo = "hash";
+      if (line.stereo === V2000_STEREO.wedge) bond.stereo = "wedge";
+      if (line.stereo === V2000_STEREO.hash) bond.stereo = "hash";
       return bond;
     });
 
@@ -64,7 +64,8 @@ export async function layoutStructure(req: LayoutRequest): Promise<Structure> {
     for (const a of atoms) {
       const valence = VALENCE[a.el];
       if (valence === undefined) continue;
-      const lp = Math.floor((valence - (a.charge ?? 0) - (bondOrderSum.get(a.id) ?? 0) - (hydrogens.get(a.id) ?? 0)) / 2);
+      const used = (a.charge ?? 0) + (bondOrderSum.get(a.id) ?? 0) + (hydrogens.get(a.id) ?? 0);
+      const lp = Math.floor((valence - used) / 2);
       if (lp > 0) a.lp = lp;
     }
 
@@ -78,17 +79,27 @@ export async function layoutStructure(req: LayoutRequest): Promise<Structure> {
 
 const round = (n: number) => Math.round(n * 1000) / 1000 || 0;
 
+/** V2000 stereo flags: 1 = wedge (up), 6 = hash (down). */
+const V2000_STEREO = { wedge: 1, hash: 6 };
+/** A V2000 line's fixed-width fields are three characters each; the n-th (0-based) as a number. */
+const field = (line: string, n: number) => Number(line.slice(3 * n, 3 * n + 3));
+/** The counts line is the fourth; the atom block starts on the fifth. */
+const [COUNTS_LINE, FIRST_ATOM_LINE] = [3, 4];
+
 /** Reads the atom and bond blocks of a V2000 molblock (kekulized, with wedge flags). */
 function parseMolblock(molblock: string) {
   const lines = molblock.split("\n");
-  const [nAtoms, nBonds] = [Number(lines[3].slice(0, 3)), Number(lines[3].slice(3, 6))];
-  const atoms = lines.slice(4, 4 + nAtoms).map((l) => {
+  const counts = lines[COUNTS_LINE];
+  const [nAtoms, nBonds] = [field(counts, 0), field(counts, 1)];
+  const atomEnd = FIRST_ATOM_LINE + nAtoms;
+  const atoms = lines.slice(FIRST_ATOM_LINE, atomEnd).map((l) => {
     const [x, y, , el] = l.trim().split(/\s+/);
     return { x: Number(x), y: Number(y), el };
   });
-  const bonds = lines.slice(4 + nAtoms, 4 + nAtoms + nBonds).map((l) => {
-    const [a, b, order, stereo] = [l.slice(0, 3), l.slice(3, 6), l.slice(6, 9), l.slice(9, 12)].map(Number);
-    if (order < 1 || order > 3) throw new Error(`unsupported bond order ${order} in molblock`);
+  const bonds = lines.slice(atomEnd, atomEnd + nBonds).map((l) => {
+    const [a, b, order, stereo] = [0, 1, 2, 3].map((n) => field(l, n));
+    const known = order === 1 || order === 2 || order === 3;
+    if (!known) throw new Error(`unsupported bond order ${order} in molblock`);
     return { a, b, order: order as 1 | 2 | 3, stereo };
   });
   return { atoms, bonds };

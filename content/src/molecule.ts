@@ -94,7 +94,8 @@ export function measure(m: Molecule, picks: number[]): Measurement | undefined {
     const u = sub(p[0], p[1]);
     const v = sub(p[2], p[1]);
     const cos = Math.min(1, Math.max(-1, dot(u, v) / (length(u) * length(v))));
-    return { kind: "angle", atoms: [picks[0], picks[1], picks[2]], value: deg(Math.acos(cos)) };
+    const [first, middle, last] = picks;
+    return { kind: "angle", atoms: [first, middle, last], value: deg(Math.acos(cos)) };
   }
   return undefined;
 }
@@ -105,7 +106,18 @@ export function togglePick(picks: number[], atom: number): number[] {
   return picks.length >= 3 ? [atom] : [...picks, atom];
 }
 
-const BOND_SIGN = { 1: "–", 2: "=", 3: "≡" } as const;
+/** Single, double, triple: the sign between two atom names, by order. */
+const SIGN_BY_ORDER = { 1: "–", 2: "=", 3: "≡" } as const;
+
+/** The scale bar is one ångström long (drawn at the view's px per Å): a unit, not a measurement. */
+const SCALE_BAR_ANGSTROMS = 1;
+export const SCALE_BAR_LABEL = `${SCALE_BAR_ANGSTROMS} Å`;
+
+/** Dark or light ink for a letter on an atom of this colour ("#RRGGBB"), by its relative luminance. */
+export function inkOn(hex: string): string {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.5 ? "#140f2b" : "white";
+}
 
 /** The measurement as drawn (value + what it is) and as read aloud. Lengths to 2 decimals, angles to 1. */
 export function readout(m: Measurement, names: string[]): { value: string; what: string; spoken: string } {
@@ -114,7 +126,7 @@ export function readout(m: Measurement, names: string[]): { value: string; what:
     const value = m.value.toFixed(2);
     return {
       value: `${value} Å`,
-      what: m.bonded ? `${a}${BOND_SIGN[m.order ?? 1]}${b} bond` : `${a}···${b} not bonded`,
+      what: m.bonded ? `${a}${SIGN_BY_ORDER[m.order ?? 1]}${b} bond` : `${a}···${b} not bonded`,
       spoken: `${a} to ${b}: ${value} ångströms, ${m.bonded ? "a bond" : "not bonded"}.`,
     };
   }

@@ -19,6 +19,7 @@ import {
   pageTilt,
   pageView,
   readout,
+  SCALE_BAR_LABEL,
   togglePick,
   turn,
   type Matrix3,
@@ -297,7 +298,7 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
         )}
         <div className="molecule-scalebar" aria-hidden="true">
           <i style={{ width: `${scale}px` }} />
-          <span>1 Å</span>
+          <span>{SCALE_BAR_LABEL}</span>
         </div>
         {(turnable || planes.length > 0) && (
           <div className="molecule-turn">

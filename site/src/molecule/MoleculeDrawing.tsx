@@ -4,19 +4,12 @@
 // - MoleculeOverlay: every atom's letter, the picked atoms, the keyboard cursor and the measurement
 //   drawn on the molecule.
 import type { MoleculeUse } from "@astratron/content";
-import { atomNames, readout, type Measurement } from "@astratron/content/molecule";
+import { atomNames, inkOn, readout, type Measurement } from "@astratron/content/molecule";
 import type { PlacedAtom } from "./layout.ts";
 
 interface Size {
   width: number;
   height: number;
-}
-
-/** Dark or light ink for a letter on an atom of this colour. */
-function inkOn(hex: string): string {
-  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
-  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return lum > 0.5 ? "#140f2b" : "#ffffff";
 }
 
 export function MoleculeStill({ molecule, placed, trueScale, size }: { molecule: MoleculeUse; placed: PlacedAtom[]; trueScale: boolean; size: Size }) {
@@ -26,7 +19,7 @@ export function MoleculeStill({ molecule, placed, trueScale, size }: { molecule:
       <defs>
         {Object.entries(molecule.elements).map(([el, style]) => (
           <radialGradient key={el} id={`still-${el}`} cx="35%" cy="30%" r="70%">
-            <stop offset="0" stopColor="#ffffff" stopOpacity="0.85" />
+            <stop offset="0" stopColor="white" stopOpacity="0.85" />
             <stop offset="0.35" stopColor={style.colour} />
             <stop offset="1" stopColor={style.colour} stopOpacity="0.75" />
           </radialGradient>
@@ -174,6 +167,9 @@ function Arrow({ from, to, crossed, className }: { from: Point2; to: Point2; cro
   );
 }
 
+/** The "net: zero" mark where cancelling arrows meet: its ring's radius and its label's drop, in px. */
+const NET_ZERO = { ring: 14, below: 30 };
+
 /**
  * Lesson 3's marks over the card (#81): the page sheet, the atom labels a Step gives (beside the
  * letters, which always stay), "toward you: wedge" / "away: dash" once the page view settles, and
@@ -215,8 +211,8 @@ export function CardMarks({ molecule, placed, size, sheet, sides, dipoles }: Mar
       {dipoles?.net && <Arrow from={dipoles.net.from} to={dipoles.net.to} crossed={false} className="molecule-dipole molecule-net" />}
       {dipoles?.ring && (
         <g className="molecule-net-zero">
-          <circle cx={dipoles.ring.x} cy={dipoles.ring.y} r={14} />
-          <text x={dipoles.ring.x} y={dipoles.ring.y + 30}>
+          <circle cx={dipoles.ring.x} cy={dipoles.ring.y} r={NET_ZERO.ring} />
+          <text x={dipoles.ring.x} y={dipoles.ring.y + NET_ZERO.below}>
             net: zero
           </text>
         </g>

@@ -158,7 +158,7 @@ export function resolveTap(
     ...bondIds.map((id) => {
       const b = bondById.get(id)!;
       const [p, q] = [atomById.get(b.a)!, atomById.get(b.b)!];
-      return { id, kind: "bond" as const, label: b.label ?? bondLabel(b.order, p, q), x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 };
+      return { id, kind: "bond" as const, label: b.label ?? bondLabel(b.order, p, q), ...midpoint(p, q) };
     }),
     ...regions.map((r) => {
       const pts = r.atoms.flatMap((a) => atomById.get(a) ?? []);
@@ -296,6 +296,10 @@ const ELEMENT: Record<string, string> = {
   P: "Phosphorus", S: "Sulfur", Cl: "Chlorine", Br: "Bromine", I: "Iodine", Li: "Lithium", Na: "Sodium", Mg: "Magnesium",
 };
 const ORDER = ["", "single", "double", "triple"];
+/** Triple first, then double, then single: the order a spoken atom label lists its partners in. */
+const HIGH_FIRST = [3, 2, 1];
+
+const midpoint = (p: { x: number; y: number }, q: { x: number; y: number }) => ({ x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 });
 
 /** "Oxygen: double bond to C; 2 lone pairs; charge −1." Charges and lone pairs are left out when the Step hides them. */
 function atomLabel(s: Structure, atom: StructureAtom, hide: Hidden[]): string {
@@ -306,7 +310,7 @@ function atomLabel(s: Structure, atom: StructureAtom, hide: Hidden[]): string {
     const other = b.a === atom.id ? b.b : b.b === atom.id ? b.a : undefined;
     if (other) (partners[b.order] ??= []).push(byId.get(other)?.el ?? "?");
   }
-  const bonds = [3, 2, 1]
+  const bonds = HIGH_FIRST
     .filter((o) => partners[o])
     .map((o) => {
       const els = partners[o];
