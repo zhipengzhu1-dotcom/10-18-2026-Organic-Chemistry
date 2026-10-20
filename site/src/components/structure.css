@@ -33,9 +33,15 @@
   /* A tall Tap drawing keeps to about a third of the screen (never below natural size, so hit areas stay
      48 px), so the Step fits one phone screen (Lesson 2 s05). */
   .tap-structure { max-width: max(var(--tap-natural, 100%), calc(34vh * var(--tap-aspect, 10))); margin-inline: auto; }
+  /* A page-sheet card under two drawings (Practice u1-3d-perspective-b, #87): once answered, the card settles
+     on the page view and labels the wedge and dash, so it and the feedback take the drawings' place. */
+  .player.answered.has-card:has(.molecule-badge) .figures { display: none; }
 }
 .tap-only-cue { margin: 0; padding: 8px 12px; color: var(--at-ink-muted); border: var(--at-border) dashed var(--at-line); }
 .tap-structure { position: relative; touch-action: manipulation; }
+/* A Tap drawing wider than the column at natural size scrolls sideways in its own box (#87, Met-enkephalin). */
+.tap-scroll { overflow-x: auto; max-width: 100%; }
+.tap-scroll .tap-structure { touch-action: pan-x; }
 .tap-structure .structure-svg .structure { width: 100%; }
 .tap-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
 .tap-layer .target { cursor: pointer; outline: none; }

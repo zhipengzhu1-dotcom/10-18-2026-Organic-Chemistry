@@ -1,0 +1,29 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md. The spec says "draft"; the owner
+# approved the Practice Problems spec, so they ship approved.
+id: u1-fc-bromine-two-bonds
+unit: u1
+lesson: u1-l01
+difficulty: 1
+status: approved
+source: Adapted from MIT 5.12 PS1 Q1 (the Br fragment) and its key
+credit: Kimberly Berkowski, MIT OCW 5.12, Spring 2005, CC BY-NC-SA 4.0
+type: numeric
+prompt: What is the formal charge on this bromine?
+figures:
+  - { structure: frag-br-2-lp2, hide: [charges], alt: "A bromine with two single bonds to the rest of a molecule and two lone pairs. Its charge is hidden." }
+unitSymbol: ""
+signKey: true
+answer: 1
+tolerance: 0
+correct: "7 − 4 − 2 = +1. A halogen usually makes 1 bond with 3 lone pairs; one more bond shows up as +1."
+hints:
+  - match: 0
+    text: "Bromine's usual pattern is 1 bond + 3 lone pairs. This one has 2 bonds. Count again."
+  - match: 3
+    text: "Count every lone-pair electron, not every pair: two pairs are 4 electrons. 7 − 4 − 2."
+  - match: -1
+    text: "Each bond counts once, for this atom's half of the pair. 7 − 4 − 2."
+  - text: "Valence 7 (a halogen), minus lone-pair electrons, minus bonds."
+reveal: 7 − 4 − 2 = +1.
+revealScene: { id: dots-and-sticks, state: { example: bromine-two-bonds } }
+sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q1 and its key, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Wording ours."

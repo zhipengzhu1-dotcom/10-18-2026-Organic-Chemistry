@@ -76,19 +76,43 @@ def inconsistencies(atoms: list[Atom], internals: list[Internal]) -> list[str]:
     return out
 
 
-def rebuild(atoms: list[Atom], internals: list[Internal]) -> np.ndarray:
-    """Least-squares fit of the Cartesians to the listed parameters, starting from CCCBDB's own table."""
+def equivalents(atoms: list[Atom], idx: tuple[int, ...]) -> list[tuple[int, ...]]:
+    """Every bonded chain of atoms (0-based) with the same elements as `idx`, each chain once (a chain and its reverse
+    are the same bond or angle). For one-centre molecules such as chloroform these are the symmetry-equivalent ones."""
+    from itertools import permutations
+
+    symbols = [a.element for a in atoms]
+    xyz = np.array([[a.x, a.y, a.z] for a in atoms])
+    bonded = set(bonds_from_radii(symbols, xyz))
+    linked = lambda i, j: (min(i, j), max(i, j)) in bonded  # noqa: E731
+    out: list[tuple[int, ...]] = []
+    for chain in permutations(range(len(atoms)), len(idx)):
+        if [symbols[i] for i in chain] != [symbols[i] for i in idx]:
+            continue
+        if all(linked(chain[k], chain[k + 1]) for k in range(len(chain) - 1)) and chain[::-1] not in out:
+            out.append(chain)
+    return out
+
+
+def rebuild(atoms: list[Atom], internals: list[Internal], *, symmetric: bool = False) -> np.ndarray:
+    """Least-squares fit of the Cartesians to the listed parameters, starting from CCCBDB's own table. `symmetric`:
+    each listed bond or angle holds for every equivalent one (see `equivalents`)."""
     from scipy.optimize import least_squares
 
     x0 = np.array([[a.x, a.y, a.z] for a in atoms])
     used = [it for it in internals if _usable(it, len(atoms)) and len(it.atoms) <= 3]
+    targets = [
+        (chain, it.value)
+        for it in used
+        for chain in (equivalents(atoms, tuple(a - 1 for a in it.atoms)) if symmetric else [tuple(a - 1 for a in it.atoms)])
+    ]
 
     def residuals(flat: np.ndarray) -> np.ndarray:
         xyz = flat.reshape(-1, 3)
         res = []
-        for it in used:
-            got = measure(xyz, tuple(a - 1 for a in it.atoms))
-            res.append((got - it.value) * (1.0 if len(it.atoms) == 2 else 0.01))
+        for chain, value in targets:
+            got = measure(xyz, chain)
+            res.append((got - value) * (1.0 if len(chain) == 2 else 0.01))
         res.extend(1e-4 * (flat - x0.ravel()))  # stay close to the original frame and orientation
         return np.array(res)
 
@@ -144,10 +168,11 @@ def experimental(m: Molecule, page: Page) -> dict:
     }
     problems = inconsistencies(page.atoms, page.internals)
     if problems:
-        xyz = rebuild(page.atoms, page.internals)
+        xyz = rebuild(page.atoms, page.internals, symmetric=m.symmetric)
         provenance["rebuilt"] = (
             "CCCBDB's Cartesian table disagrees with its own listed parameters (" + "; ".join(problems) + "), so the "
-            "Cartesians were rebuilt from the listed parameters by a least-squares fit."
+            "Cartesians were rebuilt from the listed parameters by a least-squares fit"
+            + (", holding every symmetry-equivalent bond and angle at its listed value." if m.symmetric else ".")
         )
     else:
         xyz = np.array([[a.x, a.y, a.z] for a in page.atoms])

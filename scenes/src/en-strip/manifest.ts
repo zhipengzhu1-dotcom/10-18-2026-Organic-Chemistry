@@ -25,6 +25,7 @@ export const highlights: Record<string, string[]> = {
   "h-c-o-f-cl": ["H", "C", "O", "F", "Cl"],
   "h-c-n-o-f": ["H", "C", "N", "O", "F"],
   "h-c-o-cl": ["H", "C", "O", "Cl"],
+  "h-b-c-n-o": ["H", "B", "C", "N", "O"],
 };
 
 export const enRef = (el: string) => `electronegativity-pauling/${el}`;
@@ -43,6 +44,7 @@ export const enStrip: SceneManifest<EnStripState> = {
         { id: "h-c-o-f-cl", label: "H, C, O, F, Cl" },
         { id: "h-c-n-o-f", label: "H, C, N, O, F" },
         { id: "h-c-o-cl", label: "H, C, O, Cl" },
+        { id: "h-b-c-n-o", label: "H, B, C, N, O" },
       ],
       default: "all",
     },

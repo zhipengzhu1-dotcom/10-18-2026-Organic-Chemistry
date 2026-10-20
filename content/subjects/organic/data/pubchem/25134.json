@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 25134,
+        "MolecularFormula": "BBr3",
+        "SMILES": "B(Br)(Br)Br",
+        "ConnectivitySMILES": "B(Br)(Br)Br",
+        "Title": "Boron tribromide"
+      }
+    ]
+  }
+}

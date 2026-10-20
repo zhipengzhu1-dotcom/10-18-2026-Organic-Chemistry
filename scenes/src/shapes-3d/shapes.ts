@@ -15,6 +15,9 @@ export const SHAPES = {
   bf3: "boron-trifluoride",
   ccl4: "carbon-tetrachloride",
   ch2cl2: "dichloromethane",
+  // Practice Problem u1-3d-polar-hcn (#87).
+  chcl3: "chloroform",
+  hcn: "hydrogen-cyanide",
 } as const;
 export type ShapeKey = keyof typeof SHAPES;
 
@@ -35,6 +38,8 @@ const RECIPES: Record<ShapeKey, Recipe> = {
   bf3: { centre: "B", keys: ["r.BF", "a.FBF"], title: "Boron trifluoride", shape: "trigonal planar" },
   ccl4: { centre: "C", keys: ["r.CCl", "a.ClCCl"], title: "Carbon tetrachloride", shape: "tetrahedral" },
   ch2cl2: { centre: "C", keys: ["r.CH", "r.CCl", "a.HCH", "a.ClCCl"], title: "Dichloromethane", shape: "tetrahedral" },
+  chcl3: { centre: "C", keys: ["r.CH", "r.CCl", "a.ClCCl"], title: "Chloroform", shape: "tetrahedral" },
+  hcn: { centre: "C", keys: ["r.CH", "r.CN"], title: "Hydrogen cyanide", shape: "linear" },
 };
 
 /** An element's cited Jmol colour. */
@@ -103,6 +108,8 @@ export function buildShape(key: string, cited: Record<string, Cited>): Shape {
   let outer: ShapeAtom[];
   let lonePairs: Vec3[] = [];
   let order: 1 | 2 = 1;
+  /** Per-bond orders, when a shape's bonds differ (HCN). */
+  let orders: (1 | 2 | 3)[] | undefined; // cited-data: ok, bond orders
   switch (key as ShapeKey) {
     case "methane":
     case "ccl4": {
@@ -137,6 +144,18 @@ export function buildShape(key: string, cited: Record<string, Cited>): Shape {
       outer = [...pair(aH, [1, 0, 0]).map((d) => out("H", d, rH)), ...pair(aCl, [0, 0, 1], false).map((d) => out("Cl", d, rCl))];
       break;
     }
+    case "chcl3": {
+      // H straight up; the three Cl's a tripod at the cited Cl–C–Cl angle (H–C–Cl follows).
+      const [rH, rCl, aCl] = recipe.keys.map(value);
+      outer = [out("H", [0, 1, 0], rH), ...tripod(aCl).map((d) => out("Cl", d, rCl))];
+      break;
+    }
+    case "hcn": {
+      const [rH, rN] = recipe.keys.map(value);
+      outer = [out("H", [-1, 0, 0], rH), out("N", [1, 0, 0], rN)];
+      orders = [1, 3];
+      break;
+    }
   }
   const atoms = [centre, ...outer];
   return {
@@ -144,7 +163,7 @@ export function buildShape(key: string, cited: Record<string, Cited>): Shape {
     title: recipe.title,
     shape: recipe.shape,
     atoms,
-    bonds: outer.map((_, i) => [0, i + 1, order]),
+    bonds: outer.map((_, i) => [0, i + 1, orders?.[i] ?? order]),
     lonePairs,
   };
 }

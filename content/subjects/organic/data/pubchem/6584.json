@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 6584,
+        "MolecularFormula": "C3H6O2",
+        "SMILES": "CC(=O)OC",
+        "ConnectivitySMILES": "CC(=O)OC",
+        "Title": "Methyl Acetate"
+      }
+    ]
+  }
+}

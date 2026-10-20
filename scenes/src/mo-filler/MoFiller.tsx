@@ -3,7 +3,7 @@
 import { frameSize, safeArea } from "../frame.ts";
 import type { SceneProps } from "../types.ts";
 import { DATA_FONT, TEXT_FONT, electron, ink, line, muted } from "../dots/dots.tsx";
-import { COMPARE, NAMED, PER_LEVEL, fill, type MoFillerState } from "./manifest.ts";
+import { COMPARE, H2_PLUS, NAMED, PER_LEVEL, fill, type MoFillerState } from "./manifest.ts";
 
 interface Level {
   x: number;
@@ -81,7 +81,10 @@ export default function MoFiller({ state, aspect }: SceneProps<MoFillerState>) {
     );
   }
 
-  const f = fill(n);
+  // Practice u1-mo-h2-cation (#87): H₂⁺ empty (the visual: no electrons, no counter), then filled (the reveal).
+  const empty = state.show === "h2-plus-empty";
+  const h2Plus = empty || state.show === "h2-plus";
+  const f = empty ? { bonding: 0, antibonding: 0, order: "" } : fill(h2Plus ? H2_PLUS.electrons : n);
   const size = wide ? 64 : 60;
   const mid = { x: width / 2, y: wide ? height / 2 - 90 : height / 2 - 120 };
   const gap = wide ? 400 : 640;
@@ -107,7 +110,7 @@ export default function MoFiller({ state, aspect }: SceneProps<MoFillerState>) {
       1s
     </text>
   );
-  const named = NAMED[n];
+  const named = h2Plus ? H2_PLUS.title : NAMED[n];
   const lineGap = size * 1.4; // cited-data: ok, line spacing
 
   return (
@@ -137,10 +140,12 @@ export default function MoFiller({ state, aspect }: SceneProps<MoFillerState>) {
         not to scale
       </text>
       {/* The live counter, on two lines so it reads on a phone. */}
-      <text className="counter" x={mid.x} y={height - area.y - (wide ? 75 : 160)} fill={ink} fontSize={wide ? 58 : 52} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
-        <tspan x={mid.x}>{`bonding ${f.bonding} · antibonding ${f.antibonding}`}</tspan>
-        <tspan x={mid.x} dy={lineGap}>{`bond order (${f.bonding} − ${f.antibonding}) ÷ ${PER_LEVEL} = ${f.order}`}</tspan>
-      </text>
+      {!empty && (
+        <text className="counter" x={mid.x} y={height - area.y - (wide ? 75 : 160)} fill={ink} fontSize={wide ? 58 : 52} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
+          <tspan x={mid.x}>{`bonding ${f.bonding} · antibonding ${f.antibonding}`}</tspan>
+          <tspan x={mid.x} dy={lineGap}>{`bond order (${f.bonding} − ${f.antibonding}) ÷ ${PER_LEVEL} = ${f.order}`}</tspan>
+        </text>
+      )}
     </svg>
   );
 }

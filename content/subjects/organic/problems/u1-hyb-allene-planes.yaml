@@ -1,0 +1,31 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). The answer rests on the
+# cited geometry: content/test/practice-problems.test.ts checks the two H–C–H planes meet at 90° within 0.5°.
+id: u1-hyb-allene-planes
+unit: u1
+lesson: u1-l04
+difficulty: 3
+status: approved
+source: Original
+type: rotate-and-identify
+prompt: "Allene, H₂C=C=CH₂, measured. Its middle carbon makes two double bonds. Spin it. How do the two CH₂ ends sit?"
+molecule:
+  id: allene
+  view: three-quarter
+  planes:
+    - { through: [3, 1, 4], label: "left CH₂ plane" }
+    - { through: [5, 2, 6], label: "right CH₂ plane" }
+  describe: "Allene: three carbons in a straight line. The two hydrogens on the left carbon lie in one plane; the two on the right carbon lie in a plane at right angles to it. Seen end-on, the four hydrogens form a cross."
+options:
+  - { id: a, text: both CH₂ groups lie in the same plane }
+  - { id: b, text: the two CH₂ planes are at right angles }
+  - { id: c, text: "the two CH₂ planes are twisted halfway, about 45° apart" }
+answer: [b]
+correct: "The middle carbon is sp, with two p orbitals at right angles, one for each π bond. Each end carbon's own p must lie parallel to its partner, so each CH₂ plane stands at right angles to its π bond, and the two ends end up at right angles to each other."
+hints:
+  - match: [a]
+    text: "Look down the C=C=C line. Do the two H pairs line up, or cross?"
+  - match: [c]
+    text: "The middle carbon's two p orbitals sit at a fixed right angle (Lesson 4: sp leaves two p's at right angles). The CH₂ planes follow them."
+  - text: "Turn the model to look straight down the three carbons, then switch on both plane sheets."
+reveal: "**b**. Seen end-on, down the C=C=C line, with both planes on: the two H pairs form a cross, planes at right angles."
+sourceNote: "Allene, PubChem CID 10037."

@@ -1,0 +1,26 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved).
+id: u1-hyb-carbonyl-oxygen
+unit: u1
+lesson: u1-l04
+difficulty: 2
+status: approved
+source: Adapted from MIT 5.12 PS1 Q5b key (the oxygen's hybridization)
+credit: Kimberly Berkowski, MIT OCW 5.12, Spring 2005, CC BY-NC-SA 4.0
+type: multiple-choice
+prompt: "Formaldehyde, H₂C=O. Now count the groups on the **oxygen**. Which hybrid set does it use?"
+figures:
+  - { structure: formaldehyde-kekule, alt: "Kekulé structure of formaldehyde: carbon with two H's and a double bond to O; two lone pairs on O." }
+options:
+  - { id: a, text: "sp³: two bonds and two lone pairs make four" }
+  - { id: b, text: "sp²: one bonded atom and two lone pairs make three" }
+  - { id: c, text: "sp: one bonded atom and one lone pair make two" }
+answer: [b]
+correct: "Groups are bonded atoms plus lone pairs, and the C=O double bond is one group. One carbon + two lone pairs = 3: sp². Oxygen's leftover p orbital is the one that makes the C=O π bond with carbon's."
+hints:
+  - match: [a]
+    text: "A double bond counts as **one** group, however many lines it has. How many atoms is O bonded to?"
+  - match: [c]
+    text: "Count O's lone pairs again: there are two."
+  - text: "Bonded atoms + lone pairs on O, a double bond counting once. Then 4 → sp³, 3 → sp², 2 → sp."
+reveal: "**b**. Oxygen's three sp² lobes (one toward C, two holding the lone pairs) lie in the molecule's plane; its p orbital sits beside carbon's, making the π bond."
+sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q5b and its key (which labels the C=O oxygen sp² with two lone pairs), Berkowski, Spring 2005, CC BY-NC-SA 4.0. Wording ours."

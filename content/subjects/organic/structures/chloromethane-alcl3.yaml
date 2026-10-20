@@ -1,0 +1,26 @@
+# Practice Problem u1-mo-alcl3-chloromethane (#87): chloromethane on the left with its Cl's lone pairs facing
+# aluminium, AlCl₃ on the right with its Cl's pointing away. Placed by hand, as
+# Lesson 8's ether-bf3. Structures: PubChem CIDs 6327 and 24012.
+
+id: chloromethane-alcl3
+style: full
+smiles: "[CH3:1][Cl:2].[Al:3]([Cl:4])([Cl:5])[Cl:6]"
+source: PubChem CIDs 6327, 24012
+atoms:
+  - { id: a1, el: C, x: -4.5, y: 0 }
+  - { id: a2, el: Cl, x: -3, y: 0, lp: 3 }
+  - { id: a3, el: Al, x: 0, y: 0 }
+  - { id: a4, el: Cl, x: 1.5, y: 0, lp: 3 }
+  - { id: a5, el: Cl, x: 0.75, y: -1.299, lp: 3 }
+  - { id: a6, el: Cl, x: 0.75, y: 1.299, lp: 3 }
+  - { id: a7, el: H, x: -5.25, y: -1.299 }
+  - { id: a8, el: H, x: -5.25, y: 1.299 }
+  - { id: a9, el: H, x: -6, y: 0 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a3, b: a4, order: 1 }
+  - { id: b3, a: a3, b: a5, order: 1 }
+  - { id: b4, a: a3, b: a6, order: 1 }
+  - { id: b5, a: a1, b: a7, order: 1 }
+  - { id: b6, a: a1, b: a8, order: 1 }
+  - { id: b7, a: a1, b: a9, order: 1 }

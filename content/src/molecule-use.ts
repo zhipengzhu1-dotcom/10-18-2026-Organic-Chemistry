@@ -26,6 +26,7 @@ export interface MoleculeUseFile {
   toggleLabel?: string;
   autoplay?: boolean;
   plane?: { through: [number, number, number]; label?: string; on?: boolean };
+  planes?: { through: [number, number, number]; label?: string; on?: boolean }[];
   measure?: number[];
   zoom?: number;
 }
@@ -133,6 +134,13 @@ function resolveOne(
     if (errors.length === before)
       for (const message of viewErrors(atoms, { plane: use.plane.through })) errors.push(`${named}: plane: ${message.replace(/^plane: /, "")}`);
   }
+  if (use.plane && use.planes) errors.push(`${named}: give plane or planes, not both`);
+  for (const plane of use.planes ?? []) {
+    const before = errors.length;
+    outside("planes", plane.through);
+    if (errors.length === before)
+      for (const message of viewErrors(atoms, { plane: plane.through })) errors.push(`${named}: planes: ${message.replace(/^plane: /, "")}`);
+  }
   if (use.measure) outside("measure", use.measure);
 
   const styles: { colour: Cited; vdw: Cited }[] = [];
@@ -189,6 +197,9 @@ function resolveOne(
       ...(shared.blind ? { orbitalLabels: "hide" as const } : {}),
       ...(shared.tapMeasure === false ? { tapMeasure: false as const } : {}),
       ...(use.plane ? { plane: { through: use.plane.through, label: use.plane.label ?? "Plane", on: !!use.plane.on } } : {}),
+      ...(use.planes
+        ? { planes: use.planes.map((p, i) => ({ through: p.through, label: p.label ?? `Plane ${i + 1}`, on: !!p.on })) }
+        : {}),
       ...(use.measure ? { measure: use.measure } : {}),
       ...(use.zoom ? { zoom: use.zoom } : {}),
     },

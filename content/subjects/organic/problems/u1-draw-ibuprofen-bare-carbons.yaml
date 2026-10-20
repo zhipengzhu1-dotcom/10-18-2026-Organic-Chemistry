@@ -1,0 +1,29 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). content/test/
+# practice-problems.test.ts checks that exactly the answer's three carbons have no implied H.
+id: u1-draw-ibuprofen-bare-carbons
+unit: u1
+lesson: u1-l02
+difficulty: 2
+status: approved
+source: Original
+type: tap-to-identify
+prompt: "Ibuprofen, the painkiller. Tap every carbon that has **no** hydrogens, then press Check."
+structure: ibuprofen
+alt: "Ibuprofen. A benzene ring with a branch on opposite sides. On one side, a CH₂ leading to a CH with two methyls. On the other, a CH carrying a methyl and a carboxylic acid end, C double-bonded to O and bonded to OH."
+tappable: { atoms: [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13] }
+answer: [a5, a8, a13]
+correct: "Three carbons already have four bonds to other atoms: the two ring carbons that carry a branch, and the C=O carbon of the acid."
+hints:
+  - includes: [a6, a7, a9, a10]
+    text: "That ring corner has two ring bonds, one of them double: 3 bonds, so 1 H."
+  - includes: [a2, a11]
+    text: "Three lines meet there: 3 bonds, so 1 H."
+  - includes: [a1, a3, a4, a12]
+    text: "A corner with two lines has 2 H's, and a line end has 3."
+  - misses: [a13]
+    text: "Look at the acid end: its carbon has a double bond to O, a bond to OH and a bond to the chain. That's 4."
+  - misses: [a5, a8]
+    text: "Two ring corners carry a branch: a double bond, a single bond in the ring, and the branch. That's 4 bonds."
+  - text: "For each carbon: 4 minus the bonds you see. Tap only the ones where that's 0."
+reveal: "The two ring carbons that carry a branch and the C=O carbon: 4 bonds → 0 H. Every other carbon has 1, 2 or 3 H's."
+sourceNote: "Ibuprofen, PubChem CID 3672 (formula C₁₃H₁₈O₂)."

@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 280,
+        "MolecularFormula": "CO2",
+        "SMILES": "C(=O)=O",
+        "ConnectivitySMILES": "C(=O)=O",
+        "Title": "Carbon Dioxide"
+      }
+    ]
+  }
+}

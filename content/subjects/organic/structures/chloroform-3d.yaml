@@ -1,0 +1,19 @@
+# Practice Problem u1-3d-polar-hcn (#87) card a, chloroform: H up and one Cl left as lines, a Cl wedge and a Cl dash.
+# Drawn by hand, like Lesson 3's l3-ccl4-3d: a line lies in the page, a wedge comes toward you, a hash goes away.
+# Coordinates as drawn: x right, y down.
+
+id: chloroform-3d
+style: full
+smiles: "ClC(Cl)Cl"
+source: "PubChem CID 6212"
+atoms:
+  - { id: a1, el: "C", x: 0, y: 0 }
+  - { id: a2, el: "H", x: 0, y: -1.5 }
+  - { id: a3, el: "Cl", x: -1.45, y: 0.4, lp: 3 }
+  - { id: a4, el: "Cl", x: 1.4, y: 0.55, lp: 3 }
+  - { id: a5, el: "Cl", x: 0.75, y: 1.3, lp: 3 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a1, b: a3, order: 1 }
+  - { id: b3, a: a1, b: a4, order: 1, stereo: wedge }
+  - { id: b4, a: a1, b: a5, order: 1, stereo: hash }

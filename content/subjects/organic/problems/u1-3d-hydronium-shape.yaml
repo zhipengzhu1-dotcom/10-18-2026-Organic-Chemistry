@@ -1,0 +1,28 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved).
+id: u1-3d-hydronium-shape
+unit: u1
+lesson: u1-l03
+difficulty: 1
+status: approved
+source: Original
+type: multiple-choice
+prompt: "Hydronium, H₃O⁺, from Lesson 1. Count oxygen's electron domains. What shape is the ion?"
+figures:
+  - { structure: hydronium, alt: "Lewis structure of hydronium: oxygen with three bonds to H, one lone pair, and a + charge." }
+options:
+  - { id: a, text: trigonal planar }
+  - { id: b, text: trigonal pyramidal }
+  - { id: c, text: tetrahedral }
+  - { id: d, text: bent }
+answer: [b]
+correct: "Three bonds + one lone pair = 4 domains, spread like methane's. The shape is named by the atoms: three H's below the O, a tripod, just like NH₃."
+hints:
+  - match: [a]
+    text: "Count the lone pair too: 3 bonds + 1 lone pair is 4 domains. Three domains would be flat; four aren't."
+  - match: [c]
+    text: "Tetrahedral describes the four domains. The shape is named only by where the atoms are, and the lone pair isn't an atom."
+  - match: [d]
+    text: "Bent is 2 bonds + 2 lone pairs, like water. Hydronium's O holds three H's."
+  - text: "Count bonds plus lone pairs on O, then name the shape from the atoms only."
+reveal: "4 domains, 3 of them bonds: trigonal pyramidal, the same family as NH₃."
+revealScene: { id: four-domain-family, state: { labels: names }, still: true }

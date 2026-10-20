@@ -1,0 +1,27 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). Lesson 5 draws line-angle
+# structures without lone pairs.
+id: u1-fg-ether
+unit: u1
+lesson: u1-l05
+difficulty: 1
+status: approved
+source: Original
+type: multiple-choice
+prompt: Which one is an **ether**?
+options:
+  - { id: a, structure: fg-diethyl-ether, hide: [lone-pairs], text: "Diethyl ether: an O with a two-carbon chain on each side." }
+  - { id: b, structure: fg-ethanol, hide: [lone-pairs], text: "Ethanol: a two-carbon chain ending in OH." }
+  - { id: c, structure: fg-dimethyl-sulfide, hide: [lone-pairs], text: "Dimethyl sulfide: an S with a carbon on each side." }
+  - { id: d, structure: fg-methyl-acetate, hide: [lone-pairs], text: "Methyl acetate: CH₃–C=O with O–CH₃ on the other side of the C=O carbon." }
+answer: [a]
+correct: "An O between two skeleton carbons, with no H on it and no C=O beside it: an ether."
+hints:
+  - match: [b]
+    text: "That O carries an H. O–H on a skeleton carbon is an alcohol."
+  - match: [c]
+    text: "Look at the letter: S, not O. C–S–C is ether's sulfur twin, a sulfide."
+  - match: [d]
+    text: "That O sits between two carbons, but one of them is a C=O carbon. C=O with O–C beside it reads as one group: an ester."
+  - text: "An ether is C–O–C, with the O touching only plain skeleton carbons."
+reveal: "Diethyl ether, the ether. The others: ethanol, alcohol; dimethyl sulfide, sulfide; methyl acetate, ester."
+sourceNote: "Groups from the MIT OCW 5.12 *Functional Groups* sheet, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Structures: PubChem CIDs 3283, 702, 1068, 6584."

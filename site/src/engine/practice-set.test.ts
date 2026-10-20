@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { MultipleChoiceStep } from "@astratron/content";
 import { act, start, type Action } from "./player.ts";
-import { drawSet, roundOf, summarize, type BankEntry } from "./practice-set.ts";
+import { drawSet, pinnedSet, roundOf, summarize, type BankEntry } from "./practice-set.ts";
 
 /** A small seeded random source (mulberry32), so every draw in these tests can be replayed. */
 function seeded(seed: number): () => number {
@@ -214,5 +214,25 @@ describe("Practice Set round, summary and Retry missed", () => {
     const round = roundOf(steps, ["p1", "p2", "p3"]);
     const screen = act(round, start(round), answer("a"));
     expect(summarize(round, screen.progress).firstTryPercent).toBe(33);
+  });
+});
+
+describe("a pinned Set: ?problems=<id>,<id>… plays exactly those Problems (to replay one, and for the browser tests)", () => {
+  const bank = ["p1", "p2", "p3"];
+
+  it("reads the ids in the order given", () => {
+    expect(pinnedSet("?problems=p3,p1", bank)).toEqual(["p3", "p1"]);
+  });
+
+  it("is no pin when the query names none, or names a Problem that cannot be drawn", () => {
+    expect(pinnedSet("", bank)).toBeUndefined();
+    expect(pinnedSet("?problems=", bank)).toBeUndefined();
+    expect(pinnedSet("?problems=p1,draft-one", bank)).toBeUndefined();
+  });
+
+  it("drops repeats and keeps at most a Set's worth", () => {
+    const many = Array.from({ length: 12 }, (_, i) => `q${i}`);
+    expect(pinnedSet("?problems=p1,p1,p2", bank)).toEqual(["p1", "p2"]);
+    expect(pinnedSet(`?problems=${many.join(",")}`, many)).toHaveLength(10);
   });
 });

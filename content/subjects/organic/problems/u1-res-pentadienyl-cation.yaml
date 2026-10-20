@@ -1,0 +1,28 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). Spec push notation:
+# "π 3–4 → bond 4–5" = { from: b3, to: b4 } (bond ids of the start).
+id: u1-res-pentadienyl-cation
+unit: u1
+lesson: u1-l06
+difficulty: 1
+status: approved
+source: Adapted from LibreTexts Wade 1-20(a) and its solution
+credit: "LibreTexts, Map: Organic Chemistry (Wade), CC BY-NC-SA 4.0"
+type: draw-arrows
+prompt: "This cation has a C⁺ at the end of a chain of two C=C bonds. Push electrons to move the + charge to C3 (target shown)."
+start: pentadienyl-cation
+results: [pentadienyl-cation-c3]
+answer:
+  - { from: b3, to: b4 }
+correct: "The C3=C4 pair slid toward C5⁺: now C4=C5 and C3 is +. Slide C1=C2 the same way and + lands on C1: the charge is shared by C1, C3 and C5."
+hints:
+  - from: [b3]
+    to: [a3, a4]
+    text: "That parks the pair on one carbon and leaves two C⁺. Slide the bond toward C5⁺ instead."
+  - from: [b1]
+    to: [b2]
+    text: "That π bond isn't next to C5⁺. C3 already has a double bond, so it would end up with 10 electrons."
+  - from: [sigma]
+    text: σ bonds stay put.
+  - text: "C5⁺ is the sink. Which π bond sits right next to it?"
+reveal: "Arrow from the C3=C4 π bond to the C4–C5 bond. Now C4=C5 is double and C3 is positive."
+sourceNote: "Adapted from LibreTexts, *Map: Organic Chemistry (Wade)*, §1.16 exercise 1-20(a) and its solution in §1.17, CC BY-NC-SA 4.0. Wording and drawing ours."

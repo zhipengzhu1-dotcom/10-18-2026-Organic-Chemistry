@@ -9,6 +9,9 @@ export const FG_STRUCTURE_IDS = [
   "fg-ethinylestradiol",
   "fg-aspartame",
   "fg-capsaicin",
+  // group-spotlight, Practice Problems (#87)
+  "fg-aspirin",
+  "fg-metenkephalin",
   // group-cards
   "fg-piece-alkene",
   "fg-piece-alkyne",

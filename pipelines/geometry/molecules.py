@@ -42,6 +42,9 @@ class Molecule:
     dihedrals: tuple[Dihedral, ...] = ()
     values: dict[str, tuple[str, tuple[int, ...]]] = field(default_factory=dict)
     note: str | None = None
+    # Experimental, rebuilt pages only: CCCBDB lists one of each set of symmetry-equivalent parameters (one C–Cl of
+    # chloroform's three); the rebuild then holds every equivalent bond and angle at the listed value (#87).
+    symmetric: bool = False
 
 
 def M(**kw) -> Molecule:  # noqa: N802 - short constructor for the table below
@@ -150,7 +153,7 @@ MOLECULES: list[Molecule] = [
         values={"r.CN": ("C=N", (0, 1))},
     ),
     # Practice Problems additions
-    M(id="chloroform", title="Chloroform", formula="CHCl3", smiles="ClC(Cl)Cl", cid=6212, cas="67-66-3", tier="experimental", cccbdb_name="chloroform", used_by="Practice"),
+    M(id="chloroform", title="Chloroform", formula="CHCl3", smiles="ClC(Cl)Cl", cid=6212, cas="67-66-3", tier="experimental", cccbdb_name="chloroform", used_by="Practice", symmetric=True),
     M(id="hydrogen-cyanide", title="Hydrogen cyanide", formula="CHN", smiles="C#N", cid=768, cas="74-90-8", tier="experimental", cccbdb_name="hydrogen cyanide", used_by="Practice"),
     M(id="allene", title="Allene", formula="C3H4", smiles="C=C=C", cid=10037, cas="463-49-0", tier="experimental", cccbdb_name="allene", used_by="Practice"),
 ]

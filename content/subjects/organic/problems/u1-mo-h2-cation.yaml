@@ -1,0 +1,29 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). The visual is mo-filler's
+# empty H₂⁺ diagram; the reveal fills it.
+id: u1-mo-h2-cation
+unit: u1
+lesson: u1-l08
+difficulty: 1
+status: approved
+source: Original
+scene: { id: mo-filler, state: { show: h2-plus-empty }, still: true }
+type: multiple-choice
+prompt: "H₂⁺ is H₂ with one electron removed. What is its bond order?"
+options:
+  - { id: a, text: "0" }
+  - { id: b, text: "½" }
+  - { id: c, text: "1" }
+  - { id: d, text: "2" }
+answer: [b]
+correct: "One electron, in σ: (1 − 0) ÷ 2 = ½. Half a bond is still a bond."
+hints:
+  - match: [a]
+    text: "The one electron goes into the lowest level, σ, the bonding orbital. Nothing cancels it."
+  - match: [c]
+    text: "Bond order 1 needs a full pair in σ. H₂⁺ has only one electron."
+  - match: [d]
+    text: "Bond order counts bonding minus antibonding electrons, then halves it. There's only one electron here."
+  - text: "Fill from the bottom, then bond order = (bonding − antibonding) ÷ 2."
+reveal: "One half-arrow in σ: (1 − 0) ÷ 2 = ½."
+revealScene: { id: mo-filler, state: { show: h2-plus }, still: true }
+sourceNote: "Bond order from bonding and antibonding electrons: facts as in OpenStax *Organic Chemistry* §1.11, CC BY-NC-SA 4.0; wording ours. The diagram is schematic, not to scale."

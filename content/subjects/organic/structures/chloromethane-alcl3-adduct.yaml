@@ -1,0 +1,26 @@
+# Practice Problem u1-mo-alcl3-chloromethane (#87), the target: a new Cl–Al bond, Cl⁺ and Al⁻, Al with eight.
+# Placed by hand.
+
+id: chloromethane-alcl3-adduct
+style: full
+smiles: "[CH3:1][Cl+:2][Al-:3]([Cl:4])([Cl:5])[Cl:6]"
+source: PubChem CIDs 6327, 24012
+atoms:
+  - { id: a1, el: C, x: -3, y: 0 }
+  - { id: a2, el: Cl, x: -1.5, y: 0, charge: 1, lp: 2 }
+  - { id: a3, el: Al, x: 0, y: 0, charge: -1 }
+  - { id: a4, el: Cl, x: 1.5, y: 0, lp: 3 }
+  - { id: a5, el: Cl, x: 0, y: -1.5, lp: 3 }
+  - { id: a6, el: Cl, x: 0, y: 1.5, lp: 3 }
+  - { id: a7, el: H, x: -3.75, y: -1.299 }
+  - { id: a8, el: H, x: -3.75, y: 1.299 }
+  - { id: a9, el: H, x: -4.5, y: 0 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a3, b: a4, order: 1 }
+  - { id: b4, a: a3, b: a5, order: 1 }
+  - { id: b5, a: a3, b: a6, order: 1 }
+  - { id: b6, a: a1, b: a7, order: 1 }
+  - { id: b7, a: a1, b: a8, order: 1 }
+  - { id: b8, a: a1, b: a9, order: 1 }

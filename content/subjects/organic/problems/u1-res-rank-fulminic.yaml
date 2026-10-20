@@ -1,0 +1,29 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). Cards start in the order
+# c, b, a.
+id: u1-res-rank-fulminic
+unit: u1
+lesson: u1-l07
+difficulty: 2
+status: approved
+source: Adapted from LibreTexts Wade 1-22 and its solution
+credit: "LibreTexts, Map: Organic Chemistry (Wade), CC BY-NC-SA 4.0"
+type: rank
+prompt: "Fulminic acid, HCNO, has three contributors. Drag them into order, most important at the top."
+items:
+  - { id: c, structure: fulminic-c, text: "Card c: H–C⁺=N–O⁻. + on carbon, − on oxygen." }
+  - { id: b, structure: fulminic-b, text: "Card b: H–C⁻=N⁺=O. − on carbon, + on nitrogen." }
+  - { id: a, structure: fulminic-a, text: "Card a: H–C≡N⁺–O⁻. + on nitrogen, − on oxygen." }
+answer: [a, b, c]
+correct: "Every card has two charges, so rule 2 never decides. Rule 1 drops `c` to the bottom: its carbon has only 6 electrons. `a` and `b` both have full octets; rule 3 puts − on O above − on C."
+hints:
+  - above: [[c, a], [c, b]]
+    text: "Count the electrons on carbon in `c`: two bonds' worth to N, one to H, no lone pair. Six. Rule 1 puts both full-octet cards above it."
+  - above: [[b, a]]
+    text: "`a` and `b` tie on rules 1 and 2. Rule 3: which atom holds the − better, O or C?"
+  - text: "Count charges first: they're all two. So test octets, then where − sits."
+reveal: "Top to bottom: `a`, `b`, `c`."
+revealTags:
+  a: "rule 1: octets ✓, rule 3: − on O"
+  b: "rule 1: octets ✓, rule 3: − on C"
+  c: "rule 1: 6-e⁻ C"
+sourceNote: "Adapted from LibreTexts, *Map: Organic Chemistry (Wade)*, §1.16 exercise 1-22 and its solution in §1.17 (contributors `a` and `c`), CC BY-NC-SA 4.0; contributor `b` and the ranking are ours. Fulminic acid, PubChem CID 521293."

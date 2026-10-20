@@ -77,33 +77,33 @@
     "list": [
       [
         "C",
-        0.0201,
-        -0.0053,
-        0.5088
+        0.0,
+        0.0,
+        0.4799
       ],
       [
         "H",
-        -0.0002,
-        0.0181,
-        1.5814
+        0.0,
+        0.0,
+        1.5529
       ],
       [
         "Cl",
-        -0.0149,
-        1.6578,
-        -0.0722
+        -0.0,
+        1.6759,
+        -0.064
       ],
       [
         "Cl",
-        1.4293,
-        -0.8424,
-        -0.0844
+        1.4514,
+        -0.838,
+        -0.064
       ],
       [
         "Cl",
-        -1.4343,
-        -0.8281,
-        -0.0928
+        -1.4514,
+        -0.838,
+        -0.064
       ]
     ]
   },
@@ -134,7 +134,7 @@
     "url": "https://cccbdb.nist.gov/expgeom2x.asp?casno=67663&charge=0",
     "cccbdbName": "Chloroform",
     "pointGroup": "not used (CCCBDB labels can be wrong)",
-    "rebuilt": "CCCBDB's Cartesian table disagrees with its own listed parameters (rCCl (1, 3): listed 1.762, Cartesians give 1.7670; aClCCl (3, 1, 4): listed 110.92, Cartesians give 108.5279; aHCCl (2, 1, 3): listed 107.98, Cartesians give 110.3989), so the Cartesians were rebuilt from the listed parameters by a least-squares fit.",
+    "rebuilt": "CCCBDB's Cartesian table disagrees with its own listed parameters (rCCl (1, 3): listed 1.762, Cartesians give 1.7670; aClCCl (3, 1, 4): listed 110.92, Cartesians give 108.5279; aHCCl (2, 1, 3): listed 107.98, Cartesians give 110.3989), so the Cartesians were rebuilt from the listed parameters by a least-squares fit, holding every symmetry-equivalent bond and angle at its listed value.",
     "usedBy": "Practice"
   }
 }

@@ -21,6 +21,9 @@ const POSE: Record<string, [number, number]> = {
   ch2cl2: [32, 14],
   nh3: [20, 14],
   bf3: [20, 55],
+  chcl3: [25, 14],
+  hcn: [0, 12],
+  methane: [25, 14],
 };
 /** The tip-to-tail chain is drawn larger than the molecule, so short arrows still read. */
 const CHAIN_ZOOM = 1.6;
