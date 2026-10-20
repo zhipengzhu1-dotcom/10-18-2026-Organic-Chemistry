@@ -5,7 +5,7 @@ Real work left open after v1. Owner questions live in `docs/owner/hand-check.md`
 ## Content and Step player
 
 - **Typed numbers in Lesson prose go unlinted.** `lint:numbers` scans code only (`sceneCodeDirs` in `content/src/number-lint.ts`); a content-build check for patterns like `1.09 Å` or `120°` in YAML text would close it.
-- **Draw arrows can't require push order.** Every route and order to the result counts; a multi-stage mechanism needs an `ordered` field (`content/src/arrows.ts`, `site/src/engine/player.ts`).
+- **Draw arrows can't require push order.** Every route and order to the result counts; a multi-stage mechanism needs an `ordered` field (`content/src/arrows.ts`, `content/src/step-types/draw-arrows/rules.ts`).
 - **StepPlayer switches on `step.type` throughout and holds per-Lesson code**; `MoleculeCard` / `MoleculeSwitch` carry per-Lesson flags (`site/src/components/StepPlayer.tsx`, `site/src/molecule/`).
 - **PracticeSet fakes a Lesson** (`PRACTICE_LESSON` in `site/src/components/PracticeSet.tsx`); the player should take a round of Problems directly.
 - **Problems can't be Manipulate or goal-state Manipulate** (no `problem` in `content/src/step-types/manipulate*/schema.ts`).

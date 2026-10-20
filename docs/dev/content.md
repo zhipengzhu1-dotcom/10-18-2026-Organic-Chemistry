@@ -55,4 +55,4 @@ Content side: one folder plus one entry in each table.
 2. `content/src/step-types/<type>/schema.ts`: `step` (and `problem` if it can be a Problem), `check` (its own rules, then grading through its `act` via `actChecks`, then `gradedRules`), and `fileOnly`/`structures`/`open`/`card` if it needs them.
 3. One entry in `step-types/index.ts` and one in `step-types/schemas.ts`.
 
-Site side (until #98/#99 land): `site/src/engine/player.ts` `judge` case, `site/src/lib/content.ts` `renderText` case, a view in `StepPlayer.tsx`, `site/e2e/site.ts` `playThrough` and a solver in `practice-set.spec.ts` if Problems use it.
+Site side (until #99 lands; the engine plays every type through the table, nothing to add there): `site/src/lib/content.ts` `renderText` case, a view in `StepPlayer.tsx`, `site/e2e/site.ts` `playThrough` and a solver in `practice-set.spec.ts` if Problems use it.
