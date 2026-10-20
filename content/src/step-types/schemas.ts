@@ -48,6 +48,8 @@ type Schemas = typeof stepSchemas;
 export type StepVariant = Schemas[StepType]["step"];
 /** A Problem's file shape, of any type that can be one. */
 export type ProblemVariant = { [T in StepType]: Schemas[T] extends { problem: infer P } ? P : never }[StepType];
+/** The Step types a Problem can be. */
+export type ProblemType = { [T in StepType]: Schemas[T] extends { problem: unknown } ? T : never }[StepType];
 
 /** The schema entry for an item of this type, its hooks typed loosely (each module types its own). */
 export const schemaOf = (type: StepType) =>

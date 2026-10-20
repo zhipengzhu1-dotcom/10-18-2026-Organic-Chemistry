@@ -70,7 +70,10 @@ export const rank = {
     items: s.items.map((o) => (o.structure ? { ...o, structure: draw(o.structure) } : { ...o, text: md(o.text) })),
     hints: hintText(s.hints, md),
   }),
+  outline: (s) => ({ lead: s.prompt, choices: s.items.map((i) => i.text) }),
+  // Any order of the cards is an answer, the one they were dealt in too.
+  answer: (order) => ({ order }),
   start: oneShotStart,
   takes: takesOrder,
   act: actRank,
-} satisfies StepRules<RankStep, PlayState, RankAnswer>;
+} satisfies StepRules<RankStep, PlayState, RankAnswer, string[]>;

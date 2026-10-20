@@ -13,7 +13,7 @@ import { manipulateGoal } from "./manipulate-goal/rules.ts";
 import { manipulate } from "./manipulate/rules.ts";
 import { multipleChoice } from "./multiple-choice/rules.ts";
 import { numeric } from "./numeric/rules.ts";
-import type { Nudge, PlayState, Played, StepRules } from "./play.ts";
+import type { Nudge, Outline, PlayState, Played, Renderer, StepRules } from "./play.ts";
 import { rank } from "./rank/rules.ts";
 import { rotateAndIdentify } from "./rotate-and-identify/rules.ts";
 import { tapToIdentify } from "./tap-to-identify/rules.ts";
@@ -46,15 +46,29 @@ export type StateOf<T extends StepType> = ReturnType<Table[T]["start"]>;
 export type AnswerOf<T extends StepType> = Table[T]["takes"] extends (a: any) => a is infer A ? A : never;
 /** What a Student submits, on any Step type; answers are JSON, so saved progress replays them. */
 export type Answer = { [T in StepType]: AnswerOf<T> }[StepType];
+/** What a Student chooses on screen on a Step of one type, before it is an answer (picked ids, typed text…). */
+export type ChoiceOf<T extends StepType> = Parameters<Table[T]["answer"]>[0];
 /** The fields of a Step of one type that ship in the answer key. */
 export type SecretOf<T extends StepType> = Table[T]["secret"][number];
 type PageOf<T extends StepType> = Table[T] extends { page: (step: never) => infer P } ? P : object;
-/** A Step as the Lesson page carries it before the key arrives: no secrets, plus its page-only fields. */
-export type PageStep = { [T in StepType]: Omit<StepOfType<T>, SecretOf<T> | "answerCitations"> & PageOf<T> }[StepType];
+/** A Step of one type as the Lesson page carries it before the key arrives: no secrets, plus its page-only fields. */
+export type PageStepOfType<T extends StepType> = Omit<StepOfType<T>, SecretOf<T> | "answerCitations"> & PageOf<T>;
+/** A Step as the Lesson page carries it before the key arrives. */
+export type PageStep = { [T in StepType]: PageStepOfType<T> }[StepType];
 
 /** The table entry for this Step, typed for it. */
-type AnyRules = StepRules<Step, PlayState, object, object>;
+type AnyRules = StepRules<Step, PlayState, object, unknown, object>;
 const rulesOf = (step: { type: StepType }) => stepTypes[step.type] as unknown as AnyRules;
+
+/** The Step with its Markdown fields turned into HTML and its structures pre-rendered (the site build's renderer). */
+export const renderText = <S extends Step>(step: S, r: Renderer): S => rulesOf(step).render(step, r) as S;
+
+/** The Step's text or prompt and its choices, for the Lesson's plain HTML copy; secrets aren't needed. */
+export const outline = (step: PageStep): Outline => rulesOf(step).outline(step as Step);
+
+/** The answer a choice on a Step of this type makes, or null while it isn't one yet. */
+export const answerOf = <T extends StepType>(type: T, choice: ChoiceOf<T>): AnswerOf<T> | null =>
+  (stepTypes[type] as unknown as AnyRules).answer(choice) as AnswerOf<T> | null;
 
 /** Where a Step's play starts. */
 export const startStep = <S extends Step>(step: S): StateOf<S["type"]> => rulesOf(step).start(step) as StateOf<S["type"]>;
@@ -103,7 +117,7 @@ export function joinStep(shown: PageStep, secrets?: Record<string, unknown>): St
 }
 
 export { ANSWER_ORDER, oneShotStart, reached, sameValue } from "./play.ts";
-export type { Feedback, Nudge, PlayState, Played, Renderer, StepRules } from "./play.ts";
+export type { Feedback, Nudge, Outline, PlayState, Played, Renderer, StepRules } from "./play.ts";
 export type { ChoiceAnswer, HintRule } from "./choice.ts";
 export type { DrawArrowsAnswer, DrawArrowsState, ArrowsScreen, DrawArrowsStep, Push, PushHint } from "./draw-arrows/rules.ts";
 export type { ExplainStep } from "./explain/rules.ts";

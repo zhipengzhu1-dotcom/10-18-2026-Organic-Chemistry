@@ -17,7 +17,7 @@ Entry points: `pnpm check` (typecheck, content:build, lint:numbers, lint:scenes,
 
 Coverage comes from crawling and playing, so new work is gated automatically once reachable:
 - **Every page linked from `/`** (`allPages`), both themes: axe (WCAG 2.2 AA tags), type rules, 48×48 targets. An unlinked page is not checked: link it or extend `allPages`.
-- **Every Step and feedback state** of every Lesson and of the whole Practice Bank (`playablePaths` pins Practice Sets with `?problems=…`, ten at a time), both themes, and on a 390×844 phone: no page scroll, `.player-body` not overflowing, foot button(s) fully in view. `playThrough` (`site/e2e/site.ts`) answers by first option / typing 1 / Rank as dealt / first Tap target / first push / goal Scene by keyboard. A new Step type must be answerable by `playThrough`, or extend it.
+- **Every Step and feedback state** of every Lesson and of the whole Practice Bank (`playablePaths` pins Practice Sets with `?problems=…`, ten at a time), both themes, and on a 390×844 phone: no page scroll, `.player-body` not overflowing, foot button(s) fully in view. `playThrough` (`site/e2e/site.ts`) answers by first option / typing 1 / Rank as dealt / first Tap target / first push / goal Scene by keyboard. A new Step type fails to compile until `playThrough`'s `answerers` has its entry.
 - Phone fit only sees the `playThrough` path (first choice). Long Hints on other paths are unchecked; look at them by eye.
 
 Rules that bite:

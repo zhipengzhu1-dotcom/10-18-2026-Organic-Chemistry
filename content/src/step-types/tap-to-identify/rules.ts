@@ -2,9 +2,9 @@
 // graded on the exact set picked, like Multiple choice.
 import type { Cited } from "../../data.ts";
 import type { GradedVisuals, MoleculeUse, Phase, SceneUse, Structure, StructureView, TapTarget } from "../../model.ts";
-import { judgeChoice, takesChoice, type ChoiceAnswer, type HintRule } from "../choice.ts";
+import { choiceAnswer, judgeChoice, takesChoice, type ChoiceAnswer, type HintRule } from "../choice.ts";
 import type { Push } from "../draw-arrows/rules.ts";
-import { gradedText, hintText, oneShot, oneShotStart, type PlayState, type Played, type StepRules } from "../play.ts";
+import { gradedText, hintText, oneShot, oneShotStart, promptOutline, type PlayState, type Played, type StepRules } from "../play.ts";
 
 export interface TapStep extends GradedVisuals {
   id: string;
@@ -40,7 +40,9 @@ export const tapToIdentify = {
   secret: ["answer", "correct", "hints", "reveal", "revealScene", "replay"] as const,
   blank: { answer: [], reveal: "" },
   render: (s, { md, draw }) => ({ ...s, ...gradedText(s, md), structure: draw(s.structure, s.targets), hints: hintText(s.hints, md) }),
+  outline: promptOutline,
+  answer: choiceAnswer,
   start: oneShotStart,
   takes: takesChoice,
   act: actTap,
-} satisfies StepRules<TapStep, PlayState, ChoiceAnswer>;
+} satisfies StepRules<TapStep, PlayState, ChoiceAnswer, string[]>;

@@ -2,7 +2,7 @@
 // graded on the exact set. A Hook prediction accepts every choice and reveals at once.
 import type { Cited } from "../../data.ts";
 import type { GradedVisuals, MoleculeUse, Option, Phase, SceneUse } from "../../model.ts";
-import { judgeChoice, selectOf, takesChoice, type ChoiceAnswer, type HintRule } from "../choice.ts";
+import { choiceAnswer, judgeChoice, selectOf, takesChoice, type ChoiceAnswer, type HintRule } from "../choice.ts";
 import { gradedText, hintText, oneShot, oneShotStart, reveal, type PlayState, type Played, type StepRules } from "../play.ts";
 
 export interface MultipleChoiceStep extends GradedVisuals {
@@ -45,7 +45,10 @@ export const multipleChoice = {
     options: s.options.map((o) => (o.structure ? { ...o, structure: draw(o.structure) } : { ...o, text: md(o.text) })),
     hints: hintText(s.hints, md),
   }),
+  // A structure card's text is its plain label.
+  outline: (s) => ({ lead: s.prompt, choices: s.options.map((o) => o.text) }),
+  answer: choiceAnswer,
   start: oneShotStart,
   takes: takesChoice,
   act: actMultipleChoice,
-} satisfies StepRules<MultipleChoiceStep, PlayState, ChoiceAnswer, { select: "one" | "many" }>;
+} satisfies StepRules<MultipleChoiceStep, PlayState, ChoiceAnswer, string[], { select: "one" | "many" }>;

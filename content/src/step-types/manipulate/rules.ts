@@ -2,7 +2,7 @@
 // Scene) and presses Check on a value.
 import type { Cited } from "../../data.ts";
 import type { GradedVisuals, MoleculeUse, Phase, SceneUse, SceneValue } from "../../model.ts";
-import { gradedText, hintText, oneShot, oneShotStart, sameValue, type PlayState, type Played, type StepRules } from "../play.ts";
+import { gradedText, hintText, oneShot, oneShotStart, promptOutline, sameValue, type PlayState, type Played, type StepRules } from "../play.ts";
 
 /** A Manipulate Hint: `match` lists the wrong control values it answers. */
 export interface ManipulateHint {
@@ -45,7 +45,9 @@ export const manipulate = {
   secret: ["answer", "correct", "hints", "reveal", "revealScene"] as const,
   blank: { answer: Number.NaN, reveal: "" },
   render: (s, { md }) => ({ ...s, ...gradedText(s, md), hints: hintText(s.hints, md) }),
+  outline: promptOutline,
+  answer: (setting) => ({ setting }),
   start: oneShotStart,
   takes: takesSetting,
   act: actManipulate,
-} satisfies StepRules<ManipulateStep, PlayState, ManipulateAnswer>;
+} satisfies StepRules<ManipulateStep, PlayState, ManipulateAnswer, SceneValue>;

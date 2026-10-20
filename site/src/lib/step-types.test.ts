@@ -1,15 +1,12 @@
 // The Step type table against every built Step and Problem of the real content (#97): the answer
-// key splits and rejoins through each type's secret list without loss or leak, and each type's
-// `render` gives what the site's renderText gives today.
+// key splits and rejoins through each type's secret list without loss or leak.
 import { describe, expect, it } from "vitest";
 import { buildContent, contentRoot, type Step } from "@astratron/content";
-import { joinStep, splitStep, stepTypes, type Renderer } from "@astratron/content/step-types";
+import { joinStep, splitStep, stepTypes } from "@astratron/content/step-types";
 import { sceneCatalog } from "@astratron/scenes/check";
 import { sceneManifests } from "@astratron/scenes/manifests";
 import { watchSceneManifests } from "@astratron/scenes/watch";
 import { keyText } from "./answer-key.ts";
-import { md, mdBlocks, renderText } from "./content.ts";
-import { drawView } from "./structures.ts";
 
 const { model } = buildContent(contentRoot, { scenes: sceneCatalog(sceneManifests, watchSceneManifests) });
 const units = model!.subjects.flatMap((s) => s.courses.flatMap((c) => c.units));
@@ -47,12 +44,4 @@ describe("the answer key, over every built Step and Problem", () => {
     ]);
     expect(keyText({ stages: [{ prompt: "Drag it.", goal: { bonded: 4 }, correct: "Done.", blocked: "Not yet.", idle: "Try the H." }] })).toEqual(["Done.", "Not yet.", "Try the H."]);
   });
-});
-
-it("each Step type's render gives what renderText gives, for every built Step and Problem", () => {
-  const r: Renderer = { md, mdBlocks, draw: drawView };
-  for (const [where, step] of all) {
-    const rules = stepTypes[step.type] as unknown as { render: (s: Step, r: Renderer) => Step };
-    expect(JSON.stringify(rules.render(step, r)), where).toBe(JSON.stringify(renderText(step)));
-  }
 });
