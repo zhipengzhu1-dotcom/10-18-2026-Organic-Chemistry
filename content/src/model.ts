@@ -24,6 +24,8 @@ export type SceneStateSpec =
       default: number;
       /** Shown after the value, e.g. "°". */
       unitSymbol?: string;
+      /** A Manipulate Step works it with − / + buttons (and the − / + keys) instead of a slider (Lesson 8's mo-filler). */
+      stepper?: true;
     }
   | { kind: "choice"; label: string; options: { id: string; label: string }[]; default: string };
 
@@ -84,6 +86,10 @@ export interface MoleculeUse {
   dipoles?: { arrows: BondDipole[]; net: { vector: Vec3; size: number; zero: boolean } };
   /** The other molecules of a segmented toggle (this one is first). */
   toggle?: MoleculeUse[];
+  /** Lesson 8 (#86): orbitals named only by the molecule's label (A, B…), shown side by side on wide screens. */
+  orbitalLabels?: "hide";
+  /** Lesson 8 (#86): false = no tap-measuring on this card. */
+  tapMeasure?: false;
   /** Lesson 4 (#82): the toggle group's name (default "Molecule"). */
   toggleLabel?: string;
   /** Lesson 4 (#82): step through the toggle once on entry, ending on the last. */
@@ -440,11 +446,18 @@ export interface Structure {
 export type Hidden = "charges" | "lone-pairs";
 
 /** A structure as one Step shows it. */
+/** A drawing aid on a structure (Lesson 8 s11): a lone pair labelled, or an empty p orbital outlined and labelled. */
+export interface OrbitalMark {
+  atom: string;
+  kind: "lone-pair" | "empty-p";
+  text: string;
+}
+
 export interface StructureView {
   structure: Structure;
   hide: Hidden[];
   /** Atoms ringed and bonds outlined to point the Student at them. */
-  highlight?: { ring: string[]; outline: string[]; corner?: [string, string, string] };
+  highlight?: { ring: string[]; outline: string[]; corner?: [string, string, string]; marks?: OrbitalMark[] };
   /** Added at site build time by the renderer; absent in the raw course model. */
   drawn?: DrawnStructure;
 }

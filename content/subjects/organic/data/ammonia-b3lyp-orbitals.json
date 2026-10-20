@@ -86,7 +86,6 @@
  "provenance": {
   "pipeline": "pipelines/orbitals (#70)",
   "inputSha256": "f89b449c950f32077fb6648d1c07fbcd844d4e3630972b5b11c5967857474e76",
-  "scfEnergyHartree": -56.584725887479465,
   "grid": {
    "step": 0.14,
    "pad": 4.5,
@@ -99,6 +98,7 @@
   "checks": [
    "NH₃: HOMO's largest lobe centred nearest N, on the side away from the H's"
   ],
+  "scfEnergyHartree": -56.584725887479465,
   "homoIndex": 4,
   "energiesHartree": {
    "homo": -0.2657868885582353,

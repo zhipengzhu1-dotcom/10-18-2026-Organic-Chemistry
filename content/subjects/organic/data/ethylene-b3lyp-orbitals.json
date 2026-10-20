@@ -113,7 +113,6 @@
  "provenance": {
   "pipeline": "pipelines/orbitals (#70)",
   "inputSha256": "4803701df12c608439ca60bd06eddfd0561f88d1ed658a14977eaa4f86836b6e",
-  "scfEnergyHartree": -78.62318013301908,
   "grid": {
    "step": 0.14,
    "pad": 4.5,
@@ -126,6 +125,7 @@
   "checks": [
    "ethylene: HOMO antisymmetric through the molecular plane only (π); LUMO also through the C=C bisector (π*)"
   ],
+  "scfEnergyHartree": -78.62318013301908,
   "homoIndex": 7,
   "energiesHartree": {
    "homo": -0.2804085569621826,

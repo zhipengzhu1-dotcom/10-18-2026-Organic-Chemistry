@@ -1,7 +1,21 @@
 import { expect, it } from "vitest";
 import { buildContent } from "@astratron/content";
-import { problem, validTree, writeTree } from "../../../content/test/tree.ts";
-import { splitPractice } from "./practice.ts";
+import { lesson, problem, validTree, writeTree } from "../../../content/test/tree.ts";
+import { lessonNext, splitPractice } from "./practice.ts";
+
+it("a Lesson ends on the next Lesson; the Unit's capstone ends on the Unit's Practice Set (Lesson 8)", () => {
+  const tree = validTree();
+  tree["chem/lessons/l1.yaml"] = lesson();
+  tree["chem/lessons/l2.yaml"] = lesson({ id: "l2", slug: "second-lesson", title: "Second", capstone: true });
+  tree["chem/lessons/l3.yaml"] = lesson({ id: "l3", slug: "third-lesson", title: "Third" });
+  (tree["chem/courses/chem-1.yaml"] as { units: { lessons?: string[] }[] }).units[0].lessons = ["l1", "l2", "l3"];
+  const { model, errors } = buildContent(writeTree(tree));
+  expect(errors).toEqual([]);
+  const u = model!.subjects[0].courses[0].units[0];
+  expect(lessonNext(u, 0)).toEqual({ href: u.lessons[1].url, label: "Next Lesson" });
+  expect(lessonNext(u, 1)).toEqual({ href: `${u.url}/practice`, label: `Unit ${u.number} Practice Set` });
+  expect(lessonNext(u, 2)).toBeUndefined();
+});
 
 function unit() {
   const tree = validTree();

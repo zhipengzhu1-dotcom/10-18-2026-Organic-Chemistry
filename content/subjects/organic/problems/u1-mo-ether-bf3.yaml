@@ -1,0 +1,30 @@
+# Lesson 8 Check Problem (#86), from the merged Lesson 8 spec. The spec says "draft"; Check Steps
+# need approved Problems. Draw arrows with the target hidden: either O lone pair → B gives the result.
+id: u1-mo-ether-bf3
+unit: u1
+lesson: u1-l08
+difficulty: 3
+status: approved
+source: Original
+type: draw-arrows
+prompt: "Dimethyl ether meets BF₃. Find the HOMO and the LUMO yourself, then push the electrons. No target this time."
+start: ether-bf3
+results: [ether-bf3-adduct]
+hideTarget: true
+answer:
+  - { from: a2, to: a4 }
+correct: "The ether's HOMO is an oxygen lone pair; BF₃'s LUMO is boron's empty p orbital. Same flow as with NH₃: O⁺–B⁻, and boron has eight."
+hints:
+  - from: [a5, a6, a7]
+    to: [a4]
+    text: "F's pairs sit low and are already bonded to boron. The highest filled orbital here is a lone pair on the ether's oxygen."
+  - from: [a2]
+    to: [a1, a3]
+    text: "Carbon already has eight and no low empty orbital. Where is the empty one?"
+  - from: [b3, b4, b5]
+    text: "That moves electrons out of the molecule that's short of them. Flow goes *into* boron."
+  - from: [sigma]
+    to: [a4]
+    text: "σ bonds sit low in energy. Use the ether's HOMO, an oxygen lone pair."
+  - text: "Tail on the highest filled orbital (a lone pair). Head on the lowest empty one (boron's p orbital)."
+reveal: "A lone pair on the ether's oxygen → B: a new O–B bond; O⁺, B⁻."

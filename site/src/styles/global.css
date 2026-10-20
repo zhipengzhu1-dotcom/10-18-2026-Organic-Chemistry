@@ -363,6 +363,27 @@
     .player.has-card .figure-drawing .structure {
       max-height: 3.75rem;
     }
+    /* A card of Lesson 8's computed MOs (phase-coloured lobes, #86) with long choices: once a Hint shows, the Hint
+       takes the prompt's place (still read aloud) and the card drops its size and Describe row (it
+       still turns), so the choices stay on screen. */
+    .player.has-card:has(.orbital-chip-phase):has(.fb) .player-prompt {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .player.has-card:has(.orbital-chip-phase):has(.fb) .molecule-tools {
+      display: none;
+    }
+    .player.has-card:has(.orbital-chip-phase):has(.fb) .molecule {
+      min-height: 110px;
+    }
+    /* Once answered, the long Correct line or reveal takes the card's place too (wider screens keep it). */
+    .player.answered.has-card:has(.orbital-chip-phase) :is(.molecule-pair, figure.molecule) {
+      display: none;
+    }
   }
   /* Short choices (one or two words) sit two to a row. */
   .opts.opts-pairs {
@@ -1281,6 +1302,34 @@
     stroke-opacity: 0.6;
     stroke-width: 1.5;
   }
+  /* Orbitals A and B (Lesson 8, #86): a toggle on phones, side by side from 720px. */
+  .molecule-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1 1 260px;
+  }
+  .molecule-pair-cards {
+    display: flex;
+    flex: 1;
+    gap: 12px;
+  }
+  .molecule-pair-card {
+    display: none;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .molecule-pair-card.shown {
+    display: flex;
+  }
+  @media (min-width: 720px) {
+    .molecule-pair-toggle {
+      display: none;
+    }
+    .molecule-pair-card {
+      display: flex;
+    }
+  }
   .molecule-sheet {
     fill: var(--at-electron-fill);
     fill-opacity: 0.1;
@@ -1376,6 +1425,19 @@
   .scene-value {
     min-width: 5ch;
     font-family: var(--at-font-data);
+  }
+  /* A − / + stepper in place of the slider (Lesson 8's mo-filler). */
+  .scene-stepper .scene-value {
+    min-width: 3ch;
+    text-align: center;
+    font-size: 1.25rem;
+  }
+  .scene-step {
+    font-size: 26px;
+  }
+  .scene-step[aria-disabled="true"] {
+    opacity: 0.4;
+    cursor: default;
   }
   /* On a phone, a Manipulate Step's Scene sits a little lower so its slider and a Hint fit (#78). */
   @media (max-width: 600px) {

@@ -357,6 +357,31 @@ const solvers: Record<string, { outcome: Outcome; play: (page: Page) => Promise<
       await correct(page);
     },
   },
+  // Lesson 8's Check Problems (#86). Bond orders start He₂, H₂, He₂⁺.
+  "u1-mo-bond-order-rank": {
+    outcome: "first",
+    play: async (page) => {
+      await move(page, "H₂ (2 e⁻)", "ArrowUp", 1);
+      await move(page, "He₂⁺ (3 e⁻)", "ArrowUp", 1);
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-mo-ethylene-lumo": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, "A: its sign flips between the two carbons, an extra node, so it's antibonding and empty");
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-mo-ether-bf3": {
+    outcome: "first",
+    play: async (page) => {
+      await push(page, "lone pair on O2", "B4");
+      await correct(page);
+    },
+  },
 };
 
 test("the Unit page's Practice Set row opens the Practice Set", async ({ page }) => {

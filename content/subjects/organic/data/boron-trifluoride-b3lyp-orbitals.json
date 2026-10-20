@@ -86,7 +86,6 @@
  "provenance": {
   "pipeline": "pipelines/orbitals (#70)",
   "inputSha256": "375ef90d97b5a58e5e3c507b67a53822dd0989583ee1cfcc3a5605088ba4b1ab",
-  "scfEnergyHartree": -324.6963601826018,
   "grid": {
    "step": 0.14,
    "pad": 4.5,
@@ -99,12 +98,13 @@
   "checks": [
    "BF₃: LUMO antisymmetric through the molecular plane, largest share on B; HOMO a non-degenerate F lone-pair combination (boron share below 0.05, f functions only)"
   ],
+  "scfEnergyHartree": -324.6963601826018,
   "homoIndex": 15,
   "energiesHartree": {
    "homo": -0.43469058248364334,
    "lumo": 0.017434546354630598
   },
   "bf3HomoBoronShare": 0.02,
-  "seconds": 3
+  "seconds": 4
  }
 }

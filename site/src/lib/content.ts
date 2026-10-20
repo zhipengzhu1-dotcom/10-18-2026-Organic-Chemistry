@@ -5,7 +5,7 @@ import { sceneManifests } from "@astratron/scenes/manifests";
 import { watchSceneManifests } from "@astratron/scenes/watch";
 import { marked } from "marked";
 import { drawView } from "./structures.ts";
-import { setSize } from "./practice.ts";
+import { lessonNext, setSize } from "./practice.ts";
 
 /** Set in astro.config.mjs: the real content tree. */
 declare const __CONTENT_ROOT__: string;
@@ -30,8 +30,10 @@ export interface LessonPage {
   unitTitle: string;
   unitUrl: string;
   lesson: Lesson;
-  /** The next Lesson in the Unit, if any. */
+  /** Where the Lesson-end screen's primary button goes: the next Lesson, or the capstone's Practice Set. */
   nextUrl?: string;
+  /** That button's words ("Next Lesson", "Unit 1 Practice Set"). */
+  nextLabel?: string;
 }
 
 export function lessonPages(): LessonPage[] {
@@ -46,7 +48,8 @@ export function lessonPages(): LessonPage[] {
           unitTitle: u.title,
           unitUrl: u.url,
           lesson,
-          nextUrl: u.lessons[i + 1]?.url,
+          nextUrl: lessonNext(u, i)?.href,
+          nextLabel: lessonNext(u, i)?.label,
         })),
       ),
     ),

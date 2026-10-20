@@ -25,6 +25,16 @@ function unitPage(edit: (unit: Unit) => void = () => {}): string {
 const texts = (html: string) =>
   [...html.matchAll(/>([^<>]+)</g)].map((m) => m[1].replace(/&#x27;|&#39;/g, "'").replace(/&amp;/g, "&").trim()).filter(Boolean);
 
+describe("Level select goals", () => {
+  it("are rendered through the page's Markdown renderer when given one (formulas like He₂ in the data face)", () => {
+    const { model } = buildContent(writeTree(validTree()));
+    const unit = model!.subjects[0].courses[0].units[0];
+    unit.lessons[0].goal = "Why there is no He₂.";
+    const html = renderToStaticMarkup(createElement(LevelSelect, { unit, renderText: (s: string) => s.replace("He₂", '<span class="data">He₂</span>') }));
+    expect(html).toContain('<p class="level-goal">Why there is no <span class="data">He₂</span>.</p>');
+  });
+});
+
 describe("Level select", () => {
   it("groups the Lessons into acts, each row with number, title, goal, signature Step type and Step count", () => {
     const shown = texts(unitPage());

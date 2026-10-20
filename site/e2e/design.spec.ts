@@ -130,7 +130,7 @@ for (const theme of THEMES) {
     });
 
     test("every Step and feedback panel of every Lesson passes axe and the type rules", async ({ page }) => {
-      test.setTimeout(360_000); // axe on every Step of every Lesson (ten real Lessons by #85)
+      test.setTimeout(480_000); // axe on every Step of every Lesson (eleven real Lessons with Lesson 8; slow under load)
       for (const lesson of lessonPaths(await allPages(page))) {
         await page.goto(lesson);
         await playThrough(page, async (step) => {
@@ -200,7 +200,7 @@ test.describe("Step player on a phone", () => {
   test("every Step of every Lesson, with its feedback, fits one phone screen with the button in view", async ({
     page,
   }) => {
-    test.setTimeout(120_000);
+    test.setTimeout(300_000); // every Step of every Lesson
     for (const lesson of lessonPaths(await allPages(page))) {
       await page.goto(lesson);
       await playThrough(page, async (step) => {
@@ -218,7 +218,8 @@ test.describe("Step player on a phone", () => {
         // summary has Retry missed (when any), Next Unit and Back to Unit (story 69).
         const foot = page.locator(".player-foot").locator("button, a");
         const end = await page.getByRole("link", { name: "Back to Unit" }).isVisible();
-        const ends = [page.getByRole("link", { name: "Next Lesson" }), page.getByRole("link", { name: "Next Unit" }), page.getByRole("button", { name: /^Retry missed/ })];
+        // The Unit's capstone (Lesson 8) ends on "Unit 1 Practice Set" instead of Next Lesson.
+        const ends = [page.getByRole("link", { name: "Next Lesson" }), page.getByRole("link", { name: /^Unit \d+ Practice Set$/ }), page.getByRole("link", { name: "Next Unit" }), page.getByRole("button", { name: /^Retry missed/ })];
         let extra = 0;
         for (const e of ends) extra += await e.count();
         await expect(foot).toHaveCount(end ? extra + 1 : 1);

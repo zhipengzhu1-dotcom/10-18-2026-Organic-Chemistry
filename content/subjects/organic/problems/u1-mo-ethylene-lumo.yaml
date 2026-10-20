@@ -1,0 +1,38 @@
+# Lesson 8 Check Problem (#86), from the merged Lesson 8 spec. The spec says "draft"; Check Steps
+# need approved Problems. A = π* (the LUMO), B = π (the HOMO), named only A and B on the page.
+id: u1-mo-ethylene-lumo
+unit: u1
+lesson: u1-l08
+difficulty: 2
+status: approved
+source: Original
+type: rotate-and-identify
+prompt: "Two of ethylene's orbitals, **computed** and unlabelled. Rotate them. Which one is ethylene's **LUMO**?"
+molecule:
+  id: ethylene-b3lyp
+  view: face-on
+  label: A
+  orbitalLabels: hide
+  tapMeasure: false
+  orbitals: [ethylene-b3lyp-orbitals/lumo]
+  describe: "Ethylene, flat. Four lobes: above the plane, plus over one carbon and minus over the other; below, the reverse. Nodes: the plane of the atoms, and a plane cutting between the two carbons."
+  toggle:
+    - id: ethylene-b3lyp
+      view: face-on
+      label: B
+      orbitals: [ethylene-b3lyp-orbitals/homo]
+      describe: "Two lobes: plus above the plane, minus below, each stretched over both carbons. One node: the plane of the atoms."
+options:
+  - { id: a, text: "A: its sign flips between the two carbons, an extra node, so it's antibonding and empty" }
+  - { id: b, text: "B: its sign never flips between the carbons, so it's ready to take electrons" }
+  - { id: c, text: "Neither: ethylene's electrons fill every orbital it has" }
+answer: [a]
+correct: "A is π\\*: besides the plane of the molecule, a second node cuts between the carbons. Antibonding orbitals sit high and stay empty. That's ethylene's LUMO."
+hints:
+  - match: [b]
+    text: "No sign flip between the carbons means bonding. That's π, already holding ethylene's last pair. Bonding orbitals fill first."
+  - match: [c]
+    text: "Ethylene's 12 valence electrons fill 6 orbitals, and π is the sixth, the HOMO. Every orbital above it is empty."
+  - text: "Turn each orbital edge-on and look between the two carbons. Does the sign flip there?"
+reveal: "A: two nodes, π\\*, the LUMO. B: one node, π, the HOMO."
+sourceNote: "π and π\\*: facts as in OpenStax *Organic Chemistry* §1.11, CC BY-NC-SA 4.0."

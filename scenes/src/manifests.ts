@@ -32,6 +32,9 @@ import { waterPush } from "./water-push/manifest.ts";
 // Lesson 3 (#81)
 import { fourDomainFamily } from "./four-domain-family/manifest.ts";
 import { dipoleSum } from "./dipole-sum/manifest.ts";
+// Lesson 8 (#86)
+import { moFiller } from "./mo-filler/manifest.ts";
+import { frontierLadder } from "./frontier-ladder/manifest.ts";
 
 // Lesson 4 (#82)
 import { hybridSets } from "./hybrid-sets/manifest.ts";
@@ -76,4 +79,7 @@ export const sceneManifests: readonly SceneManifest<any>[] = [
   methaneUnmixedVsReal,
   orbitalSum,
   piTwist,
+  // Lesson 8 (#86)
+  moFiller,
+  frontierLadder,
 ];

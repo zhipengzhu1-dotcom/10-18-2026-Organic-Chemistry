@@ -4,7 +4,7 @@
 import type { z } from "zod";
 import { find, geometryQuantities, type Cited, type CitedData } from "./data.ts";
 import type { MoleculeUse, OrbitalUse } from "./model.ts";
-import { bondDipoles, netDipole, viewErrors, viewMatrix, type ViewSpec } from "./molecule.ts";
+import { blindMesh, bondDipoles, netDipole, viewErrors, viewMatrix, type ViewSpec } from "./molecule.ts";
 import type { viewsFile } from "./schema.ts";
 
 /** A Step's `molecule` as written in the Lesson or Problem file. */
@@ -18,6 +18,10 @@ export interface MoleculeUseFile {
   labels?: Record<string, string>;
   pageSheet?: [number, number, number];
   dipoles?: boolean;
+  /** Lesson 8 (#86): `hide` names each orbital only by its molecule's `label` (A, B…), for "which one is σ*?" Steps. */
+  orbitalLabels?: "hide";
+  /** Lesson 8 (#86): false switches tap-measuring off on the card (and on every molecule of its toggle). */
+  tapMeasure?: false;
   toggle?: Omit<MoleculeUseFile, ToggleOnly>[];
   toggleLabel?: string;
   autoplay?: boolean;
@@ -26,7 +30,7 @@ export interface MoleculeUseFile {
   zoom?: number;
 }
 /** Fields only the first molecule of a toggle takes. */
-type ToggleOnly = "toggle" | "toggleLabel" | "autoplay";
+type ToggleOnly = "toggle" | "toggleLabel" | "autoplay" | "orbitalLabels" | "tapMeasure";
 export type Views = z.infer<typeof viewsFile>;
 
 /** The cited table bond-dipole arrows are sized from (Lesson 1's Pauling values). */
@@ -67,9 +71,12 @@ export function resolveMoleculeUse(
   if (use.toggle && (!use.label || use.toggle.some((t) => !t.label)))
     return { errors: [`${named}: a toggle needs a label on every molecule`] };
   if (!use.toggle && (use.toggleLabel || use.autoplay)) return { errors: [`${named}: toggleLabel and autoplay need a toggle`] };
-  const main = resolveOne(use, data, views, card);
+  if (use.orbitalLabels === "hide" && !use.label)
+    return { errors: [`${named}: orbitalLabels: hide names each orbital by its molecule's label (A, B…); add a label`] };
+  const shared = { blind: use.orbitalLabels === "hide", tapMeasure: use.tapMeasure };
+  const main = resolveOne(use, data, views, card, shared);
   if (!main.molecule || !use.toggle) return main;
-  const others = use.toggle.map((t) => resolveOne(t, data, views, true));
+  const others = use.toggle.map((t) => resolveOne(t, data, views, true, shared));
   const errors = others.flatMap((o) => o.errors);
   if (errors.length) return { errors };
   return {
@@ -84,11 +91,18 @@ export function resolveMoleculeUse(
   };
 }
 
+/** What every molecule of one card shares: orbitals named only by letter, and measuring on or off. */
+interface Shared {
+  blind: boolean;
+  tapMeasure?: false;
+}
+
 function resolveOne(
   use: Omit<MoleculeUseFile, ToggleOnly>,
   data: CitedData,
   views: Views,
   card: boolean,
+  shared: Shared = { blind: false },
 ): { molecule?: MoleculeUse; errors: string[] } {
   const set = data[use.id];
   const named = `molecule "${use.id}"`;
@@ -143,7 +157,7 @@ function resolveOne(
     }
   if (errors.length) return { errors };
 
-  const resolved = resolveOrbitals(use, data, card || !!use.card);
+  const resolved = resolveOrbitals(use, data, card || !!use.card, shared.blind);
   if (resolved.errors.length) return { errors: resolved.errors.map((m) => `${named}: ${m}`) };
 
   const geometry = Object.values(set.values).filter((v) => geometryQuantities.includes(v.quantity));
@@ -172,6 +186,8 @@ function resolveOne(
       ...(use.labels ? { labels: Object.fromEntries(Object.entries(use.labels).map(([k, v]) => [Number(k), v])) } : {}),
       ...(use.pageSheet ? { pageSheet: use.pageSheet } : {}),
       ...(use.dipoles ? { dipoles: dipoles() } : {}),
+      ...(shared.blind ? { orbitalLabels: "hide" as const } : {}),
+      ...(shared.tapMeasure === false ? { tapMeasure: false as const } : {}),
       ...(use.plane ? { plane: { through: use.plane.through, label: use.plane.label ?? "Plane", on: !!use.plane.on } } : {}),
       ...(use.measure ? { measure: use.measure } : {}),
       ...(use.zoom ? { zoom: use.zoom } : {}),
@@ -185,7 +201,12 @@ function resolveOne(
  * Step's molecule file (so the lobes sit on these very atoms) and shown on the inline card.
  * `cited` is what the Source note adds: each set's isovalue, then the energies shown.
  */
-function resolveOrbitals(use: MoleculeUseFile, data: CitedData, card: boolean): { orbitals: OrbitalUse[]; cited: Cited[]; errors: string[] } {
+function resolveOrbitals(
+  use: Omit<MoleculeUseFile, "toggle">,
+  data: CitedData,
+  card: boolean,
+  blind = false,
+): { orbitals: OrbitalUse[]; cited: Cited[]; errors: string[] } {
   const orbitals: OrbitalUse[] = [];
   const cited: Cited[] = [];
   const errors: string[] = [];
@@ -208,8 +229,15 @@ function resolveOrbitals(use: MoleculeUseFile, data: CitedData, card: boolean): 
       errors.push(`no orbital "${ref}"`);
       continue;
     }
-    const energy = entry.energy ? data[fid].values[entry.energy] : undefined;
     add(data[fid].values[set.iso]);
+    if (blind) {
+      // Named only by its molecule's letter: no orbital name, energy or file name reaches the page, so
+      // "which one is σ*?" can't be read from the page source. The mesh is served by its hash (site/src/pages/orbitals/m).
+      const letter = use.label!;
+      orbitals.push({ ref: letter, label: `orbital ${letter}`, chip: letter, style: entry.style, mesh: blindMesh(entry.sha256), lobes: entry.lobes });
+      continue;
+    }
+    const energy = entry.energy ? data[fid].values[entry.energy] : undefined;
     add(energy);
     orbitals.push({
       ref,

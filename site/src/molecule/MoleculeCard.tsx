@@ -141,7 +141,10 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
   function spin(axis: "x" | "y", degrees: number) {
     if (turnable) setRotation((r) => turn(r, axis, degrees));
   }
+  /** Lesson 8 (#86) switches tap-measuring off: taps and Enter pick nothing. */
+  const measuring = molecule.tapMeasure !== false;
   function pick(atom: number) {
+    if (!measuring) return;
     const next = togglePick(picks, atom);
     setPicks(next);
     const m = measure(molecule, next);
@@ -384,8 +387,10 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
       </div>
       <p id={`${id}-help`} className="sr">
         {turnable ? "Drag or use the arrow keys to turn it; plus and minus zoom; 0 resets the view. " : ""}
-        Square brackets move between atoms and Enter picks one: two atoms give a distance, three the angle at the middle
-        atom. Describe reads the arrangement.
+        {measuring
+          ? "Square brackets move between atoms and Enter picks one: two atoms give a distance, three the angle at the middle atom. "
+          : "Square brackets move between atoms. "}
+        Describe reads the arrangement.
       </p>
       <p className="sr" aria-live="polite">
         {said}

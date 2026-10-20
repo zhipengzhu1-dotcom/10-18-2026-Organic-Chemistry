@@ -147,3 +147,51 @@ describe("computed orbitals on a Step's 3D card", () => {
     ]);
   });
 });
+
+describe("orbitals shown as A and B (Lesson 8: the spec's `labels: hide`)", () => {
+  const twoOrbitals = () => {
+    const d = methaneOrbitals();
+    const list = d.orbitals.list as Record<string, (typeof d.orbitals.list)["homo"]>;
+    list.lumo = { ...list.homo, label: "LUMO", chip: "LUMO", energy: "homo", mesh: "/orbitals/methane-orbitals/lumo.glb", sha256: "a".repeat(64) };
+    return d;
+  };
+  const pair = (extra: object = {}) => ({
+    id: "methane",
+    card: true,
+    label: "A",
+    orbitalLabels: "hide",
+    tapMeasure: false,
+    orbitals: ["methane-orbitals/homo"],
+    describe: "One lobe.",
+    toggle: [{ id: "methane", label: "B", orbitals: ["methane-orbitals/lumo"], describe: "Two lobes." }],
+    ...extra,
+  });
+
+  it("name each orbital only by its letter: no orbital name, energy or telling mesh path reaches the page", () => {
+    const result = build(pair(), twoOrbitals());
+    expect(result.errors).toEqual([]);
+    const m = s02(result).molecule!;
+    expect(m.orbitalLabels).toBe("hide");
+    expect(m.orbitals).toEqual([expect.objectContaining({ ref: "A", label: "orbital A", chip: "A", mesh: `/orbitals/m/${"0".repeat(16)}.glb` })]);
+    expect(m.toggle![0].orbitals).toEqual([expect.objectContaining({ ref: "B", label: "orbital B", chip: "B", mesh: `/orbitals/m/${"a".repeat(16)}.glb` })]);
+    expect(m.orbitals![0].energy).toBeUndefined();
+    const page = JSON.stringify(m);
+    for (const telling of ["homo", "lumo", "HOMO", "LUMO"]) expect(page).not.toContain(telling);
+    expect(m.toggle![0].describe).toBe("Two lobes.");
+  });
+
+  it("turn tap-measuring off for every molecule of the card", () => {
+    const m = s02(build(pair(), twoOrbitals())).molecule!;
+    expect(m.tapMeasure).toBe(false);
+    expect(m.toggle![0].tapMeasure).toBe(false);
+  });
+
+  it("need a letter on every molecule", () => {
+    expect(build(pair({ label: undefined, toggle: [{ id: "methane", orbitals: ["methane-orbitals/lumo"] }] }), twoOrbitals()).errors).toEqual([
+      `${L}: step s02: molecule "methane": a toggle needs a label on every molecule`,
+    ]);
+    expect(build({ id: "methane", card: true, orbitalLabels: "hide", orbitals: ["methane-orbitals/homo"] }, twoOrbitals()).errors).toEqual([
+      `${L}: step s02: molecule "methane": orbitalLabels: hide names each orbital by its molecule's label (A, B…); add a label`,
+    ]);
+  });
+});

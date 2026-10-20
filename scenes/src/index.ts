@@ -68,6 +68,12 @@ import MethaneUnmixedVsReal from "./methane-unmixed-vs-real/MethaneUnmixedVsReal
 import { orbitalSum } from "./orbital-sum/manifest.ts";
 import OrbitalSum from "./orbital-sum/OrbitalSum.tsx";
 
+// Lesson 8 (#86)
+import { moFiller } from "./mo-filler/manifest.ts";
+import MoFiller from "./mo-filler/MoFiller.tsx";
+import { frontierLadder } from "./frontier-ladder/manifest.ts";
+import FrontierLadder from "./frontier-ladder/FrontierLadder.tsx";
+
 export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [sampleTwist.id]: { manifest: sampleTwist, Component: SampleTwist },
   [streamBend.id]: { manifest: streamBend, Component: StreamBend },
@@ -104,6 +110,9 @@ export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [piTwist.id]: { manifest: piTwist, Component: PiTwist },
   [methaneUnmixedVsReal.id]: { manifest: methaneUnmixedVsReal, Component: MethaneUnmixedVsReal },
   [orbitalSum.id]: { manifest: orbitalSum, Component: OrbitalSum },
+  // Lesson 8 (#86)
+  [moFiller.id]: { manifest: moFiller, Component: MoFiller },
+  [frontierLadder.id]: { manifest: frontierLadder, Component: FrontierLadder },
 };
 
 export type * from "./types.ts";

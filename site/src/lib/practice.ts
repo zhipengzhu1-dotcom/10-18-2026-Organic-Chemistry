@@ -22,6 +22,16 @@ export const drawableBank = (unit: Pick<Unit, "lessons" | "bank">) => {
 /** Problems in one Practice Set of this Unit: 10, or fewer while the Bank is small. */
 export const setSize = (unit: Pick<Unit, "lessons" | "bank">) => Math.min(SET_SIZE, drawableBank(unit).length);
 
+/**
+ * Where the Lesson-end screen's primary button goes: the Unit's capstone (Lesson 8) leads to the
+ * Unit's Practice Set when it has one; every other Lesson to the next Lesson, if any.
+ */
+export function lessonNext(unit: Pick<Unit, "url" | "number" | "lessons" | "bank">, index: number): { href: string; label: string } | undefined {
+  if (unit.lessons[index]?.capstone && setSize(unit) > 0) return { href: practiceUrl(unit), label: `Unit ${unit.number} Practice Set` };
+  const next = unit.lessons[index + 1];
+  return next && { href: next.url, label: "Next Lesson" };
+}
+
 /** A drawable Problem as the Practice Set page carries it: its Step without secrets, plus what the draw needs. */
 export interface PageProblem {
   entry: BankEntry;

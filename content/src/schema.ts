@@ -54,6 +54,10 @@ const moleculeUse = z.preprocess(
   (v) => (typeof v === "string" ? { id: v } : v),
   z.strictObject({
     ...moleculeFields,
+    /** Lesson 8 (#86): `hide` names each orbital only by its molecule's `label` (the spec's "labels: hide", shown as A/B). */
+    orbitalLabels: z.literal("hide").optional(),
+    /** Lesson 8 (#86): false switches tap-measuring off on the card (and every molecule of its toggle). */
+    tapMeasure: z.literal(false).optional(),
     /** More molecules shown in the same card, switched with a segmented toggle (every molecule needs a `label`). */
     toggle: z.array(z.strictObject(moleculeFields)).min(1).optional(),
     /** Lesson 4 (#82): the toggle group's name (default "Molecule"), e.g. "Show" for σ | π | both. */
@@ -314,6 +318,11 @@ const drawArrows = {
   results: z.array(id).min(1),
   /** Open Problems and "no target this time": don't draw the target. */
   hideTarget: z.boolean().optional(),
+  /**
+   * Lesson 8 (#86): orbital marks on the start drawing, drawing aids only: `lone-pair` labels an atom's
+   * lone pair (e.g. "HOMO"); `empty-p` outlines an empty p orbital on the atom (e.g. "LUMO (empty)").
+   */
+  marks: z.array(z.strictObject({ atom: id, kind: z.enum(["lone-pair", "empty-p"]), text })).min(1).optional(),
   /** The correct pushes, in an order that works (shown after two wrong tries, and in the reveal). */
   answer: z.array(push).min(1),
   /** In-between copy; `{atom}` and `{electrons}` are filled in. Plain defaults apply when absent. */

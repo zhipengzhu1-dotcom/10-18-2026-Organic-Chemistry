@@ -27,6 +27,39 @@ export default function SceneControl({ sceneId, control, value, onChange, locked
         };
   const read = (raw: string): SceneValue => (spec.kind === "range" ? Number(raw) : spec.options[Number(raw)].id);
 
+  if (spec.kind === "range" && spec.stepper) {
+    // − / + buttons (Lesson 8's mo-filler): Tab to a button and press Enter, or press − / + anywhere on the control.
+    const at = Number(value);
+    const by = (d: number) => {
+      const next = Math.min(spec.max, Math.max(spec.min, at + d * spec.step));
+      if (!locked && next !== at) onChange(next);
+    };
+    return (
+      <div
+        className="scene-control scene-stepper"
+        role="group"
+        aria-label={spec.label}
+        onKeyDown={(e) => {
+          if (e.key === "+" || e.key === "=") by(1);
+          else if (e.key === "-" || e.key === "−" || e.key === "_") by(-1);
+          else return;
+          e.preventDefault();
+        }}
+      >
+        <span aria-hidden="true">{spec.label}</span>
+        <button type="button" className="scene-btn scene-step" aria-label={`Remove one (${spec.label.toLowerCase()})`} aria-disabled={locked || at <= spec.min} onClick={() => by(-1)}>
+          −
+        </button>
+        <output className="scene-value" aria-hidden="true">
+          {range.text}
+        </output>
+        <button type="button" className="scene-btn scene-step" aria-label={`Add one (${spec.label.toLowerCase()})`} aria-disabled={locked || at >= spec.max} onClick={() => by(1)}>
+          +
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="scene-control">
       <span aria-hidden="true">{spec.label}</span>

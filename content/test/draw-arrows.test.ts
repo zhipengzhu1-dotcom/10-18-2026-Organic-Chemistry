@@ -203,6 +203,35 @@ describe("Draw-arrows Steps in the content build", () => {
     ]);
   });
 
+  it("carries orbital marks onto the start drawing (Lesson 8 s11: HOMO on a lone pair, an empty p outline)", () => {
+    const marks = [
+      { atom: "a2", kind: "lone-pair", text: "HOMO" },
+      { atom: "a1", kind: "empty-p", text: "LUMO (empty)" },
+    ];
+    const tree = treeWith({ 5: arrowsStep({ marks }) });
+    expect(build(tree).errors).toEqual([]);
+    const step = lessonOf(tree).steps[5] as DrawArrowsStep;
+    expect(step.start.highlight?.marks).toEqual(marks);
+    expect(step.target?.highlight?.marks).toBeUndefined();
+  });
+
+  it("rejects an orbital mark on an atom the start doesn't have, or a lone-pair mark on an atom without one", () => {
+    const errors = build(
+      treeWith({
+        5: arrowsStep({
+          marks: [
+            { atom: "a9", kind: "empty-p", text: "LUMO" },
+            { atom: "a3", kind: "lone-pair", text: "HOMO" },
+          ],
+        }),
+      }),
+    ).errors;
+    expect(errors).toEqual([
+      `${L}: step s06: an orbital mark names "a9", which the start structure doesn't have`,
+      `${L}: step s06: a lone-pair mark on "a3", which has no lone pair`,
+    ]);
+  });
+
   it("shares the fallback Hint and Correct line rules", () => {
     const errors = build(treeWith({ 5: arrowsStep({ hints: [{ from: ["b1"], text: "Only." }], correct: undefined }) })).errors;
     expect(errors).toEqual([
