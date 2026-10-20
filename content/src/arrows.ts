@@ -11,7 +11,7 @@
 // result (its electrons leave a place that has more than the result has, and
 // land where the result has more), so every valid route counts.
 import type { Push, PushHint, Structure, StructureBond } from "./model.ts";
-import { VALENCE } from "./valence.ts";
+import { formalCharge, VALENCE } from "./valence.ts";
 
 export interface MoleculeAtom {
   id: string;
@@ -66,7 +66,7 @@ function bondSums(bonds: Iterable<{ a: string; b: string; order: number }>): Map
 /** Formal charge of every atom: valence − 2·lone pairs − bond orders − H. */
 export function charges(m: Molecule): Map<string, number> {
   const sum = bondSums(m.bonds.values());
-  return new Map(m.atoms.map((a) => [a.id, (VALENCE[a.el] ?? 0) - 2 * a.lp - (sum.get(a.id) ?? 0) - a.h]));
+  return new Map(m.atoms.map((a) => [a.id, formalCharge(a.el, a.lp, sum.get(a.id) ?? 0, a.h)]));
 }
 
 /** Electrons around every atom: its lone pairs plus every bond it shares (H's included), counted in electrons. */

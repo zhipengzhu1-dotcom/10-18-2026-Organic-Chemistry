@@ -14,6 +14,15 @@ export const VALENCE: Record<string, number> = Object.fromEntries(
   Object.entries(valenceElectrons.values).map(([key, v]) => [key.replace(/\.valence$/, ""), v.value]),
 );
 
+/** Formal charge: valence electrons − lone-pair electrons − bond orders − H's (an unknown element counts 0). */
+export function formalCharge(el: string, lonePairs: number, bondOrders: number, hydrogens = 0): number {
+  const paired = PAIR * lonePairs;
+  return (VALENCE[el] ?? 0) - paired - bondOrders - hydrogens;
+}
+
+/** Electrons in a pair. */
+const PAIR = 2;
+
 /** Bonds a neutral carbon makes (its 4 valence electrons, each shared once). */
 const CARBON_BONDS = VALENCE.C;
 

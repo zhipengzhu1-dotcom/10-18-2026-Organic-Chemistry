@@ -3,7 +3,7 @@
 // drawing: no measured geometry, so no cited numbers; positions only space the
 // letters out. No React here, so manifests can import it (see embed.tsx).
 import type { Structure, StructureAtom } from "@astratron/content";
-import { VALENCE } from "@astratron/content/valence";
+import { formalCharge as chargeOf } from "@astratron/content/valence";
 import type { Drawing } from "./structure/render.ts";
 import type { Box } from "./frame.ts";
 
@@ -16,7 +16,7 @@ export interface Partner {
 
 /** The centre's formal charge: valence − lone-pair electrons − bonds. */
 export function formalCharge(el: string, lp: number, partners: Partner[]): number {
-  return VALENCE[el] - 2 * lp - partners.reduce((n, p) => n + (p.order ?? 1), 0);
+  return chargeOf(el, lp, partners.reduce((n, p) => n + (p.order ?? 1), 0));
 }
 
 /**
