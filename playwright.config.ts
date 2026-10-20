@@ -16,6 +16,8 @@ const port = Number(process.env.E2E_PORT);
 // Browser tests run against the built site (`astro build` + `astro preview`).
 export default defineConfig({
   testDir: "site/e2e",
+  // Tests are independent (each gets a fresh page and storage), so shards balance by test, not by file.
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
   // Room for a busy machine (several walks run in parallel): a short test that passes in seconds alone
   // could pass 30 s under load (structure-steps Tab reach, Lesson 0's keyboard walk, molecule-card).
