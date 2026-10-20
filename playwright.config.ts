@@ -1,7 +1,17 @@
+import { execFileSync } from "node:child_process";
 import { defineConfig, devices } from "@playwright/test";
 
-// E2E_PORT lets parallel worktrees run the smoke test side by side.
-const port = Number(process.env.E2E_PORT ?? 4329);
+// The preview server's port: E2E_PORT if set, else a free port picked once by the runner.
+// Workers load this config again but inherit the runner's env, so they see the same port.
+if (!process.env.E2E_PORT) {
+  process.env.E2E_PORT = execFileSync(process.execPath, [
+    "-e",
+    "const s=require('node:net').createServer();s.listen(0,'127.0.0.1',()=>{process.stdout.write(String(s.address().port));s.close()})",
+  ])
+    .toString()
+    .trim();
+}
+const port = Number(process.env.E2E_PORT);
 
 // Browser tests run against the built site (`astro build` + `astro preview`).
 export default defineConfig({
