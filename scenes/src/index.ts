@@ -58,6 +58,15 @@ import { ruleLadder } from "./rule-ladder/manifest.ts";
 import RuleLadder from "./rule-ladder/RuleLadder.tsx";
 import { carbonylSites } from "./carbonyl-sites/manifest.ts";
 import CarbonylSites from "./carbonyl-sites/CarbonylSites.tsx";
+// Lesson 4 (#82)
+import { hybridSets } from "./hybrid-sets/manifest.ts";
+import HybridSets from "./hybrid-sets/HybridSets.tsx";
+import { piTwist } from "./pi-twist/manifest.ts";
+import PiTwist from "./pi-twist/PiTwist.tsx";
+import { methaneUnmixedVsReal } from "./methane-unmixed-vs-real/manifest.ts";
+import MethaneUnmixedVsReal from "./methane-unmixed-vs-real/MethaneUnmixedVsReal.tsx";
+import { orbitalSum } from "./orbital-sum/manifest.ts";
+import OrbitalSum from "./orbital-sum/OrbitalSum.tsx";
 
 export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [sampleTwist.id]: { manifest: sampleTwist, Component: SampleTwist },
@@ -90,6 +99,11 @@ export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [amideHybrid.id]: { manifest: amideHybrid, Component: AmideHybrid },
   [ruleLadder.id]: { manifest: ruleLadder, Component: RuleLadder },
   [carbonylSites.id]: { manifest: carbonylSites, Component: CarbonylSites },
+  // Lesson 4 (#82)
+  [hybridSets.id]: { manifest: hybridSets, Component: HybridSets },
+  [piTwist.id]: { manifest: piTwist, Component: PiTwist },
+  [methaneUnmixedVsReal.id]: { manifest: methaneUnmixedVsReal, Component: MethaneUnmixedVsReal },
+  [orbitalSum.id]: { manifest: orbitalSum, Component: OrbitalSum },
 };
 
 export type * from "./types.ts";

@@ -68,6 +68,31 @@ export function placePoints(m: Drawable, rotation: Matrix3, frame: Frame, points
   });
 }
 
+/**
+ * Lesson 4's plane sheet (#82): the four corners (molecule file's frame, Å) of a rectangle in the
+ * plane of atoms [a, b, c], one side along a→c's line, wide enough to cover every atom's shadow on
+ * the plane plus `margin` Å.
+ */
+export function planeCorners(m: Drawable, [a, b, c]: [number, number, number], margin = 0.6): [number, number, number][] {
+  const at = (i: number) => [m.atoms[i].x, m.atoms[i].y, m.atoms[i].z];
+  const [pa, pb, pc] = [at(a), at(b), at(c)];
+  const sub = (p: number[], q: number[]) => [p[0] - q[0], p[1] - q[1], p[2] - q[2]];
+  const unit = (p: number[]) => {
+    const n = Math.hypot(p[0], p[1], p[2]);
+    return p.map((x) => x / n);
+  };
+  const cross = (p: number[], q: number[]) => [p[1] * q[2] - p[2] * q[1], p[2] * q[0] - p[0] * q[2], p[0] * q[1] - p[1] * q[0]];
+  const dot = (p: number[], q: number[]) => p[0] * q[0] + p[1] * q[1] + p[2] * q[2];
+  const u = unit(sub(pa, pc));
+  const normal = unit(cross(sub(pa, pb), sub(pc, pb)));
+  const v = cross(normal, u);
+  const us = m.atoms.map((_, i) => dot(sub(at(i), pb), u));
+  const vs = m.atoms.map((_, i) => dot(sub(at(i), pb), v));
+  const [u0, u1, v0, v1] = [Math.min(...us) - margin, Math.max(...us) + margin, Math.min(...vs) - margin, Math.max(...vs) + margin];
+  const corner = (s: number, t: number): [number, number, number] => [pb[0] + s * u[0] + t * v[0], pb[1] + s * u[1] + t * v[1], pb[2] + s * u[2] + t * v[2]];
+  return [corner(u0, v0), corner(u1, v0), corner(u1, v1), corner(u0, v1)];
+}
+
 /** Pixels per Å that keep the whole true-scale molecule inside the frame in any rotation. */
 export function fitScale(m: Drawable, width: number, height: number): number {
   const extent = Math.max(

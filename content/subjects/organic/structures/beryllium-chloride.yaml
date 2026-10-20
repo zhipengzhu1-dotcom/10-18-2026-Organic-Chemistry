@@ -1,0 +1,13 @@
+# Lesson 4 Check Problem u1-hyb-becl2: the Lewis structure Cl–Be–Cl of one gas-phase BeCl₂
+# molecule, three lone pairs on each Cl and none on Be. Drawn by hand (three atoms in a line).
+
+id: beryllium-chloride
+style: full
+source: Lewis structure of gas-phase BeCl₂ (MIT OCW 5.12 PS1 Q5a)
+atoms:
+  - { id: a1, el: Cl, x: 0, y: 0, lp: 3 }
+  - { id: a2, el: Be, x: 1.5, y: 0 }
+  - { id: a3, el: Cl, x: 3, y: 0, lp: 3 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 1 }

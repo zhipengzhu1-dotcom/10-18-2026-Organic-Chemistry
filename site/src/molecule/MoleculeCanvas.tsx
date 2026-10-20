@@ -7,7 +7,11 @@
 import { Canvas, useLoader, useThree } from "@react-three/fiber";
 import { lazy, Suspense, useEffect, useMemo, type ReactNode } from "react";
 import {
+  BufferGeometry,
   CylinderGeometry,
+  DoubleSide,
+  Float32BufferAttribute,
+  MeshBasicMaterial,
   Matrix4,
   MeshMatcapMaterial,
   Quaternion,
@@ -33,6 +37,8 @@ export interface MoleculeCanvasProps {
   children?: ReactNode;
   /** Called once the molecule's computed orbitals (molecule.orbitals, #70) are drawn. */
   onOrbitalsDrawn?: () => void;
+  /** Lesson 4's plane sheet (#82): its four corners in the molecule file's frame (Å), when shown. */
+  sheet?: [number, number, number][];
 }
 
 /** The studio matcap (Blender, #69); tinted per element. */
@@ -41,6 +47,9 @@ export const MATCAP_URL = "/matcaps/studio.webp";
 const STICK = 0.11;
 
 const sphere = new SphereGeometry(1, 40, 28);
+/** The plane sheet draws after the atoms and before the orbital lobes. */
+const SHEET_RENDER_ORDER = 5;
+const sheetMaterial = new MeshBasicMaterial({ color: "#b9a8e8", transparent: true, opacity: 0.22, side: DoubleSide, depthWrite: false });
 const stick = new CylinderGeometry(1, 1, 1, 20);
 const yAxis = new Vector3(0, 1, 0);
 
@@ -62,7 +71,7 @@ export default function MoleculeCanvas(props: MoleculeCanvasProps) {
   );
 }
 
-function Molecule({ molecule, rotation, scale, trueScale, children, onOrbitalsDrawn }: MoleculeCanvasProps) {
+function Molecule({ molecule, rotation, scale, trueScale, children, onOrbitalsDrawn, sheet }: MoleculeCanvasProps) {
   const matcap = useLoader(TextureLoader, MATCAP_URL);
   matcap.colorSpace = SRGBColorSpace;
   const { camera, invalidate } = useThree();
@@ -113,7 +122,14 @@ function Molecule({ molecule, rotation, scale, trueScale, children, onOrbitalsDr
     camera.updateProjectionMatrix();
     invalidate();
   }, [camera, scale, invalidate]);
-  useEffect(() => invalidate(), [matrix, trueScale, invalidate]);
+  useEffect(() => invalidate(), [matrix, trueScale, sheet, invalidate]);
+  const sheetGeometry = useMemo(() => {
+    if (!sheet) return null;
+    const g = new BufferGeometry();
+    const p = sheet.map(([x, y, z]) => [x - centre[0], y - centre[1], z - centre[2]]);
+    g.setAttribute("position", new Float32BufferAttribute([...p[0], ...p[1], ...p[2], ...p[0], ...p[2], ...p[3]], 3));
+    return g;
+  }, [sheet, centre]);
 
   return (
     <group matrix={matrix} matrixAutoUpdate={false}>
@@ -124,6 +140,11 @@ function Molecule({ molecule, rotation, scale, trueScale, children, onOrbitalsDr
         bonds.map((b, i) => (
           <mesh key={`b${i}`} geometry={stick} material={bondMaterial} position={b.position} quaternion={b.quaternion} scale={b.scale} />
         ))}
+      {sheetGeometry && (
+        // Translucent and drawn after the atoms without writing depth: atoms in front of it stay
+        // bright, atoms behind it show through, and orbital lobes (renderOrder 10) draw over it.
+        <mesh geometry={sheetGeometry} material={sheetMaterial} renderOrder={SHEET_RENDER_ORDER} />
+      )}
       {molecule.orbitals?.length ? (
         // Its own Suspense: the atoms show while the meshes load.
         <Suspense fallback={null}>

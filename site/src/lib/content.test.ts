@@ -18,6 +18,7 @@ describe("md marks numbers and formulas as data", () => {
     expect(md("In methane, CH₄, and water, H₂O.")).toBe(`In methane, ${d("CH₄")}, and water, ${d("H₂O")}.`);
     expect(md("ethane, H₃C–CH₃, has a C–C bond and C=O")).toBe(`ethane, ${d("H₃C–CH₃")}, has a ${d("C–C")} bond and ${d("C=O")}`);
     expect(md("OH⁻ takes H⁺")).toBe(`${d("OH⁻")} takes ${d("H⁺")}`);
+    expect(md("Beryllium chloride, BeCl₂, and Cl–Be–Cl")).toBe(`Beryllium chloride, ${d("BeCl₂")}, and ${d("Cl–Be–Cl")}`);
   });
 
   it("wraps electrons and a charge written before a formula (Lesson 7)", () => {

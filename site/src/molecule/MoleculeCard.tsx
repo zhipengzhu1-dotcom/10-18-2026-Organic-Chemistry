@@ -23,7 +23,7 @@ import {
   turn,
   type Matrix3,
 } from "@astratron/content/molecule";
-import { atomAt, dipoleArrows, fitScale, placeAtoms, placePoints } from "./layout.ts";
+import { atomAt, dipoleArrows, fitScale, placeAtoms, placePoints, planeCorners } from "./layout.ts";
 import { CardMarks, MoleculeOverlay, MoleculeStill } from "./MoleculeDrawing.tsx";
 
 const MoleculeCanvas = lazy(() => import("./MoleculeCanvas.tsx"));
@@ -77,9 +77,12 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
   const [size, setSize] = useState({ width: 358, height: 220 });
   const [gl, setGl] = useState<boolean | null>(null);
   const [rotation, setRotation] = useState<Matrix3>(molecule.orientation);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(molecule.zoom ?? 1);
   const [trueScale, setTrueScale] = useState(false);
-  const [picks, setPicks] = useState<number[]>([]);
+  // Lesson 4 (#82): `measure` names atoms measured on load.
+  const [picks, setPicks] = useState<number[]>(molecule.measure ?? []);
+  /** Lesson 4's plane sheet (#82): shown or hidden with its button. */
+  const [planeOn, setPlaneOn] = useState(molecule.plane?.on ?? false);
   const [cursor, setCursor] = useState<number | null>(null);
   const [said, setSaid] = useState("");
   const [orbitalsDrawn, setOrbitalsDrawn] = useState(false);
@@ -126,6 +129,8 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
   const dipoles = molecule.dipoles ? dipoleArrows(molecule, rotation, { ...size, scale, trueScale }, added) : undefined;
   const sides = settled && sheet ? pageSides(molecule, rotation, sheet) : [];
   const shown = measurement && readout(measurement, names);
+  const corners = useMemo(() => (molecule.plane ? planeCorners(molecule, molecule.plane.through) : undefined), [molecule]);
+  const sheetCorners = planeOn ? corners : undefined;
   /** Turning and zooming need the live 3D view; the no-WebGL still stays put. */
   const turnable = gl !== false;
 
@@ -171,7 +176,7 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
       say(zoomIn ? "Zoomed in." : "Zoomed out.");
     } else if (e.key === "0" || e.key === "Home") {
       setRotation(molecule.orientation);
-      setZoom(1);
+      setZoom(molecule.zoom ?? 1);
       say("View reset.");
     } else if (e.key === "]") moveCursor(1);
     else if (e.key === "[") moveCursor(-1);
@@ -226,12 +231,23 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
         >
           {gl ? (
             <Suspense fallback={<MoleculeStill molecule={molecule} placed={placed} trueScale={trueScale} size={size} />}>
-              <MoleculeCanvas molecule={molecule} rotation={rotation} scale={scale} trueScale={trueScale} onOrbitalsDrawn={orbitalsReady}>
+              <MoleculeCanvas molecule={molecule} rotation={rotation} scale={scale} trueScale={trueScale} onOrbitalsDrawn={orbitalsReady} sheet={sheetCorners}>
                 {children}
               </MoleculeCanvas>
             </Suspense>
           ) : (
             <MoleculeStill molecule={molecule} placed={placed} trueScale={trueScale} size={size} />
+          )}
+          {gl === false && sheetCorners && (
+            // The still has no depth: the sheet is drawn over it, faint.
+            <svg className="molecule-overlay" viewBox={`0 0 ${size.width} ${size.height}`} aria-hidden="true">
+              <polygon
+                className="molecule-plane"
+                points={placePoints(molecule, rotation, { ...size, scale, trueScale }, sheetCorners)
+                  .map((q) => `${q.x},${q.y}`)
+                  .join(" ")}
+              />
+            </svg>
           )}
           <MoleculeOverlay molecule={molecule} placed={placed} picks={picks} cursor={cursor} measurement={measurement} size={size} names={names} />
           {(sheet || dipoles || molecule.labels) && (
@@ -276,8 +292,22 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
           <i style={{ width: `${scale}px` }} />
           <span>1 Å</span>
         </div>
-        {turnable && (
+        {(turnable || molecule.plane) && (
           <div className="molecule-turn">
+            {molecule.plane && (
+              // Lesson 4's plane sheet (#82): over the stage, so it adds no row under the card.
+              <button
+                type="button"
+                className="molecule-btn molecule-plane-toggle"
+                aria-pressed={planeOn}
+                onClick={() => {
+                  setPlaneOn(!planeOn);
+                  say(planeOn ? `${molecule.plane!.label} hidden.` : `${molecule.plane!.label} shown, through the atoms it is named for.`);
+                }}
+              >
+                {molecule.plane.label}
+              </button>
+            )}
             {sheet && snap && (
               // Over the stage, with the turn buttons, so it adds no row under the card.
               <button
@@ -291,12 +321,16 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
                 Snap to page
               </button>
             )}
-            <button type="button" className="molecule-btn" aria-label="Turn left" onClick={() => spin("y", -TURN_STEP)}>
-              ↺
-            </button>
-            <button type="button" className="molecule-btn" aria-label="Turn right" onClick={() => spin("y", TURN_STEP)}>
-              ↻
-            </button>
+            {turnable && (
+              <>
+                <button type="button" className="molecule-btn" aria-label="Turn left" onClick={() => spin("y", -TURN_STEP)}>
+                  ↺
+                </button>
+                <button type="button" className="molecule-btn" aria-label="Turn right" onClick={() => spin("y", TURN_STEP)}>
+                  ↻
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>

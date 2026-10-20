@@ -33,6 +33,12 @@ import { waterPush } from "./water-push/manifest.ts";
 import { fourDomainFamily } from "./four-domain-family/manifest.ts";
 import { dipoleSum } from "./dipole-sum/manifest.ts";
 
+// Lesson 4 (#82)
+import { hybridSets } from "./hybrid-sets/manifest.ts";
+import { piTwist } from "./pi-twist/manifest.ts";
+import { methaneUnmixedVsReal } from "./methane-unmixed-vs-real/manifest.ts";
+import { orbitalSum } from "./orbital-sum/manifest.ts";
+
 export const sceneManifests: readonly SceneManifest<any>[] = [
   sampleTwist,
   streamBend,
@@ -65,4 +71,9 @@ export const sceneManifests: readonly SceneManifest<any>[] = [
   amideHybrid,
   ruleLadder,
   carbonylSites,
+  // Lesson 4 (#82)
+  hybridSets,
+  methaneUnmixedVsReal,
+  orbitalSum,
+  piTwist,
 ];

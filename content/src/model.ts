@@ -84,6 +84,16 @@ export interface MoleculeUse {
   dipoles?: { arrows: BondDipole[]; net: { vector: Vec3; size: number; zero: boolean } };
   /** The other molecules of a segmented toggle (this one is first). */
   toggle?: MoleculeUse[];
+  /** Lesson 4 (#82): the toggle group's name (default "Molecule"). */
+  toggleLabel?: string;
+  /** Lesson 4 (#82): step through the toggle once on entry, ending on the last. */
+  autoplay?: boolean;
+  /** Lesson 4 (#82): a translucent sheet through three atoms that turns with the molecule; `on` = shown at the start. */
+  plane?: { through: [number, number, number]; label: string; on: boolean };
+  /** Lesson 4 (#82): atoms measured on load (two: a length; three: the angle at the middle one). */
+  measure?: number[];
+  /** Lesson 4 (#82): the start zoom (1 fits the whole true-scale molecule in any rotation). */
+  zoom?: number;
   /** Computed orbitals drawn as translucent lobes over the atoms (#70), in the order the Step lists them. */
   orbitals?: OrbitalUse[];
 }
@@ -398,6 +408,8 @@ export interface StructureAtom {
   letter?: boolean;
   /** Screen-reader name, e.g. "the single-bonded O"; generated when absent. */
   label?: string;
+  /** A short visible tag drawn small beside the atom, e.g. "1" to number carbons (#82). */
+  tag?: string;
 }
 
 export interface StructureBond {
