@@ -3,7 +3,7 @@
 // panel, motion rules, and the axe gate on every page in both themes.
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { allPages, LESSON_0, LESSON_1, lessonAndBankPaths, playThrough, THEMES, useTheme } from "./site.ts";
+import { allPages, LESSON_0, LESSON_1, playablePaths, playThrough, THEMES, useTheme } from "./site.ts";
 
 const PHONE = { width: 390, height: 844 };
 
@@ -129,9 +129,10 @@ for (const theme of THEMES) {
       }
     });
 
-    test("every Step and feedback panel of every Lesson passes axe and the type rules", async ({ page }) => {
-      test.setTimeout(900_000); // axe on every Step of every Lesson and every Bank Problem (pinned Sets, #87; slow under load)
-      for (const lesson of lessonAndBankPaths(await allPages(page))) {
+    // One test per Lesson (and pinned Practice Set), so they run in parallel and each has its own time.
+    for (const lesson of playablePaths())
+      test(`every Step and feedback panel passes axe and the type rules: ${lesson}`, async ({ page }) => {
+        test.setTimeout(180_000);
         await page.goto(lesson);
         await playThrough(page, async (step) => {
           const label = `${lesson} ${step}`;
@@ -144,8 +145,7 @@ for (const theme of THEMES) {
           expect(await typeViolations(page), label).toEqual([]);
           expect(await smallTargets(page), label).toEqual([]);
         });
-      }
-    });
+      });
 
     test("feedback is icon + words: ✓ solid cyan, ✗ dashed magenta + Hint, → plain border + answer", async ({
       page,
@@ -199,11 +199,9 @@ test.describe("Step player on a phone", () => {
     await expect(page.locator(".player-foot").locator("button, a")).toHaveCount(1);
   });
 
-  test("every Step of every Lesson, with its feedback, fits one phone screen with the button in view", async ({
-    page,
-  }) => {
-    test.setTimeout(480_000); // every Step of every Lesson and every Bank Problem (#87)
-    for (const lesson of lessonAndBankPaths(await allPages(page))) {
+  for (const lesson of playablePaths())
+    test(`every Step, with its feedback, fits one phone screen with the button in view: ${lesson}`, async ({ page }) => {
+      test.setTimeout(180_000);
       await page.goto(lesson);
       await playThrough(page, async (step) => {
         const label = `${lesson} ${step}`;
@@ -227,8 +225,7 @@ test.describe("Step player on a phone", () => {
         await expect(foot).toHaveCount(end ? extra + 1 : 1);
         for (const b of await foot.all()) await expect(b).toBeInViewport({ ratio: 1 });
       });
-    }
-  });
+    });
 });
 
 test.describe("motion", () => {

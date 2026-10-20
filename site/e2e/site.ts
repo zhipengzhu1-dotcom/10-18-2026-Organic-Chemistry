@@ -49,6 +49,10 @@ export function lessonAndBankPaths(paths: string[]): string[] {
   });
 }
 
+/** Every Lesson page and pinned Practice Set (see lessonAndBankPaths) of the available Units, from the content model. */
+export const playablePaths = () =>
+  lessonAndBankPaths(units.filter((u) => u.status === "available").flatMap((u) => [...u.lessons.map((l) => l.url), `${u.url}/practice`]));
+
 /** Pick a theme the way a Student does: the site's switch, stored in the browser. */
 export async function useTheme(page: Page, theme: Theme) {
   await page.addInitScript((t) => localStorage.setItem("at-theme", t), theme);
