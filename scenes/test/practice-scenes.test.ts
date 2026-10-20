@@ -101,6 +101,27 @@ describe("group-spotlight: aspirin and Met-enkephalin (Lesson 5 Practice reveals
   });
 });
 
+describe("mo-filler: H₂⁺ (u1-mo-h2-cation)", () => {
+  it("shows the empty mini diagram as the Problem's visual: the formula and its count, no electrons, no bond order", () => {
+    for (const aspect of ["16:9", "9:16"] as const) {
+      const text = shows("mo-filler", { show: "h2-plus-empty" }, undefined, aspect);
+      expect(text).toContain("H₂⁺: 1 e⁻");
+      expect(text).toContain("not to scale");
+      expect(text).not.toContain("bond order");
+    }
+    expect(say("mo-filler", { show: "h2-plus-empty" })).toBe(
+      "H₂ plus, one electron. Two 1s levels at the sides. In the middle, sigma below and sigma star above. Not to scale.",
+    );
+  });
+
+  it("fills it on reveal: one electron in σ, bond order ½, with the spec's screen-reader text", () => {
+    const text = shows("mo-filler", { show: "h2-plus" });
+    expect(text).toContain("H₂⁺: 1 e⁻");
+    expect(text).toContain("bond order (1 − 0) ÷ 2 = ½");
+    expect(say("mo-filler", { show: "h2-plus" })).toBe("H₂ plus: one electron in sigma, none in sigma star. Bond order one half.");
+  });
+});
+
 describe("h-fill: furan (u1-draw-furan-h reveal)", () => {
   it("fills each of furan's four carbons with one H, ending at 4, with the spec's screen-reader text", () => {
     for (const aspect of ["16:9", "9:16"] as const) expect(shows("h-fill", { molecule: "furan" }, undefined, aspect)).toContain("H: 4");

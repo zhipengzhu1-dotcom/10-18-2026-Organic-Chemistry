@@ -1,0 +1,30 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved).
+id: u1-mo-empty-orbital
+unit: u1
+lesson: u1-l08
+difficulty: 3
+status: approved
+source: Adapted from MIT 5.12 PS2 Q4 and its key
+credit: Kimberly Berkowski, MIT OCW 5.12, Spring 2005, CC BY-NC-SA 4.0
+type: multiple-choice
+prompt: "Which of these can take a lone pair into an empty orbital on one atom, the way BF₃ does? Pick all that apply."
+options:
+  - { id: a, structure: ammonia, text: "NH₃: nitrogen with three H's and one lone pair." }
+  - { id: b, structure: boron-tribromide, text: "BBr₃: boron with three Br's, three lone pairs on each Br, none on B." }
+  - { id: c, structure: tert-butyl-cation, text: "The tert-butyl cation, (CH₃)₃C⁺: a C⁺ with three CH₃ groups and no lone pair." }
+  - { id: d, structure: tert-butyl-chloride, text: "tert-Butyl chloride, (CH₃)₃C–Cl: a carbon with three CH₃ groups and a Cl with three lone pairs." }
+  - { id: e, structure: water, text: "H₂O: oxygen with two H's and two lone pairs." }
+answer: [b, c]
+correct: "BBr₃ and the tert-butyl cation each have an atom with only six electrons and an empty p orbital: a low LUMO on one atom. NH₃, H₂O and tert-butyl chloride are the other kind: their HOMO is a lone pair to give."
+hints:
+  - includes: [a, e]
+    text: "Count the electrons around N (or O): eight, with a lone pair. That lone pair is something to give, not room to take."
+  - includes: [d]
+    text: "Every atom in tert-butyl chloride has an octet. Its Cl's lone pairs are a source, like chloromethane's Cl meeting AlCl₃."
+  - misses: [b]
+    text: "Boron again, with three Br's instead of three F's: still six electrons on B, still an empty p orbital."
+  - misses: [c]
+    text: "Count the electrons on the + carbon: three bonds, no lone pair, six. Like boron, it has an empty p orbital (three groups, sp², one p left over, Lesson 4)."
+  - text: "Look for an atom with only six electrons around it. That atom's empty p orbital is the LUMO."
+reveal: "BBr₃ and the tert-butyl cation: each has a six-electron atom with an empty p orbital (LUMO). NH₃, tert-butyl chloride and H₂O each have a lone pair to give (HOMO)."
+sourceNote: "Adapted from MIT OCW 5.12, Problem Set 2 Q4 and its key, Berkowski, Spring 2005, CC BY-NC-SA 4.0 (H–Cl from the original is left out: it takes electrons into an antibonding orbital, not an empty p, which this Unit doesn't teach). Wording ours. Structures: PubChem CIDs 222, 25134, 10486, 962."

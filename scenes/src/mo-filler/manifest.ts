@@ -1,7 +1,8 @@
 // mo-filler (Lesson 8 s04, the signature Manipulate Step): two 1s levels at the sides, σ (lower)
 // and σ* (higher) in the middle, schematic and "not to scale". Electrons are half-arrows (↑ then
 // ↓), always landing in the lowest level with room, two per level. A live counter reads the bond
-// order. `show: three` is the Rank Problem's reveal: H₂, He₂⁺ and He₂ side by side.
+// order. `show: three` is the Rank Problem's reveal: H₂, He₂⁺ and He₂ side by side. `show: h2-plus-empty`
+// and `h2-plus` are Practice Problem u1-mo-h2-cation's visual (no electrons yet) and reveal (one in σ) (#87).
 // Counts only: no chemistry numbers (the bond orders are worked out by counting).
 import type { SceneManifest } from "../types.ts";
 
@@ -29,6 +30,9 @@ export function fill(electrons: number) {
 /** The molecule an electron count makes, where the Lesson names one. */
 export const NAMED: Record<number, string> = { 2: "H₂", 4: "He₂" };
 
+/** Practice u1-mo-h2-cation (#87): the one diagram titled with H₂⁺ and its electron count. */
+export const H2_PLUS = { title: "H₂⁺: 1 e⁻", electrons: 1 };
+
 /** The Rank Problem's three cards, strongest bond first. */
 export const COMPARE = [
   { formula: "H₂", electrons: 2 },
@@ -39,6 +43,8 @@ export const COMPARE = [
 const DIAGRAM = "Two 1s levels at the sides. In the middle, sigma below and sigma star above. Not to scale.";
 
 function describe({ electrons, show }: MoFillerState): string {
+  if (show === "h2-plus-empty") return `H₂ plus, one electron. ${DIAGRAM}`;
+  if (show === "h2-plus") return "H₂ plus: one electron in sigma, none in sigma star. Bond order one half.";
   if (show === "three")
     return "H₂: two bonding, none antibonding, bond order 1. He₂ plus: two bonding, one antibonding, one half. He₂: two and two, zero.";
   const f = fill(electrons);
@@ -57,6 +63,8 @@ export const moFiller: SceneManifest<MoFillerState> = {
       options: [
         { id: "one", label: "One diagram" },
         { id: "three", label: "H₂, He₂⁺ and He₂" },
+        { id: "h2-plus-empty", label: "H₂⁺, before filling" },
+        { id: "h2-plus", label: "H₂⁺, filled" },
       ],
       default: "one",
     },
