@@ -278,8 +278,10 @@ export function format(
         : undefined);
   // Energies can be negative: print a true minus sign (U+2212), not a hyphen.
   const sign = (s: string) => (quantity === "energy" ? s.replace(/^-/, "−") : s);
+  // A value that rounds to zero shows no sign (never "−0.0"); the full value keeps it.
+  const rounded = decimals === undefined ? String(value) : value.toFixed(decimals).replace(/^-(?=0(\.0*)?$)/, "");
   return {
-    display: withUnit(sign(decimals === undefined ? String(value) : value.toFixed(decimals))),
+    display: withUnit(sign(rounded)),
     full: withUnit(sign(String(value))),
   };
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildContent } from "../src/index.ts";
-import { cite, sourceNote } from "../src/data.ts";
+import { cite, format, sourceNote } from "../src/data.ts";
 import { computedEthane, elements, methane, validTree, writeTree, type Tree } from "./tree.ts";
 
 function build(edit: (tree: Tree) => void = () => {}) {
@@ -130,6 +130,11 @@ describe("cited-data lookup", () => {
         ].join("\n")),
     );
     expect(result.errors).toEqual(["chem/data/atoms.yaml: values.crust.C.unit: a fraction needs one of %; found none"]);
+  });
+
+  it("never shows a negative zero: an energy that rounds to zero reads 0.0, keeping the full value", () => {
+    expect(format("energy", -0.0326, "eV", 1)).toEqual({ display: "0.0 eV", full: "−0.0326 eV" });
+    expect(format("energy", -0.06, "eV", 1).display).toBe("−0.1 eV");
   });
 
   it("throws on a value that isn't in the data", () => {
