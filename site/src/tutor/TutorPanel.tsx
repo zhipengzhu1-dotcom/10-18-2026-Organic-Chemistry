@@ -6,7 +6,8 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import type { PageLesson } from "../lib/answer-key.ts";
 import { tutorContext, type TutorScreen } from "./context.ts";
-import { PANEL_CLASS, TUTOR_PATH, type TutorChoices, type Turn } from "./contract.ts";
+import { PANEL_CLASS, TUTOR_PATH, type TutorChoices } from "./contract.ts";
+import { chipsFor, enterStep, type Line } from "./flow.ts";
 import { storedOn, storedPick, storeOn, storePick, pairOf } from "./settings.ts";
 import { readStage } from "./stage.ts";
 import { askTutor } from "./stream.ts";
@@ -20,16 +21,6 @@ interface Props {
   draft?: unknown;
 }
 
-/** Which model answered, at what effort, in how long: shown under a finished reply. */
-interface Meta {
-  model: string;
-  effort: string;
-  ms: number;
-}
-
-/** A thread line: a Student or Tutor turn; `live` while the reply is being written. */
-type Line = Turn & { live?: boolean; error?: boolean; meta?: Meta };
-
 export default function TutorPanel({ lesson, screen, draft }: Props) {
   /** The Tutor on/off switch (remembered); off hides the Ask button and the panel. */
   const [on, setOn] = useState(true);
@@ -37,6 +28,10 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
   const [choices, setChoices] = useState<TutorChoices | null>(null);
   const [pick, setPick] = useState("");
   const [open, setOpen] = useState(false);
+  /** Opened from the keyboard (⌘K / Ctrl+K): it appears at once, with no slide or fade. */
+  const [instant, setInstant] = useState(false);
+  /** The Step shows a Scene (read from the stage once it is on the page). */
+  const [scene, setScene] = useState(false);
   const [thread, setThread] = useState<Line[]>([]);
   const [question, setQuestion] = useState("");
   const [busy, setBusy] = useState(false);
@@ -58,6 +53,27 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
       })
       .catch(() => {});
   }, []);
+  // Each new Step: a divider and a scripted intro (no model call).
+  const step = lesson.steps[screen.index];
+  useEffect(() => {
+    setThread((t) => enterStep(t, { number: screen.index + 1, phase: step.phase, type: step.type }));
+  }, [step.id]);
+  useEffect(() => {
+    setScene(readStage().scene);
+  }, [step.id, screen.canContinue]);
+  // ⌘K / Ctrl+K opens the Tutor (or returns to it) with the field focused; not while it is switched off.
+  useEffect(() => {
+    if (!on) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.altKey || e.key.toLowerCase() !== "k") return;
+      e.preventDefault();
+      setInstant(true);
+      setOpen(true);
+      field.current?.focus({ preventScroll: true });
+    };
+    addEventListener("keydown", onKey);
+    return () => removeEventListener("keydown", onKey);
+  }, [on]);
   useEffect(() => {
     document.documentElement.dataset.tutor = open ? "open" : "closed";
     if (open) field.current?.focus({ preventScroll: true });
@@ -91,11 +107,15 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
     requestAnimationFrame(() => askButton.current?.focus({ preventScroll: true }));
   }
 
-  async function send(e: FormEvent) {
+  function submit(e: FormEvent) {
     e.preventDefault();
-    const message = question.trim();
+    send(question);
+  }
+
+  async function send(asked: string) {
+    const message = asked.trim();
     if (!message || busy) return;
-    const history = thread.filter((t) => !t.error).map(({ role, text }) => ({ role, text }));
+    const history = thread.flatMap((t) => (t.role === "divider" || t.error || t.live ? [] : [{ role: t.role, text: t.text }]));
     const context = tutorContext({ lesson, screen, draft, stage: readStage() });
     setThread((t) => [...t, { role: "student", text: message }, { role: "tutor", text: "", live: true }]);
     setQuestion("");
@@ -138,15 +158,19 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
         className="tutor-ask label"
         aria-expanded={open}
         aria-controls="tutor"
-        onClick={() => (open ? close() : setOpen(true))}
+        onClick={() => {
+          if (open) return close();
+          setInstant(false);
+          setOpen(true);
+        }}
       >
         Ask
       </button>
       {portal &&
         createPortal(
           <>
-            <div className="tutor-scrim" data-open={open} onClick={close} aria-hidden="true" />
-            <section id="tutor" className={PANEL_CLASS} data-open={open} inert={!open} aria-label="Tutor">
+            <div className="tutor-scrim" data-open={open} data-instant={instant} onClick={close} aria-hidden="true" />
+            <section id="tutor" className={PANEL_CLASS} data-open={open} data-instant={instant} inert={!open} aria-label="Tutor">
               <header className="tutor-head">
                 <h2 className="label">Tutor</h2>
                 {choices && (
@@ -179,26 +203,36 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
                 </button>
               </header>
               <ol className="tutor-thread" aria-label="Conversation">
-                {thread.length === 0 && (
-                  <li className="tutor-empty">Ask about this Step. I'll point you at the evidence, not the answer.</li>
+                {thread.map((t, i) =>
+                  t.role === "divider" ? (
+                    <li key={i} className="tutor-divider label">
+                      {t.text}
+                    </li>
+                  ) : (
+                    <li key={i} className={`tutor-turn ${t.role}${t.error ? " error" : ""}`}>
+                      <span className="tutor-who label">{t.role === "student" ? "You" : t.error ? "! Tutor problem" : "Tutor"}</span>
+                      <p>{t.text || (t.live ? "Writing…" : "")}</p>
+                      {t.meta && (
+                        <small className="tutor-meta">
+                          {t.meta.model} · {t.meta.effort} effort · <span className="data">{(t.meta.ms / 1000).toFixed(1)}</span> s
+                        </small>
+                      )}
+                    </li>
+                  ),
                 )}
-                {thread.map((t, i) => (
-                  <li key={i} className={`tutor-turn ${t.role}${t.error ? " error" : ""}`}>
-                    <span className="tutor-who label">{t.role === "student" ? "You" : "Tutor"}</span>
-                    <p>{t.text || (t.live ? "Writing…" : "")}</p>
-                    {t.meta && (
-                      <small className="tutor-meta">
-                        {t.meta.model} · {t.meta.effort} effort · <span className="data">{(t.meta.ms / 1000).toFixed(1)}</span> s
-                      </small>
-                    )}
-                  </li>
-                ))}
                 <li ref={threadEnd} className="tutor-end" aria-hidden="true" />
               </ol>
               <p className="sr" aria-live="polite">
                 {announce}
               </p>
-              <form className="tutor-form" onSubmit={send}>
+              <div className="tutor-chips" role="group" aria-label="Suggestions">
+                {chipsFor({ type: step.type, revealed: screen.canContinue, scene }).map((chip) => (
+                  <button key={chip} type="button" className="tutor-chip" disabled={busy} onClick={() => send(chip)}>
+                    {chip}
+                  </button>
+                ))}
+              </div>
+              <form className="tutor-form" onSubmit={submit}>
                 <input
                   ref={field}
                   value={question}
