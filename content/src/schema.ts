@@ -47,6 +47,8 @@ const moleculeFields = {
     .optional(),
   /** Lesson 4 (#82): a bond (two atoms) or angle (three) measured and labelled on load. */
   measure: z.array(z.number().int()).min(2).max(3).optional(),
+  /** Lesson 4 (#82): the start zoom (1 = the whole true-scale molecule fits in any rotation; at most 3). */
+  zoom: z.number().min(0.5).max(3).optional(),
 };
 const moleculeUse = z.preprocess(
   (v) => (typeof v === "string" ? { id: v } : v),

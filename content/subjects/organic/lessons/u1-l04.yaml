@@ -70,6 +70,7 @@ steps:
     molecule:
       id: ethylene
       view: three-quarter
+      zoom: 1.4
       describe: "Ethylene: two carbons joined by a double bond, each with two hydrogens. All six atoms lie in one flat plane. H–C–H {{ethylene/a.HCH}}, H–C–C {{ethylene/a.HCC}}."
     options:
       - { id: a, text: sp³ }
@@ -93,6 +94,7 @@ steps:
       id: ethylene
       view: edge-on
       card: true
+      zoom: 1.6
       label: σ
       orbitals: [ethylene-orbitals/sigma]
       plane: { through: [2, 0, 3], on: true }
@@ -119,6 +121,7 @@ steps:
     molecule:
       id: ethylene
       view: face-on
+      zoom: 1.6
       orbitals: [ethylene-orbitals/pi]
       plane: { through: [2, 0, 3] }
       describe: "Ethylene's π bond: one lobe above the plane of the six atoms and one below, both over the two carbons. Nothing lies in the plane."
@@ -168,6 +171,7 @@ steps:
       id: acetylene
       view: three-quarter
       card: true
+      zoom: 1.6
       label: σ
       orbitals: [acetylene-orbitals/sigma]
       describe: "Acetylene, four atoms in a straight line. An orange σ orbital on the axis. A cyan π orbital above and below the axis, then a second one in front and behind. Together the two π orbitals make a tube around the axis. Labelled: computed."
@@ -236,6 +240,7 @@ steps:
       id: ethylene
       view: edge-on
       card: true
+      zoom: 1.6
       orbitals: [ethylene-orbitals/sigma, ethylene-orbitals/pi]
       plane: { through: [2, 0, 3], on: true }
       describe: "Ethylene edge-on: the σ bond on the axis, the π bond above and below the plane."

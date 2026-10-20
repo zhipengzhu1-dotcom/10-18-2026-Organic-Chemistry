@@ -23,6 +23,7 @@ export interface MoleculeUseFile {
   autoplay?: boolean;
   plane?: { through: [number, number, number]; label?: string; on?: boolean };
   measure?: number[];
+  zoom?: number;
 }
 /** Fields only the first molecule of a toggle takes. */
 type ToggleOnly = "toggle" | "toggleLabel" | "autoplay";
@@ -173,6 +174,7 @@ function resolveOne(
       ...(use.dipoles ? { dipoles: dipoles() } : {}),
       ...(use.plane ? { plane: { through: use.plane.through, label: use.plane.label ?? "Plane", on: !!use.plane.on } } : {}),
       ...(use.measure ? { measure: use.measure } : {}),
+      ...(use.zoom ? { zoom: use.zoom } : {}),
     },
     errors,
   };

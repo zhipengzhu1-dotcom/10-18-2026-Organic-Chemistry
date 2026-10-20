@@ -92,6 +92,8 @@ export interface MoleculeUse {
   plane?: { through: [number, number, number]; label: string; on: boolean };
   /** Lesson 4 (#82): atoms measured on load (two: a length; three: the angle at the middle one). */
   measure?: number[];
+  /** Lesson 4 (#82): the start zoom (1 fits the whole true-scale molecule in any rotation). */
+  zoom?: number;
   /** Computed orbitals drawn as translucent lobes over the atoms (#70), in the order the Step lists them. */
   orbitals?: OrbitalUse[];
 }

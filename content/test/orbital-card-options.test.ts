@@ -106,6 +106,11 @@ describe("Lesson 4's 3D card options", () => {
     ]);
   });
 
+  it("zoom sets the start zoom, between the card's own limits", () => {
+    expect(s02(build({ id: "methane", card: true, zoom: 1.5 })).molecule!.zoom).toBe(1.5);
+    expect(build({ id: "methane", card: true, zoom: 4 }).errors.length).toBeGreaterThan(0);
+  });
+
   it("measure names two atoms (a length) or three (an angle) to show on load", () => {
     expect(s02(build({ id: "methane", card: true, measure: [0, 1] })).molecule!.measure).toEqual([0, 1]);
     expect(s02(build({ id: "methane", card: true, measure: [1, 0, 2] })).molecule!.measure).toEqual([1, 0, 2]);

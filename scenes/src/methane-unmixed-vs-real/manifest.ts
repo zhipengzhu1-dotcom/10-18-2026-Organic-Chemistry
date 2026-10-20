@@ -40,6 +40,7 @@ export const methaneUnmixedVsReal: SceneManifest<MethanePanelState> = {
   reducedMotion: "Opens paused on both panels with every label shown; there is no idle motion.",
   data: [R_CH, A_HCH, "elements/C.colour", "elements/H.colour"],
   duration: 4,
+  controls: false,
   poster: { t: 4 },
   video: {
     duration: 8,

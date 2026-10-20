@@ -77,7 +77,7 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
   const [size, setSize] = useState({ width: 358, height: 220 });
   const [gl, setGl] = useState<boolean | null>(null);
   const [rotation, setRotation] = useState<Matrix3>(molecule.orientation);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(molecule.zoom ?? 1);
   const [trueScale, setTrueScale] = useState(false);
   // Lesson 4 (#82): `measure` names atoms measured on load.
   const [picks, setPicks] = useState<number[]>(molecule.measure ?? []);
@@ -176,7 +176,7 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
       say(zoomIn ? "Zoomed in." : "Zoomed out.");
     } else if (e.key === "0" || e.key === "Home") {
       setRotation(molecule.orientation);
-      setZoom(1);
+      setZoom(molecule.zoom ?? 1);
       say("View reset.");
     } else if (e.key === "]") moveCursor(1);
     else if (e.key === "[") moveCursor(-1);
@@ -292,8 +292,22 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
           <i style={{ width: `${scale}px` }} />
           <span>1 Å</span>
         </div>
-        {turnable && (
+        {(turnable || molecule.plane) && (
           <div className="molecule-turn">
+            {molecule.plane && (
+              // Lesson 4's plane sheet (#82): over the stage, so it adds no row under the card.
+              <button
+                type="button"
+                className="molecule-btn molecule-plane-toggle"
+                aria-pressed={planeOn}
+                onClick={() => {
+                  setPlaneOn(!planeOn);
+                  say(planeOn ? `${molecule.plane!.label} hidden.` : `${molecule.plane!.label} shown, through the atoms it is named for.`);
+                }}
+              >
+                {molecule.plane.label}
+              </button>
+            )}
             {sheet && snap && (
               // Over the stage, with the turn buttons, so it adds no row under the card.
               <button
@@ -307,12 +321,16 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
                 Snap to page
               </button>
             )}
-            <button type="button" className="molecule-btn" aria-label="Turn left" onClick={() => spin("y", -TURN_STEP)}>
-              ↺
-            </button>
-            <button type="button" className="molecule-btn" aria-label="Turn right" onClick={() => spin("y", TURN_STEP)}>
-              ↻
-            </button>
+            {turnable && (
+              <>
+                <button type="button" className="molecule-btn" aria-label="Turn left" onClick={() => spin("y", -TURN_STEP)}>
+                  ↺
+                </button>
+                <button type="button" className="molecule-btn" aria-label="Turn right" onClick={() => spin("y", TURN_STEP)}>
+                  ↻
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -342,19 +360,6 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
             }}
           >
             Add
-          </button>
-        )}
-        {molecule.plane && (
-          <button
-            type="button"
-            className="molecule-btn molecule-plane-toggle"
-            aria-pressed={planeOn}
-            onClick={() => {
-              setPlaneOn(!planeOn);
-              say(planeOn ? `${molecule.plane!.label} hidden.` : `${molecule.plane!.label} shown, through the atoms it is named for.`);
-            }}
-          >
-            {molecule.plane.label}
           </button>
         )}
         <button

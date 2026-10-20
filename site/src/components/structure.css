@@ -16,9 +16,16 @@
 @media (max-width: 480px) {
   /* A Scene without controls (a reveal, a card deal) shares the phone screen with long text or feedback. */
   .scene-bare .scene-frame { max-height: min(45dvh, 10.5rem); }
+  /* A still above a question's choices is the small picture the question is about (Lesson 4's
+     Hook: carbon's unmixed orbitals under a six-line prompt), so it shrinks a little more. */
+  .player-body:has(.opts) .scene-bare .scene-frame { max-height: min(45dvh, 7.5rem); }
   /* On a phone the Lesson-end screen keeps the Wrap text and the Key idea card on one screen; the
      Wrap's recap Scene (Lesson 5's group cards) shows from tablet width up. */
   .player:has(.player-end) .player-body .scene { display: none; }
+  /* The same for a Wrap's 3D card (Lesson 4's ethylene σ + π, #82) and its Explore button. */
+  .player:has(.player-end) .player-body :is(.molecule, .molecule-switch-row, .explore-open) { display: none; }
+  /* Its Source note goes with it: the only numbers it cites are the hidden card's. */
+  .player:has(.player-end) .player-body:has(.molecule) .source-note { display: none; }
   /* A tall Tap drawing keeps to about a third of the screen (never below natural size, so hit areas stay
      48 px), so the Step fits one phone screen (Lesson 2 s05). */
   .tap-structure { max-width: max(var(--tap-natural, 100%), calc(34vh * var(--tap-aspect, 10))); margin-inline: auto; }

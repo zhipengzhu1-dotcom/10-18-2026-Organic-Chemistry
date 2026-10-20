@@ -96,7 +96,7 @@ export const answerKeyUrl = (subject: string, lessonId: string) => `/answers/${s
 export const md = (text: string) => markData(marked.parseInline(text, { async: false }));
 
 // Element symbols that turn up in organic chemistry, two-letter ones first.
-const EL = "(?:Cl|Br|Na|Mg|Al|Si|Li|Ca|Fe|Zn|Cu|Mn|Cr|Pd|Pt|Sn|Hg|Se|Os|Ni|Ag|Au|Ti|He|Ne|Ar|H|B|C|N|O|F|P|S|K|I)";
+const EL = "(?:Cl|Br|Be|Na|Mg|Al|Si|Li|Ca|Fe|Zn|Cu|Mn|Cr|Pd|Pt|Sn|Hg|Se|Os|Ni|Ag|Au|Ti|He|Ne|Ar|H|B|C|N|O|F|P|S|K|I)";
 const CHUNK = `(?:${EL}[₀-₉]*|\\((?:${EL}[₀-₉]*)+\\)[₀-₉]*)+[⁺⁻]*`;
 const DATA = new RegExp(
   `(?<![A-Za-z])${CHUNK}(?:[–=≡]${CHUNK})*(?![a-z])` + // formula: CH₄, H₃C–CH₃, C=O, OH⁻
