@@ -4,6 +4,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { allPages, LESSON_0, LESSON_1, playablePaths, playThrough, THEMES, useTheme } from "./site.ts";
+import { typeViolations } from "./type-rules.ts";
 
 const PHONE = { width: 390, height: 844 };
 
@@ -17,34 +18,6 @@ const token = (page: Page, name: string) =>
     probe.remove();
     return c;
   }, name);
-
-/** Text that breaks a type rule, as readable strings. */
-const typeViolations = (page: Page) =>
-  page.evaluate(() => {
-    const out: string[] = [];
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-      const text = n.textContent!.trim();
-      const el = n.parentElement!;
-      if (!text || el.closest(".sr, script, style")) continue;
-      const box = el.getBoundingClientRect();
-      if (!box.width || !box.height) continue;
-      const cs = getComputedStyle(el);
-      const face = cs.fontFamily.split(",")[0].replace(/["']/g, "").trim();
-      const size = parseFloat(cs.fontSize);
-      const at = `<${el.tagName.toLowerCase()}> "${text.slice(0, 40)}" (${face} ${size}px)`;
-      // SVG drawing labels (structure atoms, charges) are sized in drawing units relative to the bond
-      // length by the renderer and scale with the drawing, so the CSS-px minimum doesn't apply to them.
-      if (size < 16 && !el.closest("svg")) out.push(`${at}: text under 16px`);
-      if (face.startsWith("Pixelify") && size < 32) out.push(`${at}: Pixelify under 32px`);
-      if (face.startsWith("Silkscreen") && (size !== 16 || cs.textTransform !== "uppercase"))
-        out.push(`${at}: Silkscreen must be 16px uppercase`);
-      // "3D" is a word ("Molecules in 3D", "Explore in 3D"), not a number or a formula.
-      if (/[0-9₀-₉⁺⁻]/.test(text.replace(/\b3D\b/g, "")) && !/^(JetBrains Mono|Pixelify)/.test(face))
-        out.push(`${at}: number or formula outside the data face`);
-    }
-    return out;
-  });
 
 /** Controls smaller than 48 × 48 px. */
 const smallTargets = (page: Page) =>

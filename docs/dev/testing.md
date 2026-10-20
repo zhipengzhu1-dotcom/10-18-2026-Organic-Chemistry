@@ -19,7 +19,8 @@ Coverage comes from crawling and playing, so new work is gated automatically onc
 - **Every page linked from `/`** (`allPages`), both themes: axe (WCAG 2.2 AA tags), type rules, 48×48 targets. An unlinked page is not checked: link it or extend `allPages`.
 - **Every Step and feedback state** of every Lesson and of the whole Practice Bank (`playablePaths` pins Practice Sets with `?problems=…`, ten at a time), both themes, and on a 390×844 phone: no page scroll, `.player-body` not overflowing, foot button(s) fully in view. `playThrough` (`site/e2e/site.ts`) answers by first option / typing 1 / Rank as dealt / first Tap target / first push / goal Scene by keyboard. A new Step type fails to compile until `playThrough`'s `answerers` has its entry.
 - Phone fit only sees the `playThrough` path (first choice). Long Hints on other paths are unchecked; look at them by eye.
-- Dev-only code (the Tutor, `site/src/tutor/`) is never built, so none of these rules reach it until #114 lands. Check its type rules by hand.
+- Dev-only code is never built, so the crawl never sees it. The Tutor panel gets the type rules from `site/e2e/tutor.spec.ts` (Playwright project `tutor`: the dev server with the stand-in `claude`), over a thread with a question, a reply and its meta line, an error line and a Step divider, in both themes. New Tutor text needs a place in that thread, or it goes unchecked. Targets, motion and axe aren't run on it.
+- The type rules (`site/e2e/type-rules.ts`) read a `<select>` by its shown option, in the select's face.
 
 Rules that bite:
 - Text ≥16px (SVG drawing labels exempt); Pixelify ≥32px; Silkscreen 16px uppercase; any text with a digit, sub/superscript digit or ⁺/⁻ in JetBrains Mono. `md()` wraps numbers and formulas; lone element symbols and plain formulas (`HCl`) are not detected, so write them as code (`` `C` ``). New components that show numbers use `.data` / `font-data`.
@@ -29,7 +30,7 @@ Rules that bite:
 
 ## Playwright
 
-- Runs against the built site (`astro build` + `astro preview --ignore-lock`; without `--ignore-lock` Astro 7 backgrounds the server for agents). It picks a free port; `E2E_PORT` overrides. Tests run fully parallel, so keep each test independent of the others in its file. `--shard` deals tests round-robin (`site/e2e/round-robin-shards.ts`), so the slow per-Lesson design walks spread over CI's four shards.
+- Runs against the built site (`astro build` + `astro preview --ignore-lock`; without `--ignore-lock` Astro 7 backgrounds the server for agents). It picks a free port; `E2E_PORT` overrides. The `tutor` project runs on `astro dev` instead (`E2E_DEV_PORT`). There, Astro's dev toolbar covers the player's foot, so press those buttons by keyboard, and a click before hydration does nothing (`open` in `tutor.spec.ts` retries). Run it alone with `pnpm test:e2e --project tutor`. Tests run fully parallel, so keep each test independent of the others in its file. `--shard` deals tests round-robin (`site/e2e/round-robin-shards.ts`), so the slow per-Lesson design walks spread over CI's four shards.
 - 60 s per test and 10 s per expect leave room for a loaded machine; the per-Lesson gates set 180 s themselves. One retry in CI only.
 - Under heavy multi-agent load some walks (Lesson 0 keyboard walk, structure-steps Tab reach, molecule-card turns) run slow; a failure that passes alone is load, a failure that repeats alone is real.
 - Nothing rests on random draws: `practice-set.spec.ts` seeds the draw (mulberry32) and plays the whole Bank in pinned Sets. Keep new randomness seeded in tests.
