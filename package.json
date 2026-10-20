@@ -19,6 +19,7 @@
     "dev": "pnpm --filter @astratron/site run dev",
     "build": "pnpm --filter @astratron/site run build",
     "test:e2e": "playwright test",
+    "budget:js": "node site/src/lib/js-budget-cli.ts",
     "structure": "pnpm --filter @astratron/content run structure",
     "structures:json": "pnpm --filter @astratron/content run structures:json",
     "triage": "node site/src/submissions/triage-cli.ts",
