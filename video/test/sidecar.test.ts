@@ -1,14 +1,15 @@
-// The sources sidecar (story 111): each number a render shows, cited from the
-// same lookup the site uses, with its on-screen time range and a paste-ready
-// description block.
+// The Remotion side of the sources sidecar (story 111): when each cited value is
+// on screen, measured from the Scene's markup at every frame. The shape and its
+// description text are tested in content/test/sidecar.test.ts.
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 import { buildContent, contentRoot } from "@astratron/content";
+import { citedFor as lookUp } from "@astratron/content/sidecar";
 import { sceneRegistry, type RegisteredScene } from "@astratron/scenes";
-import { citedFor } from "../src/cited.ts";
 import { sourcesSidecar } from "../src/sidecar.ts";
 
 const model = buildContent(contentRoot).model!;
+const citedFor = (refs: readonly string[]) => lookUp("test", refs, ...model.subjects.map((s) => s.data));
 
 // A Scene that prints the C–H length from 2 s to 4 s and draws nothing else cited.
 const flash: RegisteredScene<{}> = {
@@ -27,21 +28,9 @@ const flash: RegisteredScene<{}> = {
     createElement("svg", { viewBox: "0 0 1920 1080" }, t >= 2 && t < 4 ? createElement("text", null, cited["methane/r.CH"]!.display) : null),
 };
 
-describe("citedFor", () => {
-  it("looks each ref up in the course model's cited data", () => {
-    const cited = citedFor(model, ["methane/r.CH"]);
-    expect(cited["methane/r.CH"]!.display).toBe("1.09 Å");
-    expect(cited["methane/r.CH"]!.source.citation).toMatch(/^E Hirota "Anharmonic Potential Function/);
-  });
-
-  it("names a ref that isn't in any Subject's data", () => {
-    expect(() => citedFor(model, ["methane/r.XX"])).toThrow(/methane\/r\.XX/);
-  });
-});
-
 describe("sourcesSidecar", () => {
   it("records when a printed number is on screen, from the rendered frames", () => {
-    const sidecar = sourcesSidecar(flash, "16:9", citedFor(model, flash.manifest.data));
+    const sidecar = sourcesSidecar(flash, "16:9", citedFor(flash.manifest.data));
     expect(sidecar.file).toBe("flash-16x9.mp4");
     expect(sidecar.numbers).toHaveLength(1);
     const [ch] = sidecar.numbers;
@@ -57,17 +46,9 @@ describe("sourcesSidecar", () => {
     expect(ch!.via).toMatch(/^NIST CCCBDB/);
   });
 
-  it("writes a paste-ready description naming each number, its time range and its source", () => {
-    const { description } = sourcesSidecar(flash, "9:16", citedFor(model, flash.manifest.data));
-    expect(description).toContain("0:02–0:04  C–H 1.09 Å");
-    expect(description).toContain("E Hirota \"Anharmonic Potential Function and Equilibrium Structure of Methane\" J. Mol. Spect. 77, 213-221 (1979)");
-    // The site's Source note text, word for word, follows the timed list.
-    expect(description).toContain("Geometry: experimental (gas phase). C–H 1.087 Å from E Hirota");
-  });
-
   it("counts a cited colour the Scene draws with as on screen for the whole video", () => {
     const twist = sceneRegistry["pi-twist"]!;
-    const sidecar = sourcesSidecar(twist, "16:9", citedFor(model, twist.manifest.data));
+    const sidecar = sourcesSidecar(twist, "16:9", citedFor(twist.manifest.data));
     expect(sidecar.numbers).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ ref: "elements/C.colour", display: "#909090", shown: "colour", onScreen: [{ from: 0, to: 8 }] }),
@@ -78,7 +59,11 @@ describe("sourcesSidecar", () => {
 
   it("falls back to the whole video for a cited value used in the drawing but never printed", () => {
     const hidden: RegisteredScene<{}> = { ...flash, Component: () => createElement("svg", null) };
-    const [ch] = sourcesSidecar(hidden, "16:9", citedFor(model, flash.manifest.data)).numbers;
+    const [ch] = sourcesSidecar(hidden, "16:9", citedFor(flash.manifest.data)).numbers;
     expect(ch).toMatchObject({ shown: "drawn", onScreen: [{ from: 0, to: 6 }] });
+  });
+
+  it("throws on a ref missing from the cited values, naming the Scene and the ref", () => {
+    expect(() => sourcesSidecar(flash, "16:9", {})).toThrow('Scene "flash" cites "methane/r.CH", which is not in the cited data');
   });
 });

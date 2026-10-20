@@ -38,7 +38,7 @@ describe("sources sidecar", () => {
     "nuclides/C-12.A": [[5.4, 9.3]],
   });
 
-  it("has the same shape as the video module's (#65) sidecars: each number, its citation and its on-screen time ranges", () => {
+  it("takes each number's on-screen time ranges from the script's timings (@astratron/content/sidecar's shape)", () => {
     expect(sidecar).toMatchObject({ scene: "star-forge", title: "Forged in a star", aspect: "16:9", file: "star-forge-16x9.mp4", fps: 60, duration: 13 });
     expect(sidecar.numbers.find((n) => n.ref === "nuclides/C-12.A")).toEqual({
       ref: "nuclides/C-12.A",
@@ -57,19 +57,10 @@ describe("sources sidecar", () => {
     expect(sidecar.numbers.find((n) => n.ref === "nuclides/C-12.Z")).toMatchObject({ shown: "drawn", onScreen: [{ from: 0, to: 13 }] });
   });
 
-  it("ends with a paste-ready description block", () => {
-    const lines = sidecar.description.split("\n");
-    expect(lines.slice(0, 7)).toEqual([
-      "Forged in a star",
-      "",
-      "Numbers on screen:",
-      "0:00–0:13  helium-4 protons 2",
-      "0:02–0:08  helium-4 mass number 4",
-      "0:00–0:13  carbon-12 protons 6",
-      "0:05–0:10  carbon-12 mass number 12",
-    ]);
-    expect(lines[8]).toBe("Sources:");
-    expect(sidecar.description).toContain("NUBASE2020");
+  it("throws on a ref missing from the cited data, naming the Scene and the ref", () => {
+    expect(() => checkWatchRenders([{ ...starForge, data: ["nuclides/Xx.Z"] }], organic.data)).toThrow(
+      'Scene "star-forge" cites "nuclides/Xx.Z", which is not in the cited data',
+    );
   });
 });
 

@@ -13,8 +13,8 @@ import { dirname, join } from "node:path";
 import { buildContent, contentRoot } from "@astratron/content";
 import type { Aspect, WatchSceneManifest } from "../types.ts";
 import { watchSceneFiles, watchSceneManifests, aspectSlug } from "../watch.ts";
+import { citedFor } from "@astratron/content/sidecar";
 import {
-  citedFor,
   FPS,
   inputsHash,
   MANIM_VERSION,
@@ -102,8 +102,7 @@ const data = Object.assign({}, ...model.subjects.map((s) => s.data));
 
 for (const m of watchSceneManifests.filter((w) => !ids.length || ids.includes(w.id))) {
   console.log(`Rendering ${m.id}`);
-  const { cited, missing } = citedFor(m, data);
-  if (missing.length) throw new Error(`${m.id} cites ${missing.join(", ")}, not in the cited data`);
+  const cited = citedFor(m.id, m.data, data);
   const work = mkdtempSync(join(tmpdir(), `manim-${m.id}-`));
   try {
     const record: RenderRecord = { scene: m.id, manim: MANIM_VERSION, fps: FPS, inputs: inputsHash(m, cited), aspects: {} };

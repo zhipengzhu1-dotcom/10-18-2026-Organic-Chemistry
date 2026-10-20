@@ -9,7 +9,8 @@
     "./valence": "./src/valence.ts",
     "./molecule": "./src/molecule.ts",
     "./model": "./src/model.ts",
-    "./arrows": "./src/arrows.ts"
+    "./arrows": "./src/arrows.ts",
+    "./sidecar": "./src/sidecar.ts"
   },
   "scripts": {
     "build": "node src/cli.ts",

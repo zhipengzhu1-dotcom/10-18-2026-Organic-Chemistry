@@ -16,7 +16,7 @@ Real work left open after v1. Owner questions live in `docs/owner/hand-check.md`
 - **MoleculeSwitch autoplay runs on `setInterval`**, outside the Scene clock (`site/src/molecule/MoleculeSwitch.tsx`). The motion gate sees only CSS and Web Animations, so it can't catch this kind of loop (`site/e2e/design.spec.ts`).
 - **The site shows Scenes at 16:9 only**, no 9:16 on phones (`ScenePlayer.tsx`, `WatchScenePlayer.tsx`).
 - **push-replay isn't in the Scene registry**, so a Draw-arrows replay can't go through the video path (`scenes/src/push-replay/PushReplay.tsx`).
-- **Sources sidecar shape defined twice** (`video/src/sidecar.ts`, `scenes/src/manim/pipeline.ts`), kept in step by a comment only; no shared type or test. Canvas (R3F) text is invisible to its timing, so such numbers read "drawn" for the whole video.
+- **Canvas (R3F) text is invisible to Sources sidecar timing** (`video/src/sidecar.ts`), so such numbers read "drawn" for the whole video.
 - **Two mechanisms copy structure files to JSON for Scenes** (`pnpm structures:json` for Lesson 2, `sync:structures` for functional groups); unify them.
 - **No condensed group labels** (CH₃, CO₂H) in the structure renderer; only an atom's `h` field gives H₃C– / –OH (`scenes/src/structure/render.ts`).
 - **No-WebGL still shows orbital labels and chips but no lobe shapes** (`site/src/molecule/MoleculeDrawing.tsx`).
