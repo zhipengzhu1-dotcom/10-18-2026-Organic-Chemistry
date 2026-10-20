@@ -74,7 +74,7 @@ describe("sourcesSidecar", () => {
       ]),
     );
     expect(sidecar).toMatchObject({ scene: "pi-twist", aspect: "16:9", fps: 60, duration: 8 });
-  });
+  }, 30_000); // pi-twist draws every frame of an 8 s video (slow when the machine is busy)
 
   it("falls back to the whole video for a cited value used in the drawing but never printed", () => {
     const hidden: RegisteredScene<{}> = { ...flash, Component: () => createElement("svg", null) };
