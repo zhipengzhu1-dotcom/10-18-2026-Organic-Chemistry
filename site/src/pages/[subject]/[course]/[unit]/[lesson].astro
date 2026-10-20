@@ -2,6 +2,7 @@
 import type { GetStaticPaths } from "astro";
 import Base from "../../../../layouts/Base.astro";
 import StepPlayer from "../../../../components/StepPlayer.tsx";
+import LessonText from "../../../../components/LessonText.astro";
 import { answerKeyUrl, lessonPages, renderLesson, type LessonPage } from "../../../../lib/content.ts";
 import { splitLesson } from "../../../../lib/answer-key.ts";
 
@@ -16,6 +17,12 @@ const { subject, lesson, unitId, unitTitle, unitUrl, nextUrl } = Astro.props as 
 const { page } = splitLesson(renderLesson(lesson));
 ---
 
-<Base title={`${lesson.title} · ${unitTitle} · AstraTron`} description={lesson.goal} bare>
+<Base title={`${lesson.title} · ${unitTitle} · AstraTron`} description={lesson.goal} unitId={unitId} bare>
   <StepPlayer client:load lesson={page} keyUrl={answerKeyUrl(subject, lesson.id)} exitHref={unitUrl} unitId={unitId} nextHref={nextUrl} />
+  <LessonText lesson={page} />
 </Base>
+
+<script>
+  // The Step player is running: the plain HTML copy of the Steps would only repeat it.
+  document.getElementById("lesson-text")?.remove();
+</script>

@@ -1,11 +1,13 @@
 ---
-// The site header outside the Step player: wordmark and the Streak (flame and
-// number), filled in from the browser's progress record. Donate (#77) goes here too.
-// Styles: global.css (Top bar).
+// The site header outside the Step player: wordmark, Donate (Ko-fi) and the Streak
+// (flame and number), filled in from the browser's progress record.
+// Styles: global.css (Top bar). Never shown inside a Lesson: no donate prompt there.
+import { KOFI_URL } from "../lib/site.ts";
 ---
 
 <header class="topbar">
   <a class="wordmark" href="/">AstraTron</a>
+  <a class="btn btn-primary donate" href={KOFI_URL}>Donate</a>
   <span class="streak" data-streak role="img" aria-label="Streak: 0 days">🔥<b>0</b></span>
 </header>
 
@@ -13,4 +15,3 @@
   import { showStreak } from "../progress/pages.ts";
   showStreak();
 </script>
-
