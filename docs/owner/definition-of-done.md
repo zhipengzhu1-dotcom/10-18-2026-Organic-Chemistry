@@ -7,7 +7,7 @@ v1 is done when all five things below are true. The first four are checked by th
 | 1 | **Unit 1 plays all the way through:** Lessons 0 to 8, matching their specs, plus a Practice Set drawn from the Practice Problems. | Built. The browser tests play every Lesson from Step 1 to the end screen, and play every Practice Problem the Practice Set can draw. |
 | 2 | **The full Course map:** all 18 Units, Unit 1 open, the rest "coming soon". | Built and tested. |
 | 3 | **The site around the Lessons:** the push on the home page, the Hub for returning visitors, progress and Streak saved in the browser, Donate, the footer, and the Suggest-a-Problem / Report-a-mistake form (saving to a database on your computer, not online). | Built and tested. |
-| 4 | **Every automatic check passes** (list below). | Green on this branch, 20 October 2026. |
+| 4 | **Every automatic check passes** (list below). | Green on this branch, 20 October 2026, except one: the video-stills check times out on this Mac before it starts (a known local problem with its browser; it is meant to run in CI). |
 | 5 | **Your hand check:** every Lesson played once on a phone, one with the keyboard only, one with reduced motion, every Unit 1 Source note read for chemistry sense. Plus the agent's screen-reader pass, with a written transcript for you. | Screen-reader pass done (`docs/qa/screen-reader-unit-1.md`). Your part: `hand-check.md`. |
 
 The sample Lessons the agents used while building (the "Sample: …" rows) are gone: Unit 1 now holds only the nine real Lessons and their Problems.
