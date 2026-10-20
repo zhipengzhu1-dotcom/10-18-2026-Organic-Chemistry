@@ -31,7 +31,7 @@ hints:
   - match: [a6]
     text: "That's one. The carbon bonded to N is drawn + as soon as the C=N pair moves onto N."
   - text: "Push C=N's π pair onto N, then slide the C=C toward the new C⁺. Every carbon drawn + is δ+."
-reveal: "Arrow from the C=N π bond onto nitrogen: the carbon bonded to nitrogen is now positive. Arrow from the ring C=C π bond into the bond toward that carbon: the positive charge moves two carbons around the ring. Those two carbons, C4 and C6, are δ+."
+reveal: "C4 and C6: each is drawn + in a contributor (C=N pair onto N, then the ring C=C toward C4), so both are δ+."
 replay:
   start: iminium
   result: iminium-c6

@@ -28,5 +28,5 @@ hints:
   - misses: [a1, a7, a9, a13]
     text: Pick one atom in **each** of the four highlighted bonds.
   - text: "Open the values: in each bond, the atom with the bigger number is δ−."
-reveal: "δ− on N {{electronegativity-pauling/N}} (H {{electronegativity-pauling/H}}), N {{electronegativity-pauling/N}} (C {{electronegativity-pauling/C}}), H in borane and O {{electronegativity-pauling/O}} (N {{electronegativity-pauling/N}}); their partners are δ+. B {{electronegativity-pauling/B}} < H {{electronegativity-pauling/H}}: hydrogen is δ− here."
+reveal: "δ− on N, N, H and O. B {{electronegativity-pauling/B}} < H {{electronegativity-pauling/H}}: hydrogen is δ− here."
 sourceNote: "Adapted from LibreTexts, *Map: Organic Chemistry (Wade)*, §1.16 exercise 1-10 and its solution in §1.17, CC BY-NC-SA 4.0. Wording and drawing ours. Electronegativity, Pauling scale: Allred (1961), via the CRC Handbook. Structures: PubChem CIDs 222, 768, 6331, 787."
