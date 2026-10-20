@@ -28,7 +28,7 @@ Rules that bite:
 
 ## Playwright
 
-- Runs against the built site (`astro build` + `astro preview --ignore-lock`; without `--ignore-lock` Astro 7 backgrounds the server for agents). It picks a free port; `E2E_PORT` overrides. Tests run fully parallel, so keep each test independent of the others in its file.
+- Runs against the built site (`astro build` + `astro preview --ignore-lock`; without `--ignore-lock` Astro 7 backgrounds the server for agents). It picks a free port; `E2E_PORT` overrides. Tests run fully parallel, so keep each test independent of the others in its file. `--shard` deals tests round-robin (`site/e2e/round-robin-shards.ts`), so the slow per-Lesson design walks spread over CI's four shards.
 - 60 s per test and 10 s per expect leave room for a loaded machine; the per-Lesson gates set 180 s themselves. One retry in CI only.
 - Under heavy multi-agent load some walks (Lesson 0 keyboard walk, structure-steps Tab reach, molecule-card turns) run slow; a failure that passes alone is load, a failure that repeats alone is real.
 - Nothing rests on random draws: `practice-set.spec.ts` seeds the draw (mulberry32) and plays the whole Bank in pinned Sets. Keep new randomness seeded in tests.

@@ -24,7 +24,7 @@ export default defineConfig({
   timeout: 60_000,
   expect: { timeout: 10_000 },
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? "github" : "list",
+  reporter: [[process.env.CI ? "github" : "list"], ["./site/e2e/round-robin-shards.ts"]],
   use: { baseURL: `http://localhost:${port}`, trace: "retain-on-failure" },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
