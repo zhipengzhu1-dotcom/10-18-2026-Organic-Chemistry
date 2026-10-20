@@ -57,7 +57,10 @@ export function lintChemistryNumbers(files: SourceFile[], elementColours: Record
 
       const at = `${file.path}:${i + 1}: `;
       const found = new Map<number, string>();
+      // A design token's fallback (`var(--at-ink, #ffffff)`) is the token's own value, pinned to tokens.css by a test.
+      const tokenFallbacks = new Set([...line.matchAll(/var\(--at-[a-z0-9-]+,\s*/g)].map((t) => t.index + t[0].length));
       for (const m of line.matchAll(hex)) {
+        if (tokenFallbacks.has(m.index)) continue;
         const label = colours.get(m[0].replace(/^0x/i, "#").toUpperCase());
         if (label) found.set(m.index, `${m[0]} is the ${label} from the cited elements table; read it with elementStyle()`);
       }

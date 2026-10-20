@@ -26,6 +26,10 @@ describe("chemistry-number lint for Scene code", () => {
     ]);
   });
 
+  it("leaves a design token's fallback alone, even when it matches an element colour", () => {
+    expect(lint('const ink = "var(--at-ink, #909090)";')).toEqual([]);
+  });
+
   it("leaves layout, timing and maths numbers alone", () => {
     expect(
       lint(

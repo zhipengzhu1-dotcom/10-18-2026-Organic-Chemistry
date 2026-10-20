@@ -4,12 +4,11 @@
 // Sizes are in frame units (1920×1080 or 1080×1920), scaled by `unit`.
 import type { ReactNode } from "react";
 
-export const ink = "var(--at-ink, #f2f0ff)";
-export const electron = "var(--at-electron, #35d4ff)";
-export const muted = "var(--at-ink-muted, #b9b4d8)";
-export const line = "var(--at-line, #6b6890)";
-export const boss = "var(--at-boss, #ff4fd8)";
-export const panel = "var(--at-panel, #1b1838)";
+export const ink = "var(--at-ink, #ffffff)";
+export const electron = "var(--at-electron, #3ee8ff)";
+export const muted = "var(--at-ink-muted, #b9a8e8)";
+export const line = "var(--at-line, #6a4bd1)";
+export const boss = "var(--at-boss, #ff5fd8)";
 
 /**
  * One electron as a half-arrow, as MO diagrams draw them: ↑ (spin up) or ↓, the barb on one side

@@ -114,7 +114,7 @@ export default function GroupSpotlight({ t, state, aspect, reducedMotion }: Scen
           const tone = region.tone === "lit" ? CYAN : MUTED;
           return (
             <g key={`chip-${c.molecule}-${c.region}`} opacity={amount}>
-              <rect x={c.x} y={c.y} width={c.w} height={c.h} rx={12} fill="var(--at-surface, #14122b)" fillOpacity={0.88} stroke={tone} strokeWidth={3} />
+              <rect x={c.x} y={c.y} width={c.w} height={c.h} rx={12} fill="var(--at-surface, #1a0f3d)" fillOpacity={0.88} stroke={tone} strokeWidth={3} />
               <text x={c.x + c.w / 2} y={c.y + CHIP_PAD + NAME_PX * 0.8} textAnchor="middle" fontSize={NAME_PX} fontWeight={700} fill={INK} fontFamily={FONT_TEXT}>
                 {region.label}
               </text>

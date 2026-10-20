@@ -10,7 +10,7 @@ export const ink = (which: Ink | "ink" | "muted" | "line" | "surface") =>
   ({
     ignite: "var(--at-ignite, #ff9a1f)",
     electron: "var(--at-electron, #3ee8ff)",
-    ink: "var(--at-ink, #fff)",
+    ink: "var(--at-ink, #ffffff)",
     muted: "var(--at-ink-muted, #b9a8e8)",
     line: "var(--at-line, #6a4bd1)",
     surface: "var(--at-surface, #1a0f3d)",

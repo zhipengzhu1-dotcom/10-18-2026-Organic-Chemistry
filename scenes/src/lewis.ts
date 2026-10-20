@@ -53,9 +53,9 @@ export function fit(drawing: Drawing, box: Box): { scale: number; x: number; y: 
 
 /** Text in Scenes is set in the data face (digits and formulas must be, by the site's type rule). */
 export const DATA_FONT = "var(--at-font-data, 'JetBrains Mono'), ui-monospace, monospace";
-export const INK = "var(--at-ink, #f2f0ff)";
-export const MUTED = "var(--at-ink-muted, #b8b4d8)";
-export const LINE = "var(--at-line, #6b6890)";
-export const CYAN = "var(--at-electron, #35d4ff)";
-export const MAGENTA = "var(--at-boss, #ff4fd8)";
-export const ORANGE = "var(--at-ignite, #ff9a3d)";
+export const INK = "var(--at-ink, #ffffff)";
+export const MUTED = "var(--at-ink-muted, #b9a8e8)";
+export const LINE = "var(--at-line, #6a4bd1)";
+export const CYAN = "var(--at-electron, #3ee8ff)";
+export const MAGENTA = "var(--at-boss, #ff5fd8)";
+export const ORANGE = "var(--at-ignite, #ff9a1f)";
