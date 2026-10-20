@@ -10,7 +10,7 @@ Entry points: `pnpm check` (typecheck, content:build, lint:numbers, lint:scenes,
 - **budget:js** (`site/src/lib/js-budget.ts`): ≤200 KB gzip first-load JS per Lesson and Practice Set page, following static imports from module scripts and island URLs. Only dynamic `import()` escapes it: keep three.js, meshes and Draw arrows behind one. Needs `site/dist`.
 - **video check-site**: the built site and its modules carry no Remotion (builds the site if `site/dist` is missing).
 - **video stills**: one poster frame per registry Scene × 16:9 and 9:16 through Remotion. A new Scene must pass it. See `docs/dev/video.md` for the local browser override.
-- **Answer leak** (`site/e2e/course-map.spec.ts`): no built Lesson page holds an answer, Hint, Correct line or reveal. A new grading field goes in `ANSWER_FIELDS` (`content/src/model.ts`) or this fails (`docs/dev/content.md`).
+- **Answer leak** (`site/e2e/course-map.spec.ts`): no built Lesson page holds an answer, Hint, Correct line or reveal. A new grading field goes in `ANSWER_FIELDS` (`content/src/model.ts`) or this fails (`docs/dev/content.md`). The unit test `content/test/answer-fields.test.ts` catches answer-named schema fields missing from it first.
 - **noindex** (`definition-of-done.spec.ts`, `site.test.ts`): every page carries noindex while `PUBLIC` is false.
 
 ## Design gates (`site/e2e/design.spec.ts`)
