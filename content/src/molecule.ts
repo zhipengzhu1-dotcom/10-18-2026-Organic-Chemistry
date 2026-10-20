@@ -113,6 +113,46 @@ const SIGN_BY_ORDER = { 1: "–", 2: "=", 3: "≡" } as const;
 const SCALE_BAR_ANGSTROMS = 1;
 export const SCALE_BAR_LABEL = `${SCALE_BAR_ANGSTROMS} Å`;
 
+export interface ArrowSize {
+  head: number;
+  tail: number;
+  cross: number;
+  spread: number;
+}
+
+export interface Point2 {
+  x: number;
+  y: number;
+}
+
+/**
+ * A dipole arrow's lines, in screen units: the shaft from the tail to the head's base, a cross on
+ * the tail (the δ+ end) `tail` along it and `cross` either side, and a head `head` long whose base
+ * is `spread` × `head` either side; `size` may depend on the arrow's length. None when the arrow
+ * is shorter than `min`.
+ */
+export function arrowShape(
+  from: Point2,
+  to: Point2,
+  sizing: ArrowSize | ((length: number) => ArrowSize),
+  min = 2,
+): { shaft: [Point2, Point2]; cross: [Point2, Point2]; head: [Point2, Point2, Point2] } | undefined {
+  const len = Math.hypot(to.x - from.x, to.y - from.y);
+  if (len < min) return undefined;
+  const size = typeof sizing === "function" ? sizing(len) : sizing;
+  const [ux, uy] = [(to.x - from.x) / len, (to.y - from.y) / len];
+  const [nx, ny] = [-uy, ux];
+  const base = { x: to.x - ux * size.head, y: to.y - uy * size.head };
+  const c = { x: from.x + ux * size.tail, y: from.y + uy * size.tail };
+  const side = (p: Point2, d: number) => ({ x: p.x + nx * d, y: p.y + ny * d });
+  const half = size.head * size.spread;
+  return {
+    shaft: [from, base],
+    cross: [side(c, size.cross), side(c, -size.cross)],
+    head: [to, side(base, half), side(base, -half)],
+  };
+}
+
 /** Dark or light ink for a letter on an atom of this colour ("#RRGGBB"), by its relative luminance. */
 export function inkOn(hex: string): string {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);

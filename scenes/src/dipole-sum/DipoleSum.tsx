@@ -2,7 +2,7 @@
 // the δ+ atom toward the δ− atom. Added, every arrow slides (in 3D) to its place in a tip-to-tail
 // chain centred on the central atom, and the sum is drawn: a thick net arrow, or a dashed ring
 // with "net: zero".
-import type { Vec3 } from "@astratron/content/molecule";
+import { arrowShape, type Vec3 } from "@astratron/content/molecule";
 import { frameSize, safeArea, type Box } from "../frame.ts";
 import { CYAN, DATA_FONT, INK, MAGENTA, MUTED, LINE } from "../lewis.ts";
 import { clamp, easeInOut, progress } from "../motion.ts";
@@ -48,19 +48,15 @@ function panels(n: number, area: Box, portrait: boolean): Box[] {
 }
 
 function Arrow({ from, to, width, colour, cross }: { from: Placed; to: Placed; width: number; colour: string; cross: boolean }) {
-  const len = Math.hypot(to.x - from.x, to.y - from.y);
-  if (len < 1) return null;
-  const [ux, uy] = [(to.x - from.x) / len, (to.y - from.y) / len];
-  const head = Math.min(len * 0.45, width * 4.2);
-  const [bx, by] = [to.x - ux * head, to.y - uy * head];
-  const [nx, ny] = [-uy, ux];
-  const cx = from.x + ux * Math.min(len * 0.2, width * 3);
-  const cy = from.y + uy * Math.min(len * 0.2, width * 3);
+  const sizing = (len: number) => ({ head: Math.min(len * 0.45, width * 4.2), tail: Math.min(len * 0.2, width * 3), cross: width * 2, spread: 0.5 });
+  const shape = arrowShape(from, to, sizing, 1);
+  if (!shape) return null;
+  const [[a, b], [c, d]] = [shape.shaft, shape.cross];
   return (
     <g>
-      <line x1={from.x} y1={from.y} x2={bx} y2={by} stroke={colour} strokeWidth={width} strokeLinecap="round" />
-      {cross && <line x1={cx + nx * width * 2} y1={cy + ny * width * 2} x2={cx - nx * width * 2} y2={cy - ny * width * 2} stroke={colour} strokeWidth={width * 0.8} />}
-      <polygon points={`${to.x},${to.y} ${bx + nx * head * 0.5},${by + ny * head * 0.5} ${bx - nx * head * 0.5},${by - ny * head * 0.5}`} fill={colour} />
+      <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={colour} strokeWidth={width} strokeLinecap="round" />
+      {cross && <line x1={c.x} y1={c.y} x2={d.x} y2={d.y} stroke={colour} strokeWidth={width * 0.8} />}
+      <polygon points={shape.head.map((p) => `${p.x},${p.y}`).join(" ")} fill={colour} />
     </g>
   );
 }

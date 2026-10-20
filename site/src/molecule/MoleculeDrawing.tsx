@@ -4,7 +4,7 @@
 // - MoleculeOverlay: every atom's letter, the picked atoms, the keyboard cursor and the measurement
 //   drawn on the molecule.
 import type { MoleculeUse } from "@astratron/content";
-import { atomNames, inkOn, readout, type Measurement } from "@astratron/content/molecule";
+import { arrowShape, atomNames, inkOn, readout, type Measurement, type Point2 } from "@astratron/content/molecule";
 import type { PlacedAtom } from "./layout.ts";
 
 interface Size {
@@ -132,11 +132,6 @@ function MeasurementTag({ m, placed, names }: { m: Measurement; placed: PlacedAt
   );
 }
 
-interface Point2 {
-  x: number;
-  y: number;
-}
-
 interface MarksProps {
   molecule: MoleculeUse;
   placed: PlacedAtom[];
@@ -151,18 +146,14 @@ interface MarksProps {
 
 /** An arrow with a crossed tail (+ at the δ+ end), or a plain thick one for the net pull. */
 function Arrow({ from, to, crossed, className }: { from: Point2; to: Point2; crossed: boolean; className: string }) {
-  const len = Math.hypot(to.x - from.x, to.y - from.y);
-  if (len < 2) return null;
-  const [ux, uy] = [(to.x - from.x) / len, (to.y - from.y) / len];
-  const head = Math.min(12, len * 0.4);
-  const [bx, by] = [to.x - ux * head, to.y - uy * head];
-  const [nx, ny] = [-uy, ux];
-  const [cx, cy] = [from.x + ux * Math.min(8, len * 0.2), from.y + uy * Math.min(8, len * 0.2)];
+  const shape = arrowShape(from, to, (len) => ({ head: Math.min(12, len * 0.4), tail: Math.min(8, len * 0.2), cross: 6, spread: 0.55 }));
+  if (!shape) return null;
+  const [[a, b], [c, d]] = [shape.shaft, shape.cross];
   return (
     <g className={className}>
-      <line x1={from.x} y1={from.y} x2={bx} y2={by} />
-      {crossed && <line x1={cx + nx * 6} y1={cy + ny * 6} x2={cx - nx * 6} y2={cy - ny * 6} />}
-      <polygon points={`${to.x},${to.y} ${bx + nx * head * 0.55},${by + ny * head * 0.55} ${bx - nx * head * 0.55},${by - ny * head * 0.55}`} />
+      <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} />
+      {crossed && <line x1={c.x} y1={c.y} x2={d.x} y2={d.y} />}
+      <polygon points={shape.head.map((p) => `${p.x},${p.y}`).join(" ")} />
     </g>
   );
 }
