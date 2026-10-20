@@ -1,10 +1,11 @@
 // Drawing resonance contributors inside a Scene frame (Lesson 7): a structure
 // drawn by the site's own renderer, placed in a box at a shared scale, with
-// optional highlighted bonds, the hybrid's dashed partial bonds, brackets and
-// the ↔ between contributors. Pure: every input is a prop.
+// optional highlighted bonds and the hybrid's dashed partial bonds; contributors in
+// brackets joined by ↔ come from Lesson 6's drawContributors. Pure: every input is a prop.
 import type { Structure } from "@astratron/content";
 import type { Box } from "../frame.ts";
 import { drawStructure, type Drawing, type Point } from "../structure/render.ts";
+import { drawContributors } from "../structure/contributors.ts";
 
 export const INK = "var(--at-ink, #f2f0ff)";
 export const MUTED = "var(--at-ink-muted, #a9a6c9)";
@@ -112,24 +113,40 @@ const mean = (points: Point[]): Point => ({
   y: points.reduce((s, p) => s + p.y, 0) / points.length,
 });
 
-/** Square brackets around a box (the contributors' bracket). */
-export function Brackets({ box, opacity = 1 }: { box: Box; opacity?: number }) {
-  const lip = Math.min(28, box.w * 0.05);
-  const { x, y, w, h } = box;
-  return (
-    <g fill="none" stroke={INK} strokeWidth={4} opacity={opacity}>
-      <path d={`M${x + lip},${y} H${x} V${y + h} H${x + lip}`} />
-      <path d={`M${x + w - lip},${y} H${x + w} V${y + h} H${x + w - lip}`} />
-    </g>
-  );
+export interface PlacedContributors {
+  svg: string;
+  x: number;
+  y: number;
+  scale: number;
+  /** Each contributor's drawing, in frame coordinates (for its "major"/"minor" tag). */
+  frames: Box[];
 }
 
-/** The resonance arrow, ↔, centred at a point. */
-export function ResonanceArrow({ at, size, opacity = 1 }: { at: Point; size: number; opacity?: number }) {
+/**
+ * Contributors in one pair of brackets joined by ↔ (Lesson 6's `drawContributors`), fitted to a box.
+ * `sizes` draws a contributor smaller (amide-hybrid's minor one) by shrinking its drawing's box.
+ */
+export function placeContributors(drawings: Drawing[], box: Box, sizes: number[] = []): PlacedContributors {
+  const sized = drawings.map((d, i) => ({ ...d, width: d.width * (sizes[i] ?? 1), height: d.height * (sizes[i] ?? 1) }));
+  const row = drawContributors(sized);
+  const scale = Math.min(box.w / row.width, box.h / row.height);
+  const x = box.x + (box.w - row.width * scale) / 2;
+  const y = box.y + (box.h - row.height * scale) / 2;
+  const frames = row.offsets.map((o, i) => ({ x: x + o.x * scale, y: y + o.y * scale, w: sized[i].width * scale, h: sized[i].height * scale }));
+  return { svg: row.svg, x, y, scale, frames };
+}
+
+/** A placed row of contributors. */
+export function Contributors({ placed, opacity = 1 }: { placed: PlacedContributors; opacity?: number }) {
+  const inner = placed.svg.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "");
   return (
-    <text x={at.x} y={at.y} fontSize={size} textAnchor="middle" dominantBaseline="central" fill={INK} opacity={opacity} fontFamily={TEXT_FONT}>
-      ↔
-    </text>
+    <g
+      transform={`translate(${placed.x} ${placed.y}) scale(${placed.scale})`}
+      opacity={opacity}
+      fontFamily={DATA_FONT}
+      style={{ color: INK, ["--lone-pair" as string]: ELECTRON }}
+      dangerouslySetInnerHTML={{ __html: inner }}
+    />
   );
 }
 

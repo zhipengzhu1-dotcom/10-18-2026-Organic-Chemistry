@@ -1,0 +1,241 @@
+# Lesson 3: Molecules in 3D (#81). Built from the merged Lesson spec
+# docs/specs/unit-1/lesson-03-molecules-in-3d.md: every Prompt, Hint, Correct line, Reveal and
+# Source note follows it. Geometry comes from the cited data files (CCCBDB experimental, or our
+# B3LYP/cc-pVTZ "computed" ethanol and 2-fluorobutane); the only typed angles are the VSEPR model's
+# predictions (180°, 120°, 109.5°), always named as the model's, and the flat drawing's right angle.
+# A cited angle shows with its unit ("109.5°"), so the spec's "{x} degrees" reads "{{x}}" here.
+id: u1-l03
+slug: molecules-in-3d
+title: Molecules in 3D
+act: Shape
+signature: s09
+goal: Predict a small molecule's shape by counting the electron domains on its central atom, read and check a wedge-and-dash drawing against a 3D model, and decide whether a molecule's polar bonds cancel.
+keyIdea: Electron domains push as far apart as they can, and that sets the shape. Lines, wedges and dashes put the shape on paper, and the shape decides whether polar bonds cancel.
+steps:
+  - id: s01
+    phase: hook
+    type: multiple-choice
+    prediction: true
+    prompt: "Here's methane, CH₄, the way you've drawn it so far. On paper, neighbouring H's sit at right angles. In the real molecule, is the angle between two H's (with C at the corner)…"
+    figures:
+      - { structure: methane, corner: [a4, a1, a2], alt: "Methane drawn flat: carbon in the middle, hydrogens above, right, below and left, with a right-angle mark between the top H and the right H." }
+    options:
+      - { id: a, text: smaller than a right angle }
+      - { id: b, text: "a right angle, like the drawing" }
+      - { id: c, text: bigger than a right angle }
+    answer: [c]
+    reveal: "**Bigger: {{methane/a.HCH}}**, and every pair of H's measures the same. Methane isn't flat. Its H's spread out in 3D, as far from each other as they can get. A flat drawing can't show that. This Lesson is about the real shapes, and how to draw them."
+    revealScene: methane-unflatten
+
+  - id: s02
+    phase: build
+    type: explain
+    text: "Why that shape? Count the **electron domains** around the central atom. Each bond is one domain, and a double or triple bond still counts as **one**. Each lone pair is one domain too.<br>Domains are clouds of negative charge, so they push each other as far apart as they can. That's the **VSEPR** model (valence-shell electron-pair repulsion):<br>2 domains → a **line** · 3 → a flat **triangle** · 4 → a **tetrahedron**, a pyramid with four triangular faces.<br>Methane's carbon has 4 bonds, so 4 domains: a tetrahedron."
+    scene: domain-spread
+    sourceNote: "Molecules aren't flat, and VSEPR sets their shape: after MIT OCW 5.12, Lecture 1 p. 13, Berkowski, Spring 2005, CC BY-NC-SA 4.0. The angles in this animation are the model's predictions, not measurements."
+
+  - id: s03
+    phase: build
+    type: rotate-and-identify
+    prompt: "Real methane, from measured data. Tap an H, the C, then another H to measure an angle. Try a few different pairs. What do you find?"
+    molecule:
+      id: methane
+      view: tilted
+      describe: "Methane. Carbon in the centre, four hydrogens at the corners of a tetrahedron, each {{methane/r.CH}} from carbon. Every H–C–H angle is {{methane/a.HCH}}."
+    options:
+      - { id: a, text: every H–C–H angle is the same }
+      - { id: b, text: "some angles are right angles, some are wider" }
+      - { id: c, text: some pairs of H's sit in a straight line through C }
+    answer: [a]
+    correct: "All six H–C–H angles read {{methane/a.HCH}}: the four H's are perfectly spread. The tetrahedron model predicts 109.5°, and methane matches it."
+    hints:
+      - match: [b]
+        text: "Measure two or three more pairs: H, then C, then a different H. Does any of them read as a right angle?"
+      - match: [c]
+        text: "Pick two H's that look opposite, with C between them. If they were in a straight line the angle would be 180°. What does it read?"
+      - text: Tap H, C, H for different pairs and compare the readouts.
+    reveal: "Every pair gives the same angle, {{methane/a.HCH}}. That's a tetrahedron."
+
+  - id: s04
+    phase: build
+    type: numeric
+    prompt: Ammonia, NH₃. How many electron domains surround the nitrogen?
+    figures:
+      - { structure: ammonia, alt: "Ammonia: nitrogen bonded to three hydrogens, with one lone pair on nitrogen." }
+    unitSymbol: ""
+    answer: 4
+    tolerance: 0
+    correct: "Three bonds plus one lone pair: 4 domains. So they spread out like methane's."
+    hints:
+      - match: 3
+        text: "You counted the bonds. The lone pair on N is a domain too: it pushes just like a bond does."
+      - match: 5
+        text: A lone pair is one domain, not two. Count the bonds, then add one per lone pair.
+      - match: 8
+        text: "That's the electron count. Count groups instead: each bond is one, each lone pair is one."
+      - match: 1
+        text: That's just the lone pair. Add the bonds to H.
+      - text: Count each bond to N once and each lone pair on N once.
+    reveal: "4: three bonds (1, 2, 3) and the lone pair (4)."
+
+  - id: s05
+    phase: build
+    type: explain
+    text: "The **shape** is named by where the **atoms** are. Lone pairs push, but you can't see them in the shape. With 4 domains:<br>4 bonds → **tetrahedral** (CH₄)<br>3 bonds + 1 lone pair → **trigonal pyramidal**, a tripod (NH₃)<br>2 bonds + 2 lone pairs → **bent** (H₂O)<br>A lone pair is held by only one nucleus, so it spreads wider and squeezes the bonds a little closer. Measured: CH₄ {{methane/a.HCH}}, NH₃ {{ammonia/a.HNH}}, H₂O {{water/a.HOH}}."
+    scene: four-domain-family
+
+  - id: s06
+    phase: build
+    type: rotate-and-identify
+    prompt: Water, H₂O. Turn it around. Which name fits its shape?
+    molecule:
+      id: water
+      view: end-on
+      describe: "Water. Oxygen in the middle bonded to two hydrogens, {{water/r.OH}} each. The H–O–H angle is {{water/a.HOH}}, so the molecule is bent."
+    options:
+      - { id: a, text: linear }
+      - { id: b, text: bent }
+      - { id: c, text: trigonal pyramidal }
+      - { id: d, text: tetrahedral }
+    answer: [b]
+    correct: "Bent: O has 4 domains, but only 2 of them hold atoms. The shape is named by the three atoms, and they make a V."
+    hints:
+      - match: [a]
+        text: Rotate a quarter turn (↻). Do the two H's and the O line up?
+      - match: [d]
+        text: Tetrahedral describes O's four domains. The shape is named only by the atoms. How many atoms are there?
+      - match: [c]
+        text: "A pyramid needs three atoms around the centre. Water's O holds two."
+      - text: Count the atoms around O and look at the angle they make.
+    reveal: "Two bonds and two lone pairs: bent. Side on, the H–O–H angle reads {{water/a.HOH}}."
+
+  - id: s07
+    phase: build
+    type: multiple-choice
+    prompt: "Formaldehyde, H₂C=O. Count carbon's electron domains. What shape is it around C?"
+    figures:
+      - { structure: formaldehyde, alt: "Formaldehyde: carbon bonded to two hydrogens and double-bonded to oxygen, which has two lone pairs." }
+    options:
+      - { id: a, text: "3 domains: flat triangle (trigonal planar)" }
+      - { id: b, text: "4 domains: tetrahedral" }
+      - { id: c, text: "3 domains: trigonal pyramidal" }
+      - { id: d, text: "2 domains: linear" }
+    answer: [a]
+    correct: "The double bond's electrons sit between the same two atoms, so they push as one domain. Three domains: a flat triangle."
+    hints:
+      - match: [b]
+        text: "Carbon has four bonds' worth of electrons, but the C=O double bond points one way. It counts as one domain."
+      - match: [c]
+        text: A pyramid needs a lone pair on the centre. Does carbon have one here?
+      - match: [d]
+        text: "Count carbon's neighbours: two H's and one O."
+      - text: Count the atoms bonded to C, plus any lone pairs on C. A double bond counts once.
+    reveal: "Three domains, all four atoms in one plane. Measured: H–C–H {{formaldehyde/a.HCH}}, H–C=O {{formaldehyde/a.HCO}}, near the model's 120°. The double bond's extra electrons take a little more room."
+
+  - id: s08
+    phase: build
+    type: explain
+    text: "To put 3D on paper, chemists use three kinds of bond line:<br>**line**: in the plane of the page<br>**wedge** (solid): coming toward you<br>**dash** (hashed): going away, behind the page<br>A tetrahedral carbon is drawn with **two lines** in a V, and a **wedge and a dash** side by side in the gap opposite the V."
+    scene: wedge-dash-methane
+    molecule: methane
+    sourceNote: "Line, wedge and dash conventions and the perspective drawing of methane adapted from MIT OCW 5.12, Lecture 1 p. 13, Berkowski, Spring 2005, CC BY-NC-SA 4.0."
+
+  - id: s09
+    phase: build
+    type: rotate-and-identify
+    prompt: "Ethanol, CH₃CH₂OH. Turn the model until the O and both carbons lie flat on the page (the badge says **In the page**). Now look at the two H's on the carbon bonded to O. Where are they?"
+    molecule:
+      id: ethanol
+      view: off-page
+      labels: { 1: C1, 0: C2 }
+      pageSheet: [2, 1, 0]
+      describe: "Ethanol. C2 is bonded to C1, and C1 is bonded to the oxygen, which carries one hydrogen. The H–C1–H angle is {{ethanol/a.HC1H}}."
+    options:
+      - { id: a, text: both in the page }
+      - { id: b, text: "one toward you, one away" }
+      - { id: c, text: both toward you }
+      - { id: d, text: both away }
+    answer: [b]
+    correct: "Two bonds in the page means the other two straddle it: one in front, one behind. That's why every tetrahedral carbon is drawn line, line, wedge, dash."
+    hints:
+      - match: [a]
+        text: Turn the model a quarter turn (↻) so you see the page edge on. Does either H sit on it?
+      - match: [c]
+        text: "Look at the page edge on (↻). The two H's are mirror images across it. Can both be on the same side?"
+      - match: [d]
+        text: "Look at the page edge on (↻). The two H's are mirror images across it. Can both be on the same side?"
+      - text: "Get the badge to say In the page, then look at the page edge on: which side is each H on?"
+    reveal: "One H on C1 comes toward you (the wedge) and the other goes away (the dash)."
+
+  - id: s10
+    phase: build
+    type: multiple-choice
+    prompt: Which drawing shows a carbon's four bonds correctly in 3D?
+    options:
+      - { id: a, structure: l3-methane-wd-a, text: "Lines to the top H and the left H; a wedge and a dash side by side, lower right." }
+      - { id: b, structure: l3-methane-wd-b, text: "Lines to the top H and the left H; a wedge lower right and a dash between the two lines, upper left." }
+      - { id: c, structure: methane, text: "Four plain lines at right angles: the flat Lewis drawing." }
+      - { id: d, structure: l3-methane-wd-d, text: "Lines to the top H and the left H; two wedges, lower right." }
+    answer: [a]
+    correct: "Two in-page bonds make a V, and the other two share the gap opposite: one in front, one behind."
+    hints:
+      - match: [b]
+        text: "The two in-page lines make a V. The wedge and dash both belong in the gap opposite the V, not inside it."
+      - match: [c]
+        text: "That's the flat Lewis drawing. It's fine for counting bonds but says nothing about 3D."
+      - match: [d]
+        text: "With two bonds in the page, the other two are mirror images across it. They can't both come toward you."
+      - text: Two lines in a V, then a wedge and a dash side by side opposite the V.
+    reveal: "`a` is right. `b`: dash on the wrong side. `c`: flat. `d`: two wedges can't both be in front."
+    sourceNote: "Perspective drawing after MIT OCW 5.12, Lecture 1 p. 13, CC BY-NC-SA 4.0."
+
+  - id: s11
+    phase: build
+    type: rotate-and-identify
+    prompt: "Polar bonds, but is the **molecule** polar? Shape decides. Each bond dipole pulls toward δ−; press **Add** to put the pulls tip to tail, like a tug-of-war. (CO₂'s carbon has 2 domains, two double bonds, so it's a line.) Which molecule is polar overall?"
+    molecule:
+      id: water
+      label: H₂O
+      dipoles: true
+      describe: "Water, bent. Two bond-dipole arrows point from each hydrogen toward oxygen."
+      toggle:
+        - id: carbon-dioxide
+          label: CO₂
+          dipoles: true
+          describe: "Carbon dioxide, a straight line. Two equal bond-dipole arrows point from carbon toward each oxygen, in opposite directions."
+    options:
+      - { id: a, text: water only }
+      - { id: b, text: CO₂ only }
+      - { id: c, text: both }
+      - { id: d, text: neither }
+    answer: [a]
+    correct: "Water is bent, so both pulls lean toward O and add up: polar. CO₂ is straight, so its two equal pulls point opposite ways and cancel: nonpolar, even though each C=O bond is polar."
+    hints:
+      - match: [c]
+        text: "Both have two polar bonds. Now press Add on CO₂: its arrows point in exactly opposite directions. Equal and opposite pulls cancel."
+      - match: [b]
+        text: "CO₂ is a straight line. Press Add: what's left when two equal arrows point opposite ways?"
+      - match: [d]
+        text: "Water is bent. Press Add on water: both arrows lean toward O's side. Do they cancel?"
+      - text: "Press Add on each. A net arrow means polar; 'net: zero' means nonpolar."
+    reveal: "Water: polar. CO₂: net zero, nonpolar. Polar bonds aren't enough. The shape has to let the pulls add up."
+    revealScene: { id: dipole-sum, state: { molecule: water-co2, added: 1 } }
+    sourceNote: "Arrow lengths from Pauling electronegativity differences (the values Lesson 1 cites), a rough guide, not to scale."
+
+  - id: s12
+    phase: check
+    problem: u1-3d-flat-or-pyramid
+
+  - id: s13
+    phase: check
+    problem: u1-3d-perspective
+
+  - id: s14
+    phase: check
+    problem: u1-3d-polar-molecules
+
+  - id: s15
+    phase: wrap
+    type: explain
+    text: "**Molecules aren't flat. Electron domains push apart, and that sets the shape.**<br>2 domains: line · 3: flat triangle · 4: tetrahedron, with lone pairs hidden from the shape's name.<br>Line in the page, wedge toward you, dash away.<br>Polar bonds make a polar molecule only if the shape lets them add up."
+    scene: { id: four-domain-family, state: { labels: names }, still: true }

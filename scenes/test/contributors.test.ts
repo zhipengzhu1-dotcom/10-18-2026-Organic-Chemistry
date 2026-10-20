@@ -43,11 +43,11 @@ describe("layouts stay inside the frame", () => {
       for (const molecule of ["all", "methylamine", "acetamide", "methanimine"] as const)
         inside(aspect, layoutPanels(aspect, molecule).panels.map((p) => p.box));
       const h = layoutHybrid(aspect);
-      inside(aspect, [h.major, h.minor, h.bracket, h.hybrid]);
+      inside(aspect, [h.contributors, h.hybrid]);
       const l = layoutLadder(aspect);
       inside(aspect, [...l.rungs, ...l.cards]);
       const s = layoutSites(aspect);
-      inside(aspect, [s.neutral, s.polar, s.bracket, s.hybrid]);
+      inside(aspect, [s.contributors, s.hybrid]);
     });
   }
 });

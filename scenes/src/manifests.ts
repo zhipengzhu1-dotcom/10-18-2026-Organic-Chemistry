@@ -14,6 +14,10 @@ import { carbonylNeighbours } from "./carbonyl-neighbours/manifest.ts";
 import { hFill } from "./h-fill/manifest.ts";
 import { ethanolThreeWays } from "./ethanol-three-ways/manifest.ts";
 import { lonePairFill } from "./lone-pair-fill/manifest.ts";
+import { acetateBondLengths } from "./acetate-bond-lengths/manifest.ts";
+import { formaldehydePiShift } from "./formaldehyde-pi-shift/manifest.ts";
+import { threeMoves } from "./three-moves/manifest.ts";
+import { acetateHybrid } from "./acetate-hybrid/manifest.ts";
 import { amideCnLengths } from "./amide-cn-lengths/manifest.ts";
 import { amideHybrid } from "./amide-hybrid/manifest.ts";
 import { ruleLadder } from "./rule-ladder/manifest.ts";
@@ -25,6 +29,9 @@ import { crustVsBody } from "./crust-vs-body/manifest.ts";
 import { giveOrTake } from "./give-or-take/manifest.ts";
 import { outerElectrons } from "./outer-electrons/manifest.ts";
 import { waterPush } from "./water-push/manifest.ts";
+// Lesson 3 (#81)
+import { fourDomainFamily } from "./four-domain-family/manifest.ts";
+import { dipoleSum } from "./dipole-sum/manifest.ts";
 
 export const sceneManifests: readonly SceneManifest<any>[] = [
   sampleTwist,
@@ -45,6 +52,14 @@ export const sceneManifests: readonly SceneManifest<any>[] = [
   giveOrTake,
   waterPush,
   buildBySharing,
+  // Lesson 3 (#81)
+  fourDomainFamily,
+  dipoleSum,
+  // Lesson 6 (#84)
+  acetateBondLengths,
+  formaldehydePiShift,
+  threeMoves,
+  acetateHybrid,
   // Lesson 7 (#85)
   amideCnLengths,
   amideHybrid,

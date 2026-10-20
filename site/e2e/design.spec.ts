@@ -39,7 +39,8 @@ const typeViolations = (page: Page) =>
       if (face.startsWith("Pixelify") && size < 32) out.push(`${at}: Pixelify under 32px`);
       if (face.startsWith("Silkscreen") && (size !== 16 || cs.textTransform !== "uppercase"))
         out.push(`${at}: Silkscreen must be 16px uppercase`);
-      if (/[0-9₀-₉⁺⁻]/.test(text) && !/^(JetBrains Mono|Pixelify)/.test(face))
+      // "3D" is a word ("Molecules in 3D", "Explore in 3D"), not a number or a formula.
+      if (/[0-9₀-₉⁺⁻]/.test(text.replace(/\b3D\b/g, "")) && !/^(JetBrains Mono|Pixelify)/.test(face))
         out.push(`${at}: number or formula outside the data face`);
     }
     return out;
@@ -129,7 +130,7 @@ for (const theme of THEMES) {
     });
 
     test("every Step and feedback panel of every Lesson passes axe and the type rules", async ({ page }) => {
-      test.setTimeout(180_000); // axe on every Step of every Lesson
+      test.setTimeout(360_000); // axe on every Step of every Lesson (ten real Lessons by #85)
       for (const lesson of lessonPaths(await allPages(page))) {
         await page.goto(lesson);
         await playThrough(page, async (step) => {

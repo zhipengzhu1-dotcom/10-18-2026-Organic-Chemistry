@@ -1,0 +1,14 @@
+# Lesson 3 (#81): u1-3d-polar-molecules card b, carbon dioxide in a straight line. Drawn by hand: a line lies in the page, a wedge comes toward you, a hash goes away.
+# Coordinates as drawn: x right, y down.
+
+id: l3-co2
+style: full
+smiles: "O=C=O"
+source: "PubChem CID 280"
+atoms:
+  - { id: a1, el: "C", x: 0, y: 0 }
+  - { id: a2, el: "O", x: -1.5, y: 0, lp: 2 }
+  - { id: a3, el: "O", x: 1.5, y: 0, lp: 2 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 2 }
+  - { id: b2, a: a1, b: a3, order: 2 }

@@ -1,5 +1,5 @@
 // carbonyl-sites: a pure function of t; see manifest.ts.
-import { BOSS, Brackets, DATA_FONT, ELECTRON, INK, MUTED, Molecule, ResonanceArrow, TEXT_FONT, atomAt, drawn, frameOf, hybridOf, place } from "../contributors/draw.tsx";
+import { BOSS, Contributors, DATA_FONT, ELECTRON, INK, MUTED, Molecule, TEXT_FONT, atomAt, drawn, frameOf, hybridOf, place, placeContributors } from "../contributors/draw.tsx";
 import { acetone, acetonePolar } from "../contributors/structures.ts";
 import { frameSize, type Box } from "../frame.ts";
 import { easeInOut, easeOut, lerp, progress } from "../motion.ts";
@@ -11,10 +11,8 @@ const POLAR = drawn(acetonePolar);
 const HYBRID = drawn(hybridOf(acetone, ["b2"]));
 
 export interface SitesLayout {
-  neutral: Box;
-  polar: Box;
-  arrow: { x: number; y: number };
-  bracket: Box;
+  /** The bracketed contributors (C=O ↔ C⁺–O⁻). */
+  contributors: Box;
   hybrid: Box;
   font: number;
 }
@@ -22,18 +20,12 @@ export interface SitesLayout {
 export function layoutSites(aspect: Aspect): SitesLayout {
   if (aspect === "16:9")
     return {
-      neutral: { x: 520, y: 70, w: 360, h: 260 },
-      polar: { x: 1040, y: 70, w: 360, h: 260 },
-      arrow: { x: 960, y: 200 },
-      bracket: { x: 460, y: 50, w: 1000, h: 300 },
+      contributors: { x: 460, y: 50, w: 1000, h: 300 },
       hybrid: { x: 700, y: 400, w: 520, h: 340 },
       font: 44,
     };
   return {
-    neutral: { x: 90, y: 170, w: 390, h: 330 },
-    polar: { x: 600, y: 170, w: 390, h: 330 },
-    arrow: { x: 540, y: 335 },
-    bracket: { x: 40, y: 140, w: 1000, h: 390 },
+    contributors: { x: 40, y: 140, w: 1000, h: 390 },
     hybrid: { x: 140, y: 640, w: 800, h: 460 },
     font: 40,
   };
@@ -42,7 +34,7 @@ export function layoutSites(aspect: Aspect): SitesLayout {
 export default function CarbonylSites({ t, aspect }: SceneProps<Record<string, never>>) {
   const { width, height } = frameSize(aspect);
   const L = layoutSites(aspect);
-  const scale = Math.min(L.neutral.w / NEUTRAL.width, L.neutral.h / NEUTRAL.height, L.polar.w / POLAR.width, L.polar.h / POLAR.height);
+  const row = placeContributors([NEUTRAL, POLAR], L.contributors);
   const hybrid = place(HYBRID, L.hybrid, Math.min(L.hybrid.w / HYBRID.width, L.hybrid.h / HYBRID.height));
 
   const appear = easeOut(progress(t, 0, 0.8));
@@ -77,10 +69,7 @@ export default function CarbonylSites({ t, aspect }: SceneProps<Record<string, n
   return (
     <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%" aria-hidden="true" style={{ display: "block" }}>
       <g opacity={appear * lerp(1, 0.5, merge)}>
-        <Brackets box={L.bracket} />
-        <Molecule placed={place(NEUTRAL, L.neutral, scale)} />
-        <ResonanceArrow at={L.arrow} size={L.font * 1.6} />
-        <Molecule placed={place(POLAR, L.polar, scale)} />
+        <Contributors placed={row} />
       </g>
       <g opacity={merge}>
         <text x={frameOf(hybrid).x + frameOf(hybrid).w / 2} y={L.hybrid.y - L.font * 0.2} fontSize={L.font * 0.8} textAnchor="middle" fill={MUTED} fontFamily={TEXT_FONT}>

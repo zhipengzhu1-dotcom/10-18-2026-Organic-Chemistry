@@ -497,7 +497,10 @@ function resolveMolecules(
     const { molecule, errors: broken } = resolveMoleculeUse(item.molecule as MoleculeUseFile, data, views, card);
     for (const message of broken) errors.push(`${where}${message}`);
     if (!molecule) return { item, cited: [] };
-    return { item: { ...item, molecule }, cited: molecule.card ? molecule.cited : [] };
+    if (!molecule.card) return { item: { ...item, molecule }, cited: [] };
+    // A toggle's other molecules are on the card too, so their numbers join the Source note.
+    const cited = (molecule.toggle ?? []).reduce((all, m) => merge(all, m.cited), molecule.cited);
+    return { item: { ...item, molecule }, cited };
   };
   for (const [name, lesson] of lessons) {
     if (!lesson) continue;

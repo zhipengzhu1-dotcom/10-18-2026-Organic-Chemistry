@@ -9,6 +9,10 @@
 /* Under a drawing, four structure cards share one row so the Step still fits one phone screen (Lesson 2 s08, s12). */
 .player-body:has(.figures) .opts:has(> .structure-card:nth-child(4):last-child) { grid-template-columns: repeat(4, 1fr); }
 .player-body:has(.figures) .structure-card .structure { max-height: 6rem; }
+/* Pair cards (two molecules side by side, Lesson 6; class from StepPlayer) take a row each, full width. */
+.opts:has(.structure-card-wide) { grid-template-columns: 1fr; }
+.opts:has(.structure-card-wide) .structure-card { padding: 4px 8px; }
+.opts:has(.structure-card-wide) .structure-card .structure { width: 100%; max-height: 3.4rem; }
 /* Short text choices two to a row (under a figure); one-word choices as many to a row as fit
    (Lesson 5's capsaicin: eight group names). */
 .opts.opts-chips { grid-template-columns: 1fr 1fr; }

@@ -218,6 +218,67 @@ const solvers: Record<string, { outcome: Outcome; play: (page: Page) => Promise<
       await correct(page);
     },
   },
+  // Lesson 3's Check Problems (#81).
+  "u1-3d-flat-or-pyramid": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, "BF₃ only");
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-3d-perspective": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, "CH₃ on the dash, CH₂CH₃ on the wedge");
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-3d-polar-molecules": {
+    outcome: "first",
+    play: async (page) => {
+      for (const name of ["H₂O: bent, two lines.", "CH₂Cl₂: two Cl lines, an H wedge and an H dash.", "NH₃: lone pair up; one H line, one wedge, one dash."])
+        await choose(page, name);
+      await check(page);
+      await correct(page);
+    },
+  },
+  // Lesson 6's Check Problems: Draw arrows (ozone open), structure-card pairs.
+  "u1-res-ozone": {
+    outcome: "first",
+    play: async (page) => {
+      await push(page, "lone pair on O3", "O2–O3 bond");
+      await push(page, "π bond O1=O2", "O1");
+      await correct(page);
+    },
+  },
+  "u1-res-not-resonance": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, /^Allene/);
+      await choose(page, /^Acetone/);
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-res-oxocarbenium": {
+    outcome: "first",
+    play: async (page) => {
+      await push(page, "π bond C4=C5", "C3–C4 bond");
+      await push(page, "lone pair on O6", "C5–O6 bond");
+      await correct(page);
+    },
+  },
+  "u1-res-thiodienyl": {
+    outcome: "first",
+    play: async (page) => {
+      await push(page, "lone pair on C6", "C5–C6 bond");
+      await push(page, "π bond C4=C5", "C2–C4 bond");
+      await push(page, "π bond C2=S3", "S3");
+      await correct(page);
+    },
+  },
   // Lesson 7's Check Problems; the enamine's reveal replays the two pushes in place of the drawing.
   "u1-res-major-dimethylaniline": {
     outcome: "first",
@@ -269,6 +330,11 @@ test("the Practice Set page's HTML carries no answers", async ({ request }) => {
 
 test("a Student plays the Set, sees the summary, retries exactly the missed Problems and earns the Streak", async ({ page }) => {
   test.setTimeout(90_000);
+  // Pin the draw: with 30+ Problems a random Set often holds none of the missed-outcome samples, and the
+  // Retry missed half of this test then has nothing to do. At 0.5 the Set holds u1-sample-p2 and -p4.
+  await page.addInitScript(() => {
+    Math.random = () => 0.5;
+  });
   await page.goto(PRACTICE);
 
   const drawn: string[] = [];

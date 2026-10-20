@@ -54,11 +54,15 @@ export interface Drawing {
 export interface Highlight {
   ring?: string[];
   outline?: string[];
+  /** A right-angle mark at the middle atom, between its bonds to the other two (a drawing mark, e.g. the flat Lewis CH₄'s). */
+  corner?: [string, string, string];
 }
 
 /** A dangling bond's loose end (SMILES's dummy atom): drawn as nothing, its bond runs right to it. */
 const LOOSE_END = "*";
 const RING_R = 22;
+/** Side of the right-angle mark, px. */
+const CORNER = 12;
 const LOOSE_PAD = 4;
 const OUTLINE_STROKE = 14;
 const OUTLINE_PER_LINE = 6;
@@ -257,6 +261,27 @@ export function drawStructure(structure: Structure, hide: Hidden[] = [], highlig
       parts.push(
         `<circle class="atom-ring" cx="${p.x}" cy="${p.y}" r="${RING_R}" fill="none" stroke="currentColor" stroke-width="${LINE_STROKE}" stroke-dasharray="6 4"/>`,
       );
+  }
+
+  if (highlight.corner) {
+    const [a, c, b] = highlight.corner.map((id) => at[id]);
+    if (a && c && b) {
+      const u = (p: Point) => {
+        const len = Math.hypot(p.x - c.x, p.y - c.y) || 1;
+        return { x: (p.x - c.x) / len, y: (p.y - c.y) / len };
+      };
+      const [ua, ub] = [u(a), u(b)];
+      // Clear of the middle atom's letter, then a small square's two outer sides.
+      const o = { x: c.x + (ua.x + ub.x) * LETTER_GAP * 0.6, y: c.y + (ua.y + ub.y) * LETTER_GAP * 0.6 };
+      const pts = [
+        { x: o.x + ua.x * CORNER, y: o.y + ua.y * CORNER },
+        { x: o.x + (ua.x + ub.x) * CORNER, y: o.y + (ua.y + ub.y) * CORNER },
+        { x: o.x + ub.x * CORNER, y: o.y + ub.y * CORNER },
+      ];
+      parts.push(
+        `<polyline class="corner-mark" points="${pts.map((p) => `${r1(p.x)},${r1(p.y)}`).join(" ")}" fill="none" stroke="var(--lone-pair, #0e9fbf)" stroke-width="${LINE_STROKE}"/>`,
+      );
+    }
   }
 
   const viewBox = `0 0 ${width} ${height}`;

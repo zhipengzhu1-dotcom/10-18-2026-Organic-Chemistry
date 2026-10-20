@@ -1,0 +1,19 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+
+id: thiodienyl-anion
+style: line-angle
+smiles: "[CH3:1][C:2](=[S:3])[CH:4]=[CH:5][CH2-:6]"
+atoms:
+  - { id: a1, el: C, x: 0, y: 0 }
+  - { id: a2, el: C, x: 1.299, y: -0.75, letter: true }
+  - { id: a3, el: S, x: 1.299, y: -2.25, lp: 2 }
+  - { id: a4, el: C, x: 2.598, y: 0, letter: true }
+  - { id: a5, el: C, x: 3.897, y: -0.75, letter: true }
+  - { id: a6, el: C, x: 5.196, y: 0, charge: -1, lp: 1, letter: true }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 2 }
+  - { id: b3, a: a2, b: a4, order: 1 }
+  - { id: b4, a: a4, b: a5, order: 2 }
+  - { id: b5, a: a5, b: a6, order: 1 }
+source: MIT OCW 5.12 PS1 Q6d
