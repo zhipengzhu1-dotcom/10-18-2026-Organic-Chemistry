@@ -6,8 +6,9 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import type { PageLesson } from "../lib/answer-key.ts";
 import { tutorContext, type TutorScreen } from "./context.ts";
-import { PANEL_CLASS } from "./contract.ts";
+import { PANEL_CLASS, TUTOR_PATH, type TutorChoices } from "./contract.ts";
 import { chipsFor, enterStep, type Line } from "./flow.ts";
+import { storedOn, storedPick, storeOn, storePick, pairOf } from "./settings.ts";
 import { readStage } from "./stage.ts";
 import { askTutor } from "./stream.ts";
 import "./tutor.css";
@@ -21,6 +22,11 @@ interface Props {
 }
 
 export default function TutorPanel({ lesson, screen, draft }: Props) {
+  /** The Tutor on/off switch (remembered); off hides the Ask button and the panel. */
+  const [on, setOn] = useState(true);
+  /** The route's models and efforts (`GET`), and the chosen `model|effort` pair (remembered). */
+  const [choices, setChoices] = useState<TutorChoices | null>(null);
+  const [pick, setPick] = useState("");
   const [open, setOpen] = useState(false);
   /** Opened from the keyboard (⌘K / Ctrl+K): it appears at once, with no slide or fade. */
   const [instant, setInstant] = useState(false);
@@ -38,6 +44,14 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
 
   useEffect(() => {
     setPortal(document.body);
+    setOn(storedOn());
+    fetch(TUTOR_PATH)
+      .then((r) => r.json() as Promise<TutorChoices>)
+      .then((c) => {
+        setChoices(c);
+        setPick(storedPick(c));
+      })
+      .catch(() => {});
   }, []);
   // Each new Step: a divider and a scripted intro (no model call).
   const step = lesson.steps[screen.index];
@@ -47,8 +61,9 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
   useEffect(() => {
     setScene(readStage().scene);
   }, [step.id, screen.canContinue]);
-  // ⌘K / Ctrl+K opens the Tutor (or returns to it) with the field focused.
+  // ⌘K / Ctrl+K opens the Tutor (or returns to it) with the field focused; not while it is switched off.
   useEffect(() => {
+    if (!on) return;
     const onKey = (e: KeyboardEvent) => {
       if (!(e.metaKey || e.ctrlKey) || e.altKey || e.key.toLowerCase() !== "k") return;
       e.preventDefault();
@@ -58,7 +73,7 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
-  }, []);
+  }, [on]);
   useEffect(() => {
     document.documentElement.dataset.tutor = open ? "open" : "closed";
     if (open) field.current?.focus({ preventScroll: true });
@@ -84,6 +99,14 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
     askButton.current?.focus({ preventScroll: true });
   }
 
+  /** Switches the Tutor on or off; off closes it, and focus goes to the switch left in the top bar. */
+  function switchTo(next: boolean) {
+    setOn(next);
+    storeOn(next);
+    if (!next) setOpen(false);
+    requestAnimationFrame(() => askButton.current?.focus({ preventScroll: true }));
+  }
+
   function submit(e: FormEvent) {
     e.preventDefault();
     send(question);
@@ -98,11 +121,12 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
     setQuestion("");
     setBusy(true);
     const patch = (line: Partial<Line>) => setThread((t) => [...t.slice(0, -1), { ...t[t.length - 1], ...line }]);
+    const [model, effort] = pick ? pick.split("|") : [];
     try {
-      await askTutor({ message, history, context }, (event) => {
+      await askTutor({ model, effort, message, history, context }, (event) => {
         if (event.type === "reply") patch({ text: event.text });
         if (event.type === "done") {
-          patch({ text: event.reply, live: false });
+          patch({ text: event.reply, live: false, meta: { model: event.model, effort: event.effort, ms: event.ms } });
           setAnnounce(`Tutor: ${event.reply}`);
         }
         if (event.type === "error") {
@@ -118,6 +142,13 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
       setBusy(false);
     }
   }
+
+  if (!on)
+    return (
+      <span className="switch tutor-wake">
+        <button ref={askButton} type="button" role="switch" aria-checked="false" aria-label="Tutor" title="Switch the Tutor on" onClick={() => switchTo(true)} />
+      </span>
+    );
 
   return (
     <>
@@ -142,6 +173,31 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
             <section id="tutor" className={PANEL_CLASS} data-open={open} data-instant={instant} inert={!open} aria-label="Tutor">
               <header className="tutor-head">
                 <h2 className="label">Tutor</h2>
+                {choices && (
+                  <select
+                    className="tutor-pick"
+                    aria-label="Model and effort"
+                    value={pick}
+                    onChange={(e) => {
+                      setPick(e.target.value);
+                      storePick(e.target.value);
+                    }}
+                  >
+                    {Object.entries(choices.models).flatMap(([id, label]) =>
+                      choices.efforts.map((effort) => (
+                        <option key={pairOf(id, effort)} value={pairOf(id, effort)}>
+                          {label} · {effort}
+                        </option>
+                      )),
+                    )}
+                  </select>
+                )}
+                <span className="switch tutor-switch">
+                  <span id="tutor-switch-l" className="sr">
+                    Tutor on
+                  </span>
+                  <button type="button" role="switch" aria-checked="true" aria-labelledby="tutor-switch-l" onClick={() => switchTo(false)} />
+                </span>
                 <button type="button" className="tutor-close" aria-label="Close the Tutor" onClick={close}>
                   ✕
                 </button>
@@ -156,6 +212,11 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
                     <li key={i} className={`tutor-turn ${t.role}${t.error ? " error" : ""}`}>
                       <span className="tutor-who label">{t.role === "student" ? "You" : t.error ? "! Tutor problem" : "Tutor"}</span>
                       <p>{t.text || (t.live ? "Writing…" : "")}</p>
+                      {t.meta && (
+                        <small className="tutor-meta">
+                          {t.meta.model} · {t.meta.effort} effort · <span className="data">{(t.meta.ms / 1000).toFixed(1)}</span> s
+                        </small>
+                      )}
                     </li>
                   ),
                 )}

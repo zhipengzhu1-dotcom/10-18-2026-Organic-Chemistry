@@ -55,6 +55,19 @@ function ask(body: object | string, { host = "127.0.0.1", localAddress, to = por
     req.end(typeof body === "string" ? body : JSON.stringify(body));
   });
 }
+/** GETs the route and returns its status and JSON body. */
+function choices(): Promise<{ status: number; body: any }> {
+  return new Promise((resolve, reject) => {
+    request({ host: "127.0.0.1", port, method: "GET", path: "/" }, (res) => {
+      let text = "";
+      res.setEncoding("utf8");
+      res.on("data", (d) => (text += d));
+      res.on("end", () => resolve({ status: res.statusCode!, body: text && JSON.parse(text) }));
+    })
+      .on("error", reject)
+      .end();
+  });
+}
 /** What the stand-in `claude` received. */
 const received = (): { args: string[]; cwd: string; files: string[]; stdin: string } => JSON.parse(readFileSync(log, "utf8"));
 const arg = (args: string[], flag: string) => args[args.indexOf(flag) + 1];
@@ -96,6 +109,27 @@ describe("Tutor route", () => {
     const { args } = received();
     expect([arg(args, "--model"), arg(args, "--effort")]).toEqual(["claude-sonnet-5-5", "low"]);
     expect(lines.at(-1)).toMatchObject({ type: "done", model: "Sonnet 5.5", effort: "low" });
+  });
+
+  it("lists the models, efforts and default on GET, for the picker", async () => {
+    const { status, body } = await choices();
+    expect(status).toBe(200);
+    expect(body).toEqual({
+      models: { "claude-opus-5-5": "Opus 5.5", "claude-sonnet-5-5": "Sonnet 5.5", "claude-haiku-5-5": "Haiku 5.5" },
+      efforts: ["low", "medium", "high"],
+      model: "claude-sonnet-5-5",
+      effort: "low",
+    });
+  });
+
+  it("reports in done the model that actually answered and the effort used", async () => {
+    process.env.FAKE_CLAUDE_ANSWERS_WITH = "claude-haiku-5-5";
+    try {
+      const { lines } = await ask({ model: "claude-opus-5-5", effort: "medium", message: "Hi", history: [], context });
+      expect(lines.at(-1)).toMatchObject({ type: "done", model: "Haiku 5.5", effort: "medium" });
+    } finally {
+      delete process.env.FAKE_CLAUDE_ANSWERS_WITH;
+    }
   });
 
   it("escapes the Student's words inside <student>, and wraps the thread in <conversation>", async () => {

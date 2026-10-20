@@ -19,7 +19,8 @@ process.stdin.on("end", () => {
   else answer();
 
   function answer() {
-    const model = process.argv[process.argv.indexOf("--model") + 1];
+    // FAKE_CLAUDE_ANSWERS_WITH: the model that "answered", as when Claude Code falls back to another.
+    const model = process.env.FAKE_CLAUDE_ANSWERS_WITH || process.argv[process.argv.indexOf("--model") + 1];
     const say = (o) => process.stdout.write(JSON.stringify(o) + "\n");
     if (mode === "exit") {
       process.stderr.write("Error: something went wrong\n    at somewhere\n");

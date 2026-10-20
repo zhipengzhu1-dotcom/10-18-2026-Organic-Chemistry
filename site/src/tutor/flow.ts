@@ -4,8 +4,15 @@
 import type { PageStep } from "@astratron/content/step-types";
 import type { Turn } from "./contract.ts";
 
+/** Which model answered, at what effort, in how long: shown under a finished reply. */
+export interface Meta {
+  model: string;
+  effort: string;
+  ms: number;
+}
+
 /** A thread line: a Student or Tutor turn, or a Step divider; `live` while a reply is written. */
-export type Line = (Turn | { role: "divider"; text: string }) & { live?: boolean; error?: boolean };
+export type Line = (Turn | { role: "divider"; text: string }) & { live?: boolean; error?: boolean; meta?: Meta };
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
