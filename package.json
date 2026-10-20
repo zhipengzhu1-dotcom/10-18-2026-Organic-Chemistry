@@ -10,6 +10,8 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
+    "check": "pnpm typecheck && pnpm content:build && pnpm lint:numbers && pnpm lint:scenes && pnpm blender check && pnpm test && pnpm build && pnpm budget:js && pnpm video check-site",
+    "check:full": "pnpm check && pnpm test:e2e && pnpm video stills",
     "typecheck": "tsc -p .",
     "content:build": "pnpm --filter @astratron/content run build && pnpm --filter @astratron/scenes run check",
     "content:freeze": "pnpm --filter @astratron/content run freeze",
