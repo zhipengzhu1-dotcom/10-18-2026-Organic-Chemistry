@@ -105,6 +105,45 @@ export const views: Record<string, SpotView> = {
   },
 };
 
+// Practice Problems (#87): u1-fg-aspirin and u1-fg-metenkephalin-amides.
+views.aspirin = {
+  label: "Aspirin",
+  molecules: [
+    {
+      id: "fg-aspirin",
+      regions: [
+        lit("arene", "C₆H₄", ["a5", "a6", "a7", "a8", "a9", "a10"]),
+        lit("carboxylic acid", "C(=O)OH", ["a11", "a12", "a13"]),
+        lit("ester", "C(=O)O–C", ["a1", "a2", "a3", "a4"]),
+      ],
+    },
+  ],
+  describe:
+    "Aspirin. Lit: the benzene ring, arene; on one ring carbon, C=O with OH, carboxylic acid; on the next, O bonded to a C=O carbon carrying CH₃, ester.",
+};
+const plain = (label: string, piece: string, atoms: string[]): SpotRegion => ({ label, piece, atoms, tone: "plain" });
+views.metenkephalin = {
+  label: "Met-enkephalin",
+  molecules: [
+    {
+      id: "fg-metenkephalin",
+      regions: [
+        lit("amide", "C(=O)–N", ["a11", "a12", "a13"]),
+        lit("amide", "C(=O)–N", ["a15", "a16", "a17"]),
+        lit("amide", "C(=O)–N", ["a19", "a20", "a21"]),
+        lit("amide", "C(=O)–N", ["a30", "a31", "a32"]),
+        plain("amine", "NH₂", ["a1"]),
+        plain("phenol", "Ar–OH", ["a4", "a5", "a6", "a7", "a8", "a9", "a10"]),
+        plain("arene", "C₆H₅", ["a24", "a25", "a26", "a27", "a28", "a29"]),
+        plain("sulfide", "C–S–C", ["a36"]),
+        plain("carboxylic acid", "C(=O)OH", ["a38", "a39", "a40"]),
+      ],
+    },
+  ],
+  describe:
+    "Met-enkephalin. Lit, left to right: four C=O groups along the backbone, each with NH beside it, all labelled amide. Also outlined: NH₂, amine; the left ring with OH, phenol; the upper ring, arene; S, sulfide; C=O with OH at the right end, carboxylic acid.",
+};
+
 export const spotlightViews = Object.keys(views);
 
 /** Seconds: the first region lights at LEAD, the last by DURATION − 1, each taking FADE. */

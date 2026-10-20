@@ -80,6 +80,27 @@ describe("dipole-sum: chloroform, HCN and methane (u1-3d-polar-hcn reveal)", () 
   });
 });
 
+describe("group-spotlight: aspirin and Met-enkephalin (Lesson 5 Practice reveals)", () => {
+  it("lights aspirin's arene, carboxylic acid and ester, with the spec's screen-reader text", () => {
+    expect(say("group-spotlight", { view: "aspirin" })).toBe(
+      "Aspirin. Lit: the benzene ring, arene; on one ring carbon, C=O with OH, carboxylic acid; on the next, O bonded to a C=O carbon carrying CH₃, ester.",
+    );
+    for (const aspect of ["16:9", "9:16"] as const) {
+      const text = shows("group-spotlight", { view: "aspirin" }, undefined, aspect);
+      for (const label of ["arene", "carboxylic acid", "ester"]) expect(text).toContain(label);
+    }
+  });
+
+  it("lights Met-enkephalin's four amides and outlines its other groups", () => {
+    expect(say("group-spotlight", { view: "metenkephalin" })).toBe(
+      "Met-enkephalin. Lit, left to right: four C=O groups along the backbone, each with NH beside it, all labelled amide. Also outlined: NH₂, amine; the left ring with OH, phenol; the upper ring, arene; S, sulfide; C=O with OH at the right end, carboxylic acid.",
+    );
+    const text = shows("group-spotlight", { view: "metenkephalin" });
+    expect(text.match(/amide/g)).toHaveLength(4);
+    for (const label of ["amine", "phenol", "arene", "sulfide", "carboxylic acid"]) expect(text).toContain(label);
+  });
+});
+
 describe("h-fill: furan (u1-draw-furan-h reveal)", () => {
   it("fills each of furan's four carbons with one H, ending at 4, with the spec's screen-reader text", () => {
     for (const aspect of ["16:9", "9:16"] as const) expect(shows("h-fill", { molecule: "furan" }, undefined, aspect)).toContain("H: 4");
