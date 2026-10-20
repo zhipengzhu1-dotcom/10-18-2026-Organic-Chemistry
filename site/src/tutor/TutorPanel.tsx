@@ -1,7 +1,8 @@
 // The Tutor panel (spec #104): the Ask button in the Step player's top bar and the Tutor it
 // opens, a sheet on phones and a side panel from 720 px. Dev only: StepPlayer loads it with a
 // dynamic import behind `import.meta.env.DEV`, so the build carries none of it.
-// It sees the Step only through the Tutor context (./context.ts) and never acts on the Step.
+// It sees the Step only through the Tutor context (./context.ts). It moves the stage only through
+// the player's own controls (./stage.ts) and never dispatches engine Actions.
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import type { PageLesson } from "../lib/answer-key.ts";
@@ -9,7 +10,7 @@ import { tutorContext, type TutorScreen } from "./context.ts";
 import { PANEL_CLASS, TUTOR_PATH, type TutorChoices } from "./contract.ts";
 import { chipsFor, enterStep, type Line } from "./flow.ts";
 import { storedOn, storedPick, storeOn, storePick, pairOf } from "./settings.ts";
-import { readStage } from "./stage.ts";
+import { clearRings, moveStage, readStage } from "./stage.ts";
 import { askTutor } from "./stream.ts";
 import "./tutor.css";
 
@@ -93,6 +94,16 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
   useEffect(() => {
     threadEnd.current?.scrollIntoView({ block: "end" });
   }, [thread]);
+  // The Tutor's rings belong to the Step they were drawn on.
+  useEffect(() => {
+    clearRings();
+  }, [screen.index]);
+  useEffect(
+    () => () => {
+      clearRings();
+    },
+    [],
+  );
 
   function close() {
     setOpen(false);
@@ -128,6 +139,7 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
         if (event.type === "done") {
           patch({ text: event.reply, live: false, meta: { model: event.model, effort: event.effort, ms: event.ms } });
           setAnnounce(`Tutor: ${event.reply}`);
+          void moveStage(event.actions);
         }
         if (event.type === "error") {
           patch({ text: event.message, live: false, error: true });

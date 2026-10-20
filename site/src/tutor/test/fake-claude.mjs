@@ -5,6 +5,7 @@
 // $FAKE_CLAUDE_MODE picks another script: "slow" (answers after $FAKE_CLAUDE_DELAY ms),
 // "exit" (a non-zero exit with stderr lines), "signed-out" (an error result asking to log in),
 // "malformed" (lines that aren't stream-json, then a clean exit).
+// $FAKE_CLAUDE_ACTIONS (JSON) is the stage actions the result carries.
 import { readdirSync, writeFileSync } from "node:fs";
 
 let stdin = "";
@@ -39,6 +40,6 @@ process.stdin.on("end", () => {
     for (const partial_json of ['{"rep', 'ly":"What pulls', " the electrons", '?"}']) {
       say({ type: "stream_event", event: { type: "content_block_delta", delta: { type: "input_json_delta", partial_json } } });
     }
-    say({ type: "result", is_error: false, structured_output: { reply: "What pulls the electrons?" }, modelUsage: { [model]: { outputTokens: 12 } } });
+    say({ type: "result", is_error: false, structured_output: { reply: "What pulls the electrons?", actions: JSON.parse(process.env.FAKE_CLAUDE_ACTIONS || "[]") }, modelUsage: { [model]: { outputTokens: 12 } } });
   }
 });

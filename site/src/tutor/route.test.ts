@@ -36,6 +36,7 @@ beforeEach(() => {
   log = join(logDir, `${Math.random().toString(36).slice(2)}.json`);
   process.env[CLAUDE_ENV] = fake;
   process.env.FAKE_CLAUDE_LOG = log;
+  delete process.env.FAKE_CLAUDE_ACTIONS;
   delete process.env.FAKE_CLAUDE_MODE;
   delete process.env.FAKE_CLAUDE_DELAY;
 });
@@ -90,7 +91,7 @@ describe("Tutor route", () => {
     expect(arg(args, "--tools")).toBe("");
     expect(arg(args, "--setting-sources")).toBe("");
     expect(arg(args, "--output-format")).toBe("stream-json");
-    expect(JSON.parse(arg(args, "--json-schema"))).toMatchObject({ type: "object", required: ["reply"] });
+    expect(JSON.parse(arg(args, "--json-schema"))).toMatchObject({ type: "object", properties: { reply: { type: "string" } } });
     expect(files).toEqual([]);
     expect(cwd.startsWith(fileURLToPath(new URL("../../..", import.meta.url)))).toBe(false);
   });
@@ -146,6 +147,73 @@ describe("Tutor route", () => {
     expect(stdin).toContain("<conversation>\n<student>Is it &lt;b&gt;?</student>\n<tutor>What do you notice?</tutor>\n</conversation>");
     expect(stdin.match(/<\/student>/g)).toHaveLength(2);
     expect(stdin).toMatch(/^<step>\n[^]*"prompt": "Read."[^]*\n<\/step>/);
+  });
+
+  /** Asks with a stage, the stand-in `claude` answering with these actions; returns the done line's actions. */
+  async function actionsFor(actions: unknown[], stage: object) {
+    process.env.FAKE_CLAUDE_ACTIONS = JSON.stringify(actions);
+    const { lines } = await ask({ message: "Show me", history: [], context: { ...context, stage } });
+    expect(lines.at(-1).type).toBe("done");
+    return lines.at(-1).actions;
+  }
+  const atoms = [
+    { label: "O", in: "working drawing" },
+    { label: "C", in: "working drawing" },
+    { label: "Br", in: "target (look only)" },
+  ];
+
+  it("passes on stage actions, dropping unknown types and atoms that aren't on the stage", async () => {
+    const stage = { scene: true, control: null, atoms };
+    expect(
+      await actionsFor(
+        [{ type: "check" }, { type: "highlight", atom: 3 }, { type: "highlight", atom: -1 }, { type: "highlight", atom: 0.5 }, { type: "highlight" }, { type: "highlight", atom: 1 }, { type: "play" }, { type: "answer", value: 1 }],
+        stage,
+      ),
+    ).toEqual([{ type: "highlight", atom: 1 }, { type: "play" }]);
+  });
+
+  it("keeps at most 4 actions", async () => {
+    const stage = { scene: true, control: null, atoms };
+    expect(await actionsFor([{ type: "clear" }, { type: "highlight", atom: 0 }, { type: "highlight", atom: 1 }, { type: "highlight", atom: 2 }, { type: "replay" }], stage)).toEqual([
+      { type: "clear" },
+      { type: "highlight", atom: 0 },
+      { type: "highlight", atom: 1 },
+      { type: "highlight", atom: 2 },
+    ]);
+  });
+
+  it("clamps a seek to 0..1 and a set to the control's range", async () => {
+    const stage = { scene: true, control: { label: "Temperature", min: 200, max: 400, value: 300 }, atoms: [] };
+    expect(
+      await actionsFor(
+        [{ type: "seek", at: 1.7 }, { type: "seek", at: -0.2 }, { type: "set", value: 999 }, { type: "set", value: 250.5 }],
+        stage,
+      ),
+    ).toEqual([
+      { type: "seek", at: 1 },
+      { type: "seek", at: 0 },
+      { type: "set", value: 400 },
+      { type: "set", value: 250.5 },
+    ]);
+    expect(await actionsFor([{ type: "set", value: -5 }, { type: "seek" }, { type: "set" }, { type: "seek", at: "half" }], stage)).toEqual([{ type: "set", value: 200 }]);
+  });
+
+  it("drops a set when the stage has no control, and every action when there are none", async () => {
+    expect(await actionsFor([{ type: "set", value: 3 }, { type: "pause" }], { scene: true, control: null, atoms: [] })).toEqual([{ type: "pause" }]);
+    expect(await actionsFor("nope" as never, { scene: false, control: null, atoms: [] })).toEqual([]);
+  });
+
+  it("asks claude for actions in the schema, and tells it to use them sparingly, preferring the working drawing", async () => {
+    await ask({ message: "Hi", history: [], context });
+    const { args } = received();
+    const schema = JSON.parse(arg(args, "--json-schema"));
+    expect(schema.required).toEqual(["reply", "actions"]);
+    expect(schema.properties.actions).toMatchObject({ type: "array", maxItems: 4 });
+    expect(schema.properties.actions.items.properties.type.enum).toEqual(["play", "pause", "replay", "seek", "set", "highlight", "clear"]);
+    const rules = arg(args, "--system-prompt");
+    expect(rules).toMatch(/sparingly/);
+    expect(rules).toMatch(/prefer[^.]*working drawing/i);
+    expect(rules).toMatch(/never[^.]*(answer|Check|Continue)/i);
   });
 
   const lan = Object.values(networkInterfaces())
