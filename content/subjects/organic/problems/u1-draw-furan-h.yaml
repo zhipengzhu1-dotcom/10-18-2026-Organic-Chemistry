@@ -1,0 +1,26 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). The build checks the
+# drawing's H count against the cached PubChem record (data/pubchem/8029.json, C₄H₄O).
+id: u1-draw-furan-h
+unit: u1
+lesson: u1-l02
+difficulty: 1
+status: approved
+source: Adapted from LibreTexts Wade 1-8 (furan's Lewis structure)
+credit: "LibreTexts, Map: Organic Chemistry (Wade), CC BY-NC-SA 4.0"
+type: numeric
+prompt: Furan, a ring found in coffee aroma, as a line-angle drawing. How many hydrogens does it have?
+figures:
+  - { structure: furan, alt: "Furan, line-angle drawing: a five-membered ring with O at the top, its two lone pairs drawn, and two double bonds in the ring." }
+unitSymbol: H atoms
+answer: 4
+tolerance: 0
+correct: Each of the four carbons has a double bond and a single bond, 3 bonds, so each gets 1 H. Four in all.
+hints:
+  - { match: 8, text: "Each carbon is in a double bond. That's already 3 bonds, so room for only 1 H." }
+  - { match: 0, text: "None are drawn, but they're there. Each corner fills up to 4 bonds with H's." }
+  - { match: 5, text: "O isn't a carbon: it has no hidden H's. Only the four corners get them." }
+  - { match: 2, text: All four corners get the same treatment. Check the two next to O as well. }
+  - { text: "For each corner: 4 minus the bonds you see (a double bond counts 2)." }
+reveal: "4 H's: one on each carbon."
+revealScene: { id: h-fill, state: { molecule: furan } }
+sourceNote: "Molecule after LibreTexts, *Map: Organic Chemistry (Wade)*, §1.16 exercise 1-8, CC BY-NC-SA 4.0; our question. Furan, PubChem CID 8029."

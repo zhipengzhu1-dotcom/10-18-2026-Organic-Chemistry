@@ -1,0 +1,29 @@
+# Lesson 4 Check Problem (#82), from the merged Lesson 4 spec (approved so the Check Step plays it).
+id: u1-hyb-becl2
+unit: u1
+lesson: u1-l04
+difficulty: 2
+status: approved
+source: Adapted from MIT OCW 5.12 Problem Set 1 Q5a
+credit: Kimberly Berkowski, MIT OCW 5.12, Spring 2005, CC BY-NC-SA 4.0
+type: multiple-choice
+prompt: "Beryllium chloride, BeCl₂, as a single molecule in the gas. Be has 2 outer electrons and uses both to bond to the two Cl's. Which describes the Be atom?"
+figures:
+  - { structure: beryllium-chloride, alt: "Lewis structure Cl–Be–Cl: three lone pairs on each Cl, none on Be." }
+options:
+  - { id: a, text: "sp, linear (model: 180°), with two empty p orbitals" }
+  - { id: b, text: "sp², bent, with one empty p orbital" }
+  - { id: c, text: "sp³, tetrahedral, with two lone pairs" }
+  - { id: d, text: "sp, linear, with a lone pair in each p orbital" }
+answer: [a]
+correct: "Two groups → two sp hybrids in a line. Be's two remaining p orbitals hold nothing: with only 4 electrons around it, Be is short of an octet, like boron in BF₃ (Lesson 1)."
+hints:
+  - match: [b]
+    text: "Count the groups around Be: two Cl's and no lone pairs. Two groups → sp."
+  - match: [c]
+    text: "Be has no lone pairs: both its electrons are in the Be–Cl bonds. That's two groups, not four."
+  - match: [d]
+    text: Be's two electrons are both used in bonds, so nothing is left for the p orbitals.
+  - text: "Count Be's groups (bonded atoms + lone pairs), then match: 4 → sp³, 3 → sp², 2 → sp."
+reveal: "**a**. Two orange sp lobes point at the Cl's; Be's two cyan p orbitals stand empty."
+sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q5, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Wording ours."

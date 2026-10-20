@@ -1,0 +1,54 @@
+{
+  "scene": "domain-spread",
+  "manim": "0.22.0",
+  "fps": 60,
+  "inputs": "8bccc4fb157114bdeb5a70d4f7556b107e032bfa5b009e79ad5e4d6765793302",
+  "aspects": {
+    "16:9": {
+      "frames": 600,
+      "timings": {
+        "vsepr-model/linear.angle": [
+          [
+            5.7,
+            10
+          ]
+        ],
+        "vsepr-model/trigonal-planar.angle": [
+          [
+            5.7,
+            10
+          ]
+        ],
+        "vsepr-model/tetrahedral.angle": [
+          [
+            5.7,
+            10
+          ]
+        ]
+      }
+    },
+    "9:16": {
+      "frames": 600,
+      "timings": {
+        "vsepr-model/linear.angle": [
+          [
+            5.7,
+            10
+          ]
+        ],
+        "vsepr-model/trigonal-planar.angle": [
+          [
+            5.7,
+            10
+          ]
+        ],
+        "vsepr-model/tetrahedral.angle": [
+          [
+            5.7,
+            10
+          ]
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,262 @@
+# Lesson 8: Molecular Orbitals: Why Electrons Flow (#86), the Unit 1 capstone. Built from the merged
+# Lesson spec docs/specs/unit-1/lesson-08-molecular-orbitals.md: every Prompt, Hint, Correct line,
+# Reveal and Source note follows it (site/src/lib/lesson-08.test.ts compares them).
+# Orbital shapes and energies are our PySCF B3LYP/cc-pVTZ calculations (pipelines/orbitals), cited as
+# {{<file>/<key>}}; an energy's display carries its unit, so the spec's "{x} vs {y} eV" reads
+# "{{x}} vs {{y}}" here. The spec's `mo-from-overlap` (system: h2-1s | ethylene-2p) ships as two
+# watch-only Scenes; its `orbital-viewer` is the 3D card with orbitals (`molecule: … orbitals`), and
+# its `labels: hide` is `orbitalLabels: hide` (orbitals named only A and B).
+id: u1-l08
+slug: molecular-orbitals
+title: "Molecular Orbitals: Why Electrons Flow"
+act: Moving electrons
+capstone: true
+signature: s04
+goal: Explain a bond as electrons in a bonding orbital (and its absence, as in He₂, by bond order), name a molecule's HOMO and LUMO, and read a curved arrow as electrons flowing from one molecule's HOMO into another's empty LUMO.
+keyIdea: A curved arrow is electrons flowing from a filled orbital, usually the HOMO, into an empty one, usually the LUMO.
+steps:
+  - id: s01
+    phase: hook
+    type: multiple-choice
+    prediction: true
+    prompt: "Remember BF₃? Its boron has only six electrons (Lesson 1). Ammonia, NH₃, has a lone pair on N. Both molecules are neutral. Let the two gases meet. What happens?"
+    figures:
+      - { structure: nh3-bf3-l8, caption: "B: 6 e⁻", alt: "Boron trifluoride, flat, each fluorine with three lone pairs and boron with only six electrons, beside ammonia with its lone pair on nitrogen." }
+    options:
+      - { id: a, text: "Nothing: neither has a charge, so nothing pulls" }
+      - { id: b, text: "They snap together: N bonds to B" }
+      - { id: c, text: "They swap atoms, making NF₃ and BH₃" }
+    answer: [b]
+    reveal: "They **snap together** into one molecule, H₃N–BF₃, with a brand-new N–B bond. You could already guess the arrow from Lesson 6: N's lone pair → B. But *why* that pair, and *why* boron? Lewis dots can't say. Orbitals can, and by the end of this Lesson that arrow will mean something new."
+    revealScene: bf3-nh3-snap
+
+  - id: s02
+    phase: build
+    type: explain
+    text: >-
+      In a molecule, electrons don't belong to one atom. They live in **molecular orbitals** spread over the molecule.
+      Bring two H atoms together and their 1s orbitals combine two ways:<br>
+      **In phase** (same sign): they add up between the nuclei. That's **σ**, a **bonding** orbital, lower in energy than either 1s.<br>
+      **Out of phase** (opposite signs): they cancel in the middle, leaving a **node**, where the orbital is zero. That's **σ\***, **antibonding**, higher in energy.
+      Two atomic orbitals in, two molecular orbitals out. **+ and − are the sign of the wave, not charges.**
+    scene: mo-from-overlap-h2
+    sourceNote: "Bonding and antibonding orbitals of H₂: facts as in OpenStax *Organic Chemistry* §1.11, CC BY-NC-SA 4.0; wording and pictures ours."
+
+  - id: s03
+    phase: build
+    type: rotate-and-identify
+    prompt: "Here are H₂'s two orbitals, **computed**. Rotate them. Which one is the antibonding orbital, σ\\*?"
+    molecule:
+      id: hydrogen-b3lyp
+      view: side-on
+      label: A
+      orbitalLabels: hide
+      tapMeasure: false
+      orbitals: [hydrogen-b3lyp-orbitals/sigma]
+      describe: "Hydrogen molecule, two atoms on a horizontal axis. One egg-shaped lobe, sign plus, wraps both nuclei and is thickest between them."
+      toggle:
+        - id: hydrogen-b3lyp
+          view: side-on
+          label: B
+          orbitals: [hydrogen-b3lyp-orbitals/sigma-star]
+          describe: "Two lobes: plus around the left hydrogen, minus around the right. Midway between the nuclei the orbital is zero: a flat nodal plane."
+    options:
+      - { id: a, text: A }
+      - { id: b, text: B }
+      - { id: c, text: "Neither: the − lobe means a negative charge, so these are charges, not orbitals" }
+    answer: [b]
+    correct: "B changes sign halfway between the nuclei, so there's a node right where a bond would need electrons. That's σ\\*. A is one lobe, the same sign everywhere, thickest between the nuclei: σ, the bonding orbital."
+    hints:
+      - match: [a]
+        text: "A is one lobe wrapping both nuclei, the same sign everywhere. Electrons there sit between the nuclei and hold them together. That's bonding."
+      - match: [c]
+        text: "+ and − mark the sign of the wave, not electric charge. Look for the place where the sign flips."
+      - text: "Look at the point midway between the two H's. In which orbital does the surface vanish, with + on one side and − on the other?"
+    reveal: "B is σ\\*: + around one H, − around the other, zero in between. A is σ. (B's midplane is its node: zero there.)"
+    sourceNote: "Bonding and antibonding orbitals of H₂: facts as in OpenStax *Organic Chemistry* §1.11, CC BY-NC-SA 4.0; wording and pictures ours."
+
+  - id: s04
+    phase: build
+    type: manipulate
+    prompt: "Fill the orbitals. Electrons go in the lowest level with room, two per level. **Bond order** = (bonding electrons − antibonding electrons) ÷ 2. Add electrons until **the bond disappears**, then press Check."
+    scene: { id: mo-filler, state: { electrons: 1 } }
+    control: electrons
+    answer: 4
+    correct: "Four electrons: two in σ, two in σ\\*. The antibonding pair cancels the bonding pair (it even costs a little more than the bonding pair saves). Bond order 0. That's He₂, and it's why helium stays as single atoms."
+    hints:
+      - match: [1]
+        text: "One electron in σ: bond order ½. A weak bond, but still a bond. Keep adding."
+      - match: [2]
+        text: "That's H₂: a full pair in σ, bond order 1. Where does the next electron have to go?"
+      - match: [3]
+        text: "The third electron had to go into σ\\*. Bond order dropped to ½, not to 0 yet."
+      - text: "Watch the bond-order counter. Add electrons until it reads 0."
+    reveal: "2 bonding − 2 antibonding = 0. No bond: He₂ doesn't hold together."
+    sourceNote: "Why He₂ has no bond: facts as in OpenStax *Organic Chemistry* §1.11, CC BY-NC-SA 4.0; wording ours. The diagram is schematic, not to scale."
+
+  - id: s05
+    phase: build
+    type: explain
+    text: >-
+      The same thing happens side-on. In ethylene, each carbon has one p orbital left over (Lesson 4), standing up out of the flat molecule. In phase they make **π**, a bonding orbital above and below the C=C. Out of phase they make **π\***, antibonding, with a node cutting between the two carbons.<br>
+      Fill ethylene's orbitals from the bottom and the last pair lands in π. That's its **HOMO**, the Highest Occupied Molecular Orbital. The next one up, π\*, is empty: the **LUMO**, the Lowest Unoccupied one. The energy between them is the **HOMO–LUMO gap**.
+    scene: mo-from-overlap-ethylene
+    sourceNote: "π and π\\* in ethylene: facts as in OpenStax *Organic Chemistry* §1.11, CC BY-NC-SA 4.0; wording and pictures ours."
+
+  - id: s06
+    phase: build
+    type: rotate-and-identify
+    prompt: "Ethylene's HOMO, **computed**. Rotate it. Where do its electrons spend their time?"
+    molecule:
+      id: ethylene-b3lyp
+      view: face-on
+      tapMeasure: false
+      orbitals: [ethylene-b3lyp-orbitals/homo]
+      describe: "Ethylene, flat, two carbons and four hydrogens. The orbital has two lobes: plus above the plane, minus below, each stretched over both carbons. The plane of the atoms is a node."
+    options:
+      - { id: a, text: "In two lobes above and below the flat molecule, over the C=C" }
+      - { id: b, text: "In one sausage along the C–C axis, between the nuclei" }
+      - { id: c, text: "Around the H atoms, in the plane of the molecule" }
+      - { id: d, text: "Spread evenly over all six atoms" }
+    answer: [a]
+    correct: "+ above, − below, and the plane of the atoms is a node. That's the π bond. Ethylene's most loosely held electrons sit above and below the molecule, out in the open."
+    hints:
+      - match: [b]
+        text: "Turn the molecule edge-on. The lobes sit above and below the plane, not along the C–C line. Along the axis is where the σ bond lives."
+      - match: [c]
+        text: "The H's sit in the plane, and this orbital is zero everywhere in that plane. Turn it edge-on and look."
+      - match: [d]
+        text: "Turn it edge-on: the surface hugs the two carbons and barely reaches the H's."
+      - text: "Rotate until you're looking along the plane of the molecule. Where are the lobes?"
+    reveal: "Two lobes, above and below, over the C=C. Ethylene's HOMO is its π orbital. (Turn it edge-on: the plane of the atoms is its node.)"
+
+  - id: s07
+    phase: build
+    type: multiple-choice
+    prompt: "Ethane has only σ bonds. Ethylene adds a π bond, made by side-on overlap, which is weaker than head-on (Lesson 4). Whose **HOMO** sits higher in energy?"
+    figures:
+      - { structure: ethane-full, caption: Ethane, alt: "Ethane: two carbons joined by a single bond, each with three hydrogens." }
+      - { structure: ethylene-full, caption: Ethylene, alt: "Ethylene: two carbons joined by a double bond, each with two hydrogens." }
+    options:
+      - { id: a, text: "Ethylene's (its π)" }
+      - { id: b, text: "Ethane's (a σ bond)" }
+      - { id: c, text: "The same: both are carbon–carbon bonds" }
+    answer: [a]
+    correct: "Weaker overlap, less stabilised: ethylene's π electrons sit higher ({{ethylene-b3lyp-orbitals/homo}} vs {{ethane-b3lyp-orbitals/homo}}, computed), and its HOMO–LUMO gap is smaller ({{ethylene-b3lyp-orbitals/gap}} vs {{ethane-b3lyp-orbitals/gap}}). High HOMO, small gap: electrons easy to give. That's why alkenes react and alkanes mostly don't."
+    hints:
+      - match: [b]
+        text: "Every bond in ethane is σ, made by head-on overlap, the strongest kind, so its electrons are held low and tight. Which overlap is weaker?"
+      - match: [c]
+        text: "Both have C–C bonds, but the overlap differs. Weaker overlap means less stabilisation, so a higher level."
+      - text: "Bonding orbitals sit lower the better their overlap. Which bond has the weaker overlap?"
+    reveal: "Ethylene's π HOMO sits above ethane's σ HOMO, and its gap is smaller."
+    revealScene: { id: frontier-ladder, state: { molecules: ethane-ethylene, flow: none, ring: ethylene-homo } }
+
+  - id: s08
+    phase: build
+    type: explain
+    text: >-
+      Now the payoff. A reaction starts when electrons move from where they're held loosely to where there's room.
+      **Tail of the arrow: a filled orbital**, usually the **HOMO**, whose electrons are the easiest to give.<br>
+      **Head: an empty orbital**, usually the **LUMO**, the lowest-energy room there is.<br>
+      The smaller the gap between them, and the better they overlap in space, the easier the flow.
+      Lesson 6's sources, lone pairs and π bonds, are high filled orbitals. Its sinks are atoms with low empty ones. **Every curved arrow is HOMO → LUMO.**
+    scene: arrow-is-flow
+
+  - id: s09
+    phase: build
+    type: rotate-and-identify
+    prompt: "NH₃'s HOMO and BF₃'s LUMO, **computed**, shown together. Rotate them. For the two orbitals to overlap, how must NH₃ approach BF₃?"
+    molecule:
+      id: ammonia-bf3-b3lyp-pair
+      view: top-down
+      tapMeasure: false
+      orbitals: [ammonia-bf3-pair-orbitals/nh3-homo, ammonia-bf3-pair-orbitals/bf3-lumo]
+      describe: "Ammonia above boron trifluoride, placed for clarity, not at a computed distance. Ammonia's HOMO: one large lobe on nitrogen, pointing down toward boron, away from ammonia's hydrogens, with a small opposite-sign lobe behind it. Boron trifluoride, flat. Its LUMO: two large lobes on boron, plus above the plane and minus below, and small opposite-sign lobes on each fluorine. The plane of boron trifluoride is a node."
+    options:
+      - { id: a, text: "N first, its lobe pointing at boron, from above or below BF₃'s flat plane" }
+      - { id: b, text: "N first, pointing at one of the fluorines" }
+      - { id: c, text: "H's first, pointing at boron" }
+      - { id: d, text: "Edge-on, in BF₃'s plane, between two fluorines" }
+    answer: [a]
+    correct: "NH₃'s HOMO is its lone pair, one big lobe on N pointing away from the H's. BF₃'s LUMO is boron's empty p orbital, sticking up and down out of the plane. Point one at the other and they overlap: that's where the N–B bond forms."
+    hints:
+      - match: [b]
+        text: "Fluorine has no room: BF₃'s empty orbital sits mostly on boron. The small lobes on the F's are only a minor part of it."
+      - match: [c]
+        text: "NH₃'s HOMO is on N, pointing away from the H's. The H end has nothing to give."
+      - match: [d]
+        text: "Turn BF₃ edge-on. Its LUMO has no lobe in the plane: the lobes stick out above and below boron."
+      - text: "Find the big lobe of each orbital. Which way must they face to touch?"
+    reveal: "Lone-pair lobe on N, empty p lobe on B, face to face. (Turn it side-on: N comes straight down onto B.)"
+    sourceNote: "The two molecules are computed separately and placed together for the picture."
+
+  - id: s10
+    phase: build
+    type: multiple-choice
+    prompt: "Electrons could flow two ways between these two. Read the **computed** ladders: which flow happens?"
+    scene: { id: frontier-ladder, state: { molecules: nh3-bf3, flow: none, ring: none } }
+    options:
+      - { id: a, text: "NH₃'s HOMO → BF₃'s LUMO ({{frontier-flow/nh3_bf3}} apart)" }
+      - { id: b, text: "BF₃'s HOMO → NH₃'s LUMO ({{frontier-flow/bf3_nh3}} apart)" }
+      - { id: c, text: "Neither: both molecules are neutral, so no electrons flow" }
+    answer: [a]
+    correct: "The smaller gap wins: NH₃'s lone pair sits high, BF₃'s empty p orbital sits low. Electrons flow from NH₃ into BF₃."
+    hints:
+      - match: [b]
+        text: "BF₃'s HOMO is a fluorine lone pair, held tightly and far down the ladder, and NH₃'s LUMO sits high. That's the big gap."
+      - match: [c]
+        text: "Neutral molecules react all the time: you saw these two snap together. What matters is a filled orbital close in energy to an empty one."
+      - text: "Flow goes across the smaller gap: from the higher filled level to the lower empty one."
+    reveal: "{{frontier-flow/nh3_bf3}} vs {{frontier-flow/bf3_nh3}}. The small gap is the real flow."
+    revealScene: { id: frontier-ladder, state: { molecules: nh3-bf3, flow: both, ring: none } }
+
+  - id: s11
+    phase: build
+    type: draw-arrows
+    prompt: "Now draw it. Push the electrons from NH₃'s **HOMO** into BF₃'s **LUMO**."
+    start: nh3-bf3-l8
+    results: [ammonia-bf3-adduct]
+    marks:
+      - { atom: a1, kind: lone-pair, text: HOMO }
+      - { atom: a2, kind: empty-p, text: LUMO (empty) }
+    answer:
+      - { from: a1, to: a2 }
+    correct: "N's lone pair, NH₃'s HOMO, now fills boron's empty p orbital, BF₃'s LUMO. A new N–B bond, and boron finally has eight. N now shares a pair it used to own, so it's N⁺; B gains a share, so it's B⁻ (formal charge, Lesson 1)."
+    hints:
+      - from: [a3, a4, a5]
+        to: [a2]
+        text: "F's pairs sit low on the ladder, held tightly. The highest filled orbital here is N's lone pair."
+      - from: [b1, b2, b3]
+        text: "That moves electrons away from boron, the atom that's short. Electrons flow *into* boron's empty orbital."
+      - from: [b4, b5, b6]
+        to: [a2]
+        text: "σ bonds sit low. NH₃'s HOMO is its lone pair."
+      - from: [a1]
+        to: [a3, a4, a5]
+        text: "F already has eight. The empty orbital, the LUMO, is on boron."
+      - text: "Tail on NH₃'s HOMO, the lone pair. Head on BF₃'s LUMO, boron's empty orbital."
+    reveal: "N's lone pair → B: a new N–B bond; N⁺, B⁻, and boron has eight."
+
+  - id: s12
+    phase: check
+    problem: u1-mo-bond-order-rank
+
+  - id: s13
+    phase: check
+    problem: u1-mo-ethylene-lumo
+
+  - id: s14
+    phase: check
+    problem: u1-mo-ether-bf3
+
+  - id: s15
+    phase: wrap
+    type: explain
+    text: >-
+      **A curved arrow is electrons flowing from a filled orbital into an empty one.**<br>
+      Two orbitals overlap → bonding (lower) and antibonding (higher, with a node).<br>
+      Bond order = (bonding − antibonding) ÷ 2. He₂'s is 0, so no He₂.<br>
+      HOMO: highest filled. LUMO: lowest empty. Arrows run HOMO → LUMO, across the smallest gap.<br>
+      That's why electrons flow.
+    scene: { id: arrow-is-flow, still: true }

@@ -1,0 +1,38 @@
+---
+// The coming-soon page (spec §Pages, story 6): every Unit still being written, by Course, with
+// a way back in, so a coming-soon Unit is never a dead end. Static HTML.
+import Base from "../layouts/Base.astro";
+import TopBar from "../components/TopBar.astro";
+import { courseModel, md } from "../lib/content.ts";
+
+const subject = courseModel().subjects[0];
+const unit1 = subject?.courses[0]?.units.find((u) => u.status === "available");
+const courses = (subject?.courses ?? [])
+  .map((course) => ({ ...course, units: course.units.filter((u) => u.status === "coming-soon") }))
+  .filter((course) => course.units.length);
+---
+
+<Base title="Coming soon · AstraTron" description="The Units of AstraTron still being written.">
+  <TopBar />
+  <main class="page prose">
+    <h1>Coming soon</h1>
+    <p>These Units are being written. Each opens when its Lessons are ready and checked; until then, start with what's open.</p>
+    {
+      courses.map((course) => (
+        <section aria-labelledby={`soon-${course.slug}`}>
+          <h2 id={`soon-${course.slug}`}>{course.title}</h2>
+          <ul>
+            {course.units.map((unit) => (
+              <li>
+                <span class="data">Unit {unit.number}</span> <span set:html={md(unit.title)} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+    <p>
+      {unit1 && <a class="btn btn-primary" href={unit1.url}>Start Unit <span class="data">1</span> ▸</a>} <a href={subject?.url ?? "/"}>Course map</a>
+    </p>
+  </main>
+</Base>

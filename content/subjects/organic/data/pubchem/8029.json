@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 8029,
+        "MolecularFormula": "C4H4O",
+        "SMILES": "C1=COC=C1",
+        "ConnectivitySMILES": "C1=COC=C1",
+        "Title": "Furan"
+      }
+    ]
+  }
+}

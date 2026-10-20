@@ -1,0 +1,23 @@
+# Carbon's share by mass of Earth's crust and of the human body (Lesson 0 s01, #78).
+# Crust: CRC Handbook, "Abundance of Elements in the Earth's Crust and in the Sea":
+# C 2.00×10² mg/kg = 0.02% by mass (checked 2026-10-19 against the CRC column of
+# Wikipedia's "Abundances of the elements (data page)").
+# Body: ICRP Publication 23, Reference Man (1975), Table 110 "Total body content for
+# some elements", pp. 327-328: carbon 16,000 g, 23 percent of total body weight
+# (70 kg Reference Man; checked 2026-10-19 against the table scan BioNumbers links,
+# BNID 110328). Values are facts from the literature, cited.
+id: carbon-abundance
+kind: table
+title: Carbon in Earth's crust and in the human body
+sources:
+  crc:
+    kind: reference
+    citation: CRC Handbook of Chemistry and Physics, "Abundance of Elements in the Earth's Crust and in the Sea" (C 2.00×10² mg/kg)
+    licence: Published values, cited (facts from the literature)
+  icrp23:
+    kind: reference
+    citation: ICRP Publication 23, Report of the Task Group on Reference Man (Pergamon, 1975), Table 110, pp. 327-328 (C 16,000 g of a 70 kg body)
+    licence: Published values, cited (facts from the literature)
+values:
+  crust.C: { label: carbon in Earth's crust (by mass), quantity: fraction, value: 0.02, unit: "%", source: crc }
+  body.C: { label: carbon in the human body (by mass), quantity: fraction, value: 23, unit: "%", source: icrp23 }

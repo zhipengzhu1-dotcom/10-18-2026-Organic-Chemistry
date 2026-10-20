@@ -1,0 +1,128 @@
+{
+  "id": "methylamine",
+  "kind": "molecule",
+  "title": "Methylamine",
+  "geometry": "computed",
+  "sources": {
+    "ours": {
+      "kind": "computed",
+      "citation": "Our calculation: PySCF 2.14.0, B3LYP/cc-pVTZ, isolated molecule, optimised with geomeTRIC 1.1.1, GAU_TIGHT and checked as a true minimum (all harmonic frequencies real), 2026-10-19",
+      "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+      "method": {
+        "program": "PySCF",
+        "version": "2.14.0",
+        "level": "B3LYP/cc-pVTZ",
+        "date": "2026-10-19",
+        "maxDeviation": 0.02
+      }
+    }
+  },
+  "values": {
+    "r.CN": {
+      "label": "C–N",
+      "quantity": "bond-length",
+      "value": 1.464,
+      "unit": "Å",
+      "source": "ours",
+      "atoms": [
+        0,
+        1
+      ]
+    }
+  },
+  "atoms": {
+    "source": "ours",
+    "list": [
+      [
+        "C",
+        -0.5644,
+        0.0961,
+        -0.0159
+      ],
+      [
+        "N",
+        0.8591,
+        -0.0927,
+        -0.3012
+      ],
+      [
+        "H",
+        -1.1467,
+        -0.6104,
+        -0.6084
+      ],
+      [
+        "H",
+        -0.8639,
+        1.0975,
+        -0.327
+      ],
+      [
+        "H",
+        -0.8538,
+        -0.0293,
+        1.0359
+      ],
+      [
+        "H",
+        1.1543,
+        -1.0201,
+        -0.0218
+      ],
+      [
+        "H",
+        1.4158,
+        0.5588,
+        0.2384
+      ]
+    ]
+  },
+  "bonds": [
+    [
+      0,
+      1,
+      1
+    ],
+    [
+      0,
+      2,
+      1
+    ],
+    [
+      0,
+      3,
+      1
+    ],
+    [
+      0,
+      4,
+      1
+    ],
+    [
+      1,
+      5,
+      1
+    ],
+    [
+      1,
+      6,
+      1
+    ]
+  ],
+  "provenance": {
+    "pipeline": "pipelines/geometry (#67)",
+    "start": "RDKit ETKDG embed (seed 7) + MMFF94 (staggered)",
+    "inputSha256": "de14ddf02abd8f8131d9d2eb53934b0c91fb296af1eeaaa038916a7190843aeb",
+    "optimiser": "geomeTRIC 1.1.1, GAU_TIGHT",
+    "basis": "cc-pvtz",
+    "gridLevel": 4,
+    "xcDefinition": "((0, 0, 0), ((402, 1),))",
+    "energyHartree": -95.89997533346062,
+    "lowestFrequency": 300.5,
+    "imaginaryModes": 0,
+    "charge": 0,
+    "note": "Computed on purpose: Lesson 7 compares three C–N lengths, so all three use one method.",
+    "cccbdb": "CCCBDB lists internal coordinates only, no Cartesian table (CAS 74-89-5, checked 2026-10-19)",
+    "usedBy": "L7"
+  }
+}

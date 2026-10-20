@@ -1,0 +1,16 @@
+{
+  "scene": "wedge-dash-methane",
+  "manim": "0.22.0",
+  "fps": 60,
+  "inputs": "67ff878fff0ea0a3bb5e1039c436f83da7757259271a36a301d690585afce28d",
+  "aspects": {
+    "16:9": {
+      "frames": 599,
+      "timings": {}
+    },
+    "9:16": {
+      "frames": 599,
+      "timings": {}
+    }
+  }
+}

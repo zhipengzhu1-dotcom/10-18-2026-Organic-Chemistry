@@ -2,3 +2,25 @@
 .claude/settings.local.json
 # Office lock files
 ~$*
+
+# build and test output
+node_modules/
+dist/
+.astro/
+test-results/
+playwright-report/
+
+# Python (pipelines/)
+.venv/
+__pycache__/
+.pytest_cache/
+
+# Cloudflare local emulator state (local D1) and local secrets
+.wrangler/
+.dev.vars
+
+# Python bytecode (Manim scripts)
+__pycache__/
+
+# rendered video, stills and sources sidecars (never committed)
+video/out/

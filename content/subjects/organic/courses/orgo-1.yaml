@@ -1,0 +1,65 @@
+# Course manifest: ordered Units, each `available` or `coming-soon`.
+# Titles, order and scopes come from the course-map decision (issue #10).
+# Unit numbers run on into orgo-2 (which starts at Unit 11). Slugs freeze once public.
+title: Organic Chemistry I
+units:
+  - id: u1
+    slug: structure-bonding
+    title: Structure & Bonding
+    summary: Atoms, Lewis structures, formal charge, hybridization, polarity and resonance.
+    status: available
+    lessons:
+      - u1-l00
+      - u1-l01
+      - u1-l02
+      - u1-l03
+      - u1-l04
+      - u1-l05
+      - u1-l06
+      - u1-l07
+      - u1-l08
+  - id: u2
+    slug: acids-bases
+    title: Acids & Bases
+    summary: pKa, what stabilizes a conjugate base, and predicting which way an acid–base equilibrium lies.
+    status: coming-soon
+  - id: u3
+    slug: alkanes-conformations
+    title: Alkanes & Conformations
+    summary: Naming, Newman projections, ring strain and cyclohexane chairs.
+    status: coming-soon
+  - id: u4
+    slug: stereochemistry
+    title: Stereochemistry
+    summary: Chirality, R/S, enantiomers vs diastereomers, meso compounds, optical activity.
+    status: coming-soon
+  - id: u5
+    slug: how-reactions-work
+    title: How Reactions Work
+    summary: Curved arrows, nucleophiles and electrophiles, energy diagrams, kinetics vs thermodynamics.
+    status: coming-soon
+  - id: u6
+    slug: alkenes-addition-reactions
+    title: "Alkenes: Addition Reactions"
+    summary: Markovnikov addition, carbocation rearrangements, hydroboration, halogenation, oxidation.
+    status: coming-soon
+  - id: u7
+    slug: alkynes
+    title: Alkynes
+    summary: Terminal-alkyne acidity, additions to triple bonds, and building chains with acetylides.
+    status: coming-soon
+  - id: u8
+    slug: substitution-elimination
+    title: Substitution & Elimination
+    summary: SN1, SN2, E1, E2, and how to predict which one wins.
+    status: coming-soon
+  - id: u9
+    slug: aromaticity-eas
+    title: Aromaticity & EAS
+    summary: Hückel's rule, benzene's stability, electrophilic aromatic substitution and directing effects.
+    status: coming-soon
+  - id: u10
+    slug: alcohols-ethers-epoxides
+    title: Alcohols, Ethers & Epoxides
+    summary: Making and oxidizing alcohols, Grignard and other organometallics, epoxide ring-opening.
+    status: coming-soon

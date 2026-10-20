@@ -137,7 +137,7 @@ Source note for every computed orbital and energy: "Orbitals and energies comput
 ### `u1-l08-s05` · Build · Explain
 
 - **Prompt:** "The same thing happens side-on. In ethylene, each carbon has one p orbital left over (Lesson 4), standing up out of the flat molecule. In phase they make **π**, a bonding orbital above and below the C=C. Out of phase they make **π\***, antibonding, with a node cutting between the two carbons.
-  Fill ethylene's orbitals from the bottom and the last pair lands in π. That's its **HOMO**, the **H**ighest **O**ccupied **M**olecular **O**rbital. The next one up, π\*, is empty: the **LUMO**, **L**owest **U**noccupied. The energy between them is the **HOMO–LUMO gap**."
+  Fill ethylene's orbitals from the bottom and the last pair lands in π. That's its **HOMO**, the Highest Occupied Molecular Orbital. The next one up, π\*, is empty: the **LUMO**, the Lowest Unoccupied one. The energy between them is the **HOMO–LUMO gap**."
 - **Visual / Scene:** `mo-from-overlap` (`system: ethylene-2p`), autoplays once, ending on a two-level ladder with π labelled "HOMO (filled)" and π\* labelled "LUMO (empty)".
 - **Scene:** screen reader: "Two p orbitals stand side by side on ethylene's carbons. Same sign: they merge above and below the double bond into pi, the bonding orbital, lower in energy. Opposite signs: a node cuts between the carbons, giving pi star, higher. Pi holds ethylene's last pair: it is the HOMO. Pi star is empty: it is the LUMO."
 - **Source note:** "π and π\* in ethylene: facts as in OpenStax *Organic Chemistry* §1.11, CC BY-NC-SA 4.0; wording and pictures ours."

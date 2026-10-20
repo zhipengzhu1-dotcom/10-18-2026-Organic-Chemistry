@@ -1,0 +1,38 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). Start and target are drawn
+# as Kekulé rings (the build compares atoms, H's and charge on our own graph, never RDKit's aromatic reading).
+id: u1-res-phenoxide-para
+unit: u1
+lesson: u1-l06
+difficulty: 3
+status: approved
+source: Adapted from LibreTexts Wade 1-20(b) and its solution
+credit: "LibreTexts, Map: Organic Chemistry (Wade), CC BY-NC-SA 4.0"
+type: draw-arrows
+prompt: "Phenoxide, phenol without its H⁺. Push electrons to move the negative charge from O to the ring carbon **opposite** it (target shown). It takes three arrows."
+start: phenoxide
+results: [phenoxide-para]
+answer:
+  - { from: a1, to: b1 }
+  - { from: b2, to: b3 }
+  - { from: b4, to: a5 }
+inBetween:
+  over: "{atom} would have {electrons} e⁻. Something has to leave."
+  short: "{atom} has only {electrons} e⁻. Not a real structure, keep going."
+correct: "The charge travelled from O through the ring to the far carbon. With the other two contributors (− on either carbon next to C2), phenoxide's − is shared by O and three ring carbons."
+hints:
+  - from: [b2]
+    to: [a3]
+    text: "That puts − on the carbon next to C2. It's a real contributor, but the target puts − on the carbon opposite O. Slide the bond on instead."
+  - from: [b6]
+    text: "Start where O's pair arrives: at C2. Follow the π bonds away from it, C2=C3 first."
+  - from: [b2]
+    to: [a2]
+    text: "Electrons move away from where the new pair arrives, toward the target carbon."
+  - from: [b4]
+    to: [a4]
+    text: "Electrons move away from where the new pair arrives, toward the target carbon."
+  - from: [sigma]
+    text: "σ bonds stay put, ring bonds included. Only O's lone pair and the ring's π bonds move."
+  - text: "Follow the chain: O's lone pair → the O–C2 bond; C2=C3 → C3–C4; C4=C5 → onto C5."
+reveal: "Arrow from a lone pair on oxygen into the O–C bond; arrow from the C2=C3 π bond to the C3–C4 bond; arrow from the C4=C5 π bond onto C5. Result: C=O at the top and a negative charge on the ring carbon opposite it."
+sourceNote: "Adapted from LibreTexts, *Map: Organic Chemistry (Wade)*, §1.16 exercise 1-20(b) and its solution in §1.17, CC BY-NC-SA 4.0. Wording and drawing ours. Parent: phenol, PubChem CID 996."

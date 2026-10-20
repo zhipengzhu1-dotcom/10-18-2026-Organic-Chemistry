@@ -1,0 +1,105 @@
+{
+ "id": "ketene-orbitals",
+ "kind": "table",
+ "title": "Ketene π bond orbitals",
+ "sources": {
+  "ours": {
+   "kind": "computed",
+   "citation": "Our calculation: intrinsic bond orbitals (Knizia, J. Chem. Theory Comput. 9, 4834 (2013), doi:10.1021/ct400687b) from a B3LYP/cc-pVTZ single point with PySCF 2.14.0 at the experimental geometry, 2026-10-19",
+   "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+   "note": "Drawn at the isosurface value given. Bond orbitals are one honest way to divide a molecule's electrons into bonds; Lesson 8 shows another.",
+   "method": {
+    "program": "PySCF",
+    "version": "2.14.0",
+    "level": "B3LYP/cc-pVTZ",
+    "date": "2026-10-19"
+   }
+  }
+ },
+ "values": {
+  "iso": {
+   "label": "Isosurface value",
+   "quantity": "isovalue",
+   "value": 0.05,
+   "unit": "a.u.",
+   "source": "ours"
+  }
+ },
+ "orbitals": {
+  "molecule": "ketene",
+  "kind": "ibo",
+  "iso": "iso",
+  "list": {
+   "cc-pi": {
+    "label": "C=C π bond orbital",
+    "chip": "π",
+    "style": "pi",
+    "mesh": "/orbitals/ketene-orbitals/cc-pi.glb",
+    "sha256": "50cad5bf78581e93f4f7c3c0c227104c53967d5b0ad0d7e8ff02a89a29ec7b16",
+    "triangles": 4624,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       0.758,
+       -0.002,
+       0.46
+      ]
+     },
+     {
+      "sign": "-",
+      "at": [
+       -0.758,
+       -0.002,
+       0.46
+      ]
+     }
+    ]
+   },
+   "co-pi": {
+    "label": "C=O π bond orbital",
+    "chip": "π",
+    "style": "pi",
+    "mesh": "/orbitals/ketene-orbitals/co-pi.glb",
+    "sha256": "cf55afdeccc5f5fe9a7b6805a812bb1b6f23714b313062ce4f3b33164c85c1cf",
+    "triangles": 3652,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       0.0,
+       0.662,
+       2.021
+      ]
+     },
+     {
+      "sign": "-",
+      "at": [
+       0.0,
+       -0.664,
+       2.025
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "provenance": {
+  "pipeline": "pipelines/orbitals (#70)",
+  "inputSha256": "aa624768b8108944d5159cca8551509fde486abb938db965a0369cba2622a83a",
+  "scfEnergyHartree": -152.66377102588268,
+  "grid": {
+   "step": 0.14,
+   "pad": 4.5,
+   "shape": [
+    67,
+    79,
+    87
+   ]
+  },
+  "checks": [
+   "C=C π antisymmetric through the H–C–H plane; C=O π antisymmetric through the plane at right angles"
+  ],
+  "seconds": 3
+ }
+}

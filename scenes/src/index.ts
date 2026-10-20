@@ -1,0 +1,129 @@
+// The Scene registry, shared by the site and the video renderer (ADR 0001).
+// Each entry pairs a manifest (also listed in manifests.ts) with its pure
+// component. Lesson files name Scenes by id.
+import type { RegisteredScene } from "./types.ts";
+import { streamBend } from "./stream-bend/manifest.ts";
+import StreamBend from "./stream-bend/StreamBend.tsx";
+import { enStrip } from "./en-strip/manifest.ts";
+import EnStrip from "./en-strip/EnStrip.tsx";
+import { bondDipoles } from "./bond-dipoles/manifest.ts";
+import BondDipoles from "./bond-dipoles/BondDipoles.tsx";
+import { dotsAndSticks } from "./dots-and-sticks/manifest.ts";
+import DotsAndSticks from "./dots-and-sticks/DotsAndSticks.tsx";
+import { bf3Sextet } from "./bf3-sextet/manifest.ts";
+import Bf3Sextet from "./bf3-sextet/Bf3Sextet.tsx";
+import { groupSpotlight } from "./group-spotlight/manifest.ts";
+import GroupSpotlight from "./group-spotlight/GroupSpotlight.tsx";
+import { groupCards } from "./group-cards/manifest.ts";
+import GroupCards from "./group-cards/GroupCards.tsx";
+import { carbonylNeighbours } from "./carbonyl-neighbours/manifest.ts";
+import CarbonylNeighbours from "./carbonyl-neighbours/CarbonylNeighbours.tsx";
+import { acetateBondLengths } from "./acetate-bond-lengths/manifest.ts";
+import AcetateBondLengths from "./acetate-bond-lengths/AcetateBondLengths.tsx";
+import { formaldehydePiShift } from "./formaldehyde-pi-shift/manifest.ts";
+import FormaldehydePiShift from "./formaldehyde-pi-shift/FormaldehydePiShift.tsx";
+import { threeMoves } from "./three-moves/manifest.ts";
+import ThreeMoves from "./three-moves/ThreeMoves.tsx";
+import { acetateHybrid } from "./acetate-hybrid/manifest.ts";
+import AcetateHybrid from "./acetate-hybrid/AcetateHybrid.tsx";
+
+import { hFill } from "./h-fill/manifest.ts";
+import HFill from "./h-fill/HFill.tsx";
+import { ethanolThreeWays } from "./ethanol-three-ways/manifest.ts";
+import EthanolThreeWays from "./ethanol-three-ways/EthanolThreeWays.tsx";
+import { lonePairFill } from "./lone-pair-fill/manifest.ts";
+import LonePairFill from "./lone-pair-fill/LonePairFill.tsx";
+// Lesson 0 (#78)
+import { buildBySharing } from "./build-by-sharing/manifest.ts";
+import BuildBySharing from "./build-by-sharing/BuildBySharing.tsx";
+import { crustVsBody } from "./crust-vs-body/manifest.ts";
+import CrustVsBody from "./crust-vs-body/CrustVsBody.tsx";
+import { giveOrTake } from "./give-or-take/manifest.ts";
+import GiveOrTake from "./give-or-take/GiveOrTake.tsx";
+import { outerElectrons } from "./outer-electrons/manifest.ts";
+import OuterElectrons from "./outer-electrons/OuterElectrons.tsx";
+import { waterPush } from "./water-push/manifest.ts";
+import WaterPush from "./water-push/WaterPush.tsx";
+import { fourDomainFamily } from "./four-domain-family/manifest.ts";
+import FourDomainFamily from "./four-domain-family/FourDomainFamily.tsx";
+import { dipoleSum } from "./dipole-sum/manifest.ts";
+import DipoleSum from "./dipole-sum/DipoleSum.tsx";
+import { amideCnLengths } from "./amide-cn-lengths/manifest.ts";
+import AmideCnLengths from "./amide-cn-lengths/AmideCnLengths.tsx";
+import { amideHybrid } from "./amide-hybrid/manifest.ts";
+import AmideHybrid from "./amide-hybrid/AmideHybrid.tsx";
+import { ruleLadder } from "./rule-ladder/manifest.ts";
+import RuleLadder from "./rule-ladder/RuleLadder.tsx";
+import { carbonylSites } from "./carbonyl-sites/manifest.ts";
+import CarbonylSites from "./carbonyl-sites/CarbonylSites.tsx";
+// Lesson 4 (#82)
+import { hybridSets } from "./hybrid-sets/manifest.ts";
+import HybridSets from "./hybrid-sets/HybridSets.tsx";
+import { piTwist } from "./pi-twist/manifest.ts";
+import PiTwist from "./pi-twist/PiTwist.tsx";
+import { methaneUnmixedVsReal } from "./methane-unmixed-vs-real/manifest.ts";
+import MethaneUnmixedVsReal from "./methane-unmixed-vs-real/MethaneUnmixedVsReal.tsx";
+import { orbitalSum } from "./orbital-sum/manifest.ts";
+import OrbitalSum from "./orbital-sum/OrbitalSum.tsx";
+
+// Lesson 8 (#86)
+import { moFiller } from "./mo-filler/manifest.ts";
+import MoFiller from "./mo-filler/MoFiller.tsx";
+import { frontierLadder } from "./frontier-ladder/manifest.ts";
+import FrontierLadder from "./frontier-ladder/FrontierLadder.tsx";
+
+export const sceneRegistry: Record<string, RegisteredScene<any>> = {
+  [streamBend.id]: { manifest: streamBend, Component: StreamBend },
+  [enStrip.id]: { manifest: enStrip, Component: EnStrip },
+  [bondDipoles.id]: { manifest: bondDipoles, Component: BondDipoles },
+  [dotsAndSticks.id]: { manifest: dotsAndSticks, Component: DotsAndSticks },
+  [bf3Sextet.id]: { manifest: bf3Sextet, Component: Bf3Sextet },
+  [groupSpotlight.id]: { manifest: groupSpotlight, Component: GroupSpotlight },
+  [groupCards.id]: { manifest: groupCards, Component: GroupCards },
+  [carbonylNeighbours.id]: { manifest: carbonylNeighbours, Component: CarbonylNeighbours },
+  [hFill.id]: { manifest: hFill, Component: HFill },
+  [ethanolThreeWays.id]: { manifest: ethanolThreeWays, Component: EthanolThreeWays },
+  [lonePairFill.id]: { manifest: lonePairFill, Component: LonePairFill },
+  // Lesson 0 (#78)
+  [crustVsBody.id]: { manifest: crustVsBody, Component: CrustVsBody },
+  [outerElectrons.id]: { manifest: outerElectrons, Component: OuterElectrons },
+  [giveOrTake.id]: { manifest: giveOrTake, Component: GiveOrTake },
+  [waterPush.id]: { manifest: waterPush, Component: WaterPush },
+  [buildBySharing.id]: { manifest: buildBySharing, Component: BuildBySharing },
+  [fourDomainFamily.id]: { manifest: fourDomainFamily, Component: FourDomainFamily },
+  [dipoleSum.id]: { manifest: dipoleSum, Component: DipoleSum },
+  // Lesson 6 (#84)
+  [acetateBondLengths.id]: { manifest: acetateBondLengths, Component: AcetateBondLengths },
+  [formaldehydePiShift.id]: { manifest: formaldehydePiShift, Component: FormaldehydePiShift },
+  [threeMoves.id]: { manifest: threeMoves, Component: ThreeMoves },
+  [acetateHybrid.id]: { manifest: acetateHybrid, Component: AcetateHybrid },
+  // Lesson 7
+  [amideCnLengths.id]: { manifest: amideCnLengths, Component: AmideCnLengths },
+  [amideHybrid.id]: { manifest: amideHybrid, Component: AmideHybrid },
+  [ruleLadder.id]: { manifest: ruleLadder, Component: RuleLadder },
+  [carbonylSites.id]: { manifest: carbonylSites, Component: CarbonylSites },
+  // Lesson 4 (#82)
+  [hybridSets.id]: { manifest: hybridSets, Component: HybridSets },
+  [piTwist.id]: { manifest: piTwist, Component: PiTwist },
+  [methaneUnmixedVsReal.id]: { manifest: methaneUnmixedVsReal, Component: MethaneUnmixedVsReal },
+  [orbitalSum.id]: { manifest: orbitalSum, Component: OrbitalSum },
+  // Lesson 8 (#86)
+  [moFiller.id]: { manifest: moFiller, Component: MoFiller },
+  [frontierLadder.id]: { manifest: frontierLadder, Component: FrontierLadder },
+};
+
+export type * from "./types.ts";
+export { frameSize, safeArea, type Box } from "./frame.ts";
+export { clamp, easeInOut, easeOut, lerp, progress, pulse, seededRandom } from "./motion.ts";
+export { stateAt } from "./timeline.ts";
+export { defaultState } from "./state.ts";
+
+export { BOND_PX, drawStructure, type Drawing, type DrawOptions, type Highlight, type Point, type Segment } from "./structure/render.ts";
+export { withHydrogens } from "./structure/hydrogens.ts";
+export { drawContributors, type ContributorsDrawing } from "./structure/contributors.ts";
+
+// push-replay is a pure function of t, but not a registered Scene: its picture is a Step's own start
+// and pushes (Lesson 6/7 reveals, the Tap replay), not settable states over cited data, so it has no
+// manifest and no video job. A Step that needs it on video would get a Scene wrapping one fixed
+// replay (its start and pushes in the manifest), registered like any other.
+export { default as PushReplay, describeReplay, replayDuration, PUSH_SECONDS } from "./push-replay/PushReplay.tsx";

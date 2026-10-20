@@ -1,0 +1,21 @@
+# Lesson 1 (#79): full Lewis structure, drawn by hand. The end carbon has
+# four bonds, three of them in the triple bond; nitrogen has three bonds and
+# one lone pair (after MIT 5.12 Lecture 1 p. 9).
+
+id: acetonitrile
+style: full
+smiles: "CC#N"
+source: PubChem CID 6342
+atoms:
+  - { id: a1, el: "C", x: 0, y: 0 }
+  - { id: a2, el: "C", x: 1.5, y: 0 }
+  - { id: a3, el: "N", x: 3, y: 0, lp: 1 }
+  - { id: a4, el: "H", x: -1.5, y: 0 }
+  - { id: a5, el: "H", x: 0, y: -1.5 }
+  - { id: a6, el: "H", x: 0, y: 1.5 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 3 }
+  - { id: b3, a: a1, b: a4, order: 1 }
+  - { id: b4, a: a1, b: a5, order: 1 }
+  - { id: b5, a: a1, b: a6, order: 1 }

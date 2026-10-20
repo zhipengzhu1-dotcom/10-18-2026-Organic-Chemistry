@@ -1,0 +1,7 @@
+# Lesson 1 (#79): a single atom with loose bond ends (`*`), as in MIT 5.12 PS1 Q1. Drawn by hand.
+
+id: frag-x-0-lp4
+style: full
+atoms:
+  - { id: a1, el: "X", x: 0, y: 0, charge: -1, lp: 4 }
+bonds: []

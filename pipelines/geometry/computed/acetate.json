@@ -1,0 +1,88 @@
+{
+ "id": "acetate",
+ "smiles": "CC(=O)[O-]",
+ "charge": -1,
+ "multiplicity": 1,
+ "method": {
+  "program": "PySCF",
+  "version": "2.14.0",
+  "level": "B3LYP/cc-pVTZ",
+  "xc": "b3lyp",
+  "xc_definition": "((0, 0, 0), ((402, 1),))",
+  "basis": "cc-pvtz",
+  "grid_level": 4,
+  "optimizer": "geomeTRIC 1.1.1, GAU_TIGHT",
+  "phase": "gas (isolated molecule)"
+ },
+ "date": "2026-10-19",
+ "start": "one methyl H in the carboxylate plane (the perpendicular-H conformer is a methyl-rotation saddle)",
+ "input_sha256": "42bf3b1f5d84a40bb5adf26cc64b251b7b18cab48f0d8ac7b3e4f78b3a05d10f",
+ "converged": {
+  "optimiser": true,
+  "scf": true
+ },
+ "energy_hartree": -228.6071228458875,
+ "atoms": [
+  [
+   "C",
+   -1.507592,
+   0.014258,
+   -0.0
+  ],
+  [
+   "C",
+   0.058819,
+   0.007596,
+   0.0
+  ],
+  [
+   "O",
+   0.612293,
+   1.130098,
+   0.0
+  ],
+  [
+   "O",
+   0.575,
+   -1.13347,
+   0.0
+  ],
+  [
+   "H",
+   -1.909115,
+   1.029532,
+   -0.0
+  ],
+  [
+   "H",
+   -1.875991,
+   -0.523486,
+   0.878656
+  ],
+  [
+   "H",
+   -1.875991,
+   -0.523486,
+   -0.878656
+  ]
+ ],
+ "frequencies_cm1": [
+  43.0,
+  429.2,
+  613.2,
+  615.6,
+  860.9,
+  990.3,
+  1029.4,
+  1309.6,
+  1355.0,
+  1464.4,
+  1475.4,
+  1694.6,
+  2990.8,
+  3047.1,
+  3066.4
+ ],
+ "imaginary_modes": 0,
+ "seconds": 378
+}

@@ -1,0 +1,18 @@
+# Practice Problem u1-mo-empty-orbital (#87) card d: tert-butyl chloride, (CH₃)₃C–Cl: a carbon with three CH₃ groups
+# and a Cl with three lone pairs. Drawn by hand, the methyls written as CH₃.
+
+id: tert-butyl-chloride
+style: full
+smiles: "CC(C)(C)Cl"
+source: PubChem CID 10486
+atoms:
+  - { id: a1, el: C, x: 0, y: 0 }
+  - { id: a2, el: C, x: 0, y: -1.5, h: 3 }
+  - { id: a3, el: C, x: -1.5, y: 0, h: 3 }
+  - { id: a4, el: C, x: 0, y: 1.5, h: 3 }
+  - { id: a5, el: Cl, x: 1.5, y: 0, lp: 3 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a1, b: a3, order: 1 }
+  - { id: b3, a: a1, b: a4, order: 1 }
+  - { id: b4, a: a1, b: a5, order: 1 }

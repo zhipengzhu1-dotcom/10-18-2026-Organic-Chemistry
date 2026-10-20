@@ -1,0 +1,80 @@
+{
+ "id": "ethane-b3lyp-orbitals",
+ "kind": "table",
+ "title": "Ethane frontier orbitals",
+ "sources": {
+  "ours": {
+   "kind": "computed",
+   "citation": "Our calculation: canonical molecular orbitals and their energies with PySCF 2.14.0, B3LYP/cc-pVTZ, isolated molecule at the geometry optimised with the same method, 2026-10-19; hartree to eV with CODATA 2018 (Tiesinga et al., Rev. Mod. Phys. 93, 025010 (2021), doi:10.1103/RevModPhys.93.025010)",
+   "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+   "note": "Computed orbital energies are model values: compare them with each other, not with measured energies.",
+   "method": {
+    "program": "PySCF",
+    "version": "2.14.0",
+    "level": "B3LYP/cc-pVTZ",
+    "date": "2026-10-19"
+   }
+  }
+ },
+ "values": {
+  "homo": {
+   "label": "Ethane HOMO",
+   "quantity": "energy",
+   "value": -9.4026,
+   "unit": "eV",
+   "decimals": 1,
+   "source": "ours"
+  },
+  "lumo": {
+   "label": "Ethane LUMO",
+   "quantity": "energy",
+   "value": 1.0681,
+   "unit": "eV",
+   "decimals": 1,
+   "source": "ours"
+  },
+  "gap": {
+   "label": "Ethane HOMO–LUMO gap",
+   "quantity": "energy",
+   "value": 10.4707,
+   "unit": "eV",
+   "decimals": 1,
+   "source": "ours"
+  },
+  "iso": {
+   "label": "Isosurface value",
+   "quantity": "isovalue",
+   "value": 0.05,
+   "unit": "a.u.",
+   "source": "ours"
+  }
+ },
+ "orbitals": {
+  "molecule": "ethane-b3lyp",
+  "kind": "canonical",
+  "iso": "iso",
+  "list": {}
+ },
+ "provenance": {
+  "pipeline": "pipelines/orbitals (#70)",
+  "inputSha256": "c1451f69d32399cd13410c4a2aadffb000007e7521c04011f36fd1d1fc80eaa2",
+  "grid": {
+   "step": 0.14,
+   "pad": 4.5,
+   "shape": [
+    81,
+    79,
+    83
+   ]
+  },
+  "checks": [],
+  "scfEnergyHartree": -79.86434021799256,
+  "homoIndex": 8,
+  "energiesHartree": {
+   "homo": -0.34553760766813346,
+   "lumo": 0.03925300858341707
+  },
+  "lumoValenceLike": true,
+  "seconds": 4
+ }
+}

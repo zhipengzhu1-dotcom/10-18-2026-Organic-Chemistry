@@ -1,0 +1,26 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). "model: 180°" is the hybrid
+# model's angle (Lesson 4 types the model angles as the model's), not a measurement.
+id: u1-hyb-co2-carbon
+unit: u1
+lesson: u1-l04
+difficulty: 1
+status: approved
+source: Original
+type: multiple-choice
+prompt: "Carbon dioxide, O=C=O. Which hybrid set does its carbon use?"
+figures:
+  - { structure: l3-co2, alt: "Kekulé structure O=C=O: carbon double-bonded to each oxygen, two lone pairs on each O, none on C." }
+options:
+  - { id: a, text: "sp³" }
+  - { id: b, text: "sp²" }
+  - { id: c, text: sp }
+answer: [c]
+correct: "Two groups, the two O's, and no lone pair: sp, a straight line (model: 180°), as Lesson 3 found. Carbon's two leftover p orbitals each make one π bond, one to each oxygen."
+hints:
+  - match: [a]
+    text: "sp³ needs four groups. Carbon here is bonded to just two atoms, and a double bond counts as one group."
+  - match: [b]
+    text: "sp² needs three groups. Count carbon's neighbours: two O's, and no lone pair."
+  - text: "Count the groups on C (bonded atoms + lone pairs), then match: 4 → sp³, 3 → sp², 2 → sp."
+reveal: "**sp**. Two orange sp lobes point at the O's; carbon's two cyan p orbitals stand at right angles, each making the π bond to one O."
+sourceNote: "Our Problem, in the style of MIT OCW 5.12 PS1 Q5. Hybrid model as in Lesson 4."

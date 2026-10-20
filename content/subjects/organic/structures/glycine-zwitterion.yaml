@@ -1,0 +1,27 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+
+id: glycine-zwitterion
+style: full
+smiles: "[NH3+]CC(=O)[O-]"
+atoms:
+  - { id: a1, el: N, x: 2.598, y: -1.5, charge: 1 }
+  - { id: a2, el: C, x: 1.299, y: -0.75 }
+  - { id: a3, el: C, x: 0, y: 0 }
+  - { id: a4, el: O, x: 0, y: 1.5, lp: 2 }
+  - { id: a5, el: O, x: -1.299, y: -0.75, charge: -1, lp: 3 }
+  - { id: a6, el: H, x: 1.848, y: -2.799 }
+  - { id: a7, el: H, x: 3.348, y: -0.201 }
+  - { id: a8, el: H, x: 3.897, y: -2.25 }
+  - { id: a9, el: H, x: 0.549, y: -2.049 }
+  - { id: a10, el: H, x: 2.049, y: 0.549 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a3, b: a4, order: 2 }
+  - { id: b4, a: a3, b: a5, order: 1 }
+  - { id: b5, a: a1, b: a6, order: 1 }
+  - { id: b6, a: a1, b: a7, order: 1 }
+  - { id: b7, a: a1, b: a8, order: 1 }
+  - { id: b8, a: a2, b: a9, order: 1 }
+  - { id: b9, a: a2, b: a10, order: 1 }
+source: PubChem CID 750

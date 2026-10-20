@@ -1,0 +1,14 @@
+# Practice Problem u1-3d-polar-hcn (#87) card c: hydrogen cyanide, H–C≡N in a straight line, one lone pair on N.
+# Drawn by hand.
+
+id: hydrogen-cyanide
+style: full
+smiles: "C#N"
+source: "PubChem CID 768"
+atoms:
+  - { id: a1, el: "H", x: -1.5, y: 0 }
+  - { id: a2, el: "C", x: 0, y: 0 }
+  - { id: a3, el: "N", x: 1.5, y: 0, lp: 1 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 3 }

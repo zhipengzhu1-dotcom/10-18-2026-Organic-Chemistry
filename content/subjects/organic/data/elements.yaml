@@ -1,0 +1,67 @@
+# Per-element display data (ADR 0002). Viewers and Scenes read colours and
+# radii from here through the lookup (elementStyle / cite), never from a
+# library's built-in defaults. Each column has one cited table.
+#
+# Checked 2026-10-19:
+#   colours  argbsCpk in Jmol's src/org/jmol/c/PAL.java (Jmol-SwingJS commit aa52adb)
+#   vdw      Bondi 1964, Table I (cross-checked against Wikipedia "Van der Waals radius"); B from
+#            Mantina et al. 2009 (as Wikipedia's table cites it), checked 2026-10-19 for Lesson 3's BF₃
+#   covalent Cordero et al. 2008, Table 2 (cross-checked against Wikipedia "Covalent radius")
+id: elements
+kind: table
+title: Elements
+sources:
+  jmol:
+    kind: reference
+    citation: the Jmol CPK colour table (Jmol, org/jmol/c/PAL.java), https://github.com/BobHanson/Jmol-SwingJS
+    licence: Jmol is LGPL 2.1; colour values used as data
+  bondi1964:
+    kind: reference
+    citation: Bondi, J. Phys. Chem. 68, 441 (1964), doi:10.1021/j100785a001
+    licence: Published values, cited (facts from the literature)
+  mantina2009:
+    kind: reference
+    citation: Mantina et al., J. Phys. Chem. A 113, 5806 (2009), doi:10.1021/jp8111556
+    licence: Published values, cited (facts from the literature)
+  cordero2008:
+    kind: reference
+    citation: Cordero et al., Dalton Trans. 2832 (2008), doi:10.1039/b801115j
+    licence: Published values, cited (facts from the literature)
+values:
+  H.colour: { label: H colour, quantity: colour, value: "#FFFFFF", source: jmol }
+  B.colour: { label: B colour, quantity: colour, value: "#FFB5B5", source: jmol }
+  C.colour: { label: C colour, quantity: colour, value: "#909090", source: jmol }
+  N.colour: { label: N colour, quantity: colour, value: "#3050F8", source: jmol }
+  O.colour: { label: O colour, quantity: colour, value: "#FF0D0D", source: jmol }
+  F.colour: { label: F colour, quantity: colour, value: "#90E050", source: jmol }
+  P.colour: { label: P colour, quantity: colour, value: "#FF8000", source: jmol }
+  S.colour: { label: S colour, quantity: colour, value: "#FFFF30", source: jmol }
+  Cl.colour: { label: Cl colour, quantity: colour, value: "#1FF01F", source: jmol }
+  Br.colour: { label: Br colour, quantity: colour, value: "#A62929", source: jmol }
+  I.colour: { label: I colour, quantity: colour, value: "#940094", source: jmol }
+
+  H.vdw: { label: H van der Waals radius, quantity: radius, value: 1.20, unit: Å, source: bondi1964 }
+  # Bondi 1964 has no boron; Mantina 2009 extends Bondi's set to the whole main group.
+  B.vdw: { label: B van der Waals radius, quantity: radius, value: 1.92, unit: Å, source: mantina2009 }
+  C.vdw: { label: C van der Waals radius, quantity: radius, value: 1.70, unit: Å, source: bondi1964 }
+  N.vdw: { label: N van der Waals radius, quantity: radius, value: 1.55, unit: Å, source: bondi1964 }
+  O.vdw: { label: O van der Waals radius, quantity: radius, value: 1.52, unit: Å, source: bondi1964 }
+  F.vdw: { label: F van der Waals radius, quantity: radius, value: 1.47, unit: Å, source: bondi1964 }
+  P.vdw: { label: P van der Waals radius, quantity: radius, value: 1.80, unit: Å, source: bondi1964 }
+  S.vdw: { label: S van der Waals radius, quantity: radius, value: 1.80, unit: Å, source: bondi1964 }
+  Cl.vdw: { label: Cl van der Waals radius, quantity: radius, value: 1.75, unit: Å, source: bondi1964 }
+  Br.vdw: { label: Br van der Waals radius, quantity: radius, value: 1.85, unit: Å, source: bondi1964 }
+  I.vdw: { label: I van der Waals radius, quantity: radius, value: 1.98, unit: Å, source: bondi1964 }
+
+  H.covalent: { label: H covalent radius, quantity: radius, value: 0.31, unit: Å, source: cordero2008 }
+  C.sp3.covalent: { label: C (sp³) covalent radius, quantity: radius, value: 0.76, unit: Å, source: cordero2008 }
+  C.sp2.covalent: { label: C (sp²) covalent radius, quantity: radius, value: 0.73, unit: Å, source: cordero2008 }
+  C.sp.covalent: { label: C (sp) covalent radius, quantity: radius, value: 0.69, unit: Å, source: cordero2008 }
+  N.covalent: { label: N covalent radius, quantity: radius, value: 0.71, unit: Å, source: cordero2008 }
+  O.covalent: { label: O covalent radius, quantity: radius, value: 0.66, unit: Å, source: cordero2008 }
+  F.covalent: { label: F covalent radius, quantity: radius, value: 0.57, unit: Å, source: cordero2008 }
+  P.covalent: { label: P covalent radius, quantity: radius, value: 1.07, unit: Å, source: cordero2008 }
+  S.covalent: { label: S covalent radius, quantity: radius, value: 1.05, unit: Å, source: cordero2008 }
+  Cl.covalent: { label: Cl covalent radius, quantity: radius, value: 1.02, unit: Å, source: cordero2008 }
+  Br.covalent: { label: Br covalent radius, quantity: radius, value: 1.20, unit: Å, source: cordero2008 }
+  I.covalent: { label: I covalent radius, quantity: radius, value: 1.39, unit: Å, source: cordero2008 }

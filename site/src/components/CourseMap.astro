@@ -1,0 +1,50 @@
+---
+// The Course map: each Course of a Subject as a horizontal strip of Unit tiles.
+// Available Units link to their Level select page; coming-soon Units show their
+// title but can't be entered. Styles: global.css (Course map).
+import type { Subject } from "@astratron/content";
+import { md } from "../lib/content.ts";
+
+interface Props {
+  subject: Subject;
+}
+const { subject } = Astro.props;
+---
+
+<div class="course-map">
+  {
+    subject.courses.map((course) => (
+      <section class="course" aria-labelledby={`course-${course.slug}`}>
+        <h2 id={`course-${course.slug}`}>{course.title}</h2>
+        <ol class="tiles">
+          {course.units.map((unit) => (
+            <li class:list={["tile", unit.status === "available" ? "open" : "soon"]}>
+              {unit.status === "available" ? (
+                <a href={unit.url}>
+                  <span class="tile-number">Unit {unit.number}</span>
+                  <span class="tile-title" set:html={md(unit.title)} />
+                  {unit.summary && <span class="tile-summary" set:html={md(unit.summary)} />}
+                </a>
+              ) : (
+                <div>
+                  <span class="tile-number">Unit {unit.number}</span>
+                  <span class="tile-title" set:html={md(unit.title)} />
+                  {unit.summary && <span class="tile-summary" set:html={md(unit.summary)} />}
+                  <span class="tile-soon">Coming soon</span>
+                </div>
+              )}
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))
+  }
+  {
+    subject.courses.some((c) => c.units.some((u) => u.status === "coming-soon")) && (
+      <p class="soon-link">
+        <a href="/coming-soon">What's coming next</a>
+      </p>
+    )
+  }
+</div>
+

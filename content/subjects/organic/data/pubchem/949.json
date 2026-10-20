@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 949,
+        "MolecularFormula": "C8H11N",
+        "SMILES": "CN(C)C1=CC=CC=C1",
+        "ConnectivitySMILES": "CN(C)C1=CC=CC=C1",
+        "Title": "N,N-Dimethylaniline"
+      }
+    ]
+  }
+}

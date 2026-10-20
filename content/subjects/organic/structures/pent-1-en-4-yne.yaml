@@ -1,0 +1,31 @@
+# Lesson 4 Check Problem u1-hyb-tap-sp2: full Kekulé of H₂C=CH–CH₂–C≡CH, carbons numbered 1–5
+# from the left. Atoms and bonds from `pnpm structure` (RDKit.js), turned by hand to run left to
+# right; the C3–C4≡C5–H line is straight.
+
+id: pent-1-en-4-yne
+style: full
+smiles: C=CCC#C
+atoms:
+  - { id: a1, el: C, x: 0, y: 0, tag: "1", label: C1 }
+  - { id: a2, el: C, x: 1.299, y: -0.75, tag: "2", label: C2 }
+  - { id: a3, el: C, x: 2.598, y: 0, tag: "3", label: C3 }
+  - { id: a4, el: C, x: 3.897, y: -0.75, tag: "4", label: C4 }
+  - { id: a5, el: C, x: 5.196, y: -1.5, tag: "5", label: C5 }
+  - { id: a6, el: H, x: -1.299, y: -0.75 }
+  - { id: a7, el: H, x: 0, y: 1.5 }
+  - { id: a8, el: H, x: 1.299, y: -2.25 }
+  - { id: a9, el: H, x: 1.848, y: 1.299 }
+  - { id: a10, el: H, x: 3.348, y: 1.299 }
+  - { id: a11, el: H, x: 6.495, y: -2.25 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 2 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a3, b: a4, order: 1 }
+  - { id: b4, a: a4, b: a5, order: 3 }
+  - { id: b5, a: a1, b: a6, order: 1 }
+  - { id: b6, a: a1, b: a7, order: 1 }
+  - { id: b7, a: a2, b: a8, order: 1 }
+  - { id: b8, a: a3, b: a9, order: 1 }
+  - { id: b9, a: a3, b: a10, order: 1 }
+  - { id: b10, a: a5, b: a11, order: 1 }
+source: PubChem CID 522708

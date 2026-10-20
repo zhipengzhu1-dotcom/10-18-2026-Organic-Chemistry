@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, research/3d-rendering, feat/astratron-v1]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Required check: make "test", "e2e" and "video" required status checks in branch protection so red blocks merge.
+  # The browser tests and the video stills run as their own jobs so no job comes near its time limit.
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Content build
+        run: pnpm content:build
+      - name: Chemistry-number lint (Scene code, the 3D viewer and the content module read numbers from cited data)
+        run: pnpm lint:numbers
+      - name: Scene purity lint (no timers, frame hooks, CSS animation or unseeded randomness)
+        run: pnpm lint:scenes
+      - name: Blender renders are current (re-hashes each render's recorded inputs; Blender is not installed here)
+        run: pnpm blender check
+      - name: Unit tests (content build + Step player engine)
+        run: pnpm test
+      - name: Build the site
+        run: pnpm build
+      - name: First-load JS budget (at most 200 KB compressed per Lesson page; 3D and meshes load lazily)
+        run: pnpm budget:js
+      - name: The site ships no Remotion code
+        run: pnpm video check-site
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Browser tests (smoke, design system, axe on every page in both themes), shard ${{ matrix.shard }} of 4
+        run: pnpm test:e2e --shard=${{ matrix.shard }}/4
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-${{ matrix.shard }}
+          path: test-results/
+          retention-days: 7
+
+  video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Video path (one frame of every Scene at 16:9 and 9:16 through Remotion)
+        run: pnpm video stills
+
+  # Build-time Python pipelines: fast unit tests only (no PySCF runs; their results are committed).
+  pipelines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - name: Pipeline unit tests
+        working-directory: pipelines
+        run: uv run --group compute pytest -q

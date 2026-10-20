@@ -1,0 +1,30 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). The reveal Scene works each
+# answer out from the cited geometry and Pauling electronegativities (scenes/test/practice-scenes.test.ts).
+id: u1-3d-polar-hcn
+unit: u1
+lesson: u1-l03
+difficulty: 2
+status: approved
+source: Original
+type: multiple-choice
+prompt: Which of these molecules are polar overall? Pick all that apply.
+options:
+  - { id: a, structure: chloroform-3d, text: "CHCl₃, chloroform: H and one Cl as lines, a Cl wedge and a Cl dash." }
+  - { id: b, structure: l3-bf3, text: "BF₃: a flat triangle, three lines." }
+  - { id: c, structure: hydrogen-cyanide, text: "HCN, hydrogen cyanide: a straight line, H–C≡N." }
+  - { id: d, structure: l3-methane-wd-a, text: "CH₄: two lines, a wedge and a dash." }
+answer: [a, c]
+correct: "Chloroform and HCN. HCN is a straight line like CO₂, but its ends differ: C pulls H's electrons toward itself and N pulls C's, so both pulls point the same way, toward N. BF₃ and CH₄ are so symmetric that their equal pulls cancel."
+hints:
+  - includes: [b]
+    text: "BF₃ is a flat triangle with three equal B–F pulls spread evenly. Tip to tail they cancel."
+  - includes: [d]
+    text: "Four equal C–H pulls point to the corners of a tetrahedron and cancel, and each one is tiny anyway."
+  - misses: [c]
+    text: "A straight line cancels only when its two ends are the same, as in CO₂. Draw HCN's two bond dipoles: which way does each point?"
+  - misses: [a]
+    text: "Swap one of CCl₄'s Cl's for an H: the pulls no longer balance, and the Cl side wins."
+  - text: "Polar bonds aren't enough. Picture the pulls added tip to tail: does anything survive?"
+reveal: "Polar: CHCl₃ and HCN end on a net arrow. Nonpolar: BF₃ and CH₄ end on net zero."
+revealScene: { id: dipole-sum, state: { molecule: polar-hcn, added: 1 } }
+sourceNote: "Arrow lengths from Pauling electronegativity differences (the values Lesson 1 cites), a rough guide, not to scale. Structures: PubChem CIDs 6212, 6356, 768, 297."

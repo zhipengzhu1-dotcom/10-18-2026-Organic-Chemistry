@@ -1,0 +1,55 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). Fourteen fixed regions, as
+# the spec lists them; "three amides picked" is each three-of-four set (the four `match` Hints share one text).
+id: u1-fg-metenkephalin-amides
+unit: u1
+lesson: u1-l05
+difficulty: 3
+status: approved
+source: Adapted from MIT 5.12 Hour Exam 1 Q8 and its key
+credit: Kimberly Berkowski, MIT OCW 5.12, Spring 2005, CC BY-NC-SA 4.0
+type: tap-to-identify
+prompt: "Met-enkephalin, one of the body's own painkillers. Tap **every amide**, then press Check."
+structure: fg-metenkephalin
+hide: [lone-pairs]
+alt: "Met-enkephalin: a backbone from H₂N at the left, past four C=O groups each with NH beside it, to C=O with OH at the right; a ring with OH below the left end, a second ring above the middle, and a CH₂CH₂–S–CH₃ chain at the right end."
+tappable:
+  regions:
+    - { id: amine, atoms: [a1], label: "Left end: the NH₂." }
+    - { id: phenol, atoms: [a4, a5, a6, a7, a8, a9, a10], label: "Lower left: the ring and its OH." }
+    - { id: amide-1, atoms: [a11, a12, a13], label: "The first C=O along the backbone and the NH after it." }
+    - { id: amide-2, atoms: [a15, a16, a17], label: "The second C=O and its NH." }
+    - { id: amide-3, atoms: [a19, a20, a21], label: "The third C=O and its NH." }
+    - { id: amide-4, atoms: [a30, a31, a32], label: "The fourth C=O and its NH." }
+    - { id: arene, atoms: [a24, a25, a26, a27, a28, a29], label: "Top: the second ring." }
+    - { id: sulfide, atoms: [a36], label: "Right: the S." }
+    - { id: acid, atoms: [a38, a39, a40], label: "Right end: C=O with OH." }
+    - { id: tyr, atoms: [a2, a3], label: "Skeleton: the CH carrying the NH₂, and its CH₂ to the ring." }
+    - { id: gly-1, atoms: [a14], label: "Skeleton: the CH₂ after the first NH." }
+    - { id: gly-2, atoms: [a18], label: "Skeleton: the CH₂ after the second NH." }
+    - { id: phe, atoms: [a22, a23], label: "Skeleton: the CH below the top ring, and its CH₂." }
+    - { id: met, atoms: [a33, a34, a35, a37], label: "Skeleton: the CH by the right end, its CH₂CH₂, and the CH₃ on S." }
+answer: [amide-1, amide-2, amide-3, amide-4]
+correct: "Four amides: every C=O along the backbone has NH right beside it. That's how the five building blocks of this molecule are joined."
+hints:
+  - includes: [amine]
+    text: "That NH₂ sits on a carbon with no C=O, so it's an amine. For an amide, the N touches the C=O carbon."
+  - includes: [acid]
+    text: "That C=O has OH beside it: a carboxylic acid."
+  - includes: [phenol, arene, sulfide]
+    text: "No C=O there. Amides are always a C=O with N beside it."
+  - includes: [tyr, gly-1, gly-2, phe, met]
+    text: "That's skeleton: carbons with only C, H and σ bonds."
+  - match: [amide-1, amide-2, amide-3]
+    text: "One more. Count the C=O's along the backbone that have NH beside them."
+  - match: [amide-1, amide-2, amide-4]
+    text: "One more. Count the C=O's along the backbone that have NH beside them."
+  - match: [amide-1, amide-3, amide-4]
+    text: "One more. Count the C=O's along the backbone that have NH beside them."
+  - match: [amide-2, amide-3, amide-4]
+    text: "One more. Count the C=O's along the backbone that have NH beside them."
+  - misses: [amide-1, amide-2, amide-3, amide-4]
+    text: "Follow the backbone from left to right: every C=O there, except the last one, has an NH beside it."
+  - text: "Find each C=O, then look at the atom on the other side of its carbon. N means amide."
+reveal: "Four amides along the backbone. The other groups: amine, phenol, arene, sulfide and carboxylic acid."
+revealScene: { id: group-spotlight, state: { view: metenkephalin } }
+sourceNote: "Adapted from MIT OCW 5.12, Hour Exam 1 Q8 and its key (which labels amine, phenol, amide four times, arene, sulfide and carboxylic acid), Berkowski, Spring 2005, CC BY-NC-SA 4.0. Wording ours. Met-enkephalin, PubChem CID 443363."

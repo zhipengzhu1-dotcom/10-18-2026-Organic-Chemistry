@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 222,
+        "MolecularFormula": "H3N",
+        "SMILES": "N",
+        "ConnectivitySMILES": "N",
+        "Title": "Ammonia"
+      }
+    ]
+  }
+}

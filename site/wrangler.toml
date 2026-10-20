@@ -1,0 +1,17 @@
+# Cloudflare Pages + D1 for the submission form (#75). v1 runs only under the local emulator:
+#   pnpm exec wrangler d1 migrations apply astratron-submissions --local
+#   pnpm exec wrangler pages dev ./dist
+# The database id and Turnstile keys are placeholders/test keys; real ones are a pre-public step.
+name = "astratron"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-10-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "astratron-submissions"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[vars]
+# Turnstile's always-pass test secret. A real secret goes in as a Pages secret, never in this file.
+TURNSTILE_SECRET = "1x0000000000000000000000000000000AA"

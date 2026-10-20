@@ -1,0 +1,15 @@
+# Practice Problem u1-3d-hydronium-shape (#87): hydronium, H₃O⁺, full Lewis: three O–H bonds, one lone pair on O and
+# its + charge. Drawn by hand (Lesson 1 s06's ion).
+
+id: hydronium
+style: full
+smiles: "[OH3+]"
+atoms:
+  - { id: a1, el: "O", x: 0, y: 0, charge: 1, lp: 1 }
+  - { id: a2, el: "H", x: -1.3, y: 0.75 }
+  - { id: a3, el: "H", x: 1.3, y: 0.75 }
+  - { id: a4, el: "H", x: 0, y: 1.5 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a1, b: a3, order: 1 }
+  - { id: b3, a: a1, b: a4, order: 1 }

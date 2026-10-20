@@ -1,0 +1,27 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer. Practice Problem u1-res-iminium-sites
+# (#87, MIT 5.12 PS2 Q1): N, C4, C5 and C6 lettered; labels are what each tappable atom announces.
+
+id: iminium
+style: line-angle
+smiles: "[CH3:1][N+:2]([CH3:3])=[C:4]1[CH:5]=[CH:6][CH2:7][CH2:8][CH2:9]1"
+atoms:
+  - { id: a1, el: C, x: 3.75, y: 1.299, label: "Lower methyl carbon on N." }
+  - { id: a2, el: N, x: 3, y: 0, charge: 1, label: "N, double-bonded to the ring carbon C4." }
+  - { id: a3, el: C, x: 3.75, y: -1.299, label: "Upper methyl carbon on N." }
+  - { id: a4, el: C, x: 1.5, y: 0, letter: true, label: "C4, the ring carbon double-bonded to N." }
+  - { id: a5, el: C, x: 0.75, y: -1.299, letter: true, label: "C5, in the ring C=C next to C4." }
+  - { id: a6, el: C, x: -0.75, y: -1.299, letter: true, label: "C6, the far end of the ring C=C." }
+  - { id: a7, el: C, x: -1.5, y: 0, label: "Ring CH₂ next to C6." }
+  - { id: a8, el: C, x: -0.75, y: 1.299, label: "Ring CH₂ at the bottom left." }
+  - { id: a9, el: C, x: 0.75, y: 1.299, label: "Ring CH₂ next to C4." }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a2, b: a4, order: 2 }
+  - { id: b4, a: a4, b: a5, order: 1 }
+  - { id: b5, a: a5, b: a6, order: 2 }
+  - { id: b6, a: a6, b: a7, order: 1 }
+  - { id: b7, a: a7, b: a8, order: 1 }
+  - { id: b8, a: a8, b: a9, order: 1 }
+  - { id: b9, a: a9, b: a4, order: 1 }
+source: Drawn for u1-res-iminium-sites (MIT 5.12 PS2 Q1)

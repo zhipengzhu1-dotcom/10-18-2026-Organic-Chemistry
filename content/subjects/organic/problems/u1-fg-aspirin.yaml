@@ -1,0 +1,40 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved).
+id: u1-fg-aspirin
+unit: u1
+lesson: u1-l05
+difficulty: 2
+status: approved
+source: Adapted from MIT 5.12 PS1 Q8 (the aspirin structure; that question's acid–base part is Unit 2's)
+credit: Kimberly Berkowski, MIT OCW 5.12, Spring 2005, CC BY-NC-SA 4.0
+type: multiple-choice
+prompt: Aspirin. Which groups does it contain? Pick all that apply.
+figures:
+  - { structure: fg-aspirin, hide: [lone-pairs], alt: "Aspirin: a benzene ring drawn with alternating double bonds; on one ring carbon a C=O with OH, and on the next ring carbon an O bonded to a C=O carbon that carries a CH₃." }
+options:
+  - { id: a, text: carboxylic acid }
+  - { id: b, text: ester }
+  - { id: c, text: arene }
+  - { id: d, text: ketone }
+  - { id: e, text: ether }
+  - { id: f, text: phenol }
+  - { id: g, text: alcohol }
+  - { id: h, text: aldehyde }
+answer: [a, b, c]
+correct: "Three groups: the ring (arene), the C=O with OH (carboxylic acid), and the C=O with O–C beside it (ester). The O on the ring belongs to the ester, so there's no phenol or ether."
+hints:
+  - includes: [f]
+    text: "A phenol is OH on the ring. The O on this ring carries a C=O, not an H, so it's part of the ester."
+  - includes: [e]
+    text: "That O touches a C=O carbon. C=O plus O–C is one group, an ester, not an ether."
+  - includes: [g]
+    text: "The only OH sits on a C=O carbon. C=O with OH is a carboxylic acid."
+  - includes: [d, h]
+    text: "Check each C=O's neighbour. One has OH, the other O–C. Neither has only carbons or an H."
+  - misses: [c]
+    text: "The six-ring of alternating double bonds is a group too."
+  - misses: [a, b]
+    text: "There are two C=O's. Read each with the atom on the other side of its carbon."
+  - text: "Skip the skeleton. Name each π bond and heteroatom by its neighbours."
+reveal: "Arene, carboxylic acid and ester."
+revealScene: { id: group-spotlight, state: { view: aspirin } }
+sourceNote: "Structure as in MIT OCW 5.12, Problem Set 1 Q8, Berkowski, Spring 2005, CC BY-NC-SA 4.0; our question. Aspirin, PubChem CID 2244."

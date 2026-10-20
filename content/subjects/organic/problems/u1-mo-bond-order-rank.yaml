@@ -1,0 +1,26 @@
+# Lesson 8 Check Problem (#86), from the merged Lesson 8 spec. The spec says "draft"; Check Steps
+# need approved Problems, as for Lessons 0–5.
+id: u1-mo-bond-order-rank
+unit: u1
+lesson: u1-l08
+difficulty: 1
+status: approved
+source: Original
+type: rank
+prompt: "Rank from **strongest bond** to **no bond**. (He₂⁺ is He₂ with one electron removed: three electrons.)"
+# Starting order (spec): He₂, H₂, He₂⁺.
+items:
+  - { id: he2, text: "He₂ (4 e⁻)" }
+  - { id: h2, text: "H₂ (2 e⁻)" }
+  - { id: he2plus, text: "He₂⁺ (3 e⁻)" }
+answer: [h2, he2plus, he2]
+correct: "Bond orders 1, ½, 0. He₂⁺'s third electron sits in σ\\*, cancelling half a bond, and He₂'s fourth cancels the rest."
+hints:
+  - before: [he2plus, h2]
+    text: "He₂⁺ has more electrons, but its third one sits in σ\\*: (2 − 1) ÷ 2 = ½. H₂'s bond order is 1."
+  - notLast: he2
+    text: "He₂: two in σ, two in σ\\*. (2 − 2) ÷ 2 = 0. No bond at all."
+  - text: "Fill σ, then σ\\*, for each. Bond order = (bonding − antibonding) ÷ 2."
+reveal: "H₂, He₂⁺, He₂: bond orders 1, ½, 0."
+revealScene: { id: mo-filler, state: { electrons: 4, show: three } }
+sourceNote: "Bond order and the He₂ case: facts as in OpenStax *Organic Chemistry* §1.11, CC BY-NC-SA 4.0. Wording ours."

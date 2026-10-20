@@ -1,0 +1,221 @@
+{
+  "id": "ethanol",
+  "kind": "molecule",
+  "title": "Ethanol",
+  "geometry": "computed",
+  "sources": {
+    "ours": {
+      "kind": "computed",
+      "citation": "Our calculation: PySCF 2.14.0, B3LYP/cc-pVTZ, isolated molecule, optimised with geomeTRIC 1.1.1, GAU_TIGHT and checked as a true minimum (all harmonic frequencies real), 2026-10-19",
+      "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+      "method": {
+        "program": "PySCF",
+        "version": "2.14.0",
+        "level": "B3LYP/cc-pVTZ",
+        "date": "2026-10-19",
+        "maxDeviation": 0.02
+      }
+    }
+  },
+  "values": {
+    "r.OH": {
+      "label": "O–H",
+      "quantity": "bond-length",
+      "value": 0.9609,
+      "unit": "Å",
+      "source": "ours",
+      "atoms": [
+        2,
+        3
+      ]
+    },
+    "r.CO": {
+      "label": "C–O",
+      "quantity": "bond-length",
+      "value": 1.4266,
+      "unit": "Å",
+      "source": "ours",
+      "atoms": [
+        1,
+        2
+      ]
+    },
+    "r.CC": {
+      "label": "C–C",
+      "quantity": "bond-length",
+      "value": 1.5145,
+      "unit": "Å",
+      "source": "ours",
+      "atoms": [
+        0,
+        1
+      ]
+    },
+    "a.CCO": {
+      "label": "C–C–O",
+      "quantity": "angle",
+      "value": 107.99,
+      "unit": "°",
+      "source": "ours",
+      "atoms": [
+        0,
+        1,
+        2
+      ]
+    },
+    "a.HOC": {
+      "label": "H–O–C",
+      "quantity": "angle",
+      "value": 108.75,
+      "unit": "°",
+      "source": "ours",
+      "atoms": [
+        3,
+        2,
+        1
+      ]
+    },
+    "d.CCOH": {
+      "label": "C–C–O–H",
+      "quantity": "dihedral",
+      "value": 180.0,
+      "unit": "°",
+      "source": "ours",
+      "atoms": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "a.HC1H": {
+      "label": "H–C1–H",
+      "quantity": "angle",
+      "value": 107.56,
+      "unit": "°",
+      "source": "ours",
+      "atoms": [
+        7,
+        1,
+        8
+      ]
+    }
+  },
+  "atoms": {
+    "source": "ours",
+    "list": [
+      [
+        "C",
+        1.1667,
+        -0.3742,
+        -0.0
+      ],
+      [
+        "C",
+        -0.0253,
+        0.56,
+        0.0
+      ],
+      [
+        "O",
+        -1.2091,
+        -0.236,
+        0.0
+      ],
+      [
+        "H",
+        -1.9732,
+        0.3467,
+        0.0
+      ],
+      [
+        "H",
+        2.0981,
+        0.1938,
+        -0.0
+      ],
+      [
+        "H",
+        1.1509,
+        -1.0129,
+        0.8834
+      ],
+      [
+        "H",
+        1.1509,
+        -1.0129,
+        -0.8834
+      ],
+      [
+        "H",
+        0.0052,
+        1.2073,
+        0.8847
+      ],
+      [
+        "H",
+        0.0052,
+        1.2073,
+        -0.8847
+      ]
+    ]
+  },
+  "bonds": [
+    [
+      0,
+      1,
+      1
+    ],
+    [
+      0,
+      4,
+      1
+    ],
+    [
+      0,
+      5,
+      1
+    ],
+    [
+      0,
+      6,
+      1
+    ],
+    [
+      1,
+      2,
+      1
+    ],
+    [
+      1,
+      7,
+      1
+    ],
+    [
+      1,
+      8,
+      1
+    ],
+    [
+      2,
+      3,
+      1
+    ]
+  ],
+  "provenance": {
+    "pipeline": "pipelines/geometry (#67)",
+    "start": "CCCBDB experimental Cartesians (CAS 64-17-5)",
+    "inputSha256": "9508ac3bafaa30a7886d196635a82c822e878b7b9c4a4396d51ae00d18048fcc",
+    "optimiser": "geomeTRIC 1.1.1, GAU_TIGHT",
+    "basis": "cc-pvtz",
+    "gridLevel": 4,
+    "xcDefinition": "((0, 0, 0), ((402, 1),))",
+    "energyHartree": -155.1059826345533,
+    "lowestFrequency": 239.0,
+    "imaginaryModes": 0,
+    "charge": 0,
+    "note": "Computed, not experimental: CCCBDB has Cartesians, but every listed parameter comes from Coussan et al. 1998 (doi:10.1021/jp9805961), a matrix-isolation infrared study; infrared spectra do not determine bond lengths, so those parameters are taken to be the paper's ab initio values. Needs a human read of the paper.",
+    "cccbdb": "CCCBDB has experimental Cartesians and parameters (CAS 64-17-5, checked 2026-10-19); not used, see note",
+    "usedBy": "L3"
+  }
+}

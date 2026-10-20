@@ -1,0 +1,128 @@
+{
+ "id": "hydrogen-b3lyp-orbitals",
+ "kind": "table",
+ "title": "H₂ molecular orbitals",
+ "sources": {
+  "ours": {
+   "kind": "computed",
+   "citation": "Our calculation: canonical molecular orbitals and their energies with PySCF 2.14.0, B3LYP/cc-pVTZ, isolated molecule at the geometry optimised with the same method, 2026-10-19; hartree to eV with CODATA 2018 (Tiesinga et al., Rev. Mod. Phys. 93, 025010 (2021), doi:10.1103/RevModPhys.93.025010)",
+   "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+   "note": "Computed orbital energies are model values: compare them with each other, not with measured energies.",
+   "method": {
+    "program": "PySCF",
+    "version": "2.14.0",
+    "level": "B3LYP/cc-pVTZ",
+    "date": "2026-10-19"
+   }
+  }
+ },
+ "values": {
+  "homo": {
+   "label": "H₂ HOMO",
+   "quantity": "energy",
+   "value": -11.8115,
+   "unit": "eV",
+   "decimals": 1,
+   "source": "ours"
+  },
+  "lumo": {
+   "label": "H₂ LUMO",
+   "quantity": "energy",
+   "value": 1.5806,
+   "unit": "eV",
+   "decimals": 1,
+   "source": "ours"
+  },
+  "gap": {
+   "label": "H₂ HOMO–LUMO gap",
+   "quantity": "energy",
+   "value": 13.3921,
+   "unit": "eV",
+   "decimals": 1,
+   "source": "ours"
+  },
+  "iso": {
+   "label": "Isosurface value",
+   "quantity": "isovalue",
+   "value": 0.05,
+   "unit": "a.u.",
+   "source": "ours"
+  }
+ },
+ "orbitals": {
+  "molecule": "hydrogen-b3lyp",
+  "kind": "canonical",
+  "iso": "iso",
+  "list": {
+   "sigma": {
+    "label": "σ (HOMO)",
+    "chip": "σ",
+    "style": "phase",
+    "energy": "homo",
+    "mesh": "/orbitals/hydrogen-b3lyp-orbitals/sigma.glb",
+    "sha256": "f11dfb8fe7e19ace1c1bc967778c8a99dc71221eb6b04731ba34abe9c24bd70d",
+    "triangles": 2936,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       0.0,
+       0.0,
+       0.378
+      ]
+     }
+    ]
+   },
+   "sigma-star": {
+    "label": "σ* (LUMO)",
+    "chip": "σ*",
+    "style": "phase",
+    "energy": "lumo",
+    "mesh": "/orbitals/hydrogen-b3lyp-orbitals/sigma-star.glb",
+    "sha256": "af701edcd9a26cdd82ec80ff2876d1a1c1cadc2553d82ac7b86a00abd892ec2e",
+    "triangles": 6096,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       0.0,
+       0.0,
+       -0.837
+      ]
+     },
+     {
+      "sign": "-",
+      "at": [
+       0.0,
+       0.0,
+       1.573
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "provenance": {
+  "pipeline": "pipelines/orbitals (#70)",
+  "inputSha256": "66be6959243659e61835bbaf48bfb58369f9f43ef065ed32724c3ae7625c10d4",
+  "grid": {
+   "step": 0.14,
+   "pad": 4.5,
+   "shape": [
+    67,
+    67,
+    72
+   ]
+  },
+  "checks": [
+   "H₂: HOMO one sign everywhere; LUMO antisymmetric through the midplane (σ*)"
+  ],
+  "scfEnergyHartree": -1.179998784502878,
+  "homoIndex": 0,
+  "energiesHartree": {
+   "homo": -0.4340638136137465,
+   "lumo": 0.05808775217983142
+  },
+  "seconds": 0
+ }
+}

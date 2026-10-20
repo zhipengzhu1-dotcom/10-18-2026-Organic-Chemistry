@@ -1,0 +1,30 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved).
+id: u1-fc-boron-four-bonds
+unit: u1
+lesson: u1-l01
+difficulty: 3
+status: approved
+source: Adapted from MIT 5.12 PS1 Q1 (the B fragment) and its key
+credit: Kimberly Berkowski, MIT OCW 5.12, Spring 2005, CC BY-NC-SA 4.0
+type: numeric
+prompt: What is the formal charge on this boron?
+figures:
+  - { structure: frag-b-single-single-double, hide: [charges], alt: "A boron with two single bonds and one double bond to the rest of a molecule, and no lone pairs. Its charge is hidden." }
+unitSymbol: ""
+signKey: true
+answer: -1
+tolerance: 0
+correct: "3 − 0 − 4 = −1. Boron usually makes 3 bonds (like BF₃); a fourth bond gives it a full octet and a −1 charge."
+hints:
+  - match: 0
+    text: "Boron's usual is 3 bonds. Here the double bond counts as 2, so it has 4."
+  - match: 1
+    text: "Boron owns only 3 electrons but has 4 bonds. Subtracting more than it owns leaves it negative: 3 − 0 − 4."
+  - match: -5
+    text: "Each bond counts once, not twice. 3 − 0 − 4."
+  - match: -2
+    text: "Count the bonds again: two single plus one double is 4, not 5."
+  - text: "Valence 3 (boron, as in BF₃), minus lone-pair electrons (none), minus bonds (a double bond counts 2)."
+reveal: "3 − 0 − 4 = −1. Eight electrons around B: a real ion. On the Bonding patterns card, that's boron's cell for 4 bonds: −1."
+revealScene: { id: dots-and-sticks, state: { example: boron-four-bonds } }
+sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q1 and its key, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Wording ours."

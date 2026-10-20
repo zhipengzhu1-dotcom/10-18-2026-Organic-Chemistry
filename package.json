@@ -1,0 +1,38 @@
+{
+  "name": "astratron",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "packageManager": "pnpm@12.8.1",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p .",
+    "content:build": "pnpm --filter @astratron/content run build && pnpm --filter @astratron/scenes run check",
+    "content:freeze": "pnpm --filter @astratron/content run freeze",
+    "lint:numbers": "pnpm --filter @astratron/content run lint:numbers",
+    "lint:scenes": "pnpm --filter @astratron/scenes run lint:purity",
+    "scenes:render": "pnpm --filter @astratron/scenes run render",
+    "dev": "pnpm --filter @astratron/site run dev",
+    "build": "pnpm --filter @astratron/site run build",
+    "review": "pnpm run build && pnpm --filter @astratron/site run preview --host",
+    "test:e2e": "playwright test",
+    "budget:js": "node site/src/lib/js-budget-cli.ts",
+    "sr:transcript": "SR_TRANSCRIPT=docs/qa/screen-reader-unit-1.transcript.md playwright test screen-reader",
+    "structure": "pnpm --filter @astratron/content run structure",
+    "structures:json": "pnpm --filter @astratron/content run structures:json",
+    "triage": "node site/src/submissions/triage-cli.ts",
+    "video": "pnpm --filter @astratron/video run cli",
+    "blender": "pnpm --filter @astratron/pipelines run blender"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "1.64.1",
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

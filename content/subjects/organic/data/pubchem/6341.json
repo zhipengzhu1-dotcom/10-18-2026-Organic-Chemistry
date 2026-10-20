@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 6341,
+        "MolecularFormula": "C2H7N",
+        "SMILES": "CCN",
+        "ConnectivitySMILES": "CCN",
+        "Title": "Ethylamine"
+      }
+    ]
+  }
+}

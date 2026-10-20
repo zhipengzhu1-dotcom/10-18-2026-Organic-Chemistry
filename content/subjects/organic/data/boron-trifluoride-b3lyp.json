@@ -1,0 +1,107 @@
+{
+  "id": "boron-trifluoride-b3lyp",
+  "kind": "molecule",
+  "title": "Boron trifluoride, B3LYP",
+  "geometry": "computed",
+  "sources": {
+    "ours": {
+      "kind": "computed",
+      "citation": "Our calculation: PySCF 2.14.0, B3LYP/cc-pVTZ, isolated molecule, optimised with geomeTRIC 1.1.1, GAU_TIGHT and checked as a true minimum (all harmonic frequencies real), 2026-10-19",
+      "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+      "method": {
+        "program": "PySCF",
+        "version": "2.14.0",
+        "level": "B3LYP/cc-pVTZ",
+        "date": "2026-10-19",
+        "maxDeviation": 0.02
+      }
+    }
+  },
+  "values": {
+    "r.BF": {
+      "label": "B–F",
+      "quantity": "bond-length",
+      "value": 1.3146,
+      "unit": "Å",
+      "source": "ours",
+      "atoms": [
+        0,
+        1
+      ]
+    },
+    "a.FBF": {
+      "label": "F–B–F",
+      "quantity": "angle",
+      "value": 120.0,
+      "unit": "°",
+      "source": "ours",
+      "atoms": [
+        1,
+        0,
+        2
+      ]
+    }
+  },
+  "atoms": {
+    "source": "ours",
+    "list": [
+      [
+        "B",
+        -0.0,
+        -0.0009,
+        0.0
+      ],
+      [
+        "F",
+        0.0,
+        1.3137,
+        0.0
+      ],
+      [
+        "F",
+        1.1386,
+        -0.6582,
+        -0.0
+      ],
+      [
+        "F",
+        -1.1386,
+        -0.6582,
+        0.0
+      ]
+    ]
+  },
+  "bonds": [
+    [
+      0,
+      1,
+      1
+    ],
+    [
+      0,
+      2,
+      1
+    ],
+    [
+      0,
+      3,
+      1
+    ]
+  ],
+  "provenance": {
+    "pipeline": "pipelines/geometry (#67)",
+    "start": "CCCBDB experimental Cartesians (CAS 7637-07-2)",
+    "inputSha256": "d98553eaf7e5b0d9cf0299413e3e1dad968f5c0958315c346ba1d6863abdb18a",
+    "optimiser": "geomeTRIC 1.1.1, GAU_TIGHT",
+    "basis": "cc-pvtz",
+    "gridLevel": 4,
+    "xcDefinition": "((0, 0, 0), ((402, 1),))",
+    "energyHartree": -324.69636019115563,
+    "lowestFrequency": 475.6,
+    "imaginaryModes": 0,
+    "charge": 0,
+    "note": "Computed on purpose: Lesson 8 compares orbital energies, so geometry and orbitals come from one method.",
+    "cccbdb": "not looked up (not a neutral CCCBDB species)",
+    "usedBy": "L8"
+  }
+}

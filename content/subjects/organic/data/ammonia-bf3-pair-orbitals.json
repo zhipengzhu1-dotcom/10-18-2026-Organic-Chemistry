@@ -1,0 +1,104 @@
+{
+ "id": "ammonia-bf3-pair-orbitals",
+ "kind": "table",
+ "title": "NH₃ HOMO and BF₃ LUMO, placed together",
+ "sources": {
+  "ours": {
+   "kind": "computed",
+   "citation": "Our calculation: canonical molecular orbitals with PySCF 2.14.0, B3LYP/cc-pVTZ, each molecule computed on its own at the geometry optimised with the same method and then placed together for the picture, 2026-10-19",
+   "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+   "note": "The two molecules are computed separately and placed together for the picture; the distance between them is not computed. Computed orbital energies are model values: compare them with each other, not with measured energies.",
+   "method": {
+    "program": "PySCF",
+    "version": "2.14.0",
+    "level": "B3LYP/cc-pVTZ",
+    "date": "2026-10-19"
+   }
+  }
+ },
+ "values": {
+  "iso": {
+   "label": "Isosurface value",
+   "quantity": "isovalue",
+   "value": 0.05,
+   "unit": "a.u.",
+   "source": "ours"
+  }
+ },
+ "orbitals": {
+  "molecule": "ammonia-bf3-b3lyp-pair",
+  "kind": "canonical",
+  "iso": "iso",
+  "list": {
+   "nh3-homo": {
+    "label": "NH₃ lone pair (HOMO)",
+    "chip": "NH₃ HOMO",
+    "style": "phase",
+    "mesh": "/orbitals/ammonia-bf3-pair-orbitals/nh3-homo.glb",
+    "sha256": "d477e60e32b2e3745ec547df5e54b1f8b5451cc8be7dad41353e0c39a3101c5d",
+    "triangles": 3892,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       0.0,
+       0.002,
+       3.296
+      ]
+     },
+     {
+      "sign": "-",
+      "at": [
+       0.0,
+       0.017,
+       4.786
+      ]
+     }
+    ]
+   },
+   "bf3-lumo": {
+    "label": "BF₃ empty p on boron (LUMO)",
+    "chip": "BF₃ LUMO",
+    "style": "phase",
+    "mesh": "/orbitals/ammonia-bf3-pair-orbitals/bf3-lumo.glb",
+    "sha256": "60cd10702b9ef5df1f2b2272f0c2f828aaf77763f7da0c94d3fe90e228b57076",
+    "triangles": 6248,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       0.0,
+       -0.011,
+       1.026
+      ]
+     },
+     {
+      "sign": "-",
+      "at": [
+       0.0,
+       -0.011,
+       -1.026
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "provenance": {
+  "pipeline": "pipelines/orbitals (#70)",
+  "inputSha256": "d3e4da8ea7d2c97f7b3f68f5a22268edaad330533bfd8f7f66c38f077ffdb9e9",
+  "grid": {
+   "step": 0.14,
+   "pad": 4.5,
+   "shape": [
+    83,
+    80,
+    98
+   ]
+  },
+  "checks": [
+   "pair: NH₃ HOMO's largest lobe on N, pointing down at B; BF₃ LUMO antisymmetric through its plane"
+  ],
+  "seconds": 4
+ }
+}

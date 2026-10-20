@@ -1,0 +1,65 @@
+# Named start views for the 3D Step card (#68): molecule id → view name → view.
+# A Step uses one as `molecule: { id: water, view: end-on }`. Atoms are 0-based indices in the
+# data file's atom order. Fields (see content/src/molecule.ts, ViewSpec):
+#   look: [a, b]       look along a → b (a nearest you)
+#   plane: [a, b, c]   those atoms lie in the screen plane; front: d puts atom d on your side
+#   up: k              atom k points straight up (from a for look, from b for plane)
+#   rotate: [x, y, z]  then turn about the screen's x, y and z axes, in degrees
+# Each view is checked against what its Step's drawing needs in content/test/molecule.test.ts.
+methane:
+  # Lesson 3 s03: no two H's in an obvious line with the C.
+  tilted: { rotate: [20, 30, 0] }
+water:
+  # Lesson 3 s06: down the H···H line, so the bend is hidden until the Student turns it.
+  end-on: { look: [1, 2], up: 0 }
+boron-trifluoride:
+  # Lesson 3 Check Problem u1-3d-flat-or-pyramid: down the threefold axis, where BF₃ and NH₃ look alike.
+  face-on: {}
+ammonia:
+  face-on: {}
+ethylene:
+  # Orbital sample (#70) and Lesson 4's ethylene-sigma-pi poster: C=C level, the plane edge-on, so π
+  # lobes sit above and below it.
+  edge-on: { plane: [2, 0, 1], up: 1, rotate: [0, -90, 90] }
+  # Lesson 4 s07 (signature): from straight above, so the π lobes sit on top of the atoms.
+  face-on: { plane: [0, 1, 2] }
+  # Lesson 4 s05: the flat molecule tilted well back, so the H–C–H angle can be tapped.
+  three-quarter: { plane: [0, 1, 2], rotate: [55, 20, 0] }
+acetylene:
+  # Lesson 4 s09: the H–C≡C–H line across the screen, turned partly toward the viewer.
+  three-quarter: { rotate: [15, 65, 0] }
+allene:
+  # Practice Problem u1-hyb-allene-planes (#87): a three-quarter view, C1's CH₂ (atoms 3, 4) on the left and C2's
+  # (5, 6) on the right, the C=C=C line across the screen and turned partly toward the viewer.
+  three-quarter: { rotate: [20, -60, 0] }
+ketene:
+  # Lesson 4 Check u1-hyb-ketene-pi: straight down the C=C=O axis (O nearest), so both π planes are edge-on.
+  end-on: { look: [2, 0], up: 3 }
+  # Its reveal: CH₂, C, O level left to right, the H–C–H plane seen a little from above.
+  side: { plane: [2, 0, 3], rotate: [-65, 0, 0] }
+ethanol:
+  # Lesson 3 s09: the O–C–C plane turned well away from the screen plane.
+  off-page: { plane: [2, 1, 0], up: 2, rotate: [70, 0, 0] }
+2-fluorobutane-r:
+  # Lesson 3 Check Problem u1-3d-perspective (PS1 Q2a), left drawing: CH₂CH₃ (atom 3) up and CH₃ (0)
+  # lower left in the page, H (8) toward you, so F goes away to the right.
+  as-left-drawing: { plane: [3, 1, 0], up: 3, front: 8 }
+  # Its right drawing: F (2) upper right and H (8) down, both in the page.
+  as-right-drawing: { plane: [8, 1, 2], up: 2, rotate: [0, 0, -58] }
+  # Practice Problem u1-3d-perspective-b (PS1 Q2b, #87), left drawing: H (8) up and F (2) left in the page;
+  # CH₂CH₃ (3) toward you, so CH₃ (0) goes away, both in the gap lower right.
+  ps1-q2b-left: { plane: [8, 1, 2], up: 8, front: 3 }
+  # Its right drawing: H lower left and CH₂CH₃ lower right, both in the page, CH₃ toward you (F then goes away).
+  ps1-q2b-right: { plane: [8, 1, 3], up: 8, front: 0, rotate: [0, 0, 125] }
+
+hydrogen-b3lyp:
+  # Lesson 8 s03: side-on, the H–H axis level across the screen (the file lays it along z).
+  side-on: { rotate: [0, 90, 0] }
+ethylene-b3lyp:
+  # Lesson 8 s06 and u1-mo-ethylene-lumo: face-on, looking down on the flat molecule (the file lays it in
+  # the yz plane, C=C along z), so the lobes sit over the atoms until the Student turns it edge-on.
+  face-on: { rotate: [0, 90, 0] }
+ammonia-bf3-b3lyp-pair:
+  # Lesson 8 s09: straight down from N onto B, BF₃'s plane facing the screen, so both orbitals' lobes are
+  # seen end-on; an F points up.
+  top-down: { look: [0, 4], up: 5 }

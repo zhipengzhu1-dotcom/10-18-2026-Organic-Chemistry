@@ -1,0 +1,179 @@
+# Lesson 2: Drawing Molecules. Built from the merged Lesson spec
+# docs/specs/unit-1/lesson-02-drawing-molecules.md (#80). Wording, Hints,
+# Correct lines, Reveals and Source notes follow the spec; H counts come from
+# data/h-counts.yaml (PubChem formulas) and every drawing that names a PubChem
+# compound is checked against its formula at build time.
+id: u1-l02
+slug: drawing-molecules
+title: Drawing Molecules
+goal: Convert between Lewis, Kekulé and line-angle drawings, and put back the hydrogens and lone pairs a line-angle drawing leaves out.
+keyIdea: Every end and corner is a carbon with enough H's to make four bonds; every other atom is written out; lone pairs follow the bonding pattern.
+act: Atoms & bonds
+signature: s08
+steps:
+  - id: s01
+    phase: hook
+    type: multiple-choice
+    prediction: true
+    prompt: Lesson 0's estradiol again. The drawing shows only a handful of its hydrogens. How many does the molecule really have?
+    figures:
+      - { structure: estradiol, alt: "Estradiol, line-angle drawing: four fused rings, the left ring flat with alternating double bonds and an OH, an OH top right, a methyl wedge and three stereo H's at the ring fusions." }
+    options:
+      - { id: a, text: just the ones you can see }
+      - { id: b, text: about 10 }
+      - { id: c, text: about 25 }
+      - { id: d, text: about 50 }
+    answer: [c]
+    reveal: "**{{h-counts/estradiol}}.** The drawing leaves most of them out, on purpose: every one can be worked out from the corners. By the end of this Lesson you'll find them all without seeing them."
+    revealScene: { id: h-fill, state: { molecule: estradiol } }
+    sourceNote: "Estradiol, PubChem CID 5757. Full drawing beside line drawing after MIT OCW 5.12, Lecture 1 p. 12, Berkowski, Spring 2005, CC BY-NC-SA 4.0."
+
+  - id: s02
+    phase: build
+    type: explain
+    text: "In Lesson 0 you drew molecules with dots: every outer electron is a dot, and a shared pair sits between its two atoms. That's a **Lewis structure**.<br>A **Kekulé structure** swaps each shared pair for a line. **One line = one bond = 2 electrons.** Two lines are a double bond, three a triple. Lone pairs stay as dots.<br>(Many books call both of these 'Lewis structures'. The idea is the same.)"
+    scene: { id: ethanol-three-ways, state: { stage: "1" } }
+    sourceNote: "Ethanol as Lewis and Kekulé structures, after MIT OCW 5.12, Lecture 1 p. 11, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Ethanol: PubChem CID 702."
+
+  - id: s03
+    phase: build
+    type: multiple-choice
+    prompt: This is formaldehyde as a Lewis structure. Which card is its Kekulé structure?
+    figures:
+      - { structure: formaldehyde-lewis, alt: "Formaldehyde as a Lewis structure: two H's each share a pair of dots with C; four dots between C and O; two more pairs of dots on O." }
+    options:
+      - { id: a, structure: formaldehyde-kekule, text: "C double-bonded to O; O has two lone pairs" }
+      - { id: b, structure: formaldehyde-single-bond, text: "C single-bonded to O; O has two lone pairs" }
+      - { id: c, structure: formaldehyde-no-lone-pairs, text: "C double-bonded to O; no lone pairs" }
+      - { id: d, structure: formaldehyde-carbon-lone-pair, text: "C double-bonded to O; two lone pairs on O, one on C" }
+    answer: [a]
+    correct: Four dots between C and O are two shared pairs, so two lines. O's other four dots stay as two lone pairs.
+    hints:
+      - { match: [b], text: "Count the dots between C and O: four. That's two shared pairs, so two lines." }
+      - { match: [c], text: "Only shared pairs turn into lines. O's unshared dots stay on the drawing." }
+      - { match: [d], text: "Look at the carbon in the dot drawing. Every one of its dots is shared, so it has no lone pair." }
+      - { text: "Every pair of dots between two atoms becomes one line. Every other pair stays as dots." }
+    reveal: "**a**: two lines between C and O, and O's two lone pairs. The others: **b** lost a bond, **c** lost the lone pairs, **d** invented a lone pair."
+    sourceNote: Formaldehyde, PubChem CID 712.
+
+  - id: s04
+    phase: build
+    type: explain
+    text: "Kekulé drawings get crowded fast. A **line-angle** drawing (also called skeletal) keeps only what you can't work out:<br>• Every **end** and every **corner** of a line is a carbon. Its C isn't written.<br>• H's on carbon aren't drawn. Each carbon has **enough H's to make 4 bonds**.<br>• Every other atom (O, N, Cl…) is written as a letter, **with its own H's**: OH, NH₂.<br>• Double and triple bonds are 2 and 3 lines.<br>On AstraTron every lone pair is drawn too."
+    scene: { id: ethanol-three-ways, state: { stage: "2" } }
+    sourceNote: "Rules adapted from MIT OCW 5.12, Lecture 1 p. 12, 'Rules of Drawing Line-Angle Formulas', Berkowski, Spring 2005, CC BY-NC-SA 4.0."
+
+  - id: s05
+    phase: build
+    type: tap-to-identify
+    prompt: Cyclohexanone, as a line-angle drawing. Tap every carbon, then press Check.
+    structure: cyclohexanone
+    alt: "Cyclohexanone, line-angle drawing: a hexagon of lines with a double-bonded O on the top corner; O has two lone pairs."
+    tappable: { atoms: all }
+    answer: [a2, a3, a4, a5, a6, a7]
+    correct: Six corners, six carbons, including the one under the C=O.
+    hints:
+      - { includes: [a1], text: "A letter means that atom. O is oxygen. Only bare ends and corners are carbons." }
+      - { misses: [a2], text: "The corner holding the =O is a carbon too. The C=O line has a carbon at its lower end." }
+      - { misses: [a3, a4, a5, a6, a7], text: "Every corner counts, even ones with nothing attached." }
+      - { text: "Find every place where two lines meet, or a line ends without a letter." }
+    reveal: "All six ring corners are carbons: 1, 2, 3, 4, 5, 6, counting the one under the C=O."
+    sourceNote: "Cyclohexanone after MIT OCW 5.12, Lecture 1 p. 12, CC BY-NC-SA 4.0. PubChem CID 7967."
+
+  - id: s06
+    phase: build
+    type: numeric
+    prompt: Same molecule. None of its hydrogens are drawn. How many H's does cyclohexanone have in all?
+    figures:
+      - { structure: cyclohexanone, alt: "Cyclohexanone, line-angle drawing: a hexagon of lines with a double-bonded O on the top corner; O has two lone pairs." }
+    unitSymbol: H atoms
+    answer: 10
+    tolerance: 0
+    correct: "Five CH₂ corners give {{h-counts/cyclohexanone}}. The C=O carbon already has four bonds (two ring bonds plus a double bond), so it gets none."
+    hints:
+      - { match: 12, text: "Check the carbon under the =O. It has two ring bonds and a double bond: that's already 4." }
+      - { match: 6, text: "Not one per carbon. Each corner with two ring bonds needs two more bonds, so two H's." }
+      - { match: 0, text: "None are drawn, but they're there. Each carbon fills up to 4 bonds with H's." }
+      - { match: 11, text: "Close. The C=O carbon has no H's, and each other corner has exactly two." }
+      - { text: "For each corner: 4 minus the bonds you can see is the number of H's. Then add them up." }
+    reveal: "{{h-counts/cyclohexanone}} H's: two on each of the five CH₂ corners, none on the C=O carbon."
+    revealScene: { id: h-fill, state: { molecule: cyclohexanone } }
+    sourceNote: "Cyclohexanone, PubChem CID 7967."
+
+  - id: s07
+    phase: build
+    type: explain
+    text: "Lone pairs are often left out too. **Most books and exams draw line-angle structures without them**, and expect you to put them back.<br>You already know how, from Lesson 1's bonding patterns: a neutral **O** with 2 bonds has **2** lone pairs; **N** with 3 bonds has **1**; a **halogen** with 1 bond has **3**; **C** with 4 bonds has none.<br>A charged atom is always marked with its charge, and formal charge tells you its lone pairs."
+    scene: { id: lone-pair-fill, state: { molecule: pattern-strip } }
+    sourceNote: "'Always show all lone pairs' after MIT OCW 5.12, Lecture 1 p. 12, CC BY-NC-SA 4.0. Ethanol CID 702, ethylamine CID 6341, chloroethane CID 6337."
+
+  - id: s08
+    phase: build
+    type: multiple-choice
+    prompt: Here's a Kekulé structure. Which card is the same molecule as a line-angle drawing?
+    figures:
+      - { structure: acetone-kekule, alt: "Acetone as a Kekulé structure: a central C double-bonded to O, single-bonded to two CH₃ carbons with all six H's drawn; O has two lone pairs." }
+    options:
+      - { id: a, structure: acetone, text: "three carbons in a V; oxygen double-bonded to the middle carbon" }
+      - { id: b, structure: propanal, text: "three carbons in a zigzag; oxygen double-bonded to the end carbon" }
+      - { id: c, structure: 2-propanol, text: "three carbons in a V; OH single-bonded to the middle carbon" }
+      - { id: d, structure: 2-butanone, text: "four carbons in a zigzag; oxygen double-bonded to the second carbon" }
+    answer: [a]
+    correct: "Three carbons, the O double-bonded to the middle one. The two CH₃ ends and their six H's are all implied."
+    hints:
+      - { match: [b], text: "Which carbon holds the O in the Kekulé drawing? The middle one, not an end." }
+      - { match: [c], text: "Count the lines between C and O in the Kekulé drawing: two. An OH is a single bond, a different molecule." }
+      - { match: [d], text: "Count carbons on the card: every end and every corner. The Kekulé structure has 3." }
+      - { text: "Match three things: how many carbons, which carbon holds the O, and single or double." }
+    reveal: "**a**: carbons 1, 2 and 3 match the Kekulé carbons, with =O on carbon 2. The others: **b** O on the end, **c** OH, not =O, **d** four carbons."
+    sourceNote: "Acetone CID 180, propanal CID 527, 2-propanol CID 3776, 2-butanone CID 6569."
+
+  - id: s09
+    phase: build
+    type: multiple-choice
+    prompt: Three of these are correct drawings of ethanol. Which one is drawn **wrong**?
+    options:
+      - { id: a, structure: ethanol, text: "two-line zigzag, OH on the right end" }
+      - { id: b, structure: ethanol-flipped, text: "two-line zigzag, HO on the left end" }
+      - { id: c, structure: ethanol-h3c, text: "H₃C, then a corner, then OH" }
+      - { id: d, structure: ethanol-written-c, text: "HO, then a letter C with no hydrogens, then CH₃" }
+    answer: [d]
+    correct: "If you write a carbon's C, you must write its H's too: CH₂. A bare C letter reads as a carbon with only two bonds."
+    hints:
+      - { match: [a], text: "That's the standard drawing: an end, a corner, then OH. Look for one that breaks a rule." }
+      - { match: [b], text: "Flipping a drawing doesn't change the molecule. HO and OH are the same group." }
+      - { match: [c], text: "Writing CH₃ at an end is allowed: it's a carbon with its H's spelled out. Look for a C written *without* its H's." }
+      - { text: "Rule check: an unlabelled corner gets implied H's. A written C does not, so its H's must be written too." }
+    reveal: "**d**: C written, H's missing. Fix it as HO–CH₂–CH₃, or just draw the plain zigzag ending in OH."
+    sourceNote: "The 'drawn wrong' idea after MIT OCW 5.12, Lecture 1 p. 12, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Ethanol: PubChem CID 702."
+
+  - id: s10
+    phase: build
+    type: numeric
+    prompt: "Acetamide, drawn the way most books do: no lone pairs. How many lone pairs does it have in all?"
+    figures:
+      - { structure: acetamide, hide: [lone-pairs], alt: "Acetamide, line-angle drawing: a line to a corner with a double-bonded O up and NH₂ down.", caption: "Lone pairs hidden" }
+    unitSymbol: lone pairs
+    answer: 3
+    tolerance: 0
+    correct: "O with 2 bonds: 2 lone pairs. N with 3 bonds: 1. Carbons: none. That's 3."
+    hints:
+      - { match: 2, text: "That's the oxygen. The nitrogen has a lone pair too: N with 3 bonds keeps 1." }
+      - { match: 4, text: "Count N's bonds: one to carbon, two to its H's. Three bonds leave room for just one lone pair." }
+      - { match: 1, text: "O with two bonds (one double bond) still has 2 lone pairs." }
+      - { match: 5, text: "Carbons with four bonds have no lone pairs. Only O and N carry them here." }
+      - { text: "Use the patterns: O with 2 bonds → 2 lone pairs, N with 3 bonds → 1." }
+    reveal: "3 lone pairs: 2 on the O, 1 on the N."
+    revealScene: { id: lone-pair-fill, state: { molecule: acetamide } }
+    sourceNote: Acetamide, PubChem CID 178.
+
+  - { id: s11, phase: check, problem: u1-draw-n2-kekule }
+  - { id: s12, phase: check, problem: u1-draw-acrylonitrile }
+  - { id: s13, phase: check, problem: u1-draw-acetaminophen-lone-pairs }
+  - { id: s14, phase: check, problem: u1-draw-limonene-h }
+
+  - id: s15
+    phase: wrap
+    type: explain
+    text: "**Chemists draw only what you can't work out.**<br>Lewis: every electron a dot. Kekulé: every shared pair a line.<br>Line-angle: every end and corner is a carbon with enough H's to make 4 bonds; every other atom is written out.<br>Lone pairs follow the pattern: O 2, N 1, halogen 3."
+    scene: { id: h-fill, state: { molecule: estradiol, show: final }, still: true }

@@ -1,0 +1,25 @@
+# Lesson 2 Check Problem (lesson-02-drawing-molecules.md). Approved for play as a Check Step (#80).
+id: u1-draw-limonene-h
+unit: u1
+lesson: u1-l02
+difficulty: 3
+status: approved
+source: Original
+sourceNote: "Limonene, PubChem CID 22311."
+type: numeric
+prompt: Limonene gives oranges their smell. How many hydrogens does it have?
+figures:
+  - { structure: limonene, alt: "Limonene, line-angle drawing: a six-membered ring with one double bond and a methyl end, and on the opposite corner a branch carbon with a double bond to an end CH₂ and a methyl end." }
+unitSymbol: H atoms
+answer: 16
+tolerance: 0
+correct: "Ring: 0 + 1 + 2 + 1 + 2 + 2. Methyl 3, branch carbon 0, =CH₂ 2, branch methyl 3. Total {{h-counts/limonene}}."
+hints:
+  - { match: 20, text: "Both double bonds use up bonds. Each carbon in a C=C has one bond fewer left for H's." }
+  - { match: 18, text: "Check both double bonds, the one in the ring and the one on the branch. One of them still has too many H's." }
+  - { match: 10, text: "That's the number of carbons. Now give each one H's until it has 4 bonds." }
+  - { match: 15, text: "Off by one. Recheck the ring corner with the branch on it: three ring-and-branch bonds leave room for one H." }
+  - { match: 17, text: "Off by one. Recheck the ring corner with the branch on it: three ring-and-branch bonds leave room for one H." }
+  - { text: "Go corner by corner: 4 minus the bonds you see. Double bonds count as 2." }
+reveal: "{{h-counts/limonene}} H's, counted corner by corner."
+revealScene: { id: h-fill, state: { molecule: limonene } }

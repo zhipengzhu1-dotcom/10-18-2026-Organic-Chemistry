@@ -1,0 +1,18 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+
+id: furan
+style: line-angle
+smiles: C1=COC=C1
+atoms:
+  - { id: a1, el: C, x: 0.75, y: 1.032 }
+  - { id: a2, el: C, x: 1.213, y: -0.394 }
+  - { id: a3, el: O, x: 0, y: -1.276, lp: 2 }
+  - { id: a4, el: C, x: -1.213, y: -0.394 }
+  - { id: a5, el: C, x: -0.75, y: 1.032 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 2 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a3, b: a4, order: 1 }
+  - { id: b4, a: a4, b: a5, order: 2 }
+  - { id: b5, a: a5, b: a1, order: 1 }
+source: PubChem CID 8029

@@ -1,0 +1,20 @@
+# Lesson 3 (#81): u1-3d-perspective (PS1 Q2a) left drawing, CH2CH3 up and CH3 lower left in the page, F right on a dash, H below on a wedge. Drawn by hand: a line lies in the page, a wedge comes toward you, a hash goes away.
+# Coordinates as drawn: x right, y down.
+
+id: l3-2-fluorobutane-left
+style: full
+smiles: "C[C@@H](F)CC"
+source: "PubChem CID 54429975"
+atoms:
+  - { id: a1, el: "C", x: 0, y: 0 }
+  - { id: a2, el: "C", x: 0, y: -1.5, h: 2 }
+  - { id: a3, el: "C", x: 1.3, y: -2.25, h: 3 }
+  - { id: a4, el: "C", x: -1.3, y: 0.75, h: 3 }
+  - { id: a5, el: "F", x: 1.45, y: 0.3 }
+  - { id: a6, el: "H", x: 0.35, y: 1.45 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a1, b: a4, order: 1 }
+  - { id: b4, a: a1, b: a5, order: 1, stereo: hash }
+  - { id: b5, a: a1, b: a6, order: 1, stereo: wedge }

@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 768,
+        "MolecularFormula": "CHN",
+        "SMILES": "C#N",
+        "ConnectivitySMILES": "C#N",
+        "Title": "Hydrogen Cyanide"
+      }
+    ]
+  }
+}

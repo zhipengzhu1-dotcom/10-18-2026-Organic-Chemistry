@@ -1,0 +1,1521 @@
+/* Arcade Cosmos: the site's one style sheet. Tokens live in tokens.css; this
+   file maps them into Tailwind, sets the base type rules and holds the shared
+   components. See SCRATCH notes 59-design-system.md for how to use them. */
+@import "tailwindcss";
+@import "@fontsource-variable/space-grotesk/index.css";
+@import "@fontsource-variable/jetbrains-mono/index.css";
+@import "@fontsource/pixelify-sans/latin-500.css";
+@import "@fontsource/pixelify-sans/latin-700.css";
+@import "@fontsource/silkscreen/latin-400.css";
+@import "./tokens.css";
+
+/* Tailwind reads only our tokens: no default palette (so no red), square
+   corners, our four faces, and no stock animations (they all loop). */
+@theme inline {
+  --color-*: initial;
+  --color-space: var(--at-space);
+  --color-surface: var(--at-surface);
+  --color-raised: var(--at-raised);
+  --color-line: var(--at-line);
+  --color-ink: var(--at-ink);
+  --color-ink-muted: var(--at-ink-muted);
+  --color-electron: var(--at-electron);
+  --color-ignite: var(--at-ignite);
+  --color-boss: var(--at-boss);
+  --color-shadow: var(--at-shadow);
+  --color-electron-fill: var(--at-electron-fill);
+  --color-ignite-fill: var(--at-ignite-fill);
+  --color-boss-fill: var(--at-boss-fill);
+  --color-on-fill: var(--at-on-fill);
+  --color-fill-edge: var(--at-fill-edge);
+  --color-transparent: transparent;
+
+  --font-*: initial;
+  --font-pixel: var(--at-font-pixel);
+  --font-label: var(--at-font-label);
+  --font-text: var(--at-font-text);
+  --font-data: var(--at-font-data);
+
+  --radius-*: initial;
+  --shadow-drop: var(--at-drop);
+  --shadow-drop-sm: var(--at-drop-sm);
+  --spacing-gutter: var(--at-gutter);
+  --spacing-tap: var(--at-tap);
+  --ease-snap: var(--at-ease-snap);
+  --ease-pixel: var(--at-ease-pixel);
+  --animate-*: initial;
+}
+
+@layer base {
+  html,
+  body {
+    margin: 0;
+    background: var(--at-space);
+    color: var(--at-ink);
+  }
+  body {
+    font: 400 var(--at-body-size) / 1.5 var(--at-font-text);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--at-font-text);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  a {
+    color: var(--at-electron);
+    text-underline-offset: 3px;
+  }
+  :focus-visible {
+    outline: 3px solid var(--at-electron);
+    outline-offset: 3px;
+  }
+  /* Element symbols, formulas and numbers: md() wraps them in .data; code too. */
+  .data,
+  code,
+  kbd,
+  samp {
+    font-family: var(--at-font-data);
+    font-size: 1em;
+  }
+}
+
+@layer components {
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px var(--at-gutter) 48px;
+  }
+
+  /* Wordmark: Pixelify at 32px and up only. */
+  .wordmark {
+    font: 700 32px/1 var(--at-font-pixel);
+    letter-spacing: 0.04em;
+    color: var(--at-ignite);
+    text-shadow: 2px 2px 0 var(--at-shadow);
+  }
+  /* Fixed UI words: Silkscreen, 16px, uppercase, nowhere else. */
+  .label {
+    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* Buttons: the arcade press collapses the hard shadow into the button. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: var(--at-tap);
+    min-width: var(--at-tap);
+    padding: 12px 20px;
+    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    border: var(--at-border) solid var(--at-fill-edge);
+    box-shadow: var(--at-drop);
+    transition:
+      transform var(--at-dur-press) linear,
+      box-shadow var(--at-dur-press) linear;
+  }
+  .btn:active:not(:disabled) {
+    transform: translate(5px, 5px);
+    box-shadow: 0 0 0 var(--at-shadow);
+  }
+  .btn-primary {
+    background: var(--at-ignite-fill);
+    color: var(--at-on-fill);
+  }
+  .btn-electron {
+    background: var(--at-electron-fill);
+    color: var(--at-on-fill);
+  }
+  .btn-boss {
+    background: var(--at-boss-fill);
+    color: var(--at-on-fill);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--at-ink);
+    border-color: var(--at-ink);
+    box-shadow: 5px 5px 0 var(--at-line);
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    background: var(--at-raised);
+    color: var(--at-ink-muted);
+    box-shadow: none;
+    border: var(--at-border) dashed var(--at-line);
+    cursor: not-allowed;
+  }
+  .btn-block {
+    display: flex;
+    width: 100%;
+  }
+
+  /* Toggles: segmented (pick one of few) and switch (on/off). */
+  .seg {
+    display: inline-flex;
+    border: var(--at-border) solid var(--at-line);
+    padding: 2px;
+    gap: 2px;
+  }
+  .seg button {
+    min-height: var(--at-tap);
+    min-width: var(--at-tap);
+    padding: 0 14px;
+    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    text-transform: uppercase;
+    color: var(--at-ink-muted);
+    cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] {
+    background: var(--at-electron-fill);
+    color: var(--at-on-fill);
+  }
+  .switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-height: var(--at-tap);
+    cursor: pointer;
+  }
+  .switch [role="switch"] {
+    width: 56px;
+    height: var(--at-tap);
+    position: relative;
+    cursor: pointer;
+  }
+  .switch [role="switch"]::before {
+    content: "";
+    position: absolute;
+    inset: 10px 0;
+    border: var(--at-border) solid var(--at-line);
+    background: var(--at-surface);
+  }
+  .switch [role="switch"]::after {
+    content: "";
+    position: absolute;
+    top: 15px;
+    left: 5px;
+    width: 18px;
+    height: 18px;
+    background: var(--at-ink-muted);
+    transition: left var(--at-dur-ui) var(--at-ease-pixel);
+  }
+  .switch [role="switch"][aria-checked="true"]::before {
+    border-color: var(--at-electron);
+  }
+  .switch [role="switch"][aria-checked="true"]::after {
+    left: 33px;
+    background: var(--at-electron-fill);
+  }
+
+  /* Story bars: one motif for story cards and the Step player. */
+  .bars {
+    display: flex;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .bars li {
+    flex: 1;
+    height: 6px;
+    background: color-mix(in srgb, var(--at-ink) 22%, transparent);
+  }
+  .bars li.done {
+    background: var(--at-ink);
+  }
+  .bars li.cur {
+    background: var(--at-ignite-fill);
+  }
+
+  /* Step player: full screen, single focus, no site chrome. Nothing loops here. */
+  .player {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--at-space);
+  }
+  .player-top {
+    display: grid;
+    grid-template-columns: var(--at-tap) var(--at-tap) 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 8px var(--at-gutter);
+    max-width: 640px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .player-exit,
+  .player-back {
+    width: var(--at-tap);
+    height: var(--at-tap);
+    display: grid;
+    place-items: center;
+    font: 700 22px/1 var(--at-font-text);
+    color: var(--at-ink);
+    text-decoration: none;
+    border: var(--at-border) solid var(--at-line);
+  }
+  .player-back {
+    cursor: pointer;
+  }
+  .player-back:disabled {
+    color: var(--at-ink-muted);
+    border-style: dashed;
+    cursor: default;
+  }
+  .player-end {
+    display: grid;
+    gap: 12px;
+  }
+  /* Aside button, Source note and "Report a mistake" share rows at the foot of the body. */
+  .step-meta {
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .step-meta .source-note[open] {
+    flex-basis: 100%;
+  }
+  /* On a phone, once a reveal Scene plays the answer, it takes the question's place. */
+  @media (max-width: 600px) {
+    .player.revealing .player-prompt {
+      display: none;
+    }
+    /* A Tap Step that draws figures beside its question (#78, s06): once it is answered (a Hint,
+       the Correct line or the reveal), the feedback and the drawings take the screen. */
+    .player.answered .player-prompt {
+      display: none;
+    }
+  }
+  /* A 3D Step sits tighter on a phone, and on a short laptop window too (1280 × 720): there the
+     card would otherwise shrink to a 100 px strip under the prompt, choices and Explore button. */
+  @media (max-width: 600px), (max-height: 760px) {
+    /* A 3D Step (Lesson 3, #81): a long prompt, the card and the choices share one screen, so the
+       Step sits tighter. Once answered (.player.answered, above), the card settles on the answer
+       and takes the prompt's place with the feedback. */
+    .player.has-card .player-body {
+      gap: 10px;
+    }
+    /* A card with computed orbitals, or over Rank cards (Lesson 4, #82), stays as large as it can: while a Hint shows,
+       the choices and the Hint take the prompt's place, as once the Step is answered. */
+    .player.has-card:has(:is(.orbital-chips, [aria-label="Order"])):has(.player-foot .fb) .player-prompt {
+      display: none;
+    }
+    .player.has-card .player-prompt,
+    .player-body:has(.figures):has(.opts > :nth-child(4)) .player-prompt {
+      font-size: 17px;
+      line-height: 1.25;
+    }
+    .player.has-card .opt,
+    .opts:has(> :nth-child(4)) .opt {
+      padding-block: 6px;
+    }
+    .player.has-card .opts,
+    .opts:has(> :nth-child(4)) {
+      gap: 6px;
+    }
+    /* The card may shrink to a 96 px stage over its tools (whose buttons sit closer). */
+    .player.has-card .molecule {
+      min-height: 152px;
+    }
+    .player.has-card .molecule-stage {
+      min-height: 96px;
+    }
+    .player.has-card .molecule-tools {
+      gap: 6px;
+    }
+    .player.has-card .molecule-tools .molecule-btn,
+    .player.has-card .molecule-seg button {
+      padding: 0 7px;
+    }
+    .player.has-card .figure-drawing .structure {
+      max-height: 3.75rem;
+    }
+    /* A card of Lesson 8's computed MOs (phase-coloured lobes, #86) with long choices: once a Hint shows, the Hint
+       takes the prompt's place (still read aloud) and the card drops its size and Describe row (it
+       still turns), so the choices stay on screen. */
+    .player.has-card:has(.orbital-chip-phase):has(.fb) .player-prompt {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .player.has-card:has(.orbital-chip-phase):has(.fb) .molecule-tools {
+      display: none;
+    }
+    .player.has-card:has(.orbital-chip-phase):has(.fb) .molecule {
+      min-height: 110px;
+    }
+  }
+  @media (max-width: 600px) {
+    /* The inline card is the same viewer Explore opens, so on a phone it stands in for the button. */
+    .player.has-card .explore-open {
+      display: none;
+    }
+    /* A watch-only video and its controls, or a drawing over four choices, fill most of the
+       screen: the Step sits tighter. */
+    .player-body:has(.scene video),
+    .player-body:has(.figures):has(.opts > :nth-child(4)) {
+      gap: 6px;
+    }
+    /* An Explain of four or more lines over a played Scene (Lesson 4 s04, the three hybrid sets):
+       the Scene keeps to about a sixth of the screen so the text and its controls fit (#82). */
+    .player-body:has(> .explain-text br:nth-of-type(3)) .scene .scene-frame {
+      max-height: 17dvh;
+    }
+    /* Once answered, the long Correct line or reveal takes the card's place too (wider screens keep it). */
+    .player.answered.has-card:has(.orbital-chip-phase) :is(.molecule-pair, figure.molecule) {
+      display: none;
+    }  }
+  /* Short choices (one or two words) sit two to a row. */
+  .opts.opts-pairs {
+    grid-template-columns: 1fr 1fr;
+  }
+  .soon-link a,
+  .report a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--at-tap);
+  }
+  .card .streak-tick {
+    margin-top: 8px;
+    color: var(--at-electron);
+  }
+  .player-count {
+    font: 400 16px/1 var(--at-font-data);
+    color: var(--at-ink-muted);
+    white-space: nowrap;
+  }
+  /* Takes focus on each new Step only so screen readers announce it; no ring on a whole region. */
+  .player-body:focus {
+    outline: none;
+  }
+  .player-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 12px var(--at-gutter) 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 640px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .player-body p {
+    margin: 0;
+  }
+  /* Explain text is block Markdown: space its paragraphs and lists. */
+  .explain-text > * + * {
+    margin-top: 10px;
+  }
+  .explain-text ol,
+  .explain-text ul {
+    margin: 0;
+    padding-left: 1.4em;
+  }
+  /* On a phone the Lesson-end screen (Wrap text, key idea, two buttons) has no room left for the
+     Wrap's still final frame, so the key idea card stands in for it there; wider screens show both. */
+  @media (max-width: 480px) {
+    .player-body:has(> .card) .scene-still {
+      display: none;
+    }
+  }
+  .player-prompt {
+    font: 700 20px/1.3 var(--at-font-text);
+  }
+  .player-foot {
+    padding: 12px var(--at-gutter) calc(16px + env(safe-area-inset-bottom));
+    border-top: var(--at-border) solid var(--at-line);
+    background: var(--at-space);
+  }
+  .player-foot > * {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Answer options */
+  .opts {
+    display: grid;
+    gap: 10px;
+  }
+  .opt {
+    min-height: var(--at-tap);
+    padding: 10px 14px;
+    text-align: left;
+    font: 500 var(--at-body-size) / 1.35 var(--at-font-text);
+    color: var(--at-ink);
+    border: var(--at-border) solid var(--at-line);
+    background: var(--at-surface);
+    box-shadow: 3px 3px 0 var(--at-line);
+    cursor: pointer;
+    transition:
+      transform var(--at-dur-press) linear,
+      box-shadow var(--at-dur-press) linear;
+  }
+  .opt[aria-pressed="true"] {
+    border-color: var(--at-ignite-fill);
+    box-shadow: var(--at-drop-sm);
+    outline: 2px solid var(--at-ignite-fill);
+    outline-offset: -6px;
+  }
+  .opt:disabled {
+    cursor: default;
+    color: var(--at-ink-muted);
+  }
+
+  .rank {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .rank .opt {
+    width: 100%;
+  }
+  .opt.dragging {
+    border-color: var(--at-electron);
+    box-shadow: var(--at-drop);
+  }
+
+  /* Numeric input: the number box and its fixed unit, both in the data face. */
+  .numeric {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .numeric-box {
+    width: 8em;
+    min-height: var(--at-tap);
+    padding: 0 12px;
+    font: 400 20px/1 var(--at-font-data);
+    color: var(--at-ink);
+    background: var(--at-surface);
+    border: var(--at-border) solid var(--at-line);
+  }
+  .numeric-box:disabled {
+    color: var(--at-ink-muted);
+  }
+  .numeric-unit {
+    font: 400 20px/1 var(--at-font-data);
+  }
+
+  /* Feedback panel: icon + words, never colour alone, never red, no sound.
+     ✓ solid cyan · ✗ dashed magenta + Hint · → plain border + the answer. */
+  .fb {
+    border: var(--at-border-strong) solid;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 10px;
+    align-items: start;
+    animation: fb-in var(--at-dur-ui) var(--at-ease-snap);
+  }
+  .fb p {
+    margin: 0;
+  }
+  .fb .ic {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    font: 700 18px/1 var(--at-font-text);
+  }
+  .fb strong {
+    font-weight: 700;
+  }
+  .fb-correct {
+    border-color: var(--at-electron);
+    background: color-mix(in srgb, var(--at-electron-fill) 12%, var(--at-space));
+  }
+  .fb-correct .ic {
+    background: var(--at-electron-fill);
+    color: var(--at-on-fill);
+  }
+  .fb-correct strong {
+    color: var(--at-electron);
+  }
+  .fb-hint {
+    border-color: var(--at-boss);
+    border-style: dashed;
+    background: color-mix(in srgb, var(--at-boss-fill) 10%, var(--at-space));
+  }
+  .fb-hint .ic {
+    border: var(--at-border) solid var(--at-boss);
+    color: var(--at-boss);
+  }
+  .fb-hint strong {
+    color: var(--at-boss);
+  }
+  .fb-reveal {
+    border-color: var(--at-ink-muted);
+    background: var(--at-surface);
+  }
+  .fb-reveal .ic {
+    background: var(--at-ink-muted);
+    color: var(--at-space);
+  }
+
+  /* Source note: one tap away; the numbers inside are data. */
+  .source-note summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: var(--at-tap);
+    padding: 0 12px;
+    font: 500 16px/1.2 var(--at-font-text);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--at-ink-muted);
+    border: var(--at-border) dashed var(--at-line);
+    cursor: pointer;
+    list-style: none;
+  }
+  .source-note summary::-webkit-details-marker {
+    display: none;
+  }
+  .source-note[open] summary {
+    border-style: solid;
+    color: var(--at-ink);
+  }
+  .source-note p {
+    margin: 0;
+    padding: 8px 12px;
+    font: 400 16px/1.55 var(--at-font-data);
+    color: var(--at-ink-muted);
+    border: var(--at-border) dashed var(--at-line);
+    border-top: 0;
+  }
+  .source-note strong {
+    color: var(--at-ink);
+    font-weight: 600;
+  }
+
+  /* Key idea card at the Wrap */
+  .card {
+    border: var(--at-border-strong) solid var(--at-ignite-fill);
+    box-shadow: var(--at-drop);
+    padding: 16px;
+    background: var(--at-surface);
+  }
+  .card h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+  }
+
+  /* Practice Set summary: the results card, its stats in the data face. */
+  .practice-summary h1 {
+    margin: 0 0 12px;
+    font-size: 24px;
+  }
+  .practice-stats {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+    font-size: 20px;
+    color: var(--at-electron);
+  }
+}
+
+@layer components {
+  /* Course map: each Course a strip of Unit tiles. */
+  .course-map {
+    display: grid;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .course h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+  }
+  .tiles {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    list-style: none;
+    margin: 0 calc(-1 * var(--at-gutter));
+    padding: 6px var(--at-gutter) 16px;
+    scroll-snap-type: x proximity;
+    scroll-padding: 0 var(--at-gutter);
+  }
+  .tile {
+    flex: 0 0 min(58vw, 200px);
+    scroll-snap-align: start;
+    border: var(--at-border-strong) solid var(--at-line);
+    background: var(--at-surface);
+    box-shadow: 5px 5px 0 var(--at-line);
+  }
+  .tile > a,
+  .tile > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    height: 100%;
+    min-height: 200px;
+    padding: 14px;
+    color: var(--at-ink);
+    text-decoration: none;
+  }
+  .tile.open {
+    border-color: var(--at-ignite-fill);
+    box-shadow: var(--at-drop);
+  }
+  .tile.soon {
+    border-style: dashed;
+    box-shadow: none;
+  }
+  .tile-number {
+    font: 600 16px/1 var(--at-font-data);
+    text-transform: uppercase;
+    color: var(--at-ink-muted);
+  }
+  .tile.open .tile-number {
+    color: var(--at-ignite);
+  }
+  .tile-title {
+    font: 700 19px/1.15 var(--at-font-text);
+  }
+  .tile-summary {
+    color: var(--at-ink-muted);
+  }
+  .tile-soon {
+    margin-top: auto;
+    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    text-transform: uppercase;
+    color: var(--at-ink-muted);
+  }
+
+  /* Unit page and its Level select */
+  .crumbs a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--at-tap);
+  }
+  .unit-number {
+    display: block;
+    font: 600 16px/1.2 var(--at-font-data);
+    text-transform: uppercase;
+    color: var(--at-ignite);
+  }
+  .level-select .act-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 24px 0 10px;
+    font: 600 16px/1.2 var(--at-font-text);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--at-electron);
+  }
+  .level-select .act-title::after {
+    content: "";
+    flex: 1;
+    height: 2px;
+    background: var(--at-line);
+  }
+  .level-select .levels {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+  }
+  .level-select .level {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    gap: 6px 8px;
+    padding: 12px;
+    border: var(--at-border) solid var(--at-line);
+    background: var(--at-surface);
+    box-shadow: 3px 3px 0 var(--at-line);
+  }
+  .level-select .level > :not(.chip) {
+    grid-column: 1 / -1;
+  }
+  .level-select .level-number {
+    font: 600 16px/1.2 var(--at-font-data);
+    color: var(--at-ink-muted);
+  }
+  .level-select .level-title {
+    margin: 0;
+    font-size: 19px;
+  }
+  .level-select .level-title a {
+    display: flex;
+    align-items: center;
+    min-height: var(--at-tap);
+    color: var(--at-ink);
+  }
+  .level-select .level-goal {
+    margin: 0;
+    color: var(--at-ink-muted);
+  }
+  .level-select .chip {
+    justify-self: start;
+    padding: 2px 8px;
+    font: 500 16px/1.3 var(--at-font-text);
+    color: var(--at-ink-muted);
+    border: var(--at-border) solid currentColor;
+  }
+  .level-select .chip.count {
+    font-family: var(--at-font-data);
+  }
+  .level-select .phase-bar {
+    display: flex;
+    gap: 2px;
+    height: 8px;
+  }
+  .level-select .phase {
+    min-width: 4px;
+  }
+  .level-select .phase-hook {
+    background: var(--at-ignite-fill);
+  }
+  .level-select .phase-build {
+    background: var(--at-electron-fill);
+  }
+  .level-select .phase-check {
+    background: var(--at-boss-fill);
+  }
+  .level-select .phase-wrap {
+    background: var(--at-ink-muted);
+  }
+  .level-select .skip {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--at-tap);
+  }
+  .level-select .level-on-ramp {
+    border-style: dashed;
+    box-shadow: none;
+  }
+  .level-select .level-boss {
+    border-color: var(--at-boss-fill);
+    border-width: var(--at-border-strong);
+    box-shadow: 3px 3px 0 var(--at-boss-fill);
+  }
+  .level-select .level-boss .level-number {
+    color: var(--at-boss);
+  }
+  .level-select .level-practice {
+    border-color: var(--at-ignite-fill);
+  }
+  .level-select .level-soon {
+    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    text-transform: uppercase;
+    color: var(--at-ignite);
+  }
+}
+
+@layer components {
+  /* Top bar (outside the Step player): wordmark + Streak. */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 12px var(--at-gutter) 0;
+  }
+  .topbar .wordmark {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--at-tap);
+    text-decoration: none;
+  }
+  .streak {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: 600 16px var(--at-font-text);
+  }
+  .streak b {
+    font: 700 20px var(--at-font-data);
+    color: var(--at-ignite);
+  }
+
+  /* Home: first visit vs the returning Student's Hub. */
+  .hub {
+    display: none;
+  }
+  .returning .hub {
+    display: block;
+  }
+  .returning .first-visit {
+    display: none;
+  }
+  /* The Push hero (#73): headline, live push, one button; the Course map follows. */
+  .push-hero-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 8px 0 24px;
+  }
+  .hero-title {
+    margin: 0;
+    font: 700 clamp(30px, 8vw, 44px) / 1.05 var(--at-font-text);
+  }
+  .hero-accent {
+    color: var(--at-ignite);
+  }
+  .push-hero {
+    padding: 12px;
+    border: var(--at-border-strong) solid var(--at-line);
+    background: var(--at-surface);
+    box-shadow: var(--at-drop);
+  }
+  .push-hero-msg {
+    margin: 12px 0 0;
+    min-height: 3em;
+  }
+  .push-hero-done {
+    color: var(--at-electron);
+  }
+  .continue-card {
+    margin: 12px 0 24px;
+    padding: 16px;
+    border: var(--at-border-strong) solid var(--at-ignite-fill);
+    background: var(--at-surface);
+    box-shadow: var(--at-drop);
+  }
+  .continue-card h2 {
+    margin: 6px 0 4px;
+    font-size: 22px;
+  }
+  .continue-card p {
+    margin: 0 0 12px;
+    color: var(--at-ink-muted);
+  }
+  .continue-card .continue-unit {
+    margin: 0;
+    font: 600 16px/1.2 var(--at-font-data);
+    text-transform: uppercase;
+    color: var(--at-ignite);
+  }
+  .your-progress {
+    margin-top: 40px;
+    display: grid;
+    gap: 12px;
+    justify-items: start;
+  }
+  .your-progress h2,
+  .your-progress p {
+    margin: 0;
+  }
+  .your-progress .import {
+    display: grid;
+    gap: 6px;
+    min-height: var(--at-tap);
+  }
+  .your-progress [role="alert"]:empty {
+    display: none;
+  }
+  .suggest a,
+  .prose a,
+  .site-footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--at-tap);
+  }
+  /* Every footer link is a full tap target, even inside a sentence. */
+  .site-footer a {
+    justify-content: center;
+    min-width: var(--at-tap);
+  }
+  /* Footer (#77): motto, Donate line, licences, credits, Privacy and Suggest a Problem. */
+  .site-footer {
+    max-width: 640px;
+    margin: 32px auto 0;
+    padding: 16px var(--at-gutter) 40px;
+    border-top: var(--at-border) solid var(--at-line);
+    color: var(--at-ink-muted);
+  }
+  .site-footer p {
+    margin: 0 0 12px;
+    line-height: 1.6;
+  }
+  /* Links inside sentences are underlined, never told apart by colour alone. */
+  .site-footer p a,
+  .prose a {
+    text-decoration: underline;
+  }
+  .site-footer .motto {
+    font: 700 18px/1.3 var(--at-font-text);
+    color: var(--at-ink);
+  }
+  .site-footer nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 24px;
+  }
+  /* Donate in the top bar: an orange call to action, a full tap target. */
+  .topbar .donate {
+    margin-left: auto;
+    margin-right: 16px;
+    min-height: var(--at-tap);
+  }
+  /* The privacy page. */
+  .prose h2 {
+    margin: 32px 0 8px;
+    font-size: 22px;
+  }
+  .prose li {
+    margin: 0 0 6px;
+  }
+  /* A Lesson's Steps as plain HTML, read when the Step player can't run (and by search engines). */
+  .lesson-text {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px var(--at-gutter) 48px;
+  }
+  .lesson-text section {
+    margin: 0 0 24px;
+  }
+  .level-select .level-status {
+    font: 500 16px/1.2 var(--at-font-text);
+    color: var(--at-ink-muted);
+  }
+  .level-select .level-status[data-status="done"] {
+    color: var(--at-electron);
+  }
+
+  /* The submission form (/submit). */
+  .submit-page fieldset {
+    margin: 0 0 16px;
+    padding: 8px 16px;
+    border: var(--at-border) solid var(--at-line);
+  }
+  .submit-page fieldset label,
+  .submit-page .consent {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: var(--at-tap);
+  }
+  .submit-page .field[hidden] {
+    display: none;
+  }
+  .submit-page .field {
+    margin-bottom: 16px;
+    display: grid;
+    gap: 6px;
+  }
+  .submit-page input[type="text"],
+  .submit-page input[type="email"],
+  .submit-page select,
+  .submit-page textarea {
+    width: 100%;
+    min-height: var(--at-tap);
+    padding: 8px 12px;
+    font: inherit;
+    color: var(--at-ink);
+    background: var(--at-surface);
+    border: var(--at-border) solid var(--at-line);
+  }
+  .submit-page input[type="checkbox"],
+  .submit-page input[type="radio"] {
+    width: 24px;
+    height: 24px;
+    flex: none;
+    accent-color: var(--at-electron-fill);
+  }
+  .submit-page .hint {
+    margin: 0;
+    color: var(--at-ink-muted);
+  }
+  .submit-page .field-error {
+    margin: 0;
+    color: var(--at-boss);
+  }
+  .submit-page .field-error:empty,
+  .submit-page #form-errors:empty {
+    display: none;
+  }
+  .submit-page #form-errors {
+    margin-bottom: 16px;
+    padding: 12px;
+    border: var(--at-border) dashed var(--at-boss);
+  }
+  .submit-page .note {
+    padding-left: 12px;
+    border-left: 4px solid var(--at-electron-fill);
+  }
+}
+
+/* Lines that #61's script fills with numbers (Streak, "Step 3 of 10", "0 of 3 Lessons"). */
+[data-streak-text],
+[data-continue="where"],
+[data-unit-progress] {
+  font-family: var(--at-font-data);
+}
+
+@layer components {
+  /* The 3D Step card (#68): frame with the WebGL (or still) layer, the SVG overlay, the readout,
+     scale bar and ↺/↻ over it; the size switch and Describe under it. */
+  /* The card takes the Step's spare height (and gives it back when the feedback panel opens),
+     so a 3D Step always fits one phone screen. */
+  .molecule {
+    margin: 0;
+    flex: 1 1 260px;
+    min-height: 170px;
+    max-height: 380px;
+    display: flex;
+    flex-direction: column;
+  }
+  .molecule-stage {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    min-height: 110px;
+    border: var(--at-border-strong) solid var(--at-line);
+    box-shadow: 6px 6px 0 var(--at-shadow);
+    /* The same dark ground in both themes, so white hydrogens never sit on white (#71). Text over it
+       uses the fills, which are the same in both themes and read on --at-on-fill. */
+    background: var(--at-on-fill);
+    overflow: hidden;
+  }
+  .molecule-frame {
+    position: absolute;
+    inset: 0;
+    touch-action: none;
+    user-select: none;
+    cursor: grab;
+  }
+  .molecule-frame:focus-visible {
+    outline: 3px solid var(--at-electron);
+    outline-offset: -6px;
+  }
+  .molecule-still,
+  .molecule-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .molecule-still line {
+    stroke: #c8c8d0; /* the WebGL layer's bond grey (MoleculeCanvas) */
+  }
+  .molecule-still circle {
+    stroke: var(--at-on-fill);
+  }
+  .molecule-overlay {
+    pointer-events: none;
+  }
+  .molecule-letter {
+    font-family: var(--at-font-data);
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .molecule-pick {
+    fill: none;
+    stroke: var(--at-ignite-fill);
+    stroke-width: 3;
+  }
+  .molecule-cursor {
+    fill: none;
+    stroke: var(--at-electron-fill);
+    stroke-width: 2;
+    stroke-dasharray: 5 4;
+  }
+  .molecule-tag path {
+    fill: none;
+    stroke: var(--at-electron-fill);
+    stroke-width: 2;
+    stroke-dasharray: 5 4;
+  }
+  .molecule-tag-angle path {
+    stroke: var(--at-ignite-fill);
+  }
+  .molecule-tag rect {
+    fill: var(--at-on-fill);
+    stroke: var(--at-electron-fill);
+    stroke-width: 2;
+  }
+  .molecule-tag-angle rect {
+    stroke: var(--at-ignite-fill);
+  }
+  .molecule-tag text {
+    font: 700 16px var(--at-font-data);
+    fill: var(--at-electron-fill);
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .molecule-readout {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    right: 112px;
+    margin: 0;
+    pointer-events: none;
+    font: 400 16px/1.25 var(--at-font-data);
+    color: var(--at-electron-fill);
+  }
+  .molecule-value {
+    font-weight: 700;
+    font-size: 20px;
+  }
+  .molecule-scalebar {
+    position: absolute;
+    left: 8px;
+    bottom: 6px;
+    pointer-events: none;
+    font: 400 16px/1 var(--at-font-data);
+    color: var(--at-electron-fill);
+  }
+  .molecule-scalebar i {
+    display: block;
+    height: 4px;
+    margin-bottom: 4px;
+    background: var(--at-electron-fill);
+  }
+  .molecule-turn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+  }
+  .molecule-btn {
+    display: grid;
+    place-items: center;
+    min-width: var(--at-tap);
+    min-height: var(--at-tap);
+    padding: 0 12px;
+    font: 700 18px/1 var(--at-font-text);
+    color: var(--at-ink);
+    background: var(--at-surface);
+    border: var(--at-border) solid var(--at-line);
+    cursor: pointer;
+  }
+  .molecule-tools {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  /* Plane names hold formulas ("left CH₂ plane", "H–C–H plane"): the data face (#87). */
+  .molecule-btn.molecule-plane-toggle {
+    font-family: var(--at-font-data);
+  }
+  .molecule-seg button {
+    padding: 0 10px;
+    font: 500 16px/1 var(--at-font-text);
+    text-transform: none;
+  }
+  .molecule-describe {
+    font: 500 16px/1 var(--at-font-text);
+  }
+  /* Computed orbitals on the card (#70): each lobe's sign as text over it, and a chip per orbital
+     naming it and saying it is computed (bottom right; the scale bar is bottom left). */
+  .orbital-signs {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .orbital-sign {
+    font: 700 22px var(--at-font-data);
+    fill: var(--at-electron-fill);
+    stroke: var(--at-on-fill);
+    stroke-width: 4px;
+    paint-order: stroke;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .orbital-chips {
+    position: absolute;
+    right: 8px;
+    bottom: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+    pointer-events: none;
+  }
+  .orbital-chip {
+    padding: 2px 8px;
+    font: 400 16px/1.3 var(--at-font-data);
+    color: var(--at-electron-fill);
+    border: 2px solid var(--at-electron-fill);
+    background: var(--at-on-fill);
+  }
+  .orbital-chip-sigma {
+    color: var(--at-ignite-fill);
+    border-color: var(--at-ignite-fill);
+  }
+  .orbital-chip-name {
+    font-weight: 700;
+  }
+  .molecule-describe[aria-pressed="true"],
+  .molecule-plane-toggle[aria-pressed="true"] {
+    background: var(--at-electron-fill);
+    color: var(--at-on-fill);
+  }
+  /* Lesson 4 (#82): the plane sheet's button sits over the stage with ↺/↻. */
+  .molecule-plane-toggle {
+    font: 500 16px/1 var(--at-font-text);
+    padding: 0 10px;
+  }
+  /* Lesson 3 (#81): the molecule toggle, page sheet and badge, atom labels and bond dipoles. */
+  .molecule-snap {
+    font: 500 16px/1 var(--at-font-text);
+  }
+  .molecule-switch-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+  }
+  .molecule-switch-row .figures {
+    flex: 1;
+  }
+  .molecule-switch button {
+    padding: 0 14px;
+    font: 500 16px/1 var(--at-font-data);
+    text-transform: none;
+  }
+  /* Lesson 4's plane sheet (#82) on the no-WebGL still; the live card draws it in three.js. */
+  .molecule-plane {
+    fill: var(--at-ink-muted);
+    fill-opacity: 0.18;
+    stroke: var(--at-ink-muted);
+    stroke-opacity: 0.6;
+    stroke-width: 1.5;
+  }
+  /* Orbitals A and B (Lesson 8, #86): a toggle on phones, side by side from 720px. */
+  .molecule-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1 1 260px;
+  }
+  .molecule-pair-cards {
+    display: flex;
+    flex: 1;
+    gap: 12px;
+  }
+  .molecule-pair-card {
+    display: none;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .molecule-pair-card.shown {
+    display: flex;
+  }
+  @media (min-width: 720px) {
+    .molecule-pair-toggle {
+      display: none;
+    }
+    .molecule-pair-card {
+      display: flex;
+    }
+  }
+  .molecule-sheet {
+    fill: var(--at-electron-fill);
+    fill-opacity: 0.1;
+    stroke: var(--at-electron-fill);
+    stroke-opacity: 0.6;
+    stroke-width: 1.5;
+  }
+  .molecule-badge {
+    position: absolute;
+    right: 8px;
+    bottom: 6px;
+    margin: 0;
+    padding: 4px 8px;
+    pointer-events: none;
+    font: 700 16px/1 var(--at-font-data);
+    color: var(--at-electron-fill);
+    border: 2px dashed var(--at-electron-fill);
+  }
+  .molecule-badge.in {
+    border-style: solid;
+  }
+  .molecule-label,
+  .molecule-side,
+  .molecule-net-zero text {
+    font: 700 13px var(--at-font-data);
+    fill: var(--at-electron-fill);
+    paint-order: stroke;
+    stroke: var(--at-on-fill);
+    stroke-width: 3px;
+  }
+  .molecule-side,
+  .molecule-net-zero text {
+    text-anchor: middle;
+  }
+  .molecule-dipole line {
+    stroke: var(--at-electron-fill);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+  .molecule-dipole polygon {
+    fill: var(--at-electron-fill);
+  }
+  .molecule-net line {
+    stroke: var(--at-ignite-fill);
+    stroke-width: 6;
+  }
+  .molecule-net polygon {
+    fill: var(--at-ignite-fill);
+  }
+  .molecule-net-zero circle {
+    fill: none;
+    stroke: var(--at-ignite-fill);
+    stroke-width: 3;
+    stroke-dasharray: 6 4;
+  }
+
+  /* Scene frame and its controls (#64). */
+  .scene {
+    margin: 0;
+  }
+  .scene-frame {
+    width: 100%;
+    max-height: 45dvh; /* leaves room for the prompt, controls and button on one screen */
+    overflow: hidden;
+    border: var(--at-border-strong) solid var(--at-line);
+    box-shadow: 6px 6px 0 var(--at-shadow);
+    background: var(--at-surface);
+  }
+  /* A Manipulate Step's Scene leaves room under it for its control even once the feedback panel
+     opens, so the slider stays on screen at 1280 × 720 too. */
+  .player-body:has(.scene-control) .scene-frame {
+    max-height: min(45dvh, max(150px, calc(100dvh - 500px)));
+  }
+  .scene-controls,
+  .scene-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .scene-btn {
+    display: grid;
+    place-items: center;
+    width: var(--at-tap);
+    height: var(--at-tap);
+    font: 700 18px/1 var(--at-font-text);
+    color: var(--at-ink);
+    background: var(--at-surface);
+    border: var(--at-border) solid var(--at-line);
+    box-shadow: var(--at-drop-sm);
+    cursor: pointer;
+  }
+  .scene-range {
+    flex: 1;
+    min-height: var(--at-tap);
+    accent-color: var(--at-electron-fill);
+  }
+  .scene-value {
+    min-width: 5ch;
+    font-family: var(--at-font-data);
+  }
+  /* A − / + stepper in place of the slider (Lesson 8's mo-filler). */
+  .scene-stepper .scene-value {
+    min-width: 3ch;
+    text-align: center;
+    font-size: 1.25rem;
+  }
+  .scene-step {
+    font-size: 26px;
+  }
+  .scene-step[aria-disabled="true"] {
+    opacity: 0.4;
+    cursor: default;
+  }
+  /* On a phone, a Manipulate Step's Scene sits a little lower so its slider and a Hint fit (#78). */
+  @media (max-width: 600px) {
+    .scene:has(.scene-control) .scene-frame {
+      max-height: 21dvh;
+    }
+  }
+  /* A watch-only Scene above a question shrinks to a card once played (#78). */
+  .scene-watch.shrunk .scene-frame {
+    max-height: 7rem;
+  }
+  /* A goal-state Scene's refusal ("It's full."), shown at once under it (#78). */
+  .scene-say {
+    margin: 4px 0 0;
+    min-height: 0;
+    color: var(--at-ink);
+  }
+  .scene-say:empty {
+    display: none;
+  }
+  .scene-goal [data-handle],
+  .scene-goal [data-target] {
+    cursor: pointer;
+    outline: none;
+  }
+  .scene-goal [data-handle]:focus-visible circle,
+  .scene-goal [data-target]:focus-visible circle {
+    stroke: var(--at-electron);
+    stroke-width: 8px;
+    stroke-dasharray: 18 12;
+  }
+}
+
+@keyframes fb-in {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+}
+
+/* Reduced motion (the OS setting or the site's switch): no transforms, no
+   loops, only crossfades of 120ms or less. The media query covers no-JS. */
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after {
+  animation: none !important;
+  transition: opacity var(--at-dur-fade) linear !important;
+  scroll-behavior: auto !important;
+}
+:root[data-motion="reduced"] .btn:active:not(:disabled) {
+  transform: none;
+  box-shadow: 0 0 0 3px var(--at-electron);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: opacity var(--at-dur-fade) linear !important;
+    scroll-behavior: auto !important;
+  }
+}

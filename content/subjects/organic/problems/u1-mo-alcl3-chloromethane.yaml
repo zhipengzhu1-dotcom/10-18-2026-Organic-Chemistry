@@ -1,0 +1,30 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). Any of Cl2's three lone
+# pairs → Al3 gives the same result; the drop spot sits in the gap on Al's side.
+id: u1-mo-alcl3-chloromethane
+unit: u1
+lesson: u1-l08
+difficulty: 2
+status: approved
+source: Adapted from MIT 5.12 PS1 Q16b (its first step)
+credit: Kimberly Berkowski, MIT OCW 5.12, Spring 2005, CC BY-NC-SA 4.0
+type: draw-arrows
+prompt: "Aluminium sits right below boron, so AlCl₃ is short of an octet just like BF₃. It meets chloromethane, CH₃Cl. Push electrons from the HOMO into the LUMO (target shown)."
+start: chloromethane-alcl3
+results: [chloromethane-alcl3-adduct]
+answer:
+  - { from: a2, to: a3 }
+correct: "A lone pair on chloromethane's Cl, its highest filled orbital, fills aluminium's empty p orbital, AlCl₃'s LUMO. A new Cl–Al bond: Cl now shares a pair it used to own (Cl⁺), Al gains a share (Al⁻), and Al has eight."
+hints:
+  - from: [a4, a5, a6]
+    to: [a3]
+    text: "Those chlorines already belong to AlCl₃. The new bond joins the two molecules: start on chloromethane's Cl."
+  - from: [b1]
+    text: "σ bonds sit low. Chloromethane's highest filled orbital is a lone pair on Cl."
+  - from: [b2, b3, b4]
+    text: "That moves electrons away from aluminium, the atom that's short. Flow goes *into* aluminium."
+  - from: [a2]
+    to: [a1]
+    text: "Carbon already has eight and no empty orbital. The empty one is on Al."
+  - text: "Tail on a lone pair of chloromethane's Cl; head on aluminium's empty orbital."
+reveal: "Arrow from a lone pair on chloromethane's chlorine to aluminium. Result: a chlorine–aluminium bond; that chlorine is positive, aluminium negative, aluminium with eight electrons."
+sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q16b, Berkowski, Spring 2005, CC BY-NC-SA 4.0 (the first step only; what happens next belongs to a later Unit). Wording ours. Structures: PubChem CIDs 6327, 24012."

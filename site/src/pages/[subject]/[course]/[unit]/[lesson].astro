@@ -1,0 +1,28 @@
+---
+import type { GetStaticPaths } from "astro";
+import Base from "../../../../layouts/Base.astro";
+import StepPlayer from "../../../../components/StepPlayer.tsx";
+import LessonText from "../../../../components/LessonText.astro";
+import { answerKeyUrl, lessonPages, renderLesson, type LessonPage } from "../../../../lib/content.ts";
+import { splitLesson } from "../../../../lib/answer-key.ts";
+
+export const getStaticPaths = (() =>
+  lessonPages().map((page) => ({
+    params: { subject: page.subject, course: page.course, unit: page.unit, lesson: page.lesson.slug },
+    props: page,
+  }))) satisfies GetStaticPaths;
+
+const { subject, lesson, unitId, unitTitle, unitUrl, nextUrl, nextLabel } = Astro.props as LessonPage;
+// Only what a Student sees before answering goes into the page; the answer key is its own file.
+const { page } = splitLesson(renderLesson(lesson));
+---
+
+<Base title={`${lesson.title} · ${unitTitle} · AstraTron`} description={lesson.goal} unitId={unitId} bare>
+  <StepPlayer client:load lesson={page} keyUrl={answerKeyUrl(subject, lesson.id)} exitHref={unitUrl} unitId={unitId} nextHref={nextUrl} nextLabel={nextLabel} />
+  <LessonText lesson={page} />
+</Base>
+
+<script>
+  // The Step player is running: the plain HTML copy of the Steps would only repeat it.
+  document.getElementById("lesson-text")?.remove();
+</script>

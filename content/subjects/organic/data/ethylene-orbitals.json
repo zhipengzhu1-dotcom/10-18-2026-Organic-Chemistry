@@ -1,0 +1,105 @@
+{
+ "id": "ethylene-orbitals",
+ "kind": "table",
+ "title": "Ethylene bond orbitals",
+ "sources": {
+  "ours": {
+   "kind": "computed",
+   "citation": "Our calculation: intrinsic bond orbitals (Knizia, J. Chem. Theory Comput. 9, 4834 (2013), doi:10.1021/ct400687b) from a B3LYP/cc-pVTZ single point with PySCF 2.14.0 at the experimental geometry, 2026-10-19",
+   "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+   "note": "Drawn at the isosurface value given. Bond orbitals are one honest way to divide a molecule's electrons into bonds; Lesson 8 shows another.",
+   "method": {
+    "program": "PySCF",
+    "version": "2.14.0",
+    "level": "B3LYP/cc-pVTZ",
+    "date": "2026-10-19"
+   }
+  }
+ },
+ "values": {
+  "iso": {
+   "label": "Isosurface value",
+   "quantity": "isovalue",
+   "value": 0.05,
+   "unit": "a.u.",
+   "source": "ours"
+  }
+ },
+ "orbitals": {
+  "molecule": "ethylene",
+  "kind": "ibo",
+  "iso": "iso",
+  "list": {
+   "sigma": {
+    "label": "C–C σ bond orbital",
+    "chip": "σ",
+    "style": "sigma",
+    "mesh": "/orbitals/ethylene-orbitals/sigma.glb",
+    "sha256": "2cf5dbb5fc94c6074d5ba1a7df055629b669b802029fe147ea22f20a9884332b",
+    "triangles": 2680,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     {
+      "sign": "-",
+      "at": [
+       0.0,
+       0.0,
+       -0.94
+      ]
+     }
+    ]
+   },
+   "pi": {
+    "label": "C=C π bond orbital",
+    "chip": "π",
+    "style": "pi",
+    "mesh": "/orbitals/ethylene-orbitals/pi.glb",
+    "sha256": "b82adf69b44c7527095a3fce956b81eb7f0192fb6140708be03ad69cf2815400",
+    "triangles": 4816,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       0.761,
+       0.0,
+       0.0
+      ]
+     },
+     {
+      "sign": "-",
+      "at": [
+       -0.761,
+       0.0,
+       0.0
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "provenance": {
+  "pipeline": "pipelines/orbitals (#70)",
+  "inputSha256": "4c5449fd74810014cbf7593c6fcd0a2226f24fc7469082434ce786c6de18abfb",
+  "scfEnergyHartree": -78.62287252145785,
+  "grid": {
+   "step": 0.14,
+   "pad": 4.5,
+   "shape": [
+    67,
+    79,
+    83
+   ]
+  },
+  "checks": [
+   "one π IBO antisymmetric through the molecular plane, on the two carbons; one symmetric C–C σ"
+  ],
+  "seconds": 3
+ }
+}

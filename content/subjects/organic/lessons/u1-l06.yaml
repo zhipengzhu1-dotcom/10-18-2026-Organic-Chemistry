@@ -1,0 +1,218 @@
+# Lesson 6: Resonance: Pushing Electrons (#84), built from the merged Lesson
+# spec docs/specs/unit-1/lesson-06-resonance.md. Wording is the spec's; bond
+# lengths come only through Scenes reading the cited geometry (#67).
+id: u1-l06
+slug: resonance-pushing-electrons
+title: "Resonance: Pushing Electrons"
+goal: Draw curved arrows from an electron source to a sink to turn one resonance contributor into another, using the three moves, without ever moving an atom or a σ bond.
+keyIdea: Curved arrows move only lone pairs and π bonds, from source to sink; atoms and σ bonds never move. The real molecule is the hybrid of its drawings.
+act: Moving electrons
+signature: s04
+steps:
+  - id: s01
+    phase: hook
+    type: multiple-choice
+    prediction: true
+    prompt: This is acetate, what's left of vinegar's acid after it gives away H⁺. One C–O bond is drawn double, the other single. Which one is longer?
+    figures:
+      - structure: acetate
+        alt: "Acetate, CH₃–C(=O)–O⁻, drawn with every lone pair: one C–O bond double, the other single, the negative charge on the single-bonded oxygen."
+    options:
+      - { id: a, text: The C–O single bond }
+      - { id: b, text: The C=O double bond }
+      - { id: c, text: They're the same length }
+    answer: [c]
+    reveal: Measure them and they're **identical**. In acetic acid they really do differ. So the drawing of acetate is hiding something. By the end of this Lesson you'll know what.
+    revealScene: { id: acetate-bond-lengths, state: { molecule: both } }
+    sourceNote: >-
+      Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phase. Both molecules use the same method so they can be
+      compared fairly. This is a deliberate exception to "experiment first": CCCBDB lists acetic acid by internal
+      coordinates only, and a difference of a few hundredths of an Å is only honest when both numbers come from one
+      method. The methyl group turns freely, so acetate's two oxygens are equivalent; the tiny
+      split at one frozen methyl position is not shown.
+
+  - id: s02
+    phase: build
+    type: explain
+    text: |-
+      A **curved arrow** tracks one pair of electrons. Its tail sits on the pair that moves, the **source**. Its head points to where the pair lands, the **sink**.\
+      Sources: a lone pair, or a π bond.\
+      Sinks: an electronegative atom, an atom with room for more electrons, or a positive atom.\
+      (A half-headed 'fishhook' arrow moves a single electron. You'll meet it much later.)
+    scene: formaldehyde-pi-shift
+    sourceNote: Source and sink lists adapted from MIT OCW 5.12, Lecture 2 p. 1, Berkowski, Spring 2005, CC BY-NC-SA 4.0.
+
+  - id: s03
+    phase: build
+    type: tap-to-identify
+    prompt: Nitromethane. Tap every place electrons could flow **from**, then press Check.
+    structure: nitromethane
+    tappable: { atoms: all, bonds: all }
+    tapOnly:
+      idle: Just tap, no pushing on this Step.
+      drag: "No pushing yet: this Step only asks where electrons could come from. Tap each lone pair or bond you think is a source."
+    answer: [a3, a4, b2]
+    correct: Lone pairs on both oxygens and the N=O π bond. Every other bond here is σ.
+    hints:
+      - includes: [a2]
+        text: N⁺ here has four bonds and no lone pair, so it has nothing to give.
+      - includes: [b1, b3, b4, b5, b6]
+        text: "That's a σ bond. In resonance only lone pairs and π bonds move; σ bonds stay put."
+      - includes: [a1, a5, a6, a7]
+        text: Look for lone pairs or π bonds. This carbon and its H's have neither.
+      - misses: [b2]
+        text: A double bond is one σ plus one π, and the π pair is free to move.
+      - misses: [a3, a4]
+        text: Both oxygens carry lone pairs. Check the other one.
+      - text: Sources are lone pairs and π bonds. Find every one.
+    reveal: "The three sources: lone pairs on O, lone pairs on O⁻, the N=O π bond."
+    sourceNote: Nitromethane from MIT OCW 5.12, Lecture 1 p. 17, CC BY-NC-SA 4.0.
+
+  - id: s04
+    phase: build
+    type: draw-arrows
+    prompt: Push the electrons to turn formaldehyde into its other contributor.
+    start: formaldehyde
+    results: [formaldehyde-polar]
+    answer:
+      - { from: b1, to: a2 }
+    correct: "The π pair is now a lone pair on O: O⁻ and C⁺. Same atoms, same σ bonds. Only the π electrons moved."
+    hints:
+      - from: [b1]
+        to: [a1]
+        text: Electrons flow to the sink. Oxygen is more electronegative, so it pulls the pair.
+      - from: [a2]
+        to: [a1]
+        text: That pushes more electrons onto carbon, which already has a full octet. Move a pair away from carbon instead.
+      - from: [b2, b3]
+        text: σ bonds never move in resonance.
+      - text: Which atom is the sink? Move the pair that sits between C and O toward it.
+    reveal: Arrow from the C=O π bond to oxygen. Result H₂C⁺ single-bonded to O⁻.
+    sourceNote: Adapted from MIT OCW 5.12, Lecture 2 p. 1, CC BY-NC-SA 4.0.
+
+  - id: s05
+    phase: build
+    type: explain
+    text: >-
+      Every resonance arrow is one of **three moves**: 1. **Lone pair → bond.** A lone pair becomes a new π bond to the atom next door. 2. **Bond → atom.** A π pair leaves its bond and becomes a lone pair on one of its own atoms. 3. **Bond → next bond.** A π pair slides over by one position. The rules never change: **atoms don't move, σ bonds don't break**, and every drawing must be a real Lewis structure. If one push gives an atom too many electrons, a second push has to take some away. The arrows happen together.
+    scene: { id: three-moves, state: { panel: all } }
+    sourceNote: Rules adapted from MIT OCW 5.12, Lecture 2 p. 2, 'Rules for Resonance Structures', CC BY-NC-SA 4.0.
+
+  - id: s06
+    phase: build
+    type: draw-arrows
+    prompt: Back to acetate. Push electrons to move the negative charge to the other oxygen.
+    start: acetate
+    results: [acetate-swapped]
+    answer:
+      - { from: a4, to: a2 }
+      - { from: b2, to: a3 }
+    inBetween:
+      over: "C has {electrons} e⁻: something has to leave. In resonance both arrows happen at once, so this halfway drawing isn't a real structure."
+      short: "C has only {electrons} e⁻ and O3 has a charge. This halfway drawing isn't real either. Fill the gap."
+    correct: The charge moved from one O to the other, and nothing else changed. Two drawings, one ion.
+    hints:
+      - from: [b2]
+        to: [a2]
+        text: Oxygen is the electronegative sink. Pull the π pair toward O, not C.
+      - from: [a3]
+        to: [a2]
+        text: Start from the oxygen that carries the negative charge. It has the extra pair.
+      - from: [sigma]
+        text: σ bonds stay put.
+      - text: One pair comes in from O⁻ and one pair leaves toward the other O.
+    reveal: Arrow from a lone pair on the lower oxygen into the C–O bond; arrow from the C=O π bond onto the upper oxygen. The double bond and the negative charge have swapped oxygens.
+    sourceNote: Acetate from MIT OCW 5.12, Problem Set 1 Q3b, CC BY-NC-SA 4.0.
+
+  - id: s07
+    phase: build
+    type: explain
+    text: |-
+      So which drawing is acetate? **Neither.** The real ion is the **resonance hybrid**: the − charge is shared by both oxygens (δ− each), and both C–O bonds sit between single and double. That's why they measured the same.\
+      The ↔ arrow means 'two drawings of one thing'. It is **not** ⇌: acetate never flips back and forth. It is the blend, all the time.
+    scene: acetate-hybrid
+    sourceNote: >-
+      Bond lengths computed with PySCF, B3LYP/cc-pVTZ, gas phase. Both molecules use the same method so they can be
+      compared fairly. The hybrid idea follows MIT OCW 5.12, Lecture 1 p. 17, CC BY-NC-SA 4.0.
+
+  - id: s08
+    phase: build
+    type: draw-arrows
+    prompt: "The allyl cation. Use move 3: slide the π bond toward the positive carbon."
+    start: allyl-cation
+    results: [allyl-cation-swapped]
+    answer:
+      - { from: b1, to: a3 }
+    correct: The double bond slid one position and the + charge jumped to the other end. The real allyl cation shares + between both ends.
+    hints:
+      - from: [b1]
+        to: [a1, a2]
+        text: That parks the pair on one carbon and leaves two C⁺. The empty spot is on C3, so slide the bond toward it.
+      - from: [b2]
+        text: That's σ. Only the π bond moves.
+      - text: C3⁺ is the sink. Which π pair is next to it?
+    reveal: Arrow from the C1=C2 π bond to the C2–C3 bond. Now C2=C3 is double and C1 is positive.
+
+  - id: s09
+    phase: build
+    type: multiple-choice
+    prompt: Same atoms, same places? Which pair shows two resonance contributors?
+    options:
+      - id: a
+        structure: card-nitromethane-contributors
+        text: "Nitromethane, CH₃–N⁺(=O)–O⁻, next to CH₃–N⁺(–O⁻)=O."
+      - id: b
+        structure: card-nitromethane-methyl-nitrite
+        text: "Nitromethane, CH₃–N⁺(=O)–O⁻, next to methyl nitrite, CH₃–O–N=O."
+      - id: c
+        structure: card-acetate-acetic-acid
+        text: "Acetate, CH₃–C(=O)–O⁻, next to acetic acid, CH₃–C(=O)–OH."
+    answer: [a]
+    correct: Same atoms, same σ bonds; only electrons differ. That's resonance.
+    hints:
+      - includes: [b]
+        text: "Look at what carbon is bonded to: N in one, O in the other. An atom moved, so that's a different molecule, not a contributor."
+      - includes: [c]
+        text: Count the hydrogens. Adding H⁺ makes a different species. Resonance never adds or removes atoms.
+      - text: Resonance contributors differ only in where lone pairs and π bonds are.
+    reveal: "**a**: two contributors of nitromethane. **b**: atom moved. **c**: H added."
+
+  - id: s10
+    phase: build
+    type: draw-arrows
+    prompt: "Nitromethane: push electrons to swap which oxygen carries the negative charge."
+    start: nitromethane
+    results: [nitromethane-swapped]
+    answer:
+      - { from: a4, to: a2 }
+      - { from: b2, to: a3 }
+    inBetween:
+      over: "N would have {electrons} e⁻. A second-row atom can't, so another pair has to leave. This isn't a real structure."
+      short: "N has only {electrons} e⁻ and a 2+ charge. Not a real structure. Finish the move."
+    correct: "Same as acetate: charge shared by two oxygens. The real nitromethane is their hybrid."
+    hints:
+      - from: [b2]
+        to: [a2]
+        text: Pull the π pair toward the electronegative oxygen.
+      - from: [a3]
+        to: [a2]
+        text: Start from O⁻, the oxygen with the extra pair.
+      - from: [b1]
+        text: σ bonds stay put.
+      - text: "It's the acetate pattern again: one pair in, one pair out."
+    reveal: Arrow from a lone pair on O⁻ into the N–O bond; arrow from the N=O π bond onto the other oxygen. The charges have swapped oxygens.
+    sourceNote: Nitromethane from MIT OCW 5.12, Lecture 1 p. 17, CC BY-NC-SA 4.0.
+
+  - { id: s11, phase: check, problem: u1-res-ozone }
+  - { id: s12, phase: check, problem: u1-res-not-resonance }
+  - { id: s13, phase: check, problem: u1-res-oxocarbenium }
+  - { id: s14, phase: check, problem: u1-res-thiodienyl }
+
+  - id: s15
+    phase: wrap
+    type: explain
+    text: |-
+      **Electrons move. Atoms don't.**\
+      Arrows go source → sink: lone pairs and π bonds are sources; electronegative, positive or empty-handed atoms are sinks.\
+      Three moves: lone pair → bond, bond → atom, bond → next bond. The real molecule is the hybrid of its drawings.
+    scene: { id: acetate-hybrid, state: { stage: hybrid }, still: true }

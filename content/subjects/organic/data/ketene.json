@@ -1,0 +1,147 @@
+{
+  "id": "ketene",
+  "kind": "molecule",
+  "title": "Ketene",
+  "geometry": "experimental",
+  "notice": "Data derived from NIST CCCBDB; not covered by the repository's MIT licence or the content's CC BY-NC-SA licence. NIST Computational Chemistry Comparison and Benchmark Database, NIST Standard Reference Database Number 101, Release 22, May 2022, Editor: Russell D. Johnson III, http://cccbdb.nist.gov/, DOI:10.18434/T47C7Z. © U.S. Secretary of Commerce; used with acknowledgement under https://www.nist.gov/open/license.",
+  "sources": {
+    "cccbdb": {
+      "kind": "experimental",
+      "citation": "NIST CCCBDB, SRD 101, Release 22 (May 2022), doi:10.18434/T47C7Z",
+      "licence": "NIST SRD 101; reuse with acknowledgement (https://www.nist.gov/open/license). Not covered by the repo's MIT licence."
+    },
+    "1998kuc": {
+      "kind": "experimental",
+      "citation": "K Kuchitsu(ed) \"Structure of Free Polyatomic Molecules - Basic Data\" Springer, Berlin, 1998, doi:10.1007/978-3-642-45748-7",
+      "via": "cccbdb",
+      "licence": "NIST SRD 101; reuse with acknowledgement (https://www.nist.gov/open/license). Not covered by the repo's MIT licence."
+    }
+  },
+  "values": {
+    "r.CO": {
+      "label": "C–O",
+      "quantity": "bond-length",
+      "value": 1.162,
+      "unit": "Å",
+      "source": "1998kuc",
+      "atoms": [
+        1,
+        2
+      ],
+      "note": "rs structure"
+    },
+    "r.CC": {
+      "label": "C–C",
+      "quantity": "bond-length",
+      "value": 1.314,
+      "unit": "Å",
+      "source": "1998kuc",
+      "atoms": [
+        0,
+        1
+      ]
+    },
+    "r.CH": {
+      "label": "C–H",
+      "quantity": "bond-length",
+      "value": 1.083,
+      "unit": "Å",
+      "source": "1998kuc",
+      "atoms": [
+        0,
+        3
+      ],
+      "note": "rs structure"
+    },
+    "a.HCH": {
+      "label": "H–C–H",
+      "quantity": "angle",
+      "value": 122.56,
+      "unit": "°",
+      "source": "1998kuc",
+      "atoms": [
+        3,
+        0,
+        4
+      ]
+    },
+    "a.HCC": {
+      "label": "C–C–H",
+      "quantity": "angle",
+      "value": 118.72,
+      "unit": "°",
+      "source": "1998kuc",
+      "atoms": [
+        1,
+        0,
+        3
+      ],
+      "note": "by symmetry"
+    }
+  },
+  "atoms": {
+    "source": "cccbdb",
+    "list": [
+      [
+        "C",
+        -0.0,
+        -0.0012,
+        -0.0006
+      ],
+      [
+        "C",
+        0.0,
+        -0.0011,
+        1.3134
+      ],
+      [
+        "O",
+        0.0,
+        0.0,
+        2.4754
+      ],
+      [
+        "H",
+        0.0,
+        0.9486,
+        -0.5211
+      ],
+      [
+        "H",
+        0.0,
+        -0.9463,
+        -0.5184
+      ]
+    ]
+  },
+  "bonds": [
+    [
+      0,
+      1,
+      2
+    ],
+    [
+      0,
+      3,
+      1
+    ],
+    [
+      0,
+      4,
+      1
+    ],
+    [
+      1,
+      2,
+      2
+    ]
+  ],
+  "provenance": {
+    "pipeline": "pipelines/geometry (#67)",
+    "url": "https://cccbdb.nist.gov/expgeom2x.asp?casno=463514&charge=0",
+    "cccbdbName": "Ketene",
+    "pointGroup": "not used (CCCBDB labels can be wrong)",
+    "rebuilt": "CCCBDB's Cartesian table disagrees with its own listed parameters (rCO (2, 3): listed 1.162, Cartesians give 1.1600; rCH (1, 4): listed 1.083, Cartesians give 1.0790; aHCH (4, 1, 5): listed 122.56, Cartesians give 122.3044; aHCC (2, 1, 4): listed 118.72, Cartesians give 118.8478), so the Cartesians were rebuilt from the listed parameters by a least-squares fit.",
+    "usedBy": "L4"
+  }
+}

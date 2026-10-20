@@ -1,0 +1,19 @@
+# Practice Problem u1-3d-perspective-b (#87, MIT 5.12 PS1 Q2b) right drawing, partly drawn: H lower left and CH₂CH₃
+# lower right in the page; an empty dash upper left and an empty wedge upper right, side by side above. Drawn by hand:
+# a line lies in the page, a wedge comes toward you, a hash goes away. Coordinates as drawn: x right, y down.
+
+id: ps1-q2b-right
+style: full
+atoms:
+  - { id: a1, el: "C", x: 0, y: 0 }
+  - { id: a2, el: "H", x: -1.3, y: 0.75 }
+  - { id: a3, el: "C", x: 1.3, y: 0.75, h: 2 }
+  - { id: a4, el: "C", x: 2.6, y: 0, h: 3 }
+  - { id: a5, el: "*", x: -0.55, y: -1.4 }
+  - { id: a6, el: "*", x: 0.55, y: -1.4 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a1, b: a3, order: 1 }
+  - { id: b3, a: a3, b: a4, order: 1 }
+  - { id: b4, a: a1, b: a5, order: 1, stereo: hash }
+  - { id: b5, a: a1, b: a6, order: 1, stereo: wedge }

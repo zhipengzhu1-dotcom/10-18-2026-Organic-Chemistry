@@ -1,0 +1,16 @@
+# Practice Problem u1-mo-empty-orbital (#87) card b: boron tribromide, BBr₃, full Lewis: three B–Br bonds, three lone
+# pairs on each Br, none on B. Drawn by hand.
+
+id: boron-tribromide
+style: full
+smiles: "BrB(Br)Br"
+source: PubChem CID 25134
+atoms:
+  - { id: a1, el: B, x: 0, y: 0 }
+  - { id: a2, el: Br, x: 0, y: -1.5, lp: 3 }
+  - { id: a3, el: Br, x: -1.299, y: 0.75, lp: 3 }
+  - { id: a4, el: Br, x: 1.299, y: 0.75, lp: 3 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a1, b: a3, order: 1 }
+  - { id: b3, a: a1, b: a4, order: 1 }

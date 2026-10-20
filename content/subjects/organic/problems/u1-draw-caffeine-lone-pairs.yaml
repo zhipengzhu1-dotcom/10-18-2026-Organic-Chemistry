@@ -1,0 +1,25 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). The build checks the
+# drawing's lone pairs against valence and its H count against PubChem CID 2519 (C₈H₁₀N₄O₂).
+id: u1-draw-caffeine-lone-pairs
+unit: u1
+lesson: u1-l02
+difficulty: 3
+status: approved
+source: Original
+type: numeric
+prompt: "Caffeine, drawn the way most books do: no lone pairs. How many lone pairs does it have in all?"
+figures:
+  - { structure: caffeine, hide: [lone-pairs], alt: "Caffeine, line-angle drawing with its lone pairs hidden: a six-membered ring fused to a five-membered ring, alternating lines in the rings, two C=O groups, four N letters and three methyl line ends on N." }
+unitSymbol: lone pairs
+answer: 8
+tolerance: 0
+correct: "Two O's with 2 bonds: 2 + 2. Four N's with 3 bonds each: 1 each, including the one with a double bond. 4 + 4 = 8."
+hints:
+  - { match: 4, text: "That's only the oxygens, or only the nitrogens. Count both kinds." }
+  - { match: 7, text: "One N has a double bond in the ring. A double bond counts 2, so that N still has 3 bonds and 1 lone pair." }
+  - { match: 12, text: "N with 3 bonds keeps 1 lone pair, not 2. A double bond counts as 2 bonds." }
+  - { match: 6, text: "There are four nitrogens. Find all of them, then the two oxygens." }
+  - { text: "Find every O and N. O with 2 bonds → 2 lone pairs, N with 3 bonds → 1." }
+reveal: "8 lone pairs: 2 on each O, 1 on each of the four N's."
+revealScene: { id: lone-pair-fill, state: { molecule: caffeine } }
+sourceNote: "Caffeine, PubChem CID 2519 (formula C₈H₁₀N₄O₂)."

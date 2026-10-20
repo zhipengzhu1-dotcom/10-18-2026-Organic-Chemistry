@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 123139,
+        "MolecularFormula": "CH3N",
+        "SMILES": "C=N",
+        "ConnectivitySMILES": "C=N",
+        "Title": "Azomethine"
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+# Lesson 4 Check Problem (#82), from the merged Lesson 4 spec. The spec says "draft"; Check Steps
+# need approved Problems, as for Lessons 0–3, 5 and 6.
+id: u1-hyb-pi-count
+unit: u1
+lesson: u1-l04
+difficulty: 1
+status: approved
+source: Original
+type: numeric
+prompt: Acrylonitrile, used to make acrylic fibres. How many **π** bonds does it have?
+figures:
+  - { structure: acrylonitrile-kekule, alt: "Acrylonitrile, full Kekulé structure: CH₂ double-bonded to CH, single-bonded to C, triple-bonded to N, which has one lone pair. Every H is drawn." }
+unitSymbol: π bonds
+answer: 3
+tolerance: 0
+correct: "The C=C has one π and the C≡N has two: three π bonds, alongside six σ bonds."
+hints:
+  - match: 2
+    text: A triple bond holds **two** π bonds, not one.
+  - match: 1
+    text: There are two multiple bonds here, the C=C and the C≡N. Count both.
+  - match: 6
+    text: "That's the σ count: every bond has exactly one σ. π bonds are the extras in double and triple bonds."
+  - match: 9
+    text: That's every bond, σ and π together. Count only the π's.
+  - text: Single = σ. Double = σ + π. Triple = σ + 2π. Add up the π's.
+reveal: "C–H and C–C: σ. C=C: σ + π. C≡N: σ + 2π. The π's count up 1, 2, 3."
+sourceNote: "Our Problem, in the style of MIT OCW 5.12 PS1 Q5. Acrylonitrile, PubChem CID 7855."

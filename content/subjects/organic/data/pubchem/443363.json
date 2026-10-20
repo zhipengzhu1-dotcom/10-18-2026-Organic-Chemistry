@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 443363,
+        "MolecularFormula": "C27H35N5O7S",
+        "SMILES": "CSCC[C@@H](C(=O)O)NC(=O)[C@H](CC1=CC=CC=C1)NC(=O)CNC(=O)CNC(=O)[C@H](CC2=CC=C(C=C2)O)N",
+        "ConnectivitySMILES": "CSCCC(C(=O)O)NC(=O)C(CC1=CC=CC=C1)NC(=O)CNC(=O)CNC(=O)C(CC2=CC=C(C=C2)O)N",
+        "Title": "Metenkefalin"
+      }
+    ]
+  }
+}

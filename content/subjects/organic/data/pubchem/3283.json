@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 3283,
+        "MolecularFormula": "C4H10O",
+        "SMILES": "CCOCC",
+        "ConnectivitySMILES": "CCOCC",
+        "Title": "Diethyl Ether"
+      }
+    ]
+  }
+}

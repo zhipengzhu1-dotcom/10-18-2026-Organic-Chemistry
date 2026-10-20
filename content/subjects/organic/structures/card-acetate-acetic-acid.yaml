@@ -1,0 +1,23 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+# A structure card: two molecules side by side (the first, then the second).
+
+id: card-acetate-acetic-acid
+style: line-angle
+smiles: CC(=O)[O-].CC(=O)O
+source: PubChem CIDs 175 and 176 (acetate, acetic acid)
+atoms:
+  - { id: a1, el: C, x: 0, y: 0 }
+  - { id: a2, el: C, x: 1.299, y: -0.75 }
+  - { id: a3, el: O, x: 1.299, y: -2.25, lp: 2 }
+  - { id: a4, el: O, x: 2.598, y: 0, charge: -1, lp: 3 }
+  - { id: a5, el: C, x: 6.098, y: 0 }
+  - { id: a6, el: C, x: 7.397, y: -0.75 }
+  - { id: a7, el: O, x: 7.397, y: -2.25, lp: 2 }
+  - { id: a8, el: O, x: 8.696, y: 0, h: 1, lp: 2 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 2 }
+  - { id: b3, a: a2, b: a4, order: 1 }
+  - { id: b4, a: a5, b: a6, order: 1 }
+  - { id: b5, a: a6, b: a7, order: 2 }
+  - { id: b6, a: a6, b: a8, order: 1 }

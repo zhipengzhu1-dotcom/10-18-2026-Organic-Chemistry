@@ -1,0 +1,140 @@
+{
+  "id": "ethylene-b3lyp",
+  "kind": "molecule",
+  "title": "Ethylene, B3LYP",
+  "geometry": "computed",
+  "sources": {
+    "ours": {
+      "kind": "computed",
+      "citation": "Our calculation: PySCF 2.14.0, B3LYP/cc-pVTZ, isolated molecule, optimised with geomeTRIC 1.1.1, GAU_TIGHT and checked as a true minimum (all harmonic frequencies real), 2026-10-19",
+      "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+      "method": {
+        "program": "PySCF",
+        "version": "2.14.0",
+        "level": "B3LYP/cc-pVTZ",
+        "date": "2026-10-19",
+        "maxDeviation": 0.02
+      }
+    }
+  },
+  "values": {
+    "r.CC": {
+      "label": "C=C",
+      "quantity": "bond-length",
+      "value": 1.3241,
+      "unit": "Å",
+      "source": "ours",
+      "atoms": [
+        0,
+        1
+      ]
+    },
+    "r.CH": {
+      "label": "C–H",
+      "quantity": "bond-length",
+      "value": 1.0826,
+      "unit": "Å",
+      "source": "ours",
+      "atoms": [
+        0,
+        2
+      ]
+    },
+    "a.HCH": {
+      "label": "H–C–H",
+      "quantity": "angle",
+      "value": 116.52,
+      "unit": "°",
+      "source": "ours",
+      "atoms": [
+        2,
+        0,
+        3
+      ]
+    }
+  },
+  "atoms": {
+    "source": "ours",
+    "list": [
+      [
+        "C",
+        -0.0,
+        -0.0,
+        0.6621
+      ],
+      [
+        "C",
+        -0.0,
+        -0.0,
+        -0.6621
+      ],
+      [
+        "H",
+        -0.0,
+        0.9207,
+        1.2316
+      ],
+      [
+        "H",
+        -0.0,
+        -0.9207,
+        1.2316
+      ],
+      [
+        "H",
+        -0.0,
+        0.9207,
+        -1.2316
+      ],
+      [
+        "H",
+        -0.0,
+        -0.9207,
+        -1.2316
+      ]
+    ]
+  },
+  "bonds": [
+    [
+      0,
+      1,
+      2
+    ],
+    [
+      0,
+      2,
+      1
+    ],
+    [
+      0,
+      3,
+      1
+    ],
+    [
+      1,
+      4,
+      1
+    ],
+    [
+      1,
+      5,
+      1
+    ]
+  ],
+  "provenance": {
+    "pipeline": "pipelines/geometry (#67)",
+    "start": "CCCBDB experimental Cartesians (CAS 74-85-1)",
+    "inputSha256": "a4c17f3a53170d1bbdf57bef31e05188b0ec9f17568999bc2189ee3f9959a84a",
+    "optimiser": "geomeTRIC 1.1.1, GAU_TIGHT",
+    "basis": "cc-pvtz",
+    "gridLevel": 4,
+    "xcDefinition": "((0, 0, 0), ((402, 1),))",
+    "energyHartree": -78.62318014100018,
+    "lowestFrequency": 835.9,
+    "imaginaryModes": 0,
+    "charge": 0,
+    "note": "Computed on purpose: Lesson 8 compares orbital energies, so geometry and orbitals come from one method.",
+    "cccbdb": "not looked up (not a neutral CCCBDB species)",
+    "usedBy": "L8"
+  }
+}

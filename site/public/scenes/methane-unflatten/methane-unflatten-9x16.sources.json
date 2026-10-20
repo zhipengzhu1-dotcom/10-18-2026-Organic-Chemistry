@@ -1,0 +1,85 @@
+{
+  "scene": "methane-unflatten",
+  "title": "Methane isn't flat",
+  "aspect": "9:16",
+  "file": "methane-unflatten-9x16.mp4",
+  "fps": 60,
+  "duration": 8,
+  "numbers": [
+    {
+      "ref": "methane/r.CH",
+      "label": "C–H",
+      "quantity": "bond-length",
+      "value": 1.087,
+      "unit": "Å",
+      "display": "1.09 Å",
+      "full": "1.087 Å",
+      "tier": "experimental",
+      "citation": "E Hirota \"Anharmonic Potential Function and Equilibrium Structure of Methane\" J. Mol. Spect. 77, 213-221 (1979), doi:10.1016/0022-2852(79)90103-6",
+      "via": "NIST CCCBDB, SRD 101, Release 22 (May 2022), doi:10.18434/T47C7Z",
+      "licence": "NIST SRD 101; reuse with acknowledgement (https://www.nist.gov/open/license). Not covered by the repo's MIT licence.",
+      "shown": "drawn",
+      "onScreen": [
+        {
+          "from": 0,
+          "to": 8
+        }
+      ]
+    },
+    {
+      "ref": "methane/a.HCH",
+      "label": "H–C–H",
+      "quantity": "angle",
+      "value": 109.471,
+      "unit": "°",
+      "display": "109.5°",
+      "full": "109.471°",
+      "tier": "experimental",
+      "citation": "L.M. Sverdlov, M. A. Kovner, E. P. Krainov, \"Vibrational Spectra of Polyatomic Molecules\" Wiley, New York 1974",
+      "via": "NIST CCCBDB, SRD 101, Release 22 (May 2022), doi:10.18434/T47C7Z",
+      "licence": "NIST SRD 101; reuse with acknowledgement (https://www.nist.gov/open/license). Not covered by the repo's MIT licence.",
+      "shown": "text",
+      "onScreen": [
+        {
+          "from": 5.6,
+          "to": 8
+        }
+      ]
+    },
+    {
+      "ref": "elements/C.colour",
+      "label": "C colour",
+      "quantity": "colour",
+      "value": "#909090",
+      "display": "#909090",
+      "full": "#909090",
+      "citation": "the Jmol CPK colour table (Jmol, org/jmol/c/PAL.java), https://github.com/BobHanson/Jmol-SwingJS",
+      "licence": "Jmol is LGPL 2.1; colour values used as data",
+      "shown": "drawn",
+      "onScreen": [
+        {
+          "from": 0,
+          "to": 8
+        }
+      ]
+    },
+    {
+      "ref": "elements/H.colour",
+      "label": "H colour",
+      "quantity": "colour",
+      "value": "#FFFFFF",
+      "display": "#FFFFFF",
+      "full": "#FFFFFF",
+      "citation": "the Jmol CPK colour table (Jmol, org/jmol/c/PAL.java), https://github.com/BobHanson/Jmol-SwingJS",
+      "licence": "Jmol is LGPL 2.1; colour values used as data",
+      "shown": "drawn",
+      "onScreen": [
+        {
+          "from": 0,
+          "to": 8
+        }
+      ]
+    }
+  ],
+  "description": "Methane isn't flat\n\nNumbers on screen:\n0:00–0:08  C–H 1.09 Å\n0:05–0:08  H–C–H 109.5°\n0:00–0:08  C colour #909090\n0:00–0:08  H colour #FFFFFF\n\nSources:\nGeometry: experimental (gas phase). C–H 1.087 Å from E Hirota \"Anharmonic Potential Function and Equilibrium Structure of Methane\" J. Mol. Spect. 77, 213-221 (1979), doi:10.1016/0022-2852(79)90103-6, via NIST CCCBDB, SRD 101, Release 22 (May 2022), doi:10.18434/T47C7Z. H–C–H 109.471° from L.M. Sverdlov, M. A. Kovner, E. P. Krainov, \"Vibrational Spectra of Polyatomic Molecules\" Wiley, New York 1974, via NIST CCCBDB, SRD 101, Release 22 (May 2022), doi:10.18434/T47C7Z. Other distances are calculated from these values.\nC colour #909090 and H colour #FFFFFF from the Jmol CPK colour table (Jmol, org/jmol/c/PAL.java), https://github.com/BobHanson/Jmol-SwingJS."
+}

@@ -1,0 +1,11 @@
+# Hand-placed coordinates; drawn by the site’s own renderer.
+
+id: n2-kekule
+style: full
+smiles: "N#N"
+source: PubChem CID 947
+atoms:
+  - { id: a1, el: N, x: 0, y: 0, lp: 1 }
+  - { id: a2, el: N, x: 1.5, y: 0, lp: 1 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 3 }

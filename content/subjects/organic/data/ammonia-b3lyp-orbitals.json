@@ -1,0 +1,110 @@
+{
+ "id": "ammonia-b3lyp-orbitals",
+ "kind": "table",
+ "title": "Ammonia frontier orbitals",
+ "sources": {
+  "ours": {
+   "kind": "computed",
+   "citation": "Our calculation: canonical molecular orbitals and their energies with PySCF 2.14.0, B3LYP/cc-pVTZ, isolated molecule at the geometry optimised with the same method, 2026-10-19; hartree to eV with CODATA 2018 (Tiesinga et al., Rev. Mod. Phys. 93, 025010 (2021), doi:10.1103/RevModPhys.93.025010)",
+   "licence": "CC BY-NC-SA 4.0 (our calculation, AstraTron content)",
+   "note": "Computed orbital energies are model values: compare them with each other, not with measured energies.",
+   "method": {
+    "program": "PySCF",
+    "version": "2.14.0",
+    "level": "B3LYP/cc-pVTZ",
+    "date": "2026-10-19"
+   }
+  }
+ },
+ "values": {
+  "homo": {
+   "label": "NH₃ HOMO",
+   "quantity": "energy",
+   "value": -7.2324,
+   "unit": "eV",
+   "decimals": 1,
+   "source": "ours"
+  },
+  "lumo": {
+   "label": "NH₃ LUMO",
+   "quantity": "energy",
+   "value": 0.8094,
+   "unit": "eV",
+   "decimals": 1,
+   "source": "ours"
+  },
+  "gap": {
+   "label": "NH₃ HOMO–LUMO gap",
+   "quantity": "energy",
+   "value": 8.0418,
+   "unit": "eV",
+   "decimals": 1,
+   "source": "ours"
+  },
+  "iso": {
+   "label": "Isosurface value",
+   "quantity": "isovalue",
+   "value": 0.05,
+   "unit": "a.u.",
+   "source": "ours"
+  }
+ },
+ "orbitals": {
+  "molecule": "ammonia-b3lyp",
+  "kind": "canonical",
+  "iso": "iso",
+  "list": {
+   "homo": {
+    "label": "lone pair (HOMO)",
+    "chip": "HOMO",
+    "style": "phase",
+    "energy": "homo",
+    "mesh": "/orbitals/ammonia-b3lyp-orbitals/homo.glb",
+    "sha256": "92ff7b47b50da50cae5cef3a68cc060c0a098dfdb778b1191aa8cfb36dfbc251",
+    "triangles": 3952,
+    "lobes": [
+     {
+      "sign": "+",
+      "at": [
+       0.0,
+       -0.028,
+       -0.781
+      ]
+     },
+     {
+      "sign": "-",
+      "at": [
+       0.0,
+       -0.001,
+       0.683
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "provenance": {
+  "pipeline": "pipelines/orbitals (#70)",
+  "inputSha256": "f89b449c950f32077fb6648d1c07fbcd844d4e3630972b5b11c5967857474e76",
+  "grid": {
+   "step": 0.14,
+   "pad": 4.5,
+   "shape": [
+    77,
+    76,
+    69
+   ]
+  },
+  "checks": [
+   "NH₃: HOMO's largest lobe centred nearest N, on the side away from the H's"
+  ],
+  "scfEnergyHartree": -56.584725887479465,
+  "homoIndex": 4,
+  "energiesHartree": {
+   "homo": -0.2657868885582353,
+   "lumo": 0.029745092733083567
+  },
+  "lumoValenceLike": true,
+  "seconds": 1
+ }
+}
