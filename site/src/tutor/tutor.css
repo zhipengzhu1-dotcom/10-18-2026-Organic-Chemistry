@@ -32,6 +32,11 @@
   pointer-events: none;
   transition: opacity var(--at-dur-ui) linear;
 }
+/* Opened from the keyboard: no slide, no fade. */
+.tutor-scrim[data-instant="true"],
+.tutor-panel[data-instant="true"] {
+  transition: none;
+}
 .tutor-scrim[data-open="true"] {
   opacity: 1;
   pointer-events: auto;
@@ -120,8 +125,18 @@
   flex-direction: column;
   gap: 12px;
 }
-.tutor-empty {
+/* A Step divider: a rule either side of the Step's number. */
+.tutor-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   color: var(--at-ink-muted);
+}
+.tutor-divider::before,
+.tutor-divider::after {
+  content: "";
+  flex: 1;
+  border-top: var(--at-border) solid var(--at-line);
 }
 /* Student and Tutor turns differ by side, surface, edge and their name, never colour alone. */
 .tutor-turn {
@@ -142,8 +157,10 @@
   background: var(--at-space);
   border-style: dashed;
 }
+/* A failure: a dotted border, its own edge and the "! Tutor problem" name, not colour alone. */
 .tutor-turn.error {
-  border-left-color: var(--at-boss);
+  border-style: dotted;
+  border-left: 6px solid var(--at-boss);
 }
 .tutor-turn.error .tutor-who {
   color: var(--at-boss);
@@ -155,11 +172,30 @@
   height: 0;
 }
 
+.tutor-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px var(--at-gutter) 0;
+  border-top: var(--at-border) solid var(--at-line);
+}
+.tutor-chip {
+  min-height: var(--at-tap);
+  padding: 0 12px;
+  font: 400 var(--at-body-size) / 1.2 var(--at-font-text);
+  color: var(--at-electron);
+  background: transparent;
+  border: var(--at-border) solid var(--at-electron);
+  cursor: pointer;
+}
+.tutor-chip:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
 .tutor-form {
   display: flex;
   gap: 10px;
   padding: 10px var(--at-gutter) 14px;
-  border-top: var(--at-border) solid var(--at-line);
 }
 .tutor-form input {
   flex: 1;
