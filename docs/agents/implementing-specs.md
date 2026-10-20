@@ -22,5 +22,5 @@ Before adding one: read the module's notes in `docs/dev/`, `git fetch origin`, a
 
 ## Implementers
 
-- Run `pnpm check` before reporting done. The full suite (`pnpm check:full`: browser tests, video stills) is CI's job.
+- Run `pnpm check` before reporting done. The full suite (`pnpm check:full`: browser tests, video stills) is CI's job; for Scene work, also run `pnpm video stills --changed` (`docs/dev/video.md`).
 - Run git as plain, separate commands from the worktree root.

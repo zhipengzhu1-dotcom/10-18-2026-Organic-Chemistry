@@ -14,6 +14,7 @@ import { sceneManifests } from "@astratron/scenes/manifests";
 import { watchSceneManifests } from "@astratron/scenes/watch";
 import { citedFor } from "./cited.ts";
 import { videoJobs, type VideoJob } from "./jobs.ts";
+import { unknownScenesError } from "./select.ts";
 import { sourcesSidecar } from "./sidecar.ts";
 import { browserOptions } from "./browser.ts";
 import type { FrameProps } from "./remotion/Root.tsx";
@@ -35,8 +36,8 @@ export interface RenderOptions {
 
 /** Renders the chosen Scenes at every aspect; returns the files written. */
 export async function renderScenes({ mode, scenes = [], sidecarOnly = false, out = outDir, log = console.log }: RenderOptions) {
-  const unknown = scenes.filter((id) => !sceneRegistry[id]);
-  if (unknown.length) throw new Error(`Unknown Scene(s): ${unknown.join(", ")}. Scenes: ${Object.keys(sceneRegistry).join(", ")}`);
+  const unknown = unknownScenesError(scenes, Object.keys(sceneRegistry));
+  if (unknown) throw new Error(unknown);
   const jobs = videoJobs(sceneManifests).filter((j) => !scenes.length || scenes.includes(j.sceneId));
 
   // Watch-only Scenes (#66) are in the catalog so Lessons that show them build; Manim renders them (`pnpm scenes:render`).

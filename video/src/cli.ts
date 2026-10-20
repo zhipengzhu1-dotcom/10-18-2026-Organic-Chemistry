@@ -2,11 +2,14 @@
 //   links <lesson> [--origin <url>]   each Step's id, phase, Prompt opening and deep link
 //   render [scene…] [--sources-only]  video + sources sidecar per Scene × aspect → video/out/
 //   stills [scene…]                   the poster frame per Scene × aspect → video/out/ (CI gate)
+//     render/stills pick Scenes with ids, --only <id>[,<id>…] or --changed (select.ts); none = all
 //   check-site                        fails if the built site or its modules carry Remotion (builds the site if needed)
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { buildContent, contentRoot } from "@astratron/content";
+import { sceneManifests } from "@astratron/scenes/manifests";
 import { formatLinks, lessonLinks } from "./links.ts";
+import { changedScenes, gitChangedFiles, parseSelection, sceneFiles, unknownScenesError } from "./select.ts";
 import { builtSite, remotionDependencies, remotionInFiles } from "./site-check.ts";
 
 const repo = fileURLToPath(new URL("../..", import.meta.url));
@@ -15,13 +18,28 @@ const flags = rest.filter((a) => a.startsWith("--"));
 const args = rest.filter((a, i) => !a.startsWith("--") && rest[i - 1] !== "--origin");
 
 const usage = `Usage: pnpm video links <lesson id or slug> [--origin <url>]
-       pnpm video render [scene…] [--sources-only]
-       pnpm video stills [scene…]
+       pnpm video render [scene… | --only <id>[,<id>…] | --changed] [--sources-only]
+       pnpm video stills [scene… | --only <id>[,<id>…] | --changed]
        pnpm video check-site`;
 
 function fail(message: string): never {
   console.error(message);
   process.exit(1);
+}
+
+/** The Scene ids to render ([] = all), or undefined when `--changed` finds none. */
+function selectScenes(rest: string[]): string[] | undefined {
+  const selection = parseSelection(rest);
+  if (selection.kind === "all") return [];
+  if (selection.kind === "ids") {
+    const unknown = unknownScenesError(selection.ids, sceneManifests.map((m) => m.id));
+    if (unknown) fail(unknown);
+    return selection.ids;
+  }
+  const files = new Map(sceneManifests.map((m) => [m.id, sceneFiles(repo, m.id, m.data)]));
+  const changed = changedScenes(files, gitChangedFiles(repo));
+  if (changed.length) console.log(`Changed Scenes: ${changed.join(", ")}`);
+  return changed.length ? changed : undefined;
 }
 
 async function main() {
@@ -37,8 +55,10 @@ async function main() {
     }
     case "render":
     case "stills": {
+      const scenes = selectScenes(rest);
+      if (!scenes) return console.log("no Scenes changed");
       const { renderScenes } = await import("./render.ts");
-      const files = await renderScenes({ mode: command === "stills" ? "still" : "video", scenes: args, sidecarOnly: flags.includes("--sources-only") });
+      const files = await renderScenes({ mode: command === "stills" ? "still" : "video", scenes, sidecarOnly: flags.includes("--sources-only") });
       console.log(`${files.length} file(s) written.`);
       return;
     }
