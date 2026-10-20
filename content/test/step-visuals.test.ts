@@ -3,6 +3,7 @@
 // answered (`revealScene`), and an `aside` one tap away (a Scene or a table of
 // drawings). Problems carry them too, so their Check Steps show them.
 import { describe, expect, it } from "vitest";
+import { answeredCitations } from "../src/model.ts";
 import { buildContent, type SceneCatalog } from "../src/index.ts";
 import { elements, lesson, sampleSteps, validTree, writeTree, type Tree } from "./tree.ts";
 
@@ -148,7 +149,7 @@ describe("revealScene: a Scene shown once the Step is answered", () => {
     expect(result.errors).toEqual([]);
     const step = stepsOf(result)[2];
     expect(step.type !== "explain" && step.revealScene).toMatchObject({ id: "strip", state: { highlight: "some" } });
-    expect(step.citations?.map((c) => c.ref)).toEqual(["elements/C.colour"]);
+    expect(answeredCitations(step).map((c) => c.ref)).toEqual(["elements/C.colour"]);
   });
 
   it("is checked against the Scene registry", () => {
@@ -222,7 +223,7 @@ describe("Problems carry figures, revealScene and aside into their Check Steps",
     expect(check.figures?.[0].view.highlight?.ring).toEqual(["a1"]);
     expect(check.type !== "explain" && check.revealScene?.id).toBe("strip");
     expect(check.aside?.scene?.state).toEqual({ highlight: "some" });
-    expect(check.citations?.map((c) => c.ref)).toEqual(["elements/C.colour"]);
+    expect(answeredCitations(check).map((c) => c.ref)).toEqual(["elements/C.colour"]);
   });
 
   it("checked", () => {

@@ -4,14 +4,24 @@
 // Sizes are in frame units (1920×1080 or 1080×1920), scaled by `unit`.
 import type { ReactNode } from "react";
 
-export const ink = "var(--at-ink, #f2f0ff)";
-export const electron = "var(--at-electron, #35d4ff)";
-export const muted = "var(--at-ink-muted, #b9b4d8)";
-export const line = "var(--at-line, #6b6890)";
-export const boss = "var(--at-boss, #ff4fd8)";
-export const panel = "var(--at-panel, #1b1838)";
+export const ink = "var(--at-ink, #ffffff)";
+export const electron = "var(--at-electron, #3ee8ff)";
+export const muted = "var(--at-ink-muted, #b9a8e8)";
+export const line = "var(--at-line, #6a4bd1)";
+export const boss = "var(--at-boss, #ff5fd8)";
 
-export { OUTER } from "./outer.ts";
+/**
+ * One electron as a half-arrow, as MO diagrams draw them: ↑ (spin up) or ↓, the barb on one side
+ * only. `h` is its height; `w` its stroke (default in proportion to `h`).
+ */
+export function HalfArrow({ x, y, h, up, w = h * 0.09 }: { x: number; y: number; h: number; up: boolean; w?: number }) {
+  const top = y - h / 2;
+  const bottom = y + h / 2;
+  const tip = up ? top : bottom;
+  const back = up ? h * 0.32 : -h * 0.32;
+  const d = `M ${x} ${bottom} L ${x} ${top} M ${x} ${tip} L ${x - h * 0.22} ${tip + back}`;
+  return <path className={`electron ${up ? "up" : "down"}`} d={d} stroke={electron} strokeWidth={w} strokeLinecap="round" fill="none" />;
+}
 
 /** Element symbols, formulas and numbers are set in the data face (design rule); body words in the text face. */
 export const DATA_FONT = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
@@ -26,8 +36,10 @@ export interface Pt {
 export const dir = (deg: number): Pt => ({ x: Math.cos((deg * Math.PI) / 180), y: Math.sin((deg * Math.PI) / 180) });
 
 export function Letter({ at, el, size, colour = ink, opacity = 1 }: { at: Pt; el: string; size: number; colour?: string; opacity?: number }) {
+  // Drawn letters are never read: a Scene's description (and an interactive Scene's named buttons) say it.
   return (
     <text
+      aria-hidden="true"
       x={at.x}
       y={at.y}
       fill={colour}

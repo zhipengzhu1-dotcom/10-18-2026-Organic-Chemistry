@@ -5,6 +5,7 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type { NumericStep, RankStep, SceneValue, Structure } from "@astratron/content";
 import { act, start, type Action, type Answer, type LessonProgress, type PlayableLesson, type Screen } from "../engine/player.ts";
+import { answeredCitations } from "@astratron/content/model";
 import { withKey, type AnswerKey, type PageLesson } from "../lib/answer-key.ts";
 import { mistakeTarget, reportMistakeHref } from "../lib/submit-links.ts";
 import { recordProblem, saveLesson, streakOn } from "../progress/record.ts";
@@ -46,7 +47,7 @@ interface Props {
 
 /**
  * Island-only action: (re)open a Step, replaying saved answers. With no `stepId` it opens
- * where the progress says; with no `saved` it keeps the progress on screen.
+ * where `saved` says, or reopens the Step on screen; with no `saved` it keeps the progress on screen.
  */
 type PlayerAction = Action | { type: "open"; stepId?: string; saved?: LessonProgress };
 
@@ -58,7 +59,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   const [screen, dispatch] = useReducer(
     (s: Screen, a: PlayerAction) =>
       a.type === "open"
-        ? start(lesson, a.stepId, a.saved ?? s.progress)
+        ? start(lesson, a.stepId ?? (a.saved ? undefined : s.step.id), a.saved ?? s.progress)
         : act(lesson, { ...s, step: lesson.steps[s.index] }, a),
     lesson,
     (l) => start(l),
@@ -119,7 +120,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     let { record, earned } = practice
       ? { record: readRecord(), earned: false }
       : saveLesson(readRecord(), page.id, screen.progress, now);
-    if (key && screen.step.type !== "explain" && "problemId" in screen.step && screen.step.problemId && screen.canContinue) {
+    // A Step opened ahead by a link saves nothing and earns nothing (story 17).
+    if (key && !screen.ahead && screen.step.type !== "explain" && "problemId" in screen.step && screen.step.problemId && screen.canContinue) {
       const result = { tries: screen.tries, correct: screen.feedback?.kind === "correct" };
       const solved = recordProblem(record, screen.step.problemId, result, now);
       record = solved.record;
@@ -133,6 +135,15 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     const moved = location.hash || screen.index > 0;
     if (linked && moved && location.hash !== `#${step.id}`) history.replaceState(null, "", `#${step.id}`);
   }, [linked, step.id, screen.index, practice]);
+
+  // A new Step on screen (Continue, back, a Step link) takes focus, so a screen reader announces it.
+  const body = useRef<HTMLElement>(null);
+  const shownStep = useRef(step.id);
+  useEffect(() => {
+    if (shownStep.current === step.id) return;
+    shownStep.current = step.id;
+    body.current?.focus({ preventScroll: true });
+  }, [step.id]);
 
   // Goal-state Manipulate: after `idleSeconds` with no move, the stage's idle Hint (the second also nudges).
   const goalIdle = step.type === "manipulate-goal" && screen.goal && !screen.canContinue && key ? step.idleSeconds : 0;
@@ -233,7 +244,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         </span>
       </div>
 
-      <main className="player-body">
+      <main className="player-body" ref={body} tabIndex={-1} aria-label={`${practice ? "Problem" : "Step"} ${screen.index + 1} of ${screen.total}`}>
         {step.type === "explain" ? (
           // Block Markdown: paragraphs and lists.
           <div className="explain-text" {...html(step.text)} />
@@ -330,7 +341,6 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
             sceneId={step.scene.id}
             state={sceneState}
             cited={step.scene.cited}
-            loop={step.type === "manipulate"}
             still={step.scene.still}
           >
             {step.type === "manipulate" && setting !== undefined && (
@@ -446,10 +456,12 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         <div className="step-meta">
           {step.aside && <AsideButton key={`aside-${step.id}`} aside={step.aside} stepId={step.id} />}
 
-          {/* Keyed per Step so a new Step opens its Source note collapsed. A reveal Scene that prints numbers
-              (Lesson 7's C–N lengths) would give the answer away in the note, so the note waits for the answer. */}
-          {!(step.type !== "explain" && step.revealScene && Object.keys(step.revealScene.cited).length && !screen.canContinue) && (
-            <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} note={step.sourceNote} />
+          {/* Keyed per Step so a new Step opens its Source note collapsed. Numbers cited only in the answer
+              (its Hints, reveal or reveal Scene) join the note once it's answered. A Step whose reveal Scene
+              prints numbers (Lesson 7's C–N lengths) shows its note only then, which also keeps it on one phone screen. */}
+          {/* A graded Step's note waits for the answer key, which says whether it has a reveal Scene (no flicker). */}
+          {(step.type === "explain" || key) && !(step.type !== "explain" && step.revealScene && Object.keys(step.revealScene.cited).length && !screen.canContinue) && (
+            <SourceNote key={`source-note-${step.id}`} cited={screen.canContinue ? answeredCitations(step) : (step.citations ?? [])} note={step.sourceNote} />
           )}
 
           <p className="report">
@@ -484,6 +496,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
               Back to Unit
             </a>
           </div>
+        ) : screen.ahead && screen.canContinue && screen.index + 1 === screen.total ? (
+          // A Step link opened this Wrap ahead of the Student's place: it doesn't finish the Lesson (story 17).
+          <button type="button" className="btn btn-primary btn-block" onClick={() => dispatch({ type: "open", stepId: screen.progress.step })}>
+            Go to my place
+          </button>
         ) : practice && screen.canContinue && screen.index + 1 === screen.total ? (
           <button type="button" className="btn btn-primary btn-block" onClick={() => practice.onFinish(lesson, screen.progress)}>
             See results

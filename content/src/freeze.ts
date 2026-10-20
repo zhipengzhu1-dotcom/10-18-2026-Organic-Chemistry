@@ -60,7 +60,7 @@ function nextId(lesson: LessonFile, frozen: string[]): string {
  * Ids already frozen stay frozen. Refuses to run on content that doesn't build.
  */
 export function freezeStepIds(root: string): void {
-  const { model, errors } = buildContent(root);
+  const { model, errors } = buildContent(root, { unfrozen: true });
   if (!model) throw new Error(`Content build failed; fix it before freezing:\n  ${errors.join("\n  ")}`);
   for (const subject of model.subjects) {
     const file = join(root, subject.slug, LOCK_FILE);

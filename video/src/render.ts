@@ -15,13 +15,13 @@ import { watchSceneManifests } from "@astratron/scenes/watch";
 import { citedFor } from "./cited.ts";
 import { videoJobs, type VideoJob } from "./jobs.ts";
 import { sourcesSidecar } from "./sidecar.ts";
+import { browserOptions } from "./browser.ts";
 import type { FrameProps } from "./remotion/Root.tsx";
 
 export const outDir = fileURLToPath(new URL("../out", import.meta.url));
 const entryPoint = fileURLToPath(new URL("./remotion/index.ts", import.meta.url));
-// Software GL (SwiftShader via ANGLE): the same pixels on a laptop and on CI with
-// no GPU. Remotion's default GL left the root component loading forever on macOS.
-const chromiumOptions = { gl: "swangle" } as const;
+// Software GL, and REMOTION_BROWSER_EXECUTABLE to use a local browser (browser.ts).
+const browser = browserOptions();
 
 export interface RenderOptions {
   mode: "video" | "still";
@@ -54,17 +54,17 @@ export async function renderScenes({ mode, scenes = [], sidecarOnly = false, out
     const inputProps: FrameProps = { sceneId: job.sceneId, aspect: job.aspect, cited };
 
     if (needsBrowser) {
-      const composition = await selectComposition({ serveUrl, id: job.id, inputProps, chromiumOptions });
+      const composition = await selectComposition({ serveUrl, id: job.id, inputProps, ...browser });
       check(job, composition);
       if (mode === "still") {
         const output = join(out, `${job.id}.png`);
-        await renderStill({ serveUrl, composition, frame: job.posterFrame, output, inputProps, chromiumOptions });
+        await renderStill({ serveUrl, composition, frame: job.posterFrame, output, inputProps, ...browser });
         written.push(output);
         log(`still  ${job.id}  frame ${job.posterFrame}  ${job.width}×${job.height}  → ${output}`);
         continue;
       }
       const output = join(out, `${job.id}.mp4`);
-      await renderMedia({ serveUrl, composition, codec: "h264", crf: 18, outputLocation: output, inputProps, chromiumOptions });
+      await renderMedia({ serveUrl, composition, codec: "h264", crf: 18, outputLocation: output, inputProps, ...browser });
       written.push(output);
       log(`video  ${job.id}  ${job.durationInFrames} frames @ ${job.fps} fps  → ${output}`);
     }

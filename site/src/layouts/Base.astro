@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
 import { suggestProblemHref } from "../lib/submit-links.ts";
-import { KOFI_URL, pageMeta } from "../lib/site.ts";
+import { KOFI_URL, pageMeta, robots } from "../lib/site.ts";
 
 interface Props {
   title: string;
@@ -21,11 +21,14 @@ const meta = pageMeta({ path: Astro.url.pathname, unitId });
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <!-- Nothing is indexed until the owner goes public (pre-public checklist). -->
-    <meta name="robots" content="noindex" />
+    <!-- Nothing is indexed until the owner goes public: PUBLIC in lib/site.ts (pre-public checklist). -->
+    {robots() && <meta name="robots" content={robots()} />}
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={meta.canonical} />
+    <!-- The icon, from the repo's "AstraTron Icon.jpg" (sips -z 32 32 / 180 180). -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <meta property="og:site_name" content="AstraTron" />
     <meta property="og:type" content="website" />
@@ -86,6 +89,7 @@ const meta = pageMeta({ path: Astro.url.pathname, unitId });
             and <a href="https://chem.libretexts.org/">LibreTexts</a>.
           </p>
           <nav aria-label="Site">
+            <a href="/about">About</a>
             <a href="/privacy">Privacy</a>
             <a href={suggestProblemHref()}>Suggest a Problem</a>
           </nav>

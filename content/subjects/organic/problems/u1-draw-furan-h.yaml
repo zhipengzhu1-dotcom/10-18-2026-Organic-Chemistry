@@ -23,4 +23,4 @@ hints:
   - { text: "For each corner: 4 minus the bonds you see (a double bond counts 2)." }
 reveal: "4 H's: one on each carbon."
 revealScene: { id: h-fill, state: { molecule: furan } }
-sourceNote: "Molecule after LibreTexts, *Map: Organic Chemistry (Wade)*, §1.16 exercise 1-8, CC BY-NC-SA 4.0; our question. Furan, PubChem CID 8029 (formula C₄H₄O)."
+sourceNote: "Molecule after LibreTexts, *Map: Organic Chemistry (Wade)*, §1.16 exercise 1-8, CC BY-NC-SA 4.0; our question. Furan, PubChem CID 8029."

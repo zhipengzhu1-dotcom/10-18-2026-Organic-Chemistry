@@ -1,15 +1,16 @@
 // four-domain-family (Lesson 3, s05; s15's final frame): CH₄, NH₃ and H₂O side by side, rebuilt
 // from their cited (experimental) bond lengths and angles, all in the same orientation and
 // turning together. Lone pairs are translucent lobes labelled "lone pair (sketch)". Under each:
-// the shape name and the measured angle; a dashed line reads the model's 109.5°.
+// the shape name and the measured angle; a dashed line reads the VSEPR model's tetrahedral angle
+// (cited as a model value, vsepr-model.yaml).
 import type { Cited } from "@astratron/content/data";
 import type { SceneManifest } from "../types.ts";
 import { colourRef, shapeRefs } from "../shapes-3d/shapes.ts";
 
 export type FourDomainState = { labels: string };
 
-/** The tetrahedron model's prediction, named as the model's (the spec's only typed angle here). */
-export const MODEL_ANGLE = "109.5"; // cited-data: ok, the VSEPR model's prediction, always labelled "model"
+/** The tetrahedron model's prediction, cited as the model's (never a measurement). */
+export const MODEL_ANGLE = "vsepr-model/tetrahedral.angle";
 
 export const FAMILY = [
   { key: "methane", angle: "methane/a.HCH", angleName: "H–C–H", words: "Methane: four hydrogens, tetrahedral" },
@@ -45,9 +46,9 @@ export const fourDomainFamily: SceneManifest<FourDomainState> = {
     labels === "names"
       ? "Methane tetrahedral, ammonia trigonal pyramidal, water bent."
       : `Three molecules side by side. ${FAMILY.map((m) => `${m.words}, ${m.angleName} ${degrees(cited[m.angle])} degrees.`).join(" ")} ` +
-        `The tetrahedron model predicts ${MODEL_ANGLE} degrees for all three.`,
+        `The tetrahedron model predicts ${degrees(cited[MODEL_ANGLE])} degrees for all three.`,
   reducedMotion: "Opens paused side on, with every name and angle shown; Play turns the three together once.",
-  data: [...FAMILY.flatMap((m) => shapeRefs(m.key)), ...["C", "N", "O", "H"].map(colourRef)],
+  data: [...FAMILY.flatMap((m) => shapeRefs(m.key)), MODEL_ANGLE, ...["C", "N", "O", "H"].map(colourRef)],
   duration: TURN_SECONDS,
   poster: { t: TURN_SECONDS },
   video: {

@@ -11,6 +11,8 @@ export const GET: APIRoute = () => {
     ...unitPages().map((p) => p.unit.url),
     ...lessonPages().map((p) => p.lesson.url),
     ...practicePages().map((p) => practiceUrl(p.unit)),
+    "/about",
+    "/coming-soon",
     "/privacy",
     "/submit",
   ];

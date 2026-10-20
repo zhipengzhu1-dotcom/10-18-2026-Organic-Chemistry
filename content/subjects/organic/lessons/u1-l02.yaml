@@ -26,7 +26,7 @@ steps:
     answer: [c]
     reveal: "**{{h-counts/estradiol}}.** The drawing leaves most of them out, on purpose: every one can be worked out from the corners. By the end of this Lesson you'll find them all without seeing them."
     revealScene: { id: h-fill, state: { molecule: estradiol } }
-    sourceNote: "Estradiol, PubChem CID 5757 (formula C₁₈H₂₄O₂). Full drawing beside line drawing after MIT OCW 5.12, Lecture 1 p. 12, Berkowski, Spring 2005, CC BY-NC-SA 4.0."
+    sourceNote: "Estradiol, PubChem CID 5757. Full drawing beside line drawing after MIT OCW 5.12, Lecture 1 p. 12, Berkowski, Spring 2005, CC BY-NC-SA 4.0."
 
   - id: s02
     phase: build
@@ -98,7 +98,7 @@ steps:
       - { text: "For each corner: 4 minus the bonds you can see is the number of H's. Then add them up." }
     reveal: "{{h-counts/cyclohexanone}} H's: two on each of the five CH₂ corners, none on the C=O carbon."
     revealScene: { id: h-fill, state: { molecule: cyclohexanone } }
-    sourceNote: "Cyclohexanone, PubChem CID 7967 (formula C₆H₁₀O)."
+    sourceNote: "Cyclohexanone, PubChem CID 7967."
 
   - id: s07
     phase: build

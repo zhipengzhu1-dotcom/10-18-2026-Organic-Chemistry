@@ -8,8 +8,11 @@ import { describe, expect, it } from "vitest";
 import { buildContent, contentRoot } from "../src/index.ts";
 import {
   atomNames,
+  arrowShape,
   describeMolecule,
+  inkOn,
   measure,
+  SCALE_BAR_LABEL,
   project,
   readout,
   togglePick,
@@ -228,5 +231,26 @@ describe("Describe", () => {
     const text = describeMolecule({ ...water, describe: "A bent molecule." }, viewMatrix(water.atoms));
     expect(text.startsWith("A bent molecule. Water: 3 atoms.")).toBe(true);
     expect(text).toContain("O1 is bonded to H1 and H2.");
+  });
+});
+
+describe("drawing helpers the 3D card and the 3D Scenes share", () => {
+  it("inks a letter dark on a light atom and white on a dark one", () => {
+    expect(inkOn("#FFFFFF")).toBe("#140f2b");
+    expect(inkOn("#FF0D0D")).toBe("white");
+    expect(inkOn("#909090")).toBe("#140f2b");
+    expect(inkOn("#3050F8")).toBe("white");
+  });
+
+  it("shapes a dipole arrow: shaft to the head's base, a cross on the tail, a head at the tip", () => {
+    const a = arrowShape({ x: 0, y: 0 }, { x: 100, y: 0 }, { head: 10, tail: 8, cross: 6, spread: 0.5 })!;
+    expect(a.shaft).toEqual([{ x: 0, y: 0 }, { x: 90, y: 0 }]);
+    expect(a.cross).toEqual([{ x: 8, y: 6 }, { x: 8, y: -6 }]);
+    expect(a.head).toEqual([{ x: 100, y: 0 }, { x: 90, y: 5 }, { x: 90, y: -5 }]);
+    expect(arrowShape({ x: 0, y: 0 }, { x: 0.5, y: 0 }, { head: 10, tail: 8, cross: 6, spread: 0.5 }, 1)).toBeUndefined();
+  });
+
+  it("labels the scale bar one ångström", () => {
+    expect(SCALE_BAR_LABEL).toBe("1 Å");
   });
 });

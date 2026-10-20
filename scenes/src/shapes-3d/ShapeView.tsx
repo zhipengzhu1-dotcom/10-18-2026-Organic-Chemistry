@@ -2,27 +2,22 @@
 // to front as shaded balls in their cited Jmol colours, each with its letter, and optional lone-pair
 // lobes (a sketch). Pure: everything comes from the props. Shared by Lesson 3's Scenes.
 import type { Cited } from "@astratron/content/data";
-import type { Matrix3, Vec3 } from "@astratron/content/molecule";
+import { inkOn, SCALE_BAR_LABEL, type Matrix3, type Vec3 } from "@astratron/content/molecule";
 import type { Box } from "../frame.ts";
 import { CYAN, DATA_FONT, INK } from "../lewis.ts";
 import { colourRef, onScreen, type Shape } from "./shapes.ts";
 
-/** Ball size as a fraction of 1 Å on screen (ball and stick). */
-export const BALL = 0.3;
+/** Every ball's size (its radius) in Å on screen, the same for all elements: a sketch, unlike the 3D card's 30% of Bondi radii. */
+export const BALL_SIZE = 0.3;
 /** Lone-pair lobes reach this far from the centre, in Å on screen (a sketch). */
 const LOBE = 0.95;
 
 
 
-/** Dark or light ink for a letter on a ball of this colour. */
-export function inkOn(hex: string): string {
-  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.5 ? "#140f2b" : "white";
-}
 
 /** Pixels per Å that fit the shape (and lobes) in the box at any turn. */
 export function fitScale(shape: Shape, box: Box, room = 1.25): number {
-  const reach = Math.max(LOBE, ...shape.atoms.map((a) => Math.hypot(...a.pos))) + BALL * 2;
+  const reach = Math.max(LOBE, ...shape.atoms.map((a) => Math.hypot(...a.pos))) + BALL_SIZE * 2;
   return Math.min(box.w, box.h) / 2 / (reach * room);
 }
 
@@ -61,7 +56,7 @@ export function ShapeView({ shape, view, cx, cy, px, cited, lonePairs, font, id 
   const lobes = lonePairs ? place(shape.lonePairs.map((d) => [d[0] * LOBE, d[1] * LOBE, d[2] * LOBE] as Vec3), view, cx, cy, px) : [];
   const colour = (el: string) => String(cited[colourRef(el)]?.value ?? "#888888");
   const order = shape.atoms.map((_, i) => i).sort((a, b) => at[a].z - at[b].z);
-  const ball = BALL * px;
+  const ball = BALL_SIZE * px;
   return (
     <g>
       <defs>
@@ -141,8 +136,6 @@ export function ShapeView({ shape, view, cx, cy, px, cited, lonePairs, font, id 
   );
 }
 
-const SCALE_LABEL = "1 Å"; // cited-data: ok, the scale bar's unit length (drawn at px per Å), not a measurement
-
 /** A one-ångström scale bar with its label, left-aligned at (x, y). */
 export function ScaleBar({ x, y, px, font }: { x: number; y: number; px: number; font: number }) {
   return (
@@ -151,7 +144,7 @@ export function ScaleBar({ x, y, px, font }: { x: number; y: number; px: number;
       <line x1={x} y1={y - 8} x2={x} y2={y + 8} stroke={INK} strokeWidth={3} />
       <line x1={x + px} y1={y - 8} x2={x + px} y2={y + 8} stroke={INK} strokeWidth={3} />
       <text x={x + px + 12} y={y} fill={INK} fontSize={font} fontFamily={DATA_FONT} dominantBaseline="central">
-        {SCALE_LABEL}
+        {SCALE_BAR_LABEL}
       </text>
     </g>
   );

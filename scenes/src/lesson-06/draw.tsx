@@ -7,9 +7,9 @@ import type { Box } from "../frame.ts";
 import { pushArrow } from "../structure/arrows.ts";
 import type { Drawing, Point } from "../structure/render.ts";
 
-export const ink = "var(--at-ink, #f2f0ff)";
-export const electron = "var(--at-electron, #5ee7ff)";
-export const muted = "var(--at-ink-muted, #b9b6d9)";
+export const ink = "var(--at-ink, #ffffff)";
+export const electron = "var(--at-electron, #3ee8ff)";
+export const muted = "var(--at-ink-muted, #b9a8e8)";
 export const fontText = "var(--at-font-text, 'Space Grotesk', system-ui, sans-serif)";
 export const fontData = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
 

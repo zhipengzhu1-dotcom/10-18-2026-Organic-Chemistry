@@ -2,12 +2,12 @@
 //   links <lesson> [--origin <url>]   each Step's id, phase, Prompt opening and deep link
 //   render [scene…] [--sources-only]  video + sources sidecar per Scene × aspect → video/out/
 //   stills [scene…]                   the poster frame per Scene × aspect → video/out/ (CI gate)
-//   check-site                        fails if the built site or its modules carry Remotion
-import { existsSync } from "node:fs";
+//   check-site                        fails if the built site or its modules carry Remotion (builds the site if needed)
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { buildContent, contentRoot } from "@astratron/content";
 import { formatLinks, lessonLinks } from "./links.ts";
-import { remotionDependencies, remotionInFiles } from "./site-check.ts";
+import { builtSite, remotionDependencies, remotionInFiles } from "./site-check.ts";
 
 const repo = fileURLToPath(new URL("../..", import.meta.url));
 const [command, ...rest] = process.argv.slice(2);
@@ -43,8 +43,10 @@ async function main() {
       return;
     }
     case "check-site": {
-      const dist = `${repo}site/dist`;
-      if (!existsSync(dist)) fail("site/dist not found: build the site first (pnpm build).");
+      const dist = builtSite(repo, () => {
+        console.log("site/dist not found: building the site first (pnpm build).");
+        execFileSync("pnpm", ["build"], { cwd: repo, stdio: "inherit" });
+      });
       const hits = [...remotionDependencies(repo, ["site", "scenes", "content"]), ...remotionInFiles(dist).map((f) => `site/dist/${f}`)];
       if (hits.length) fail(`Remotion found in the site (ADR 0001: it is only the video renderer):\n  ${hits.join("\n  ")}`);
       console.log("Site OK: no Remotion code in site/dist or in the modules it ships.");

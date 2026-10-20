@@ -1,0 +1,45 @@
+---
+// The about page (spec §Pages): what AstraTron is, who it's for, how it works and where its
+// numbers come from. Static HTML, plain and short.
+import Base from "../layouts/Base.astro";
+import TopBar from "../components/TopBar.astro";
+import { courseModel } from "../lib/content.ts";
+import { KOFI_URL } from "../lib/site.ts";
+import { suggestProblemHref } from "../lib/submit-links.ts";
+
+const unit1 = courseModel().subjects[0]?.courses[0]?.units.find((u) => u.status === "available");
+---
+
+<Base title="About · AstraTron" description="What AstraTron is, who it's for, and where its numbers come from.">
+  <TopBar />
+  <main class="page prose">
+    <h1>About AstraTron</h1>
+    <p>
+      AstraTron is a free place to do organic chemistry, not just read about it. You push electrons, turn molecules in 3D and get
+      feedback written for your specific mistake, one Step at a time.
+    </p>
+
+    <h2>Who it's for</h2>
+    <p>Students taking Organic Chemistry I and II, and anyone in high school or beyond who is curious about it.</p>
+
+    <h2>How it works</h2>
+    <p>
+      Each Unit is a set of short Lessons, and each Lesson is a run of Steps you answer, drag or tap. There are no accounts and no
+      ads: your progress and Streak stay in your browser.
+    </p>
+
+    <h2>Where the numbers come from</h2>
+    <p>
+      Every number comes from a cited source, and each Step's Source note says which one. Measured values are labelled measured;
+      computed and model values are labelled as such.
+    </p>
+
+    <h2>Who makes it</h2>
+    <p>
+      AstraTron is a personal project, not a registered charity. If it helped you, you can <a href={KOFI_URL}>chip in on Ko-fi</a>;
+      donations pay for hosting and new Units. Seen a mistake, or have a good Problem? <a href={suggestProblemHref()}>Tell us</a>.
+    </p>
+
+    {unit1 && <p><a class="btn btn-primary" href={unit1.url}>Start Unit <span class="data">1</span> ▸</a></p>}
+  </main>
+</Base>

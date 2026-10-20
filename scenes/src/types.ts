@@ -80,7 +80,7 @@ export interface SceneManifest<S extends SceneState = SceneState> {
   reducedMotion: string;
   /** Cited-data refs (`file/key`) of every number or element colour the Scene shows. May be empty. */
   data: string[];
-  /** Seconds one autoplay run lasts on the site (a Manipulate Step loops it). */
+  /** Seconds one autoplay run lasts on the site (it plays once; Replay plays it again). */
   duration: number;
   /**
    * false: the site shows no Play/Replay/Scrub row; the Scene plays once on entry (or rests on its

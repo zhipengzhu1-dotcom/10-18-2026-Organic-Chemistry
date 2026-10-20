@@ -5,6 +5,61 @@
   "file": "domain-spread-9x16.mp4",
   "fps": 60,
   "duration": 10,
-  "numbers": [],
-  "description": "Electron domains push apart\nThis video shows no cited numbers."
+  "numbers": [
+    {
+      "ref": "vsepr-model/linear.angle",
+      "label": "model angle, linear (2 domains)",
+      "quantity": "angle",
+      "value": 180,
+      "unit": "°",
+      "display": "180°",
+      "full": "180°",
+      "citation": "Gillespie, R. J. and Hargittai, I., The VSEPR Model of Molecular Geometry, Allyn and Bacon (1991): ideal electron-domain arrangements (two domains linear, three trigonal planar, four tetrahedral)",
+      "licence": "Geometric definitions (the angles of regular shapes), not third-party data; cited for traceability",
+      "shown": "text",
+      "onScreen": [
+        {
+          "from": 5.7,
+          "to": 10
+        }
+      ]
+    },
+    {
+      "ref": "vsepr-model/trigonal-planar.angle",
+      "label": "model angle, trigonal planar (3 domains)",
+      "quantity": "angle",
+      "value": 120,
+      "unit": "°",
+      "display": "120°",
+      "full": "120°",
+      "citation": "Gillespie, R. J. and Hargittai, I., The VSEPR Model of Molecular Geometry, Allyn and Bacon (1991): ideal electron-domain arrangements (two domains linear, three trigonal planar, four tetrahedral)",
+      "licence": "Geometric definitions (the angles of regular shapes), not third-party data; cited for traceability",
+      "shown": "text",
+      "onScreen": [
+        {
+          "from": 5.7,
+          "to": 10
+        }
+      ]
+    },
+    {
+      "ref": "vsepr-model/tetrahedral.angle",
+      "label": "model angle, tetrahedral (4 domains)",
+      "quantity": "angle",
+      "value": 109.4712,
+      "unit": "°",
+      "display": "109.5°",
+      "full": "109.4712°",
+      "citation": "Gillespie, R. J. and Hargittai, I., The VSEPR Model of Molecular Geometry, Allyn and Bacon (1991): ideal electron-domain arrangements (two domains linear, three trigonal planar, four tetrahedral)",
+      "licence": "Geometric definitions (the angles of regular shapes), not third-party data; cited for traceability",
+      "shown": "text",
+      "onScreen": [
+        {
+          "from": 5.7,
+          "to": 10
+        }
+      ]
+    }
+  ],
+  "description": "Electron domains push apart\n\nNumbers on screen:\n0:05–0:10  model angle, linear (2 domains) 180°\n0:05–0:10  model angle, trigonal planar (3 domains) 120°\n0:05–0:10  model angle, tetrahedral (4 domains) 109.5°\n\nSources:\nModel, not measured. model angle, linear (2 domains) 180°, model angle, trigonal planar (3 domains) 120° and model angle, tetrahedral (4 domains) 109.4712° from Gillespie, R. J. and Hargittai, I., The VSEPR Model of Molecular Geometry, Allyn and Bacon (1991): ideal electron-domain arrangements (two domains linear, three trigonal planar, four tetrahedral)."
 }

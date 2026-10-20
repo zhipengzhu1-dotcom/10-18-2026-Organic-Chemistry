@@ -8,7 +8,7 @@
 import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { sceneRegistry, type SceneInput, type SceneState } from "@astratron/scenes";
 import type { Cited } from "@astratron/content/data";
-import { useReducedMotion } from "./ScenePlayer.tsx";
+import { useReducedMotion } from "./use-reduced-motion.ts";
 
 interface Props {
   sceneId: string;

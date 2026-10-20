@@ -24,7 +24,7 @@ Give the agent the domain, the Ko-fi address and the Turnstile site key, then as
 
 - [ ] Set `SITE_ADDRESS` in `site/src/lib/site.ts` to the real domain (it is `https://astratron.pages.dev` now). The sitemap, links and share images all follow it.
 - [ ] Set `KOFI_URL` in the same file to your Ko-fi page (it is `https://ko-fi.com/astratron` now).
-- [ ] Remove the `noindex` line from `site/src/layouts/Base.astro`, so search engines may list the site. Also remove the browser test that checks for it ("every page of the site carries noindex" in `site/e2e/definition-of-done.spec.ts`).
+- [ ] Set `PUBLIC = true` next to it in `site/src/lib/site.ts`, so every page drops `noindex` and search engines may list the site. Also remove the browser test that checks for it ("every page of the site carries noindex" in `site/e2e/definition-of-done.spec.ts`) and the `PUBLIC` check in `site/src/lib/site.test.ts`.
 - [ ] Put the Turnstile **site key** in the build setting `PUBLIC_TURNSTILE_SITEKEY` (read by `site/src/pages/submit.astro`). Put the **secret key** into Cloudflare as a Pages secret named `TURNSTILE_SECRET`. The secret never goes in the code; delete the test secret from `site/wrangler.toml` at the same time.
 - [ ] Add the contact line `hello@<your domain>` to the privacy page (it has none yet).
 - [ ] Add a favicon (the small icon in the browser tab), made from `AstraTron Icon.jpg`.

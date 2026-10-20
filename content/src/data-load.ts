@@ -18,7 +18,7 @@ const method = z.strictObject({
 });
 
 const source = z.strictObject({
-  kind: z.enum(["experimental", "computed", "reference"]),
+  kind: z.enum(["experimental", "computed", "reference", "model"]),
   citation: text,
   licence: text,
   /** Id of another source in this file that the value was taken from (e.g. NIST CCCBDB). */
@@ -65,6 +65,9 @@ const value = z.strictObject({
   decimals: z.number().int().min(0).max(6).optional(),
 });
 
+/** Single, double or triple. */
+const order = z.union([z.literal(1), z.literal(2), z.literal(3)]);
+
 const atom = z.tuple([z.string().regex(/^[A-Z][a-z]?$/, "must be an element symbol"), z.number(), z.number(), z.number()]);
 
 export const dataFile = z.strictObject({
@@ -76,7 +79,7 @@ export const dataFile = z.strictObject({
   values: z.record(key, value),
   atoms: z.strictObject({ source: key, list: z.array(atom).min(1) }).optional(),
   /** Molecules: bonds as [atom index, atom index, bond order], 0-based (pipeline output). */
-  bonds: z.array(z.tuple([z.number().int().nonnegative(), z.number().int().nonnegative(), z.union([z.literal(1), z.literal(2), z.literal(3)])])).optional(),
+  bonds: z.array(z.tuple([z.number().int().nonnegative(), z.number().int().nonnegative(), order])).optional(),
   /** Licence notice for third-party data (e.g. the NIST acknowledgement on CCCBDB-derived files). */
   notice: text.optional(),
   orbitals: orbitalSet.optional(),

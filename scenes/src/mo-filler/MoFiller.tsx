@@ -1,25 +1,14 @@
 // mo-filler: a pure function of state (see manifest.ts). Nothing depends on t: a Manipulate Step
-// loops its Scene, and each + / − redraws at once. Schematic levels, no numbers.
+// plays its Scene once, and each + / − redraws at once. Schematic levels, no numbers.
 import { frameSize, safeArea } from "../frame.ts";
 import type { SceneProps } from "../types.ts";
-import { DATA_FONT, TEXT_FONT, electron, ink, line, muted } from "../dots/dots.tsx";
+import { DATA_FONT, HalfArrow, TEXT_FONT, electron, ink, line, muted } from "../dots/dots.tsx";
 import { COMPARE, H2_PLUS, NAMED, PER_LEVEL, fill, type MoFillerState } from "./manifest.ts";
 
 interface Level {
   x: number;
   y: number;
   w: number;
-}
-
-/** One electron as a half-arrow: ↑ (spin up) or ↓, the shape cue for the pair's two spins. */
-function HalfArrow({ x, y, h, up }: { x: number; y: number; h: number; up: boolean }) {
-  const top = y - h / 2;
-  const bottom = y + h / 2;
-  const tip = up ? top : bottom;
-  const back = up ? h * 0.32 : -h * 0.32;
-  // The barb sits on one side only: a half-arrow, as MO diagrams draw electrons.
-  const d = `M ${x} ${bottom} L ${x} ${top} M ${x} ${tip} L ${x - h * 0.22} ${tip + back}`;
-  return <path className={`electron ${up ? "up" : "down"}`} d={d} stroke={electron} strokeWidth={h * 0.09} strokeLinecap="round" fill="none" />;
 }
 
 function LevelLine({ level, label, n, size }: { level: Level; label: string; n: number; size: number }) {

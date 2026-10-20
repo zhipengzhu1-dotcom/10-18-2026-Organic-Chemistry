@@ -122,4 +122,8 @@ export { BOND_PX, drawStructure, type Drawing, type DrawOptions, type Highlight,
 export { withHydrogens } from "./structure/hydrogens.ts";
 export { drawContributors, type ContributorsDrawing } from "./structure/contributors.ts";
 
+// push-replay is a pure function of t, but not a registered Scene: its picture is a Step's own start
+// and pushes (Lesson 6/7 reveals, the Tap replay), not settable states over cited data, so it has no
+// manifest and no video job. A Step that needs it on video would get a Scene wrapping one fixed
+// replay (its start and pushes in the manifest), registered like any other.
 export { default as PushReplay, describeReplay, replayDuration, PUSH_SECONDS } from "./push-replay/PushReplay.tsx";

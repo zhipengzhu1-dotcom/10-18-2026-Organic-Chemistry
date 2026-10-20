@@ -3,11 +3,9 @@
 // drawing: no measured geometry, so no cited numbers; positions only space the
 // letters out. No React here, so manifests can import it (see embed.tsx).
 import type { Structure, StructureAtom } from "@astratron/content";
+import { formalCharge as chargeOf } from "@astratron/content/valence";
 import type { Drawing } from "./structure/render.ts";
 import type { Box } from "./frame.ts";
-
-/** Outer-shell (valence) electrons of the neutral atom: counts, not measured data. */
-export const VALENCE: Record<string, number> = { H: 1, B: 3, C: 4, N: 5, O: 6, F: 7, Cl: 7, Br: 7 };
 
 /** A partner of the centre atom; `el: "*"` is a loose bond end (the rest of a molecule). */
 export interface Partner {
@@ -18,7 +16,7 @@ export interface Partner {
 
 /** The centre's formal charge: valence − lone-pair electrons − bonds. */
 export function formalCharge(el: string, lp: number, partners: Partner[]): number {
-  return VALENCE[el] - 2 * lp - partners.reduce((n, p) => n + (p.order ?? 1), 0);
+  return chargeOf(el, lp, partners.reduce((n, p) => n + (p.order ?? 1), 0));
 }
 
 /**
@@ -55,9 +53,9 @@ export function fit(drawing: Drawing, box: Box): { scale: number; x: number; y: 
 
 /** Text in Scenes is set in the data face (digits and formulas must be, by the site's type rule). */
 export const DATA_FONT = "var(--at-font-data, 'JetBrains Mono'), ui-monospace, monospace";
-export const INK = "var(--at-ink, #f2f0ff)";
-export const MUTED = "var(--at-ink-muted, #b8b4d8)";
-export const LINE = "var(--at-line, #6b6890)";
-export const CYAN = "var(--at-electron, #35d4ff)";
-export const MAGENTA = "var(--at-boss, #ff4fd8)";
-export const ORANGE = "var(--at-ignite, #ff9a3d)";
+export const INK = "var(--at-ink, #ffffff)";
+export const MUTED = "var(--at-ink-muted, #b9a8e8)";
+export const LINE = "var(--at-line, #6a4bd1)";
+export const CYAN = "var(--at-electron, #3ee8ff)";
+export const MAGENTA = "var(--at-boss, #ff5fd8)";
+export const ORANGE = "var(--at-ignite, #ff9a1f)";

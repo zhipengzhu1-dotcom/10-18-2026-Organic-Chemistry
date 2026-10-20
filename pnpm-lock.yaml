@@ -292,6 +292,12 @@ importers:
       '@astratron/scenes':
         specifier: workspace:*
         version: link:../scenes
+      '@fontsource-variable/jetbrains-mono':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource-variable/space-grotesk':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@remotion/bundler':
         specifier: 4.0.537
         version: 4.0.537(csso@5.0.5)(lightningcss@1.33.0)(postcss@8.5.31)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)

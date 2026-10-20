@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lintChemistryNumbers, lintRepo } from "../src/number-lint.ts";
+import { lintChemistryNumbers, lintRepo, sceneCodeDirs } from "../src/number-lint.ts";
 
 const colours = { "#909090": "C colour", "#FF0D0D": "O colour" };
 const lint = (text: string) => lintChemistryNumbers([{ path: "scenes/src/Bond.tsx", text }], colours);
@@ -26,6 +26,10 @@ describe("chemistry-number lint for Scene code", () => {
     ]);
   });
 
+  it("leaves a design token's fallback alone, even when it matches an element colour", () => {
+    expect(lint('const ink = "var(--at-ink, #909090)";')).toEqual([]);
+  });
+
   it("leaves layout, timing and maths numbers alone", () => {
     expect(
       lint(
@@ -39,6 +43,10 @@ describe("chemistry-number lint for Scene code", () => {
         ].join("\n"),
       ),
     ).toEqual([]);
+  });
+
+  it("covers Scene code, the 3D viewer and the content module (ADR 0002)", () => {
+    expect(sceneCodeDirs).toEqual(["scenes/src", "site/src/molecule", "content/src"]);
   });
 
   it("passes on the repo's Scene code", () => {

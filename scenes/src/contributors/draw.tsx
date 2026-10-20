@@ -7,11 +7,11 @@ import type { Box } from "../frame.ts";
 import { drawStructure, type Drawing, type Point } from "../structure/render.ts";
 import { drawContributors } from "../structure/contributors.ts";
 
-export const INK = "var(--at-ink, #f2f0ff)";
-export const MUTED = "var(--at-ink-muted, #a9a6c9)";
-export const ELECTRON = "var(--at-electron, #35d4ff)";
-export const BOSS = "var(--at-boss, #ff4fd8)";
-export const LINE = "var(--at-line, #6b6890)";
+export const INK = "var(--at-ink, #ffffff)";
+export const MUTED = "var(--at-ink-muted, #b9a8e8)";
+export const ELECTRON = "var(--at-electron, #3ee8ff)";
+export const BOSS = "var(--at-boss, #ff5fd8)";
+export const LINE = "var(--at-line, #6a4bd1)";
 export const TEXT_FONT = "var(--at-font-text, 'Space Grotesk', system-ui, sans-serif)";
 export const DATA_FONT = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
 

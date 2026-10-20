@@ -3,7 +3,7 @@ import { frameSize } from "../frame.ts";
 import { progress } from "../motion.ts";
 import type { SceneProps } from "../types.ts";
 import { AtomDots, TEXT_FONT, line, muted, type Pt } from "../dots/dots.tsx";
-import { OUTER } from "../dots/outer.ts";
+import { VALENCE } from "@astratron/content/valence";
 import { BEAT, ROW } from "./manifest.ts";
 
 export default function OuterElectrons({ t, aspect, reducedMotion }: SceneProps) {
@@ -23,7 +23,7 @@ export default function OuterElectrons({ t, aspect, reducedMotion }: SceneProps)
   return (
     <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%" aria-hidden="true" style={{ display: "block" }}>
       {atoms.map((el, i) => (
-        <AtomDots key={el} at={place(i)} el={el} n={OUTER[el]} size={size} r={16} opacity={shown(i)} />
+        <AtomDots key={el} at={place(i)} el={el} n={VALENCE[el]} size={size} r={16} opacity={shown(i)} />
       ))}
       {wide && <line x1={neon.x - 200} y1={300} x2={neon.x - 200} y2={640} stroke={line} strokeWidth={4} strokeDasharray="12 12" />}
       <text

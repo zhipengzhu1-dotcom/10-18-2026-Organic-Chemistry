@@ -7,7 +7,8 @@
 // data-load.ts's job, at build time.
 
 export type Tier = "experimental" | "computed";
-export type SourceKind = Tier | "reference";
+/** "model": a model's idealised value (e.g. VSEPR's tetrahedral angle), a definition, never a measurement. */
+export type SourceKind = Tier | "reference" | "model";
 export type Quantity =
   | "bond-length"
   | "angle"
@@ -38,7 +39,7 @@ export interface Method {
 
 export interface Source {
   id: string;
-  /** experimental (measured), computed (our calculation) or reference (a standard table). */
+  /** experimental (measured), computed (our calculation), reference (a standard table) or model (an idealised definition). */
   kind: SourceKind;
   /** One line a Student can follow to the source, ending in its DOI or URL. */
   citation: string;
@@ -211,8 +212,9 @@ export function sourceNote(values: Cited[]): SourceNoteParagraph[] {
     const other = list.filter((v) => !geometry.includes(v));
     if (geometry.length) paragraphs.push(geometryParagraph(geometry));
     if (other.length) {
-      const computed = other.every((v) => v.source.kind === "computed");
-      paragraphs.push({ ...(computed ? { lead: "Computed, not measured." } : {}), text: clauses(other) });
+      const all = (kind: SourceKind) => other.every((v) => v.source.kind === kind);
+      const lead = all("computed") ? "Computed, not measured." : all("model") ? "Model, not measured." : undefined;
+      paragraphs.push({ ...(lead ? { lead } : {}), text: clauses(other) });
     }
   }
   return paragraphs;
@@ -276,8 +278,10 @@ export function format(
         : undefined);
   // Energies can be negative: print a true minus sign (U+2212), not a hyphen.
   const sign = (s: string) => (quantity === "energy" ? s.replace(/^-/, "−") : s);
+  // A value that rounds to zero shows no sign (never "−0.0"); the full value keeps it.
+  const rounded = decimals === undefined ? String(value) : value.toFixed(decimals).replace(/^-(?=0(\.0*)?$)/, "");
   return {
-    display: withUnit(sign(decimals === undefined ? String(value) : value.toFixed(decimals))),
+    display: withUnit(sign(rounded)),
     full: withUnit(sign(String(value))),
   };
 }

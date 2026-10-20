@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { frameSize } from "../frame.ts";
 import type { SceneProps } from "../types.ts";
 import { DATA_FONT, DotsBeside, Hit, Letter, SharedPair, TEXT_FONT, dir, electron, ink, line, muted, type Pt } from "../dots/dots.tsx";
-import { OUTER } from "../dots/outer.ts";
+import { VALENCE } from "@astratron/content/valence";
 import { SIDES, SIDE_NAMES, TRAY, type SharingState, type Side } from "./manifest.ts";
 import { layoutSharing } from "./layout.ts";
 
@@ -52,7 +52,7 @@ export default function BuildBySharing({ t, state, aspect, reducedMotion, input 
 
     // The tray: H atoms not yet bonded, one dot each (only while carbon is being built, not in a drawing to count).
     if (state.count === "live") out.push(
-      <text key="tray" x={L.trayLabel.x} y={L.trayLabel.y} fill={muted} fontSize={L.letter * 0.42} textAnchor="middle" style={{ fontFamily: TEXT_FONT }}>
+      <text key="tray" aria-hidden="true" x={L.trayLabel.x} y={L.trayLabel.y} fill={muted} fontSize={L.letter * 0.42} textAnchor="middle" style={{ fontFamily: TEXT_FONT }}>
         Tray
       </text>,
     );
@@ -63,17 +63,17 @@ export default function BuildBySharing({ t, state, aspect, reducedMotion, input 
         <g key={id}>
           <Letter at={at} el="H" size={L.letter} />
           {DotsBeside({ at, deg: 0, d: L.letter * 0.62, r: L.dot, count: 1, kind: "e tray-e" })}
-          <Hit at={at} r={L.hit} role="handle" id={id} label="Hydrogen atom in the tray" live={live} held={held === id} />
+          <Hit at={at} r={L.hit} role="handle" id={id} label={`Hydrogen atom ${k - bondedSides.length} of ${TRAY - bondedSides.length} in the tray`} live={live} held={held === id} />
         </g>,
       );
     }
 
     // The count around carbon.
     if (state.count !== "hidden") {
-      const shown = state.count === "pairs" ? 2 * bondedSides.filter((_, i) => lit(i)).length : OUTER.C + bondedSides.length;
+      const shown = state.count === "pairs" ? 2 * bondedSides.filter((_, i) => lit(i)).length : VALENCE.C + bondedSides.length;
       const label = state.count === "pairs" ? `Shared pairs × 2 = ${shown}` : `Around C: ${shown}`;
       out.push(
-        <text key="count" x={L.count.x} y={L.count.y} fill={ink} fontSize={L.letter * 0.5} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
+        <text key="count" aria-hidden="true" x={L.count.x} y={L.count.y} fill={ink} fontSize={L.letter * 0.5} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
           {label}
         </text>,
       );
@@ -105,9 +105,9 @@ export default function BuildBySharing({ t, state, aspect, reducedMotion, input 
     }
     if (joined) out.push(<g key="cc">{SharedPair({ a: pieces[0].at, b: pieces[1].at, r: L.dot })}</g>);
     if (state.count !== "hidden") {
-      const each = joined ? 2 * OUTER.C : 2 * OUTER.C - 1;
+      const each = joined ? 2 * VALENCE.C : 2 * VALENCE.C - 1;
       out.push(
-        <text key="count" x={L.count.x} y={L.count.y} fill={ink} fontSize={L.letter * 0.5} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
+        <text key="count" aria-hidden="true" x={L.count.x} y={L.count.y} fill={ink} fontSize={L.letter * 0.5} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
           {joined ? `C₂H₆ · around each C: ${each}` : `Around each C: ${each}`}
         </text>,
       );

@@ -1,4 +1,5 @@
-// The chemistry-number lint (ADR 0002): Scene code must read bond lengths,
+// The chemistry-number lint (ADR 0002): Scene code, the 3D viewer (site/src/molecule)
+// and the content module must read bond lengths,
 // angles, radii, energies and element colours from the cited data, never type
 // them in. Heuristic, so it flags what *looks* like chemistry:
 //   - any number (other than 0 and 1) on a line whose identifiers or text
@@ -56,7 +57,10 @@ export function lintChemistryNumbers(files: SourceFile[], elementColours: Record
 
       const at = `${file.path}:${i + 1}: `;
       const found = new Map<number, string>();
+      // A design token's fallback (`var(--at-ink, #ffffff)`) is the token's own value, pinned to tokens.css by a test.
+      const tokenFallbacks = new Set([...line.matchAll(/var\(--at-[a-z0-9-]+,\s*/g)].map((t) => t.index + t[0].length));
       for (const m of line.matchAll(hex)) {
+        if (tokenFallbacks.has(m.index)) continue;
         const label = colours.get(m[0].replace(/^0x/i, "#").toUpperCase());
         if (label) found.set(m.index, `${m[0]} is the ${label} from the cited elements table; read it with elementStyle()`);
       }
@@ -72,8 +76,8 @@ export function lintChemistryNumbers(files: SourceFile[], elementColours: Record
   return messages;
 }
 
-/** Folders of Scene code the lint covers, relative to the repo root. */
-export const sceneCodeDirs = ["scenes/src"];
+/** Folders the lint covers, relative to the repo root: Scene code, the 3D viewer and the content module. */
+export const sceneCodeDirs = ["scenes/src", "site/src/molecule", "content/src"];
 
 /**
  * Lints every .ts/.tsx/.js/.jsx file (tests excluded) under the Scene code

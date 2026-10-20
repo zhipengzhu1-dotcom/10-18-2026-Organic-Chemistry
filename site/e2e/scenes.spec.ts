@@ -55,24 +55,29 @@ test("Manipulate a Scene by keyboard: the slider drives the live Scene and Check
   await expect(page.getByText("ⓘ Where these numbers come from")).toBeVisible();
 });
 
-test("Manipulate a Scene by pointer, and the Scene loops", async ({ page }) => {
+test("Manipulate a Scene by pointer at 1280 × 720; the Scene plays once and stops (nothing loops)", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto(MANIPULATE);
   const twist = page.getByRole("slider", { name: "Twist" });
-  const box = (await twist.boundingBox())!;
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  const click = async (at: (box: { x: number; y: number; width: number; height: number }) => [number, number]) => {
+    await twist.scrollIntoViewIfNeeded();
+    const box = (await twist.boundingBox())!;
+    await page.mouse.click(...at(box));
+  };
+  await click((box) => [box.x + box.width / 2, box.y + box.height / 2]);
   await expect(twist).toHaveAttribute("aria-valuetext", "90°");
 
-  // Still playing after more than one run (4 s): Manipulate Steps loop.
-  await page.waitForTimeout(4_500);
-  await expect(pauseButton(page)).toBeVisible();
+  // One run (4 s), then it stops on its last frame: nothing loops in the Step player.
+  await expect(playButton(page)).toBeVisible({ timeout: 6_000 });
+  await page.waitForTimeout(1_000);
+  await expect(pauseButton(page)).toHaveCount(0);
 
-  // Two wrong tries reveal the answer, and the slider jumps to it.
-  await page.mouse.click(box.x + 2, box.y + box.height / 2);
+  // Two wrong tries reveal the answer, and the slider jumps to it. The feedback panel never covers the slider.
+  await click((box) => [box.x + 2, box.y + box.height / 2]);
   await expect(twist).toHaveAttribute("aria-valuetext", "0°");
   await page.getByRole("button", { name: "Check" }).click();
-  // FOLLOW-UP (#88): at 1280×720 the feedback panel covers this slider, so a mouse can't reach it; finish by keyboard.
-  await twist.focus();
-  await page.keyboard.press("End");
+  await expect(page.getByRole("status")).toContainText("✗ Not quite.");
+  await click((box) => [box.x + box.width - 2, box.y + box.height / 2]);
   await expect(twist).toHaveAttribute("aria-valuetext", "180°");
   await page.getByRole("button", { name: "Check" }).click();
   await expect(page.getByRole("status")).toContainText("→ Answer:");

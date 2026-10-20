@@ -5,7 +5,8 @@
 // only, no measured data.
 import type { Structure } from "@astratron/content";
 import type { SceneManifest } from "../types.ts";
-import { formalCharge, star, VALENCE, type Partner } from "../lewis.ts";
+import { VALENCE } from "@astratron/content/valence";
+import { formalCharge, star, type Partner } from "../lewis.ts";
 
 export type DotsAndSticksState = { example: string };
 

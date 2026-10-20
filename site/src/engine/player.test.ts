@@ -143,6 +143,36 @@ describe("Step links (ADR 0003)", () => {
   it("a link to an unknown id opens the first Step", () => {
     expect(start(lesson, "s99")).toMatchObject({ index: 0, step: { id: "s01" } });
   });
+
+  it("a link past where the Student has got to opens that Step, ahead, without moving their place", () => {
+    const linked = start(lesson, "s05");
+    expect(linked).toMatchObject({ step: { id: "s05" }, ahead: true, done: false, progress: { step: "s01", done: false } });
+  });
+
+  it("reaching Wrap through a Step link does not mark the Lesson done (story 17)", () => {
+    const explainToWrap = act(lesson, start(lesson, "s04"), answer("a"));
+    const reachedWrap = act(lesson, explainToWrap, next);
+    expect(reachedWrap).toMatchObject({ step: { id: "s05" }, ahead: true, done: false, progress: { done: false } });
+  });
+
+  it("answers given ahead are not saved, so nothing is unlocked for later", () => {
+    const answered = act(lesson, start(lesson, "s03"), answer("a"));
+    expect(answered).toMatchObject({ canContinue: true, feedback: { kind: "correct" } });
+    expect(answered.progress.answers).toEqual({});
+    expect(act(lesson, answered, next)).toMatchObject({ step: { id: "s04" }, ahead: true });
+  });
+
+  it("a link back to a Step already reached opens it normally", () => {
+    const left = play(answer("c"), next, next, answer("a"), next);
+    const linked = start(lesson, "s02", left.progress);
+    expect(linked).toMatchObject({ step: { id: "s02" }, ahead: false, progress: { step: "s02", reached: "s04" } });
+    expect(act(lesson, act(lesson, linked, next), next)).toMatchObject({ step: { id: "s04" }, ahead: false });
+  });
+
+  it("a link to a Step of a Lesson already done opens it normally", () => {
+    const linked = start(lesson, "s05", { step: "s02", answers: {}, done: true });
+    expect(linked).toMatchObject({ ahead: false, done: true });
+  });
 });
 
 describe("Navigation and resume", () => {
@@ -174,6 +204,7 @@ describe("Navigation and resume", () => {
       step: "s03",
       answers: { s01: [{ choice: ["c"] }], s03: [{ choice: ["b"] }] },
       done: false,
+      reached: "s03",
     });
   });
 

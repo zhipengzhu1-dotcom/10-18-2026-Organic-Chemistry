@@ -102,12 +102,12 @@ dialog.aside > .btn { margin-top: 12px; }
 .drop-spot .spot { fill: var(--at-electron-fill, transparent); fill-opacity: 0.25; stroke: var(--at-electron); stroke-width: 2px; stroke-dasharray: 4 3; }
 .drop-spot.over .spot, .drop-spot:focus-visible .spot { fill-opacity: 0.6; stroke-width: 3px; }
 .push-arrow { fill: none; stroke: var(--at-electron); stroke-width: 2.5px; pointer-events: none; }
-.push-arrow.shown { stroke: var(--at-boss); stroke-dasharray: 6 3; }
+.push-arrow.shown { stroke: var(--at-ignite); stroke-dasharray: 6 3; }
 .arrowhead.ink { fill: var(--at-electron); }
-.arrowhead.shown { fill: var(--at-boss); }
+.arrowhead.shown { fill: var(--at-ignite); }
 .riding-electron { fill: var(--at-electron); pointer-events: none; }
-.flag-ring { fill: none; stroke: var(--at-boss); stroke-width: 3px; stroke-dasharray: 5 3; pointer-events: none; }
-.arrow-flags { list-style: none; margin: 0; padding: 8px 12px; border: var(--at-border) dashed var(--at-boss); font: 400 16px/1.4 var(--at-font-data); }
+.flag-ring { fill: none; stroke: var(--at-ignite); stroke-width: 3px; stroke-dasharray: 5 3; pointer-events: none; }
+.arrow-flags { list-style: none; margin: 0; padding: 8px 12px; border: var(--at-border) dashed var(--at-ignite); font: 400 16px/1.4 var(--at-font-data); }
 /* Rank structure cards stay one column (it is an order, top to bottom) and carry their letter (Hints name cards by it). */
 .opts.rank:has(.structure-card) { grid-template-columns: 1fr; }
 .rank .structure-card { position: relative; display: grid; place-items: center; padding: 4px 8px 4px 36px; }

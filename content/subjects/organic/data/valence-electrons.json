@@ -1,0 +1,128 @@
+{
+  "id": "valence-electrons",
+  "kind": "table",
+  "title": "Valence (outer-shell) electrons",
+  "sources": {
+    "asd": {
+      "kind": "reference",
+      "citation": "Kramida, A., Ralchenko, Yu., Reader, J., and NIST ASD Team (2024). NIST Atomic Spectra Database (ver. 5.12), https://physics.nist.gov/asd (retrieved 2026-10-19), doi:10.18434/T4W30F: ground-state electron configurations (electrons in the outermost s and p subshells; filled d and f shells not counted)",
+      "licence": "NIST Standard Reference Data; reuse with acknowledgement (https://www.nist.gov/open/license)"
+    }
+  },
+  "values": {
+    "H.valence": {
+      "label": "hydrogen outer electrons",
+      "quantity": "count",
+      "value": 1,
+      "source": "asd"
+    },
+    "Li.valence": {
+      "label": "lithium outer electrons",
+      "quantity": "count",
+      "value": 1,
+      "source": "asd"
+    },
+    "Be.valence": {
+      "label": "beryllium outer electrons",
+      "quantity": "count",
+      "value": 2,
+      "source": "asd"
+    },
+    "Na.valence": {
+      "label": "sodium outer electrons",
+      "quantity": "count",
+      "value": 1,
+      "source": "asd"
+    },
+    "Mg.valence": {
+      "label": "magnesium outer electrons",
+      "quantity": "count",
+      "value": 2,
+      "source": "asd"
+    },
+    "B.valence": {
+      "label": "boron outer electrons",
+      "quantity": "count",
+      "value": 3,
+      "source": "asd"
+    },
+    "Al.valence": {
+      "label": "aluminium outer electrons",
+      "quantity": "count",
+      "value": 3,
+      "source": "asd"
+    },
+    "C.valence": {
+      "label": "carbon outer electrons",
+      "quantity": "count",
+      "value": 4,
+      "source": "asd"
+    },
+    "Si.valence": {
+      "label": "silicon outer electrons",
+      "quantity": "count",
+      "value": 4,
+      "source": "asd"
+    },
+    "N.valence": {
+      "label": "nitrogen outer electrons",
+      "quantity": "count",
+      "value": 5,
+      "source": "asd"
+    },
+    "P.valence": {
+      "label": "phosphorus outer electrons",
+      "quantity": "count",
+      "value": 5,
+      "source": "asd"
+    },
+    "O.valence": {
+      "label": "oxygen outer electrons",
+      "quantity": "count",
+      "value": 6,
+      "source": "asd"
+    },
+    "S.valence": {
+      "label": "sulfur outer electrons",
+      "quantity": "count",
+      "value": 6,
+      "source": "asd"
+    },
+    "Se.valence": {
+      "label": "selenium outer electrons",
+      "quantity": "count",
+      "value": 6,
+      "source": "asd"
+    },
+    "F.valence": {
+      "label": "fluorine outer electrons",
+      "quantity": "count",
+      "value": 7,
+      "source": "asd"
+    },
+    "Cl.valence": {
+      "label": "chlorine outer electrons",
+      "quantity": "count",
+      "value": 7,
+      "source": "asd"
+    },
+    "Br.valence": {
+      "label": "bromine outer electrons",
+      "quantity": "count",
+      "value": 7,
+      "source": "asd"
+    },
+    "I.valence": {
+      "label": "iodine outer electrons",
+      "quantity": "count",
+      "value": 7,
+      "source": "asd"
+    },
+    "Ne.valence": {
+      "label": "neon outer electrons",
+      "quantity": "count",
+      "value": 8,
+      "source": "asd"
+    }
+  }
+}

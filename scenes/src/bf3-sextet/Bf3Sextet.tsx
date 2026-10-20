@@ -2,7 +2,8 @@
 import { frameSize, safeArea, type Box } from "../frame.ts";
 import { pulse } from "../motion.ts";
 import type { SceneProps } from "../types.ts";
-import { CYAN, DATA_FONT, INK, MAGENTA, MUTED, VALENCE, fit } from "../lewis.ts";
+import { VALENCE } from "@astratron/content/valence";
+import { CYAN, DATA_FONT, INK, MAGENTA, MUTED, fit } from "../lewis.ts";
 import { Embedded } from "../embed.tsx";
 import { drawStructure } from "../structure/render.ts";
 import { bf3, timing } from "./manifest.ts";

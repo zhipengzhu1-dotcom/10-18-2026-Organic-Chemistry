@@ -92,6 +92,9 @@ describe("frontier-ladder: computed levels on one shared axis", () => {
     );
     for (const ref of ["ethane-b3lyp-orbitals/homo", "ethylene-b3lyp-orbitals/lumo", "ethylene-b3lyp-orbitals/gap"]) expect(svg).toContain(cited[ref].display);
     expect(svg.match(/>Computed</g)).toHaveLength(2);
+    // Each HOMO holds a pair, drawn as the same up and down half-arrows as mo-filler's.
+    expect(svg.match(/class="electron up"/g)).toHaveLength(2);
+    expect(svg.match(/class="electron down"/g)).toHaveLength(2);
   });
 
   it("with both flows, the smaller gap is the solid arrow and the larger dashed, each bracket labelled", () => {

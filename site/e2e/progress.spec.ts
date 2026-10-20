@@ -46,6 +46,13 @@ test("leaving mid-Lesson and coming back resumes at the same Step", async ({ pag
   await expect(page.getByRole("status")).toContainText("✗ Not quite. Look for a double line.");
 });
 
+test("Continue and back move focus to the new Step, so a screen reader announces it", async ({ page }) => {
+  await playToStep3(page);
+  await expect(page.getByRole("main", { name: "Step 3 of 14" })).toBeFocused();
+  await page.getByRole("button", { name: "Previous Step" }).click();
+  await expect(page.getByRole("main", { name: "Step 2 of 14" })).toBeFocused();
+});
+
 test("back is allowed, answered Steps stay locked, and there's no skipping ahead", async ({ page }) => {
   await playToStep3(page);
   await page.getByRole("button", { name: "Previous Step" }).click();
@@ -60,6 +67,21 @@ test("back is allowed, answered Steps stay locked, and there's no skipping ahead
   await next(page);
   await at(page, 3);
   await expect(page.getByRole("button", { name: "Continue" })).toHaveCount(0);
+});
+
+test("a Step link to the Wrap opens it but doesn't finish the Lesson or earn the Streak (story 17)", async ({ page }) => {
+  const lesson = buildContent(contentRoot).model!.subjects[0].courses[0].units[0].lessons.find((l) => l.url === FINISH)!;
+  const steps = lesson.steps.length;
+  await page.goto(`${FINISH}#${lesson.steps.at(-1)!.id}`);
+  await at(page, steps, steps);
+  await expect(page.getByRole("heading", { name: "Key idea" })).toHaveCount(0);
+  await expect(page.getByText(/Streak: 1 day/)).toHaveCount(0);
+  await page.getByRole("button", { name: "Go to my place" }).click();
+  await at(page, 1, steps);
+
+  await page.goto(UNIT);
+  await expect(page.getByRole("listitem").filter({ hasText: "Why Carbon?" })).not.toContainText("Done");
+  await expect(page.getByRole("img", { name: "Streak: 0 days" })).toBeVisible();
 });
 
 test("finishing a Lesson shows the key idea, a Streak tick, Next Lesson and Back to Unit", async ({ page }) => {

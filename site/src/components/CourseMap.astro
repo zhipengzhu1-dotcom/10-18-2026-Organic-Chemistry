@@ -39,5 +39,12 @@ const { subject } = Astro.props;
       </section>
     ))
   }
+  {
+    subject.courses.some((c) => c.units.some((u) => u.status === "coming-soon")) && (
+      <p class="soon-link">
+        <a href="/coming-soon">What's coming next</a>
+      </p>
+    )
+  }
 </div>
 

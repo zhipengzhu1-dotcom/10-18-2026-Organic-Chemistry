@@ -8,7 +8,7 @@ import { molecule } from "../lesson-02/molecules.ts";
 import { innerSvg, stageFor, transformOn } from "../lesson-02/place.ts";
 import { FILL, lonePairAtoms, PANELS, type LonePairState } from "./manifest.ts";
 
-const ink = "var(--at-ink, #f2f0ff)";
+const ink = "var(--at-ink, #ffffff)";
 const muted = "var(--at-ink-muted, #b9a8e8)";
 const line = "var(--at-line, #6a4bd1)";
 const electron = "var(--at-electron, #3ee8ff)";

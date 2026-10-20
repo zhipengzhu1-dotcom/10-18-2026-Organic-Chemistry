@@ -7,8 +7,8 @@ import { useEffect, useRef, useState } from "react";
 import type { Aspect } from "@astratron/scenes";
 import { watchScene, watchSceneFiles } from "@astratron/scenes/watch";
 import type { Cited } from "@astratron/content/data";
-import { clockStep, openClock, type Clock, type ClockAction, type ClockConfig } from "../engine/scene-clock.ts";
-import { useReducedMotion } from "./ScenePlayer.tsx";
+import { clockStep, frameRatio, openClock, scrubText, type Clock, type ClockAction, type ClockConfig } from "../engine/scene-clock.ts";
+import { useReducedMotion } from "./use-reduced-motion.ts";
 
 interface Props {
   sceneId: string;
@@ -30,7 +30,7 @@ const url = (file: string) => `/${file}`;
 export default function WatchScenePlayer({ sceneId, cited, aspect = "16:9", shrinkWhenDone = false, onPlaying }: Props) {
   const manifest = watchScene(sceneId)!;
   const files = watchSceneFiles(sceneId, aspect);
-  const config: ClockConfig = { duration: manifest.duration, loop: false, posterT: manifest.poster };
+  const config: ClockConfig = { duration: manifest.duration, posterT: manifest.poster };
   const reducedMotion = useReducedMotion();
   const video = useRef<HTMLVideoElement>(null);
   // Until the island knows the motion setting (and on the server) the Scene rests on its poster frame.
@@ -68,16 +68,13 @@ export default function WatchScenePlayer({ sceneId, cited, aspect = "16:9", shri
 
   useEffect(() => onPlaying?.(clock.playing), [clock.playing]);
 
-  const [w, h] = aspect === "16:9" ? [16, 9] : [9, 16];
-  const seconds = (t: number) => `${t.toFixed(1)} of ${manifest.duration} seconds`;
-
   return (
     <figure className={shrinkWhenDone && !clock.playing ? "scene scene-watch shrunk" : "scene scene-watch"}>
       <div
         className="scene-frame"
         role="img"
         aria-label={manifest.describe(cited)}
-        style={{ aspectRatio: `${w} / ${h}` }}
+        style={{ aspectRatio: frameRatio(aspect) }}
       >
         <video
           ref={video}
@@ -110,7 +107,7 @@ export default function WatchScenePlayer({ sceneId, cited, aspect = "16:9", shri
           max={manifest.duration}
           step={0.01}
           value={clock.t}
-          aria-valuetext={seconds(clock.t)}
+          aria-valuetext={scrubText(clock.t, manifest.duration)}
           className="scene-range"
           onChange={(e) => act({ type: "seek", t: Number(e.target.value) })}
         />

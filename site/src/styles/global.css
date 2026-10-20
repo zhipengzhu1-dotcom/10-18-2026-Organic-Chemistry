@@ -307,6 +307,10 @@
     .player.answered .player-prompt {
       display: none;
     }
+  }
+  /* A 3D Step sits tighter on a phone, and on a short laptop window too (1280 × 720): there the
+     card would otherwise shrink to a 100 px strip under the prompt, choices and Explore button. */
+  @media (max-width: 600px), (max-height: 760px) {
     /* A 3D Step (Lesson 3, #81): a long prompt, the card and the choices share one screen, so the
        Step sits tighter. Once answered (.player.answered, above), the card settles on the answer
        and takes the prompt's place with the feedback. */
@@ -323,10 +327,6 @@
       font-size: 17px;
       line-height: 1.25;
     }
-    /* The inline card is the same viewer Explore opens, so on a phone it stands in for the button. */
-    .player.has-card .explore-open {
-      display: none;
-    }
     .player.has-card .opt,
     .opts:has(> :nth-child(4)) .opt {
       padding-block: 6px;
@@ -334,17 +334,6 @@
     .player.has-card .opts,
     .opts:has(> :nth-child(4)) {
       gap: 6px;
-    }
-    /* A watch-only video and its controls, or a drawing over four choices, fill most of the
-       screen: the Step sits tighter. */
-    .player-body:has(.scene video),
-    .player-body:has(.figures):has(.opts > :nth-child(4)) {
-      gap: 6px;
-    }
-    /* An Explain of four or more lines over a played Scene (Lesson 4 s04, the three hybrid sets):
-       the Scene keeps to about a sixth of the screen so the text and its controls fit (#82). */
-    .player-body:has(> .explain-text br:nth-of-type(3)) .scene .scene-frame {
-      max-height: 17dvh;
     }
     /* The card may shrink to a 96 px stage over its tools (whose buttons sit closer). */
     .player.has-card .molecule {
@@ -380,6 +369,23 @@
     .player.has-card:has(.orbital-chip-phase):has(.fb) .molecule {
       min-height: 110px;
     }
+  }
+  @media (max-width: 600px) {
+    /* The inline card is the same viewer Explore opens, so on a phone it stands in for the button. */
+    .player.has-card .explore-open {
+      display: none;
+    }
+    /* A watch-only video and its controls, or a drawing over four choices, fill most of the
+       screen: the Step sits tighter. */
+    .player-body:has(.scene video),
+    .player-body:has(.figures):has(.opts > :nth-child(4)) {
+      gap: 6px;
+    }
+    /* An Explain of four or more lines over a played Scene (Lesson 4 s04, the three hybrid sets):
+       the Scene keeps to about a sixth of the screen so the text and its controls fit (#82). */
+    .player-body:has(> .explain-text br:nth-of-type(3)) .scene .scene-frame {
+      max-height: 17dvh;
+    }
     /* Once answered, the long Correct line or reveal takes the card's place too (wider screens keep it). */
     .player.answered.has-card:has(.orbital-chip-phase) :is(.molecule-pair, figure.molecule) {
       display: none;
@@ -388,6 +394,7 @@
   .opts.opts-pairs {
     grid-template-columns: 1fr 1fr;
   }
+  .soon-link a,
   .report a {
     display: inline-flex;
     align-items: center;
@@ -401,6 +408,10 @@
     font: 400 16px/1 var(--at-font-data);
     color: var(--at-ink-muted);
     white-space: nowrap;
+  }
+  /* Takes focus on each new Step only so screen readers announce it; no ring on a whole region. */
+  .player-body:focus {
+    outline: none;
   }
   .player-body {
     flex: 1;
@@ -1400,6 +1411,11 @@
     border: var(--at-border-strong) solid var(--at-line);
     box-shadow: 6px 6px 0 var(--at-shadow);
     background: var(--at-surface);
+  }
+  /* A Manipulate Step's Scene leaves room under it for its control even once the feedback panel
+     opens, so the slider stays on screen at 1280 × 720 too. */
+  .player-body:has(.scene-control) .scene-frame {
+    max-height: min(45dvh, max(150px, calc(100dvh - 500px)));
   }
   .scene-controls,
   .scene-control {

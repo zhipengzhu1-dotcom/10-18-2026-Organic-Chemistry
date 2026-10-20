@@ -36,5 +36,6 @@ writeFileSync(file, doc.toString({ lineWidth: 0 }));
 console.log(`wrote ${file}`);
 for (const a of structure.atoms) {
   const bonds = structure.bonds.filter((b) => b.a === a.id || b.b === a.id).map((b) => `${b.id}→${b.a === a.id ? b.b : b.a}`);
-  console.log(`  ${a.id.padEnd(4)} ${a.el}${a.h ? `H${a.h}` : ""}${a.charge ? ` (${a.charge > 0 ? "+" : ""}${a.charge})` : ""}  ${bonds.join(" ")}`);
+  const name = a.id.padEnd(4);
+  console.log(`  ${name} ${a.el}${a.h ? `H${a.h}` : ""}${a.charge ? ` (${a.charge > 0 ? "+" : ""}${a.charge})` : ""}  ${bonds.join(" ")}`);
 }

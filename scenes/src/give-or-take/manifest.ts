@@ -7,7 +7,7 @@
 // electron count comes from the cited data (NIST ASD; Andersen, Haugen & Hotop 1999).
 import type { Cited } from "@astratron/content/data";
 import type { SceneManifest } from "../types.ts";
-import { OUTER } from "../dots/outer.ts";
+import { VALENCE } from "@astratron/content/valence";
 
 export type GiveOrTakeState = { atom: string };
 
@@ -16,7 +16,7 @@ const NAMES: Record<string, string> = { Li: "Lithium", Be: "Beryllium", B: "Boro
 /** Atoms whose singly charged anion is bound (Andersen, Haugen & Hotop 1999, Table 3). */
 const BOUND = ["Li", "B", "C", "O", "F"];
 /** A full outer shell in this row: the octet (a count, the rule this Lesson teaches). */
-export const OCTET = 2 * OUTER.C;
+export const OCTET = 2 * VALENCE.C;
 
 const ie = (atom: string, key: string) => `ionization-li-f/${atom}.${key}`;
 const ea = (atom: string) => `electron-affinity-li-f/${atom}`;
@@ -32,7 +32,7 @@ export interface Routes {
 
 /** Both routes for one atom, from its cited values (outer-electron counts fall back to the periodic table without them). */
 export function routes(atom: string, cited: Record<string, Cited> = {}): Routes {
-  const outer = Number(cited[ie(atom, "valence")]?.value ?? OUTER[atom] ?? 0);
+  const outer = Number(cited[ie(atom, "valence")]?.value ?? VALENCE[atom] ?? 0);
   const take = OCTET - outer;
   return {
     name: NAMES[atom],

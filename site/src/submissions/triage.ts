@@ -202,10 +202,15 @@ export async function draftFix(db: Db, id: string, { subjectDir, summary, now }:
 /** Screens out a received row (personal info, spam, off-topic, duplicate, or not a mistake). */
 export const screenOut = (db: Db, id: string, now: number) => moveTo(db, id, "screened-out", now);
 
-/** The owner merged the PR: the row is accepted and deleted, leaving only the published file. */
-export async function accept(db: Db, id: string, now: number) {
+/**
+ * The owner merged the PR: the row is accepted and deleted, leaving only the published file.
+ * Returns the "accepted" reply drafted just before the row goes (null with no address).
+ */
+export async function accept(db: Db, id: string, now: number): Promise<string | null> {
   await moveTo(db, id, "accepted", now);
+  const reply = await draftReply(db, id, "accepted");
   await problemMerged(db, id);
+  return reply;
 }
 
 /** The owner closed the PR unmerged: the row is rejected, and deleted 30 days later. */
@@ -238,7 +243,7 @@ export async function draftReply(db: Db, id: string, outcome: Outcome): Promise<
     "",
     `Thank you for writing to AstraTron. ${body[outcome]}`,
     "",
-    "This is the only reply we send, and we delete your address now.",
+    "This is the only reply we send, and your address is deleted within 90 days of when you wrote.",
     "",
     "AstraTron",
   ].join("\n");

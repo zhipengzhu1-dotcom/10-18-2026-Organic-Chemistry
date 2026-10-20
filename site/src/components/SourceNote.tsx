@@ -13,7 +13,10 @@ export default function SourceNote({ cited, note, notice }: { cited: Cited[]; no
   if (!cited.length && !note) return null;
   return (
     <details className="source-note">
-      <summary>{cited.length ? "ⓘ Where these numbers come from" : "ⓘ Sources"}</summary>
+      {/* The ⓘ is decoration; read aloud it's only "circled i". */}
+      <summary>
+        <span aria-hidden="true">ⓘ</span> {cited.length ? "Where these numbers come from" : "Sources"}
+      </summary>
       {note && <p dangerouslySetInnerHTML={{ __html: note }} />}
       {sourceNote(cited).map((p, i) => (
         <p key={i}>

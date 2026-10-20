@@ -57,7 +57,7 @@ export default function PushReplay({ t, start, pushes, hide = [], reducedMotion 
     <svg viewBox={drawing.viewBox} width="100%" height="100%" preserveAspectRatio="xMidYMid meet" className="push-replay">
       <defs>
         <marker id="push-replay-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-          <path d="M0,0 L10,5 L0,10 z" fill="var(--at-electron, #5ee7ff)" />
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--at-electron, #3ee8ff)" />
         </marker>
       </defs>
       {/* The renderer's own svg sets the data face; its inner drawing keeps it here. */}
@@ -71,14 +71,14 @@ export default function PushReplay({ t, start, pushes, hide = [], reducedMotion 
             <path
               d={a.d}
               fill="none"
-              stroke="var(--at-electron, #5ee7ff)"
+              stroke="var(--at-electron, #3ee8ff)"
               strokeWidth={2.5}
               pathLength={1}
               strokeDasharray={`${length} 1`}
               markerEnd={length >= 1 ? "url(#push-replay-head)" : undefined}
             />
             {current && !reducedMotion && length < 1 && (
-              <g fill="var(--at-electron, #5ee7ff)">
+              <g fill="var(--at-electron, #3ee8ff)">
                 <circle cx={electron.x - 3} cy={electron.y} r={2.6} />
                 <circle cx={electron.x + 3} cy={electron.y} r={2.6} />
               </g>

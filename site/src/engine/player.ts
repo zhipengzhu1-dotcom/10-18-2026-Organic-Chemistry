@@ -3,7 +3,9 @@
 // line; wrong #1 → the first matching Hint (generic fallback last); wrong #2 →
 // the reveal. A Hook `prediction` accepts every choice and reveals at once.
 // Navigation: back is allowed, answered Steps stay locked, Continue never passes
-// an unanswered Step, and the Lesson is done on reaching Wrap. Every Screen
+// an unanswered Step, and the Lesson is done on reaching Wrap. A Step link past
+// the furthest Step reached opens that Step "ahead": it plays, but saves no
+// answers, doesn't move the Student's place and can't make the Lesson done. Every Screen
 // carries the Lesson's progress (answers by Step id), from which it resumes.
 import type { DrawArrowsStep, GoalStep, GradedStep, HintRule, Lesson, Push, RankHint, SceneValue, Step, Structure } from "@astratron/content";
 import { arrowsAct, arrowsStart, arrowsView, type ArrowsState, type Flag } from "@astratron/content/arrows";
@@ -43,6 +45,11 @@ export interface LessonProgress {
   answers: Record<string, Answer[]>;
   /** True once the Student has reached Wrap; going back doesn't undo it. */
   done: boolean;
+  /**
+   * The furthest Step reached in order (by Continue). Records saved before it existed lack it:
+   * then it is `step`, or every Step once `done`.
+   */
+  reached?: string;
 }
 
 export interface Screen {
@@ -55,8 +62,10 @@ export interface Screen {
   feedback: Feedback | null;
   /** True once the Step needs nothing more from the Student; it is then locked. */
   canContinue: boolean;
-  /** True while the current Step is the Wrap. */
+  /** True while the current Step is the Wrap, reached in order. */
   done: boolean;
+  /** True on a Step past the furthest one reached, opened by a Step link (story 17). */
+  ahead: boolean;
   /** The Lesson's progress, updated by every action; save it to resume later. */
   progress: LessonProgress;
   /** Draw-arrows Steps: the pushes so far, the drawing they give and its in-between flags. */
@@ -92,10 +101,15 @@ export type PlayableLesson = Pick<Lesson, "steps" | "deletedSteps">;
  * an unknown id opens the first Step. Saved answers come back locked.
  */
 export function start(lesson: PlayableLesson, stepId?: string, saved?: LessonProgress): Screen {
-  const id = stepId ?? saved?.step;
+  const reached = lesson.steps[indexOf(lesson, saved?.done ? lesson.steps.at(-1)!.id : (saved?.reached ?? saved?.step))].id;
+  const progress = { step: saved?.step ?? reached, answers: saved?.answers ?? {}, done: saved?.done ?? false, reached };
+  return open(lesson, indexOf(lesson, stepId ?? saved?.step), progress);
+}
+
+/** Where a Step id (or a deleted Step's id) stands now; the first Step for none or an unknown id. */
+function indexOf(lesson: PlayableLesson, id?: string): number {
   const target = (id && lesson.deletedSteps?.[id]) || id;
-  const progress = { step: "", answers: saved?.answers ?? {}, done: saved?.done ?? false };
-  return open(lesson, Math.max(0, lesson.steps.findIndex((s) => s.id === target)), progress);
+  return Math.max(0, lesson.steps.findIndex((s) => s.id === target));
 }
 
 export function act(lesson: PlayableLesson, screen: Screen, action: Action): Screen {
@@ -106,11 +120,13 @@ export function act(lesson: PlayableLesson, screen: Screen, action: Action): Scr
     const stage = screen.step.type === "manipulate-goal" && screen.goal && screen.step.stages[screen.goal.stage];
     if (!screen.canContinue && stage) return { ...screen, feedback: { kind: "hint", text: stage.blocked } };
     if (!screen.canContinue || screen.index + 1 >= lesson.steps.length) return screen;
-    return open(lesson, screen.index + 1, screen.progress);
+    if (screen.ahead) return open(lesson, screen.index + 1, screen.progress);
+    const reached = lesson.steps[Math.max(screen.index + 1, indexOf(lesson, screen.progress.reached))].id;
+    return open(lesson, screen.index + 1, { ...screen.progress, reached });
   }
   const { type: _type, ...answer } = action;
   const next = answerStep(screen, answer);
-  if (next === screen) return screen;
+  if (next === screen || screen.ahead) return next;
   const { answers } = screen.progress;
   const saved = [...(answers[screen.step.id] ?? []), answer];
   return { ...next, progress: { ...screen.progress, answers: { ...answers, [screen.step.id]: saved } } };
@@ -129,7 +145,8 @@ function answerStep(screen: Screen, answer: Answer): Screen {
 /** Opens a Step and replays its saved answers, so an answered Step shows its feedback, locked. */
 function open(lesson: PlayableLesson, index: number, saved: LessonProgress): Screen {
   const step = lesson.steps[index];
-  const done = step.phase === "wrap";
+  const ahead = index > indexOf(lesson, saved.reached ?? saved.step);
+  const done = step.phase === "wrap" && !ahead;
   const fresh: Screen = {
     index,
     total: lesson.steps.length,
@@ -138,7 +155,8 @@ function open(lesson: PlayableLesson, index: number, saved: LessonProgress): Scr
     feedback: null,
     canContinue: step.type === "explain",
     done,
-    progress: { ...saved, step: step.id, done: saved.done || done },
+    ahead,
+    progress: ahead ? saved : { ...saved, step: step.id, done: saved.done || done },
     ...(step.type === "draw-arrows" && { arrows: arrowsScreen(step, arrowsStart()) }),
     ...(step.type === "manipulate-goal" && { goal: goalStart(step) }),
   };

@@ -1,7 +1,14 @@
 // The site's own Scene clock (ADR 0001): a pure state machine for `t`. The
 // ScenePlayer island feeds it animation-frame ticks; Scenes only see `t`.
-// A Scene autoplays once on entry (loops only in Manipulate Steps); under
+// A Scene autoplays once on entry (nothing loops in the Step player, spec #56); under
 // reduced motion it opens paused on its poster frame.
+import type { Aspect } from "@astratron/scenes";
+
+/** A Scene frame's CSS aspect ratio (both Scene players). */
+export const frameRatio = (aspect: Aspect) => (aspect === "16:9" ? "16 / 9" : "9 / 16");
+
+/** The scrubber's spoken time: "1.5 of 8 seconds". */
+export const scrubText = (t: number, duration: number) => `${t.toFixed(1)} of ${duration} seconds`;
 
 export interface Clock {
   /** Seconds into the Scene. */
@@ -12,8 +19,6 @@ export interface Clock {
 export interface ClockConfig {
   /** Seconds one run lasts (the manifest's `duration`). */
   duration: number;
-  /** True in Manipulate Steps only. */
-  loop: boolean;
   /** The poster frame's time (the manifest's `poster.t`). */
   posterT: number;
 }
@@ -31,13 +36,13 @@ export function openClock(config: ClockConfig, reducedMotion: boolean): Clock {
 }
 
 export function clockStep(clock: Clock, action: ClockAction, config: ClockConfig): Clock {
-  const { duration, loop } = config;
+  const { duration } = config;
   switch (action.type) {
     case "tick": {
       if (!clock.playing) return clock;
       const t = clock.t + action.dt;
       if (t < duration) return { t, playing: true };
-      return loop ? { t: t % duration, playing: true } : { t: duration, playing: false };
+      return { t: duration, playing: false };
     }
     case "play":
       return { t: clock.t >= duration ? 0 : clock.t, playing: true };

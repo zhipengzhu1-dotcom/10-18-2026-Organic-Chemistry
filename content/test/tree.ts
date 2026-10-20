@@ -3,12 +3,26 @@
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { stringify } from "yaml";
+import { parse, stringify } from "yaml";
 
 export type Tree = Record<string, unknown>;
 
-export function writeTree(tree: Tree): string {
+/**
+ * Every Lesson must be frozen (ADR 0003), so a Subject in the tree without its own
+ * step-ids.lock.yaml gets one freezing each Lesson's ids as written; `freeze: false` leaves it out.
+ */
+export function writeTree(tree: Tree, { freeze = true } = {}): string {
   const root = mkdtempSync(join(tmpdir(), "astratron-content-"));
+  const locks: Record<string, Record<string, string[]>> = {};
+  for (const [path, body] of Object.entries(tree)) {
+    const [subject, dir] = path.split("/");
+    if (!freeze || dir !== "lessons" || `${subject}/step-ids.lock.yaml` in tree) continue;
+    const lesson = (typeof body === "string" ? parse(body) : body) as { id?: unknown; steps?: { id?: unknown }[]; deletedSteps?: object };
+    if (typeof lesson?.id !== "string" || !Array.isArray(lesson.steps)) continue;
+    const ids = [...lesson.steps.map((s) => s?.id), ...Object.keys(lesson.deletedSteps ?? {})];
+    (locks[subject] ??= {})[lesson.id] = ids.filter((id): id is string => typeof id === "string");
+  }
+  for (const [subject, lock] of Object.entries(locks)) tree = { ...tree, [`${subject}/step-ids.lock.yaml`]: lock };
   for (const [path, body] of Object.entries(tree)) {
     const file = join(root, path);
     mkdirSync(dirname(file), { recursive: true });

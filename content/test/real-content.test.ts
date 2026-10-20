@@ -14,6 +14,26 @@ it("the real content tree builds with no errors", () => {
   expect(units.flatMap((u) => u.bank.map((p) => p.id)).filter((id) => /sample/.test(id))).toEqual([]);
 });
 
+it("no Numeric Step's or Problem's shown Source note gives away its H count in a formula", () => {
+  const units = buildContent(contentRoot).model!.subjects.flatMap((s) => s.courses.flatMap((c) => c.units));
+  const steps = units.flatMap((u) => [...u.lessons.flatMap((l) => l.steps), ...u.bank.map((p) => p.step)]);
+  const sub = (n: number) => String(n).replace(/\d/g, (d) => "₀₁₂₃₄₅₆₇₈₉"[Number(d)]);
+  const leaks = steps.flatMap((s) => {
+    if (s.type !== "numeric" || !s.sourceNote) return [];
+    const shown = [s.sourceNote, ...(s.citations ?? []).map((c) => `${c.full} ${c.source.citation}`)].join(" ");
+    const answer = new RegExp(`H${sub(s.answer)}(?![₀-₉])|C${s.answer}H|H${s.answer}(?!\\d)`);
+    return answer.test(shown) ? [`${s.id}: ${s.sourceNote}`] : [];
+  });
+  expect(leaks).toEqual([]);
+});
+
+it("Lesson 2's hook doesn't show estradiol's formula before the guess (its H count is the answer)", () => {
+  const l02 = buildContent(contentRoot).model!.subjects[0].courses[0].units[0].lessons.find((l) => l.id === "u1-l02")!;
+  const s01 = l02.steps.find((s) => s.id === "s01")!;
+  expect(s01.sourceNote).not.toMatch(/H₂₄/);
+  expect(JSON.stringify(s01.citations ?? [])).not.toMatch(/C18H24O2/);
+});
+
 describe("the real cited data", () => {
   const data = buildContent(contentRoot).model!.subjects.find((s) => s.slug === "organic")!.data;
 

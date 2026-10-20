@@ -5,7 +5,7 @@ lesson: u1-l02
 difficulty: 3
 status: approved
 source: Original
-sourceNote: "Limonene, PubChem CID 22311 (formula C₁₀H₁₆)."
+sourceNote: "Limonene, PubChem CID 22311."
 type: numeric
 prompt: Limonene gives oranges their smell. How many hydrogens does it have?
 figures:

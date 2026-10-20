@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildContent } from "../src/index.ts";
-import { cite, sourceNote } from "../src/data.ts";
+import { cite, format, sourceNote } from "../src/data.ts";
 import { computedEthane, elements, methane, validTree, writeTree, type Tree } from "./tree.ts";
 
 function build(edit: (tree: Tree) => void = () => {}) {
@@ -132,6 +132,11 @@ describe("cited-data lookup", () => {
     expect(result.errors).toEqual(["chem/data/atoms.yaml: values.crust.C.unit: a fraction needs one of %; found none"]);
   });
 
+  it("never shows a negative zero: an energy that rounds to zero reads 0.0, keeping the full value", () => {
+    expect(format("energy", -0.0326, "eV", 1)).toEqual({ display: "0.0 eV", full: "−0.0326 eV" });
+    expect(format("energy", -0.06, "eV", 1).display).toBe("−0.1 eV");
+  });
+
   it("throws on a value that isn't in the data", () => {
     expect(() => cite(dataOf(build()), "methane/r.CC")).toThrow('No cited value "methane/r.CC"');
   });
@@ -157,13 +162,29 @@ describe("Lessons and Problems cite numbers as {{file/key}}", () => {
     expect(s02.citations?.map((c) => c.full)).toEqual(["1.087 Å"]);
   });
 
-  it("a Check Step carries its Problem's citations", () => {
+  it("a Check Step carries its Problem's citations, an answer-only one apart from the rest", () => {
     const result = build((t) => {
       (t["chem/problems/p1.yaml"] as { reveal: string }).reveal = "The angle is {{methane/a.HCH}}.";
+      (t["chem/problems/p1.yaml"] as { prompt: string }).prompt = "C–H is {{methane/r.CH}}. What is the angle?";
     });
     const s08 = steps(result)[7];
     expect(s08).toMatchObject({ reveal: "The angle is 109.5°." });
-    expect(s08.citations?.map((c) => c.ref)).toEqual(["methane/a.HCH"]);
+    expect(s08.citations?.map((c) => c.ref)).toEqual(["methane/r.CH"]);
+    expect("answerCitations" in s08 && s08.answerCitations?.map((c) => c.ref)).toEqual(["methane/a.HCH"]);
+  });
+
+  it("a number cited only in a Step's answer fields (correct, Hints, reveal) is kept apart, to show after answering", () => {
+    type Choice = { prompt: string; correct: string; hints: { text: string }[]; reveal: string };
+    const result = build((t) => {
+      const s03 = (t["chem/lessons/l1.yaml"] as { steps: Choice[] }).steps[2];
+      s03.prompt = "C–H is {{methane/r.CH}}. Which angle?";
+      s03.correct = "Yes: {{methane/a.HCH}}, and C–H {{methane/r.CH}}.";
+      s03.hints[1].text = "Think {{methane/a.HCH}}.";
+    });
+    expect(result.errors).toEqual([]);
+    const s03 = steps(result)[2];
+    expect(s03.citations?.map((c) => c.ref)).toEqual(["methane/r.CH"]);
+    expect("answerCitations" in s03 && s03.answerCitations?.map((c) => c.ref)).toEqual(["methane/a.HCH"]);
   });
 
   it("a Step with no cited numbers has no citations", () => {
@@ -224,6 +245,29 @@ describe("Source note", () => {
       text: "C colour #909090 and H colour #FFFFFF from the Jmol CPK colour table, Jmol source org/jmol/c/PAL.java.",
     });
     expect(note[1].lead).toBe("Geometry: experimental (gas phase).");
+  });
+
+  it('labels a model\'s values (a geometric ideal, e.g. VSEPR) "model, not measured"', () => {
+    const result = build(
+      (t) =>
+        (t["chem/data/vsepr.yaml"] = [
+          "id: vsepr",
+          "kind: table",
+          "title: VSEPR ideal angles",
+          "sources:",
+          "  gh: { kind: model, citation: Gillespie and Hargittai (1991), licence: Geometric definitions }",
+          "values:",
+          "  tetrahedral.angle: { label: tetrahedral, quantity: angle, value: 109.47, unit: °, source: gh }",
+          "  linear.angle: { label: linear, quantity: angle, value: 180, unit: °, source: gh, decimals: 0 }",
+        ].join("\n")),
+    );
+    expect(result.errors).toEqual([]);
+    const data = dataOf(result);
+    expect(cite(data, "vsepr/tetrahedral.angle")).toMatchObject({ display: "109.5°", source: { kind: "model" } });
+    expect(cite(data, "vsepr/linear.angle").display).toBe("180°");
+    expect(sourceNote([cite(data, "vsepr/tetrahedral.angle")])).toEqual([
+      { lead: "Model, not measured.", text: "tetrahedral 109.47° from Gillespie and Hargittai (1991)." },
+    ]);
   });
 
   it("still names a shared source once after the values cross to the browser as JSON", () => {

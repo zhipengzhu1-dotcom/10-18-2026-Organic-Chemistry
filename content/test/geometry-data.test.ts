@@ -156,6 +156,44 @@ describe("Lesson 4 and Practice build checks", () => {
     expect(raw("ketene").provenance.rebuilt).toMatch(/rebuilt from the listed parameters/);
   });
 
+  it("every computed file states the current validation's largest B3LYP deviation (after chloroform's rebuild)", () => {
+    const summary = JSON.parse(readFileSync(new URL("../../pipelines/geometry/computed/validation/summary.json", import.meta.url), "utf8"));
+    const stated = Object.values(data).flatMap((d) =>
+      d.kind === "molecule" && d.geometry === "computed"
+        ? Object.values(d.values).length || d.atoms
+          ? [[d.id, raw(d.id).sources?.ours?.method?.maxDeviation] as const]
+          : []
+        : [],
+    );
+    expect(stated.length).toBeGreaterThan(10);
+    for (const [id, dev] of stated) expect(dev, id).toBe(summary.maxDeviationAngstrom);
+  });
+
+  it("every rebuilt molecule's Cartesians reproduce each listed parameter (chloroform: C3v, C–Cl 1.762 Å)", () => {
+    const rebuilt = UNIT1.filter((id) => raw(id).provenance?.rebuilt);
+    expect(rebuilt).toEqual(expect.arrayContaining(["ketene", "chloroform"]));
+    for (const id of rebuilt) {
+      expect(raw(id).provenance.rebuilt, id).toMatch(/rebuilt from the listed parameters/);
+      const at = data[id].atoms!.list.map((a) => [a.x, a.y, a.z] as V);
+      for (const v of Object.values(data[id].values)) {
+        if (!v.atoms || typeof v.value !== "number") continue;
+        const [p, q, r] = v.atoms.map((i) => at[i]);
+        const measured =
+          v.atoms.length === 2
+            ? Math.hypot(...sub(p, q))
+            : v.atoms.length === 3
+              ? (Math.acos(dot(sub(p, q), sub(r, q)) / (Math.hypot(...sub(p, q)) * Math.hypot(...sub(r, q)))) * 180) / Math.PI
+              : undefined;
+        if (measured === undefined) continue;
+        expect(Math.abs(measured - v.value), `${id} ${v.label}`).toBeLessThan(v.atoms.length === 2 ? 0.0005 : 0.01);
+      }
+    }
+    // Chloroform's three C–Cl bonds are equal (C3v), at the listed length.
+    const cl = data.chloroform.atoms!.list.map((a, i) => [a, i] as const).filter(([a]) => a.element === "Cl");
+    const c = data.chloroform.atoms!.list[0];
+    for (const [a] of cl) expect(Math.hypot(a.x - c.x, a.y - c.y, a.z - c.z)).toBeCloseTo(1.762, 3);
+  });
+
   it("allene's two H–C–H planes meet at 90° within 0.5°", () => {
     const m = data.allene;
     const hOn = (c: number) => m.bonds!.filter((b) => b.a === c || b.b === c).map((b) => (b.a === c ? b.b : b.a)).filter((i) => m.atoms!.list[i].element === "H");

@@ -11,11 +11,7 @@
 // result (its electrons leave a place that has more than the result has, and
 // land where the result has more), so every valid route counts.
 import type { Push, PushHint, Structure, StructureBond } from "./model.ts";
-
-/** Valence electrons of the elements a Draw-arrows drawing may hold. */
-export const VALENCE: Record<string, number> = {
-  H: 1, Li: 1, Na: 1, Mg: 2, B: 3, Al: 3, C: 4, Si: 4, N: 5, P: 5, O: 6, S: 6, Se: 6, F: 7, Cl: 7, Br: 7, I: 7,
-};
+import { formalCharge, VALENCE } from "./valence.ts";
 
 export interface MoleculeAtom {
   id: string;
@@ -55,7 +51,7 @@ export function moleculeOf(s: Structure): Molecule {
   const atoms = s.atoms.map((a) => {
     // A carbon that writes its H's (a lettered CH₂, `h: 2`) has exactly those; a corner has the implied ones.
     const implied =
-      s.style === "line-angle" && a.el === "C" && a.h === undefined ? Math.max(0, 4 - Math.abs(a.charge ?? 0) - (sum.get(a.id) ?? 0)) : 0;
+      s.style === "line-angle" && a.el === "C" && a.h === undefined ? Math.max(0, VALENCE.C - Math.abs(a.charge ?? 0) - (sum.get(a.id) ?? 0)) : 0;
     return { id: a.id, el: a.el, x: a.x, y: a.y, h: (a.h ?? 0) + implied, lp: a.lp ?? 0 };
   });
   return { base: s, atoms, bonds };
@@ -70,7 +66,7 @@ function bondSums(bonds: Iterable<{ a: string; b: string; order: number }>): Map
 /** Formal charge of every atom: valence − 2·lone pairs − bond orders − H. */
 export function charges(m: Molecule): Map<string, number> {
   const sum = bondSums(m.bonds.values());
-  return new Map(m.atoms.map((a) => [a.id, (VALENCE[a.el] ?? 0) - 2 * a.lp - (sum.get(a.id) ?? 0) - a.h]));
+  return new Map(m.atoms.map((a) => [a.id, formalCharge(a.el, a.lp, sum.get(a.id) ?? 0, a.h)]));
 }
 
 /** Electrons around every atom: its lone pairs plus every bond it shares (H's included), counted in electrons. */

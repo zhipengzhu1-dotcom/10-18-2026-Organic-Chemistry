@@ -1,11 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { clockStep, openClock, type ClockAction, type ClockConfig } from "./scene-clock.ts";
+import { clockStep, frameRatio, openClock, scrubText, type ClockAction, type ClockConfig } from "./scene-clock.ts";
 
-const once: ClockConfig = { duration: 4, loop: false, posterT: 1 };
-const looping: ClockConfig = { ...once, loop: true };
+const once: ClockConfig = { duration: 4, posterT: 1 };
 const run = (config: ClockConfig, reducedMotion: boolean, ...actions: ClockAction[]) =>
   actions.reduce((c, a) => clockStep(c, a, config), openClock(config, reducedMotion));
 const tick = (dt: number): ClockAction => ({ type: "tick", dt });
+
+describe("Scene frame words", () => {
+  it("gives a frame's CSS aspect ratio", () => {
+    expect(frameRatio("16:9")).toBe("16 / 9");
+    expect(frameRatio("9:16")).toBe("9 / 16");
+  });
+
+  it("reads the scrubber's time as seconds of the whole, to a tenth", () => {
+    expect(scrubText(1.25, 8)).toBe("1.3 of 8 seconds");
+    expect(scrubText(0, 10)).toBe("0.0 of 10 seconds");
+  });
+});
 
 describe("Scene clock", () => {
   it("autoplays from the start on entry", () => {
@@ -13,14 +24,8 @@ describe("Scene clock", () => {
     expect(run(once, false, tick(1.5))).toEqual({ t: 1.5, playing: true });
   });
 
-  it("plays once and stops on the last frame, outside Manipulate Steps", () => {
+  it("plays once and stops on the last frame: nothing loops in the Step player, Manipulate Steps included", () => {
     expect(run(once, false, tick(3), tick(3))).toEqual({ t: 4, playing: false });
-  });
-
-  it("loops in Manipulate Steps", () => {
-    const c = run(looping, false, tick(3), tick(2));
-    expect(c.playing).toBe(true);
-    expect(c.t).toBeCloseTo(1);
   });
 
   it("under reduced motion opens paused on the poster frame, and Play starts it", () => {

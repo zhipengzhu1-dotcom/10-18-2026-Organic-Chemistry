@@ -22,9 +22,8 @@ async function showAllAtoms(page: Page) {
 }
 
 test.describe("the 3D Step card", () => {
-  // At 1280x720 the card is squeezed to about 100 px tall to fit the Step on one screen (a #88
-  // hand-check item); a taller laptop window shows it at a size you can tap.
-  test.use({ viewport: { width: 1280, height: 1000 } });
+  // A short laptop window (1280 × 720): the Step sits tighter so the card stays big enough to tap.
+  test.use({ viewport: { width: 1280, height: 720 } });
 
   test("draws the molecule with WebGL, every atom lettered, a 1 Å scale bar and its Source note", async ({ page }) => {
     await page.goto(`${LESSON}#s03`);
@@ -102,12 +101,21 @@ test.describe("the 3D Step card", () => {
 
   test("↺ / ↻ turn it; Ball & stick ⟷ True scale keeps the 1 Å bar; Describe reads the arrangement", async ({ page }) => {
     await page.goto(`${LESSON}#s03`);
-    const at = () => card(page).locator('.molecule-letter[data-atom="1"]').getAttribute("x");
-    const before = await at();
+    const at = async () => Number(await card(page).locator('.molecule-letter[data-atom="1"]').getAttribute("x"));
+    // Read the start only once the card has its final size (fonts and the 3D chunk can still move the
+    // layout just after load), and compare to a hundredth of a pixel (a turn and its undo round-trip in floats).
+    await page.evaluate(() => document.fonts.ready);
+    await expect(card(page).locator("canvas")).toHaveCount(1);
+    let before = NaN;
+    await expect.poll(async () => {
+      const [a, b] = [await at(), (await page.waitForTimeout(200), await at())];
+      before = b;
+      return Math.abs(a - b);
+    }).toBeLessThan(0.01);
     await page.getByRole("button", { name: "Turn right" }).click();
-    await expect.poll(at).not.toBe(before);
+    await expect.poll(async () => Math.abs((await at()) - before)).toBeGreaterThan(1);
     await page.getByRole("button", { name: "Turn left" }).click();
-    await expect.poll(at).toBe(before);
+    await expect.poll(async () => Math.abs((await at()) - before)).toBeLessThan(0.01);
 
     const bar = card(page).locator(".molecule-scalebar i");
     const w0 = (await bar.boundingBox())!.width;

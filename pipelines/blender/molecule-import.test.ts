@@ -1,7 +1,7 @@
 // The Blender side of the import (molecule_import.py), run only where Blender is installed:
 // CI has no Blender, so there this suite is skipped and the committed renders are checked by hash.
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -42,5 +42,18 @@ describe.skipIf(!existsSync(BLENDER))("molecule_import.py in Blender", () => {
     } finally {
       rmSync(work, { recursive: true, force: true });
     }
+  }, 60_000);
+
+  it("reads a site orbital mesh (#70: quantised GLB, one node per lobe sign) with every triangle", () => {
+    const data = JSON.parse(readFileSync(join(repoRoot, "content/subjects/organic/data/ethylene-orbitals.json"), "utf8"));
+    const pi = data.orbitals.list.pi;
+    const out = execFileSync(
+      BLENDER,
+      ["-b", "--factory-startup", "-noaudio", "-P", join(repoRoot, "pipelines/blender/glb_probe.py"), "--", join(repoRoot, "site/public", pi.mesh)],
+      { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+    );
+    const probe = JSON.parse(out.split("\n").find((l) => l.startsWith("PROBE "))!.slice(6));
+    expect(probe.meshes.map((m: { name: string }) => m.name).sort()).toEqual(["minus-hatched", "plus-solid"]);
+    expect(probe.meshes.reduce((n: number, m: { faces: number }) => n + m.faces, 0)).toBe(pi.triangles);
   }, 60_000);
 });

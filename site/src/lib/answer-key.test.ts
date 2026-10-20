@@ -15,6 +15,17 @@ it("the page's Lesson carries no answers, Hints, Correct lines or reveals", () =
   expect(page.steps[2]).toMatchObject({ id: "s03", prompt: "Question s03", select: "one" });
 });
 
+it("a number cited only in the answer fields travels in the key, so the Source note can't give it away", () => {
+  const tree = validTree();
+  tree["chem/data/methane.yaml"] = methane();
+  const s03 = (tree["chem/lessons/l1.yaml"] as { steps: Record<string, unknown>[] }).steps[2];
+  Object.assign(s03, { prompt: "C–H is {{methane/r.CH}}. Which angle?", reveal: "It is {{methane/a.HCH}}." });
+  const { page, key } = splitLesson(buildContent(writeTree(tree)).model!.subjects[0].courses[0].units[0].lessons[0]);
+  expect(JSON.stringify(page)).not.toContain("methane/a.HCH");
+  expect(JSON.stringify(page)).toContain("methane/r.CH");
+  expect((key.s03.answerCitations as { ref: string }[]).map((c) => c.ref)).toEqual(["methane/a.HCH"]);
+});
+
 it("a reveal Scene shows the answer, so it travels in the key, not the page", () => {
   const base = lesson();
   const revealScene = { id: "group-spotlight", state: { view: "amoxicillin", labels: "on" }, cited: {} };
