@@ -458,8 +458,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
           {step.aside && <AsideButton key={`aside-${step.id}`} aside={step.aside} stepId={step.id} />}
 
           {/* Keyed per Step so a new Step opens its Source note collapsed. Numbers cited only in the answer
-              (its Hints, reveal or reveal Scene, e.g. Lesson 7's C–N lengths) join the note once it's answered. */}
-          <SourceNote key={`source-note-${step.id}`} cited={screen.canContinue ? answeredCitations(step) : (step.citations ?? [])} note={step.sourceNote} />
+              (its Hints, reveal or reveal Scene) join the note once it's answered. A Step whose reveal Scene
+              prints numbers (Lesson 7's C–N lengths) shows its note only then, which also keeps it on one phone screen. */}
+          {!(step.type !== "explain" && step.revealScene && Object.keys(step.revealScene.cited).length && !screen.canContinue) && (
+            <SourceNote key={`source-note-${step.id}`} cited={screen.canContinue ? answeredCitations(step) : (step.citations ?? [])} note={step.sourceNote} />
+          )}
 
           <p className="report">
             <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>
