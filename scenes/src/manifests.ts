@@ -18,6 +18,10 @@ import { acetateBondLengths } from "./acetate-bond-lengths/manifest.ts";
 import { formaldehydePiShift } from "./formaldehyde-pi-shift/manifest.ts";
 import { threeMoves } from "./three-moves/manifest.ts";
 import { acetateHybrid } from "./acetate-hybrid/manifest.ts";
+import { amideCnLengths } from "./amide-cn-lengths/manifest.ts";
+import { amideHybrid } from "./amide-hybrid/manifest.ts";
+import { ruleLadder } from "./rule-ladder/manifest.ts";
+import { carbonylSites } from "./carbonyl-sites/manifest.ts";
 
 // Lesson 0 (#78)
 import { buildBySharing } from "./build-by-sharing/manifest.ts";
@@ -31,6 +35,12 @@ import { dipoleSum } from "./dipole-sum/manifest.ts";
 // Lesson 8 (#86)
 import { moFiller } from "./mo-filler/manifest.ts";
 import { frontierLadder } from "./frontier-ladder/manifest.ts";
+
+// Lesson 4 (#82)
+import { hybridSets } from "./hybrid-sets/manifest.ts";
+import { piTwist } from "./pi-twist/manifest.ts";
+import { methaneUnmixedVsReal } from "./methane-unmixed-vs-real/manifest.ts";
+import { orbitalSum } from "./orbital-sum/manifest.ts";
 
 export const sceneManifests: readonly SceneManifest<any>[] = [
   sampleTwist,
@@ -59,6 +69,16 @@ export const sceneManifests: readonly SceneManifest<any>[] = [
   formaldehydePiShift,
   threeMoves,
   acetateHybrid,
+  // Lesson 7 (#85)
+  amideCnLengths,
+  amideHybrid,
+  ruleLadder,
+  carbonylSites,
+  // Lesson 4 (#82)
+  hybridSets,
+  methaneUnmixedVsReal,
+  orbitalSum,
+  piTwist,
   // Lesson 8 (#86)
   moFiller,
   frontierLadder,

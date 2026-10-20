@@ -20,9 +20,16 @@
 @media (max-width: 480px) {
   /* A Scene without controls (a reveal, a card deal) shares the phone screen with long text or feedback. */
   .scene-bare .scene-frame { max-height: min(45dvh, 10.5rem); }
+  /* A still above a question's choices is the small picture the question is about (Lesson 4's
+     Hook: carbon's unmixed orbitals under a six-line prompt), so it shrinks a little more. */
+  .player-body:has(.opts) .scene-bare .scene-frame { max-height: min(45dvh, 7.5rem); }
   /* On a phone the Lesson-end screen keeps the Wrap text and the Key idea card on one screen; the
      Wrap's recap Scene (Lesson 5's group cards) shows from tablet width up. */
   .player:has(.player-end) .player-body .scene { display: none; }
+  /* The same for a Wrap's 3D card (Lesson 4's ethylene σ + π, #82) and its Explore button. */
+  .player:has(.player-end) .player-body :is(.molecule, .molecule-switch-row, .explore-open) { display: none; }
+  /* Its Source note goes with it: the only numbers it cites are the hidden card's. */
+  .player:has(.player-end) .player-body:has(.molecule) .source-note { display: none; }
   /* A tall Tap drawing keeps to about a third of the screen (never below natural size, so hit areas stay
      48 px), so the Step fits one phone screen (Lesson 2 s05). */
   .tap-structure { max-width: max(var(--tap-natural, 100%), calc(34vh * var(--tap-aspect, 10))); margin-inline: auto; }
@@ -79,7 +86,7 @@ dialog.aside > .btn { margin-top: 12px; }
 .arrows-target .structure-svg { flex: 1; opacity: 0.6; }
 .arrows-target .structure { max-height: 10vh; width: 100%; }
 .arrows-structure { position: relative; touch-action: none; user-select: none; -webkit-user-select: none; }
-.arrows-structure .structure-svg .structure { width: 100%; max-height: 24vh; }
+.arrows-structure .structure-svg .structure { width: 100%; max-height: 21vh; } /* 21vh: room for a two-line in-between flag and a three-line Hint on a phone (Lesson 7) */
 .arrows-layer { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .arrows-layer .source { cursor: grab; outline: none; }
 .arrows-layer .hit, .arrows-layer .spot-hit { fill: transparent; stroke: none; pointer-events: all; }
@@ -95,3 +102,15 @@ dialog.aside > .btn { margin-top: 12px; }
 .riding-electron { fill: var(--at-electron); pointer-events: none; }
 .flag-ring { fill: none; stroke: var(--at-boss); stroke-width: 3px; stroke-dasharray: 5 3; pointer-events: none; }
 .arrow-flags { list-style: none; margin: 0; padding: 8px 12px; border: var(--at-border) dashed var(--at-boss); font: 400 16px/1.4 var(--at-font-data); }
+/* Rank structure cards stay one column (it is an order, top to bottom) and carry their letter (Hints name cards by it). */
+.opts.rank:has(.structure-card) { grid-template-columns: 1fr; }
+.rank .structure-card { position: relative; display: grid; place-items: center; padding: 4px 8px 4px 36px; }
+.rank .structure-card .structure { max-height: 4rem; }
+.card-tag { position: absolute; top: 6px; left: 10px; font: 700 18px/1 var(--at-font-data); color: var(--at-electron); }
+/* Once a Rank Step is answered, each card says why it sits there. */
+.rank-tag { display: block; font: 400 16px/1.3 var(--at-font-data); color: var(--at-ink-muted); }
+/* Answered: drawing and tag side by side, so four tagged cards still fit a phone. */
+.rank .structure-card:has(.rank-tag) { display: flex; align-items: center; gap: 8px; }
+.rank .structure-card:has(.rank-tag) > span:nth-of-type(3) { flex: 1 1 55%; min-width: 0; }
+.rank .structure-card:has(.rank-tag) .structure { max-height: 3.25rem; }
+.rank .structure-card .rank-tag { flex: 1 1 45%; text-align: left; }

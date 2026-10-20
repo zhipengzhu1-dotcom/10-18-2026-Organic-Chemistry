@@ -89,7 +89,17 @@ export interface MoleculeUse {
   /** Lesson 8 (#86): orbitals named only by the molecule's label (A, B…), shown side by side on wide screens. */
   orbitalLabels?: "hide";
   /** Lesson 8 (#86): false = no tap-measuring on this card. */
-  measure?: false;
+  tapMeasure?: false;
+  /** Lesson 4 (#82): the toggle group's name (default "Molecule"). */
+  toggleLabel?: string;
+  /** Lesson 4 (#82): step through the toggle once on entry, ending on the last. */
+  autoplay?: boolean;
+  /** Lesson 4 (#82): a translucent sheet through three atoms that turns with the molecule; `on` = shown at the start. */
+  plane?: { through: [number, number, number]; label: string; on: boolean };
+  /** Lesson 4 (#82): atoms measured on load (two: a length; three: the angle at the middle one). */
+  measure?: number[];
+  /** Lesson 4 (#82): the start zoom (1 fits the whole true-scale molecule in any rotation). */
+  zoom?: number;
   /** Computed orbitals drawn as translucent lobes over the atoms (#70), in the order the Step lists them. */
   orbitals?: OrbitalUse[];
 }
@@ -210,14 +220,16 @@ export interface RankStep extends GradedVisuals {
   phase: Phase;
   type: "rank";
   prompt: string;
-  /** In the order the cards start in. */
-  items: { id: string; text: string }[];
+  /** In the order the cards start in; a structure card's text is its screen-reader label (Lesson 7). */
+  items: Option[];
   /** The one correct order of item ids, first to last. */
   answer: string[];
   correct?: string;
   /** A Hint's `match` is one whole wrong order; or it names a pattern (see RankHint). */
   hints?: RankHint[];
   reveal: string;
+  /** Once answered, each card's note on why it sits there; secret (it gives the order away). */
+  revealTags?: Record<string, string>;
   problemId?: string;
   scene?: SceneUse;
   molecule?: MoleculeUse;
@@ -226,7 +238,7 @@ export interface RankStep extends GradedVisuals {
 
 /**
  * A Rank Hint. Every condition given must hold: `match` = this whole order; `notFirst` /
- * `notLast` = that item isn't at that end; `before: [x, y]` = x is placed before y.
+ * `notLast` = that item isn't at that end; `before: [x, y]` = x is placed before y; `above` = any one of its [x, y] pairs is.
  * The generic fallback has no condition.
  */
 export interface RankHint {
@@ -234,6 +246,8 @@ export interface RankHint {
   notFirst?: string;
   notLast?: string;
   before?: [string, string];
+  /** At least one of these [upper, lower] pairs has its first item above its second. */
+  above?: [string, string][];
   text: string;
 }
 
@@ -400,6 +414,8 @@ export interface StructureAtom {
   letter?: boolean;
   /** Screen-reader name, e.g. "the single-bonded O"; generated when absent. */
   label?: string;
+  /** A short visible tag drawn small beside the atom, e.g. "1" to number carbons (#82). */
+  tag?: string;
 }
 
 export interface StructureBond {
@@ -505,6 +521,8 @@ export interface TapStep extends GradedVisuals {
   reveal: string;
   /** Shown when the Step sits among Draw-arrows Steps: it is tap-only. */
   tapOnly?: { idle: string; drag: string };
+  /** Played (push-replay) in place of the drawing once the Step is answered: pushes on `start` that make the δ site (Lesson 7). Secret. */
+  replay?: { start: Structure; pushes: Push[] };
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];

@@ -51,7 +51,7 @@ steps:
       view: side-on
       label: A
       orbitalLabels: hide
-      measure: false
+      tapMeasure: false
       orbitals: [hydrogen-b3lyp-orbitals/sigma]
       describe: "Hydrogen molecule, two atoms on a horizontal axis. One egg-shaped lobe, sign plus, wraps both nuclei and is thickest between them."
       toggle:
@@ -110,7 +110,7 @@ steps:
     molecule:
       id: ethylene-b3lyp
       view: face-on
-      measure: false
+      tapMeasure: false
       orbitals: [ethylene-b3lyp-orbitals/homo]
       describe: "Ethylene, flat, two carbons and four hydrogens. The orbital has two lobes: plus above the plane, minus below, each stretched over both carbons. The plane of the atoms is a node."
     options:
@@ -170,7 +170,7 @@ steps:
     molecule:
       id: ammonia-bf3-b3lyp-pair
       view: top-down
-      measure: false
+      tapMeasure: false
       orbitals: [ammonia-bf3-pair-orbitals/nh3-homo, ammonia-bf3-pair-orbitals/bf3-lumo]
       describe: "Ammonia above boron trifluoride, placed for clarity, not at a computed distance. Ammonia's HOMO: one large lobe on nitrogen, pointing down toward boron, away from ammonia's hydrogens, with a small opposite-sign lobe behind it. Boron trifluoride, flat. Its LUMO: two large lobes on boron, plus above the plane and minus below, and small opposite-sign lobes on each fluorine. The plane of boron trifluoride is a node."
     options:

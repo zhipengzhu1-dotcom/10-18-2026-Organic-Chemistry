@@ -50,6 +50,23 @@ import { fourDomainFamily } from "./four-domain-family/manifest.ts";
 import FourDomainFamily from "./four-domain-family/FourDomainFamily.tsx";
 import { dipoleSum } from "./dipole-sum/manifest.ts";
 import DipoleSum from "./dipole-sum/DipoleSum.tsx";
+import { amideCnLengths } from "./amide-cn-lengths/manifest.ts";
+import AmideCnLengths from "./amide-cn-lengths/AmideCnLengths.tsx";
+import { amideHybrid } from "./amide-hybrid/manifest.ts";
+import AmideHybrid from "./amide-hybrid/AmideHybrid.tsx";
+import { ruleLadder } from "./rule-ladder/manifest.ts";
+import RuleLadder from "./rule-ladder/RuleLadder.tsx";
+import { carbonylSites } from "./carbonyl-sites/manifest.ts";
+import CarbonylSites from "./carbonyl-sites/CarbonylSites.tsx";
+// Lesson 4 (#82)
+import { hybridSets } from "./hybrid-sets/manifest.ts";
+import HybridSets from "./hybrid-sets/HybridSets.tsx";
+import { piTwist } from "./pi-twist/manifest.ts";
+import PiTwist from "./pi-twist/PiTwist.tsx";
+import { methaneUnmixedVsReal } from "./methane-unmixed-vs-real/manifest.ts";
+import MethaneUnmixedVsReal from "./methane-unmixed-vs-real/MethaneUnmixedVsReal.tsx";
+import { orbitalSum } from "./orbital-sum/manifest.ts";
+import OrbitalSum from "./orbital-sum/OrbitalSum.tsx";
 
 // Lesson 8 (#86)
 import { moFiller } from "./mo-filler/manifest.ts";
@@ -83,6 +100,16 @@ export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [formaldehydePiShift.id]: { manifest: formaldehydePiShift, Component: FormaldehydePiShift },
   [threeMoves.id]: { manifest: threeMoves, Component: ThreeMoves },
   [acetateHybrid.id]: { manifest: acetateHybrid, Component: AcetateHybrid },
+  // Lesson 7
+  [amideCnLengths.id]: { manifest: amideCnLengths, Component: AmideCnLengths },
+  [amideHybrid.id]: { manifest: amideHybrid, Component: AmideHybrid },
+  [ruleLadder.id]: { manifest: ruleLadder, Component: RuleLadder },
+  [carbonylSites.id]: { manifest: carbonylSites, Component: CarbonylSites },
+  // Lesson 4 (#82)
+  [hybridSets.id]: { manifest: hybridSets, Component: HybridSets },
+  [piTwist.id]: { manifest: piTwist, Component: PiTwist },
+  [methaneUnmixedVsReal.id]: { manifest: methaneUnmixedVsReal, Component: MethaneUnmixedVsReal },
+  [orbitalSum.id]: { manifest: orbitalSum, Component: OrbitalSum },
   // Lesson 8 (#86)
   [moFiller.id]: { manifest: moFiller, Component: MoFiller },
   [frontierLadder.id]: { manifest: frontierLadder, Component: FrontierLadder },

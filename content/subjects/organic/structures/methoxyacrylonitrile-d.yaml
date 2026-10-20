@@ -1,0 +1,19 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+
+id: methoxyacrylonitrile-d
+style: line-angle
+smiles: "[CH3:1][O:2][CH+:3][CH:4]=[C:5]=[N-:6]"
+atoms:
+  - { id: a1, el: C, x: 0, y: 0 }
+  - { id: a2, el: O, x: 1.299, y: -0.75, lp: 2 }
+  - { id: a3, el: C, x: 2.598, y: 0, charge: 1, letter: true, h: 1 }
+  - { id: a4, el: C, x: 3.897, y: -0.75, letter: true, h: 1 }
+  - { id: a5, el: C, x: 5.196, y: 0, letter: true }
+  - { id: a6, el: N, x: 6.495, y: 0.75, charge: -1, lp: 2 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a3, b: a4, order: 1 }
+  - { id: b4, a: a4, b: a5, order: 2 }
+  - { id: b5, a: a5, b: a6, order: 2 }
+source: PubChem CID 5324713 (contributor)

@@ -167,7 +167,7 @@ describe("Lesson 8's orbital cards", () => {
   it("s03 shows H₂'s σ as A and σ* as B, side-on with the H–H axis level, measuring off, and the page never names which is which", () => {
     const m = card(3);
     expect(m.orbitalLabels).toBe("hide");
-    expect(m.measure).toBe(false);
+    expect(m.tapMeasure).toBe(false);
     expect([m.label, m.toggle![0].label]).toEqual(["A", "B"]);
     const sigma = data["hydrogen-b3lyp-orbitals"].orbitals!.list;
     expect(m.orbitals![0].mesh).toContain(sigma.sigma.sha256.slice(0, 16));
@@ -195,7 +195,7 @@ describe("Lesson 8's orbital cards", () => {
     const [n, b] = [p[0], p[4]];
     expect(Math.hypot(n[0] - b[0], n[1] - b[1])).toBeLessThan(0.01);
     expect(n[2]).toBeGreaterThan(b[2]);
-    expect(m.measure).toBe(false);
+    expect(m.tapMeasure).toBe(false);
   });
 });
 

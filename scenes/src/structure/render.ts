@@ -12,6 +12,8 @@ const FONT = 20;
 const CHAR_W = FONT * 0.6; // JetBrains Mono advance width
 const LETTER_GAP = 12; // bonds stop this far short of a letter
 const LP_DIST = 17;
+/** How far an atom tag sits from its atom's centre (px). */
+const TAG_DIST = 20;
 const LP_SPREAD = 4.5;
 const DOT_R = 2.4;
 /** Lewis style: distance between the shared pairs of a double or triple bond. */
@@ -252,6 +254,14 @@ export function drawStructure(structure: Structure, hide: Hidden[] = [], highlig
       const right = a.h && !hLeft && free ? CHAR_W * (1 + String(a.h).length) : 0;
       parts.push(
         `<text class="charge"${fadeOf(a.id)} x="${r1(x + Math.cos(dir) * dist + right)}" y="${r1(y + Math.sin(dir) * dist)}" text-anchor="middle" dominant-baseline="central" font-size="${FONT * 0.7}" fill="currentColor">${sign}</text>`,
+      );
+    }
+
+    if (a.tag) {
+      // A number for the Student (#82): small, in the widest gap left by bonds, H's and lone pairs.
+      const dir = lonePairDirections([...occupied, ...lonePairs, ...(showCharges && a.charge ? [-Math.PI / 4] : [])], 1)[0];
+      parts.push(
+        `<text class="atom-tag" x="${r1(x + Math.cos(dir) * TAG_DIST)}" y="${r1(y + Math.sin(dir) * TAG_DIST)}" text-anchor="middle" dominant-baseline="central" font-size="${FONT * 0.6}" fill="currentColor" opacity="0.75">${a.tag}</text>`,
       );
     }
 

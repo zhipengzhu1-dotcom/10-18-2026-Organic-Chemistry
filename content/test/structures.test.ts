@@ -107,6 +107,48 @@ describe("structure cards in Multiple choice", () => {
   });
 });
 
+describe("structure cards in Rank / order (Lesson 7 s09)", () => {
+  const rankStep = (extra: object = {}) => ({
+    id: "s03",
+    phase: "build",
+    type: "rank",
+    prompt: "Most important first.",
+    items: [
+      { id: "b", text: "Methoxide: CH₃ bonded to O⁻.", structure: "methoxide" },
+      { id: "a", text: "Formaldehyde: carbon double-bonded to oxygen.", structure: "formaldehyde", hide: ["lone-pairs"] },
+    ],
+    answer: ["a", "b"],
+    correct: "Neutral first.",
+    hints: [{ text: "Count charges." }],
+    reveal: "Formaldehyde, then methoxide.",
+    ...extra,
+  });
+
+  it("resolves each card to its structure, with the text as its screen-reader label", () => {
+    const { lesson, errors } = build(treeWith({ 2: rankStep() }));
+    expect(errors).toEqual([]);
+    const step = lesson!.steps[2];
+    if (step.type !== "rank") throw new Error(step.type);
+    expect(step.items).toMatchObject([
+      { id: "b", text: "Methoxide: CH₃ bonded to O⁻.", structure: { hide: [], structure: { id: "methoxide" } } },
+      { id: "a", structure: { hide: ["lone-pairs"], structure: { id: "formaldehyde" } } },
+    ]);
+  });
+
+  it("works in a Rank Problem too, and rejects a card whose structure has no file", () => {
+    const items = [
+      { id: "b", text: "x", structure: "nope" },
+      { id: "a", text: "y" },
+    ];
+    const { errors } = build(
+      treeWith({}, (tree) => {
+        tree["chem/problems/p1.yaml"] = { ...problem("p1"), ...rankStep({ items }), id: "p1", phase: undefined, options: undefined };
+      }),
+    );
+    expect(errors).toEqual([`chem/problems/p1.yaml: structure "nope" not found`]);
+  });
+});
+
 describe("Tap-to-identify Steps", () => {
   it("resolves the structure and every tappable atom and bond with a screen-reader label, in reading order", () => {
     const { lesson, errors } = build(treeWith({ 5: tapStep() }));

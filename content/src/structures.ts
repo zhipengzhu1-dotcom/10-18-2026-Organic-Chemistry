@@ -1,7 +1,7 @@
 // Structures in the content build: checking structure files, resolving
 // structure cards and Tap-to-identify targets, and writing the screen-reader
 // label of every tappable atom and bond.
-import type { Figure, Hidden, Option, Structure, StructureAtom, StructureView, TapTarget } from "./model.ts";
+import type { Figure, Hidden, Option, Push, Structure, StructureAtom, StructureView, TapTarget } from "./model.ts";
 import type { ProblemFile, StructureFile } from "./schema.ts";
 import { hintIds } from "./shape.ts";
 import { expectedLonePairs, hydrogenCount } from "./valence.ts";
@@ -19,7 +19,7 @@ import {
 } from "./arrows.ts";
 
 type TapFile = Extract<ProblemFile, { type: "tap-to-identify" }>;
-type TapFields = Pick<TapFile, "structure" | "hide" | "outline" | "tappable" | "answer" | "hints">;
+type TapFields = Pick<TapFile, "structure" | "hide" | "outline" | "tappable" | "answer" | "hints" | "replay">;
 type FigureFile = NonNullable<TapFile["figures"]>[number];
 type OptionFile = Extract<ProblemFile, { type: "multiple-choice" }>["options"][number];
 
@@ -134,7 +134,7 @@ export function resolveTap(
   item: TapFields,
   structures: Map<string, Structure | undefined>,
   errors: string[],
-): { structure: StructureView; targets: TapTarget[] } | undefined {
+): { structure: StructureView; targets: TapTarget[]; replay?: { start: Structure; pushes: Push[] } } | undefined {
   const structure = structures.get(item.structure);
   if (!structure) {
     if (!structures.has(item.structure)) errors.push(`structure "${item.structure}" not found`);
@@ -187,7 +187,14 @@ export function resolveTap(
   for (const id of item.answer) if (!tappable.has(id)) errors.push(`answer names "${id}", which can't be tapped`);
   for (const hint of item.hints ?? [])
     for (const id of hintIds(hint)) if (!tappable.has(id)) errors.push(`a Hint names "${id}", which can't be tapped`);
-  return { structure: view(structure, item.hide, undefined, item.outline), targets };
+  const drawn = view(structure, item.hide, undefined, item.outline);
+  if (!item.replay) return { structure: drawn, targets };
+  // The reveal's push-replay is checked like a Draw-arrows answer: each push a step toward the result, ending on it.
+  const { start, result, pushes } = item.replay;
+  const found: string[] = [];
+  const resolved = resolveArrows({ start, results: [result], answer: pushes }, structures, found);
+  for (const message of found) errors.push(`replay: ${message}`);
+  return { structure: drawn, targets, ...(resolved && { replay: { start: resolved.start.structure, pushes } }) };
 }
 
 type ArrowsFile = Extract<ProblemFile, { type: "draw-arrows" }>;

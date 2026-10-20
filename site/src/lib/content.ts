@@ -1,5 +1,5 @@
 // Build-time access to the course model. A content error fails the site build.
-import { buildContent, type Course, type CourseModel, type Figure, type Lesson, type Step, type Unit } from "@astratron/content";
+import { buildContent, type Course, type CourseModel, type Figure, type Lesson, type Option, type Step, type Unit } from "@astratron/content";
 import { checkManifests, checkWatchManifests, sceneCatalog } from "@astratron/scenes/check";
 import { sceneManifests } from "@astratron/scenes/manifests";
 import { watchSceneManifests } from "@astratron/scenes/watch";
@@ -97,14 +97,16 @@ export const answerKeyUrl = (subject: string, lessonId: string) => `/answers/${s
  * Numbers and formulas get `<span class="data">` (the data face); see markData.
  */
 export const md = (text: string) => markData(marked.parseInline(text, { async: false }));
+/** Block Markdown (paragraphs, lists) for Explain text, which can run to several paragraphs (Lesson 7 s05). */
+export const mdBlocks = (text: string) => markData(marked.parse(text, { async: false }));
 
 // Element symbols that turn up in organic chemistry, two-letter ones first.
-const EL = "(?:Cl|Br|Na|Mg|Al|Si|Li|Ca|Fe|Zn|Cu|Mn|Cr|Pd|Pt|Sn|Hg|Se|Os|Ni|Ag|Au|Ti|He|Ne|Ar|H|B|C|N|O|F|P|S|K|I)";
+const EL = "(?:Cl|Br|Be|Na|Mg|Al|Si|Li|Ca|Fe|Zn|Cu|Mn|Cr|Pd|Pt|Sn|Hg|Se|Os|Ni|Ag|Au|Ti|He|Ne|Ar|H|B|C|N|O|F|P|S|K|I)";
 const CHUNK = `(?:${EL}[₀-₉]*|\\((?:${EL}[₀-₉]*)+\\)[₀-₉]*)+[⁺⁻]*`;
 const DATA = new RegExp(
-  `(?<![A-Za-z])${CHUNK}(?:[–=≡]${CHUNK})*(?![a-z])` + // formula: CH₄, H₃C–CH₃, C=O, OH⁻
-    `|(?<![\\d.])[−+]?\\d+(?:\\.\\d+)?` + // number: 4, 1.54, −1.7, the 3 of 3D and sp3
-    `|(?<![A-Za-z])e⁻`, // the electron: 6 e⁻
+  `(?<![A-Za-z])[⁺⁻]?${CHUNK}(?:[–=≡]${CHUNK})*(?![a-z])` + // formula: CH₄, H₃C–CH₃, C=O, OH⁻, ⁻CH₂–CH=N⁺
+    `|(?<![A-Za-z])e⁻` + // an electron: 6 e⁻, 6-e⁻
+    `|(?<![\\d.])[−+]?\\d+(?:\\.\\d+)?`, // number: 4, 1.54, −1.7, the 3 of 3D and sp3
   "g",
 );
 /** A formula needs a subscript, a charge or a bond; a lone capital (I, C) stays prose. */
@@ -160,7 +162,7 @@ function renderVisuals(s: Step): Step {
 }
 
 function renderText(s: Step): Step {
-  if (s.type === "explain") return { ...s, text: md(s.text) };
+  if (s.type === "explain") return { ...s, text: mdBlocks(s.text) };
   if (s.type === "manipulate-goal")
     return {
       ...s,
@@ -169,6 +171,8 @@ function renderText(s: Step): Step {
     };
   const shared = { prompt: md(s.prompt), correct: s.correct && md(s.correct), reveal: md(s.reveal) };
   const choices = (list: { id: string; text: string }[]) => list.map((o) => ({ ...o, text: md(o.text) }));
+  // A structure card's text is its screen-reader label: kept plain; its drawing is pre-rendered SVG.
+  const cards = (list: Option[]) => list.map((o) => (o.structure ? { ...o, structure: drawView(o.structure) } : { ...o, text: md(o.text) }));
   switch (s.type) {
     case "multiple-choice":
       return {
@@ -188,7 +192,7 @@ function renderText(s: Step): Step {
     case "numeric":
       return { ...s, ...shared, hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
     case "rank":
-      return { ...s, ...shared, items: choices(s.items), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
+      return { ...s, ...shared, items: cards(s.items), hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
     case "manipulate":
       return { ...s, ...shared, hints: s.hints?.map((h) => ({ ...h, text: md(h.text) })) };
     case "rotate-and-identify":

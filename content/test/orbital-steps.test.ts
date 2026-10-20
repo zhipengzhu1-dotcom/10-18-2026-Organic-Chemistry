@@ -160,7 +160,7 @@ describe("orbitals shown as A and B (Lesson 8: the spec's `labels: hide`)", () =
     card: true,
     label: "A",
     orbitalLabels: "hide",
-    measure: false,
+    tapMeasure: false,
     orbitals: ["methane-orbitals/homo"],
     describe: "One lobe.",
     toggle: [{ id: "methane", label: "B", orbitals: ["methane-orbitals/lumo"], describe: "Two lobes." }],
@@ -182,8 +182,8 @@ describe("orbitals shown as A and B (Lesson 8: the spec's `labels: hide`)", () =
 
   it("turn tap-measuring off for every molecule of the card", () => {
     const m = s02(build(pair(), twoOrbitals())).molecule!;
-    expect(m.measure).toBe(false);
-    expect(m.toggle![0].measure).toBe(false);
+    expect(m.tapMeasure).toBe(false);
+    expect(m.toggle![0].tapMeasure).toBe(false);
   });
 
   it("need a letter on every molecule", () => {

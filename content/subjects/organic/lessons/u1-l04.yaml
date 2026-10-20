@@ -1,0 +1,246 @@
+# Lesson 4: Hybridization & Orbitals (#82). Built from the merged Lesson spec
+# docs/specs/unit-1/lesson-04-hybridization-orbitals.md: every Prompt, Hint, Correct line, Reveal and
+# Source note follows it. Geometry comes from the cited CCCBDB experimental data files; the computed
+# bond orbitals (#70) sit on those same atoms. The only typed angles are the hybrid model's own
+# (109.5°, 120°, 180°) and the p orbitals' right angle, always named as the model's.
+# A cited value shows with its unit ("1.09 Å", "109.5°"), so the spec's "{x} Å" and "{x} degrees"
+# read "{{x}}" here. The spec's orbital Scenes (ethylene-sigma-pi, acetylene-sigma-pi, ketene-pi)
+# are the 3D card with computed orbitals, a Show toggle and the plane sheet (notes/70, notes/82).
+id: u1-l04
+slug: hybridization-orbitals
+title: Hybridization & Orbitals
+act: Shape
+signature: s07
+goal: Assign sp³, sp² or sp to an atom by counting its groups, predict its bond angles, and tell a σ bond (head-on, on the axis) from a π bond (side-on p overlap, above and below the plane), counting σ + π in double and triple bonds.
+keyIdea: Carbon mixes its orbitals to match its groups (four sp³, three sp², two sp) and builds a σ framework from head-on overlaps; leftover p orbitals overlap side-on as π bonds above and below it.
+steps:
+  - id: s01
+    phase: hook
+    type: multiple-choice
+    prediction: true
+    prompt: "Carbon's four outer electrons live in one round **2s** orbital and three **2p** orbitals, which point at right angles (90°) to each other. If carbon bonded four H's straight onto those orbitals as they are, what would methane look like?"
+    scene: { id: hybrid-sets, state: { set: unmixed }, still: true }
+    options:
+      - { id: a, text: four identical C–H bonds in a perfect tetrahedron }
+      - { id: b, text: "three H's at right angles to each other, plus a fourth one that's different" }
+      - { id: c, text: a flat square of four H's }
+    answer: [b]
+    reveal: "Unmixed orbitals would give **b**: three bonds at right angles and an odd one out. Real methane (you met it in Lesson 3) has four identical C–H bonds, {{methane/r.CH}} each, and every H–C–H angle is {{methane/a.HCH}}. So carbon doesn't bond with its orbitals as they come. It **mixes** them first."
+    revealScene: { id: methane-unmixed-vs-real, state: { panel: both } }
+    sourceNote: "The left panel is a model, not a molecule. Model, not computed: textbook hydrogen-like 2s and 2p orbitals. Adapted from MIT OCW 5.12, Lecture 1 p. 13, Berkowski, Spring 2005, CC BY-NC-SA 4.0."
+
+  - id: s02
+    phase: build
+    type: explain
+    text: "Each p orbital has two lobes of opposite sign, drawn solid and hatched.<br>Before it bonds, carbon **mixes** its 2s with its three 2p orbitals. Four orbitals go in, four come out: four identical **sp³** hybrid orbitals, each mostly one big lobe.<br>Four equal lobes spread as far apart as they can, to the corners of a tetrahedron. The model predicts 109.5° between them, just what methane shows. This mixing is called **hybridization**."
+    scene: hybrid-mixing
+    sourceNote: "Model, not computed: textbook hydrogen-like 2s and 2p orbitals mixed into hybrids. Hybrid orbitals are a way to picture bonding, not something measured. Adapted from MIT OCW 5.12, Lecture 1 pp. 13–14, Berkowski, Spring 2005, CC BY-NC-SA 4.0."
+
+  - id: s03
+    phase: build
+    type: numeric
+    prompt: Now carbon mixes its 2s with only **two** of its 2p orbitals. How many hybrid orbitals come out?
+    scene: { id: orbital-sum, state: { filled: "no" }, still: true }
+    unitSymbol: hybrid orbitals
+    answer: 3
+    tolerance: 0
+    correct: "Three in, three out: three **sp²** hybrids. The third 2p orbital stays out of the mix, unchanged."
+    hints:
+      - match: 2
+        text: "You mixed three orbitals: one s and two p. Mixing never creates or loses orbitals: what goes in comes out."
+      - match: 4
+        text: Only two of the three p orbitals join in. The third stays out of the mix.
+      - match: 1
+        text: Mixing makes several equal orbitals, not one big one. Count how many go in.
+      - text: Count the orbitals that go into the mix. The same number comes out.
+    reveal: One 2s + two 2p = three sp² hybrids, with one 2p left over.
+    revealScene: { id: orbital-sum, state: { filled: "yes" }, still: true }
+
+  - id: s04
+    phase: build
+    type: explain
+    text: "How many p orbitals join the mix depends on how many **groups** the atom points at: bonded atoms plus lone pairs, Lesson 3's electron domains. A double or triple bond counts as **one** group.<br>**4 groups → sp³**: s + 3 p, four hybrids, tetrahedral (model: 109.5°). No p left.<br>**3 groups → sp²**: s + 2 p, three hybrids in a plane (model: 120°). One p left, standing at right angles to that plane.<br>**2 groups → sp**: s + 1 p, two hybrids in a line (model: 180°). Two p left, at right angles to each other."
+    scene: { id: hybrid-sets, state: { set: tour } }
+    sourceNote: "Model, not computed: textbook hydrogen-like 2s and 2p orbitals mixed into hybrids. Hybrid orbitals are a way to picture bonding, not something measured. Hybrid sets and their angles adapted from MIT OCW 5.12, Lecture 1 p. 14, Berkowski, Spring 2005, CC BY-NC-SA 4.0."
+
+  - id: s05
+    phase: build
+    type: rotate-and-identify
+    prompt: "Ethylene, H₂C=CH₂, measured. Tap H, C, H to measure an angle at one carbon. Which hybrid set do its carbons use?"
+    molecule:
+      id: ethylene
+      view: three-quarter
+      zoom: 1.4
+      describe: "Ethylene: two carbons joined by a double bond, each with two hydrogens. All six atoms lie in one flat plane. H–C–H {{ethylene/a.HCH}}, H–C–C {{ethylene/a.HCC}}."
+    options:
+      - { id: a, text: sp³ }
+      - { id: b, text: sp² }
+      - { id: c, text: sp }
+    answer: [b]
+    correct: "Each carbon has three groups (two H's and the other carbon), so three sp² hybrids, all six atoms in one plane. The measured angles, {{ethylene/a.HCH}} (H–C–H) and {{ethylene/a.HCC}} (H–C–C), sit close to the model's 120°. Real angles shift a little because a C=C neighbour and an H neighbour aren't the same."
+    hints:
+      - match: [a]
+        text: "sp³ needs four groups. Count what one carbon is bonded to: two H's and one carbon. The double bond is a single neighbour."
+      - match: [c]
+        text: "sp is for two groups in a straight line. Each carbon here has three neighbours, and the angles aren't 180°."
+      - text: "Count the groups around one carbon, then match: 4 → sp³, 3 → sp², 2 → sp."
+    reveal: "**b**, sp². Turned edge-on, all six atoms lie in one plane; H–C–H measures {{ethylene/a.HCH}}."
+
+  - id: s06
+    phase: build
+    type: explain
+    text: "Orbitals overlap in two ways.<br>**σ (sigma):** head-on, along the line between the two nuclei. The shared electrons sit right on that line. Every single bond is a σ bond, and in ethylene the sp² hybrids make all five σ bonds: the **σ framework**.<br>**π (pi):** each carbon's leftover p orbital stands upright, and side by side they overlap **above and below** the plane. No π electrons sit on the C–C line itself.<br>So a double bond is **one σ + one π**."
+    molecule:
+      id: ethylene
+      view: edge-on
+      card: true
+      zoom: 1.6
+      label: σ
+      orbitals: [ethylene-orbitals/sigma]
+      plane: { through: [2, 0, 3], on: true }
+      describe: "Ethylene, edge-on. An orange σ orbital sits on the line between the two carbons. Then a cyan π orbital appears as two lobes, one above the plane of the atoms and one below, with nothing on the line between the carbons. Labelled: computed."
+      toggleLabel: Show
+      autoplay: true
+      toggle:
+        - id: ethylene
+          view: edge-on
+          label: π
+          orbitals: [ethylene-orbitals/pi]
+          plane: { through: [2, 0, 3], on: true }
+        - id: ethylene
+          view: edge-on
+          label: σ + π
+          orbitals: [ethylene-orbitals/sigma, ethylene-orbitals/pi]
+          plane: { through: [2, 0, 3], on: true }
+    sourceNote: "σ and π in ethylene adapted from MIT OCW 5.12, Lecture 1 p. 14, CC BY-NC-SA 4.0."
+
+  - id: s07
+    phase: build
+    type: rotate-and-identify
+    prompt: "Here's ethylene with only its π bond shown, seen from straight above. Spin it. Where are the π electrons?"
+    molecule:
+      id: ethylene
+      view: face-on
+      zoom: 1.6
+      orbitals: [ethylene-orbitals/pi]
+      plane: { through: [2, 0, 3] }
+      describe: "Ethylene's π bond: one lobe above the plane of the six atoms and one below, both over the two carbons. Nothing lies in the plane."
+    options:
+      - { id: a, text: on the line between the two carbons }
+      - { id: b, text: above and below the plane of the six atoms }
+      - { id: c, text: "in the plane, out between the H's" }
+      - { id: d, text: wrapped around the C–H bonds }
+    answer: [b]
+    correct: "Side-on overlap puts the π electrons above and below the plane, with none in the plane itself. The line between the carbons belongs to the σ bond."
+    hints:
+      - match: [a]
+        text: That's where the σ bond lives. Turn the molecule until its plane is edge-on and look again.
+      - match: [c]
+        text: "Turn the plane edge-on: the π lobes stick out of the plane, not along it."
+      - match: [d]
+        text: The C–H bonds are σ bonds. The π lobes sit over the two carbons only.
+      - text: Spin until you see the six atoms edge-on, as a line. Where are the cyan lobes?
+    reveal: "**b**. Turned edge-on with the plane on, one π lobe sits **above** the plane and one **below**."
+
+  - id: s08
+    phase: build
+    type: manipulate
+    prompt: "A π bond needs its two p orbitals parallel. Twist one end of ethylene. Find the twist where the π overlap is gone, then press Check."
+    scene: { id: pi-twist, state: { twist: 0 } }
+    control: twist
+    answer: 90
+    correct: "At 90° the two p orbitals are at right angles: no side-on overlap, no π bond. That's why a C=C bond doesn't spin: turning it means breaking the π bond. A σ bond alone, like ethane's C–C, can spin freely, because head-on overlap is the same at any twist."
+    hints:
+      - match: [0]
+        text: That's flat ethylene, full overlap. Start twisting.
+      - match: [15, 30, 45, 60, 75]
+        text: Still overlapping a little. Keep twisting.
+      - match: [180]
+        text: At 180° the p orbitals are parallel again, just flipped, so they overlap fully. Look in between.
+      - match: [105, 120, 135, 150, 165]
+        text: "Past the gap: the overlap is coming back. Go back a little."
+      - text: Watch the overlap bar and stop where it hits zero.
+    reveal: "90°: the two p orbitals are at right angles, the overlap bar is empty: no π bond."
+    sourceNote: "Model, not computed: textbook p orbitals on ethylene's measured frame. The overlap bar is the model, not a calculation. Adapted from MIT OCW 5.12, Lecture 1 p. 14, Berkowski, Spring 2005, CC BY-NC-SA 4.0."
+
+  - id: s09
+    phase: build
+    type: explain
+    text: "Acetylene, H–C≡C–H. Each carbon has two groups, so it's **sp**, and all four atoms sit in a straight line. The sp hybrids make the σ framework.<br>Each carbon keeps **two** p orbitals at right angles to each other, so they overlap side-on twice: one π above and below, one in front and behind.<br>A triple bond is **one σ + two π**. Together the two π bonds wrap the C–C line in a tube of electrons."
+    molecule:
+      id: acetylene
+      view: three-quarter
+      card: true
+      zoom: 1.6
+      label: σ
+      orbitals: [acetylene-orbitals/sigma]
+      describe: "Acetylene, four atoms in a straight line. An orange σ orbital on the axis. A cyan π orbital above and below the axis, then a second one in front and behind. Together the two π orbitals make a tube around the axis. Labelled: computed."
+      toggleLabel: Show
+      autoplay: true
+      toggle:
+        - { id: acetylene, view: three-quarter, label: π₁, orbitals: [acetylene-orbitals/pi1] }
+        - { id: acetylene, view: three-quarter, label: π₂, orbitals: [acetylene-orbitals/pi2] }
+        - { id: acetylene, view: three-quarter, label: both π, orbitals: [acetylene-orbitals/pi-both] }
+        - { id: acetylene, view: three-quarter, label: all, orbitals: [acetylene-orbitals/sigma, acetylene-orbitals/pi-both] }
+    sourceNote: "Acetylene adapted from MIT OCW 5.12, Lecture 1 p. 14, CC BY-NC-SA 4.0."
+
+  - id: s10
+    phase: build
+    type: rank
+    prompt: Switch between the three molecules. Each card measures its C–C bond. Order the bonds from shortest to longest.
+    molecule:
+      id: ethane
+      card: true
+      label: Ethane
+      measure: [0, 1]
+      describe: "Ethane C–C {{ethane/r.CC}}."
+      toggle:
+        - { id: ethylene, label: Ethylene, measure: [0, 1], describe: "Ethylene C=C {{ethylene/r.CC}}." }
+        - { id: acetylene, label: Acetylene, measure: [0, 1], describe: "Acetylene C≡C {{acetylene/r.CC}}." }
+    items:
+      - { id: ethane, text: ethane C–C }
+      - { id: ethylene, text: ethylene C=C }
+      - { id: acetylene, text: acetylene C≡C }
+    answer: [acetylene, ethylene, ethane]
+    correct: "{{acetylene/r.CC}} < {{ethylene/r.CC}} < {{ethane/r.CC}}. Each π bond adds another overlap between the same two carbons and pulls them closer."
+    hints:
+      - match: [ethane, ethylene, acetylene]
+        text: "Check the measurements: more bonds between the same two carbons hold them closer, so the single bond is the longest."
+      - match: [ethane, acetylene, ethylene]
+        text: "Check the measurements: more bonds between the same two carbons hold them closer, so the single bond is the longest."
+      - before: [ethylene, acetylene]
+        text: Two π bonds pull tighter than one. Check acetylene's number.
+      - match: [acetylene, ethane, ethylene]
+        text: "Compare ethane and ethylene: the double bond is the shorter one."
+      - text: Read the three measurements and sort them, smallest first.
+    reveal: "Acetylene C≡C {{acetylene/r.CC}} (σ + 2π), ethylene C=C {{ethylene/r.CC}} (σ + π), ethane C–C {{ethane/r.CC}} (σ)."
+    sourceNote: "These lengths come from different kinds of measured structure (see each reference); those differences are much smaller than the gaps between single, double and triple bonds."
+
+  - id: s11
+    phase: check
+    problem: u1-hyb-pi-count
+
+  - id: s12
+    phase: check
+    problem: u1-hyb-tap-sp2
+
+  - id: s13
+    phase: check
+    problem: u1-hyb-becl2
+
+  - id: s14
+    phase: check
+    problem: u1-hyb-ketene-pi
+
+  - id: s15
+    phase: wrap
+    type: explain
+    text: "**Mix, then bond.**<br>Count the groups: 4 → sp³ (109.5°), 3 → sp² (120°), 2 → sp (180°), model angles; real ones sit close.<br>Head-on overlap is **σ**: the framework that holds every atom in place.<br>Side-on p overlap is **π**, above and below it. Double = σ + π. Triple = σ + 2π.<br>π electrons sit outside the framework. In Lesson 6 they're the ones that move."
+    molecule:
+      id: ethylene
+      view: edge-on
+      card: true
+      zoom: 1.6
+      orbitals: [ethylene-orbitals/sigma, ethylene-orbitals/pi]
+      plane: { through: [2, 0, 3], on: true }
+      describe: "Ethylene edge-on: the σ bond on the axis, the π bond above and below the plane."

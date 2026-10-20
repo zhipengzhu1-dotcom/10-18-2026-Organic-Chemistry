@@ -65,12 +65,13 @@ type Condition = {
   notFirst?: string;
   notLast?: string;
   before?: string[];
+  above?: string[][];
   from?: string[];
   to?: string[];
 };
 /** The generic fallback Hint has no condition. */
 const isFallback = (h: Condition) =>
-  h.match === undefined && !h.includes && !h.misses && !h.notFirst && !h.notLast && !h.before && !h.from && !h.to;
+  h.match === undefined && !h.includes && !h.misses && !h.notFirst && !h.notLast && !h.before && !h.above && !h.from && !h.to;
 
 /** Every id a set Hint names: its exact `match`, and its `includes` / `misses` conditions. */
 export const hintIds = (h: { match?: string[]; includes?: string[]; misses?: string[] }) => [
@@ -111,6 +112,14 @@ function answerRules(item: Interaction): string[] {
       for (const h of item.hints ?? [])
         for (const id of [h.notFirst, h.notLast, ...(h.before ?? [])])
           if (id !== undefined && !itemIds.includes(id)) errors.push(`a Hint names unknown item "${id}"`);
+      for (const [upper, lower] of item.hints?.flatMap((h) => h.above ?? []) ?? []) {
+        const unknown = [upper, lower].filter((id) => !itemIds.includes(id));
+        for (const id of unknown) errors.push(`a Hint names unknown item "${id}"`);
+        if (!unknown.length && item.answer.indexOf(upper) < item.answer.indexOf(lower))
+          errors.push(`a Hint's "above" pair ${upper} above ${lower} holds in the answer order`);
+      }
+      for (const id of Object.keys(item.revealTags ?? {}))
+        if (!itemIds.includes(id)) errors.push(`a reveal tag names unknown item "${id}"`);
       break;
     }
     case "manipulate":

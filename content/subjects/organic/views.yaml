@@ -21,6 +21,18 @@ ethylene:
   # Orbital sample (#70) and Lesson 4's ethylene-sigma-pi poster: C=C level, the plane edge-on, so π
   # lobes sit above and below it.
   edge-on: { plane: [2, 0, 1], up: 1, rotate: [0, -90, 90] }
+  # Lesson 4 s07 (signature): from straight above, so the π lobes sit on top of the atoms.
+  face-on: { plane: [0, 1, 2] }
+  # Lesson 4 s05: the flat molecule tilted well back, so the H–C–H angle can be tapped.
+  three-quarter: { plane: [0, 1, 2], rotate: [55, 20, 0] }
+acetylene:
+  # Lesson 4 s09: the H–C≡C–H line across the screen, turned partly toward the viewer.
+  three-quarter: { rotate: [15, 65, 0] }
+ketene:
+  # Lesson 4 Check u1-hyb-ketene-pi: straight down the C=C=O axis (O nearest), so both π planes are edge-on.
+  end-on: { look: [2, 0], up: 3 }
+  # Its reveal: CH₂, C, O level left to right, the H–C–H plane seen a little from above.
+  side: { plane: [2, 0, 3], rotate: [-65, 0, 0] }
 ethanol:
   # Lesson 3 s09: the O–C–C plane turned well away from the screen plane.
   off-page: { plane: [2, 1, 0], up: 2, rotate: [70, 0, 0] }

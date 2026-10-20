@@ -1,0 +1,15 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+
+id: acrolein
+style: line-angle
+smiles: "[CH2:1]=[CH:2][CH:3]=[O:4]"
+atoms:
+  - { id: a1, el: C, x: 0, y: 0, letter: true, h: 2 }
+  - { id: a2, el: C, x: 1.299, y: -0.75, letter: true, h: 1 }
+  - { id: a3, el: C, x: 2.598, y: 0, letter: true, h: 1 }
+  - { id: a4, el: O, x: 3.897, y: -0.75, lp: 2 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 2 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a3, b: a4, order: 2 }
+source: PubChem CID 7847

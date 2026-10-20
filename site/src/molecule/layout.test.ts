@@ -4,7 +4,7 @@
 import { describe, expect, it } from "vitest";
 import { buildContent, contentRoot } from "@astratron/content";
 import { viewMatrix } from "@astratron/content/molecule";
-import { atomAt, BALL, fitScale, placeAtoms, placePoints } from "./layout.ts";
+import { atomAt, BALL, fitScale, placeAtoms, placePoints, planeCorners } from "./layout.ts";
 
 const data = buildContent(contentRoot).model!.subjects.find((s) => s.slug === "organic")!.data;
 const elements = { C: { colour: "#909090", vdw: 1.7 }, H: { colour: "#FFFFFF", vdw: 1.2 } };
@@ -61,5 +61,21 @@ describe("the 3D card's screen layout", () => {
     expect(atomAt(placed, placed[1].x + 2, placed[1].y - 2)).toBe(1);
     expect(atomAt(placed, 150, 150)).toBe(0);
     expect(atomAt(placed, 5, 5)).toBeUndefined();
+  });
+});
+
+describe("the plane sheet (Lesson 4, #82)", () => {
+  const ethylene = { atoms: data.ethylene.atoms!.list, elements };
+
+  it("lies in the plane of its three atoms and covers every atom in it, with a margin", () => {
+    // Ethylene's six atoms all lie in the file's yz plane (x = 0).
+    const corners = planeCorners(ethylene, [2, 0, 3], 0.5);
+    expect(corners).toHaveLength(4);
+    for (const c of corners) expect(c[0]).toBeCloseTo(0, 9);
+    const ys = corners.map((c) => c[1]);
+    const zs = corners.map((c) => c[2]);
+    // The H's reach 0.9289 Å either side in y and 1.2321 Å in z (ethylene.json), plus the margin.
+    expect(Math.max(...ys)).toBeCloseTo(0.9289 + 0.5, 6);
+    expect(Math.min(...zs)).toBeCloseTo(-1.2321 - 0.5, 6);
   });
 });

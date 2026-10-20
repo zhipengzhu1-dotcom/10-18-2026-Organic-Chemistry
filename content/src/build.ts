@@ -27,7 +27,7 @@ import {
   type StructureFile,
 } from "./schema.ts";
 import { checkDeletedSteps, checkFrozenIds, LOCK_FILE } from "./freeze.ts";
-import type { Aside, BuildResult, Course, Figure, GradedStep, HeroPush, Lesson, Option, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
+import type { Aside, BuildResult, Course, Figure, GradedStep, HeroPush, Lesson, Option, Push, Step, Structure, StructureView, Subject, TapTarget } from "./model.ts";
 
 /** The Practice Set page sits at `<unit url>/practice`, so no Lesson may take that slug. */
 export const PRACTICE_SLUG = "practice";
@@ -42,8 +42,10 @@ import { checkAgainstPubChem, pubchemCid, checkStructure, resolveArrows, resolve
 /** What a Step or Problem gains once its structures are resolved, keyed by "<lesson id>#<step id>" or "problem:<id>". */
 type StructureFields = {
   options?: Option[];
+  items?: Option[];
   structure?: StructureView;
   targets?: TapTarget[];
+  replay?: { start: Structure; pushes: Push[] };
   start?: StructureView;
   target?: StructureView;
   results?: Structure[];
@@ -185,6 +187,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
       const found: string[] = [];
       const fields: StructureFields = {};
       if (item.type === "multiple-choice") fields.options = resolveOptions(item.options, structures, found);
+      else if (item.type === "rank") fields.items = resolveOptions(item.items, structures, found);
       else if (item.type === "tap-to-identify") Object.assign(fields, resolveTap(item, structures, found));
       else if (item.type === "draw-arrows") Object.assign(fields, resolveArrows(item, structures, found));
       if (item.figures) fields.figures = item.figures.flatMap((f) => resolveFigure(f, structures, found) ?? []);

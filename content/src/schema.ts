@@ -36,23 +36,34 @@ const moleculeFields = {
   pageSheet: z.tuple([z.number().int(), z.number().int(), z.number().int()]).optional(),
   /** Bond-dipole arrows (from the cited Pauling electronegativities) and an Add button that sums them. */
   dipoles: z.boolean().optional(),
+  /** Computed orbitals drawn as lobes on the card (#70): `<orbital data file>/<orbital id>`. */
+  orbitals: z
+    .array(z.string().regex(/^[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9-]*$/, "must be <orbital data file>/<orbital id>"))
+    .min(1)
+    .optional(),
+  /** Lesson 4 (#82): a translucent sheet through three atoms that turns with the molecule, with a button to show it. */
+  plane: z
+    .strictObject({ through: z.tuple([z.number().int(), z.number().int(), z.number().int()]), label: text.optional(), on: z.boolean().optional() })
+    .optional(),
+  /** Lesson 4 (#82): a bond (two atoms) or angle (three) measured and labelled on load. */
+  measure: z.array(z.number().int()).min(2).max(3).optional(),
+  /** Lesson 4 (#82): the start zoom (1 = the whole true-scale molecule fits in any rotation; at most 3). */
+  zoom: z.number().min(0.5).max(3).optional(),
 };
-/** Computed orbitals drawn as lobes on the card (#70): `<orbital data file>/<orbital id>`. */
-const orbitals = z
-  .array(z.string().regex(/^[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9-]*$/, "must be <orbital data file>/<orbital id>"))
-  .min(1)
-  .optional();
 const moleculeUse = z.preprocess(
   (v) => (typeof v === "string" ? { id: v } : v),
   z.strictObject({
     ...moleculeFields,
-    orbitals,
     /** Lesson 8 (#86): `hide` names each orbital only by its molecule's `label` (the spec's "labels: hide", shown as A/B). */
     orbitalLabels: z.literal("hide").optional(),
-    /** Lesson 8 (#86): false switches tap-measuring off on the card. */
-    measure: z.literal(false).optional(),
+    /** Lesson 8 (#86): false switches tap-measuring off on the card (and every molecule of its toggle). */
+    tapMeasure: z.literal(false).optional(),
     /** More molecules shown in the same card, switched with a segmented toggle (every molecule needs a `label`). */
-    toggle: z.array(z.strictObject({ ...moleculeFields, orbitals })).min(1).optional(),
+    toggle: z.array(z.strictObject(moleculeFields)).min(1).optional(),
+    /** Lesson 4 (#82): the toggle group's name (default "Molecule"), e.g. "Show" for σ | π | both. */
+    toggleLabel: text.optional(),
+    /** Lesson 4 (#82): step through the toggle once on entry, ending on the last (at once under reduced motion). */
+    autoplay: z.boolean().optional(),
   }),
 );
 const molecule = moleculeUse.optional();
@@ -63,7 +74,7 @@ const hide = z.array(z.enum(["charges", "lone-pairs"])).optional();
 /** A text option, or a structure card: `structure` names a structure file and `text` is then its screen-reader label. */
 const option = z.strictObject({ id, text, structure: id.optional(), hide });
 
-/** A text-only card (Rank items; structure Rank cards are not resolved yet). */
+/** A text-only card (Rotate-and-identify choices). */
 const textOption = z.strictObject({ id, text });
 
 /** A named start view; see ViewSpec in molecule.ts. Atoms are 0-based indices in the data file's order. */
@@ -154,6 +165,9 @@ const multipleChoice = {
   reveal: text,
 };
 
+/** One curved arrow: `from` an atom id (its lone pair) or a bond id; `to` an atom id or a bond id. */
+const push = z.strictObject({ from: id, to: id });
+
 /** Fields shared by a Tap-to-identify Step and Problem. */
 const tapToIdentify = {
   ...gradedVisuals,
@@ -180,6 +194,8 @@ const tapToIdentify = {
   reveal: text,
   /** The tap-only cue, required when the Step sits among Draw-arrows Steps: the idle callout and the message on a drag. */
   tapOnly: z.strictObject({ idle: text, drag: text }).optional(),
+  /** Pushes played (push-replay) once the Step is answered, in place of the drawing: they turn `start` into `result`. Secret. */
+  replay: z.strictObject({ start: id, result: id, pushes: z.array(push).min(1) }).optional(),
 };
 
 /** A Numeric Hint: `match` is a common wrong value, matched within the Step's tolerance. */
@@ -209,6 +225,8 @@ const rankHint = z.strictObject({
   notFirst: id.optional(),
   notLast: id.optional(),
   before: z.tuple([id, id]).optional(),
+  /** At least one of these [upper, lower] pairs has its first item above its second (Lesson 7: "`c` or `d` above `a` or `b`"). */
+  above: z.array(z.tuple([id, id])).min(1).optional(),
   text,
 });
 
@@ -218,14 +236,16 @@ const rank = {
   type: z.literal("rank"),
   molecule,
   prompt: text,
-  /** The cards, in the order they start in. */
-  items: z.array(textOption).min(2),
+  /** The cards, in the order they start in: text, or structure cards (Lesson 7). */
+  items: z.array(option).min(2),
   /** The one strict order of item ids, first to last. */
   answer: z.array(id).min(2),
   correct: text.optional(),
   /** A Rank Hint's `match` is one whole wrong order; `notFirst`, `notLast` and `before` name a pattern. */
   hints: z.array(rankHint).optional(),
   reveal: text,
+  /** Shown on each card once the Step is answered, in the right order: why it sits there (secret: it gives the order away). */
+  revealTags: z.record(id, text).optional(),
 };
 
 /**
@@ -279,9 +299,6 @@ const goalStage = z.strictObject({
   /** The Hint after `idleSeconds` with no move (a second idle shows the next move as a nudge). */
   idle: text,
 });
-
-/** One curved arrow: `from` an atom id (its lone pair) or a bond id; `to` an atom id or a bond id. */
-const push = z.strictObject({ from: id, to: id });
 
 /**
  * A Draw-arrows Hint, matched on the wrong push: `from` = it starts at one of these (atom ids =
@@ -468,6 +485,8 @@ export const structureFile = z.strictObject({
         lp: z.number().int().min(0).max(4).optional(),
         letter: z.boolean().optional(),
         label: text.optional(),
+        /** A short visible tag beside the atom, e.g. "1" to number carbons (#82). */
+        tag: z.string().max(3).optional(),
       }),
     )
     .min(1),

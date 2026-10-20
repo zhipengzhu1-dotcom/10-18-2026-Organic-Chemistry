@@ -32,6 +32,15 @@ async function push(page: Page, from: string, to: string) {
   await page.keyboard.press("Enter");
 }
 
+/** Taps atoms of a Tap Problem by keyboard. */
+async function tapAtoms(page: Page, names: string[]) {
+  const taps = page.getByRole("group", { name: "Tappable atoms and bonds" });
+  for (const name of names) {
+    await taps.getByRole("button", { name, exact: true }).focus();
+    await page.keyboard.press("Enter");
+  }
+}
+
 /** Moves a Rank card by keyboard. */
 async function move(page: Page, card: string, key: "ArrowUp" | "ArrowDown", times: number) {
   await page.getByRole("list", { name: "Order" }).getByRole("button", { name: card, exact: true }).focus();
@@ -235,6 +244,45 @@ const solvers: Record<string, { outcome: Outcome; play: (page: Page) => Promise<
       await correct(page);
     },
   },
+  // Lesson 4's Check Problems (#82): each answered wrong twice, so a drawn Set almost always has a
+  // missed Problem to retry (the Bank now holds 25; with only the samples' two, about one Set in
+  // three drew none). Their right answers are in `retry` below.
+  "u1-hyb-pi-count": {
+    outcome: "missed",
+    play: async (page) => {
+      for (const wrong of ["2", "6"]) {
+        await page.getByRole("textbox", { name: "Answer" }).fill(wrong);
+        await check(page);
+      }
+    },
+  },
+  "u1-hyb-tap-sp2": {
+    outcome: "missed",
+    play: async (page) => {
+      for (let i = 0; i < 2; i++) {
+        await tapAtoms(page, [i === 0 ? "C3" : "C4"]);
+        await check(page);
+      }
+    },
+  },
+  "u1-hyb-becl2": {
+    outcome: "missed",
+    play: async (page) => {
+      for (const wrong of ["sp², bent, with one empty p orbital", "sp³, tetrahedral, with two lone pairs"]) {
+        await choose(page, wrong);
+        await check(page);
+      }
+    },
+  },
+  "u1-hyb-ketene-pi": {
+    outcome: "missed",
+    play: async (page) => {
+      for (const wrong of ["both π bonds above and below the H–C–H plane", "both π bonds lying in the H–C–H plane"]) {
+        await choose(page, wrong);
+        await check(page);
+      }
+    },
+  },
   "u1-3d-polar-molecules": {
     outcome: "first",
     play: async (page) => {
@@ -276,6 +324,36 @@ const solvers: Record<string, { outcome: Outcome; play: (page: Page) => Promise<
       await push(page, "lone pair on C6", "C5–C6 bond");
       await push(page, "π bond C4=C5", "C2–C4 bond");
       await push(page, "π bond C2=S3", "S3");
+      await correct(page);
+    },
+  },
+  // Lesson 7's Check Problems; the enamine's reveal replays the two pushes in place of the drawing.
+  "u1-res-major-dimethylaniline": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, /^The neutral drawing/);
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-res-enamine-site": {
+    outcome: "first",
+    play: async (page) => {
+      await page.getByRole("group", { name: "Tappable atoms and bonds" }).getByRole("button", { name: "Carbon with 2 H: double bond to C.", exact: true }).click();
+      await check(page);
+      await correct(page);
+      await expect(page.getByRole("img", { name: /^Arrows: lone pair on N3/ })).toBeVisible();
+    },
+  },
+  // Wrong order first (the Hint for a 6-electron card on top), then a, b, c, d.
+  "u1-res-rank-methoxyacrylonitrile": {
+    outcome: "eventually",
+    play: async (page) => {
+      await check(page);
+      await expect(status(page)).toContainText("each have a carbon with only 6 electrons");
+      await move(page, "Card a: CH₃–O⁺=CH–CH=C=N⁻. + on oxygen, − on N.", "ArrowUp", 1);
+      await move(page, "Card b: CH₃–O⁺=CH–CH⁻–C≡N. + on oxygen, − on the middle carbon.", "ArrowUp", 2);
+      await check(page);
       await correct(page);
     },
   },
@@ -325,6 +403,11 @@ test("the Practice Set page's HTML carries no answers", async ({ request }) => {
 
 test("a Student plays the Set, sees the summary, retries exactly the missed Problems and earns the Streak", async ({ page }) => {
   test.setTimeout(90_000);
+  // Pin the draw: with 30+ Problems a random Set often holds none of the missed-outcome samples, and the
+  // Retry missed half of this test then has nothing to do. At 0.5 the Set holds u1-sample-p2 and -p4.
+  await page.addInitScript(() => {
+    Math.random = () => 0.5;
+  });
   await page.goto(PRACTICE);
 
   const drawn: string[] = [];
@@ -366,6 +449,22 @@ test("a Student plays the Set, sees the summary, retries exactly the missed Prob
     },
     "u1-sample-p4": async (p) => {
       await move(p, "methane, CH₄", "ArrowDown", 2);
+      await check(p);
+    },
+    "u1-hyb-pi-count": async (p) => {
+      await p.getByRole("textbox", { name: "Answer" }).fill("3");
+      await check(p);
+    },
+    "u1-hyb-tap-sp2": async (p) => {
+      await tapAtoms(p, ["C1", "C2"]);
+      await check(p);
+    },
+    "u1-hyb-becl2": async (p) => {
+      await choose(p, "sp, linear (model: 180°), with two empty p orbitals");
+      await check(p);
+    },
+    "u1-hyb-ketene-pi": async (p) => {
+      await choose(p, "the C=C π above and below the H–C–H plane; the C=O π lying in that plane");
       await check(p);
     },
   };

@@ -21,9 +21,16 @@ export interface MoleculeUseFile {
   /** Lesson 8 (#86): `hide` names each orbital only by its molecule's `label` (A, B…), for "which one is σ*?" Steps. */
   orbitalLabels?: "hide";
   /** Lesson 8 (#86): false switches tap-measuring off on the card (and on every molecule of its toggle). */
-  measure?: false;
-  toggle?: Omit<MoleculeUseFile, "toggle" | "orbitalLabels" | "measure">[];
+  tapMeasure?: false;
+  toggle?: Omit<MoleculeUseFile, ToggleOnly>[];
+  toggleLabel?: string;
+  autoplay?: boolean;
+  plane?: { through: [number, number, number]; label?: string; on?: boolean };
+  measure?: number[];
+  zoom?: number;
 }
+/** Fields only the first molecule of a toggle takes. */
+type ToggleOnly = "toggle" | "toggleLabel" | "autoplay" | "orbitalLabels" | "tapMeasure";
 export type Views = z.infer<typeof viewsFile>;
 
 /** The cited table bond-dipole arrows are sized from (Lesson 1's Pauling values). */
@@ -63,25 +70,35 @@ export function resolveMoleculeUse(
   const named = `molecule "${use.id}"`;
   if (use.toggle && (!use.label || use.toggle.some((t) => !t.label)))
     return { errors: [`${named}: a toggle needs a label on every molecule`] };
+  if (!use.toggle && (use.toggleLabel || use.autoplay)) return { errors: [`${named}: toggleLabel and autoplay need a toggle`] };
   if (use.orbitalLabels === "hide" && !use.label)
     return { errors: [`${named}: orbitalLabels: hide names each orbital by its molecule's label (A, B…); add a label`] };
-  const shared = { blind: use.orbitalLabels === "hide", measure: use.measure };
+  const shared = { blind: use.orbitalLabels === "hide", tapMeasure: use.tapMeasure };
   const main = resolveOne(use, data, views, card, shared);
   if (!main.molecule || !use.toggle) return main;
   const others = use.toggle.map((t) => resolveOne(t, data, views, true, shared));
   const errors = others.flatMap((o) => o.errors);
   if (errors.length) return { errors };
-  return { molecule: { ...main.molecule, card: true, toggle: others.map((o) => o.molecule!) }, errors: [] };
+  return {
+    molecule: {
+      ...main.molecule,
+      card: true,
+      toggle: others.map((o) => o.molecule!),
+      ...(use.toggleLabel ? { toggleLabel: use.toggleLabel } : {}),
+      ...(use.autoplay ? { autoplay: true } : {}),
+    },
+    errors: [],
+  };
 }
 
 /** What every molecule of one card shares: orbitals named only by letter, and measuring on or off. */
 interface Shared {
   blind: boolean;
-  measure?: false;
+  tapMeasure?: false;
 }
 
 function resolveOne(
-  use: Omit<MoleculeUseFile, "toggle">,
+  use: Omit<MoleculeUseFile, ToggleOnly>,
   data: CitedData,
   views: Views,
   card: boolean,
@@ -110,6 +127,13 @@ function resolveOne(
     if (!errors.length)
       for (const message of viewErrors(atoms, { plane: use.pageSheet })) errors.push(`${named}: pageSheet: ${message.replace(/^plane: /, "")}`);
   }
+  if (use.plane) {
+    const before = errors.length;
+    outside("plane", use.plane.through);
+    if (errors.length === before)
+      for (const message of viewErrors(atoms, { plane: use.plane.through })) errors.push(`${named}: plane: ${message.replace(/^plane: /, "")}`);
+  }
+  if (use.measure) outside("measure", use.measure);
 
   const styles: { colour: Cited; vdw: Cited }[] = [];
   const elements: MoleculeUse["elements"] = {};
@@ -163,7 +187,10 @@ function resolveOne(
       ...(use.pageSheet ? { pageSheet: use.pageSheet } : {}),
       ...(use.dipoles ? { dipoles: dipoles() } : {}),
       ...(shared.blind ? { orbitalLabels: "hide" as const } : {}),
-      ...(shared.measure === false ? { measure: false as const } : {}),
+      ...(shared.tapMeasure === false ? { tapMeasure: false as const } : {}),
+      ...(use.plane ? { plane: { through: use.plane.through, label: use.plane.label ?? "Plane", on: !!use.plane.on } } : {}),
+      ...(use.measure ? { measure: use.measure } : {}),
+      ...(use.zoom ? { zoom: use.zoom } : {}),
     },
     errors,
   };

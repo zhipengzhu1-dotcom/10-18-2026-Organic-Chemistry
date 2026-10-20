@@ -313,7 +313,13 @@
     .player.has-card .player-body {
       gap: 10px;
     }
-    .player.has-card .player-prompt {
+    /* A card with computed orbitals, or over Rank cards (Lesson 4, #82), stays as large as it can: while a Hint shows,
+       the choices and the Hint take the prompt's place, as once the Step is answered. */
+    .player.has-card:has(:is(.orbital-chips, [aria-label="Order"])):has(.player-foot .fb) .player-prompt {
+      display: none;
+    }
+    .player.has-card .player-prompt,
+    .player-body:has(.figures):has(.opts > :nth-child(4)) .player-prompt {
       font-size: 17px;
       line-height: 1.25;
     }
@@ -334,6 +340,11 @@
     .player-body:has(.scene video),
     .player-body:has(.figures):has(.opts > :nth-child(4)) {
       gap: 6px;
+    }
+    /* An Explain of four or more lines over a played Scene (Lesson 4 s04, the three hybrid sets):
+       the Scene keeps to about a sixth of the screen so the text and its controls fit (#82). */
+    .player-body:has(> .explain-text br:nth-of-type(3)) .scene .scene-frame {
+      max-height: 17dvh;
     }
     /* The card may shrink to a 96 px stage over its tools (whose buttons sit closer). */
     .player.has-card .molecule {
@@ -406,6 +417,22 @@
   }
   .player-body p {
     margin: 0;
+  }
+  /* Explain text is block Markdown: space its paragraphs and lists. */
+  .explain-text > * + * {
+    margin-top: 10px;
+  }
+  .explain-text ol,
+  .explain-text ul {
+    margin: 0;
+    padding-left: 1.4em;
+  }
+  /* On a phone the Lesson-end screen (Wrap text, key idea, two buttons) has no room left for the
+     Wrap's still final frame, so the key idea card stands in for it there; wider screens show both. */
+  @media (max-width: 480px) {
+    .player-body:has(> .card) .scene-still {
+      display: none;
+    }
   }
   .player-prompt {
     font: 700 20px/1.3 var(--at-font-text);
@@ -1239,9 +1266,15 @@
   .orbital-chip-name {
     font-weight: 700;
   }
-  .molecule-describe[aria-pressed="true"] {
+  .molecule-describe[aria-pressed="true"],
+  .molecule-plane-toggle[aria-pressed="true"] {
     background: var(--at-electron-fill);
     color: var(--at-on-fill);
+  }
+  /* Lesson 4 (#82): the plane sheet's button sits over the stage with ↺/↻. */
+  .molecule-plane-toggle {
+    font: 500 16px/1 var(--at-font-text);
+    padding: 0 10px;
   }
   /* Lesson 3 (#81): the molecule toggle, page sheet and badge, atom labels and bond dipoles. */
   .molecule-snap {
@@ -1260,6 +1293,14 @@
     padding: 0 14px;
     font: 500 16px/1 var(--at-font-data);
     text-transform: none;
+  }
+  /* Lesson 4's plane sheet (#82) on the no-WebGL still; the live card draws it in three.js. */
+  .molecule-plane {
+    fill: var(--at-ink-muted);
+    fill-opacity: 0.18;
+    stroke: var(--at-ink-muted);
+    stroke-opacity: 0.6;
+    stroke-width: 1.5;
   }
   /* Orbitals A and B (Lesson 8, #86): a toggle on phones, side by side from 720px. */
   .molecule-pair {

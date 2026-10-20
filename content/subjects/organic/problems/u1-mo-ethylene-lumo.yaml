@@ -13,7 +13,7 @@ molecule:
   view: face-on
   label: A
   orbitalLabels: hide
-  measure: false
+  tapMeasure: false
   orbitals: [ethylene-b3lyp-orbitals/lumo]
   describe: "Ethylene, flat. Four lobes: above the plane, plus over one carbon and minus over the other; below, the reverse. Nodes: the plane of the atoms, and a plane cutting between the two carbons."
   toggle:

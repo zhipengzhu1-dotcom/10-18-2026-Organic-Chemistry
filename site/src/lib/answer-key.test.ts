@@ -79,6 +79,44 @@ it("a Draw-arrows Step keeps its start and shown target on the page; results, pu
   expect(withKey(page, JSON.parse(JSON.stringify(key)))).toEqual(whole);
 });
 
+it("a Tap Step's reveal replay (it draws the answer) goes in the key", () => {
+  const step = {
+    id: "s05",
+    phase: "check" as const,
+    type: "tap-to-identify" as const,
+    prompt: "Tap.",
+    structure: { structure: { id: "shown", style: "full" as const, atoms: [], bonds: [] }, hide: [] },
+    targets: [],
+    answer: ["a1"],
+    reveal: "Secret reveal.",
+    replay: { start: { id: "secret-start", style: "full" as const, atoms: [], bonds: [] }, pushes: [{ from: "a3", to: "b2" }] },
+  };
+  const whole = { ...lesson(), steps: [step] };
+  const { page, key } = splitLesson(whole);
+  expect(JSON.stringify(page)).not.toMatch(/secret|Secret|pushes/);
+  expect(withKey(page, JSON.parse(JSON.stringify(key)))).toEqual(whole);
+});
+
+it("a Rank Step's reveal tags (they give the order away) go in the key", () => {
+  const step = {
+    id: "s09",
+    phase: "build" as const,
+    type: "rank" as const,
+    prompt: "Order.",
+    items: [
+      { id: "b", text: "B" },
+      { id: "a", text: "A" },
+    ],
+    answer: ["a", "b"],
+    reveal: "a, b",
+    revealTags: { a: "Secret tag", b: "Secret tag too" },
+  };
+  const whole = { ...lesson(), steps: [step] };
+  const { page, key } = splitLesson(whole);
+  expect(JSON.stringify(page)).not.toMatch(/Secret/);
+  expect(withKey(page, JSON.parse(JSON.stringify(key)))).toEqual(whole);
+});
+
 it("a goal-state Step's stages and any reveal Scene go in the key; without the key it has no stages yet", () => {
   const scene = { id: "build-by-sharing", state: {}, cited: {} };
   const goal = {
