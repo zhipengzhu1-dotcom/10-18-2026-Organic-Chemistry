@@ -30,7 +30,7 @@ const url = (file: string) => `/${file}`;
 export default function WatchScenePlayer({ sceneId, cited, aspect = "16:9", shrinkWhenDone = false, onPlaying }: Props) {
   const manifest = watchScene(sceneId)!;
   const files = watchSceneFiles(sceneId, aspect);
-  const config: ClockConfig = { duration: manifest.duration, loop: false, posterT: manifest.poster };
+  const config: ClockConfig = { duration: manifest.duration, posterT: manifest.poster };
   const reducedMotion = useReducedMotion();
   const video = useRef<HTMLVideoElement>(null);
   // Until the island knows the motion setting (and on the server) the Scene rests on its poster frame.

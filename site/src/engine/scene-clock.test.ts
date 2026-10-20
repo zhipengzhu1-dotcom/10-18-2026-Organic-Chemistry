@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { clockStep, frameRatio, openClock, scrubText, type ClockAction, type ClockConfig } from "./scene-clock.ts";
 
-const once: ClockConfig = { duration: 4, loop: false, posterT: 1 };
-const looping: ClockConfig = { ...once, loop: true };
+const once: ClockConfig = { duration: 4, posterT: 1 };
 const run = (config: ClockConfig, reducedMotion: boolean, ...actions: ClockAction[]) =>
   actions.reduce((c, a) => clockStep(c, a, config), openClock(config, reducedMotion));
 const tick = (dt: number): ClockAction => ({ type: "tick", dt });
@@ -25,14 +24,8 @@ describe("Scene clock", () => {
     expect(run(once, false, tick(1.5))).toEqual({ t: 1.5, playing: true });
   });
 
-  it("plays once and stops on the last frame, outside Manipulate Steps", () => {
+  it("plays once and stops on the last frame: nothing loops in the Step player, Manipulate Steps included", () => {
     expect(run(once, false, tick(3), tick(3))).toEqual({ t: 4, playing: false });
-  });
-
-  it("loops in Manipulate Steps", () => {
-    const c = run(looping, false, tick(3), tick(2));
-    expect(c.playing).toBe(true);
-    expect(c.t).toBeCloseTo(1);
   });
 
   it("under reduced motion opens paused on the poster frame, and Play starts it", () => {

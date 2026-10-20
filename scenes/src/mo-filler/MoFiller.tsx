@@ -1,5 +1,5 @@
 // mo-filler: a pure function of state (see manifest.ts). Nothing depends on t: a Manipulate Step
-// loops its Scene, and each + / − redraws at once. Schematic levels, no numbers.
+// plays its Scene once, and each + / − redraws at once. Schematic levels, no numbers.
 import { frameSize, safeArea } from "../frame.ts";
 import type { SceneProps } from "../types.ts";
 import { DATA_FONT, HalfArrow, TEXT_FONT, electron, ink, line, muted } from "../dots/dots.tsx";

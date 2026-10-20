@@ -341,7 +341,6 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
             sceneId={step.scene.id}
             state={sceneState}
             cited={step.scene.cited}
-            loop={step.type === "manipulate"}
             still={step.scene.still}
           >
             {step.type === "manipulate" && setting !== undefined && (
