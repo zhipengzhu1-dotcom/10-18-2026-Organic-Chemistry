@@ -12,7 +12,8 @@ process.stdin.on("end", () => {
   if (process.env.FAKE_CLAUDE_LOG) {
     writeFileSync(process.env.FAKE_CLAUDE_LOG, JSON.stringify({ args: process.argv.slice(2), cwd: process.cwd(), files: readdirSync(process.cwd()), stdin }));
   }
-  const model = process.argv[process.argv.indexOf("--model") + 1];
+  // FAKE_CLAUDE_ANSWERS_WITH: the model that "answered", as when Claude Code falls back to another.
+  const model = process.env.FAKE_CLAUDE_ANSWERS_WITH || process.argv[process.argv.indexOf("--model") + 1];
   const say = (o) => process.stdout.write(JSON.stringify(o) + "\n");
   say({ type: "system", subtype: "init" });
   say({ type: "stream_event", event: { type: "content_block_start", index: 0 } });

@@ -9,7 +9,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Stage } from "./context.ts";
-import { ACTION_TYPES, MAX_ACTIONS, TUTOR_PATH, type StageAction, type TutorEvent, type TutorRequest, type Turn } from "./contract.ts";
+import { ACTION_TYPES, MAX_ACTIONS, TUTOR_PATH, type StageAction, type TutorChoices, type TutorEvent, type TutorRequest, type Turn } from "./contract.ts";
 
 /** Replaces the `claude` binary (the route tests point it at a stand-in). */
 export const CLAUDE_ENV = "ASTRATRON_TUTOR_CLAUDE";
@@ -190,10 +190,15 @@ type Next = () => void;
 export function tutorMiddleware({ timeoutMs = TIMEOUT_MS, maxRunning = MAX_RUNNING } = {}) {
   let running = 0;
   return (req: IncomingMessage, res: ServerResponse, next: Next) => {
-    if (req.method !== "POST") return next();
+    if (req.method !== "POST" && req.method !== "GET") return next();
     if (!loopback(req.socket.remoteAddress)) {
       res.statusCode = 403;
       return res.end();
+    }
+    if (req.method === "GET") {
+      const choices: TutorChoices = { models: MODELS, efforts: EFFORTS, model: DEFAULT_MODEL, effort: DEFAULT_EFFORT };
+      res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+      return res.end(JSON.stringify(choices));
     }
     let body = "";
     req.setEncoding("utf8");

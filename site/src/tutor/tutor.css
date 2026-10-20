@@ -189,3 +189,34 @@
   stroke-linecap: round;
   pointer-events: none;
 }
+
+/* Settings (#106): the model and effort picker on its own row under the header, the on/off
+   switch beside the close control, and the meta line under each finished reply. */
+.tutor-head {
+  flex-wrap: wrap;
+}
+.tutor-head h2 {
+  flex: 1;
+}
+.tutor-pick {
+  order: 1;
+  flex-basis: 100%;
+  min-height: var(--at-tap);
+  padding: 0 10px;
+  font: 400 var(--at-body-size) / 1.2 var(--at-font-text);
+  color: var(--at-ink);
+  background: var(--at-space);
+  border: var(--at-border) solid var(--at-line);
+  cursor: pointer;
+}
+.tutor-meta {
+  display: block;
+  margin-top: 6px;
+  font-size: 16px;
+  color: var(--at-ink-muted);
+}
+/* Switched off: only the header's switch is left, unchecked, in the Ask button's column. */
+.player-top:has(.tutor-wake) {
+  grid-template-columns: var(--at-tap) var(--at-tap) minmax(0, 1fr) auto max-content;
+  gap: 8px;
+}
