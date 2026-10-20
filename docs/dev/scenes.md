@@ -17,7 +17,7 @@ Rules live in ADR 0001 (Scenes are pure, Remotion is video-only) and ADR 0002 (n
 1. `scenes/src/<id>/manifest.ts` (no React imports) + the component (+ a `layout.ts` when layout is non-trivial).
 2. Register in both `sceneManifests` (`scenes/src/manifests.ts`, Node tools read it) and `sceneRegistry` (`scenes/src/index.ts`, site + video read it). `scenes/test/registry.test.ts` checks the lists agree, data refs exist, the real content builds, and markup is deterministic at both aspects.
 3. Add a test that the layout stays inside the frame at both aspects.
-4. Gates: `pnpm content:build`, `pnpm lint:numbers`, `pnpm lint:scenes`, `pnpm video stills <id>`.
+4. Gates: `pnpm content:build`, `pnpm lint:numbers`, `pnpm lint:scenes`, `pnpm video stills --changed` (or `--only <id>`).
 
 Every caller of `buildContent(..., { scenes })` passes `sceneCatalog(sceneManifests, watchSceneManifests)`; leaving out the watch list makes Lessons that show a watch-only Scene fail to build.
 
