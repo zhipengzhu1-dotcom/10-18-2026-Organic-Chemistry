@@ -1,15 +1,26 @@
 // The Step player engine: a pure state machine with no DOM. The Lesson screen
-// renders whatever Screen it returns. Two-try feedback: right → the Correct
-// line; wrong #1 → the first matching Hint (generic fallback last); wrong #2 →
-// the reveal. A Hook `prediction` accepts every choice and reveals at once.
-// Navigation: back is allowed, answered Steps stay locked, Continue never passes
-// an unanswered Step, and the Lesson is done on reaching Wrap. A Step link past
-// the furthest Step reached opens that Step "ahead": it plays, but saves no
-// answers, doesn't move the Student's place and can't make the Lesson done. Every Screen
-// carries the Lesson's progress (answers by Step id), from which it resumes.
-import type { DrawArrowsStep, GoalStep, GradedStep, HintRule, Lesson, RankHint, SceneValue, Step } from "@astratron/content";
-import { arrowsAct, arrowsStart, arrowsView, type ArrowsState } from "@astratron/content/arrows";
-import { reached, type Answer, type ArrowsScreen, type Feedback, type GoalScreen } from "@astratron/content/step-types";
+// renders whatever Screen it returns. Each Step plays through its Step type's
+// `act` (@astratron/content/step-types): one-shot types give two tries (right →
+// the Correct line; wrong #1 → the first matching Hint, generic fallback last;
+// wrong #2 → the reveal), Draw arrows grades push by push, a goal-state Step
+// works through its stages. Navigation: back is allowed, answered Steps stay
+// locked, Continue never passes an unanswered Step, and the Lesson is done on
+// reaching Wrap. A Step link past the furthest Step reached opens that Step
+// "ahead": it plays, but saves no answers, doesn't move the Student's place and
+// can't make the Lesson done. Every Screen carries the Lesson's progress
+// (answers by Step id), from which it resumes.
+import type { Lesson, Step } from "@astratron/content";
+import {
+  act as playStep,
+  startStep,
+  type Answer,
+  type ArrowsScreen,
+  type Feedback,
+  type GoalScreen,
+  type Nudge,
+  type StateOf,
+  type StepType,
+} from "@astratron/content/step-types";
 
 // Feedback, what a Student submits (each Step type's own answer shape) and the per-type play
 // screens come from the Step type table (@astratron/content/step-types).
@@ -33,11 +44,16 @@ export interface LessonProgress {
   reached?: string;
 }
 
+/** A Step's play state, of whichever type it is. */
+type StepState = StateOf<StepType>;
+
 export interface Screen {
   /** Position of the current Step (0-based); `step.id` is its permanent Step id. */
   index: number;
   total: number;
   step: Step;
+  /** The Step type's play state; `tries`, `canContinue`, `arrows` and `goal` are read from it. */
+  state: StepState;
   /** Graded tries made on this Step. */
   tries: number;
   feedback: Feedback | null;
@@ -77,32 +93,27 @@ function indexOf(lesson: PlayableLesson, id?: string): number {
 
 export function act(lesson: PlayableLesson, screen: Screen, action: Action): Screen {
   if (action.type === "back") return screen.index > 0 ? open(lesson, screen.index - 1, screen.progress) : screen;
-  if (action.type === "idle") return idle(screen);
+  // Nudges go to the Step type (a goal-state Step answers them with its stage's Hints) and are never saved.
+  if (action.type === "idle") return play(screen, { idle: true });
   if (action.type === "continue") {
-    // A goal-state Step answers an early Continue with its stage's Hint.
-    const stage = screen.step.type === "manipulate-goal" && screen.goal && screen.step.stages[screen.goal.stage];
-    if (!screen.canContinue && stage) return { ...screen, feedback: { kind: "hint", text: stage.blocked } };
-    if (!screen.canContinue || screen.index + 1 >= lesson.steps.length) return screen;
+    if (!screen.canContinue) return play(screen, { early: true });
+    if (screen.index + 1 >= lesson.steps.length) return screen;
     if (screen.ahead) return open(lesson, screen.index + 1, screen.progress);
     const reached = lesson.steps[Math.max(screen.index + 1, indexOf(lesson, screen.progress.reached))].id;
     return open(lesson, screen.index + 1, { ...screen.progress, reached });
   }
   const { type: _type, ...answer } = action;
-  const next = answerStep(screen, answer);
+  const next = play(screen, answer);
   if (next === screen || screen.ahead) return next;
   const { answers } = screen.progress;
   const saved = [...(answers[screen.step.id] ?? []), answer];
   return { ...next, progress: { ...screen.progress, answers: { ...answers, [screen.step.id]: saved } } };
 }
 
-/** The Screen after one answer, or the same Screen when the Step can't take it. */
-function answerStep(screen: Screen, answer: Answer): Screen {
-  const { step } = screen;
-  if (step.type === "explain" || screen.canContinue) return screen;
-  if (step.type === "draw-arrows") return pushArrow(screen, step, answer);
-  if (step.type === "manipulate-goal") return moveGoal(screen, step, answer);
-  const result = grade(step, answer, screen.tries);
-  return result ? { ...screen, ...result } : screen;
+/** The Screen after one answer or nudge, or the same Screen when the Step can't take it. */
+function play(screen: Screen, input: Answer | Nudge): Screen {
+  const played = playStep(screen.step, screen.state, input);
+  return played ? { ...withState(screen, played.state), feedback: played.feedback } : screen;
 }
 
 /** Opens a Step and replays its saved answers, so an answered Step shows its feedback, locked. */
@@ -110,151 +121,13 @@ function open(lesson: PlayableLesson, index: number, saved: LessonProgress): Scr
   const step = lesson.steps[index];
   const ahead = index > indexOf(lesson, saved.reached ?? saved.step);
   const done = step.phase === "wrap" && !ahead;
-  const fresh: Screen = {
-    index,
-    total: lesson.steps.length,
-    step,
-    tries: 0,
-    feedback: null,
-    canContinue: step.type === "explain",
-    done,
-    ahead,
-    progress: ahead ? saved : { ...saved, step: step.id, done: saved.done || done },
-    ...(step.type === "draw-arrows" && { arrows: arrowsScreen(step, arrowsStart()) }),
-    ...(step.type === "manipulate-goal" && { goal: goalStart(step) }),
-  };
-  return (saved.answers[step.id] ?? []).reduce(answerStep, fresh);
+  const progress = ahead ? saved : { ...saved, step: step.id, done: saved.done || done };
+  const fresh = withState({ index, total: lesson.steps.length, step, feedback: null, done, ahead, progress }, startStep(step));
+  return (saved.answers[step.id] ?? []).reduce(play, fresh);
 }
 
-/**
- * Draw arrows: each push is graded the moment it is made, by the structure it gives. Two tries
- * per push (its Hint, then the push is shown). `tries` counts wrong pushes, plus one when done,
- * so 1 means no push was wrong (first try). Done with every push the Student's own → the Correct
- * line; a push had to be shown → the reveal.
- */
-function pushArrow(screen: Screen, step: DrawArrowsStep, answer: Answer): Screen {
-  if (!("push" in answer) && !("undo" in answer)) return screen;
-  const before = screen.arrows ?? arrowsScreen(step, arrowsStart());
-  const state = arrowsAct(taskOf(step), before, answer);
-  if (state === before) return screen;
-  const tries = state.wrong + (state.done ? 1 : 0);
-  const last = state.last!;
-  let feedback: Feedback | null = null;
-  if (state.done)
-    feedback = state.pushes.some((p) => p.shown)
-      ? { kind: "reveal", text: step.reveal, answer: step.answer }
-      : { kind: "correct", text: step.correct ?? "" };
-  else if (last.kind === "wrong") feedback = { kind: "hint", text: last.hint };
-  else if (last.kind === "shown") feedback = { kind: "shown", text: `Here is that push: ${last.label}.` };
-  return { ...screen, arrows: arrowsScreen(step, state), tries, feedback, canContinue: state.done };
-}
-
-/** A goal-state Step opens on its first stage, the Scene at its Step state plus the stage's start. */
-function goalStart(step: GoalStep): GoalScreen {
-  // Before the answer key arrives the Step has no stages: it shows its prompt and Scene, and grades nothing.
-  const first = step.stages[0];
-  return { stage: 0, prompt: first?.prompt ?? step.prompt, state: { ...step.scene.state, ...first?.start }, idle: 0 };
-}
-
-/**
- * A move on a goal-state Step: the Scene's new state. Reaching the stage's goal shows its Correct
- * line and opens the next stage (or Continue, after the last). Any move clears a Hint and the idle count.
- */
-function moveGoal(screen: Screen, step: GoalStep, answer: Answer): Screen {
-  if (!("state" in answer) || !screen.goal) return screen;
-  const { stage } = screen.goal;
-  const state = { ...screen.goal.state, ...answer.state };
-  const current = step.stages[stage];
-  if (!current || !reached(state, current.goal)) return { ...screen, feedback: null, goal: { ...screen.goal, state, idle: 0 } };
-  const feedback: Feedback = { kind: "correct", text: current.correct };
-  const next = step.stages[stage + 1];
-  if (!next) return { ...screen, feedback, canContinue: true, goal: { ...screen.goal, state, idle: 0 } };
-  return {
-    ...screen,
-    feedback,
-    goal: { stage: stage + 1, prompt: next.prompt, state: { ...state, ...next.start }, idle: 0 },
-  };
-}
-
-/** No move for a while on a goal-state Step: its stage's idle Hint (counted, so the second can nudge). */
-function idle(screen: Screen): Screen {
-  const stage = screen.step.type === "manipulate-goal" && screen.goal && screen.step.stages[screen.goal.stage];
-  if (!stage || !screen.goal || screen.canContinue) return screen;
-  const text = stage.idle;
-  return { ...screen, feedback: { kind: "hint", text }, goal: { ...screen.goal, idle: screen.goal.idle + 1 } };
-}
-
-// Before the answer key arrives a Draw-arrows Step has no results yet: it draws, but grades nothing.
-const taskOf = (step: DrawArrowsStep) => ({ ...step, start: step.start.structure, results: step.results ?? [] });
-
-function arrowsScreen(step: DrawArrowsStep, state: ArrowsState): ArrowsScreen {
-  const { structure, flags } = arrowsView(taskOf(step), state);
-  return { ...state, structure, flags };
-}
-
-/** Returns the Screen changes for an answer, or undefined when the answer doesn't fit the Step type. */
-function grade(step: GradedStep, answer: Answer, triesBefore: number): Partial<Screen> | undefined {
-  const reveal: Feedback = { kind: "reveal", text: step.reveal, answer: step.answer };
-  if (step.type === "multiple-choice" && step.prediction) return { feedback: reveal, canContinue: true };
-
-  const judged = judge(step, answer);
-  if (!judged) return undefined;
-  const tries = triesBefore + 1;
-  if (judged.right) return { tries, feedback: { kind: "correct", text: step.correct ?? "" }, canContinue: true };
-  if (tries >= 2) return { tries, feedback: reveal, canContinue: true };
-  return { tries, feedback: { kind: "hint", text: judged.hint?.text ?? "" } };
-}
-
-/** Whether the answer is right and, if not, the first Hint that matches it (the generic fallback matches anything). */
-function judge(step: GradedStep, answer: Answer): { right: boolean; hint?: { text: string } } | undefined {
-  switch (step.type) {
-    case "multiple-choice":
-    case "rotate-and-identify":
-    case "tap-to-identify": {
-      if (!("choice" in answer)) return undefined;
-      const { choice } = answer;
-      return { right: sameSet(choice, step.answer), hint: step.hints?.find((h) => hintFits(h, choice)) };
-    }
-    case "numeric": {
-      if (!("value" in answer) || !Number.isFinite(answer.value)) return undefined;
-      const near = (target: number) => Math.abs(answer.value - target) <= step.tolerance + 1e-9;
-      return { right: near(step.answer), hint: step.hints?.find((h) => h.match === undefined || near(h.match)) };
-    }
-    case "rank": {
-      if (!("order" in answer)) return undefined;
-      const { order } = answer;
-      const at = (id: string) => order.indexOf(id);
-      const fits = (h: RankHint) =>
-        (!h.match || sameOrder(h.match, order)) &&
-        (!h.notFirst || at(h.notFirst) !== 0) &&
-        (!h.notLast || at(h.notLast) !== order.length - 1) &&
-        (!h.before || at(h.before[0]) < at(h.before[1])) &&
-        (!h.above || h.above.some(([upper, lower]) => at(upper) < at(lower)));
-      return { right: sameOrder(order, step.answer), hint: step.hints?.find(fits) };
-    }
-    case "manipulate": {
-      if (!("setting" in answer)) return undefined;
-      const same = (v: number | string) =>
-        typeof v === "number" && typeof answer.setting === "number" ? Math.abs(v - answer.setting) < 1e-9 : v === answer.setting;
-      return { right: same(step.answer), hint: step.hints?.find((h) => !h.match || h.match.some(same)) };
-    }
-  }
-}
-
-/** Every condition the Hint gives must hold; the generic fallback has none. */
-function hintFits(hint: HintRule, choice: string[]): boolean {
-  return (
-    (!hint.match || sameSet(hint.match, choice)) &&
-    (!hint.includes || hint.includes.some((id) => choice.includes(id))) &&
-    (!hint.misses || hint.misses.some((id) => !choice.includes(id)))
-  );
-}
-
-function sameSet(a: string[], b: string[]): boolean {
-  const set = new Set(a);
-  return set.size === new Set(b).size && b.every((x) => set.has(x));
-}
-
-function sameOrder(a: string[], b: string[]): boolean {
-  return a.length === b.length && a.every((x, i) => x === b[i]);
+/** The Screen with the Step's play state: its tries, whether it is done, and its type's own (pushes, stage). */
+function withState(screen: Omit<Screen, "state" | "tries" | "canContinue">, state: StepState): Screen {
+  const { tries, done, ...own } = state;
+  return { ...screen, ...own, state, tries, canContinue: done };
 }

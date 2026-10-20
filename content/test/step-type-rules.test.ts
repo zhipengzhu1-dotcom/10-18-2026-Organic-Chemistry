@@ -67,6 +67,14 @@ describe("Multiple choice", () => {
     expect(feedback(play(playable, { choice: ["a"] }))).toEqual([["correct", "Right, because."]]);
   });
 
+  it("a Hint matches the exact chosen set only, else the generic fallback; wrong then right is the second try", () => {
+    const step = built().steps[2];
+    expect(feedback(play(step, { choice: ["a", "b"] }))).toEqual([["hint", "Generic hint."]]);
+    expect(feedback(play(step, { choice: ["c"] }))).toEqual([["hint", "Generic hint."]]);
+    const [, right] = play(step, { choice: ["b"] }, { choice: ["a"] });
+    expect(right).toMatchObject({ state: { tries: 2, done: true }, feedback: { kind: "correct" } });
+  });
+
   it("without its key it grades nothing right", () => {
     const step = joinStep(splitStep(built().steps[2]).shown);
     expect(play(step, { choice: ["a"] })[0]?.feedback?.kind).toBe("hint");
@@ -87,6 +95,11 @@ describe("Numeric", () => {
     expect(feedback(play(step, { value: 109.9 }))).toEqual([["correct", "Yes."]]);
     expect(feedback(play(step, { value: 120.4 }))).toEqual([["hint", "Planar."]]);
     expect(play(step, { value: Number.NaN })).toEqual([undefined]);
+    expect(feedback(play(step, { value: 110.1 }))).toEqual([["hint", "3D."]]);
+  });
+
+  it("wrong twice reveals the number", () => {
+    expect(play(step, { value: 120 }, { value: 100 })[1]?.feedback).toEqual({ kind: "reveal", text: "This.", answer: 109.5 });
   });
 });
 
@@ -103,6 +116,22 @@ describe("Rank", () => {
     expect(feedback(play(step, { order: ["c", "a", "b"] }))).toEqual([["hint", "A above B?"]]);
     expect(feedback(play(step, { order: ["c", "b", "a"] }))).toEqual([["correct", "Yes."]]);
   });
+
+  it("a Hint can answer an exact order, an item not last, or one item placed before another", () => {
+    const hinted = (hints: StepOfType<"rank">["hints"]) => ({ ...step, hints }) as StepOfType<"rank">;
+    const patterned = hinted([
+      { match: ["a", "b", "c"], text: "Reversed." },
+      { notLast: "a", text: "A last." },
+      { before: ["a", "b"], text: "B before A." },
+      { text: "Again." },
+    ]);
+    expect(feedback(play(patterned, { order: ["a", "b", "c"] }))).toEqual([["hint", "Reversed."]]);
+    expect(feedback(play(patterned, { order: ["c", "a", "b"] }))).toEqual([["hint", "A last."]]);
+    expect(feedback(play(hinted([{ before: ["a", "b"], text: "B before A." }, { text: "Again." }]), { order: ["c", "a", "b"] }))).toEqual([
+      ["hint", "B before A."],
+    ]);
+    expect(feedback(play(patterned, { order: ["b", "c", "a"] }))).toEqual([["hint", "Again."]]);
+  });
 });
 
 describe("Manipulate", () => {
@@ -110,6 +139,25 @@ describe("Manipulate", () => {
   it("compares values like the Scene does (numbers within rounding)", () => {
     expect(feedback(play(step, { setting: 90 + 1e-12 }))).toEqual([["correct", "Yes."]]);
     expect(feedback(play(step, { setting: 0 }, { setting: 45 }))).toEqual([["hint", "Flat."], ["reveal", "This."]]);
+  });
+
+  it("choice states compare by option id", () => {
+    const view = { ...step, control: "view", answer: "end", hints: [{ text: "Look end-on." }] } as StepOfType<"manipulate">;
+    expect(feedback(play(view, { setting: "end" }))).toEqual([["correct", "Yes."]]);
+    expect(feedback(play(view, { setting: "side" }))).toEqual([["hint", "Look end-on."]]);
+  });
+});
+
+describe("Rotate-and-identify", () => {
+  it("grades like Multiple choice: the exact set of option ids, Hints first to last, two tries", () => {
+    const mc = built().steps[2] as StepOfType<"multiple-choice">;
+    const step = { ...mc, type: "rotate-and-identify" } as unknown as StepOfType<"rotate-and-identify">;
+    expect(feedback(play(step, { choice: ["a"] }))).toEqual([["correct", "Right, because."]]);
+    expect(feedback(play(step, { choice: ["b"] }, { choice: ["c"] }))).toEqual([
+      ["hint", "Hint for b."],
+      ["reveal", "It is a, because."],
+    ]);
+    expect(play(step, { value: 1 })).toEqual([undefined]);
   });
 });
 

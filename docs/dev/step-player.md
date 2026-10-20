@@ -1,6 +1,6 @@
 # Step player
 
-Engine: `site/src/engine/player.ts` (pure, no DOM; its header comment states the play rules). View: `site/src/components/StepPlayer.tsx` (an island that draws the engine's `Screen`). Progress: `site/src/progress/`. Practice Set: `site/src/engine/practice-set.ts` + `components/PracticeSet.tsx`.
+Engine: `site/src/engine/player.ts` (pure, no DOM; its header comment states the play rules). It has no per-type code: each Step plays through its Step type's `start`/`act` (`@astratron/content/step-types`), and the Screen's `tries`, `canContinue`, `arrows` and `goal` are read from that play state (`screen.state`). View: `site/src/components/StepPlayer.tsx` (an island that draws the engine's `Screen`). Progress: `site/src/progress/`. Practice Set: `site/src/engine/practice-set.ts` + `components/PracticeSet.tsx`.
 
 ## Engine conventions
 
