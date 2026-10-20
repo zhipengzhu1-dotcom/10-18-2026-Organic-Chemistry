@@ -1,0 +1,22 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+
+id: phenoxide-para
+style: line-angle
+smiles: "[O:1]=[C:2]1[CH:3]=[CH:4][CH-:5][CH:6]=[CH:7]1"
+atoms:
+  - { id: a1, el: O, x: 0, y: -2.571, lp: 2 }
+  - { id: a2, el: C, x: 0, y: -1.071, letter: true }
+  - { id: a3, el: C, x: -1.299, y: -0.321, letter: true }
+  - { id: a4, el: C, x: -1.299, y: 1.179, letter: true }
+  - { id: a5, el: C, x: 0, y: 1.929, letter: true, charge: -1, lp: 1 }
+  - { id: a6, el: C, x: 1.299, y: 1.179, letter: true }
+  - { id: a7, el: C, x: 1.299, y: -0.321, letter: true }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 2 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a3, b: a4, order: 2 }
+  - { id: b4, a: a4, b: a5, order: 1 }
+  - { id: b5, a: a5, b: a6, order: 1 }
+  - { id: b6, a: a6, b: a7, order: 2 }
+  - { id: b7, a: a7, b: a2, order: 1 }
+source: Drawn for u1-res-phenoxide-para; parent phenol, LibreTexts Wade 1-20b

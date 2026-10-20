@@ -1,0 +1,24 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). Cards stand alone, without
+# brackets or ↔ (as Lessons 6 and 7 decided).
+id: u1-res-nitromethane-equal
+unit: u1
+lesson: u1-l07
+difficulty: 1
+status: approved
+source: Original (nitromethane from MIT 5.12 Lecture 1 p. 17, as in Lesson 6)
+type: multiple-choice
+prompt: "Nitromethane's two contributors from Lesson 6. Which one is major?"
+options:
+  - { id: a, structure: nitromethane-upper, text: "The one with the upper O double-bonded: CH₃–N⁺, the upper O double-bonded, the lower O⁻." }
+  - { id: b, structure: nitromethane-lower, text: "The one with the lower O double-bonded: CH₃–N⁺, the upper O⁻, the lower O double-bonded." }
+  - { id: c, text: They count equally }
+answer: [c]
+correct: "Run the rules: both have full octets, two charges, − on O, and the charges side by side. A tie on every rule, because the two drawings differ only in which O is which. Equal weight, so both N–O bonds are the same in the hybrid."
+hints:
+  - match: [a]
+    text: "Go rule by rule: octets, number of charges, where − sits, how close the charges are. Does any rule tell them apart?"
+  - match: [b]
+    text: "Go rule by rule: octets, number of charges, where − sits, how close the charges are. Does any rule tell them apart?"
+  - text: Compare the two drawings on all four rules.
+reveal: "**They count equally.** Octets: tie. Charges: tie. − on O: tie. Charges side by side: tie. Same drawing, mirrored. Equal weight."
+sourceNote: "Nitromethane from MIT OCW 5.12, Lecture 1 p. 17, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Rules adapted from Lecture 2 p. 4. Nitromethane, PubChem CID 6375."

@@ -1,0 +1,22 @@
+# Practice Problem u1-res-nitromethane-equal (#87) card b: nitromethane-swapped turned so CH₃ is on the left and the
+# lower O is the double-bonded one.
+
+id: nitromethane-lower
+style: full
+smiles: "[CH3:1][N+:2]([O-:3])=[O:4]"
+atoms:
+  - { id: a1, el: C, x: -0.643, y: 0 }
+  - { id: a2, el: N, x: 0.857, y: 0, charge: 1 }
+  - { id: a3, el: O, x: 1.607, y: -1.299, charge: -1, lp: 3 }
+  - { id: a4, el: O, x: 1.607, y: 1.299, lp: 2 }
+  - { id: a5, el: H, x: -0.643, y: -1.5 }
+  - { id: a6, el: H, x: -0.643, y: 1.5 }
+  - { id: a7, el: H, x: -2.143, y: 0 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a2, b: a4, order: 2 }
+  - { id: b4, a: a1, b: a5, order: 1 }
+  - { id: b5, a: a1, b: a6, order: 1 }
+  - { id: b6, a: a1, b: a7, order: 1 }
+source: PubChem CID 6375

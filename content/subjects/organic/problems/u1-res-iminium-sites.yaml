@@ -1,0 +1,41 @@
+# Unit 1 Practice Problem (#87), from docs/specs/unit-1/practice-problems.md (approved). Tap-only (Lesson 7 has
+# Draw-arrows Steps); the reveal replays both pushes on the drawing.
+id: u1-res-iminium-sites
+unit: u1
+lesson: u1-l07
+difficulty: 3
+status: approved
+source: Adapted from MIT 5.12 PS2 Q1 and its key
+credit: Kimberly Berkowski, MIT OCW 5.12, Spring 2005, CC BY-NC-SA 4.0
+type: tap-to-identify
+prompt: "This iminium ion has a C=N⁺ next to a ring C=C. Tap every **carbon** that some resonance contributor draws with a **+** (δ+ in the hybrid), then press Check. Just tap, no pushing on this Problem."
+structure: iminium
+alt: "An iminium ion: a six-membered ring whose carbon C4 is double-bonded to N⁺ carrying two methyls; next to C4, a ring double bond C5=C6; the other three ring corners are CH₂."
+tappable: { atoms: [a1, a2, a3, a4, a5, a6, a7, a8, a9] }
+tapOnly:
+  idle: "Just tap, no pushing on this Problem."
+  drag: "No pushing here: picture the pushes, then tap the carbons they make electron-poor."
+answer: [a4, a6]
+correct: "Push the C=N π pair onto N: + lands on C4. Slide the ring's C5=C6 toward C4⁺: + lands on C6. Both minor drawings mark δ+ carbons, the two places an electron source can attack."
+hints:
+  - includes: [a5]
+    text: "No reasonable contributor puts + on C5. When the ring C=C slides toward C4, which end is left short?"
+  - includes: [a2]
+    text: "The question asks for carbons. N is drawn + in the major contributor, but it has a full octet; the electron-poor spots are carbons."
+  - includes: [a1, a3]
+    text: "The methyl carbons have only σ bonds; they're not in the π system."
+  - includes: [a7, a8, a9]
+    text: "Those ring corners have only σ bonds. Look at the carbons in the C=N and C=C."
+  - match: [a4]
+    text: "That's one. Now slide the ring C=C toward C4⁺: where does + land?"
+  - match: [a6]
+    text: "That's one. The carbon bonded to N is drawn + as soon as the C=N pair moves onto N."
+  - text: "Push C=N's π pair onto N, then slide the C=C toward the new C⁺. Every carbon drawn + is δ+."
+reveal: "Arrow from the C=N π bond onto nitrogen: the carbon bonded to nitrogen is now positive. Arrow from the ring C=C π bond into the bond toward that carbon: the positive charge moves two carbons around the ring. Those two carbons, C4 and C6, are δ+."
+replay:
+  start: iminium
+  result: iminium-c6
+  pushes:
+    - { from: b3, to: a2 }
+    - { from: b5, to: b4 }
+sourceNote: "Adapted from MIT OCW 5.12, Problem Set 2 Q1 and its key (which circles the same two carbons), Berkowski, Spring 2005, CC BY-NC-SA 4.0. Wording ours."

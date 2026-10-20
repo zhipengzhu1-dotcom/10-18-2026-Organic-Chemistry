@@ -10,6 +10,8 @@ import { buildContent, contentRoot } from "../src/index.ts";
 import { project, viewMatrix, type Vec3, type ViewSpec } from "../src/molecule.ts";
 import { expectedLonePairs, hydrogenCount, impliedHydrogens } from "../src/valence.ts";
 import { readStructure } from "../src/structure-file.ts";
+import { arrowsAct, arrowsStart } from "../src/arrows.ts";
+import type { Push } from "../src/model.ts";
 
 const organic = buildContent(contentRoot).model!.subjects.find((s) => s.slug === "organic")!;
 const data = organic.data;
@@ -170,6 +172,51 @@ describe("the spec's build-time sanity checks", () => {
       { through: [3, 1, 4], label: "left CH₂ plane" },
       { through: [5, 2, 6], label: "right CH₂ plane" },
     ]);
+  });
+});
+
+describe("the Draw-arrows Practice Problems grade the spec's pushes", () => {
+  const task = (id: string) => {
+    const step = unit.bank.find((p) => p.id === id)!.step;
+    if (step.type !== "draw-arrows") throw new Error(`${id} is not Draw arrows`);
+    return { ...step, start: step.start.structure, results: step.results ?? [] };
+  };
+  const play = (id: string, pushes: Push[]) => pushes.reduce((s, push) => arrowsAct(task(id), s, { push }), arrowsStart());
+  const hintFor = (id: string, before: Push[], wrong: Push) => {
+    const state = play(id, [...before, wrong]);
+    return state.last?.kind === "wrong" ? state.last.hint : `not wrong: ${state.last?.kind}`;
+  };
+  const hint = (id: string, starts: string) => {
+    const file = yaml(`problems/${id}.yaml`);
+    return file.hints.find((h: { text: string }) => h.text.startsWith(starts)).text as string;
+  };
+
+  it.each(["u1-res-pentadienyl-cation", "u1-res-acac-enolate", "u1-res-phenoxide-para", "u1-mo-alcl3-chloromethane"])(
+    "%s: the answer's pushes, in order, reach the target first try",
+    (id) => {
+      const state = play(id, task(id).answer);
+      expect(state.done).toBe(true);
+      expect(state.wrong).toBe(0);
+    },
+  );
+
+  it("u1-res-acac-enolate: either oxygen is right", () => {
+    const state = play("u1-res-acac-enolate", [{ from: "a4", to: "b4" }, { from: "b5", to: "a6" }]);
+    expect(state.done && state.wrong).toBe(0);
+  });
+
+  it("each spec wrong push gets its Hint", () => {
+    expect(hintFor("u1-res-pentadienyl-cation", [], { from: "b3", to: "a3" })).toBe(hint("u1-res-pentadienyl-cation", "That parks"));
+    expect(hintFor("u1-res-pentadienyl-cation", [], { from: "b1", to: "b2" })).toBe(hint("u1-res-pentadienyl-cation", "That π bond"));
+    expect(hintFor("u1-res-acac-enolate", [], { from: "b2", to: "a2" })).toBe(hint("u1-res-acac-enolate", "Oxygen is"));
+    expect(hintFor("u1-res-acac-enolate", [], { from: "a3", to: "a2" })).toBe(hint("u1-res-acac-enolate", "That oxygen"));
+    expect(hintFor("u1-res-acac-enolate", [{ from: "a4", to: "b3" }], { from: "b5", to: "a6" })).toBe(hint("u1-res-acac-enolate", "The pair that came"));
+    expect(hintFor("u1-res-phenoxide-para", [], { from: "b2", to: "a3" })).toBe(hint("u1-res-phenoxide-para", "That puts"));
+    expect(hintFor("u1-res-phenoxide-para", [], { from: "b6", to: "a6" })).toBe(hint("u1-res-phenoxide-para", "Start where"));
+    expect(hintFor("u1-res-phenoxide-para", [], { from: "b3", to: "a3" })).toBe(hint("u1-res-phenoxide-para", "σ bonds"));
+    expect(hintFor("u1-mo-alcl3-chloromethane", [], { from: "a4", to: "a3" })).toBe(hint("u1-mo-alcl3-chloromethane", "Those chlorines"));
+    expect(hintFor("u1-mo-alcl3-chloromethane", [], { from: "b1", to: "a2" })).toBe(hint("u1-mo-alcl3-chloromethane", "σ bonds sit low"));
+    expect(hintFor("u1-mo-alcl3-chloromethane", [], { from: "a2", to: "a1" })).toBe(hint("u1-mo-alcl3-chloromethane", "Carbon already"));
   });
 });
 

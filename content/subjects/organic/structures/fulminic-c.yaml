@@ -1,0 +1,16 @@
+# Practice Problem u1-res-rank-fulminic (#87) card c: H–C⁺=N–O⁻, full Lewis. Drawn by hand in a line (fulminic
+# acid, LibreTexts Wade 1-22).
+
+id: fulminic-c
+style: full
+smiles: "[CH+:1]=[N:2][O-:3]"
+atoms:
+  - { id: a1, el: C, x: 0, y: 0, charge: 1 }
+  - { id: a2, el: N, x: 1.5, y: 0, lp: 1 }
+  - { id: a3, el: O, x: 3, y: 0, charge: -1, lp: 3 }
+  - { id: a4, el: H, x: -1.5, y: 0 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 2 }
+  - { id: b2, a: a2, b: a3, order: 1 }
+  - { id: b3, a: a1, b: a4, order: 1 }
+source: Drawn for u1-res-rank-fulminic; fulminic acid, LibreTexts Wade 1-22
