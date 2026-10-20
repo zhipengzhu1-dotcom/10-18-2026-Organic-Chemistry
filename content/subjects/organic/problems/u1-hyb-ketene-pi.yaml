@@ -16,7 +16,7 @@ molecule:
   zoom: 1.6
   orbitals: [ketene-orbitals/cc-pi, ketene-orbitals/co-pi]
   plane: { through: [3, 0, 4], label: H–C–H plane }
-  describe: "Ketene: CH2, then C, then O, in a straight line from the middle carbon. The C=C π bond has lobes above and below the plane of the H–C–H group. The C=O π bond has its lobes in that plane, at right angles to the first. Labelled: computed."
+  describe: "Ketene: CH₂, then C, then O, in a straight line from the middle carbon. The C=C π bond has lobes above and below the plane of the H–C–H group. The C=O π bond has its lobes in that plane, at right angles to the first. Labelled: computed."
 options:
   - { id: a, text: both π bonds above and below the H–C–H plane }
   - { id: b, text: "the C=C π above and below the H–C–H plane; the C=O π lying in that plane" }

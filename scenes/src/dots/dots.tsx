@@ -36,8 +36,10 @@ export interface Pt {
 export const dir = (deg: number): Pt => ({ x: Math.cos((deg * Math.PI) / 180), y: Math.sin((deg * Math.PI) / 180) });
 
 export function Letter({ at, el, size, colour = ink, opacity = 1 }: { at: Pt; el: string; size: number; colour?: string; opacity?: number }) {
+  // Drawn letters are never read: a Scene's description (and an interactive Scene's named buttons) say it.
   return (
     <text
+      aria-hidden="true"
       x={at.x}
       y={at.y}
       fill={colour}

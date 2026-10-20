@@ -99,7 +99,7 @@ steps:
     type: explain
     text: >-
       The same thing happens side-on. In ethylene, each carbon has one p orbital left over (Lesson 4), standing up out of the flat molecule. In phase they make **π**, a bonding orbital above and below the C=C. Out of phase they make **π\***, antibonding, with a node cutting between the two carbons.<br>
-      Fill ethylene's orbitals from the bottom and the last pair lands in π. That's its **HOMO**, the **H**ighest **O**ccupied **M**olecular **O**rbital. The next one up, π\*, is empty: the **LUMO**, **L**owest **U**noccupied. The energy between them is the **HOMO–LUMO gap**.
+      Fill ethylene's orbitals from the bottom and the last pair lands in π. That's its **HOMO**, the Highest Occupied Molecular Orbital. The next one up, π\*, is empty: the **LUMO**, the Lowest Unoccupied one. The energy between them is the **HOMO–LUMO gap**.
     scene: mo-from-overlap-ethylene
     sourceNote: "π and π\\* in ethylene: facts as in OpenStax *Organic Chemistry* §1.11, CC BY-NC-SA 4.0; wording and pictures ours."
 

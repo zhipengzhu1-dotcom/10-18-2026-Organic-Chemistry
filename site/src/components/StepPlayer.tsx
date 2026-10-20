@@ -136,6 +136,15 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     if (linked && moved && location.hash !== `#${step.id}`) history.replaceState(null, "", `#${step.id}`);
   }, [linked, step.id, screen.index, practice]);
 
+  // A new Step on screen (Continue, back, a Step link) takes focus, so a screen reader announces it.
+  const body = useRef<HTMLElement>(null);
+  const shownStep = useRef(step.id);
+  useEffect(() => {
+    if (shownStep.current === step.id) return;
+    shownStep.current = step.id;
+    body.current?.focus({ preventScroll: true });
+  }, [step.id]);
+
   // Goal-state Manipulate: after `idleSeconds` with no move, the stage's idle Hint (the second also nudges).
   const goalIdle = step.type === "manipulate-goal" && screen.goal && !screen.canContinue && key ? step.idleSeconds : 0;
   useEffect(() => {
@@ -235,7 +244,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         </span>
       </div>
 
-      <main className="player-body">
+      <main className="player-body" ref={body} tabIndex={-1} aria-label={`${practice ? "Problem" : "Step"} ${screen.index + 1} of ${screen.total}`}>
         {step.type === "explain" ? (
           // Block Markdown: paragraphs and lists.
           <div className="explain-text" {...html(step.text)} />

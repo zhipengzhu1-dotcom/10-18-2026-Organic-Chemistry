@@ -106,7 +106,11 @@ describe("build-by-sharing drawing", () => {
     const live = draw(start, {});
     expect(live).toContain('data-handle="tray-1"');
     expect(live).toContain('data-target="dot-n"');
-    expect(live).toContain('aria-label="Hydrogen atom in the tray"');
+    // Numbered, so a screen reader tells the tray's atoms apart (SR pass, #88).
+    expect(live).toContain('aria-label="Hydrogen atom 1 of 6 in the tray"');
+    expect(live).toContain('aria-label="Hydrogen atom 6 of 6 in the tray"');
+    // The drawn letters and counts are hidden from screen readers; the buttons and the description say it all.
+    expect(live).not.toMatch(/<text(?![^>]*aria-hidden)[^>]*>/);
     expect(live).toContain('aria-label="Carbon&#x27;s single dot, top"');
   });
 

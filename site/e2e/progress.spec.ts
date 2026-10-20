@@ -46,6 +46,13 @@ test("leaving mid-Lesson and coming back resumes at the same Step", async ({ pag
   await expect(page.getByRole("status")).toContainText("✗ Not quite. Look for a double line.");
 });
 
+test("Continue and back move focus to the new Step, so a screen reader announces it", async ({ page }) => {
+  await playToStep3(page);
+  await expect(page.getByRole("main", { name: "Step 3 of 14" })).toBeFocused();
+  await page.getByRole("button", { name: "Previous Step" }).click();
+  await expect(page.getByRole("main", { name: "Step 2 of 14" })).toBeFocused();
+});
+
 test("back is allowed, answered Steps stay locked, and there's no skipping ahead", async ({ page }) => {
   await playToStep3(page);
   await page.getByRole("button", { name: "Previous Step" }).click();

@@ -402,6 +402,10 @@
     color: var(--at-ink-muted);
     white-space: nowrap;
   }
+  /* Takes focus on each new Step only so screen readers announce it; no ring on a whole region. */
+  .player-body:focus {
+    outline: none;
+  }
   .player-body {
     flex: 1;
     min-height: 0;
