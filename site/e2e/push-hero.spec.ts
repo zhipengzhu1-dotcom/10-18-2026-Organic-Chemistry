@@ -98,7 +98,7 @@ test("a wrong push gets the miss line, not the answer", async ({ page }) => {
 test("a returning visitor gets the Hub instead of the hero", async ({ page }) => {
   await page.goto("/");
   await page.evaluate(() =>
-    localStorage.setItem("astratron.progress", JSON.stringify({ version: 1, lessons: {}, problems: {}, last: "u1-sample" })),
+    localStorage.setItem("astratron.progress", JSON.stringify({ version: 1, lessons: {}, problems: {}, last: "u1-l01" })),
   );
   await page.reload();
   await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();

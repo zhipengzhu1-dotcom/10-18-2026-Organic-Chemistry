@@ -1,8 +1,8 @@
-// The 3D Step card and Rotate-and-identify 3D (#68) in the built site, on the sample Lesson.
+// The 3D Step card and Rotate-and-identify 3D (#68) in the built site, on Lesson 3 (Molecules in 3D).
 // Expected numbers come from the methane geometry (CCCBDB: C–H 1.087 Å, H–C–H 109.47°).
 import { expect, test, type Page } from "@playwright/test";
 
-const LESSON = "/organic/orgo-1/structure-bonding/sample-3d";
+const LESSON = "/organic/orgo-1/structure-bonding/molecules-in-3d";
 
 const card = (page: Page) => page.locator("figure.molecule");
 const frame = (page: Page) => page.getByRole("application", { name: /Methane/ });
@@ -15,10 +15,21 @@ async function tapAtom(page: Page, index: number) {
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
 }
 
+/** Lesson 3's tilted start view hides one H behind C; two quarter turns show all five atoms. */
+async function showAllAtoms(page: Page) {
+  for (let i = 0; i < 2; i++) await page.getByRole("button", { name: "Turn right" }).click();
+  await expect(card(page).locator(".molecule-letter")).toHaveCount(5);
+}
+
 test.describe("the 3D Step card", () => {
+  // At 1280x720 the card is squeezed to about 100 px tall to fit the Step on one screen (a #88
+  // hand-check item); a taller laptop window shows it at a size you can tap.
+  test.use({ viewport: { width: 1280, height: 1000 } });
+
   test("draws the molecule with WebGL, every atom lettered, a 1 Å scale bar and its Source note", async ({ page }) => {
-    await page.goto(`${LESSON}#s02`);
+    await page.goto(`${LESSON}#s03`);
     await expect(card(page).locator("canvas")).toHaveCount(1);
+    await showAllAtoms(page);
     const letters = await card(page).locator(".molecule-letter").allTextContents();
     expect(letters.sort()).toEqual(["C", "H", "H", "H", "H"]);
     await expect(card(page).locator(".molecule-scalebar")).toHaveText("1 Å");
@@ -33,7 +44,8 @@ test.describe("the 3D Step card", () => {
   test("tap two atoms for a distance, three for the angle at the middle one; a fourth restarts; a picked atom un-picks", async ({
     page,
   }) => {
-    await page.goto(`${LESSON}#s02`);
+    await page.goto(`${LESSON}#s03`);
+    await showAllAtoms(page);
     await tapAtom(page, 0);
     await expect(live(page)).toHaveText("C1 picked. Pick another atom.");
     await tapAtom(page, 1);
@@ -60,7 +72,7 @@ test.describe("the 3D Step card", () => {
   });
 
   test("keyboard: [ / ] move between atoms, Enter picks, arrows turn, + and − zoom; the live region reads it", async ({ page }) => {
-    await page.goto(`${LESSON}#s02`);
+    await page.goto(`${LESSON}#s03`);
     await frame(page).focus();
     await page.keyboard.press("]");
     await expect(live(page)).toHaveText("C1, carbon.");
@@ -89,7 +101,7 @@ test.describe("the 3D Step card", () => {
   });
 
   test("↺ / ↻ turn it; Ball & stick ⟷ True scale keeps the 1 Å bar; Describe reads the arrangement", async ({ page }) => {
-    await page.goto(`${LESSON}#s02`);
+    await page.goto(`${LESSON}#s03`);
     const at = () => card(page).locator('.molecule-letter[data-atom="1"]').getAttribute("x");
     const before = await at();
     await page.getByRole("button", { name: "Turn right" }).click();
@@ -111,21 +123,21 @@ test.describe("the 3D Step card", () => {
 
 test.describe("Rotate-and-identify 3D", () => {
   test("is answered with ordinary choices and graded like Multiple choice", async ({ page }) => {
-    await page.goto(`${LESSON}#s05`);
+    await page.goto(`${LESSON}#s06`);
     await expect(page.getByRole("application", { name: /Water/ })).toBeVisible();
     const choose = (name: string) => page.getByRole("group", { name: "Choices" }).getByRole("button", { name }).click();
-    await choose("Straight");
+    await choose("linear");
     await page.getByRole("button", { name: "Check" }).click();
-    await expect(page.getByRole("status")).toContainText("From this side the two H's line up.");
-    await choose("Bent");
+    await expect(page.getByRole("status")).toContainText("Rotate a quarter turn (↻). Do the two H's and the O line up?");
+    await choose("bent");
     await page.getByRole("button", { name: "Check" }).click();
-    await expect(page.getByRole("status")).toContainText("Correct. Bent.");
+    await expect(page.getByRole("status")).toContainText("✓ Correct.");
   });
 
   test("the Step's own words open the Describe text", async ({ page }) => {
     await page.goto(`${LESSON}#s03`);
     await page.getByRole("button", { name: "Describe" }).click();
-    await expect(live(page)).toContainText("One carbon in the middle, bonded to four hydrogens. Methane: 5 atoms.");
+    await expect(live(page)).toContainText("Methane. Carbon in the centre, four hydrogens at the corners of a tetrahedron, each 1.09 Å from carbon.");
   });
 });
 
@@ -140,7 +152,7 @@ test.describe("without WebGL", () => {
   });
 
   test("shows a still with the same text, and the Step can still be finished", async ({ page }) => {
-    await page.goto(`${LESSON}#s05`);
+    await page.goto(`${LESSON}#s06`);
     const water = card(page);
     await expect(water.locator("canvas")).toHaveCount(0);
     await expect(water.locator(".molecule-still circle")).toHaveCount(3);
@@ -151,7 +163,7 @@ test.describe("without WebGL", () => {
     await expect(water).toContainText("Still image");
     await page.getByRole("button", { name: "Describe" }).click();
     await expect(water.locator("[aria-live]")).toContainText("Water: 3 atoms. O1 is bonded to H1 and H2.");
-    await page.getByRole("group", { name: "Choices" }).getByRole("button", { name: "Bent" }).click();
+    await page.getByRole("group", { name: "Choices" }).getByRole("button", { name: "bent" }).click();
     await page.getByRole("button", { name: "Check" }).click();
     await expect(page.getByRole("status")).toContainText("Correct.");
     await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();

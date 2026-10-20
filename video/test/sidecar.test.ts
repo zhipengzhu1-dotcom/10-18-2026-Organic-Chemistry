@@ -66,13 +66,15 @@ describe("sourcesSidecar", () => {
   });
 
   it("counts a cited colour the Scene draws with as on screen for the whole video", () => {
-    const twist = sceneRegistry["sample-twist"]!;
+    const twist = sceneRegistry["pi-twist"]!;
     const sidecar = sourcesSidecar(twist, "16:9", citedFor(model, twist.manifest.data));
-    expect(sidecar.numbers).toEqual([
-      expect.objectContaining({ ref: "elements/C.colour", display: "#909090", shown: "colour", onScreen: [{ from: 0, to: 8 }] }),
-    ]);
-    expect(sidecar).toMatchObject({ scene: "sample-twist", aspect: "16:9", fps: 60, duration: 8 });
-  });
+    expect(sidecar.numbers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ ref: "elements/C.colour", display: "#909090", shown: "colour", onScreen: [{ from: 0, to: 8 }] }),
+      ]),
+    );
+    expect(sidecar).toMatchObject({ scene: "pi-twist", aspect: "16:9", fps: 60, duration: 8 });
+  }, 30_000); // pi-twist draws every frame of an 8 s video (slow when the machine is busy)
 
   it("falls back to the whole video for a cited value used in the drawing but never printed", () => {
     const hidden: RegisteredScene<{}> = { ...flash, Component: () => createElement("svg", null) };

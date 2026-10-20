@@ -1,11 +1,20 @@
-// Computed orbitals on the 3D Step card (#70), on the sample Lesson's ethylene π Step (s11): the
+// Computed orbitals on the 3D Step card (#70), on Lesson 4's σ / π Step (s06, π picked): the
 // mesh loads only on the Step that uses it, the lobes are drawn translucent over the atoms (above
 // and below the edge-on plane), each sign carries a label, the orbital its chip, and the Source note
 // says the orbitals are computed.
 import { expect, test, type Page } from "@playwright/test";
 
-const LESSON = "/organic/orgo-1/structure-bonding/sample-3d";
+const UNIT = "/organic/orgo-1/structure-bonding";
+const STEP = `${UNIT}/hybridization-orbitals#s06`;
+const SIGMA = "/orbitals/ethylene-orbitals/sigma.glb";
 const MESH = "/orbitals/ethylene-orbitals/pi.glb";
+
+/** Lesson 4 s06 opens on σ; its π button shows the π orbital alone. */
+async function openPi(page: Page) {
+  await page.goto(STEP);
+  await page.getByRole("button", { name: "π", exact: true }).click();
+  await expect(card(page).locator(".orbital-chip")).toHaveText(["π computed"]);
+}
 
 const card = (page: Page) => page.locator("figure.molecule");
 
@@ -43,20 +52,27 @@ async function cyanAboveBelow(page: Page, row: number) {
 }
 
 test.describe("computed orbitals on the 3D card", () => {
+  test.use({ viewport: { width: 1280, height: 1000 } });
+
   test("load their mesh only on the Step that shows them", async ({ page }) => {
     const meshes: string[] = [];
     page.on("request", (r) => r.url().includes("/orbitals/") && meshes.push(new URL(r.url()).pathname));
-    await page.goto(`${LESSON}#s02`);
+    // Lesson 3's methane card has no orbitals.
+    await page.goto(`${UNIT}/molecules-in-3d#s03`);
     await expect(card(page).locator("canvas")).toHaveCount(1);
     expect(meshes).toEqual([]);
 
-    await page.goto(`${LESSON}#s11`);
+    await page.goto(STEP);
     await expect(card(page).locator(".molecule-stage")).toHaveAttribute("data-orbitals", "drawn");
-    expect(meshes).toEqual([MESH]);
+    expect(meshes).toEqual([SIGMA]);
+    await page.getByRole("button", { name: "π", exact: true }).click();
+    await expect(card(page).locator(".orbital-chip")).toHaveText(["π computed"]);
+    await expect(card(page).locator(".molecule-stage")).toHaveAttribute("data-orbitals", "drawn");
+    expect(meshes).toEqual([SIGMA, MESH]);
   });
 
   test("ethylene's π shows translucent lobes above and below the edge-on plane, with sign labels and a chip", async ({ page }) => {
-    await page.goto(`${LESSON}#s11`);
+    await openPi(page);
     await expect(card(page).locator(".molecule-stage")).toHaveAttribute("data-orbitals", "drawn");
 
     // Chip names the orbital and says it is computed; never colour alone: + and − label the lobes.
@@ -86,7 +102,7 @@ test.describe("computed orbitals on the 3D card", () => {
   });
 
   test("the Source note says the orbitals are computed, how, and at what isovalue", async ({ page }) => {
-    await page.goto(`${LESSON}#s11`);
+    await openPi(page);
     await page.locator("details.source-note summary").click();
     const note = page.locator("details.source-note");
     await expect(note).toContainText("Computed, not measured.");

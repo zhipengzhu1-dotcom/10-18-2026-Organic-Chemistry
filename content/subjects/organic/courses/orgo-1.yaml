@@ -18,12 +18,6 @@ units:
       - u1-l06
       - u1-l07
       - u1-l08
-      - u1-sample
-      - u1-sample-step-types
-      - u1-sample-structures
-      - u1-sample-scenes
-      - u1-sample-arrows
-      - u1-sample-3d
   - id: u2
     slug: acids-bases
     title: Acids & Bases

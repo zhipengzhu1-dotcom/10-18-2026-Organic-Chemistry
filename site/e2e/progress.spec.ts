@@ -4,53 +4,46 @@ import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 import { buildContent, contentRoot } from "@astratron/content";
 import { CURRENT_VERSION } from "../src/progress/record.ts";
+import { playThrough } from "./site.ts";
 
 /** Core Lessons in Unit 1 (the On-ramp doesn't count). */
 const UNIT_1_CORE = buildContent(contentRoot).model!.subjects[0].courses[0].units[0].lessons.filter((l) => !l.onRamp).length;
 
 const UNIT = "/organic/orgo-1/structure-bonding";
-const LESSON = `${UNIT}/sample-carbons-four-bonds`;
-const NEXT_LESSON = `${UNIT}/sample-numbers-and-order`;
+// Lesson 5 for resume, back and the Hub; Lesson 0 (then Lesson 1) for finishing a Lesson: its two
+// Check Problems don't earn the day on their own, so the Wrap is what earns the Streak tick.
+const LESSON = `${UNIT}/functional-groups`;
+const FINISH = `${UNIT}/why-carbon`;
+const NEXT_LESSON = `${UNIT}/bonds-polarity-formal-charge`;
 
 const choose = (page: Page, name: string) =>
   page.getByRole("group", { name: "Choices" }).getByRole("button", { name, exact: true }).click();
 const check = (page: Page) => page.getByRole("button", { name: "Check" }).click();
 const next = (page: Page) => page.getByRole("button", { name: "Continue" }).click();
-const at = (page: Page, n: number, of = 10) => expect(page.getByText(`Step ${n} of ${of}`)).toBeVisible();
+const at = (page: Page, n: number, of = 14) => expect(page.getByText(`Step ${n} of ${of}`)).toBeVisible();
 
-/** Plays the sample Lesson from Step 1 to Step 3. */
+/** Plays Lesson 5 from Step 1 to Step 3. */
 async function playToStep3(page: Page) {
   await page.goto(LESSON);
   await at(page, 1);
-  await choose(page, "2");
+  await choose(page, "No: a bigger molecule behaves differently all over");
   await check(page);
   await next(page);
   await next(page);
   await at(page, 3);
 }
 
-/** From Step 3, answers everything right and reaches the Wrap. */
-async function finishFromStep3(page: Page) {
-  for (const [step, pick] of [[3, "4"], [6, "4"], [8, "2"], [9, "CH₅"]] as const) {
-    while (!(await page.getByText(`Step ${step} of 10`).isVisible())) await next(page);
-    await choose(page, pick);
-    await check(page);
-    await expect(page.getByRole("status")).toContainText("✓ Correct.");
-  }
-  await next(page);
-  await at(page, 10);
-}
 
 test("leaving mid-Lesson and coming back resumes at the same Step", async ({ page }) => {
   await playToStep3(page);
-  await choose(page, "3");
+  await page.getByRole("group", { name: "Choices" }).getByRole("button", { name: /^Cyclohexene/ }).click();
   await check(page);
   await expect(page.getByRole("status")).toContainText("✗ Not quite.");
 
   await page.goto(UNIT);
   await page.goto(LESSON);
   await at(page, 3);
-  await expect(page.getByRole("status")).toContainText("✗ Not quite. Count again from the formula.");
+  await expect(page.getByRole("status")).toContainText("✗ Not quite. Look for a double line.");
 });
 
 test("back is allowed, answered Steps stay locked, and there's no skipping ahead", async ({ page }) => {
@@ -59,7 +52,7 @@ test("back is allowed, answered Steps stay locked, and there's no skipping ahead
   await at(page, 2);
   await page.getByRole("button", { name: "Previous Step" }).click();
   await at(page, 1);
-  await expect(page.getByRole("status")).toContainText("→ Answer: Four.");
+  await expect(page.getByRole("status")).toContainText("→ Answer: Yes.");
   for (const button of await page.getByRole("group", { name: "Choices" }).getByRole("button").all()) {
     await expect(button).toBeDisabled();
   }
@@ -70,29 +63,31 @@ test("back is allowed, answered Steps stay locked, and there's no skipping ahead
 });
 
 test("finishing a Lesson shows the key idea, a Streak tick, Next Lesson and Back to Unit", async ({ page }) => {
-  await playToStep3(page);
-  await finishFromStep3(page);
+  test.setTimeout(90_000);
+  await page.goto(FINISH);
+  await playThrough(page, async () => {});
 
   await expect(page.getByRole("heading", { name: "Key idea" })).toBeVisible();
-  await expect(page.getByText("A neutral carbon makes four bonds, and a double bond counts as two of them.")).toBeVisible();
+  await expect(page.getByText("Carbon sits in the middle of its row", { exact: false })).toBeVisible();
   await expect(page.getByText("✓ Streak: 1 day")).toBeVisible();
   await expect(page.getByText(/donat/i)).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Next Lesson" })).toHaveAttribute("href", NEXT_LESSON);
 
   await page.getByRole("link", { name: "Back to Unit" }).click();
   await expect(page).toHaveURL(UNIT);
-  await expect(page.getByText(`1 of ${UNIT_1_CORE} Lessons`)).toBeVisible();
+  // The On-ramp is done, but only core Lessons count toward the Unit.
+  await expect(page.getByText(`0 of ${UNIT_1_CORE} Lessons`)).toBeVisible();
   const row = (title: string) => page.getByRole("listitem").filter({ hasText: title });
-  await expect(row("Sample: Carbon's Four Bonds")).toContainText("Done");
-  await expect(row("Sample: Numbers and Order")).toContainText("Not started");
+  await expect(row("Why Carbon?")).toContainText("Done");
+  await expect(row("Bonds, Polarity & Formal Charge")).toContainText("Not started");
   await expect(page.getByRole("img", { name: "Streak: 1 day" })).toContainText("1");
 
   await page.goto(NEXT_LESSON);
-  await choose(page, "C≡C (three pairs)");
+  await choose(page, "only the water bends");
   await check(page);
   await page.goto(UNIT);
-  await expect(row("Sample: Numbers and Order")).toContainText("In progress");
-  await expect(page.getByText(`1 of ${UNIT_1_CORE} Lessons`)).toBeVisible();
+  await expect(row("Bonds, Polarity & Formal Charge")).toContainText("In progress");
+  await expect(page.getByText(`0 of ${UNIT_1_CORE} Lessons`)).toBeVisible();
 });
 
 test("a first-time visitor gets no Hub; a returning one gets the Continue card, Streak and map", async ({ page }) => {
@@ -104,8 +99,8 @@ test("a first-time visitor gets no Hub; a returning one gets the Continue card, 
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
   const card = page.getByRole("region", { name: "Continue" });
-  await expect(card).toContainText("Sample: Carbon's Four Bonds");
-  await expect(card).toContainText("Step 3 of 10");
+  await expect(card).toContainText("Functional Groups");
+  await expect(card).toContainText("Step 3 of 14");
   await expect(page.getByRole("img", { name: "Streak: 0 days" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Organic Chemistry I", exact: true })).toBeVisible();
 
@@ -119,14 +114,14 @@ test("progress exports to a file and imports in another browser", async ({ page,
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export progress" }).click();
   const file = await (await download).path();
-  expect(JSON.parse(await readFile(file, "utf8"))).toMatchObject({ version: CURRENT_VERSION, last: "u1-sample" });
+  expect(JSON.parse(await readFile(file, "utf8"))).toMatchObject({ version: CURRENT_VERSION, last: "u1-l05" });
 
   const other = await browser.newPage();
   await other.goto("/");
   await expect(other.getByRole("heading", { name: "Welcome back" })).toBeHidden();
   await other.getByLabel("Import progress").setInputFiles(file);
   await expect(other.getByRole("heading", { name: "Welcome back" })).toBeVisible();
-  await expect(other.getByRole("region", { name: "Continue" })).toContainText("Step 3 of 10");
+  await expect(other.getByRole("region", { name: "Continue" })).toContainText("Step 3 of 14");
   await other.close();
 });
 

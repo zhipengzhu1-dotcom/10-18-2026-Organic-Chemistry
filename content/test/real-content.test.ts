@@ -5,10 +5,13 @@ import { cite, elementStyle } from "../src/data.ts";
 it("the real content tree builds with no errors", () => {
   const result = buildContent(contentRoot);
   expect(result.errors).toEqual([]);
-  const urls = result.model!.subjects.flatMap((s) =>
-    s.courses.flatMap((c) => c.units.flatMap((u) => u.lessons.map((l) => l.url))),
+  const units = result.model!.subjects.flatMap((s) => s.courses.flatMap((c) => c.units));
+  // v1 ships Unit 1's nine Lessons and its Bank, and nothing else: the build-time sample Lessons
+  // and Problems are gone (#88).
+  expect(units.flatMap((u) => u.lessons.map((l) => l.id))).toEqual(
+    ["u1-l00", "u1-l01", "u1-l02", "u1-l03", "u1-l04", "u1-l05", "u1-l06", "u1-l07", "u1-l08"],
   );
-  expect(urls).toContain("/organic/orgo-1/structure-bonding/sample-carbons-four-bonds");
+  expect(units.flatMap((u) => u.bank.map((p) => p.id)).filter((id) => /sample/.test(id))).toEqual([]);
 });
 
 describe("the real cited data", () => {

@@ -3,7 +3,7 @@
 // panel, motion rules, and the axe gate on every page in both themes.
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { allPages, lessonAndBankPaths, playThrough, SAMPLE_LESSON, THEMES, useTheme } from "./site.ts";
+import { allPages, LESSON_0, LESSON_1, lessonAndBankPaths, playThrough, THEMES, useTheme } from "./site.ts";
 
 const PHONE = { width: 390, height: 844 };
 
@@ -98,7 +98,7 @@ test.describe("theme and motion preferences", () => {
     await page.getByRole("button", { name: "Light" }).click();
     await page.getByRole("switch", { name: "Reduce motion" }).click();
     await expect(page.getByRole("switch", { name: "Reduce motion" })).toHaveAttribute("aria-checked", "true");
-    await page.goto(SAMPLE_LESSON);
+    await page.goto(LESSON_1);
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     await expect(page.locator("html")).toHaveAttribute("data-motion", "reduced");
     await expect(page.locator("body")).toHaveCSS("background-color", "rgb(243, 237, 255)");
@@ -111,7 +111,7 @@ for (const theme of THEMES) {
 
     test("every page passes axe, the type rules and 48px tap targets", async ({ page }) => {
       const pages = await allPages(page);
-      expect(pages).toContain(SAMPLE_LESSON);
+      expect(pages).toContain(LESSON_0);
       for (const path of pages) {
         await page.goto(path);
         await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
@@ -150,7 +150,7 @@ for (const theme of THEMES) {
     test("feedback is icon + words: ✓ solid cyan, ✗ dashed magenta + Hint, → plain border + answer", async ({
       page,
     }) => {
-      await page.goto(SAMPLE_LESSON);
+      await page.goto(LESSON_0);
       const panel = page.getByRole("status").locator(".fb");
       const choose = (name: string) =>
         page.getByRole("group", { name: "Choices" }).getByRole("button", { name, exact: true }).click();
@@ -163,17 +163,19 @@ for (const theme of THEMES) {
         await expect(panel).toContainText(words);
       };
 
-      await choose("2");
+      // Lesson 0 s01 is a Hook prediction: any guess gets the reveal.
+      await choose("about 5%");
       await check();
       await looks("solid", "ink-muted", "→", "Answer:");
-      await next();
-      await next();
-      await choose("3");
+      // s07 is a Check Problem: a wrong pick gets its Hint, then the right one.
+      await page.goto(`${LESSON_0}#s07`);
+      await expect(page.getByText("Step 7 of 9")).toBeVisible();
+      await choose("Carbon's outer shell is already full.");
       await check();
-      await looks("dashed", "boss", "✗", "Not quite. Count again from the formula.");
-      await choose("4");
+      await looks("dashed", "boss", "✗", "Not quite. A full shell is 8.");
+      await choose("Gaining or losing 4 electrons is too hard, so sharing is the cheaper way to fill its shell.");
       await check();
-      await looks("solid", "electron", "✓", "Correct. Four C–H bonds");
+      await looks("solid", "electron", "✓", "4 is the most electrons any atom in the row has to move.");
     });
   });
 }
@@ -182,11 +184,11 @@ test.describe("Step player on a phone", () => {
   test.use({ viewport: PHONE, hasTouch: true });
 
   test("single focus: ✕, story bars, Step count and one fixed bottom button; no site chrome", async ({ page }) => {
-    await page.goto(SAMPLE_LESSON);
+    await page.goto(LESSON_0);
     await expect(page.getByRole("link", { name: "Leave the Lesson" })).toHaveText("✕");
-    await expect(page.locator(".bars li")).toHaveCount(10);
+    await expect(page.locator(".bars li")).toHaveCount(9);
     await expect(page.locator(".bars li.cur")).toHaveCount(1);
-    await expect(page.locator(".player-count")).toHaveText("Step 1 of 10");
+    await expect(page.locator(".player-count")).toHaveText("Step 1 of 9");
     await expect(page.getByRole("navigation")).toHaveCount(0);
     await expect(page.getByRole("banner")).toHaveCount(0);
     await expect(page.getByRole("contentinfo")).toHaveCount(0);
@@ -244,7 +246,8 @@ test.describe("motion", () => {
       };
     });
     await page.emulateMedia({ reducedMotion: "no-preference" });
-    await page.goto(SAMPLE_LESSON);
+    // Lesson 1: no watch-only (video) Scene, so nothing may play sound or video at all.
+    await page.goto(LESSON_1);
     await playThrough(page, async (label) => {
       const moves = await motion(page);
       expect(
@@ -269,7 +272,7 @@ test.describe("motion", () => {
     test(`reduced motion via the ${via} keeps only crossfades of 120 ms or less`, async ({ page }) => {
       if (via === "OS setting") await page.emulateMedia({ reducedMotion: "reduce" });
       else await page.addInitScript(() => localStorage.setItem("at-motion", "reduced"));
-      for (const path of ["/", SAMPLE_LESSON]) {
+      for (const path of ["/", LESSON_1]) {
         await page.goto(path);
         const bad = (await motion(page)).filter(([, prop, s]) => prop !== "opacity" || s > 0.12);
         expect(bad, path).toEqual([]);

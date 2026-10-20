@@ -38,6 +38,8 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - name: Browser tests (smoke, design system, axe on every page in both themes)
         run: pnpm test:e2e
+      - name: First-load JS budget (at most 200 KB compressed per Lesson page; 3D and meshes load lazily)
+        run: pnpm budget:js
       - name: The site ships no Remotion code (checks the site/dist the smoke test built)
         run: pnpm video check-site
       - name: Video path (one frame of every Scene at 16:9 and 9:16 through Remotion)
