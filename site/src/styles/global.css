@@ -352,6 +352,27 @@
     .player.has-card .figure-drawing .structure {
       max-height: 3.75rem;
     }
+    /* A card of computed orbitals (Lesson 8, #86) with long choices: once a Hint shows, the Hint
+       takes the prompt's place (still read aloud) and the card drops its size and Describe row (it
+       still turns), so the choices stay on screen. */
+    .player.has-card:has(.orbital-chips):has(.fb) .player-prompt {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .player.has-card:has(.orbital-chips):has(.fb) .molecule-tools {
+      display: none;
+    }
+    .player.has-card:has(.orbital-chips):has(.fb) .molecule {
+      min-height: 110px;
+    }
+    /* Once answered, the long Correct line or reveal takes the card's place too (wider screens keep it). */
+    .player.answered.has-card:has(.orbital-chips) :is(.molecule-pair, figure.molecule) {
+      display: none;
+    }
   }
   /* Short choices (one or two words) sit two to a row. */
   .opts.opts-pairs {
@@ -1246,12 +1267,10 @@
     flex-direction: column;
     gap: 8px;
     flex: 1 1 260px;
-    min-height: 0;
   }
   .molecule-pair-cards {
     display: flex;
     flex: 1;
-    min-height: 0;
     gap: 12px;
   }
   .molecule-pair-card {
