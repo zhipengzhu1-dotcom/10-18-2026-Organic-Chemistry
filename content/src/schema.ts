@@ -514,3 +514,13 @@ export type LessonFile = z.infer<typeof lessonFile>;
 export type ProblemFile = z.infer<typeof problemFile>;
 export type CourseFile = z.infer<typeof courseFile>;
 export type StructureFile = z.infer<typeof structureFile>;
+
+// Leaf shapes the resolved model uses as written (content/src/model.ts re-exports them):
+// one definition, so a field added here reaches the engine's types too.
+export type HintRule = z.infer<typeof hint>;
+export type NumericHint = z.infer<typeof numericHint>;
+export type RankHint = z.infer<typeof rankHint>;
+export type ManipulateHint = z.infer<typeof manipulateHint>;
+export type Push = z.infer<typeof push>;
+export type PushHint = z.infer<typeof pushHint>;
+export type GoalStage = z.infer<typeof goalStage>;

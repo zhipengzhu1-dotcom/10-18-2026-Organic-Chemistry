@@ -2,6 +2,9 @@
 // video renderer. Check Steps arrive with their Problem inlined.
 import type { Atom, Bond, Cited, CitedData, Tier } from "./data.ts";
 import type { BondDipole, Matrix3, Vec3 } from "./molecule.ts";
+import type { GoalStage, HintRule, ManipulateHint, NumericHint, Push, PushHint, RankHint } from "./schema.ts";
+
+export type { GoalStage, HintRule, ManipulateHint, NumericHint, Push, PushHint, RankHint };
 
 export type Phase = "hook" | "build" | "check" | "wrap";
 
@@ -188,12 +191,6 @@ export interface MultipleChoiceStep extends GradedVisuals {
   citations?: Cited[];
 }
 
-export interface NumericHint {
-  /** A common wrong value this Hint answers, matched within the Step's tolerance; absent on the generic fallback. */
-  match?: number;
-  text: string;
-}
-
 /** Numeric input: the Student types a number; the unit is fixed and shown beside the box, never typed. */
 export interface NumericStep extends GradedVisuals {
   id: string;
@@ -238,27 +235,6 @@ export interface RankStep extends GradedVisuals {
   citations?: Cited[];
 }
 
-/**
- * A Rank Hint. Every condition given must hold: `match` = this whole order; `notFirst` /
- * `notLast` = that item isn't at that end; `before: [x, y]` = x is placed before y; `above` = any one of its [x, y] pairs is.
- * The generic fallback has no condition.
- */
-export interface RankHint {
-  match?: string[];
-  notFirst?: string;
-  notLast?: string;
-  before?: [string, string];
-  /** At least one of these [upper, lower] pairs has its first item above its second. */
-  above?: [string, string][];
-  text: string;
-}
-
-export interface ManipulateHint {
-  /** The wrong control values this Hint answers; absent on the generic fallback. */
-  match?: SceneValue[];
-  text: string;
-}
-
 /** Manipulate a Scene: the Student works a slider (one settable state of the Scene) and presses Check on a value. */
 export interface ManipulateStep extends GradedVisuals {
   id: string;
@@ -294,27 +270,6 @@ export interface RotateAndIdentifyStep extends GradedVisuals {
   problemId?: string;
   scene?: SceneUse;
   citations?: Cited[];
-}
-
-/**
- * One curved arrow, as the Student draws it. `from` is an atom id (a lone pair on that atom) or a
- * bond id (that bond's electrons); `to` is an atom id or a bond id (where the arrowhead lands).
- */
-export interface Push {
-  from: string;
-  to: string;
-}
-
-/**
- * A Draw-arrows Hint, matched on the wrong push. Every condition given must hold: `from` = the push
- * starts at one of these (atom ids = their lone pair, bond ids, or `sigma` = any single bond);
- * `to` = it lands on one of these (an atom drop and the bond it makes count as the same).
- * The generic fallback has neither and comes last.
- */
-export interface PushHint {
-  from?: string[];
-  to?: string[];
-  text: string;
 }
 
 /**
@@ -356,20 +311,6 @@ export type GradedStep =
   | ManipulateStep
   | RotateAndIdentifyStep
   | DrawArrowsStep;
-
-/** One stage of a goal-state Manipulate Step. */
-export interface GoalStage {
-  prompt: string;
-  /** States the Scene is set to as the stage opens, on top of where the last stage left it. */
-  start?: Record<string, SceneValue>;
-  /** The stage is done once the Scene's state holds every one of these values. */
-  goal: Record<string, SceneValue>;
-  correct: string;
-  /** The Hint when Continue is tapped before the stage is done. */
-  blocked: string;
-  /** The Hint after `idleSeconds` with no move; a second idle shows the next move as a nudge. */
-  idle: string;
-}
 
 /**
  * A goal-state Manipulate a Scene Step: the Student works the Scene itself (its handles, e.g.
@@ -493,18 +434,6 @@ export interface TapTarget {
   label: string;
   /** For a region: the atoms it covers. */
   atoms?: string[];
-}
-
-/**
- * A Hint for a graded Step. Every condition given must hold: `match` = the exact chosen set;
- * `includes` = at least one of these was chosen; `misses` = at least one of these was not.
- * The generic fallback has no condition and comes last.
- */
-export interface HintRule {
-  match?: string[];
-  includes?: string[];
-  misses?: string[];
-  text: string;
 }
 
 export interface TapStep extends GradedVisuals {
