@@ -343,7 +343,7 @@
     }
     /* An Explain of four or more lines over a played Scene (Lesson 4 s04, the three hybrid sets):
        the Scene keeps to about a sixth of the screen so the text and its controls fit (#82). */
-    .player-body:has(> p br:nth-of-type(3)) .scene .scene-frame {
+    .player-body:has(> .explain-text br:nth-of-type(3)) .scene .scene-frame {
       max-height: 17dvh;
     }
     /* The card may shrink to a 96 px stage over its tools (whose buttons sit closer). */
