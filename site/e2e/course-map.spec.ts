@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { buildContent, contentRoot } from "@astratron/content";
+import { ANSWER_ORDER } from "@astratron/content/step-types";
+import { keyText, splitLesson } from "../src/lib/answer-key.ts";
 
 const UNIT_1 = "/organic/orgo-1/structure-bonding";
 const LESSON = `${UNIT_1}/bonds-polarity-formal-charge`;
@@ -65,16 +67,9 @@ test("no built Lesson page carries an answer, a Hint, a Correct line or a reveal
   for (const lesson of lessons) {
     const html = decode(await (await request.get(lesson.url)).text());
     expect(html, `${lesson.url} should be its Lesson page`).toContain(lesson.title);
-    for (const step of lesson.steps) {
-      if (step.type === "explain") continue;
-      const secrets = (
-        step.type === "manipulate-goal"
-          ? step.stages.flatMap((s) => [s.correct, s.blocked, s.idle])
-          : [step.correct, step.reveal, ...(step.hints ?? []).map((h) => h.text)]
-      ).filter(Boolean) as string[];
-      for (const secret of secrets) if (html.includes(plain(secret))) leaks.push(`${lesson.url}#${step.id}: "${secret}"`);
-    }
-    const keys = html.match(/"(answer|tolerance|hints|reveal|correct|stages|revealScene)"/g);
+    for (const [id, secrets] of Object.entries(splitLesson(lesson).key))
+      for (const secret of keyText(secrets)) if (html.includes(plain(secret))) leaks.push(`${lesson.url}#${id}: "${secret}"`);
+    const keys = html.match(new RegExp(`"(${[...ANSWER_ORDER, "answerCitations"].join("|")})"`, "g"));
     if (keys) leaks.push(`${lesson.url}: answer-key fields ${[...new Set(keys)].join(", ")}`);
   }
   expect(leaks).toEqual([]);

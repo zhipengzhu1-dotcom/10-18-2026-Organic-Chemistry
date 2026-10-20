@@ -161,7 +161,8 @@ function renderVisuals(s: Step): Step {
   return out;
 }
 
-function renderText(s: Step): Step {
+/** Markdown → HTML on a Step's text fields; its structures pre-rendered. (#99 moves this onto each Step type's `render`.) */
+export function renderText(s: Step): Step {
   if (s.type === "explain") return { ...s, text: mdBlocks(s.text) };
   if (s.type === "manipulate-goal")
     return {

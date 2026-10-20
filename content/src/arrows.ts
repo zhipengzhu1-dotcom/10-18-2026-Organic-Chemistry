@@ -10,7 +10,8 @@
 // Grading is by result: a push is accepted when it moves toward an accepted
 // result (its electrons leave a place that has more than the result has, and
 // land where the result has more), so every valid route counts.
-import type { Push, PushHint, Structure, StructureBond } from "./model.ts";
+import type { Structure, StructureBond } from "./model.ts";
+import type { Push, PushHint } from "./step-types/draw-arrows/rules.ts";
 import { formalCharge, VALENCE } from "./valence.ts";
 
 export interface MoleculeAtom {

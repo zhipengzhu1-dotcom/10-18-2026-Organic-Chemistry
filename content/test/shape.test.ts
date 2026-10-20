@@ -94,6 +94,18 @@ describe("interactive Step rules", () => {
     ]);
   });
 
+  it("grades through the Step type's own act: a Hint no pick can reach is an error", () => {
+    const steps = sampleSteps();
+    // One right option, so the Student picks one: no single pick is the set [b, c].
+    Object.assign(steps[2], { hints: [{ match: ["b", "c"], text: "Both slips." }, { includes: ["b"], text: "Hint for b." }, { text: "Generic hint." }] });
+    expect(errorsForLesson({ steps })).toEqual([
+      `${L}: step s03: Hint 1 never shows: every answer it matches is right or meets an earlier Hint first`,
+    ]);
+    // With two right options any set can be picked, so it shows.
+    Object.assign(steps[2], { answer: ["a", "c"] });
+    expect(errorsForLesson({ steps })).toEqual([]);
+  });
+
   it("requires a Correct line on a graded Step", () => {
     const steps = sampleSteps();
     Object.assign(steps[2], { correct: undefined });

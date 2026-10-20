@@ -95,9 +95,9 @@ describe("Numeric input and Rank / order Steps", () => {
 
   it("a Rank Hint may name a pattern, but only with the Step's items", () => {
     const ok = [
+      { before: ["single", "double"], text: "Swapped." },
       { notLast: "single", text: "Longest last." },
       { notFirst: "triple", text: "Shortest first." },
-      { before: ["single", "double"], text: "Swapped." },
       { text: "Count shared pairs." },
     ];
     expect(build(numeric(), rank({ hints: ok })).errors).toEqual([]);
@@ -105,6 +105,14 @@ describe("Numeric input and Rank / order Steps", () => {
     expect(build(numeric(), rank({ hints: bad })).errors).toEqual([
       `${L}: step s06: a Hint names unknown item "quadruple"`,
       `${L}: step s06: a Hint names unknown item "nope"`,
+    ]);
+  });
+
+  it("every Rank Hint must show on some wrong order (graded through the type's own act)", () => {
+    // Any order with C–C before C=C also has C–C not last, so the second Hint never shows.
+    const shadowed = [{ notLast: "single", text: "Longest last." }, { before: ["single", "double"], text: "Swapped." }, { text: "Count shared pairs." }];
+    expect(build(numeric(), rank({ hints: shadowed })).errors).toEqual([
+      `${L}: step s06: Hint 2 never shows: every answer it matches is right or meets an earlier Hint first`,
     ]);
   });
 

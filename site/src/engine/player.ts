@@ -7,32 +7,13 @@
 // the furthest Step reached opens that Step "ahead": it plays, but saves no
 // answers, doesn't move the Student's place and can't make the Lesson done. Every Screen
 // carries the Lesson's progress (answers by Step id), from which it resumes.
-import type { DrawArrowsStep, GoalStep, GradedStep, HintRule, Lesson, Push, RankHint, SceneValue, Step, Structure } from "@astratron/content";
-import { arrowsAct, arrowsStart, arrowsView, type ArrowsState, type Flag } from "@astratron/content/arrows";
+import type { DrawArrowsStep, GoalStep, GradedStep, HintRule, Lesson, RankHint, SceneValue, Step } from "@astratron/content";
+import { arrowsAct, arrowsStart, arrowsView, type ArrowsState } from "@astratron/content/arrows";
+import { reached, type Answer, type ArrowsScreen, type Feedback, type GoalScreen } from "@astratron/content/step-types";
 
-export type Feedback =
-  | { kind: "correct"; text: string }
-  | { kind: "hint"; text: string }
-  /** Draw arrows, second wrong try on a push: that push is placed for the Student ("Here is that push: …"). */
-  | { kind: "shown"; text: string }
-  /** `answer` is the Step's answer: option ids, a number, or an order of item ids. */
-  | { kind: "reveal"; text: string; answer: GradedStep["answer"] };
-
-/**
- * What a Student submits: chosen option ids (Multiple choice, Rotate-and-identify) or picked atom/bond/region ids
- * (Tap-to-identify), a number (Numeric), an order of item ids (Rank) or the control's
- * current value (Manipulate a Scene).
- */
-export type Answer =
-  | { choice: string[] }
-  | { value: number }
-  | { order: string[] }
-  | { setting: number | string }
-  /** Draw arrows: one curved arrow, graded the moment it is drawn, or undoing the last one. */
-  | { push: Push }
-  | { undo: true }
-  /** Goal-state Manipulate: the Scene's state after a move its own rules accepted (the changed states). */
-  | { state: Record<string, SceneValue> };
+// Feedback, what a Student submits (each Step type's own answer shape) and the per-type play
+// screens come from the Step type table (@astratron/content/step-types).
+export type { Answer, ArrowsScreen, Feedback, GoalScreen };
 
 /** `idle`: a goal-state Manipulate Step saw no move for its `idleSeconds` (the player's timer sends it). */
 export type Action = ({ type: "answer" } & Answer) | { type: "continue" } | { type: "back" } | { type: "idle" };
@@ -72,24 +53,6 @@ export interface Screen {
   arrows?: ArrowsScreen;
   /** Goal-state Manipulate Steps: the stage on screen and the Scene's state. */
   goal?: GoalScreen;
-}
-
-export interface GoalScreen {
-  /** Index of the stage being worked. */
-  stage: number;
-  /** The stage's prompt. */
-  prompt: string;
-  /** Every settable state of the Scene, as the Student's moves left it. */
-  state: Record<string, SceneValue>;
-  /** Idle Hints since the last move: 1 shows the idle Hint, 2 or more also nudges the next move. */
-  idle: number;
-}
-
-export interface ArrowsScreen extends ArrowsState {
-  /** The start with every placed push applied: bonds, lone pairs and charges as they are now. */
-  structure: Structure;
-  /** Atoms over their octet or newly short of it (none once done). */
-  flags: Flag[];
 }
 
 /** What the engine needs from a resolved Lesson. */
@@ -192,9 +155,6 @@ function goalStart(step: GoalStep): GoalScreen {
   const first = step.stages[0];
   return { stage: 0, prompt: first?.prompt ?? step.prompt, state: { ...step.scene.state, ...first?.start }, idle: 0 };
 }
-
-const reached = (state: Record<string, SceneValue>, goal: Record<string, SceneValue>) =>
-  Object.entries(goal).every(([k, v]) => (typeof v === "number" ? Math.abs(Number(state[k]) - v) < 1e-9 : state[k] === v));
 
 /**
  * A move on a goal-state Step: the Scene's new state. Reaching the stage's goal shows its Correct

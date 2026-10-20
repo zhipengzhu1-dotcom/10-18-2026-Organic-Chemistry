@@ -1,25 +1,13 @@
 // Keeps answers out of the Lesson page's static HTML (spec story 99). The page
 // gets only what a Student sees before answering; the answer key is a separate
 // built file (/answers/<subject>/<lesson id>.json) that the Step player fetches.
-// A new Step type whose grading needs other fields adds them to ANSWER_FIELDS (content/src/model.ts);
-// content/test/answer-fields.test.ts fails on one named like an answer that isn't there.
-import type { GoalStep, GradedStep, Lesson, Step } from "@astratron/content";
-import { ANSWER_FIELDS } from "@astratron/content/model";
+// What is secret is each Step type's own list (`secret` in content/src/step-types/<type>/rules.ts);
+// content/test/answer-fields.test.ts fails on a field named like an answer that isn't on it.
+import type { Lesson, Step } from "@astratron/content";
+import { joinStep, splitStep, type AnswerKey, type PageStep } from "@astratron/content/step-types";
 
-// The answer fields (the content module's ANSWER_FIELDS: answers, Hints, reveals, Draw-arrows results,
-// goal stages, reveal Scenes, Tap replays, Rank reveal tags), and the numbers cited only in them.
-const SECRET_FIELDS = [...ANSWER_FIELDS, "answerCitations"] as const;
-type Secret = (typeof SECRET_FIELDS)[number];
-type Shown<S> = S extends GradedStep | GoalStep ? Omit<S, Extract<Secret, keyof S>> : S;
-
-/**
- * A Step as the page carries it: graded Steps lose their secrets. A Multiple choice Step
- * says whether one or many choices are picked, which the Student sees before answering.
- */
-export type PageStep = Shown<Step> & { select?: "one" | "many" };
+export type { AnswerKey, PageStep };
 export type PageLesson = Omit<Lesson, "steps"> & { steps: PageStep[] };
-/** Step id → that Step's secret fields. */
-export type AnswerKey = Record<string, Record<string, unknown>>;
 
 export function splitLesson(lesson: Lesson): { page: PageLesson; key: AnswerKey } {
   const { steps, key } = splitSteps(lesson.steps);
@@ -29,29 +17,38 @@ export function splitLesson(lesson: Lesson): { page: PageLesson; key: AnswerKey 
 /** Splits Steps (a Lesson's, or a Practice Set's Problems) into what the page shows and the key, by Step id. */
 export function splitSteps(all: Step[]): { steps: PageStep[]; key: AnswerKey } {
   const key: AnswerKey = {};
-  const steps = all.map((step): PageStep => {
-    if (step.type === "explain") return step;
-    const shown: Record<string, unknown> = { ...step };
-    const secrets: Record<string, unknown> = {};
-    for (const field of SECRET_FIELDS) {
-      if (!(field in step)) continue;
-      secrets[field] = shown[field];
-      delete shown[field];
-    }
-    key[step.id] = secrets;
-    if (step.type === "multiple-choice" || step.type === "rotate-and-identify") shown.select = step.answer.length === 1 ? "one" : "many";
-    return shown as PageStep;
+  const steps = all.map((step) => {
+    const { shown, secrets } = splitStep(step);
+    if (secrets) key[step.id] = secrets;
+    return shown;
   });
   return { steps, key };
 }
 
-/** The playable Lesson. Without the key, graded Steps carry empty secrets and must not be graded. */
+/** The playable Lesson. Without the key, graded Steps carry blank secrets and must not be graded. */
 export function withKey(page: PageLesson, key: AnswerKey = {}): Lesson {
-  const steps = page.steps.map((step): Step => {
-    if (step.type === "explain") return step;
-    if (step.type === "manipulate-goal") return { stages: [], ...step, ...key[step.id] } as GoalStep;
-    const { select: _select, ...shown } = step;
-    return { answer: [], reveal: "", ...shown, ...key[step.id] } as GradedStep;
-  });
-  return { ...page, steps };
+  return { ...page, steps: page.steps.map((step) => joinStep(step, key[step.id])) };
+}
+
+/** Key fields that hold values, not words: answers and Hint conditions (ids, numbers, Scene values), Scenes, citations, structures, goals. */
+const VALUES = new Set([
+  "answer", "tolerance", "results", "revealScene", "replay", "answerCitations",
+  "match", "includes", "misses", "notFirst", "notLast", "before", "above", "from", "to", "start", "goal",
+  // A stage's prompt is a question, not an answer (the first is the Step's own prompt).
+  "prompt",
+]);
+
+/**
+ * The words a key entry carries (Correct lines, Hints, reveals, reveal tags, in-between copy, stage
+ * Hints): what must never be on the page.
+ */
+export function keyText(secrets: Record<string, unknown>): string[] {
+  const out: string[] = [];
+  const walk = (value: unknown) => {
+    if (typeof value === "string") out.push(value);
+    else if (Array.isArray(value)) value.forEach(walk);
+    else if (value && typeof value === "object") for (const [k, v] of Object.entries(value)) if (!VALUES.has(k)) walk(v);
+  };
+  walk(secrets);
+  return out;
 }

@@ -18,7 +18,7 @@ Comment on the ticket when work starts, and again when it merges, naming the mer
 
 ## Shared Step fields and renderer features
 
-Before adding one: read the module's notes in `docs/dev/`, `git fetch origin`, and grep the content schema on the default branch (`content/src/schema.ts`). Reuse what a merged ticket already added.
+Before adding one: read the module's notes in `docs/dev/`, `git fetch origin`, and grep the content schemas on the default branch (`content/src/step-types/`, `content/src/schema.ts`). Reuse what a merged ticket already added.
 
 ## Implementers
 
