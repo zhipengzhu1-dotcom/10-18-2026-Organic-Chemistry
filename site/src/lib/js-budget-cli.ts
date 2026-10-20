@@ -1,8 +1,10 @@
 // `pnpm budget:js`: fails when a built Lesson page's first-load JS is over 200 KB compressed (#88).
-// Run after the site build (CI runs it after the browser tests build site/dist).
+// Run after the site build (CI runs it after the browser tests build site/dist). It also fails when the
+// build carries any of the dev-only Tutor (spec #104).
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { BUDGET_BYTES, firstLoadJs, lessonPages, overBudget } from "./js-budget.ts";
+import { tutorInFiles } from "../tutor/absent.ts";
 
 const dist = fileURLToPath(new URL("../../dist", import.meta.url));
 if (!existsSync(dist)) {
@@ -17,3 +19,10 @@ if (!pages.length || over.length) {
   process.exit(1);
 }
 console.log(`All ${pages.length} Lesson pages load at most ${BUDGET_BYTES / 1024} KB of compressed JS first.`);
+
+const tutor = tutorInFiles(dist);
+if (tutor.length) {
+  console.error(`The dev-only Tutor is in the build:\n  ${tutor.join("\n  ")}`);
+  process.exit(1);
+}
+console.log("No Tutor in site/dist (it is dev only).");

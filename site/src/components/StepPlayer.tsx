@@ -4,7 +4,7 @@
 // Step type (./steps/). The page carries the Lesson without its answers (spec
 // story 99); the answer key is fetched from its own built file, and nothing is
 // checked until it arrives.
-import { useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { act, start, type Action, type LessonProgress, type PlayableLesson, type Screen } from "../engine/player.ts";
 import { answeredCitations } from "@astratron/content/model";
 import { answerOf, secretFields, type ChoiceOf, type StepType } from "@astratron/content/step-types";
@@ -23,6 +23,9 @@ import ExploreIn3D from "../explore/ExploreIn3D.tsx";
 import { viewOf, type ViewProps } from "./steps/index.ts";
 import { html } from "./steps/view.tsx";
 import "./structure.css";
+
+/** The Tutor (spec #104): dev only. Behind `import.meta.env.DEV` the build drops it and its chunk. */
+const Tutor = import.meta.env.DEV ? lazy(() => import("../tutor/TutorPanel.tsx")) : null;
 
 interface Props {
   /** The Lesson without answers, text fields already rendered to HTML at build time. */
@@ -219,6 +222,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         <span className="player-count">
           {practice ? "Problem" : "Step"} {screen.index + 1} of {screen.total}
         </span>
+        {Tutor && (
+          <Suspense fallback={null}>
+            <Tutor lesson={page} screen={screen} draft={draft?.stepId === step.id ? draft.choice : undefined} />
+          </Suspense>
+        )}
       </div>
 
       <main className="player-body" ref={body} tabIndex={-1} aria-label={`${practice ? "Problem" : "Step"} ${screen.index + 1} of ${screen.total}`}>

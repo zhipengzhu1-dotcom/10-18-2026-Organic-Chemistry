@@ -47,3 +47,7 @@ Engine: `site/src/engine/player.ts` (pure, no DOM; its header comment states the
 - When a Step still overflows, shorten or join text, use chip layouts (`opts-chips`, `opts-words`, `opts-pairs`), cap drawings (Draw-arrows start 21vh, Manipulate frame 21dvh), or split the Step. Record the choice in the PR.
 - `global.css` rules sit in `@layer` blocks; `structure.css` is unlayered, so it wins over them.
 - Drawings too wide to keep 48 px hits at 640 px scroll sideways in `.tap-scroll` (only Met-enkephalin today).
+
+## Tutor (dev only)
+
+`StepPlayer` mounts the Tutor panel only under `import.meta.env.DEV`, through `lazy(() => import(...))`, so the build drops it; the chrome counts in the design gates are unchanged. Notes: `docs/dev/tutor.md`.
