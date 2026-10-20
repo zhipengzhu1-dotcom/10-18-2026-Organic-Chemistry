@@ -46,7 +46,7 @@ interface Props {
 
 /**
  * Island-only action: (re)open a Step, replaying saved answers. With no `stepId` it opens
- * where the progress says; with no `saved` it keeps the progress on screen.
+ * where `saved` says, or reopens the Step on screen; with no `saved` it keeps the progress on screen.
  */
 type PlayerAction = Action | { type: "open"; stepId?: string; saved?: LessonProgress };
 
@@ -58,7 +58,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
   const [screen, dispatch] = useReducer(
     (s: Screen, a: PlayerAction) =>
       a.type === "open"
-        ? start(lesson, a.stepId, a.saved ?? s.progress)
+        ? start(lesson, a.stepId ?? (a.saved ? undefined : s.step.id), a.saved ?? s.progress)
         : act(lesson, { ...s, step: lesson.steps[s.index] }, a),
     lesson,
     (l) => start(l),
@@ -119,7 +119,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     let { record, earned } = practice
       ? { record: readRecord(), earned: false }
       : saveLesson(readRecord(), page.id, screen.progress, now);
-    if (key && screen.step.type !== "explain" && "problemId" in screen.step && screen.step.problemId && screen.canContinue) {
+    // A Step opened ahead by a link saves nothing and earns nothing (story 17).
+    if (key && !screen.ahead && screen.step.type !== "explain" && "problemId" in screen.step && screen.step.problemId && screen.canContinue) {
       const result = { tries: screen.tries, correct: screen.feedback?.kind === "correct" };
       const solved = recordProblem(record, screen.step.problemId, result, now);
       record = solved.record;
@@ -484,6 +485,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
               Back to Unit
             </a>
           </div>
+        ) : screen.ahead && screen.canContinue && screen.index + 1 === screen.total ? (
+          // A Step link opened this Wrap ahead of the Student's place: it doesn't finish the Lesson (story 17).
+          <button type="button" className="btn btn-primary btn-block" onClick={() => dispatch({ type: "open", stepId: screen.progress.step })}>
+            Go to my place
+          </button>
         ) : practice && screen.canContinue && screen.index + 1 === screen.total ? (
           <button type="button" className="btn btn-primary btn-block" onClick={() => practice.onFinish(lesson, screen.progress)}>
             See results

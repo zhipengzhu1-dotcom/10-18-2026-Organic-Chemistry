@@ -62,6 +62,21 @@ test("back is allowed, answered Steps stay locked, and there's no skipping ahead
   await expect(page.getByRole("button", { name: "Continue" })).toHaveCount(0);
 });
 
+test("a Step link to the Wrap opens it but doesn't finish the Lesson or earn the Streak (story 17)", async ({ page }) => {
+  const lesson = buildContent(contentRoot).model!.subjects[0].courses[0].units[0].lessons.find((l) => l.url === FINISH)!;
+  const steps = lesson.steps.length;
+  await page.goto(`${FINISH}#${lesson.steps.at(-1)!.id}`);
+  await at(page, steps, steps);
+  await expect(page.getByRole("heading", { name: "Key idea" })).toHaveCount(0);
+  await expect(page.getByText(/Streak: 1 day/)).toHaveCount(0);
+  await page.getByRole("button", { name: "Go to my place" }).click();
+  await at(page, 1, steps);
+
+  await page.goto(UNIT);
+  await expect(page.getByRole("listitem").filter({ hasText: "Why Carbon?" })).not.toContainText("Done");
+  await expect(page.getByRole("img", { name: "Streak: 0 days" })).toBeVisible();
+});
+
 test("finishing a Lesson shows the key idea, a Streak tick, Next Lesson and Back to Unit", async ({ page }) => {
   test.setTimeout(90_000);
   await page.goto(FINISH);
