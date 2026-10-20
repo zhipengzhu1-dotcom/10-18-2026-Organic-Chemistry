@@ -8,7 +8,8 @@ import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { find, sourceNote, type Cited, type CitedData } from "@astratron/content/data";
+import type { Cited, CitedData } from "@astratron/content/data";
+import { citedFor, sourcesSidecar as toSidecar, type Sidecar } from "@astratron/content/sidecar";
 import type { Aspect, WatchSceneManifest } from "../types.ts";
 import { frameSize } from "../frame.ts";
 import { aspectSlug, watchSceneFiles } from "../watch.ts";
@@ -72,87 +73,12 @@ export function manimProps(m: WatchSceneManifest, cited: Record<string, Cited>, 
 /** Seconds [from, to] a ref's number is on screen. */
 export type Timings = Record<string, [number, number][]>;
 
-/**
- * `<scene>-<aspect>.sources.json`, in the same shape as the video module's
- * sidecars for interactive Scenes (#65, video/src/sidecar.ts): the scenes
- * module can't import the video module, so the shape is kept in step here.
- */
-export interface SourcesSidecar {
-  scene: string;
-  title: string;
-  aspect: Aspect;
-  /** The video file this sidecar describes. */
-  file: string;
-  fps: number;
-  duration: number;
-  numbers: {
-    ref: string;
-    label: string;
-    quantity: Cited["quantity"];
-    value: number | string;
-    unit?: string;
-    display: string;
-    full: string;
-    tier?: Cited["tier"];
-    citation: string;
-    via?: string;
-    licence: string;
-    /** `text` when printed on screen; `drawn` when it only shapes the drawing (on screen throughout). */
-    shown: "text" | "drawn";
-    onScreen: { from: number; to: number }[];
-  }[];
-  /** Paste-ready text for a video description. */
-  description: string;
-}
-
-const round = (s: number) => Math.round(s * 1000) / 1000;
-
-/** m:ss, rounded down for a start and up for an end so the range covers the value (as #65 does). */
-function clock(s: number, up: boolean): string {
-  const whole = up ? Math.ceil(s - 1e-9) : Math.floor(s + 1e-9);
-  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
-}
-
-/** Each number the video uses, its citation from the cited-data lookup, and when it is on screen (from the script's timings). */
-export function sourcesSidecar(m: WatchSceneManifest, cited: Record<string, Cited>, aspect: Aspect, timings: Timings): SourcesSidecar {
-  const values = m.data.map((ref) => cited[ref]);
-  const numbers = values.map((v): SourcesSidecar["numbers"][number] => {
-    const ranges = timings[v.ref] ?? [];
-    return {
-      ref: v.ref,
-      label: v.label,
-      quantity: v.quantity,
-      value: v.value,
-      ...(v.unit ? { unit: v.unit } : {}),
-      display: v.display,
-      full: v.full,
-      ...(v.tier ? { tier: v.tier } : {}),
-      citation: v.source.citation,
-      ...(v.source.via ? { via: v.source.via.citation } : {}),
-      licence: v.licence,
-      shown: ranges.length ? "text" : "drawn",
-      onScreen: ranges.length ? ranges.map(([from, to]) => ({ from: round(from), to: round(to) })) : [{ from: 0, to: m.duration }],
-    };
-  });
-  const lines = numbers.flatMap((n) => n.onScreen.map((r) => `${clock(r.from, false)}–${clock(r.to, true)}  ${n.label} ${n.display}`));
-  const note = sourceNote(values).map((p) => (p.lead ? `${p.lead} ${p.text}` : p.text));
-  const description = numbers.length
-    ? [m.title, "", "Numbers on screen:", ...lines, "", "Sources:", ...note].join("\n")
-    : `${m.title}\nThis video shows no cited numbers.`;
+/** `<scene>-<aspect>.sources.json` (@astratron/content/sidecar), with on-screen times from the script's timings. */
+export function sourcesSidecar(m: WatchSceneManifest, cited: Record<string, Cited>, aspect: Aspect, timings: Timings): Sidecar {
   const file = watchSceneFiles(m.id, aspect).video.split("/").pop()!;
-  return { scene: m.id, title: m.title, aspect, file, fps: FPS, duration: m.duration, numbers, description };
-}
-
-/** The cited values a watch-only Scene names, from a Subject's data. */
-export function citedFor(m: WatchSceneManifest, data: CitedData): { cited: Record<string, Cited>; missing: string[] } {
-  const cited: Record<string, Cited> = {};
-  const missing: string[] = [];
-  for (const ref of m.data) {
-    const c = find(data, ref);
-    if (c) cited[ref] = c;
-    else missing.push(ref);
-  }
-  return { cited, missing };
+  const video = { scene: m.id, title: m.title, aspect, file, fps: FPS, duration: m.duration, refs: m.data };
+  const measured = Object.fromEntries(Object.entries(timings).map(([ref, r]) => [ref, r.map(([from, to]) => ({ from, to }))]));
+  return toSidecar(video, cited, measured);
 }
 
 /** sha256 over everything a render depends on: script, fonts, props of each aspect, Manim version, fps. */
@@ -182,11 +108,7 @@ export function checkWatchRenders(manifests: readonly WatchSceneManifest[], data
   const errors: string[] = [];
   for (const m of manifests) {
     const at = (message: string) => errors.push(`scenes/${m.id}: ${message}; run \`pnpm scenes:render ${m.id}\``);
-    const { cited, missing } = citedFor(m, data);
-    if (missing.length) {
-      errors.push(`scenes/${m.id}: cites ${missing.join(", ")}, not in the cited data`);
-      continue;
-    }
+    const cited = citedFor(m.id, m.data, data);
     const recordFile = join(root, recordPath(m.id));
     if (!existsSync(recordFile)) {
       at(`${recordPath(m.id)} is missing`);

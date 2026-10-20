@@ -8,11 +8,11 @@ import { fileURLToPath } from "node:url";
 import { bundle } from "@remotion/bundler";
 import { renderMedia, renderStill, selectComposition } from "@remotion/renderer";
 import { buildContent, contentRoot } from "@astratron/content";
+import { citedFor } from "@astratron/content/sidecar";
 import { sceneRegistry } from "@astratron/scenes";
 import { sceneCatalog } from "@astratron/scenes/check";
 import { sceneManifests } from "@astratron/scenes/manifests";
 import { watchSceneManifests } from "@astratron/scenes/watch";
-import { citedFor } from "./cited.ts";
 import { videoJobs, type VideoJob } from "./jobs.ts";
 import { unknownScenesError } from "./select.ts";
 import { sourcesSidecar } from "./sidecar.ts";
@@ -51,7 +51,7 @@ export async function renderScenes({ mode, scenes = [], sidecarOnly = false, out
 
   for (const job of jobs) {
     const scene = sceneRegistry[job.sceneId]!;
-    const cited = citedFor(model, scene.manifest.data);
+    const cited = citedFor(job.sceneId, scene.manifest.data, ...model.subjects.map((s) => s.data));
     const inputProps: FrameProps = { sceneId: job.sceneId, aspect: job.aspect, cited };
 
     if (needsBrowser) {

@@ -46,7 +46,6 @@ export const renderPaths: readonly (string | RegExp)[] = [
   /^video\/src\/remotion\//,
   "video/src/render.ts",
   "video/src/browser.ts",
-  "video/src/cited.ts",
   "video/src/jobs.ts",
   "video/package.json",
   "site/src/styles/tokens.css",

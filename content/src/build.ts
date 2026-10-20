@@ -219,6 +219,19 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
     for (const problem of problems.values())
       if (problem) resolveStructures(`problem:${problem.id}`, problem, `${slug}/problems/${problem.id}.yaml: `);
 
+    /**
+     * A Scene use resolved (ADR 0002). A Scene citing a ref missing from the
+     * data was already reported by checkStepScene, and no model is built, so
+     * only then does it resolve without its cited values.
+     */
+    const sceneFor = (use: SceneUseFile): SceneUse => {
+      try {
+        return resolveSceneUse(use, options.scenes, data);
+      } catch (e) {
+        if (!errors.length) throw e;
+        return { id: use.id, state: { ...use.state }, cited: {} };
+      }
+    };
     const courses: Course[] = [];
     /** Unit id → the Lesson ids its manifest lists; undefined when a manifest is broken (tags then can't be checked). */
     let listed: Map<string, string[]> | undefined = new Map();
@@ -249,8 +262,7 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
               }
               const number = lesson.onRamp ? 0 : ++coreNumber;
               const lessonRel = `${slug}/lessons/${lesson.id}.yaml`;
-              const scene = (use: SceneUseFile) => resolveSceneUse(use, options.scenes, data);
-              const resolved = resolveLesson(lesson, `${url}/${lesson.slug}`, number, problems, structured, scene, lessonRel, errors);
+              const resolved = resolveLesson(lesson, `${url}/${lesson.slug}`, number, problems, structured, sceneFor, lessonRel, errors);
               for (const step of resolved.steps) {
                 const problemId = "problemId" in step ? step.problemId : undefined;
                 const cited = problemId && problemCitations.get(problemId);
@@ -265,7 +277,6 @@ export function buildContent(root: string, options: BuildOptions = {}): BuildRes
         }),
       });
     }
-    const sceneFor = (use: SceneUseFile) => resolveSceneUse(use, options.scenes, data);
     fillBanks(slug, courses, listed, lessons, problems, structured, { citations: problemCitations, answers: problemAnswers }, sceneFor, errors);
     let hero: HeroPush | undefined;
     if (subject?.hero) {

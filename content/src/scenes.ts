@@ -4,6 +4,7 @@
 import type { LessonFile, ProblemFile } from "./schema.ts";
 import type { SceneCatalog, SceneStateSpec, SceneUse, SceneValue } from "./model.ts";
 import { find, type CitedData } from "./data.ts";
+import { citedFor } from "./sidecar.ts";
 
 type StepFile = LessonFile["steps"][number];
 /** A Step's `scene` as written in the Lesson file. */
@@ -109,14 +110,13 @@ function checkStages(step: GoalStepFile, use: SceneUseFile, catalog: SceneCatalo
 export const reached = (state: Record<string, SceneValue>, goal: Record<string, SceneValue>) =>
   Object.entries(goal).every(([k, v]) => state[k] !== undefined && sameValue(state[k], v));
 
-/** The Scene with every settable state filled (defaults from the catalog) and its cited values attached. */
+/**
+ * The Scene with every settable state filled (defaults from the catalog) and
+ * its cited values attached. Throws on a cited ref that isn't in the data.
+ */
 export function resolveSceneUse(use: SceneUseFile, catalog: SceneCatalog | undefined, data: CitedData): SceneUse {
   const entry = catalog?.[use.id];
   const defaults = Object.fromEntries(Object.entries(entry?.states ?? {}).map(([k, spec]) => [k, spec.default]));
-  const cited: SceneUse["cited"] = {};
-  for (const ref of entry?.data ?? []) {
-    const value = find(data, ref);
-    if (value) cited[ref] = value;
-  }
+  const cited = citedFor(use.id, entry?.data ?? [], data);
   return { id: use.id, state: { ...defaults, ...use.state }, cited, ...(use.still ? { still: true } : {}) };
 }
