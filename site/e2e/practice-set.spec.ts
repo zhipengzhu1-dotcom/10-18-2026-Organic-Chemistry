@@ -91,104 +91,6 @@ function hintThenReveal(wrong: Play, hint: string, right: Play, again?: Play): S
 }
 
 const solvers: Record<string, Solver> = {
-  "u1-sample-p1": {
-    outcome: "first",
-    play: async (page) => {
-      await choose(page, "2");
-      await check(page);
-      await correct(page);
-    },
-  },
-  // Wrong twice: the Hint, then the reveal.
-  "u1-sample-p2": {
-    outcome: "missed",
-    play: async (page) => {
-      await choose(page, "CH₄");
-      await check(page);
-      await expect(status(page)).toContainText("Methane has four C–H bonds");
-      await choose(page, "CH₂O");
-      await check(page);
-      await revealed(page);
-    },
-    retry: async (p) => {
-      await choose(p, "CH₅");
-      await check(p);
-    },
-  },
-  "u1-sample-p3": {
-    outcome: "first",
-    play: async (page) => {
-      await type(page, "6");
-      await check(page);
-      await correct(page);
-    },
-  },
-  // Rank: the start order, twice, is wrong.
-  "u1-sample-p4": {
-    outcome: "missed",
-    play: async (page) => {
-      await check(page);
-      await check(page);
-      await revealed(page);
-    },
-    retry: async (p) => {
-      await move(p, "methane, CH₄", "ArrowDown", 2);
-      await check(p);
-    },
-  },
-  "u1-sample-p5": {
-    outcome: "first",
-    play: async (page) => {
-      await page.getByRole("group", { name: "Tappable atoms and bonds" }).getByRole("button", { name: /^Carbon/ }).click();
-      await check(page);
-      await correct(page);
-    },
-  },
-  "u1-sample-p6": {
-    outcome: "first",
-    play: async (page) => {
-      await choose(page, /^CH₃⁺/);
-      await check(page);
-      await correct(page);
-    },
-  },
-  // Rotate-and-identify 3D (#68), graded like Multiple choice: formaldehyde is flat, ammonia a pyramid.
-  "u1-sample-p7": {
-    outcome: "first",
-    play: async (page) => {
-      await choose(page, "Flat");
-      await check(page);
-      await correct(page);
-    },
-  },
-  "u1-sample-p8": {
-    outcome: "first",
-    play: async (page) => {
-      await choose(page, "A pyramid");
-      await check(page);
-      await correct(page);
-    },
-  },
-  // Draw arrows, graded push by push. Ozone: one wrong push (its Hint), then both right.
-  "u1-sample-arrows-p1": {
-    outcome: "eventually",
-    play: async (page) => {
-      await push(page, "π bond O1=O2", "O2");
-      await expect(status(page)).toContainText("That leaves the end oxygen with only 6 electrons.");
-      await push(page, "lone pair on O3", "O2–O3 bond");
-      await push(page, "π bond O1=O2", "O1");
-      await correct(page);
-    },
-  },
-  // Acetylacetonate (open): right first try.
-  "u1-sample-arrows-p2": {
-    outcome: "first",
-    play: async (page) => {
-      await push(page, "lone pair on C4", "C4–C5 bond");
-      await push(page, "π bond C5=O6", "O6");
-      await correct(page);
-    },
-  },
   // Lesson 1's Check Problems.
   "u1-bond-polarity-rank": {
     outcome: "first",
@@ -694,8 +596,8 @@ test("the Unit page's Practice Set row opens the Practice Set", async ({ page })
 
 test("the Practice Set page's HTML carries no answers", async ({ request }) => {
   const html = await (await request.get(PRACTICE)).text();
-  expect(html).toContain("How many of carbon");
-  for (const secret of ["Two C–H bonds plus a double bond make four.", "Three is the number of bonds.", "Four amides: every C=O along the backbone", '"answer"']) {
+  expect(html).toContain("What is the formal charge on this boron?");
+  for (const secret of ["3 − 0 − 4 = −1. Boron usually makes 3 bonds", "Two groups, the two O's, and no lone pair", "Four amides: every C=O along the backbone", '"answer"']) {
     expect(html).not.toContain(secret);
   }
 });

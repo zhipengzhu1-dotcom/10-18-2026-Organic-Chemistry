@@ -4,7 +4,9 @@ import type { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 import { buildContent, contentRoot } from "@astratron/content";
 
-export const SAMPLE_LESSON = "/organic/orgo-1/structure-bonding/sample-carbons-four-bonds";
+/** Lesson 0 (the On-ramp, 9 Steps, a watch-only Scene first) and Lesson 1 (no video Scenes). */
+export const LESSON_0 = "/organic/orgo-1/structure-bonding/why-carbon";
+export const LESSON_1 = "/organic/orgo-1/structure-bonding/bonds-polarity-formal-charge";
 export const THEMES = ["dark", "light"] as const;
 export type Theme = (typeof THEMES)[number];
 

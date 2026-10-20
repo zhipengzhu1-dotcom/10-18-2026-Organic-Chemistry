@@ -3,7 +3,10 @@
 // the screen; three.js loads only when a 3D view first draws.
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { SAMPLE_LESSON } from "./site.ts";
+
+// Lesson 3 s08 names methane (no inline card); Lesson 4 s14 is a Check Step whose Problem names ketene.
+const L3 = "/organic/orgo-1/structure-bonding/molecules-in-3d";
+const L4 = "/organic/orgo-1/structure-bonding/hybridization-orbitals";
 
 const exploreButton = (page: Page) => page.getByRole("button", { name: "Explore in 3D" });
 const dialog = (page: Page, name: string) => page.getByRole("dialog", { name: `${name} in 3D` });
@@ -21,7 +24,7 @@ const hasThree = (bodies: string[]) => bodies.some((b) => b.includes("MeshMatcap
 
 test("three.js loads only when Explore in 3D is pressed, not with the page", async ({ page }) => {
   const bodies = scripts(page);
-  await page.goto(`${SAMPLE_LESSON}#s02`);
+  await page.goto(`${L3}#s08`);
   await expect(exploreButton(page)).toBeVisible();
   await page.waitForLoadState("networkidle");
   expect(hasThree(bodies)).toBe(false);
@@ -32,7 +35,7 @@ test("three.js loads only when Explore in 3D is pressed, not with the page", asy
 });
 
 test("keyboard: open, switch to true scale, turn, zoom and reset, then Esc closes and focus returns", async ({ page }) => {
-  await page.goto(`${SAMPLE_LESSON}#s02`);
+  await page.goto(`${L3}#s08`);
   await exploreButton(page).focus();
   await page.keyboard.press("Enter");
 
@@ -70,7 +73,7 @@ test("keyboard: open, switch to true scale, turn, zoom and reset, then Esc close
 });
 
 test("the view's Source note names the geometry, colour and radius sources", async ({ page }) => {
-  await page.goto(`${SAMPLE_LESSON}#s02`);
+  await page.goto(`${L3}#s08`);
   await exploreButton(page).click();
   const d = dialog(page, "Methane");
   await d.getByText("ⓘ Where these numbers come from").click();
@@ -82,10 +85,10 @@ test("the view's Source note names the geometry, colour and radius sources", asy
 });
 
 test("a Check Step's Problem that names a molecule offers it, and the open view passes axe", async ({ page }) => {
-  await page.goto(`${SAMPLE_LESSON}#s08`);
-  await expect(page.getByText("Step 8 of 10")).toBeVisible();
+  await page.goto(`${L4}#s14`);
+  await expect(page.getByText("Step 14 of 15")).toBeVisible();
   await exploreButton(page).click();
-  const d = dialog(page, "Ethylene");
+  const d = dialog(page, "Ketene");
   await expect(d.locator("canvas")).toBeVisible();
   await expect(d.locator(".explore-words")).toContainText("C1 is bonded to C2 (double), H1 and H2.");
   const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
@@ -115,7 +118,7 @@ test("a Check Step's Problem that names a molecule offers it, and the open view 
 });
 
 test("a Step that names no molecule has no Explore button", async ({ page }) => {
-  await page.goto(`${SAMPLE_LESSON}#s04`);
-  await expect(page.getByText("Step 4 of 10")).toBeVisible();
+  await page.goto(`${L3}#s04`);
+  await expect(page.getByText("Step 4 of 15")).toBeVisible();
   await expect(exploreButton(page)).toHaveCount(0);
 });

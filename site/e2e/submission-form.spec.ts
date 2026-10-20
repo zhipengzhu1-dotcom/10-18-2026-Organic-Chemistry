@@ -5,7 +5,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const UNIT_1 = "/organic/orgo-1/structure-bonding";
-const LESSON = `${UNIT_1}/sample-carbons-four-bonds`;
+const LESSON = `${UNIT_1}/why-carbon`;
 
 const TURNSTILE_STUB = `
   for (const box of document.querySelectorAll(".cf-turnstile")) {
@@ -40,7 +40,7 @@ test("Suggest a Problem is on the Unit page and the footer, never in a Lesson", 
   await expect(page.getByRole("contentinfo").getByRole("link", { name: "Suggest a Problem" })).toBeVisible();
 
   await page.goto(LESSON);
-  await expect(page.getByText("Step 1 of 10")).toBeVisible();
+  await expect(page.getByText("Step 1 of 9")).toBeVisible();
   await expect(page.getByRole("link", { name: "Suggest a Problem" })).toHaveCount(0);
 });
 
@@ -49,19 +49,19 @@ test("Report a mistake on a Step and on a Problem opens the form pre-filled with
   await page.goto(`${LESSON}#s02`);
   await expect(page.getByRole("link", { name: "Report a mistake" })).toHaveAttribute(
     "href",
-    "/submit?kind=mistake&unit=u1&target=u1-sample%23s02",
+    "/submit?kind=mistake&unit=u1&target=u1-l00%23s02",
   );
   // A Check Step is a Problem: the report names the Problem.
-  await page.goto(`${LESSON}#s08`);
+  await page.goto(`${LESSON}#s07`);
   await expect(page.getByRole("link", { name: "Report a mistake" })).toHaveAttribute(
     "href",
-    "/submit?kind=mistake&unit=u1&target=u1-sample-p1",
+    "/submit?kind=mistake&unit=u1&target=u1-onramp-why-share",
   );
   await page.getByRole("link", { name: "Report a mistake" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Report a mistake");
   await expect(page.getByRole("radio", { name: "Report a mistake" })).toBeChecked();
   await expect(page.getByLabel("Unit", { exact: true })).toHaveValue("u1");
-  await expect(page.getByLabel("Which Step or Problem")).toHaveValue("u1-sample-p1");
+  await expect(page.getByLabel("Which Step or Problem")).toHaveValue("u1-onramp-why-share");
 });
 
 test("the form is text-only, with every field, the licence consent and the personal-info note", async ({ page }) => {
@@ -119,7 +119,7 @@ test("a sent Problem with no email gets the credit confirmation", async ({ page 
 
 test("a sent Mistake report with an email promises one reply, then deletion", async ({ page }) => {
   await offline(page);
-  await page.goto("/submit?kind=mistake&unit=u1&target=u1-sample%23s02");
+  await page.goto("/submit?kind=mistake&unit=u1&target=u1-l00%23s02");
   await page.getByLabel("What's wrong").fill("The reveal names the wrong carbon.");
   await page.getByLabel("Your answer and reasoning").fill("It should be C2.");
   await page.getByLabel("Reply email (optional)").fill("ana@example.org");

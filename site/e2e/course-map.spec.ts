@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { buildContent, contentRoot } from "@astratron/content";
 
 const UNIT_1 = "/organic/orgo-1/structure-bonding";
-const LESSON = `${UNIT_1}/sample-carbons-four-bonds`;
+const LESSON = `${UNIT_1}/bonds-polarity-formal-charge`;
 
 for (const path of ["/", "/organic"]) {
   test(`${path} shows the Course map: each Course a strip of Unit tiles, only Unit 1 enterable`, async ({ page }) => {
@@ -29,26 +29,27 @@ test("Unit 1 is a Level select page whose Lesson rows open their Lessons", async
   await page.goto(UNIT_1);
   await expect(page).toHaveTitle("Structure & Bonding · AstraTron");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Structure & Bonding");
-  const row = page.getByRole("listitem").filter({ hasText: "Sample: Carbon's Four Bonds" });
-  await expect(row).toContainText("10 Steps");
-  await expect(row).toContainText("Multiple choice");
-  await expect(row.getByRole("img", { name: "Hook 1 Step, Build 6 Steps, Check 2 Steps, Wrap 1 Step" })).toBeAttached();
+  const row = page.getByRole("listitem").filter({ hasText: "Bonds, Polarity & Formal Charge" });
+  await expect(row).toContainText("14 Steps");
+  await expect(row).toContainText("Tap to identify");
+  await expect(row.getByRole("img", { name: "Hook 1 Step, Build 9 Steps, Check 3 Steps, Wrap 1 Step" })).toBeAttached();
   await expect(page.getByRole("listitem").last()).toContainText("Practice Set");
 
-  await row.getByRole("link", { name: "Sample: Carbon's Four Bonds" }).click();
+  await row.getByRole("link", { name: "Bonds, Polarity & Formal Charge" }).click();
   await expect(page).toHaveURL(LESSON);
-  await expect(page.getByText("Step 1 of 10")).toBeVisible();
+  await expect(page).toHaveTitle("Bonds, Polarity & Formal Charge · Structure & Bonding · AstraTron");
+  await expect(page.getByText("Step 1 of 14")).toBeVisible();
 });
 
 test("a Step link opens that Step, and the address follows the Step on screen", async ({ page }) => {
-  await page.goto(`${LESSON}#s06`);
-  await expect(page.getByText("Step 6 of 10")).toBeVisible();
-  await page.getByRole("group", { name: "Choices" }).getByRole("button", { name: "4", exact: true }).click();
+  await page.goto(`${LESSON}#s13`);
+  await expect(page.getByText("Step 13 of 14")).toBeVisible();
+  await page.getByRole("group", { name: "Choices" }).getByRole("button").nth(2).click();
   await page.getByRole("button", { name: "Check" }).click();
   await expect(page.getByRole("status")).toContainText("✓ Correct.");
   await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page.getByText("Step 7 of 10")).toBeVisible();
-  await expect(page).toHaveURL(`${LESSON}#s07`);
+  await expect(page.getByText("Step 14 of 14")).toBeVisible();
+  await expect(page).toHaveURL(`${LESSON}#s14`);
 });
 
 test("a Unit that is coming soon has no page", async ({ request }) => {
