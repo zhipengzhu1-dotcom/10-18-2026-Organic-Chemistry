@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 175,
+        "MolecularFormula": "C2H3O2-",
+        "SMILES": "CC(=O)[O-]",
+        "ConnectivitySMILES": "CC(=O)[O-]",
+        "Title": "Acetate"
+      }
+    ]
+  }
+}

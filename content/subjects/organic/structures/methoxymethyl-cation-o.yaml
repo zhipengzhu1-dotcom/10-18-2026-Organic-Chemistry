@@ -1,0 +1,22 @@
+# Laid out by RDKit.js (`pnpm structure`); drawn by the site's own renderer.
+
+id: methoxymethyl-cation-o
+style: full
+smiles: "[CH3:1][O+:2]=[CH2:3]"
+atoms:
+  - { id: a1, el: C, x: -1.299, y: 2.25 }
+  - { id: a2, el: O, x: 0, y: 1.5, charge: 1, lp: 1 }
+  - { id: a3, el: C, x: 0, y: 0 }
+  - { id: a4, el: H, x: -0.549, y: 3.549 }
+  - { id: a5, el: H, x: -2.049, y: 0.951 }
+  - { id: a6, el: H, x: -2.598, y: 3 }
+  - { id: a7, el: H, x: 1.299, y: -0.75 }
+  - { id: a8, el: H, x: -1.299, y: -0.75 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a2, b: a3, order: 2 }
+  - { id: b3, a: a1, b: a4, order: 1 }
+  - { id: b4, a: a1, b: a5, order: 1 }
+  - { id: b5, a: a1, b: a6, order: 1 }
+  - { id: b6, a: a3, b: a7, order: 1 }
+  - { id: b7, a: a3, b: a8, order: 1 }

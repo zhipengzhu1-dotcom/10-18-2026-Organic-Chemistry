@@ -3,7 +3,7 @@
 // The page carries the Lesson without its answers (spec story 99); the answer
 // key is fetched from its own built file, and nothing is checked until it arrives.
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
-import type { NumericStep, RankStep, SceneValue } from "@astratron/content";
+import type { NumericStep, RankStep, SceneValue, Structure } from "@astratron/content";
 import { act, start, type Action, type Answer, type LessonProgress, type PlayableLesson, type Screen } from "../engine/player.ts";
 import { withKey, type AnswerKey, type PageLesson } from "../lib/answer-key.ts";
 import { mistakeTarget, reportMistakeHref } from "../lib/submit-links.ts";
@@ -140,8 +140,15 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
     return () => clearTimeout(timer);
   }, [goalIdle, step.id, screen.goal?.state, screen.goal?.idle, screen.goal?.stage]);
 
+  // Once a Rank Step is answered the cards stand in the right order (the reveal moves them there).
   const order =
-    step.type !== "rank" ? [] : ranked?.stepId === step.id ? ranked.order : step.items.map((item) => item.id);
+    step.type !== "rank"
+      ? []
+      : screen.canContinue && step.answer.length
+        ? step.answer
+        : ranked?.stepId === step.id
+          ? ranked.order
+          : step.items.map((item) => item.id);
 
   // Manipulate a Scene: the control's value; the reveal jumps it to the answer (and a resumed
   // right answer shows it there too).
@@ -226,7 +233,8 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
 
       <main className="player-body">
         {step.type === "explain" ? (
-          <p {...html(step.text)} />
+          // Block Markdown: paragraphs and lists.
+          <div className="explain-text" {...html(step.text)} />
         ) : (
           // A goal-state Manipulate Step shows the prompt of the stage on screen. While a Hook's
           // video plays, its question waits (still read to screen readers), as the spec has it.
@@ -240,7 +248,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         {step.figures && !revealScene && !(hasCard && "molecule" in step && step.molecule?.toggle) && <Figures figures={step.figures} />}
 
         {step.type === "tap-to-identify" && step.alt && <p className="sr">{step.alt}</p>}
-        {step.type === "tap-to-identify" && !revealScene && (
+        {/* A Tap Step whose answer comes from a push (Lesson 7): once answered, the replay takes the drawing's place. */}
+        {step.type === "tap-to-identify" && screen.canContinue && step.replay && (
+          <PushReplayPlayer key={`replay-${step.id}`} start={step.replay.start} pushes={step.replay.pushes} />
+        )}
+        {step.type === "tap-to-identify" && !revealScene && !(screen.canContinue && step.replay) && (
           <StructureTap
             step={step}
             picked={chosen}
@@ -373,7 +385,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
                 <button
                   key={o.id}
                   type="button"
-                  className="opt structure-card"
+                  className={`opt structure-card${pairCard(o.structure.structure) ? " structure-card-wide" : ""}`}
                   aria-pressed={chosen.includes(o.id)}
                   disabled={screen.canContinue}
                   onClick={() => pick(o.id)}
@@ -409,6 +421,7 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
             order={order}
             onChange={(o) => setRanked({ stepId: step.id, order: o })}
             locked={screen.canContinue}
+            tags={screen.canContinue ? step.revealTags : undefined}
           />
         )}
 
@@ -430,8 +443,11 @@ export default function StepPlayer({ lesson: page, keyUrl, exitHref, unitId, nex
         <div className="step-meta">
           {step.aside && <AsideButton key={`aside-${step.id}`} aside={step.aside} stepId={step.id} />}
 
-          {/* Keyed per Step so a new Step opens its Source note collapsed. */}
-          <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} note={step.sourceNote} />
+          {/* Keyed per Step so a new Step opens its Source note collapsed. A reveal Scene that prints numbers
+              (Lesson 7's C–N lengths) would give the answer away in the note, so the note waits for the answer. */}
+          {!(step.type !== "explain" && step.revealScene && Object.keys(step.revealScene.cited).length && !screen.canContinue) && (
+            <SourceNote key={`source-note-${step.id}`} cited={step.citations ?? []} note={step.sourceNote} />
+          )}
 
           <p className="report">
             <a href={reportMistakeHref(unitId, mistakeTarget(lesson.id, step))}>Report a mistake</a>
@@ -522,6 +538,20 @@ function chips(step: { options: { text: string; structure?: unknown }[]; figures
   return undefined;
 }
 
+/** A card that draws two molecules side by side (a "pair" card): such cards get a row each. */
+function pairCard(structure: Structure): boolean {
+  const seen = new Set([structure.atoms[0]?.id]);
+  for (let grew = true; grew; ) {
+    grew = false;
+    for (const b of structure.bonds)
+      if (seen.has(b.a) !== seen.has(b.b)) {
+        seen.add(b.a).add(b.b);
+        grew = true;
+      }
+  }
+  return seen.size < structure.atoms.length;
+}
+
 /** Reads what the Student typed: accepts a comma decimal and a typographic minus; NaN when it isn't a number. */
 function parseNumber(text: string): number {
   const t = text.trim().replace(/−/g, "-").replace(",", ".");
@@ -586,10 +616,12 @@ interface RankCardsProps {
   order: string[];
   onChange: (order: string[]) => void;
   locked: boolean;
+  /** Once answered: each card's note on why it sits there. */
+  tags?: Record<string, string>;
 }
 
 /** Cards in one column: drag a card (mouse or touch), or focus it and press ↑/↓ to move it. */
-function RankCards({ step, order, onChange, locked }: RankCardsProps) {
+function RankCards({ step, order, onChange, locked, tags }: RankCardsProps) {
   const list = useRef<HTMLOListElement>(null);
   const [dragging, setDragging] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
@@ -643,14 +675,17 @@ function RankCards({ step, order, onChange, locked }: RankCardsProps) {
         Drag a card, or focus it and press the up and down arrow keys to move it.
       </p>
       <ol ref={list} className="opts rank" aria-label="Order">
-        {order.map((id, i) => (
+        {order.map((id, i) => {
+          // A structure card (Lesson 7): the drawing is pre-rendered SVG; its text is the screen-reader label.
+          const drawn = step.items.find((item) => item.id === id)?.structure?.drawn;
+          return (
           <li key={id}>
             <button
               type="button"
               data-id={id}
               aria-describedby={`${step.id}-rank-help`}
               aria-disabled={locked}
-              className={dragging === id ? "opt dragging" : "opt"}
+              className={`opt${drawn ? " structure-card" : ""}${dragging === id ? " dragging" : ""}`}
               style={{ width: "100%", touchAction: "none", userSelect: "none", cursor: locked ? "default" : "grab" }}
               onFocus={() => setFocusId(id)}
               onBlur={() => setFocusId((f) => (f === id ? null : f))}
@@ -667,10 +702,26 @@ function RankCards({ step, order, onChange, locked }: RankCardsProps) {
                 e.preventDefault();
                 moveTo(id, to, true);
               }}
-              {...html(text(id))}
-            />
+            >
+              {drawn ? (
+                <>
+                  {/* Named by hidden text, as structure choice cards are (WCAG 2.5.3 Label in Name). */}
+                  <span className="sr">{text(id)}</span>
+                  {/* The card's letter, which Hints name ("`a` gives every atom an octet"). */}
+                  <span className="card-tag" aria-hidden="true">
+                    {id}
+                  </span>
+                  <span aria-hidden="true" {...html(drawn.svg)} />
+                </>
+              ) : (
+                <span {...html(text(id))} />
+              )}
+              {/* Once answered: why the card sits there (Lesson 7). */}
+              {tags?.[id] && <span className="rank-tag"> {tags[id]}</span>}
+            </button>
           </li>
-        ))}
+          );
+        })}
       </ol>
       <p aria-live="polite" className="sr">
         {said}

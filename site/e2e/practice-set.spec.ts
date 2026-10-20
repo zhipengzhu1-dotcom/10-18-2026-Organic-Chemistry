@@ -292,6 +292,71 @@ const solvers: Record<string, { outcome: Outcome; play: (page: Page) => Promise<
       await correct(page);
     },
   },
+  // Lesson 6's Check Problems: Draw arrows (ozone open), structure-card pairs.
+  "u1-res-ozone": {
+    outcome: "first",
+    play: async (page) => {
+      await push(page, "lone pair on O3", "O2–O3 bond");
+      await push(page, "π bond O1=O2", "O1");
+      await correct(page);
+    },
+  },
+  "u1-res-not-resonance": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, /^Allene/);
+      await choose(page, /^Acetone/);
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-res-oxocarbenium": {
+    outcome: "first",
+    play: async (page) => {
+      await push(page, "π bond C4=C5", "C3–C4 bond");
+      await push(page, "lone pair on O6", "C5–O6 bond");
+      await correct(page);
+    },
+  },
+  "u1-res-thiodienyl": {
+    outcome: "first",
+    play: async (page) => {
+      await push(page, "lone pair on C6", "C5–C6 bond");
+      await push(page, "π bond C4=C5", "C2–C4 bond");
+      await push(page, "π bond C2=S3", "S3");
+      await correct(page);
+    },
+  },
+  // Lesson 7's Check Problems; the enamine's reveal replays the two pushes in place of the drawing.
+  "u1-res-major-dimethylaniline": {
+    outcome: "first",
+    play: async (page) => {
+      await choose(page, /^The neutral drawing/);
+      await check(page);
+      await correct(page);
+    },
+  },
+  "u1-res-enamine-site": {
+    outcome: "first",
+    play: async (page) => {
+      await page.getByRole("group", { name: "Tappable atoms and bonds" }).getByRole("button", { name: "Carbon with 2 H: double bond to C.", exact: true }).click();
+      await check(page);
+      await correct(page);
+      await expect(page.getByRole("img", { name: /^Arrows: lone pair on N3/ })).toBeVisible();
+    },
+  },
+  // Wrong order first (the Hint for a 6-electron card on top), then a, b, c, d.
+  "u1-res-rank-methoxyacrylonitrile": {
+    outcome: "eventually",
+    play: async (page) => {
+      await check(page);
+      await expect(status(page)).toContainText("each have a carbon with only 6 electrons");
+      await move(page, "Card a: CH₃–O⁺=CH–CH=C=N⁻. + on oxygen, − on N.", "ArrowUp", 1);
+      await move(page, "Card b: CH₃–O⁺=CH–CH⁻–C≡N. + on oxygen, − on the middle carbon.", "ArrowUp", 2);
+      await check(page);
+      await correct(page);
+    },
+  },
 };
 
 test("the Unit page's Practice Set row opens the Practice Set", async ({ page }) => {
@@ -313,6 +378,11 @@ test("the Practice Set page's HTML carries no answers", async ({ request }) => {
 
 test("a Student plays the Set, sees the summary, retries exactly the missed Problems and earns the Streak", async ({ page }) => {
   test.setTimeout(90_000);
+  // Pin the draw: with 30+ Problems a random Set often holds none of the missed-outcome samples, and the
+  // Retry missed half of this test then has nothing to do. At 0.5 the Set holds u1-sample-p2 and -p4.
+  await page.addInitScript(() => {
+    Math.random = () => 0.5;
+  });
   await page.goto(PRACTICE);
 
   const drawn: string[] = [];

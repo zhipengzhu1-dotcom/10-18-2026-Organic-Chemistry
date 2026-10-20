@@ -14,6 +14,14 @@ import { carbonylNeighbours } from "./carbonyl-neighbours/manifest.ts";
 import { hFill } from "./h-fill/manifest.ts";
 import { ethanolThreeWays } from "./ethanol-three-ways/manifest.ts";
 import { lonePairFill } from "./lone-pair-fill/manifest.ts";
+import { acetateBondLengths } from "./acetate-bond-lengths/manifest.ts";
+import { formaldehydePiShift } from "./formaldehyde-pi-shift/manifest.ts";
+import { threeMoves } from "./three-moves/manifest.ts";
+import { acetateHybrid } from "./acetate-hybrid/manifest.ts";
+import { amideCnLengths } from "./amide-cn-lengths/manifest.ts";
+import { amideHybrid } from "./amide-hybrid/manifest.ts";
+import { ruleLadder } from "./rule-ladder/manifest.ts";
+import { carbonylSites } from "./carbonyl-sites/manifest.ts";
 
 // Lesson 0 (#78)
 import { buildBySharing } from "./build-by-sharing/manifest.ts";
@@ -53,6 +61,16 @@ export const sceneManifests: readonly SceneManifest<any>[] = [
   // Lesson 3 (#81)
   fourDomainFamily,
   dipoleSum,
+  // Lesson 6 (#84)
+  acetateBondLengths,
+  formaldehydePiShift,
+  threeMoves,
+  acetateHybrid,
+  // Lesson 7 (#85)
+  amideCnLengths,
+  amideHybrid,
+  ruleLadder,
+  carbonylSites,
   // Lesson 4 (#82)
   hybridSets,
   methaneUnmixedVsReal,

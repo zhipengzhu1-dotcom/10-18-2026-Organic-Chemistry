@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 5324713,
+        "MolecularFormula": "C4H5NO",
+        "SMILES": "CO/C=C/C#N",
+        "ConnectivitySMILES": "COC=CC#N",
+        "Title": "3-Methoxyacrylonitrile"
+      }
+    ]
+  }
+}

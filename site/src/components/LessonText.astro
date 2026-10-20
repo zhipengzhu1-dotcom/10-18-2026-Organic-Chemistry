@@ -1,0 +1,54 @@
+---
+// A Lesson's Steps as real HTML (spec story 98): each Step's text or prompt and its choices,
+// through the Wrap and the key idea. It takes the page Lesson (splitLesson), so answers, Hints
+// and reveals can't be here. The Lesson page removes it once scripts run; it is what a search
+// engine, or a Student whose scripts fail, reads.
+import type { PageLesson, PageStep } from "../lib/answer-key.ts";
+
+interface Props {
+  lesson: PageLesson;
+}
+const { lesson } = Astro.props;
+const PHASE = { hook: "Hook", build: "Build", check: "Check", wrap: "Wrap" } as const;
+
+/** The choices a Step shows before it is answered, as HTML. */
+function choices(step: PageStep): string[] {
+  switch (step.type) {
+    case "multiple-choice":
+      // A structure card's text is its plain label.
+      return step.options.map((o) => o.text);
+    case "rotate-and-identify":
+      return step.options.map((o) => o.text);
+    case "rank":
+      return step.items.map((i) => i.text);
+    default:
+      return [];
+  }
+}
+---
+
+<article class="lesson-text" id="lesson-text" aria-labelledby="lesson-text-title">
+  <h1 id="lesson-text-title">{lesson.title}</h1>
+  <p>{lesson.goal}</p>
+  {
+    lesson.steps.map((step, i) => (
+      <section aria-label={`Step ${i + 1}`}>
+        <h2 class="label">
+          Step {i + 1} · {PHASE[step.phase]}
+        </h2>
+        {step.type === "explain" ? <p set:html={step.text} /> : <p set:html={step.prompt} />}
+        {choices(step).length > 0 && (
+          <ul>
+            {choices(step).map((c) => (
+              <li set:html={c} />
+            ))}
+          </ul>
+        )}
+      </section>
+    ))
+  }
+  <section aria-label="Key idea">
+    <h2 class="label">Key idea</h2>
+    <p set:html={lesson.keyIdea} />
+  </section>
+</article>

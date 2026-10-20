@@ -17,7 +17,7 @@ const { subject, unit, nextUnitUrl } = Astro.props as PracticePage;
 const { problems } = splitPractice(unit, renderStep);
 ---
 
-<Base title={`Practice Set · ${unit.title} · AstraTron`} description={`Ten Problems covering Unit ${unit.number}.`} bare>
+<Base title={`Practice Set · ${unit.title} · AstraTron`} description={`Ten Problems covering Unit ${unit.number}.`} unitId={unit.id} bare>
   <PracticeSet
     client:load
     unitId={unit.id}

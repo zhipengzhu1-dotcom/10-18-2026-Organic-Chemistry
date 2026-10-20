@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 6375,
+        "MolecularFormula": "CH3NO2",
+        "SMILES": "C[N+](=O)[O-]",
+        "ConnectivitySMILES": "C[N+](=O)[O-]",
+        "Title": "Nitromethane"
+      }
+    ]
+  }
+}

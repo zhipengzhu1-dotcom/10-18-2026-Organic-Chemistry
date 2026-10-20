@@ -20,6 +20,14 @@ import { groupCards } from "./group-cards/manifest.ts";
 import GroupCards from "./group-cards/GroupCards.tsx";
 import { carbonylNeighbours } from "./carbonyl-neighbours/manifest.ts";
 import CarbonylNeighbours from "./carbonyl-neighbours/CarbonylNeighbours.tsx";
+import { acetateBondLengths } from "./acetate-bond-lengths/manifest.ts";
+import AcetateBondLengths from "./acetate-bond-lengths/AcetateBondLengths.tsx";
+import { formaldehydePiShift } from "./formaldehyde-pi-shift/manifest.ts";
+import FormaldehydePiShift from "./formaldehyde-pi-shift/FormaldehydePiShift.tsx";
+import { threeMoves } from "./three-moves/manifest.ts";
+import ThreeMoves from "./three-moves/ThreeMoves.tsx";
+import { acetateHybrid } from "./acetate-hybrid/manifest.ts";
+import AcetateHybrid from "./acetate-hybrid/AcetateHybrid.tsx";
 
 import { hFill } from "./h-fill/manifest.ts";
 import HFill from "./h-fill/HFill.tsx";
@@ -42,6 +50,14 @@ import { fourDomainFamily } from "./four-domain-family/manifest.ts";
 import FourDomainFamily from "./four-domain-family/FourDomainFamily.tsx";
 import { dipoleSum } from "./dipole-sum/manifest.ts";
 import DipoleSum from "./dipole-sum/DipoleSum.tsx";
+import { amideCnLengths } from "./amide-cn-lengths/manifest.ts";
+import AmideCnLengths from "./amide-cn-lengths/AmideCnLengths.tsx";
+import { amideHybrid } from "./amide-hybrid/manifest.ts";
+import AmideHybrid from "./amide-hybrid/AmideHybrid.tsx";
+import { ruleLadder } from "./rule-ladder/manifest.ts";
+import RuleLadder from "./rule-ladder/RuleLadder.tsx";
+import { carbonylSites } from "./carbonyl-sites/manifest.ts";
+import CarbonylSites from "./carbonyl-sites/CarbonylSites.tsx";
 // Lesson 4 (#82)
 import { hybridSets } from "./hybrid-sets/manifest.ts";
 import HybridSets from "./hybrid-sets/HybridSets.tsx";
@@ -73,6 +89,16 @@ export const sceneRegistry: Record<string, RegisteredScene<any>> = {
   [buildBySharing.id]: { manifest: buildBySharing, Component: BuildBySharing },
   [fourDomainFamily.id]: { manifest: fourDomainFamily, Component: FourDomainFamily },
   [dipoleSum.id]: { manifest: dipoleSum, Component: DipoleSum },
+  // Lesson 6 (#84)
+  [acetateBondLengths.id]: { manifest: acetateBondLengths, Component: AcetateBondLengths },
+  [formaldehydePiShift.id]: { manifest: formaldehydePiShift, Component: FormaldehydePiShift },
+  [threeMoves.id]: { manifest: threeMoves, Component: ThreeMoves },
+  [acetateHybrid.id]: { manifest: acetateHybrid, Component: AcetateHybrid },
+  // Lesson 7
+  [amideCnLengths.id]: { manifest: amideCnLengths, Component: AmideCnLengths },
+  [amideHybrid.id]: { manifest: amideHybrid, Component: AmideHybrid },
+  [ruleLadder.id]: { manifest: ruleLadder, Component: RuleLadder },
+  [carbonylSites.id]: { manifest: carbonylSites, Component: CarbonylSites },
   // Lesson 4 (#82)
   [hybridSets.id]: { manifest: hybridSets, Component: HybridSets },
   [piTwist.id]: { manifest: piTwist, Component: PiTwist },
@@ -88,5 +114,6 @@ export { defaultState } from "./state.ts";
 
 export { BOND_PX, drawStructure, type Drawing, type DrawOptions, type Highlight, type Point, type Segment } from "./structure/render.ts";
 export { withHydrogens } from "./structure/hydrogens.ts";
+export { drawContributors, type ContributorsDrawing } from "./structure/contributors.ts";
 
 export { default as PushReplay, describeReplay, replayDuration, PUSH_SECONDS } from "./push-replay/PushReplay.tsx";

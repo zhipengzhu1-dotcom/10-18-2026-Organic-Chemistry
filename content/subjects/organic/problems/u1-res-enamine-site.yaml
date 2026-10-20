@@ -1,0 +1,29 @@
+# Lesson 7 Check Problem (docs/specs/unit-1/lesson-07-which-contributor-wins.md). Our example.
+id: u1-res-enamine-site
+unit: u1
+lesson: u1-l07
+difficulty: 2
+status: approved
+source: Original
+type: tap-to-identify
+prompt: "N,N-Dimethylvinylamine. Picture its second contributor: N's lone pair pushes into the C–N bond. Tap the **carbon** that becomes δ−, then press Check. Just tap, no pushing on this Problem."
+structure: dimethylvinylamine
+tappable: { atoms: [a1, a2, a3, a4, a5] }
+tapOnly:
+  idle: Just tap, no pushing on this Problem.
+  drag: "No pushing here: picture the push, then tap the carbon it makes electron-rich."
+answer: [a1]
+correct: "N's pair makes C=N⁺, so the C=C pair lands on C1: ⁻CH₂–CH=N⁺. C1 is the electron-rich carbon."
+hints:
+  - { includes: [a2], text: "C2 gets the new double bond to N. When N's pair moves in, the C=C pair has to move out. Where does it land?" }
+  - { includes: [a3], text: "N is the source here: it ends up +, not −. The question asks for a carbon." }
+  - { includes: [a4, a5], text: "The methyl carbons have only σ bonds; they're not in the π system." }
+  - text: "Push N's lone pair into the C–N bond, then push the C=C pair onto the end carbon. Which carbon is now −?"
+reveal: "Arrow from nitrogen's lone pair into the C–N bond; arrow from the C=C π bond onto the end carbon. The end carbon is now negative: it is the δ− carbon."
+# The reveal plays push-replay: lone pair on N3 → bond 2–3, π 1–2 → C1.
+replay:
+  start: dimethylvinylamine
+  result: dimethylvinylamine-polar
+  pushes:
+    - { from: a3, to: b2 }
+    - { from: b1, to: a1 }

@@ -130,7 +130,7 @@ for (const theme of THEMES) {
     });
 
     test("every Step and feedback panel of every Lesson passes axe and the type rules", async ({ page }) => {
-      test.setTimeout(180_000); // axe on every Step of every Lesson
+      test.setTimeout(360_000); // axe on every Step of every Lesson (ten real Lessons by #85)
       for (const lesson of lessonPaths(await allPages(page))) {
         await page.goto(lesson);
         await playThrough(page, async (step) => {

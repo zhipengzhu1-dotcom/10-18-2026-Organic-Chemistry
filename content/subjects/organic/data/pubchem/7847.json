@@ -1,0 +1,13 @@
+{
+  "PropertyTable": {
+    "Properties": [
+      {
+        "CID": 7847,
+        "MolecularFormula": "C3H4O",
+        "SMILES": "C=CC=O",
+        "ConnectivitySMILES": "C=CC=O",
+        "Title": "Acrolein"
+      }
+    ]
+  }
+}
