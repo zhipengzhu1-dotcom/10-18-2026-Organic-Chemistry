@@ -295,6 +295,25 @@ describe("the one reply", () => {
     expect(new Set(texts).size).toBe(3);
   });
 
+  it("for an accepted row is handed back by accept, since accepting deletes the row (stories 87/88)", async () => {
+    const id = await add({ display_name: "Ana", reply_email: "ana@example.org" });
+    await moveTo(db, id, "drafted", T0);
+    const reply = await accept(db, id, T0 + DAY);
+    expect(reply).toContain("Ana");
+    expect(reply).toContain("accepted");
+    expect(reply).not.toContain("ana@example.org");
+    expect(await submissions(db)).toEqual([]);
+  });
+
+  it("promises only what v1 does with the address: it goes within 90 days, not now", async () => {
+    const id = await add({ reply_email: "s@example.org" });
+    for (const outcome of ["accepted", "rejected", "screened-out"] as const) {
+      const reply = (await draftReply(db, id, outcome))!;
+      expect(reply).not.toMatch(/delete your address now/);
+      expect(reply).toContain("within 90 days");
+    }
+  });
+
   it("is not drafted when the Student left no address", async () => {
     const id = await add();
     expect(await draftReply(db, id, "rejected")).toBeNull();

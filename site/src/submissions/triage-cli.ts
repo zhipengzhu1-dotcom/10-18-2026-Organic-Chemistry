@@ -14,7 +14,7 @@ const USAGE = `pnpm triage <command>
   draft <id> <problem.yaml>     add a draft Problem file to the Bank; prints the PR branch and body
   fix <id> "<one-line summary>" record a confirmed Mistake report; prints the fix PR branch and body
   reply <id> accepted|rejected|screened-out   print the one reply as text (nothing is sent)
-  accept <id>                   after the PR merged: accept and delete the row
+  accept <id>                   after the PR merged: accept, print the accepted reply, delete the row
   reject <id>                   after the PR was closed unmerged`;
 
 const site = fileURLToPath(new URL("../../", import.meta.url));
@@ -38,7 +38,7 @@ try {
   else if (command === "fix" && arg) print(await draftFix(db, id, { subjectDir, summary: arg, now }));
   else if (command === "reply" && ["accepted", "rejected", "screened-out"].includes(arg))
     print((await draftReply(db, id, arg as Outcome)) ?? "No reply: the Student left no address.");
-  else if (command === "accept") await accept(db, id, now);
+  else if (command === "accept") print((await accept(db, id, now)) ?? "Accepted. No reply: the Student left no address.");
   else if (command === "reject") await reject(db, id, now);
   else throw new Error(USAGE);
 } catch (e) {
