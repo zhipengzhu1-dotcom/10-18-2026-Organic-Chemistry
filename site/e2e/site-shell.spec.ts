@@ -15,7 +15,8 @@ const lessons = units.flatMap((u) => u.lessons.map((lesson) => ({ lesson, unit: 
 const squash = (s: string) => s.replace(/\s+/g, " ").trim();
 /** The longest run of a Markdown text between marks, which survives rendering unchanged. */
 const plain = (markdown: string) =>
-  squash(markdown)
+  // List markers ("1. ", "- ") become list items, not text (Lesson 7's Explain lists).
+  squash(markdown.replace(/^\s*(?:\d+\.|-)\s+/gm, " "))
     .split(/[*_`{}[\]()<>\\]+/)
     .reduce((a, b) => (b.trim().length > a.length ? b.trim() : a), "");
 
