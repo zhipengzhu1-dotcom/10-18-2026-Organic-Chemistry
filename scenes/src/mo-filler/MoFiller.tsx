@@ -69,7 +69,7 @@ export default function MoFiller({ state, aspect }: SceneProps<MoFillerState>) {
               {c.formula}
             </text>
             <Pair x={c.x - size} y={c.y} gap={gap * 0.6} w={size * 3} n={c.electrons} size={size} />
-            <text x={c.x} y={c.y + gap / 2 + size * 0.6} fill={ink} fontSize={size * 0.9} textAnchor="middle" style={{ fontFamily: TEXT_FONT }}>
+            <text x={c.x} y={c.y + gap / 2 + size * 0.6} fill={ink} fontSize={size * 0.9} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
               {`bond order ${fill(c.electrons).order}`}
             </text>
           </g>
