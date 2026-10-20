@@ -2,12 +2,17 @@
 // composition per registered Scene × aspect, from videoJobs, so the renders
 // and the CLI agree. Each frame is the Scene at t = frame / 60 with the state
 // its stored timeline gives at t: no input, nothing else.
-import { AbsoluteFill, Composition, useCurrentFrame, useVideoConfig } from "remotion";
-import type { CSSProperties } from "react";
+import { AbsoluteFill, Composition, continueRender, delayRender, useCurrentFrame, useVideoConfig } from "remotion";
+import { useEffect, useState, type CSSProperties } from "react";
 import type { Cited } from "@astratron/content/data";
 import { sceneRegistry, stateAt, type Aspect } from "@astratron/scenes";
 import { sceneManifests } from "@astratron/scenes/manifests";
 import { videoJobs } from "../jobs.ts";
+// The site's own design tokens (#59, the dark :root block) and self-hosted fonts: numbers and
+// formulas render in JetBrains Mono, as on the site (story 93), never a copied colour or system font.
+import "../../../site/src/styles/tokens.css";
+import "@fontsource-variable/jetbrains-mono/index.css";
+import "@fontsource-variable/space-grotesk/index.css";
 
 export interface FrameProps extends Record<string, unknown> {
   sceneId: string;
@@ -16,24 +21,19 @@ export interface FrameProps extends Record<string, unknown> {
   cited: Record<string, Cited>;
 }
 
-// The dark Arcade Cosmos tokens Scenes read through CSS variables (design tokens, #59).
-const tokens = {
-  "--at-space": "#0d0626",
-  "--at-surface": "#1a0f3d",
-  "--at-line": "#6a4bd1",
-  "--at-ink": "#ffffff",
-  "--at-ink-muted": "#b9a8e8",
-  "--at-electron": "#3ee8ff",
-  "--at-ignite": "#ff9a1f",
-  "--at-boss": "#ff5fd8",
-  "--at-font-text": '"Space Grotesk", system-ui, sans-serif',
-  "--at-font-data": '"JetBrains Mono", ui-monospace, monospace',
-  background: "var(--at-space)",
-  // The site's text font; until its font files are bundled here, the system sans stands in.
-  fontFamily: "var(--at-font-text)",
-} as CSSProperties;
+const frameStyle: CSSProperties = { background: "var(--at-space)", fontFamily: "var(--at-font-text)" };
+
+/** Holds the frame until both fonts are loaded, so no frame is drawn in a fallback face. */
+function useFonts() {
+  const [handle] = useState(() => delayRender("Loading Space Grotesk and JetBrains Mono"));
+  useEffect(() => {
+    const faces = ['400 32px "Space Grotesk Variable"', '700 32px "Space Grotesk Variable"', '400 32px "JetBrains Mono Variable"', '700 32px "JetBrains Mono Variable"'];
+    Promise.all(faces.map((f) => document.fonts.load(f))).then(() => continueRender(handle));
+  }, [handle]);
+}
 
 export function SceneFrame({ sceneId, aspect, cited }: FrameProps) {
+  useFonts();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const scene = sceneRegistry[sceneId];
@@ -41,7 +41,7 @@ export function SceneFrame({ sceneId, aspect, cited }: FrameProps) {
   const t = frame / fps;
   const { Component, manifest } = scene;
   return (
-    <AbsoluteFill style={tokens}>
+    <AbsoluteFill style={frameStyle}>
       <Component t={t} state={stateAt(manifest, t)} aspect={aspect} reducedMotion={false} cited={cited} />
     </AbsoluteFill>
   );
