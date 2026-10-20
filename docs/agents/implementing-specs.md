@@ -7,6 +7,11 @@ Repo rules for `/implement-spec` and `/implement`. The skills under `.claude/ski
 - The default branch is the integration branch. Each finished ticket gets its own PR into it, with `Closes #<n>` in the body.
 - A merger agent merges the PR once CI is green (owner decision 2026-10-20). The owner reviews afterwards.
 
+## Before the first ticket
+
+- Read the spec's user stories against each other and raise any clash with the owner. In #104, story 15 (the Tutor moves a Scene control) collided with story 17 (it never picks for you) on Manipulate Steps, and only the code review caught it.
+- Tickets that touch the same module run one after another, and run in parallel only across modules. Three parallel Tutor tickets on `TutorPanel.tsx` and `tutor.css` meant queued merges, conflicts resolved twice and duplicate CSS blocks.
+
 ## Done means green on GitHub
 
 - A ticket is merged only when GitHub CI is green on the pushed commit: `gh pr checks <pr> --watch` or `gh run watch <run-id>`. Local gates passing is the entry ticket, not the finish line.
@@ -23,4 +28,4 @@ Before adding one: read the module's notes in `docs/dev/`, `git fetch origin`, a
 ## Implementers
 
 - Run `pnpm check` before reporting done. The full suite (`pnpm check:full`: browser tests, video stills) is CI's job; for Scene work, also run `pnpm video stills --changed` (`docs/dev/video.md`).
-- Run git as plain, separate commands from the worktree root.
+- Edit files with Edit and Write. Run each Bash command on its own from the worktree root, with no `cd … &&` in front: the worktree guard refuses chained commands, heredocs, `python3 -` and `sed -i` edits it can't verify, and each refusal costs a retry.

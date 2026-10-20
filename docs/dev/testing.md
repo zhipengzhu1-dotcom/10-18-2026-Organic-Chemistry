@@ -19,6 +19,7 @@ Coverage comes from crawling and playing, so new work is gated automatically onc
 - **Every page linked from `/`** (`allPages`), both themes: axe (WCAG 2.2 AA tags), type rules, 48×48 targets. An unlinked page is not checked: link it or extend `allPages`.
 - **Every Step and feedback state** of every Lesson and of the whole Practice Bank (`playablePaths` pins Practice Sets with `?problems=…`, ten at a time), both themes, and on a 390×844 phone: no page scroll, `.player-body` not overflowing, foot button(s) fully in view. `playThrough` (`site/e2e/site.ts`) answers by first option / typing 1 / Rank as dealt / first Tap target / first push / goal Scene by keyboard. A new Step type fails to compile until `playThrough`'s `answerers` has its entry.
 - Phone fit only sees the `playThrough` path (first choice). Long Hints on other paths are unchecked; look at them by eye.
+- Dev-only code (the Tutor, `site/src/tutor/`) is never built, so none of these rules reach it until #114 lands. Check its type rules by hand.
 
 Rules that bite:
 - Text ≥16px (SVG drawing labels exempt); Pixelify ≥32px; Silkscreen 16px uppercase; any text with a digit, sub/superscript digit or ⁺/⁻ in JetBrains Mono. `md()` wraps numbers and formulas; lone element symbols and plain formulas (`HCl`) are not detected, so write them as code (`` `C` ``). New components that show numbers use `.data` / `font-data`.
@@ -35,3 +36,8 @@ Rules that bite:
 - Query by role and accessible name, not classes; the specs depend on names like "Check", "Continue", "Choices", "Answer", "Back to Unit".
 - Turnstile and `/api/submit` are stubbed in the browser (`astro preview` serves no Functions); see `docs/dev/submissions.md`.
 - First run on a machine: `pnpm exec playwright install chromium`.
+
+## Hand checks
+
+- Check a page under `pnpm dev` by driving Playwright's headless Chromium from a script in your scratchpad. The Chrome extension can't reach a worktree's dev server ("Frame with ID 0 is showing error page").
+- Real Safari and screen-reader checks are the owner's: list them in the PR as not done.
