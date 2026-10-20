@@ -11,6 +11,19 @@ export const line = "var(--at-line, #6b6890)";
 export const boss = "var(--at-boss, #ff4fd8)";
 export const panel = "var(--at-panel, #1b1838)";
 
+/**
+ * One electron as a half-arrow, as MO diagrams draw them: ↑ (spin up) or ↓, the barb on one side
+ * only. `h` is its height; `w` its stroke (default in proportion to `h`).
+ */
+export function HalfArrow({ x, y, h, up, w = h * 0.09 }: { x: number; y: number; h: number; up: boolean; w?: number }) {
+  const top = y - h / 2;
+  const bottom = y + h / 2;
+  const tip = up ? top : bottom;
+  const back = up ? h * 0.32 : -h * 0.32;
+  const d = `M ${x} ${bottom} L ${x} ${top} M ${x} ${tip} L ${x - h * 0.22} ${tip + back}`;
+  return <path className={`electron ${up ? "up" : "down"}`} d={d} stroke={electron} strokeWidth={w} strokeLinecap="round" fill="none" />;
+}
+
 /** Element symbols, formulas and numbers are set in the data face (design rule); body words in the text face. */
 export const DATA_FONT = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
 export const TEXT_FONT = "var(--at-font-text, 'Space Grotesk', system-ui, sans-serif)";

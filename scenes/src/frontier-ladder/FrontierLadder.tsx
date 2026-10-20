@@ -1,19 +1,11 @@
 // frontier-ladder: a pure function of (state, cited); see manifest.ts. Static: nothing depends on t.
 import { frameSize, safeArea } from "../frame.ts";
 import type { SceneProps } from "../types.ts";
-import { DATA_FONT, TEXT_FONT, boss, electron, ink, line, muted } from "../dots/dots.tsx";
+import { DATA_FONT, HalfArrow, TEXT_FONT, boss, electron, ink, line, muted } from "../dots/dots.tsx";
 import { FLOWS, ladders, type FrontierLadderState, type Ladder } from "./manifest.ts";
 
 /** The Scene frame's own ground (both themes), behind a label that sits over an arrow. */
 const surface = "var(--at-surface, #1b1838)";
-
-function HalfArrow({ x, y, h, up, w }: { x: number; y: number; h: number; up: boolean; w: number }) {
-  const top = y - h / 2;
-  const bottom = y + h / 2;
-  const tip = up ? top : bottom;
-  const back = up ? h * 0.32 : -h * 0.32;
-  return <path className="electron" d={`M ${x} ${bottom} L ${x} ${top} M ${x} ${tip} L ${x - h * 0.24} ${tip + back}`} stroke={electron} strokeWidth={w} strokeLinecap="round" fill="none" />;
-}
 
 /** A vertical bracket from y1 to y2 at x, ticks pointing toward `side` (−1 left, +1 right); its label runs up the far side. */
 function Bracket({ x, y1, y2, side, label, size, dashed = false, colour = muted, pill = false }: { x: number; y1: number; y2: number; side: number; label: string; size: number; dashed?: boolean; colour?: string; pill?: boolean }) {
