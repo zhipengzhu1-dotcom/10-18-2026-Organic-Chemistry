@@ -42,6 +42,11 @@ ethanol:
   as-left-drawing: { plane: [3, 1, 0], up: 3, front: 8 }
   # Its right drawing: F (2) upper right and H (8) down, both in the page.
   as-right-drawing: { plane: [8, 1, 2], up: 2, rotate: [0, 0, -58] }
+  # Practice Problem u1-3d-perspective-b (PS1 Q2b, #87), left drawing: H (8) up and F (2) left in the page;
+  # CH₂CH₃ (3) toward you, so CH₃ (0) goes away, both in the gap lower right.
+  ps1-q2b-left: { plane: [8, 1, 2], up: 8, front: 3 }
+  # Its right drawing: H lower left and CH₂CH₃ lower right, both in the page, CH₃ toward you (F then goes away).
+  ps1-q2b-right: { plane: [8, 1, 3], up: 8, front: 0, rotate: [0, 0, 125] }
 
 hydrogen-b3lyp:
   # Lesson 8 s03: side-on, the H–H axis level across the screen (the file lays it along z).

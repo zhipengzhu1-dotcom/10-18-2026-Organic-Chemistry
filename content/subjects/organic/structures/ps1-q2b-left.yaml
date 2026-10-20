@@ -1,0 +1,21 @@
+# Practice Problem u1-3d-perspective-b (#87, MIT 5.12 PS1 Q2b) left drawing: H up and F left in the page; CH₃ on a
+# dash and CH₂CH₃ on a wedge, side by side in the gap lower right. Drawn by hand: a line lies in the page, a wedge
+# comes toward you, a hash goes away. Coordinates as drawn: x right, y down.
+
+id: ps1-q2b-left
+style: full
+smiles: "C[C@@H](F)CC"
+source: "PubChem CID 54429975"
+atoms:
+  - { id: a1, el: "C", x: 0, y: 0 }
+  - { id: a2, el: "H", x: 0, y: -1.5 }
+  - { id: a3, el: "F", x: -1.45, y: 0.35 }
+  - { id: a4, el: "C", x: 0.45, y: 1.45, h: 3 }
+  - { id: a5, el: "C", x: 1.4, y: 0.6, h: 2 }
+  - { id: a6, el: "C", x: 2.75, y: 1.25, h: 3 }
+bonds:
+  - { id: b1, a: a1, b: a2, order: 1 }
+  - { id: b2, a: a1, b: a3, order: 1 }
+  - { id: b3, a: a1, b: a4, order: 1, stereo: hash }
+  - { id: b4, a: a1, b: a5, order: 1, stereo: wedge }
+  - { id: b5, a: a5, b: a6, order: 1 }

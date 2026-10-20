@@ -58,10 +58,10 @@ const oxygenThreeBonds = example("oxygen-three-bonds", "O", 1, [LOOSE_SINGLE, LO
 );
 
 // Practice Problems (#87): the PS1 Q1 bromine and boron fragments.
-const bromineTwoBonds = example("bromine-two-bonds", "Br", 2, [LOOSE_SINGLE, LOOSE_SINGLE], 0, (c) =>
+const bromineTwoBonds = example("bromine-two-bonds", "Br", 2, [LOOSE_SINGLE, LOOSE_SINGLE], 0, (c) => // cited-data: ok, counts of lone pairs and bonds
   `Bromine: ${c.valence} valence electrons, minus ${c.lonePairElectrons} in two lone pairs, minus ${c.bonds} bonds, equals ${signedWords(c.charge)}.`,
 );
-const boronFourBonds = example("boron-four-bonds", "B", 0, [LOOSE_SINGLE, LOOSE_SINGLE, LOOSE_DOUBLE], Math.PI / 2, (c) =>
+const boronFourBonds = example("boron-four-bonds", "B", 0, [LOOSE_SINGLE, LOOSE_SINGLE, LOOSE_DOUBLE], Math.PI / 2, (c) => // cited-data: ok, counts of lone pairs and bonds
   `Boron: ${c.valence} valence electrons, no lone pairs, ${c.bonds} bonds. ${c.valence} minus ${c.lonePairElectrons} minus ${c.bonds} equals ${signedWords(c.charge)}.`,
 );
 

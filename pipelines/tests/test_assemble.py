@@ -61,6 +61,27 @@ def test_a_page_whose_cartesians_disagree_with_its_parameters_is_rebuilt_from_th
     assert inconsistencies(atoms, ketene.internals) == []
 
 
+def test_a_symmetric_molecule_is_rebuilt_with_every_equivalent_bond_and_angle_at_its_listed_value():
+    # CCCBDB lists one C–Cl, one Cl–C–Cl and one H–C–Cl for chloroform; by symmetry they hold for all three.
+    # A fit to the listed atoms alone left the other two C–Cl bonds at 1.743 and 1.776 Å (#87).
+    from geometry.assemble import measure
+    import numpy as np
+
+    f = experimental(BY_ID["chloroform"], page("67663"))
+    assert "rebuilt" in f["provenance"] and "symmetry" in f["provenance"]["rebuilt"]
+    xyz = np.array([a[1:] for a in f["atoms"]["list"]], dtype=float)
+    symbols = [a[0] for a in f["atoms"]["list"]]
+    c, h = symbols.index("C"), symbols.index("H")
+    cls = [i for i, s in enumerate(symbols) if s == "Cl"]
+    v = {k: f["values"][k]["value"] for k in ("r.CCl", "a.ClCCl", "a.HCCl")}
+    for i in cls:
+        assert abs(measure(xyz, (c, i)) - v["r.CCl"]) < 0.001
+        assert abs(measure(xyz, (h, c, i)) - v["a.HCCl"]) < 0.1
+    for k, i in enumerate(cls):
+        for j in cls[k + 1:]:
+            assert abs(measure(xyz, (i, c, j)) - v["a.ClCCl"]) < 0.1
+
+
 def test_consistent_pages_are_used_as_they_are():
     f = experimental(BY_ID["methane"], page("74828"))
     assert "rebuilt" not in f["provenance"]

@@ -59,6 +59,27 @@ describe("en-strip: the δ− Problem's elements", () => {
   });
 });
 
+describe("dipole-sum: chloroform, HCN and methane (u1-3d-polar-hcn reveal)", () => {
+  it("reads the spec's four sentences once added: chloroform and HCN polar, BF₃ and methane net zero", () => {
+    expect(say("dipole-sum", { molecule: "polar-hcn", added: 1 })).toBe(
+      [
+        "Chloroform: tetrahedral. Three C–Cl arrows point toward the chlorines and a small C–H arrow points toward carbon; added, they leave a net arrow toward the chlorines. Polar.",
+        "Boron trifluoride: flat. Three equal arrows; they cancel, net zero. Nonpolar.",
+        "Hydrogen cyanide: a straight line. The C–H arrow points toward carbon and the C≡N arrow toward nitrogen, the same direction; added, a net arrow toward nitrogen. Polar.",
+        "Methane: tetrahedral. Four equal arrows; they cancel, net zero. Nonpolar.",
+      ].join(" "),
+    );
+  });
+
+  it("works each answer out from the cited geometry and electronegativities", () => {
+    for (const [molecule, polar] of [["chcl3", true], ["hcn", true], ["ch4", false]] as const) {
+      const text = say("dipole-sum", { molecule, added: 1 });
+      expect(text).toContain(polar ? "Polar." : "Nonpolar.");
+    }
+    for (const aspect of ["16:9", "9:16"] as const) expect(shows("dipole-sum", { molecule: "polar-hcn", added: 1 }, undefined, aspect)).toContain("net: zero");
+  });
+});
+
 describe("h-fill: furan (u1-draw-furan-h reveal)", () => {
   it("fills each of furan's four carbons with one H, ending at 4, with the spec's screen-reader text", () => {
     for (const aspect of ["16:9", "9:16"] as const) expect(shows("h-fill", { molecule: "furan" }, undefined, aspect)).toContain("H: 4");

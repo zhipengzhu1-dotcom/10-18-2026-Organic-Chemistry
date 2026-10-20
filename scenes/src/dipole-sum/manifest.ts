@@ -21,11 +21,44 @@ export const SETS: Record<string, string[]> = {
   bf3: ["bf3"],
   "water-co2": ["water", "co2"],
   "polar-check": ["water", "co2", "ccl4", "ch2cl2", "nh3"],
+  // Practice Problem u1-3d-polar-hcn (#87): its four cards in order.
+  chcl3: ["chcl3"],
+  hcn: ["hcn"],
+  ch4: ["methane"],
+  "polar-hcn": ["chcl3", "bf3", "hcn", "methane"],
 };
 
-export const FORMULA: Record<string, string> = { water: "H₂O", co2: "CO₂", ccl4: "CCl₄", ch2cl2: "CH₂Cl₂", nh3: "NH₃", bf3: "BF₃" };
+export const FORMULA: Record<string, string> = {
+  water: "H₂O",
+  co2: "CO₂",
+  ccl4: "CCl₄",
+  ch2cl2: "CH₂Cl₂",
+  nh3: "NH₃",
+  bf3: "BF₃",
+  chcl3: "CHCl₃",
+  hcn: "HCN",
+  methane: "CH₄",
+};
 /** Where the net arrow points, in words. */
-const TOWARD: Record<string, string> = { water: "oxygen", co2: "", ccl4: "", ch2cl2: "the chlorines", nh3: "nitrogen", bf3: "" };
+const TOWARD: Record<string, string> = {
+  water: "oxygen",
+  co2: "",
+  ccl4: "",
+  ch2cl2: "the chlorines",
+  nh3: "nitrogen",
+  bf3: "",
+  chcl3: "the chlorines",
+  hcn: "nitrogen",
+  methane: "",
+};
+/** The Practice Problems spec's sentences for u1-3d-polar-hcn's reveal, once added (used only when the sum agrees). */
+const POLAR_HCN: Record<string, string> = {
+  chcl3:
+    "Chloroform: tetrahedral. Three C–Cl arrows point toward the chlorines and a small C–H arrow points toward carbon; added, they leave a net arrow toward the chlorines. Polar.",
+  bf3: "Boron trifluoride: flat. Three equal arrows; they cancel, net zero. Nonpolar.",
+  hcn: "Hydrogen cyanide: a straight line. The C–H arrow points toward carbon and the C≡N arrow toward nitrogen, the same direction; added, a net arrow toward nitrogen. Polar.",
+  methane: "Methane: tetrahedral. Four equal arrows; they cancel, net zero. Nonpolar.",
+};
 const ELEMENTS = ["H", "B", "C", "N", "O", "F", "Cl"];
 export const enRef = (el: string) => `electronegativity-pauling/${el}`;
 const COUNT = ["no", "one", "two", "three", "four"];
@@ -51,8 +84,9 @@ export function summed(key: string, cited: Record<string, Cited>): Summed {
 }
 
 /** The spec's own sentences for s11 (water, CO₂); a general one for the rest. */
-function sentence(key: string, s: Summed, added: boolean, many: boolean): string {
+function sentence(key: string, s: Summed, added: boolean, many: boolean, set?: string): string {
   const n = s.arrows.length;
+  if (set === "polar-hcn" && added && POLAR_HCN[key]?.endsWith(s.net.zero ? " Nonpolar." : " Polar.")) return POLAR_HCN[key];
   if (!many && key === "water")
     return added
       ? "Water, bent. Two bond-dipole arrows point from each hydrogen toward oxygen. Added tip to tail, they give one net arrow pointing toward oxygen: water is polar."
@@ -83,6 +117,10 @@ export const dipoleSum: SceneManifest<DipoleSumState> = {
         { id: "bf3", label: "BF₃" },
         { id: "water-co2", label: "H₂O and CO₂" },
         { id: "polar-check", label: "H₂O, CO₂, CCl₄, CH₂Cl₂ and NH₃" },
+        { id: "chcl3", label: "CHCl₃" },
+        { id: "hcn", label: "HCN" },
+        { id: "ch4", label: "CH₄" },
+        { id: "polar-hcn", label: "CHCl₃, BF₃, HCN and CH₄" },
       ],
       default: "water",
     },
@@ -95,7 +133,7 @@ export const dipoleSum: SceneManifest<DipoleSumState> = {
     if (!keys.every((k) => shapeRefs(k).every((ref) => cited[ref])))
       return `${keys.map((k) => FORMULA[k]).join(", ")}: a bond-dipole arrow on each polar bond.`;
     const many = keys.length > 1 && molecule === "polar-check";
-    const text = keys.map((k) => sentence(k, summed(k, cited), added >= 1, many)).join(" ");
+    const text = keys.map((k) => sentence(k, summed(k, cited), added >= 1, many, molecule)).join(" ");
     return added >= 1 ? text : `${text} Press Add to put them tip to tail.`;
   },
   reducedMotion: "Opens paused on the final frame: with Add, the arrows already tip to tail and the result in words; nothing slides.",
