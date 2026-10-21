@@ -1,7 +1,7 @@
 // group-spotlight: a pure function of (t, state); see manifest.ts.
 import { frameSize, safeArea, type Box } from "../frame.ts";
 import { fgStructures } from "../functional-groups/structures.ts";
-import { centreOf, CYAN, drawingSize, fitScale, FONT_DATA, FONT_TEXT, HALO, INK, Molecule, MUTED, placeMolecule, type Placed } from "../functional-groups/Molecule.tsx";
+import { centreOf, BLUE, drawingSize, fitScale, FONT_DATA, FONT_HAND, HALO, INK, Molecule, MUTED, placeMolecule, type Placed } from "../functional-groups/Molecule.tsx";
 import type { Aspect, SceneProps } from "../types.ts";
 import { litAmount, views, type SpotlightState } from "./manifest.ts";
 
@@ -111,11 +111,11 @@ export default function GroupSpotlight({ t, state, aspect, reducedMotion }: Scen
           const region = view.molecules[c.molecule].regions[c.region];
           const amount = amounts[c.molecule][c.region];
           if (amount <= 0) return null;
-          const tone = region.tone === "lit" ? CYAN : MUTED;
+          const tone = region.tone === "lit" ? BLUE : MUTED;
           return (
             <g key={`chip-${c.molecule}-${c.region}`} opacity={amount}>
               <rect x={c.x} y={c.y} width={c.w} height={c.h} rx={12} fill="var(--at-paper, #ffffff)" fillOpacity={0.88} stroke={tone} strokeWidth={3} />
-              <text x={c.x + c.w / 2} y={c.y + CHIP_PAD + NAME_PX * 0.8} textAnchor="middle" fontSize={NAME_PX} fontWeight={700} fill={INK} fontFamily={FONT_TEXT}>
+              <text x={c.x + c.w / 2} y={c.y + CHIP_PAD + NAME_PX * 0.8} textAnchor="middle" fontSize={NAME_PX * 1.1} fill={INK} fontFamily={FONT_HAND}>
                 {region.label}
               </text>
               <text x={c.x + c.w / 2} y={c.y + CHIP_PAD + NAME_PX + PIECE_PX * 0.85} textAnchor="middle" fontSize={PIECE_PX} fill={tone} fontFamily={FONT_DATA}>

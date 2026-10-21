@@ -1,10 +1,11 @@
 """star-forge: Lesson 0's watch-only intro (s01), Manim CE 0.22.0, plain text (no LaTeX).
 
 The owner-approved prototype cut 2 (prototypes/lesson-00/star-forge-manim/ on branch
-prototype/lesson-00-why-carbon), ported to the pipeline: silent, 60 fps, about 13 s,
-the last frame is the poster. Six beats: star core; three helium-4 drift in; they fuse
-into carbon-12 as "3 4He -> 12C" writes on; pull back, the carbon drifts into a cell;
-the nucleus morphs into a C with four valence dots; the star-line card.
+prototype/lesson-00-why-carbon), ported to the pipeline and redrawn on Paper Notebook (#123):
+silent, 60 fps, about 13 s, the last frame is the poster. Six beats: a hand-drawn star; three
+helium-4 drift in; they fuse into carbon-12 as "3 4He -> 12C" writes on; pull back, the carbon
+drifts into a cell; the nucleus morphs into a C with four valence dots; the star-line card.
+The Arcade nebula and starfield are now ruled paper with doodles around the edges.
 
 Every number and colour comes from the props file the render command writes
 (SCENE_PROPS, built from the cited-data lookup and the design tokens); the mass
@@ -15,86 +16,52 @@ sidecar. Render with `pnpm scenes:render star-forge`, never by hand.
 
 import json
 import os
+import sys
 from pathlib import Path
 
 import numpy as np
 from manim import *  # noqa: F403  (idiomatic Manim)
 from manim.utils.rate_functions import ease_in_out_sine
 
-HERE = Path(__file__).resolve().parent
-PROPS = json.loads(Path(os.environ["SCENE_PROPS"]).read_text())
-PORTRAIT = PROPS["aspect"] == "9x16"
-VALUES = PROPS["values"]
-TEXT = PROPS["text"]
-
-# ---- config per aspect (the frame is 8 units across its short side) -------
-config.pixel_width, config.pixel_height = PROPS["width"], PROPS["height"]
-if PORTRAIT:
-    config.frame_width = 8.0
-    config.frame_height = 8.0 * PROPS["height"] / PROPS["width"]
-else:
-    config.frame_height = 8.0
-    config.frame_width = 8.0 * PROPS["width"] / PROPS["height"]
-config.frame_rate = PROPS["fps"]
-
-# ---- design tokens ----------------------------------------------------------
-PAL = {k: ManimColor(v) for k, v in PROPS["palette"].items()}
-SPACE, INK, MUTED = PAL["at-space"], PAL["at-ink"], PAL["at-ink-muted"]
-CYAN, ORANGE = PAL["at-electron"], PAL["at-ignite"]
-MAGENTA, VIOLET, BLUE_N = PAL["at-neb-1"], PAL["at-neb-2"], PAL["at-neb-3"]
-config.background_color = SPACE
-MONO = "JetBrains Mono"
-SANS = "Space Grotesk"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from paper import *  # noqa: E402, F403  (after Manim: the palette names win)
 
 # ---- cited numbers ------------------------------------------------------------
 HE_Z, HE_A = int(VALUES["nuclides/He-4.Z"]), int(VALUES["nuclides/He-4.A"])
 C_Z, C_A = int(VALUES["nuclides/C-12.Z"]), int(VALUES["nuclides/C-12.A"])
 N_HE = C_A // HE_A  # helium nuclei per carbon nucleus
 
-RNG = np.random.default_rng(12)
-
 
 # ---- building blocks -------------------------------------------------------
-def glow(color, radius, layers=18, peak=0.6, inner=None):
-    """Radial glow from stacked translucent discs (Cairo has no blur)."""
-    discs = VGroup()
-    for i in range(layers):
-        f = 1 - i / layers  # 1 -> small
-        c = color if inner is None else interpolate_color(inner, color, f**0.8)
-        discs.add(
-            Circle(radius=radius * f, stroke_width=0)
-            .set_fill(c, opacity=peak / layers * (1.6 if i > layers * 0.7 else 1))
-        )
-    return discs
+def star(radius):
+    """A hand-drawn star: an orange marker disc with a yellow middle, a pen outline and rays."""
+    disc = marked(Circle(radius=radius), ORANGE_FILL, pen=ORANGE, width=PEN * 1.2)
+    middle = Circle(radius=radius * 0.55).set_stroke(width=0).set_fill(YELLOW_FILL, opacity=1).shift(MARKER_SHIFT)
+    rays = VGroup()
+    for k in range(12):
+        a = k * TAU / 12 + 0.13
+        u = np.array([np.cos(a), np.sin(a), 0])
+        r0, r1 = radius * 1.12, radius * (1.42 if k % 2 else 1.3)
+        rays.add(Line(u * r0, u * r1, stroke_color=ORANGE, stroke_width=PEN * 1.2))
+    return VGroup(disc[0], middle, disc[1], rays)
 
 
-def nebula(color, w, h, peak=0.16):
-    return glow(color, 1.0, layers=32, peak=peak).stretch(w, 0).stretch(h, 1)
-
-
-def starfield(w, h, n):
-    dots = VGroup()
-    for _ in range(n):
-        x, y = RNG.uniform(-w / 2, w / 2), RNG.uniform(-h / 2, h / 2)
-        r = RNG.choice([0.008, 0.012, 0.018, 0.026], p=[0.4, 0.3, 0.2, 0.1])
-        col = RNG.choice([INK, MUTED, CYAN], p=[0.7, 0.2, 0.1])
-        dots.add(Dot([x, y, 0], radius=r, color=col).set_opacity(RNG.uniform(0.35, 0.95)))
-    return dots
+MARKER_SHIFT = np.array([0.05, -0.04, 0])
 
 
 def nucleon(color, r=0.075):
-    return Dot(radius=r, color=color).set_stroke(SPACE, width=1.2, opacity=0.6)
+    return Dot(radius=r).set_fill(color, opacity=1).set_stroke(INK, width=1.6)
 
 
 def nucleon_colours(z, a):
-    """Protons (cyan) and neutrons (white), alternating while both remain."""
+    """Protons (blue marker) and neutrons (paper), alternating while both remain; every one inked round."""
     p, n, cols = z, a - z, []
     while p or n:
         if p:
-            cols.append(CYAN)
+            cols.append(BLUE_FILL)
             p -= 1
         if n:
-            cols.append(INK)
+            cols.append(PAPER)
             n -= 1
     return cols
 
@@ -113,9 +80,14 @@ def nucleus(z, a, r=0.075):
     return VGroup(*[nucleon(c, r=r).move_to(p) for c, p in zip(nucleon_colours(z, a), cluster_points(a))])
 
 
+def ring(radius):
+    """A blue pen ring round a nucleus (the Arcade glow, as the notebook draws it)."""
+    return Circle(radius=radius, stroke_color=BLUE, stroke_width=PEN * 0.7)
+
+
 def helium():
-    """One helium nucleus with a soft cyan glow."""
-    return VGroup(glow(CYAN, 0.42, layers=12, peak=0.55), nucleus(HE_Z, HE_A))
+    """One helium nucleus inside its ring."""
+    return VGroup(ring(0.3), nucleus(HE_Z, HE_A))
 
 
 def isotope(mass, sym, size, weight=MEDIUM):
@@ -129,7 +101,7 @@ def isotope(mass, sym, size, weight=MEDIUM):
 def equation(size):
     n = Text(str(N_HE), font=MONO, font_size=size, color=INK)
     he = isotope(HE_A, "He", size, weight=NORMAL)
-    arrow = Text("→", font=MONO, font_size=size, color=CYAN)
+    arrow = Text("→", font=MONO, font_size=size, color=BLUE)
     c = isotope(C_A, "C", size, weight=NORMAL)
     parts = VGroup(n, he, arrow, c).arrange(RIGHT, buff=0.32 * size / 56)
     for p in (he, c):
@@ -138,11 +110,27 @@ def equation(size):
     return parts
 
 
+def backdrop(P):
+    """Ruled paper wide enough for the camera's travel, with doodles in the corners the story leaves free."""
+    lo = np.minimum(ORIGIN, P) - np.array([FW, FH, 0]) * 0.75
+    hi = np.maximum(ORIGIN, P) + np.array([FW, FH, 0]) * 0.75
+    paper = ruled(hi[0] - lo[0], hi[1] - lo[1], (lo + hi) / 2, margin=False)
+    if PORTRAIT:
+        spots = [("sprig", 2.2, (-2.65, 4.4), 0.12), ("tubes", 1.15, (2.55, 4.95), -0.06),
+                 ("flask", 1.3, (-2.8, -5.35), -0.1), ("benzene", 1.05, (-1.9, -11.1), 0.0),
+                 ("beaker", 1.25, (3.9, -11.25), 0.08)]
+    else:
+        spots = [("sprig", 2.2, (-4.85, 1.45), 0.12), ("flask", 1.5, (-4.75, -2.2), -0.08),
+                 ("tubes", 1.0, (5.3, 2.25), -0.05), ("benzene", 1.0, (10.1, 2.0), 0.0),
+                 ("beaker", 1.1, (10.35, -4.1), 0.08)]
+    doodles = VGroup(*[doodle(n, h, [x, y, 0], a) for n, h, (x, y), a in spots])
+    return VGroup(paper, doodles)
+
+
 class StarForge(MovingCameraScene):
     def construct(self):
         self.shown = {}  # ref -> [[from, to], ...] seconds on screen
-        with register_font(str(HERE / "fonts" / "SpaceGrotesk-wght.ttf")), \
-             register_font(str(HERE / "fonts" / "JetBrainsMono-wght.ttf")):
+        with fonts():
             self.build()
         out = os.environ.get("TIMINGS_OUT")
         if out:
@@ -156,35 +144,23 @@ class StarForge(MovingCameraScene):
 
     def build(self):
         frame = self.camera.frame
-        FW, FH = config.frame_width, config.frame_height
 
         # Where the carbon ends up (reflowed per aspect).
         P = np.array([1.0, -6.0, 0]) if PORTRAIT else np.array([4.2, -1.2, 0])
 
-        # ---- backdrop: nebula + stars (static, wide enough for camera travel)
-        neb = VGroup(
-            nebula(MAGENTA, FW * 0.55, FH * 0.35).move_to([-FW * 0.35, FH * 0.32, 0]),
-            nebula(VIOLET, FW * 0.7, FH * 0.4).move_to(P + np.array([FW * 0.1, -FH * 0.05, 0])),
-            nebula(BLUE_N, FW * 0.6, FH * 0.45, peak=0.22).move_to([FW * 0.4, FH * 0.1, 0]),
-            nebula(MAGENTA, FW * 0.4, FH * 0.3, peak=0.12).move_to(P + np.array([-FW * 0.3, -FH * 0.2, 0])),
-            nebula(BLUE_N, FW * 0.5, FH * 0.3, peak=0.18).move_to([-FW * 0.3, -FH * 0.35, 0]),
-        )
-        stars = starfield(FW * 2.2, FH * 2.2, 260)
-        self.add(neb, stars)
+        # ---- backdrop: ruled paper and doodles (static, wide enough for camera travel)
+        self.add(backdrop(P))
 
-        # ---- Beat 1 (0.0-2.0): star core fades up, breathes; camera pushes in
-        star = VGroup(
-            glow(ORANGE, 2.7 if not PORTRAIT else 2.4, layers=70, peak=2.6, inner=PAL["star-core"]),
-            glow(INK, 0.9, layers=30, peak=2.0),
-        )
+        # ---- Beat 1 (0.0-2.0): the star fades up, breathes; camera pushes in
+        sun = star(1.55 if not PORTRAIT else 1.4)
         breath = ValueTracker(0)
-        star.base = star.copy()
-        star.add_updater(lambda m: m.become(
-            star.base.copy().scale(1 + 0.035 * np.sin(breath.get_value() * TAU / 2.2))))
+        sun.base = sun.copy()
+        sun.add_updater(lambda m: m.become(
+            sun.base.copy().scale(1 + 0.035 * np.sin(breath.get_value() * TAU / 2.2))))
         self.add(breath)
         breath.add_updater(lambda v, dt: v.increment_value(dt))
         frame.save_state()
-        self.play(FadeIn(star, scale=0.9), frame.animate.scale(0.86),
+        self.play(FadeIn(sun, scale=0.9), frame.animate.scale(0.86),
                   run_time=2.0, rate_func=ease_in_out_sine)
 
         # ---- Beat 2 (2.0-4.5): the helium nuclei drift in, labels follow
@@ -211,14 +187,18 @@ class StarForge(MovingCameraScene):
         )
         self.mark("nuclides/He-4.A", t_labels, self.now())
 
-        # ---- Beat 3 (4.5-6.5): flash, merge into carbon; equation writes on
-        c_nuc = VGroup(glow(CYAN, 0.8, layers=16, peak=0.7), nucleus(C_Z, C_A, r=0.085))
+        # ---- Beat 3 (4.5-6.5): a highlighter flash, merge into carbon; equation writes on
+        c_nuc = VGroup(ring(0.5), nucleus(C_Z, C_A, r=0.085))
         c_label = isotope(C_A, "C", 36)
         c_label.add_updater(lambda m: m.next_to(c_nuc[1], UR, buff=0.14))
         eq = equation(64 if PORTRAIT else 56)
         eq.move_to([0, -FH * 0.86 * 0.5 * 0.62, 0])
+        # The equation sits on a strip of paper, so it reads over the star's rays.
+        eq_card = SurroundingRectangle(eq, buff=0.18, corner_radius=0.12, stroke_color=INK, stroke_width=PEN * 0.6) \
+            .set_fill(PAPER, opacity=1)
+        eq = VGroup(eq_card, eq)
         he_dots = VGroup(*[n for h in hes for n in h[1]])
-        flash = glow(INK, 0.5, layers=20, peak=2.0)
+        flash = Circle(radius=0.5).set_stroke(width=0).set_fill(YELLOW_FILL, opacity=0.9)
         self.play(
             *[h.animate.move_to(ORIGIN) for h in hes],
             run_time=0.5, rate_func=rate_functions.ease_in_quad,
@@ -230,7 +210,8 @@ class StarForge(MovingCameraScene):
             ReplacementTransform(he_dots, c_nuc[1]),
             FadeOut(VGroup(*[h[0] for h in hes])),
             FadeIn(c_nuc[0], scale=0.4),
-            Write(eq, run_time=1.5),
+            FadeIn(eq_card, run_time=0.3),
+            Write(eq[1], run_time=1.5),
             Succession(Wait(0.4), FadeIn(c_label, run_time=0.4)),
             run_time=1.5,
         )
@@ -238,25 +219,25 @@ class StarForge(MovingCameraScene):
         self.add(c_nuc, c_label)
 
         # ---- Beat 4 (6.5-9.0): pull back, star shrinks to a point, carbon drifts out; cell
-        star.clear_updaters()
+        sun.clear_updaters()
         t_pull = self.now()
         mid = P * 0.55
         end_w = FW * (1.05 if PORTRAIT else 1.0)
         self.play(
             frame.animate.set(width=end_w).move_to(mid),
-            star.animate.scale(0.035).set_opacity(0.9),
+            sun.animate.scale(0.06),
             c_nuc.animate.move_to(P),
             Succession(FadeOut(eq, run_time=0.6), Wait(1.3)),
             run_time=1.9, rate_func=ease_in_out_sine,
         )
         self.mark("nuclides/He-4.A", t_eq, t_pull + 0.6)  # the equation fades out early in beat 4
         cell = self.membrane(P)
-        self.play(Create(cell, run_time=0.6), FadeIn(cell[0]), run_time=0.6)
+        self.play(Create(cell[1], run_time=0.6), FadeIn(cell[0]), run_time=0.6)
 
         # ---- Beat 5 (9.0-10.5): nucleus morphs into C; four valence dots, one at a time
         C = Text("C", font=MONO, font_size=150, color=INK, weight=BOLD).move_to(P)
         c_label.clear_updaters()
-        # The nucleons collapse into one white disc, whose outline then morphs into the C.
+        # The nucleons collapse into one ink disc, whose outline then morphs into the C.
         disc = Circle(radius=0.27, stroke_width=0).set_fill(INK, opacity=1).move_to(c_nuc[1]).set_z_index(1)
         collapse = AnimationGroup(
             *[n.animate.move_to(disc.get_center()).scale(0.4) for n in c_nuc[1]],
@@ -280,10 +261,7 @@ class StarForge(MovingCameraScene):
         self.remove(morph.mobject, c_nuc, disc, *c_nuc[1])
         self.add(C)
         d = 0.9
-        vdots = VGroup(*[
-            VGroup(glow(CYAN, 0.16, layers=8, peak=0.7), Dot(radius=0.085, color=CYAN)).move_to(P + v * d)
-            for v in (UP, RIGHT, DOWN, LEFT)
-        ])
+        vdots = VGroup(*[Dot(radius=0.09, color=BLUE).move_to(P + v * d) for v in (UP, RIGHT, DOWN, LEFT)])
         self.play(Succession(*[GrowFromCenter(v, run_time=0.2) for v in vdots]), run_time=0.8)
 
         # ---- Beat 6 (10.5-13.0): C slides up, star-line card writes on, hold
@@ -292,10 +270,10 @@ class StarForge(MovingCameraScene):
         fh = frame.height
         atom_target = fc + UP * fh * 0.2
         if PORTRAIT:
-            card = self.card(TEXT["card"], TEXT["cardSub"], big=46, small=32)
+            card = self.card(TEXT["card"], TEXT["cardSub"], big=60, small=34)
             card.move_to(fc + DOWN * fh * 0.13)
         else:
-            card = self.card([" ".join(TEXT["card"])], [" ".join(TEXT["cardSub"])], big=44, small=30)
+            card = self.card([" ".join(TEXT["card"])], [" ".join(TEXT["cardSub"])], big=58, small=32)
             card.move_to(fc + DOWN * fh * 0.2)
         self.play(
             atom.animate.scale(0.8).move_to(atom_target),
@@ -308,22 +286,20 @@ class StarForge(MovingCameraScene):
 
     # ---- helpers -----------------------------------------------------------
     def membrane(self, center):
-        """Soft rounded cell outline, faint cyan, slightly wobbly."""
+        """A cell drawn in green: a slightly wobbly pen outline over a pale leaf-green marker fill."""
         a, b = (1.9, 1.5) if PORTRAIT else (2.1, 1.45)
 
         def pt(t):
             r = 1 + 0.025 * np.sin(2 * t + 0.6) + 0.015 * np.sin(3 * t + 1.3)
             return center + np.array([a * r * np.cos(t), b * r * np.sin(t), 0])
 
-        outline = ParametricFunction(pt, t_range=[0, TAU], stroke_color=CYAN, stroke_width=3,
-                                     stroke_opacity=0.55)
-        halo = outline.copy().set_stroke(CYAN, width=14, opacity=0.12)
-        fill = outline.copy().set_stroke(width=0).set_fill(CYAN, opacity=0.06)
-        return VGroup(fill, halo, outline)
+        outline = ParametricFunction(pt, t_range=[0, TAU], stroke_color=GREEN, stroke_width=PEN)
+        fill = outline.copy().set_stroke(width=0).set_fill(GREEN_FILL, opacity=0.3).shift(MARKER_SHIFT)
+        return VGroup(fill, outline)
 
     def card(self, big_lines, small_lines, big, small):
-        b = VGroup(*[Text(s, font=SANS, font_size=big, weight=BOLD, color=INK) for s in big_lines])
-        b.arrange(DOWN, buff=0.18)
-        s = VGroup(*[Text(t, font=SANS, font_size=small, color=MUTED) for t in small_lines])
+        b = VGroup(*[Text(s, font=HAND, font_size=big, color=INK) for s in big_lines])
+        b.arrange(DOWN, buff=0.14)
+        s = VGroup(*[Text(t, font=TEXT_FONT, font_size=small, color=MUTED) for t in small_lines])
         s.arrange(DOWN, buff=0.14)
         return VGroup(b, s).arrange(DOWN, buff=0.4)

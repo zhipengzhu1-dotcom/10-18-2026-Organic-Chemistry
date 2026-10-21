@@ -22,26 +22,31 @@ export const manimDir = "scenes/manim";
 export const recordPath = (id: string) => `${manimDir}/renders/${id}.json`;
 export const publicPath = (file: string) => `site/public/${file}`;
 
+export const tokensPath = "site/src/styles/tokens.css";
 /**
- * The Arcade Cosmos colours the committed Manim and Blender renders were drawn with (#59's dark
- * `:root`), frozen here when the site moved to Paper Notebook (#118) so those renders stay current.
- * #123 re-renders them on paper and moves these keys to the new token names.
+ * Files every watch-only render draws with besides its own script, all in `scenes/manim/`:
+ * the paper, palette and fonts module, the fonts and the doodles. A change to any stales every render.
  */
-export const ARCADE_VIDEO_PALETTE: Readonly<Record<string, string>> = {
-  "at-space": "#0d0626",
-  "at-neb-1": "#ff4fd8",
-  "at-neb-2": "#b44dff",
-  "at-neb-3": "#2340ff",
-  "at-electron": "#3ee8ff",
-  "at-ignite": "#ff9a1f",
-  "at-ink": "#ffffff", // cited-data: ok, the Arcade ink colour, not hydrogen's
-  "at-ink-muted": "#b9a8e8",
-  "star-core": "#ffe2a8", // the star's pale-gold core (the prototype's glow centre), not a UI token
-};
+const sharedInputs = (root: string) => [
+  "paper.py",
+  ...readdirSync(join(root, manimDir, "fonts")).sort().map((f) => `fonts/${f}`),
+  ...readdirSync(join(root, manimDir, "doodles")).sort().map((f) => `doodles/${f}`),
+];
 
-/** Colours for the Manim and Blender renderers (frozen: see ARCADE_VIDEO_PALETTE). */
-export function videoPalette(): Record<string, string> {
-  return { ...ARCADE_VIDEO_PALETTE };
+/**
+ * The Paper Notebook colours for the Manim and Blender renderers: every `--at-*` colour in the
+ * site's single `:root` block (paper, rule, margin, pen inks, marker fills), keyed by token name.
+ */
+export function videoPalette(root = repoRoot): Record<string, string> {
+  const css = readFileSync(join(root, tokensPath), "utf8");
+  const start = css.indexOf(":root {");
+  if (start < 0) throw new Error(`${tokensPath} has no :root block`);
+  const body = css.slice(start, css.indexOf("}", start));
+  const palette: Record<string, string> = {};
+  for (const m of body.matchAll(/--(at-[a-z0-9-]+):\s*(#[0-9a-fA-F]{6})\b/g)) palette[m[1]] = m[2].toLowerCase();
+  for (const name of ["at-paper", "at-rule", "at-ink", "at-ink-muted", "at-blue", "at-orange", "at-blue-fill", "at-orange-fill"])
+    if (!palette[name]) throw new Error(`${tokensPath} has no --${name} colour in :root`);
+  return palette;
 }
 
 export interface ManimProps {
@@ -69,7 +74,7 @@ export function manimProps(m: WatchSceneManifest, cited: Record<string, Cited>, 
     duration: m.duration,
     values: Object.fromEntries(m.data.map((ref) => [ref, cited[ref].value])),
     text: m.text,
-    palette: videoPalette(),
+    palette: videoPalette(root),
   };
 }
 
@@ -84,11 +89,11 @@ export function sourcesSidecar(m: WatchSceneManifest, cited: Record<string, Cite
   return toSidecar(video, cited, measured);
 }
 
-/** sha256 over everything a render depends on: script, fonts, props of each aspect, Manim version, fps. */
+/** sha256 over everything a render depends on: script, paper.py, fonts, doodles, props of each aspect, Manim version, fps. */
 export function inputsHash(m: WatchSceneManifest, cited: Record<string, Cited>, root = repoRoot): string {
   const hash = createHash("sha256");
   hash.update(`manim ${MANIM_VERSION} fps ${FPS}\n`);
-  const files = [m.render.script, ...readdirSync(join(root, manimDir, "fonts")).sort().map((f) => `fonts/${f}`)];
+  const files = [m.render.script, ...sharedInputs(root)];
   for (const file of files) hash.update(`${file}\n`).update(readFileSync(join(root, manimDir, file)));
   for (const aspect of m.aspects) hash.update(JSON.stringify(manimProps(m, cited, aspect, root)));
   return hash.digest("hex");

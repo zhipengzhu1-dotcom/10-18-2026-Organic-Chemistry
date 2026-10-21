@@ -8,11 +8,13 @@ import type { Cited } from "@astratron/content/data";
 import { sceneRegistry, stateAt, type Aspect } from "@astratron/scenes";
 import { sceneManifests } from "@astratron/scenes/manifests";
 import { videoJobs } from "../jobs.ts";
-// The site's own design tokens (the Paper Notebook :root block, #118) and self-hosted fonts: numbers and
-// formulas render in JetBrains Mono, as on the site (story 93), never a copied colour or system font.
+// The site's own design tokens (the Paper Notebook :root block, #118) and the self-hosted faces Scenes
+// draw with (#123): Patrick Hand for labels, Nunito for text, JetBrains Mono for numbers and formulas,
+// as on the site (story 93), never a copied colour or system font.
 import "../../../site/src/styles/tokens.css";
-import "@fontsource-variable/jetbrains-mono/index.css";
+import "@fontsource/patrick-hand/index.css";
 import "@fontsource-variable/nunito/index.css";
+import "@fontsource-variable/jetbrains-mono/index.css";
 
 export interface FrameProps extends Record<string, unknown> {
   sceneId: string;
@@ -23,11 +25,17 @@ export interface FrameProps extends Record<string, unknown> {
 
 const frameStyle: CSSProperties = { background: "var(--at-paper)", fontFamily: "var(--at-font-text)" };
 
-/** Holds the frame until both fonts are loaded, so no frame is drawn in a fallback face. */
+/** Holds the frame until every face is loaded, so no frame is drawn in a fallback face. */
 function useFonts() {
-  const [handle] = useState(() => delayRender("Loading Nunito and JetBrains Mono"));
+  const [handle] = useState(() => delayRender("Loading Patrick Hand, Nunito and JetBrains Mono"));
   useEffect(() => {
-    const faces = ['400 32px "Nunito Variable"', '700 32px "Nunito Variable"', '400 32px "JetBrains Mono Variable"', '700 32px "JetBrains Mono Variable"'];
+    const faces = [
+      '400 32px "Patrick Hand"',
+      '400 32px "Nunito Variable"',
+      '700 32px "Nunito Variable"',
+      '400 32px "JetBrains Mono Variable"',
+      '700 32px "JetBrains Mono Variable"',
+    ];
     Promise.all(faces.map((f) => document.fonts.load(f))).then(() => continueRender(handle));
   }, [handle]);
 }

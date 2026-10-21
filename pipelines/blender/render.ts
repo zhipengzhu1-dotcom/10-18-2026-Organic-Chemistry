@@ -26,12 +26,36 @@ const dir = "pipelines/blender";
 export type RenderName = "matcap" | "share-site" | "share-unit-1";
 export const RENDER_NAMES: RenderName[] = ["matcap", "share-site", "share-unit-1"];
 
-/** Fonts the share images set text in (OFL; licences next to each file). */
+/**
+ * Fonts the share images set text in (OFL; licences next to each file): the site's faces, each for
+ * its job. Kaushan Script for the wordmark only; Patrick Hand for headings; JetBrains Mono for numbers.
+ */
 const FONTS = {
-  pixel: `${dir}/fonts/PixelifySans-Regular.woff`,
-  text: "scenes/manim/fonts/SpaceGrotesk-wght.ttf",
+  script: `${dir}/fonts/KaushanScript-Regular.ttf`,
+  hand: "scenes/manim/fonts/PatrickHand-Regular.ttf",
   data: "scenes/manim/fonts/JetBrainsMono-wght.ttf",
 };
+
+/** The site's ruled paper in image px: a faint blue rule every `rule` px, the pink margin line at `margin` px. */
+const PAPER = { rule: 32, margin: 64 };
+
+/** One hand-drawn doodle (the Manim Scenes' own, scenes/manim/doodles/) on the ground: centre and height in px. */
+export interface PropsDoodle {
+  path: string;
+  x: number;
+  y: number;
+  height: number;
+  /** Degrees, counter-clockwise. */
+  angle: number;
+}
+
+const doodle = (name: string, x: number, y: number, height: number, angle = 0): PropsDoodle => ({
+  path: `scenes/manim/doodles/${name}.svg`,
+  x,
+  y,
+  height,
+  angle,
+});
 
 export interface PropsAtom {
   element: string;
@@ -71,6 +95,8 @@ export interface BlenderProps {
   seed: number;
   palette: Record<string, string>;
   fonts: typeof FONTS;
+  paper: typeof PAPER;
+  doodles: PropsDoodle[];
   molecules: PropsMolecule[];
   /**
    * Orbital meshes (glb from the orbital pipeline, #70, in Å in the molecule's data frame; a node
@@ -90,33 +116,36 @@ interface Placement {
 interface ShareLayout {
   scale: number;
   molecules: Placement[];
+  doodles: PropsDoodle[];
   text: (subject: Subject, palette: Record<string, string>) => PropsText[];
 }
 
 const unit1 = (s: Subject) => s.courses[0].units.find((u) => u.id === "u1")!;
 
 const LAYOUTS: Record<Exclude<RenderName, "matcap">, ShareLayout> = {
-  // The Push hero's product (OH⁻ + H⁺ → water, #73), right of the wordmark.
+  // The Push hero's product (OH⁻ + H⁺ → water, #73), right of the wordmark; doodles in the free corners.
   "share-site": {
     scale: 190,
     molecules: [{ id: "water", view: { plane: [1, 0, 2], rotate: [0, -25, 90] }, at: [890, 330] }],
+    doodles: [doodle("sprig", 1115, 120, 190, -12), doodle("benzene", 560, 112, 92, 8), doodle("flask", 180, 522, 136, -6), doodle("beaker", 1105, 540, 112, 6)],
     text: (_, p) => [
-      { text: "AstraTron", font: "pixel", size: 112, x: 72, y: 300, colour: p["at-ignite"] },
-      { text: "Come build.", font: "text", size: 56, x: 76, y: 392, colour: p["at-electron"] },
+      { text: "AstraTron", font: "script", size: 112, x: 96, y: 300, colour: p["at-ink"] },
+      { text: "Come build.", font: "hand", size: 64, x: 104, y: 392, colour: p["at-blue"] },
     ],
   },
   // Unit 1: sp³, sp² and sp carbon side by side under the Unit's name.
   "share-unit-1": {
     scale: 92,
     molecules: [
-      { id: "methane", view: { rotate: [20, 30, 0] }, at: [230, 452] },
-      { id: "ethylene", view: DEFAULT_VIEW, at: [600, 452] },
-      { id: "acetylene", view: DEFAULT_VIEW, at: [970, 452] },
+      { id: "methane", view: { rotate: [20, 30, 0] }, at: [230, 462] },
+      { id: "ethylene", view: DEFAULT_VIEW, at: [600, 462] },
+      { id: "acetylene", view: DEFAULT_VIEW, at: [970, 462] },
     ],
+    doodles: [doodle("tubes", 905, 118, 104, -5), doodle("atom", 1090, 170, 150, 10)],
     text: (s, p) => [
-      { text: "AstraTron", font: "pixel", size: 48, x: 72, y: 100, colour: p["at-ignite"] },
-      { text: `Unit ${unit1(s).number}`, font: "data", size: 44, x: 72, y: 196, colour: p["at-electron"] },
-      { text: unit1(s).title, font: "text", size: 76, x: 70, y: 286, colour: p["at-ink"] },
+      { text: "AstraTron", font: "script", size: 56, x: 96, y: 92, colour: p["at-ink"] },
+      { text: `Unit ${unit1(s).number}`, font: "data", size: 44, x: 96, y: 178, colour: p["at-blue"] },
+      { text: unit1(s).title, font: "hand", size: 84, x: 94, y: 266, colour: p["at-ink"] },
     ],
   },
 };
@@ -169,7 +198,7 @@ function model(root: string): CourseModel {
 export function blenderProps(name: Exclude<RenderName, "matcap">, root = repoRoot): BlenderProps {
   const layout = LAYOUTS[name];
   const subject = organic(model(root));
-  const palette = videoPalette();
+  const palette = videoPalette(root);
   const { width, height } = SHARE_IMAGES[name === "share-site" ? "site" : "unit-1"];
   return {
     render: name,
@@ -180,6 +209,8 @@ export function blenderProps(name: Exclude<RenderName, "matcap">, root = repoRoo
     seed: 69,
     palette,
     fonts: FONTS,
+    paper: PAPER,
+    doodles: layout.doodles,
     molecules: layout.molecules.map((p) => placeMolecule(subject, p, layout, width, height)),
     meshes: [],
     text: layout.text(subject, palette),
@@ -202,7 +233,8 @@ export function renderPlan(name: RenderName): { script: string; outputs: string[
 export function renderInputs(name: RenderName, root = repoRoot): string[] {
   if (name === "matcap") return [`${dir}/make_matcap.py`];
   const props = blenderProps(name, root);
-  return [`${dir}/share_images.py`, `${dir}/molecule_import.py`, ...Object.values(FONTS), ...props.meshes.map((m) => m.path), propsPath(name)];
+  const doodles = [...new Set(props.doodles.map((d) => d.path))].sort();
+  return [`${dir}/share_images.py`, `${dir}/molecule_import.py`, ...Object.values(FONTS), ...doodles, ...props.meshes.map((m) => m.path), propsPath(name)];
 }
 
 export const sha256 = (path: string) => createHash("sha256").update(readFileSync(path)).digest("hex");

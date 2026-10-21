@@ -2,7 +2,7 @@
 import { frameSize, safeArea } from "../frame.ts";
 import { easeOut, progress } from "../motion.ts";
 import type { SceneProps } from "../types.ts";
-import { CYAN, DATA_FONT, INK, MAGENTA, MUTED } from "../lewis.ts";
+import { BLUE, DATA_FONT, INK, PINK, MUTED } from "../lewis.ts";
 import { rank, type BondDipolesState } from "./manifest.ts";
 
 /** When row i slides in (seconds). */
@@ -36,7 +36,7 @@ export default function BondDipoles({ t, state, aspect, reducedMotion, cited }: 
         const ax = leftX;
         const bx = leftX + span;
         const sign = (el: string) => (el === r.minus ? "δ−" : "δ+");
-        const tone = (el: string) => (el === r.minus ? MAGENTA : CYAN);
+        const tone = (el: string) => (el === r.minus ? PINK : BLUE);
         // The crossed arrow: tail (+) at the δ+ atom, head at the δ− atom; weight follows ΔEN.
         const toB = r.minus === r.b;
         const from = toB ? ax + unit : bx - unit;

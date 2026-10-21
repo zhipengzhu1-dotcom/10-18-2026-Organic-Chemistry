@@ -11,9 +11,9 @@ import { FILL, lonePairAtoms, PANELS, type LonePairState } from "./manifest.ts";
 const ink = "var(--at-ink, #1d1b26)";
 const muted = "var(--at-ink-muted, #57536b)";
 const line = "var(--at-ink-muted, #57536b)";
-const electron = "var(--at-blue, #0a64c2)";
+const blue = "var(--at-blue, #0a64c2)";
 const mono = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
-const sans = "var(--at-font-text, system-ui, sans-serif)";
+const hand = "var(--at-font-hand, 'Patrick Hand', cursive)";
 
 /** The chip across the top and one box per drawing: a row at 16:9, a column at 9:16. */
 export function layoutLonePairs(aspect: Aspect, panels: number): { chip: Box; boxes: Box[] } {
@@ -64,19 +64,19 @@ export default function LonePairFill({ t, state, aspect }: SceneProps<LonePairSt
       <g key={id}>
         <g
           transform={transformOn(stage, drawing, s)}
-          style={{ color: ink, fontFamily: mono, ["--lone-pair" as string]: electron }}
+          style={{ color: ink, fontFamily: mono, ["--lone-pair" as string]: blue }}
           dangerouslySetInnerHTML={{ __html: innerSvg(drawing) }}
         />
         {labels.map((l, i) => {
           const at = stage.point(s.atoms.find((a) => a.id === l.at)!);
           return (
             <g key={l.at} opacity={l.opacity}>
-              {l.active && <circle cx={at.x} cy={at.y} r={stage.unit * 0.42} fill="none" stroke={electron} strokeWidth={4} />}
+              {l.active && <circle cx={at.x} cy={at.y} r={stage.unit * 0.42} fill="none" stroke={blue} strokeWidth={4} />}
               <text
                 x={boxes[p].x + boxes[p].w / 2}
                 y={boxes[p].y + boxes[p].h * 0.8 + i * fontPx * 1.3}
                 textAnchor="middle"
-                fill={l.active ? electron : muted}
+                fill={l.active ? blue : muted}
                 fontSize={fontPx * 0.9}
                 fontFamily={mono}
               >
@@ -91,8 +91,8 @@ export default function LonePairFill({ t, state, aspect }: SceneProps<LonePairSt
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%" aria-hidden="true" style={{ display: "block" }}>
-      <rect x={chip.x + chip.w * (aspect === "16:9" ? 0.34 : 0.15)} y={chip.y} width={chip.w * (aspect === "16:9" ? 0.32 : 0.7)} height={chip.h} rx={chip.h / 2} fill="none" stroke={allShown ? electron : line} strokeWidth={3} />
-      <text x={chip.x + chip.w / 2} y={chip.y + chip.h / 2} textAnchor="middle" dominantBaseline="central" fill={allShown ? electron : muted} fontSize={fontPx} fontFamily={sans}>
+      <rect x={chip.x + chip.w * (aspect === "16:9" ? 0.34 : 0.15)} y={chip.y} width={chip.w * (aspect === "16:9" ? 0.32 : 0.7)} height={chip.h} rx={chip.h / 2} fill="none" stroke={allShown ? blue : line} strokeWidth={3} />
+      <text x={chip.x + chip.w / 2} y={chip.y + chip.h / 2} textAnchor="middle" dominantBaseline="central" fill={allShown ? blue : muted} fontSize={fontPx * 1.1} fontFamily={hand}>
         {allShown ? "Lone pairs shown" : "Lone pairs hidden"}
       </text>
       {panels}

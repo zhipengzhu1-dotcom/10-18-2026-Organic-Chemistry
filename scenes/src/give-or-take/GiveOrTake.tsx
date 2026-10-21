@@ -3,7 +3,7 @@
 // the 1920-wide frame shows at about a fifth of its size.
 import { frameSize, safeArea } from "../frame.ts";
 import type { SceneProps } from "../types.ts";
-import { AtomDots, DATA_FONT, TEXT_FONT, boss, electron, ink, line, muted } from "../dots/dots.tsx";
+import { AtomDots, DATA_FONT, HAND_FONT, TEXT_FONT, pink, pinkFill, blue, ink, line, muted } from "../dots/dots.tsx";
 import { ATOMS, number, routes, type GiveOrTakeState } from "./manifest.ts";
 
 export default function GiveOrTake({ state, aspect, cited }: SceneProps<GiveOrTakeState>) {
@@ -29,7 +29,7 @@ export default function GiveOrTake({ state, aspect, cited }: SceneProps<GiveOrTa
   return (
     <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%" aria-hidden="true" style={{ display: "block" }}>
       <AtomDots at={atom} el={state.atom} n={r.outer} size={260} r={24} />
-      <text x={atom.x} y={atom.y + 300} fill={ink} fontSize={size.label * 0.85} textAnchor="middle" style={{ fontFamily: TEXT_FONT }}>
+      <text x={atom.x} y={atom.y + 300} fill={ink} fontSize={size.label * 0.9} textAnchor="middle" style={{ fontFamily: HAND_FONT }}>
         {r.name}
       </text>
       <text x={atom.x} y={atom.y + 390} fill={muted} fontSize={size.small} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
@@ -44,7 +44,7 @@ export default function GiveOrTake({ state, aspect, cited }: SceneProps<GiveOrTa
       <text x={panel.x} y={giveY} fill={ink} fontSize={size.label} style={{ fontFamily: DATA_FONT }}>
         {`Give ${r.give.count}`}
       </text>
-      <rect className="give" x={panel.x} y={giveY + 30} width={scale(give)} height={barH} fill={boss} />
+      <rect className="give" x={panel.x} y={giveY + 30} width={scale(give)} height={barH} fill={pinkFill} stroke={pink} strokeWidth={5} />
       <text x={panel.x + scale(give) + 24} y={giveY + 30 + barH * 0.72} fill={ink} fontSize={size.value} style={{ fontFamily: DATA_FONT }}>
         {r.give.energy ? `${number(r.give.energy)} eV` : ""}
       </text>
@@ -62,7 +62,7 @@ export default function GiveOrTake({ state, aspect, cited }: SceneProps<GiveOrTa
             width={scale(released)}
             height={barH}
             fill="none"
-            stroke={electron}
+            stroke={blue}
             strokeWidth={8}
             strokeDasharray="16 12"
           />
@@ -83,9 +83,17 @@ export default function GiveOrTake({ state, aspect, cited }: SceneProps<GiveOrTa
         </g>
       )}
 
-      <text x={width / 2} y={height - area.y - 10} fill={ink} fontSize={size.counter} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
-        {`Electrons to move, cheaper way: ${r.move}`}
-      </text>
+      {wide ? (
+        <text x={width / 2} y={height - area.y - 10} fill={ink} fontSize={size.counter} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
+          {`Electrons to move, cheaper way: ${r.move}`}
+        </text>
+      ) : (
+        // Too long for the 9:16 width on one line: two lines, so nothing crops.
+        <text x={width / 2} y={height - area.y - 10 - size.counter * 1.25} fill={ink} fontSize={size.counter} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
+          <tspan x={width / 2}>Electrons to move,</tspan>
+          <tspan x={width / 2} dy={size.counter * 1.25}>{`cheaper way: ${r.move}`}</tspan>
+        </text>
+      )}
     </svg>
   );
 }

@@ -25,6 +25,8 @@ export interface SharingLayout {
   tray: Pt[];
   trayLabel: Pt;
   count: Pt;
+  /** The count once ethane is joined (9:16 stacks the two carbons where `count` sits). */
+  countJoined: Pt;
   pieces: { left: PieceLayout; right: PieceLayout };
   handleAt: (id: string, state: SharingState) => Pt | undefined;
   targetAt: (id: string, state: SharingState) => Pt | undefined;
@@ -61,6 +63,7 @@ export function layoutSharing(aspect: Aspect): SharingLayout {
     tray,
     trayLabel: wide ? { x: 1510, y: 90 } : { x: 540, y: 1190 },
     count: wide ? { x: 620, y: 1010 } : { x: 540, y: 1050 },
+    countJoined: wide ? { x: 620, y: 1010 } : { x: 540, y: 1720 },
     pieces,
     handleAt: (id, state) => {
       if (id.startsWith("tray-")) return tray[Number(id.slice(5)) - 1];

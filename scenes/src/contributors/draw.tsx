@@ -9,11 +9,13 @@ import { drawContributors } from "../structure/contributors.ts";
 
 export const INK = "var(--at-ink, #1d1b26)";
 export const MUTED = "var(--at-ink-muted, #57536b)";
-export const ELECTRON = "var(--at-blue, #0a64c2)";
-export const BOSS = "var(--at-pink, #bd1278)";
+export const BLUE = "var(--at-blue, #0a64c2)";
+export const PINK = "var(--at-pink, #bd1278)";
 export const LINE = "var(--at-ink-muted, #57536b)";
 export const TEXT_FONT = "var(--at-font-text, 'Nunito', system-ui, sans-serif)";
 export const DATA_FONT = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
+/** Labels and headings (a name, a tag): the hand face, never for numbers. */
+export const HAND_FONT = "var(--at-font-hand, 'Patrick Hand', cursive)";
 
 /** Where the dashed half of a partial bond sits, beside the solid line (drawing units). */
 const DASH_SHIFT = 9;
@@ -77,10 +79,10 @@ export function Molecule({ placed, opacity = 1, glow = [], dashed = [] }: Molecu
   const inner = drawing.svg.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "");
   const centre = mean(Object.values(drawing.atoms));
   return (
-    <g transform={`translate(${x} ${y}) scale(${scale})`} opacity={opacity} fontFamily={DATA_FONT} style={{ color: INK, ["--lone-pair" as string]: ELECTRON }}>
+    <g transform={`translate(${x} ${y}) scale(${scale})`} opacity={opacity} fontFamily={DATA_FONT} style={{ color: INK, ["--lone-pair" as string]: BLUE }}>
       {glow.map((id) => {
         const s = drawing.bonds[id];
-        return <line key={id} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} stroke={ELECTRON} strokeOpacity={0.35} strokeWidth={16} strokeLinecap="round" />;
+        return <line key={id} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} stroke={BLUE} strokeOpacity={0.35} strokeWidth={16} strokeLinecap="round" />;
       })}
       <g dangerouslySetInnerHTML={{ __html: inner }} />
       {dashed.map((id) => {
@@ -144,16 +146,16 @@ export function Contributors({ placed, opacity = 1 }: { placed: PlacedContributo
       transform={`translate(${placed.x} ${placed.y}) scale(${placed.scale})`}
       opacity={opacity}
       fontFamily={DATA_FONT}
-      style={{ color: INK, ["--lone-pair" as string]: ELECTRON }}
+      style={{ color: INK, ["--lone-pair" as string]: BLUE }}
       dangerouslySetInnerHTML={{ __html: inner }}
     />
   );
 }
 
 /** A short tag above a box ("major", "minor"). */
-export function Tag({ box, text, size, colour = ELECTRON, opacity = 1 }: { box: Box; text: string; size: number; colour?: string; opacity?: number }) {
+export function Tag({ box, text, size, colour = BLUE, opacity = 1 }: { box: Box; text: string; size: number; colour?: string; opacity?: number }) {
   return (
-    <text x={box.x + box.w / 2} y={box.y - size * 0.5} fontSize={size} textAnchor="middle" fill={colour} opacity={opacity} fontFamily={TEXT_FONT} fontWeight={700}>
+    <text x={box.x + box.w / 2} y={box.y - size * 0.5} fontSize={size} textAnchor="middle" fill={colour} opacity={opacity} fontFamily={HAND_FONT}>
       {text}
     </text>
   );

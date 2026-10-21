@@ -59,10 +59,11 @@ pnpm blender check                          # CI gate: re-hash every recorded in
 | Render | Script | Output |
 |---|---|---|
 | `matcap` | `blender/make_matcap.py` | `site/public/matcaps/studio.webp` (512 px, ~10 KB; the 3D card tints it per element) |
-| `share-site` | `blender/share_images.py` | `site/public/share/site.webp` (1200×630: the Push hero's water + wordmark) |
-| `share-unit-1` | `blender/share_images.py` | `site/public/share/unit-1.webp` (1200×630: methane, ethylene, acetylene + Unit 1's title) |
+| `share-site` | `blender/share_images.py` | `site/public/share/site.webp` (1200×630 on ruled paper: the Push hero's water, the wordmark, doodles) |
+| `share-unit-1` | `blender/share_images.py` | `site/public/share/unit-1.webp` (1200×630 on ruled paper: methane, ethylene, acetylene, Unit 1's title, doodles) |
 
 - Molecules enter Blender only through `blender/molecule_import.py`, which reads `blender/renders/<name>.props.json`. `blender/render.ts` writes that file from the cited-data lookup (atoms, bonds, Jmol colours, Bondi radii × 0.3, the Unit's title), the design tokens and the layout. Orbital meshes (glb in the molecule's data frame, #70) go in `meshes`.
-- `blender/renders/<name>.json` records the Blender version and the sha256 of every file Blender read (scripts, fonts, props, meshes) and of each output. `pnpm blender check` (and `pnpm test`) fail when any changed, or when the props the cited data now gives differ from the committed ones. Data a render doesn't use (another element's colour) doesn't make it stale.
-- Fonts: Pixelify Sans (`blender/fonts/`, OFL) and the Manim fonts in `scenes/manim/fonts/`.
+- `blender/renders/<name>.json` records the Blender version and the sha256 of every file Blender read (scripts, fonts, doodles, props, meshes) and of each output. `pnpm blender check` (and `pnpm test`) fail when any changed, or when the props the cited data now gives differ from the committed ones. Data a render doesn't use (another element's colour) doesn't make it stale.
+- Paper Notebook (#123): the ground is white paper with a faint blue rule every 32 px and the pink margin line at 64 px (the site's body), drawn as flat emission strips in the token colours; doodles are the Manim Scenes' own SVGs (`scenes/manim/doodles/`), imported with Blender's `io_curve_svg` add-on (fills flat, pen lines as ink tubes); the molecules get a pen-ink Freestyle outline so white H balls read on white. Colours are `videoPalette()` (every `--at-*` colour in `tokens.css`).
+- Fonts: Kaushan Script for the wordmark only (`blender/fonts/`, OFL), and Patrick Hand and JetBrains Mono from `scenes/manim/fonts/`.
 - `blender/molecule-import.test.ts` runs the import in Blender where it is installed (skipped in CI).

@@ -1,5 +1,5 @@
 // rule-ladder: a pure function of (t, state); see manifest.ts.
-import { BOSS, DATA_FONT, ELECTRON, INK, LINE, MUTED, Molecule, TEXT_FONT, drawn, place } from "../contributors/draw.tsx";
+import { PINK, DATA_FONT, BLUE, HAND_FONT, INK, LINE, MUTED, Molecule, TEXT_FONT, drawn, place } from "../contributors/draw.tsx";
 import { acetamide, acetamidePolar } from "../contributors/structures.ts";
 import { frameSize, type Box } from "../frame.ts";
 import { easeOut, lerp, progress } from "../motion.ts";
@@ -66,9 +66,9 @@ export default function RuleLadder({ t, state, aspect }: SceneProps<RuleLadderSt
         const marks = verdict && all ? easeOut(progress(t, 5 + i, 5.5 + i)) : 0;
         return (
           <g key={rule.id}>
-            <rect x={box.x} y={box.y} width={box.w} height={box.h} rx={24} fill={ELECTRON} fillOpacity={0.12 * lit} stroke={lit > 0.5 ? ELECTRON : LINE} strokeWidth={4} opacity={lerp(0.4, 1, lit)} />
+            <rect x={box.x} y={box.y} width={box.w} height={box.h} rx={24} fill={BLUE} fillOpacity={0.12 * lit} stroke={lit > 0.5 ? BLUE : LINE} strokeWidth={4} opacity={lerp(0.4, 1, lit)} />
             <g opacity={lerp(0.4, 1, lit)} fontFamily={TEXT_FONT}>
-              <text x={box.x + L.title.dx * 0.45} y={box.y + L.title.dy} fontSize={L.font * 1.3} textAnchor="middle" fill={ELECTRON} fontWeight={700} fontFamily={DATA_FONT}>
+              <text x={box.x + L.title.dx * 0.45} y={box.y + L.title.dy} fontSize={L.font * 1.3} textAnchor="middle" fill={BLUE} fontWeight={700} fontFamily={DATA_FONT}>
                 {rule.id}
               </text>
               <text x={box.x + L.title.dx} y={box.y + L.title.dy} fontSize={L.font} fill={INK} fontWeight={700}>
@@ -84,7 +84,7 @@ export default function RuleLadder({ t, state, aspect }: SceneProps<RuleLadderSt
                   fontSize={L.font * 1.4}
                   textAnchor="middle"
                   dominantBaseline="central"
-                  fill={ok ? ELECTRON : BOSS}
+                  fill={ok ? BLUE : PINK}
                   fontFamily={TEXT_FONT}
                   fontWeight={700}
                   opacity={marks}
@@ -98,14 +98,14 @@ export default function RuleLadder({ t, state, aspect }: SceneProps<RuleLadderSt
       <g opacity={cards}>
         {L.cards.map((box, k) => (
           <g key={k}>
-            <rect x={box.x} y={box.y} width={box.w} height={box.h} rx={18} fill="none" stroke={k === 0 && major > 0.5 ? ELECTRON : LINE} strokeWidth={3} />
+            <rect x={box.x} y={box.y} width={box.w} height={box.h} rx={18} fill="none" stroke={k === 0 && major > 0.5 ? BLUE : LINE} strokeWidth={3} />
             <Molecule placed={place(k === 0 ? NEUTRAL : CHARGED, box, scale * 0.85)} />
           </g>
         ))}
-        <text x={centre(L.cards[0])} y={L.cards[0].y + L.cards[0].h + L.font * 0.9} fontSize={L.font * 0.8} textAnchor="middle" fill={ELECTRON} fontFamily={TEXT_FONT} fontWeight={700} opacity={major}>
+        <text x={centre(L.cards[0])} y={L.cards[0].y + L.cards[0].h + L.font * 0.9} fontSize={L.font * 0.8} textAnchor="middle" fill={BLUE} fontFamily={HAND_FONT} opacity={major}>
           major
         </text>
-        <text x={centre(L.cards[1])} y={L.cards[1].y + L.cards[1].h + L.font * 0.9} fontSize={L.font * 0.8} textAnchor="middle" fill={MUTED} fontFamily={TEXT_FONT} opacity={major}>
+        <text x={centre(L.cards[1])} y={L.cards[1].y + L.cards[1].h + L.font * 0.9} fontSize={L.font * 0.8} textAnchor="middle" fill={MUTED} fontFamily={HAND_FONT} opacity={major}>
           minor
         </text>
       </g>

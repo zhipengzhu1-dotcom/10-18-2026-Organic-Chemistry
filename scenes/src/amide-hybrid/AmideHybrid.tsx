@@ -1,5 +1,5 @@
 // amide-hybrid: a pure function of t; see manifest.ts.
-import { Contributors, DATA_FONT, ELECTRON, BOSS, INK, MUTED, Molecule, TEXT_FONT, Tag, atomAt, drawn, frameOf, hybridOf, place, placeContributors } from "../contributors/draw.tsx";
+import { Contributors, DATA_FONT, BLUE, PINK, INK, MUTED, Molecule, TEXT_FONT, Tag, atomAt, drawn, frameOf, hybridOf, place, placeContributors } from "../contributors/draw.tsx";
 import { acetamide, acetamidePolar } from "../contributors/structures.ts";
 import { frameSize, type Box } from "../frame.ts";
 import { easeOut, lerp, progress } from "../motion.ts";
@@ -72,11 +72,11 @@ export default function AmideHybrid({ t, aspect, cited }: SceneProps<Record<stri
         <Tag box={hybridBox} text="hybrid" size={L.font} colour={INK} />
         <Molecule placed={hybrid} dashed={PARTIAL} />
       </g>
-      <text x={deltaAt.x} y={deltaAt.y} fontSize={L.font * 1.1} textAnchor="middle" dominantBaseline="central" fill={BOSS} fontFamily={DATA_FONT} opacity={delta}>
+      <text x={deltaAt.x} y={deltaAt.y} fontSize={L.font * 1.1} textAnchor="middle" dominantBaseline="central" fill={PINK} fontFamily={DATA_FONT} opacity={delta}>
         δ−
       </text>
 
-      <text x={L.label.x} y={L.label.y} fontSize={L.font} textAnchor="middle" fill={ELECTRON} fontFamily={DATA_FONT} opacity={appear}>
+      <text x={L.label.x} y={L.label.y} fontSize={L.font} textAnchor="middle" fill={BLUE} fontFamily={DATA_FONT} opacity={appear}>
         {`${cn?.label ?? "C–N"} ${cn?.display ?? ""}`}
         <tspan fill={MUTED} fontFamily={TEXT_FONT}>
           , computed

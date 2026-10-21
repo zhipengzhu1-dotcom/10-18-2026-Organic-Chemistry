@@ -11,7 +11,7 @@ import { drawnHydrogens, FILL, fillOrder, type HFillState } from "./manifest.ts"
 
 const ink = "var(--at-ink, #1d1b26)";
 const muted = "var(--at-ink-muted, #57536b)";
-const electron = "var(--at-blue, #0a64c2)";
+const blue = "var(--at-blue, #0a64c2)";
 const mono = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
 
 export function layoutHFill(aspect: Aspect): { stage: Box; counter: Box } {
@@ -60,13 +60,13 @@ export default function HFill({ t, state, aspect }: SceneProps<HFillState>) {
       <g
         transform={transformOn(stage, drawing, withHydrogens(base, done))}
         fill={ink}
-        style={{ color: ink, fontFamily: mono, ["--lone-pair" as string]: electron }}
+        style={{ color: ink, fontFamily: mono, ["--lone-pair" as string]: blue }}
         dangerouslySetInnerHTML={{ __html: innerSvg(drawing) }}
       />
       {filling && (
         <g opacity={labelOpacity}>
-          <circle cx={at.x} cy={at.y} r={stage.unit * 0.42} fill="none" stroke={electron} strokeWidth={4} />
-          <text x={at.x + stage.unit * 0.55} y={at.y - stage.unit * 0.55} fill={electron} fontSize={fontPx} fontFamily={mono}>
+          <circle cx={at.x} cy={at.y} r={stage.unit * 0.42} fill="none" stroke={blue} strokeWidth={4} />
+          <text x={at.x + stage.unit * 0.55} y={at.y - stage.unit * 0.55} fill={blue} fontSize={fontPx} fontFamily={mono}>
             {label}
           </text>
         </g>

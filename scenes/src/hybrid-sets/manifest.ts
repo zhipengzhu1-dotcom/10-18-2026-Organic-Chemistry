@@ -1,5 +1,5 @@
 // hybrid-sets (Lesson 4 s04, and s01's still of the unmixed orbitals): a carbon with one hybrid
-// set at a time, from the labelled model (scenes/src/hybrid-model). Orange hybrid lobes and cyan
+// set at a time, from the labelled model (scenes/src/hybrid-model). Orange hybrid lobes and blue
 // leftover p orbitals, each with a chip, and the model's angle between two lobes. A translucent
 // plane holds the sp² lobes. `tour` steps sp³ → sp² → sp → all in time with s04's three lines.
 // The spec asks for a rotatable R3F view; Scenes take no Student input (and the video path has no
@@ -23,9 +23,9 @@ export function shownSet(set: SetChoice, t: number): "unmixed" | HybridSet | "al
 const lines: Record<HybridSet, () => string> = {
   sp3: () => `sp3: four orange hybrid lobes to the corners of a tetrahedron, model angle ${degrees(modelAngle("sp3"))} degrees.`,
   sp2: () =>
-    `sp2: three orange lobes in a flat triangle, model angle ${degrees(modelAngle("sp2"))} degrees, and one cyan p orbital standing straight up through the plane.`,
+    `sp2: three orange lobes in a flat triangle, model angle ${degrees(modelAngle("sp2"))} degrees, and one blue p orbital standing straight up through the plane.`,
   sp: () =>
-    `sp: two orange lobes in a straight line, model angle ${degrees(modelAngle("sp"))} degrees, and two cyan p orbitals at right angles to the line and to each other.`,
+    `sp: two orange lobes in a straight line, model angle ${degrees(modelAngle("sp"))} degrees, and two blue p orbitals at right angles to the line and to each other.`,
 };
 
 export const hybridSets: SceneManifest<HybridSetsState> = {

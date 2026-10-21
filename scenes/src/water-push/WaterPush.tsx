@@ -2,7 +2,7 @@
 import { frameSize } from "../frame.ts";
 import { easeInOut, lerp, progress } from "../motion.ts";
 import type { SceneProps } from "../types.ts";
-import { DATA_FONT, Dot, DotsBeside, Letter, SharedPair, boss, electron, ink, pairAt } from "../dots/dots.tsx";
+import { DATA_FONT, Dot, DotsBeside, Letter, SharedPair, pink, blue, ink, pairAt } from "../dots/dots.tsx";
 import { BEATS } from "./manifest.ts";
 
 /** The class of the ring around the new O–H pair. */
@@ -45,19 +45,19 @@ export default function WaterPush({ t, aspect }: SceneProps) {
         <Dot key={i} at={p} r={r} />
       ))}
       {!lit && (
-        <text x={o.x + size * 0.48} y={o.y - size * 0.5} fill={boss} fontSize={size * 0.5} opacity={1 - moved} style={{ fontFamily: DATA_FONT }}>
+        <text x={o.x + size * 0.48} y={o.y - size * 0.5} fill={pink} fontSize={size * 0.5} opacity={1 - moved} style={{ fontFamily: DATA_FONT }}>
           −
         </text>
       )}
       <Letter at={ionAt} el={lit ? "H" : "H⁺"} size={size} colour={ink} />
       {arrowOpacity > 0 && (
-        <g opacity={arrowOpacity} stroke={electron} strokeWidth={8} fill="none">
+        <g opacity={arrowOpacity} stroke={blue} strokeWidth={8} fill="none">
           <path d={`M ${from.x} ${from.y} Q ${ctrl.x} ${ctrl.y} ${to.x} ${to.y}`} />
           <path d={`M ${to.x - 34} ${to.y - 14} L ${to.x} ${to.y} L ${to.x - 12} ${to.y - 38}`} />
         </g>
       )}
       {lit && (
-        <ellipse className={HIGHLIGHT} cx={(o.x + ionAt.x) / 2} cy={o.y} rx={ring.x} ry={ring.y} fill="none" stroke={electron} strokeWidth={ring.stroke} />
+        <ellipse className={HIGHLIGHT} cx={(o.x + ionAt.x) / 2} cy={o.y} rx={ring.x} ry={ring.y} fill="none" stroke={blue} strokeWidth={ring.stroke} />
       )}
     </svg>
   );
