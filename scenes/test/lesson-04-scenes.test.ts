@@ -41,9 +41,9 @@ const shows = (id: string, state: SceneState = {}, t?: number, aspect: Aspect = 
 describe("hybrid-sets", () => {
   const sp3 = "sp3: four orange hybrid lobes to the corners of a tetrahedron, model angle 109.5 degrees.";
   const sp2 =
-    "sp2: three orange lobes in a flat triangle, model angle 120 degrees, and one cyan p orbital standing straight up through the plane.";
+    "sp2: three orange lobes in a flat triangle, model angle 120 degrees, and one blue p orbital standing straight up through the plane.";
   const sp =
-    "sp: two orange lobes in a straight line, model angle 180 degrees, and two cyan p orbitals at right angles to the line and to each other.";
+    "sp: two orange lobes in a straight line, model angle 180 degrees, and two blue p orbitals at right angles to the line and to each other.";
 
   it("reads the spec's screen-reader line for the three sets", () => {
     expect(say("hybrid-sets", { set: "all" })).toBe(`${sp3} ${sp2} ${sp}`);

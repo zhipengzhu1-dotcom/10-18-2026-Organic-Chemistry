@@ -3,7 +3,7 @@
 import type { Cited } from "@astratron/content/data";
 import { frameSize } from "../frame.ts";
 import { panelBoxes, split } from "../lesson-06/layout.ts";
-import { fit, fontData, fontText, ink, muted, Placed, electron } from "../lesson-06/draw.tsx";
+import { fit, fontData, fontHand, ink, muted, Placed, blue } from "../lesson-06/draw.tsx";
 import { lesson6Structures } from "../lesson-06/structures.ts";
 import { easeOut, progress } from "../motion.ts";
 import { drawStructure, type Point } from "../structure/render.ts";
@@ -47,7 +47,7 @@ export default function AcetateBondLengths({ t, state, aspect, reducedMotion, ci
         );
         return (
           <g key={panel.name}>
-            <text x={head.x + head.w / 2} y={head.y + head.h / 2} textAnchor="middle" dominantBaseline="central" fill={ink} fontSize={unitSize * 0.05} fontWeight={700} style={{ fontFamily: fontText }}>
+            <text x={head.x + head.w / 2} y={head.y + head.h / 2} textAnchor="middle" dominantBaseline="central" fill={ink} fontSize={unitSize * 0.056} style={{ fontFamily: fontHand }}>
               {panel.name}
             </text>
             <Placed svg={drawing.svg} at={at} />
@@ -59,7 +59,7 @@ export default function AcetateBondLengths({ t, state, aspect, reducedMotion, ci
               const other = Object.entries(mids).find(([l]) => l !== line)![1];
               const spot = at.at(outward(mids[line], seg, other));
               return (
-                <text key={line} x={spot.x} y={spot.y} textAnchor="middle" dominantBaseline="central" fill={electron} opacity={reveal} fontSize={unitSize * 0.04} style={{ fontFamily: fontData }}>
+                <text key={line} x={spot.x} y={spot.y} textAnchor="middle" dominantBaseline="central" fill={blue} opacity={reveal} fontSize={unitSize * 0.04} style={{ fontFamily: fontData }}>
                   {value.display}
                 </text>
               );

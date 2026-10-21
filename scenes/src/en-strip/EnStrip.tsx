@@ -2,7 +2,7 @@
 import { frameSize, safeArea } from "../frame.ts";
 import { progress } from "../motion.ts";
 import type { SceneProps } from "../types.ts";
-import { CYAN, DATA_FONT, INK, LINE, MUTED } from "../lewis.ts";
+import { BLUE, DATA_FONT, INK, LINE, MUTED } from "../lewis.ts";
 import { highlights, shown, strip, type EnStripState } from "./manifest.ts";
 
 /** Columns of the strip: group 1, then groups 13–17 after a gap. */
@@ -51,14 +51,14 @@ export default function EnStrip({ t, state, aspect, reducedMotion, cited }: Scen
               width={cell - 2 * pad}
               height={cell - 2 * pad}
               fill={on ? "var(--at-paper, #ffffff)" : "none"}
-              stroke={on ? CYAN : LINE}
+              stroke={on ? BLUE : LINE}
               strokeWidth={cell * 0.03}
               strokeDasharray={on ? undefined : `${cell * 0.06} ${cell * 0.05}`}
             />
             <text x={x + cell / 2} y={y + cell * 0.42} fill={INK} fontSize={cell * 0.38} fontWeight={700} textAnchor="middle" dominantBaseline="central">
               {s.el}
             </text>
-            <text x={x + cell / 2} y={y + cell * 0.78} fill={on ? CYAN : MUTED} fontSize={cell * 0.22} textAnchor="middle" dominantBaseline="central" opacity={reveal}>
+            <text x={x + cell / 2} y={y + cell * 0.78} fill={on ? BLUE : MUTED} fontSize={cell * 0.22} textAnchor="middle" dominantBaseline="central" opacity={reveal}>
               {shown(cited, s.el)}
             </text>
           </g>

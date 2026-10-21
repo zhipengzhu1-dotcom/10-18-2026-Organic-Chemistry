@@ -1,7 +1,7 @@
 // lone-pair-fill (Lesson 2 s07, s10 reveal, u1-draw-acetaminophen-lone-pairs
 // reveal): a line-angle drawing marked "Lone pairs hidden". Atom by atom, each
 // N, O or halogen lights, a label reads its pattern ("O, 2 bonds → 2 lone
-// pairs") and the pairs appear as cyan dots; the chip changes to "Lone pairs
+// pairs") and the pairs appear as blue dots; the chip changes to "Lone pairs
 // shown". Counts come from the structure files (valence-checked at build time).
 import { expectedLonePairs } from "@astratron/content/valence";
 import type { Structure } from "@astratron/content";

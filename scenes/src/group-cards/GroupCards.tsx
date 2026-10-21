@@ -1,7 +1,7 @@
 // group-cards: a pure function of (t, state); see manifest.ts.
 import { frameSize, safeArea, type Box } from "../frame.ts";
 import { fgStructures } from "../functional-groups/structures.ts";
-import { BOLD_CSS, FONT_TEXT, INK, Molecule, placeMolecule } from "../functional-groups/Molecule.tsx";
+import { BOLD_CSS, FONT_HAND, INK, Molecule, placeMolecule } from "../functional-groups/Molecule.tsx";
 import type { Aspect, SceneProps } from "../types.ts";
 import { cardsOf, dealt, type CardsState } from "./manifest.ts";
 
@@ -56,7 +56,7 @@ export default function GroupCards({ t, state, aspect, reducedMotion }: ScenePro
               base={0.75}
               highlights={[{ atoms: card.group, amount: 1, tone: "bold" }]}
             />
-            <text x={b.x + b.w / 2} y={b.y + b.h - pad} textAnchor="middle" fontSize={namePx} fontWeight={700} fill={INK} fontFamily={FONT_TEXT}>
+            <text x={b.x + b.w / 2} y={b.y + b.h - pad} textAnchor="middle" fontSize={namePx * 1.1} fill={INK} fontFamily={FONT_HAND}>
               {card.name}
             </text>
           </g>

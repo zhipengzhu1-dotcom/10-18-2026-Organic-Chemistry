@@ -27,7 +27,7 @@ Scene contract and registry: `scenes.md`.
 
 ### Fonts and colours
 
-`video/src/remotion/Root.tsx` imports `site/src/styles/tokens.css` and the two `@fontsource-variable` fonts, and holds every frame with `delayRender` until both fonts load, so numbers render in JetBrains Mono. Change tokens or fonts in the site; the video follows (`video/test/remotion-root.test.ts`).
+`video/src/remotion/Root.tsx` imports `site/src/styles/tokens.css` and the three faces Scenes draw with (Patrick Hand for labels, Nunito for text, JetBrains Mono for numbers), and holds every frame with `delayRender` until each loads, so nothing renders in a fallback face. Kaushan Script is the site's wordmark only; Scenes never use it. Change tokens or fonts in the site; the video follows (`video/test/remotion-root.test.ts`). A face a Scene starts using must be added to `video/package.json` and the root.
 
 ### Sources sidecar
 
@@ -39,9 +39,13 @@ Scene contract and registry: `scenes.md`.
 
 ## Manim watch-only Scenes
 
-- Watch-only Scenes are silent, plain Manim renders: no editing pass, no music or sound effects (owner choice). `Text` only; LaTeX is not installed, so `Tex`/`MathTex` fail.
+- Watch-only Scenes are silent, plain Manim renders: no editing pass, no music or sound effects (owner choice; the paper re-render in #123 added none). `Text` only; LaTeX is not installed, so `Tex`/`MathTex` fail.
 - `pnpm scenes:render <id>` needs `uv` and `ffmpeg`/`ffprobe`; Manim 0.22.0 comes from `uv run --with`, never installed into the repo. Roughly 45 s per aspect for a 13 s clip at 1080p60.
-- Commit the outputs under `site/public/scenes/<id>/` and `scenes/manim/renders/<id>.json`. `scenes/test/manim-render.test.ts` (in `pnpm test`) re-hashes the inputs (script, fonts, props incl. cited values and tokens, Manim version, fps) and fails on a stale or missing render. Changing a cited value, a palette colour or a font therefore means re-rendering every affected watch-only Scene. The palette is `ARCADE_VIDEO_PALETTE` in `scenes/src/manim/pipeline.ts`, frozen when the site moved to Paper Notebook (#118) so editing `tokens.css` leaves Manim and Blender renders current; #123 re-renders them on paper. CI never runs Manim.
+- Commit the outputs under `site/public/scenes/<id>/` and `scenes/manim/renders/<id>.json`. `scenes/test/manim-render.test.ts` (in `pnpm test`) re-hashes the inputs (script, `paper.py`, fonts, doodles, props incl. cited values and tokens, Manim version, fps) and fails on a stale or missing render. Changing a cited value, a colour in `tokens.css`, `paper.py`, a font or a doodle therefore means re-rendering every affected watch-only Scene (`pnpm scenes:render`, about 15 min for all nine). CI never runs Manim.
+- Paper Notebook (#123): `videoPalette()` in `scenes/src/manim/pipeline.ts` reads every `--at-*` colour from the single `:root` of `site/src/styles/tokens.css`; the Blender share images use it too. `scenes/manim/paper.py` is the shared look every script imports right after Manim: ruled paper (rules every 0.42 units; the pink margin line on 16:9 only, as the site draws it only from 640 px up), the palette as `PAPER`, `INK`, `BLUE`, `BLUE_FILL`…, `marked()` (a marker fill a little off-register under its pen line), `doodle()` and `fonts()`. Marker fills always sit inside a pen line; text on paper is a pen ink, never a fill.
+- Faces in Manim: `HAND` (Patrick Hand) for labels and headings, `TEXT_FONT` (Nunito) for sentences, `MONO` (JetBrains Mono) for numbers and formulas. Patrick Hand has one weight (no `BOLD`) and a small x-height: set it about a fifth larger than the sans it replaces.
+- `scenes/manim/doodles/*.svg` are the six notebook doodles (flask, tubes, benzene, atom, sprig, beaker), redrawn from the prototype's sprite. Every colour in them must be `--at-ink` or a marker fill (`manim-render.test.ts` checks); the Blender share images import the same files.
+- star-forge's backdrop is ruled paper wide enough for the camera's travel, with doodles placed per aspect in the corners each beat leaves free; moving the camera or a beat means re-checking them (render, then look at frames across the clip, not just the poster).
 - One script can hold several Scene classes (`scenes/manim/lesson_03.py`). Watch-only Scenes have no states: a spec Scene with a parameter becomes one watch Scene per value (e.g. `mo-from-overlap-h2` / `-ethylene`).
 - The site plays only the 16:9 file; the 9:16 file ships for the future channel.
 - Phone fit: a 16:9 video plus choices plus feedback overflows a 390×844 screen. On any non-Explain Step the player shrinks the video to a card whenever it isn't playing (`shrinkWhenDone` in `StepPlayer.tsx`; a view with `tells` opts out); check the Step still fits with the design gate, or put the video on an Explain Step.

@@ -1,14 +1,17 @@
 // Electron-dot (Lewis) drawing pieces for Lesson 0's Scenes: atom letters and
-// every outer electron as a cyan dot. A shared pair (a bond) is two dots side
+// every outer electron as a blue dot. A shared pair (a bond) is two dots side
 // by side between its atoms; a lone pair is two dots beside one atom.
 // Sizes are in frame units (1920×1080 or 1080×1920), scaled by `unit`.
 import type { ReactNode } from "react";
 
 export const ink = "var(--at-ink, #1d1b26)";
-export const electron = "var(--at-blue, #0a64c2)";
+export const blue = "var(--at-blue, #0a64c2)";
 export const muted = "var(--at-ink-muted, #57536b)";
 export const line = "var(--at-ink-muted, #57536b)";
-export const boss = "var(--at-pink, #bd1278)";
+export const pink = "var(--at-pink, #bd1278)";
+/** Marker fills: too pale alone on paper, so always inside a pen line of the matching ink. */
+export const blueFill = "var(--at-blue-fill, #4dabff)";
+export const pinkFill = "var(--at-pink-fill, #ff70b8)";
 
 /**
  * One electron as a half-arrow, as MO diagrams draw them: ↑ (spin up) or ↓, the barb on one side
@@ -20,12 +23,14 @@ export function HalfArrow({ x, y, h, up, w = h * 0.09 }: { x: number; y: number;
   const tip = up ? top : bottom;
   const back = up ? h * 0.32 : -h * 0.32;
   const d = `M ${x} ${bottom} L ${x} ${top} M ${x} ${tip} L ${x - h * 0.22} ${tip + back}`;
-  return <path className={`electron ${up ? "up" : "down"}`} d={d} stroke={electron} strokeWidth={w} strokeLinecap="round" fill="none" />;
+  return <path className={`electron ${up ? "up" : "down"}`} d={d} stroke={blue} strokeWidth={w} strokeLinecap="round" fill="none" />;
 }
 
 /** Element symbols, formulas and numbers are set in the data face (design rule); body words in the text face. */
 export const DATA_FONT = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
 export const TEXT_FONT = "var(--at-font-text, 'Nunito', system-ui, sans-serif)";
+/** Labels and headings (a name, a title): the hand face, never for numbers. */
+export const HAND_FONT = "var(--at-font-hand, 'Patrick Hand', cursive)";
 
 export interface Pt {
   x: number;
@@ -56,7 +61,7 @@ export function Letter({ at, el, size, colour = ink, opacity = 1 }: { at: Pt; el
 }
 
 /** One electron. `kind` sets the class: "e" for an electron that belongs to the drawing, others for spares. */
-export function Dot({ at, r, kind = "e", colour = electron, opacity = 1 }: { at: Pt; r: number; kind?: string; colour?: string; opacity?: number }) {
+export function Dot({ at, r, kind = "e", colour = blue, opacity = 1 }: { at: Pt; r: number; kind?: string; colour?: string; opacity?: number }) {
   return <circle className={kind} cx={at.x} cy={at.y} r={r} fill={colour} opacity={opacity} />;
 }
 
@@ -107,7 +112,7 @@ export function Hit({ at, r, role, id, label, live, held }: { at: Pt; r: number;
   const data = role === "handle" ? { "data-handle": id } : { "data-target": id };
   return (
     <g role="button" tabIndex={0} aria-label={label} aria-pressed={role === "handle" ? !!held : undefined} {...data} className={`scene-${role}`}>
-      <circle cx={at.x} cy={at.y} r={r} fill="transparent" stroke={held ? electron : "none"} strokeWidth={6} strokeDasharray={held ? "18 12" : undefined} />
+      <circle cx={at.x} cy={at.y} r={r} fill="transparent" stroke={held ? blue : "none"} strokeWidth={6} strokeDasharray={held ? "18 12" : undefined} />
     </g>
   );
 }

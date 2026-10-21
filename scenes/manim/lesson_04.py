@@ -15,31 +15,19 @@ command writes (SCENE_PROPS). Render with `pnpm scenes:render hybrid-mixing`, ne
 import json
 import math
 import os
+import sys
 from pathlib import Path
 
 import numpy as np
 from manim import *  # noqa: F403  (idiomatic Manim)
 from manim.utils.rate_functions import ease_in_out_sine
 
-HERE = Path(__file__).resolve().parent
-PROPS = json.loads(Path(os.environ["SCENE_PROPS"]).read_text())
-PORTRAIT = PROPS["aspect"] == "9x16"
-TEXT = PROPS["text"]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from paper import *  # noqa: E402, F403  (after Manim: the palette names win)
 
-config.pixel_width, config.pixel_height = PROPS["width"], PROPS["height"]
-if PORTRAIT:
-    config.frame_width = 8.0
-    config.frame_height = 8.0 * PROPS["height"] / PROPS["width"]
-else:
-    config.frame_height = 8.0
-    config.frame_width = 8.0 * PROPS["width"] / PROPS["height"]
-config.frame_rate = PROPS["fps"]
-
-PAL = {k: ManimColor(v) for k, v in PROPS["palette"].items()}
-SPACE, INK, MUTED = PAL["at-space"], PAL["at-ink"], PAL["at-ink-muted"]
-CYAN, ORANGE = PAL["at-electron"], PAL["at-ignite"]
-config.background_color = SPACE
-MONO = "JetBrains Mono"
+# Each orbital colour as a pen line and the marker fill inside it.
+SKY = (BLUE, BLUE_FILL)  # s, p
+SUN = (ORANGE, ORANGE_FILL)  # the hybrids
 
 # ---- the hybrid model (scenes/src/hybrid-model/model.ts) ---------------------
 Y00 = 1 / (2 * math.sqrt(math.pi))
@@ -90,7 +78,8 @@ def hatch(shape, color, gap=0.13):
 
 
 def lobe(n, sign, axis2d, scale, color):
-    """One lobe as a filled outline laid along a screen direction; - lobes are hatched."""
+    """One lobe as a marker-filled pen outline laid along a screen direction; - lobes are hatched in pen."""
+    pen, fill = color
     length = float(np.linalg.norm(axis2d))
     d = axis2d / length if length > 1e-9 else np.array([0.0, 1.0])
     across = np.array([-d[1], d[0]])
@@ -98,9 +87,9 @@ def lobe(n, sign, axis2d, scale, color):
     half = profile(n, sign)
     ring = half + [(u, -v) for (u, v) in reversed(half)]
     pts = [np.array([*(scale * (u * along * d + v * across)), 0.0]) for (u, v) in ring]
-    shape = Polygon(*pts).set_stroke(color, 3).set_fill(color, 0.35 if sign > 0 else 0.08)
+    shape = Polygon(*pts).set_stroke(pen, PEN * 0.75).set_fill(fill, 0.75 if sign > 0 else 0.2)
     if sign < 0:
-        return VGroup(shape, hatch(shape, color))
+        return VGroup(shape, hatch(shape, pen))
     return VGroup(shape)
 
 
@@ -110,14 +99,14 @@ def orbital(n, axis2d, scale, color):
 
 def chip(text, color, size=24):
     t = Text(text, font=MONO, font_size=size, color=color)
-    box = SurroundingRectangle(t, buff=0.08, color=color, stroke_width=2).set_fill(SPACE, 1)
+    box = SurroundingRectangle(t, buff=0.08, color=color, stroke_width=2.5).set_fill(PAPER, 1)
     return VGroup(box, t)
 
 
 class HybridMixing(Scene):
     def construct(self):
-        with register_font(str(HERE / "fonts" / "SpaceGrotesk-wght.ttf")), \
-             register_font(str(HERE / "fonts" / "JetBrainsMono-wght.ttf")):
+        self.add(ruled())
+        with fonts():
             self.build()
         out = os.environ.get("TIMINGS_OUT")
         if out:
@@ -127,10 +116,11 @@ class HybridMixing(Scene):
         return float(self.renderer.time)
 
     def build(self):
-        FW, FH = config.frame_width, config.frame_height
         model = Text(TEXT["model"][0], font=MONO, font_size=26, color=MUTED)
         model_box = DashedVMobject(SurroundingRectangle(model, buff=0.12, color=MUTED, stroke_width=2), num_dashes=24)
         label = VGroup(model_box, model).to_corner(UL, buff=0.35)
+        if not PORTRAIT:
+            label.shift(RIGHT * 0.95)  # right of the margin line
         self.add(label)
 
         s_chip, p_chip, h_chip = TEXT["chips"]
@@ -140,12 +130,12 @@ class HybridMixing(Scene):
             spots = [np.array(p) for p in [(-1.8, 2.6, 0), (1.8, 2.6, 0), (-1.8, -2.6, 0), (1.8, -2.6, 0)]]
         else:
             spots = [np.array([x, 0.2, 0]) for x in (-5.0, -1.7, 1.7, 5.0)]
-        s_shape = Circle(radius=scale / 3).set_stroke(CYAN, 3).set_fill(CYAN, 0.35)
+        s_shape = Circle(radius=scale / 3).set_stroke(BLUE, PEN * 0.75).set_fill(BLUE_FILL, 0.75)
         p_dirs = [np.array([0.0, 1.0]), view((1, 0, 0), 35, -18), view((0, 0, 1), 35, -18)]
-        inputs = [VGroup(s_shape, chip(s_chip, CYAN).next_to(s_shape, DOWN, buff=0.35))]
+        inputs = [VGroup(s_shape, chip(s_chip, BLUE).next_to(s_shape, DOWN, buff=0.35))]
         for d in p_dirs:
-            orb = orbital(None, d, scale * 0.8, CYAN)
-            inputs.append(VGroup(orb, chip(p_chip, CYAN).next_to(orb, DOWN, buff=0.25)))
+            orb = orbital(None, d, scale * 0.8, SKY)
+            inputs.append(VGroup(orb, chip(p_chip, BLUE).next_to(orb, DOWN, buff=0.25)))
         for g, spot in zip(inputs, spots):
             g.move_to(spot)
         self.play(LaggedStart(*[FadeIn(g, scale=0.9) for g in inputs], lag_ratio=0.2), run_time=1.6)
@@ -154,7 +144,7 @@ class HybridMixing(Scene):
         # Slide together and blend.
         centre = ORIGIN + np.array([0, -0.1, 0])
         self.play(*[g.animate.move_to(centre).scale(0.6) for g in inputs], run_time=1.6, rate_func=ease_in_out_sine)
-        blend = Circle(radius=0.75).set_stroke(width=0).set_fill(ORANGE, 0.55).move_to(centre)
+        blend = Circle(radius=0.75).set_stroke(ORANGE, PEN * 0.75).set_fill(ORANGE_FILL, 0.8).move_to(centre)
         self.play(FadeOut(VGroup(*inputs), scale=0.7), FadeIn(blend, scale=0.6), run_time=1.0)
 
         # Four sp3 lobes swing out to the corners of a tetrahedron.
@@ -162,8 +152,8 @@ class HybridMixing(Scene):
         dirs = [d / math.sqrt(3) for d in dirs]
         big = scale * 1.25
         # Each orbital is built with its nucleus at the origin, then shifted onto the centre.
-        lobes = [orbital(3, d, big, ORANGE).shift(centre) for d in dirs]
-        starts = [orbital(3, d, big * 0.25, ORANGE).shift(centre) for d in dirs]
+        lobes = [orbital(3, d, big, SUN).shift(centre) for d in dirs]
+        starts = [orbital(3, d, big * 0.25, SUN).shift(centre) for d in dirs]
         self.play(FadeOut(blend), *[ReplacementTransform(a, b) for a, b in zip(starts, lobes)], run_time=2.0, rate_func=ease_in_out_sine)
         nucleus = Dot(centre, radius=0.12, color=INK)
         reach = max(r for (r, _) in profile(3, 1))  # the + lobe's tip, along its axis

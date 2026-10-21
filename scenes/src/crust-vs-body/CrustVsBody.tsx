@@ -3,7 +3,7 @@
 import { frameSize, safeArea } from "../frame.ts";
 import { easeOut, progress } from "../motion.ts";
 import type { SceneProps } from "../types.ts";
-import { DATA_FONT, TEXT_FONT, boss, electron, ink, line, muted } from "../dots/dots.tsx";
+import { DATA_FONT, HAND_FONT, TEXT_FONT, pink, pinkFill, blue, blueFill, ink, line, muted } from "../dots/dots.tsx";
 import { BODY, CRUST } from "./manifest.ts";
 
 /** Share of the axis length before the break. */
@@ -25,8 +25,8 @@ export default function CrustVsBody({ t, aspect, reducedMotion, cited }: ScenePr
   const grow = reducedMotion ? 1 : easeOut(progress(t, 0.1, 1.2));
 
   const rows = [
-    { label: "Earth's crust", value: crust, display: cited[CRUST]?.display ?? "", colour: boss },
-    { label: "Human body", value: body, display: cited[BODY]?.display ?? "", colour: electron },
+    { label: "Earth's crust", value: crust, display: cited[CRUST]?.display ?? "", colour: pink, fill: pinkFill },
+    { label: "Human body", value: body, display: cited[BODY]?.display ?? "", colour: blue, fill: blueFill },
   ];
   const rowH = wide ? 320 : 420;
   const top = wide ? area.y + 200 : area.y + 500;
@@ -37,7 +37,7 @@ export default function CrustVsBody({ t, aspect, reducedMotion, cited }: ScenePr
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%" aria-hidden="true" style={{ display: "block" }}>
-      <text x={width / 2} y={area.y + 60} fill={muted} fontSize={wide ? 68 : 64} textAnchor="middle" style={{ fontFamily: TEXT_FONT }}>
+      <text x={width / 2} y={area.y + 60} fill={muted} fontSize={wide ? 72 : 68} textAnchor="middle" style={{ fontFamily: HAND_FONT }}>
         Carbon, share by mass
       </text>
       {rows.map((row, i) => {
@@ -46,10 +46,10 @@ export default function CrustVsBody({ t, aspect, reducedMotion, cited }: ScenePr
         const labelAt = wide ? { x: axis.x - 30, y: y + barH / 2, anchor: "end" as const } : { x: axis.x, y: y - 40, anchor: "start" as const };
         return (
           <g key={row.label}>
-            <text x={labelAt.x} y={labelAt.y} fill={ink} fontSize={label} textAnchor={labelAt.anchor} dominantBaseline="central" style={{ fontFamily: TEXT_FONT }}>
+            <text x={labelAt.x} y={labelAt.y} fill={ink} fontSize={label} textAnchor={labelAt.anchor} dominantBaseline="central" style={{ fontFamily: HAND_FONT }}>
               {row.label}
             </text>
-            <rect className="bar" x={axis.x} y={y} width={w} height={barH} fill={row.colour} />
+            <rect className="bar" x={axis.x} y={y} width={w} height={barH} fill={row.fill} stroke={row.colour} strokeWidth={6} />
             <text x={axis.x + w + 24} y={y + barH / 2} fill={ink} fontSize={label} dominantBaseline="central" opacity={grow} style={{ fontFamily: DATA_FONT }}>
               {row.display}
             </text>

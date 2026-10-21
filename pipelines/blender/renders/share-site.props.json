@@ -6,21 +6,62 @@
   "samples": 256,
   "seed": 69,
   "palette": {
-    "at-space": "#0d0626",
-    "at-neb-1": "#ff4fd8",
-    "at-neb-2": "#b44dff",
-    "at-neb-3": "#2340ff",
-    "at-electron": "#3ee8ff",
-    "at-ignite": "#ff9a1f",
-    "at-ink": "#ffffff",
-    "at-ink-muted": "#b9a8e8",
-    "star-core": "#ffe2a8"
+    "at-paper": "#ffffff",
+    "at-rule": "#e3ecfa",
+    "at-margin": "#ffc2dc",
+    "at-ink": "#1d1b26",
+    "at-ink-muted": "#57536b",
+    "at-blue": "#0a64c2",
+    "at-green": "#1d7a3c",
+    "at-pink": "#bd1278",
+    "at-violet": "#5a3fd6",
+    "at-orange": "#a94a00",
+    "at-blue-fill": "#4dabff",
+    "at-green-fill": "#6fd486",
+    "at-pink-fill": "#ff70b8",
+    "at-violet-fill": "#9d8cff",
+    "at-orange-fill": "#ff9548",
+    "at-yellow-fill": "#ffd84d"
   },
   "fonts": {
-    "pixel": "pipelines/blender/fonts/PixelifySans-Regular.woff",
-    "text": "scenes/manim/fonts/SpaceGrotesk-wght.ttf",
+    "script": "pipelines/blender/fonts/KaushanScript-Regular.ttf",
+    "hand": "scenes/manim/fonts/PatrickHand-Regular.ttf",
     "data": "scenes/manim/fonts/JetBrainsMono-wght.ttf"
   },
+  "paper": {
+    "rule": 32,
+    "margin": 64
+  },
+  "doodles": [
+    {
+      "path": "scenes/manim/doodles/sprig.svg",
+      "x": 1115,
+      "y": 120,
+      "height": 190,
+      "angle": -12
+    },
+    {
+      "path": "scenes/manim/doodles/benzene.svg",
+      "x": 560,
+      "y": 112,
+      "height": 92,
+      "angle": 8
+    },
+    {
+      "path": "scenes/manim/doodles/flask.svg",
+      "x": 180,
+      "y": 522,
+      "height": 136,
+      "angle": -6
+    },
+    {
+      "path": "scenes/manim/doodles/beaker.svg",
+      "x": 1105,
+      "y": 540,
+      "height": 112,
+      "angle": 6
+    }
+  ],
   "molecules": [
     {
       "id": "water",
@@ -101,19 +142,19 @@
   "text": [
     {
       "text": "AstraTron",
-      "font": "pixel",
+      "font": "script",
       "size": 112,
-      "x": 72,
+      "x": 96,
       "y": 300,
-      "colour": "#ff9a1f"
+      "colour": "#1d1b26"
     },
     {
       "text": "Come build.",
-      "font": "text",
-      "size": 56,
-      "x": 76,
+      "font": "hand",
+      "size": 64,
+      "x": 104,
       "y": 392,
-      "colour": "#3ee8ff"
+      "colour": "#0a64c2"
     }
   ]
 }

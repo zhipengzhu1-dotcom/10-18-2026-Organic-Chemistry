@@ -1,5 +1,5 @@
 // carbonyl-sites: a pure function of t; see manifest.ts.
-import { BOSS, Contributors, DATA_FONT, ELECTRON, INK, MUTED, Molecule, TEXT_FONT, atomAt, drawn, frameOf, hybridOf, place, placeContributors } from "../contributors/draw.tsx";
+import { PINK, Contributors, DATA_FONT, BLUE, INK, MUTED, Molecule, TEXT_FONT, atomAt, drawn, frameOf, hybridOf, place, placeContributors } from "../contributors/draw.tsx";
 import { acetone, acetonePolar } from "../contributors/structures.ts";
 import { frameSize, type Box } from "../frame.ts";
 import { easeInOut, easeOut, lerp, progress } from "../motion.ts";
@@ -77,17 +77,17 @@ export default function CarbonylSites({ t, aspect }: SceneProps<Record<string, n
         </text>
         <Molecule placed={hybrid} dashed={["b2"]} />
       </g>
-      {label({ x: c.x + 0.55 * unit, y: c.y }, "δ+", "electron-poor", ELECTRON)}
-      {label({ x: o.x + 0.55 * unit, y: o.y }, "δ−", "electron-rich", BOSS)}
+      {label({ x: c.x + 0.55 * unit, y: c.y }, "δ+", "electron-poor", BLUE)}
+      {label({ x: o.x + 0.55 * unit, y: o.y }, "δ−", "electron-rich", PINK)}
 
       <g opacity={progress(t, 4.2, 4.6)}>
-        <circle cx={pair.x - dot * 1.6} cy={pair.y} r={dot} fill={ELECTRON} />
-        <circle cx={pair.x + dot * 1.6} cy={pair.y} r={dot} fill={ELECTRON} />
+        <circle cx={pair.x - dot * 1.6} cy={pair.y} r={dot} fill={BLUE} />
+        <circle cx={pair.x + dot * 1.6} cy={pair.y} r={dot} fill={BLUE} />
         <text x={pair.x} y={pair.y + L.font * 1.1} fontSize={L.font * 0.8} textAnchor="middle" fill={INK} fontFamily={TEXT_FONT}>
           an electron source
         </text>
       </g>
-      <g opacity={arrow} stroke={ELECTRON} strokeWidth={4} fill="none" strokeLinecap="round">
+      <g opacity={arrow} stroke={BLUE} strokeWidth={4} fill="none" strokeLinecap="round">
         <path d={`M${tail.x},${tail.y} Q${bend.x},${bend.y} ${head.x},${head.y}`} strokeDasharray="2 12" />
         <polyline points={`${tip(0.5, unit * 0.16)} ${head.x},${head.y} ${tip(-0.5, unit * 0.16)}`} />
       </g>

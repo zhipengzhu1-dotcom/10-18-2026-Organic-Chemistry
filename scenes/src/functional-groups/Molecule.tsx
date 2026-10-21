@@ -7,11 +7,13 @@ import type { Structure } from "@astratron/content";
 import type { Box } from "../frame.ts";
 import { drawStructure, type Drawing, type Point } from "../structure/render.ts";
 
-export const CYAN = "var(--at-blue, #0a64c2)";
+export const BLUE = "var(--at-blue, #0a64c2)";
 export const INK = "var(--at-ink, #1d1b26)";
 export const MUTED = "var(--at-ink-muted, #57536b)";
 export const FONT_TEXT = "var(--at-font-text, 'Nunito', system-ui, sans-serif)";
 export const FONT_DATA = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
+/** Group names and other labels: the hand face. */
+export const FONT_HAND = "var(--at-font-hand, 'Patrick Hand', cursive)";
 
 /** Halo around a region's atoms and along its inner links, in drawing units (one link is 60). */
 export const HALO = 26;
@@ -67,7 +69,7 @@ export interface Highlight {
   atoms: string[];
   /** 0 (not shown) to 1 (fully shown). */
   amount: number;
-  /** lit: cyan copy, tinted halo and a solid cyan ring; plain: ink copy and a thin muted ring; bold: thick ink copy only. */
+  /** lit: blue copy, tinted halo and a solid blue ring; plain: ink copy and a thin muted ring; bold: thick ink copy only. */
   tone: "lit" | "plain" | "bold";
 }
 
@@ -127,18 +129,18 @@ export function Molecule({ structure, placed, highlights, idBase, base }: Props)
         <g key={i} opacity={amount}>
           {tone === "lit" && (
             // Group opacity, so overlapping halo shapes tint as one even wash.
-            <g fill={CYAN} opacity={0.16}>
+            <g fill={BLUE} opacity={0.16}>
               {shapesOf(atoms)}
             </g>
           )}
           <g
             clipPath={`url(#${idBase}-clip-${i})`}
-            color={tone === "lit" ? CYAN : INK}
+            color={tone === "lit" ? BLUE : INK}
             className={tone === "bold" ? "fg-bold" : undefined}
             dangerouslySetInnerHTML={{ __html: inner }}
           />
           {tone !== "bold" && (
-            <g mask={`url(#${idBase}-mask-${i})`} fill="none" stroke={tone === "lit" ? CYAN : MUTED} strokeWidth={tone === "lit" ? 7 : 4}>
+            <g mask={`url(#${idBase}-mask-${i})`} fill="none" stroke={tone === "lit" ? BLUE : MUTED} strokeWidth={tone === "lit" ? 7 : 4}>
               {shapesOf(atoms)}
             </g>
           )}

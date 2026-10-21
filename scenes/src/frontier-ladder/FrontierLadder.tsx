@@ -1,7 +1,7 @@
 // frontier-ladder: a pure function of (state, cited); see manifest.ts. Static: nothing depends on t.
 import { frameSize, safeArea } from "../frame.ts";
 import type { SceneProps } from "../types.ts";
-import { DATA_FONT, HalfArrow, TEXT_FONT, boss, electron, ink, line, muted } from "../dots/dots.tsx";
+import { DATA_FONT, HalfArrow, TEXT_FONT, pink, blue, ink, line, muted } from "../dots/dots.tsx";
 import { FLOWS, ladders, type FrontierLadderState, type Ladder } from "./manifest.ts";
 
 /** The Scene frame's own ground (paper), behind a label that sits over an arrow. */
@@ -78,7 +78,7 @@ export default function FrontierLadder({ state, aspect, cited }: SceneProps<Fron
           <Bracket x={x + gapSide * (levelW / 2 + 30)} y1={l.lumo.y} y2={l.homo.y} side={-gapSide} label={`gap ${l.gap.display}`} size={size * 0.8} />
         )}
         {state.ring === "ethylene-homo" && l.molecule.key === "ethylene" && (
-          <ellipse className="ring" cx={x} cy={l.homo.y} rx={levelW * 0.7} ry={size * 1.3} fill="none" stroke={boss} strokeWidth={6} strokeDasharray="16 10" />
+          <ellipse className="ring" cx={x} cy={l.homo.y} rx={levelW * 0.7} ry={size * 1.3} fill="none" stroke={pink} strokeWidth={6} strokeDasharray="16 10" />
         )}
       </g>
     );
@@ -92,7 +92,7 @@ export default function FrontierLadder({ state, aspect, cited }: SceneProps<Fron
     const x1 = xs[f.from] + dir * (levelW / 2 + 10);
     const x2 = xs[f.to] - dir * (levelW / 2 + 10);
     const solid = id === smaller;
-    const colour = solid ? electron : muted;
+    const colour = solid ? blue : muted;
     // Bend the curve so the two flows don't overlap: one bows up-left, the other down-right.
     const cx = (x1 + x2) / 2 + (k === 0 ? -1 : 1) * 40;
     const cy = Math.min(from.y, to.y) + (k === 0 ? 40 : 140);

@@ -1,6 +1,6 @@
 // pi-twist: a pure function of (state); see manifest.ts.
 import { frameSize, safeArea, type Box } from "../frame.ts";
-import { Chip, ink, ModelTag, OrbitalDefs, orbitalLobes, type Drawable } from "../hybrid-model/draw.tsx";
+import { Chip, fill as marker, ink, ModelTag, OrbitalDefs, orbitalLobes, type Drawable } from "../hybrid-model/draw.tsx";
 import { project, type Vec3, type ViewTurn } from "../hybrid-model/model.ts";
 import type { Aspect, SceneProps } from "../types.ts";
 import { overlapAt, overlapWord, type PiTwistState } from "./manifest.ts";
@@ -65,8 +65,8 @@ export default function PiTwist({ state, aspect, cited }: SceneProps<PiTwistStat
       key,
       node: (
         <g key={key}>
-          <circle cx={p.x} cy={p.y} r={r} fill={element === "C" ? carbon : hydrogen} stroke="#140f2b" strokeWidth={Math.max(2, r * 0.1)} />
-          <text x={p.x} y={p.y} fill="#140f2b" fontSize={r * 1.1} fontWeight={700} textAnchor="middle" dominantBaseline="central">
+          <circle cx={p.x} cy={p.y} r={r} fill={element === "C" ? carbon : hydrogen} stroke="var(--at-ink, #1d1b26)" strokeWidth={Math.max(2, r * 0.1)} />
+          <text x={p.x} y={p.y} fill="var(--at-ink, #1d1b26)" fontSize={r * 1.1} fontWeight={700} textAnchor="middle" dominantBaseline="central">
             {element}
           </text>
         </g>
@@ -78,7 +78,7 @@ export default function PiTwist({ state, aspect, cited }: SceneProps<PiTwistStat
     drawables.push({
       z: Math.min(p.z, q.z) - 0.002,
       key,
-      node: <line key={key} x1={p.x} y1={p.y} x2={q.x} y2={q.y} stroke="#c8c8d0" strokeWidth={scale * 0.08} strokeLinecap="round" />,
+      node: <line key={key} x1={p.x} y1={p.y} x2={q.x} y2={q.y} stroke="var(--at-ink-muted, #57536b)" strokeOpacity={0.45} strokeWidth={scale * 0.08} strokeLinecap="round" />,
     });
   };
   stick(c1, c2, "cc");
@@ -89,7 +89,7 @@ export default function PiTwist({ state, aspect, cited }: SceneProps<PiTwistStat
     [c2, pRight, "p2"],
   ] as const) {
     const p = screen(at);
-    for (const d of orbitalLobes({ kind: "p", axis, colour: "electron", x: p.x, y: p.y, scale: scale * LOBE, turn: VIEW, key }))
+    for (const d of orbitalLobes({ kind: "p", axis, colour: "blue", x: p.x, y: p.y, scale: scale * LOBE, turn: VIEW, key }))
       drawables.push({ ...d, z: d.z * LOBE + p.z });
   }
   ball(c1, "C", "c1");
@@ -117,8 +117,9 @@ export default function PiTwist({ state, aspect, cited }: SceneProps<PiTwistStat
       {drawables.map((d) => d.node)}
       {chip && <Chip x={stage.x + stage.w / 2} y={stage.y + stage.h * 0.94} text={chip} colour="ink" size={label} />}
       <g data-overlap={overlap.toFixed(6)}>
-        <rect x={track.x} y={track.y} width={track.w} height={track.h} fill="none" stroke={ink("line")} strokeWidth={4} />
-        <rect x={fill.x} y={fill.y} width={fill.w} height={fill.h} fill={ink("electron")} />
+        {/* A blue marker fill inside the track's pen line (paper: a fill never stands alone). */}
+        <rect x={fill.x} y={fill.y} width={fill.w} height={fill.h} fill={marker("blue")} />
+        <rect x={track.x} y={track.y} width={track.w} height={track.h} fill="none" stroke={ink("blue")} strokeWidth={4} />
         <text
           x={vertical ? bar.x + bar.w / 2 : bar.x}
           y={vertical ? bar.y + bar.h * 0.92 : bar.y + bar.h * 0.18}
@@ -126,7 +127,7 @@ export default function PiTwist({ state, aspect, cited }: SceneProps<PiTwistStat
           fontSize={vertical ? Math.min(label, bar.w * 0.13) : label}
           textAnchor={vertical ? "middle" : "start"}
           dominantBaseline="central"
-          fontFamily="var(--at-font-data, monospace)"
+          fontFamily="var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)"
         >
           π overlap (model)
         </text>
