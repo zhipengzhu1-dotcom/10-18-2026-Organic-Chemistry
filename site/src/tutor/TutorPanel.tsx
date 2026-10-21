@@ -285,8 +285,9 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
                         <Digits text={t.text || (t.live ? "Writing…" : "")} />
                       </p>
                       {t.meta && (
+                        // The whole line is in the data face (tutor.css).
                         <small className="tutor-meta">
-                          <Digits text={t.meta.model} /> · {t.meta.effort} effort · <span className="data">{(t.meta.ms / 1000).toFixed(1)}</span> s
+                          {t.meta.model} · {t.meta.effort} effort · {(t.meta.ms / 1000).toFixed(1)} s
                         </small>
                       )}
                     </li>

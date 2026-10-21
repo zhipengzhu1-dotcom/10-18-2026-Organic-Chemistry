@@ -1,5 +1,6 @@
 // The 3D card's SVG layers, drawn from the same projection as the WebGL canvas (layout.ts):
-// - MoleculeStill: atoms and bonds as shaded circles and lines, back to front. It is the
+// - MoleculeStill: atoms as shaded circles in a pen outline and bonds as pen-ink lines, back to
+//   front, matching the WebGL layer (MoleculeCanvas). It is the
 //   pre-rendered still shown on devices without WebGL, and while the WebGL layer loads.
 // - MoleculeOverlay: every atom's letter, the picked atoms, the keyboard cursor and the measurement
 //   drawn on the molecule.
@@ -41,13 +42,13 @@ export function MoleculeStill({ molecule, placed, trueScale, size }: { molecule:
                     y1={a.y}
                     x2={other.x}
                     y2={other.y}
-                    stroke="var(--at-ink-muted, #57536b)"
+                    stroke="var(--at-ink, #1d1b26)"
                     strokeWidth={Math.max(3, a.r * 0.45)}
                     strokeLinecap="round"
                   />
                 );
               })}
-          <circle cx={a.x} cy={a.y} r={a.r} fill={`url(#still-${a.element})`} stroke="var(--at-ink, #1d1b26)" strokeWidth="1.5" />
+          <circle cx={a.x} cy={a.y} r={a.r} fill={`url(#still-${a.element})`} stroke="var(--at-ink, #1d1b26)" strokeWidth="2" />
         </g>
       ))}
     </svg>

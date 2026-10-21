@@ -1121,11 +1121,13 @@
     width: 100%;
     flex: 1;
     min-height: 110px;
-    border: var(--at-border-strong) solid var(--at-ink-muted);
-    box-shadow: 6px 6px 0 var(--at-ink);
-    /* A pale blue wash, not bare paper, so white hydrogens never sit on white (#71). Text over it
-       is pen ink. */
-    background: color-mix(in srgb, var(--at-blue-fill) 14%, var(--at-paper));
+    /* Paper in a hand-drawn pen frame (#122), offset on a marker fill since it's read, not pressed.
+       Atoms carry their own pen outline (MoleculeCanvas), so white hydrogens read on white. */
+    border: var(--at-pen) solid var(--at-ink);
+    /* The overlays keep 14 px (the wobble's short side) off each corner's shallow edge. */
+    border-radius: var(--at-wobble);
+    box-shadow: 5px 5px 0 var(--at-blue-fill);
+    background: var(--at-paper);
     overflow: hidden;
   }
   .molecule-frame {
@@ -1145,12 +1147,6 @@
     inset: 0;
     width: 100%;
     height: 100%;
-  }
-  .molecule-still line {
-    stroke: var(--at-ink-muted); /* the WebGL layer's bond colour (MoleculeCanvas) */
-  }
-  .molecule-still circle {
-    stroke: var(--at-ink);
   }
   .molecule-overlay {
     pointer-events: none;
@@ -1197,9 +1193,9 @@
   }
   .molecule-readout {
     position: absolute;
-    top: 6px;
+    top: 14px;
     left: 8px;
-    right: 112px;
+    right: 126px;
     margin: 0;
     pointer-events: none;
     font: 400 16px/1.25 var(--at-font-data);
@@ -1211,7 +1207,7 @@
   }
   .molecule-scalebar {
     position: absolute;
-    left: 8px;
+    left: 16px;
     bottom: 6px;
     pointer-events: none;
     font: 400 16px/1 var(--at-font-data);
@@ -1226,7 +1222,7 @@
   .molecule-turn {
     position: absolute;
     top: 0;
-    right: 0;
+    right: 14px;
     display: flex;
   }
   .molecule-btn {
@@ -1282,7 +1278,7 @@
   .orbital-chips {
     position: absolute;
     right: 8px;
-    bottom: 6px;
+    bottom: 14px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -1380,7 +1376,7 @@
   .molecule-badge {
     position: absolute;
     right: 8px;
-    bottom: 6px;
+    bottom: 14px;
     margin: 0;
     padding: 4px 8px;
     pointer-events: none;

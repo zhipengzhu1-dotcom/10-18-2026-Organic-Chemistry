@@ -1,5 +1,5 @@
-/* Explore in 3D (#71): a full-screen dialog on the Arcade Cosmos tokens (#59), holding the same
-   3D card as the Step (#68), grown to fill the screen. */
+/* Explore in 3D (#71): a full-screen paper dialog (Paper Notebook, #122), holding the same 3D card
+   as the Step (#68), grown to fill the screen: the card brings its own pen frame. */
 .explore-open { align-self: flex-start; }
 dialog.explore {
   width: 100vw;
@@ -24,6 +24,6 @@ dialog.explore::backdrop { background: var(--at-paper); }
 }
 .explore-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .explore-head h2 { margin: 0; font: 600 22px/1.2 var(--at-font-text); }
-.explore-close { background: transparent; color: var(--at-ink); border-color: var(--at-ink); box-shadow: none; padding: 0; }
+.explore-close { background: var(--at-paper); color: var(--at-ink); border-color: var(--at-ink); box-shadow: none; padding: 0; }
 .explore .molecule { flex: 1 1 auto; max-height: none; min-height: min(60dvh, 520px); }
 .explore-words { margin: 0; color: var(--at-ink-muted); font-size: 16px; }
