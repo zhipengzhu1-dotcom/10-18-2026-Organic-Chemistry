@@ -1,18 +1,11 @@
 ---
-// The site's display switches: theme (Dark / Light) and Reduce motion.
-// Choices are stored in localStorage (`at-theme`, `at-motion`) and applied
-// before paint by the inline script in Base.astro. Not shown in the Step player.
+// The site's display switch: Reduce motion. The choice is stored in localStorage
+// (`at-motion`) and applied before paint by the inline script in Base.astro.
+// There is one theme (paper), so no theme switch. Not shown in the Step player.
 ---
 
 <section class="prefs" aria-labelledby="prefs-h">
   <h2 id="prefs-h">Display</h2>
-  <div class="prefs-row">
-    <span id="theme-l">Theme</span>
-    <div class="seg" role="group" aria-labelledby="theme-l">
-      <button type="button" data-theme-choice="dark" aria-pressed="true">Dark</button>
-      <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
-    </div>
-  </div>
   <div class="prefs-row">
     <span class="switch">
       <span id="motion-l">Reduce motion</span>
@@ -26,7 +19,7 @@
   .prefs {
     margin-top: 40px;
     padding-top: 16px;
-    border-top: var(--at-border) solid var(--at-line);
+    border-top: var(--at-border) solid var(--at-ink-muted);
   }
   .prefs h2 {
     font-size: 20px;
@@ -62,18 +55,6 @@
       return null;
     }
   };
-
-  const themeButtons = document.querySelectorAll<HTMLButtonElement>("[data-theme-choice]");
-  const showTheme = () =>
-    themeButtons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themeChoice === root.dataset.theme)));
-  themeButtons.forEach((b) =>
-    b.addEventListener("click", () => {
-      root.dataset.theme = b.dataset.themeChoice;
-      store("at-theme", b.dataset.themeChoice!);
-      showTheme();
-    }),
-  );
-  showTheme();
 
   const motion = document.querySelector<HTMLButtonElement>("[data-motion-switch]")!;
   const osReduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;

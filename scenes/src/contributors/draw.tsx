@@ -7,12 +7,12 @@ import type { Box } from "../frame.ts";
 import { drawStructure, type Drawing, type Point } from "../structure/render.ts";
 import { drawContributors } from "../structure/contributors.ts";
 
-export const INK = "var(--at-ink, #ffffff)";
-export const MUTED = "var(--at-ink-muted, #b9a8e8)";
-export const ELECTRON = "var(--at-electron, #3ee8ff)";
-export const BOSS = "var(--at-boss, #ff5fd8)";
-export const LINE = "var(--at-line, #6a4bd1)";
-export const TEXT_FONT = "var(--at-font-text, 'Space Grotesk', system-ui, sans-serif)";
+export const INK = "var(--at-ink, #1d1b26)";
+export const MUTED = "var(--at-ink-muted, #57536b)";
+export const ELECTRON = "var(--at-blue, #0a64c2)";
+export const BOSS = "var(--at-pink, #bd1278)";
+export const LINE = "var(--at-ink-muted, #57536b)";
+export const TEXT_FONT = "var(--at-font-text, 'Nunito', system-ui, sans-serif)";
 export const DATA_FONT = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
 
 /** Where the dashed half of a partial bond sits, beside the solid line (drawing units). */

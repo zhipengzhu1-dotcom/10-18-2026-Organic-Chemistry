@@ -2,7 +2,7 @@
 // - the static HTML of every Lesson has its Step text and no answers, and every page says noindex;
 // - every interactive Step's answer controls and Check button are reachable with Tab;
 // - with reduced motion, every Scene a Step opens on rests paused on its poster frame.
-// The walk through every Lesson and a Practice Set with axe in both themes is design.spec.ts and
+// The walk through every Lesson and a Practice Set with axe is design.spec.ts and
 // practice-set.spec.ts; the no-answers scan is course-map.spec.ts; the JS budget is `pnpm budget:js`.
 import { expect, test, type Page } from "@playwright/test";
 import { buildContent, contentRoot } from "@astratron/content";

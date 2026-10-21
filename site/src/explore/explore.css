@@ -9,10 +9,10 @@ dialog.explore {
   margin: 0;
   padding: 0;
   border: 0;
-  background: var(--at-space);
+  background: var(--at-paper);
   color: var(--at-ink);
 }
-dialog.explore::backdrop { background: var(--at-space); }
+dialog.explore::backdrop { background: var(--at-paper); }
 .explore-body {
   display: flex;
   flex-direction: column;

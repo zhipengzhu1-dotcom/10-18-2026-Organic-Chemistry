@@ -4,11 +4,11 @@
 // Sizes are in frame units (1920×1080 or 1080×1920), scaled by `unit`.
 import type { ReactNode } from "react";
 
-export const ink = "var(--at-ink, #ffffff)";
-export const electron = "var(--at-electron, #3ee8ff)";
-export const muted = "var(--at-ink-muted, #b9a8e8)";
-export const line = "var(--at-line, #6a4bd1)";
-export const boss = "var(--at-boss, #ff5fd8)";
+export const ink = "var(--at-ink, #1d1b26)";
+export const electron = "var(--at-blue, #0a64c2)";
+export const muted = "var(--at-ink-muted, #57536b)";
+export const line = "var(--at-ink-muted, #57536b)";
+export const boss = "var(--at-pink, #bd1278)";
 
 /**
  * One electron as a half-arrow, as MO diagrams draw them: ↑ (spin up) or ↓, the barb on one side
@@ -25,7 +25,7 @@ export function HalfArrow({ x, y, h, up, w = h * 0.09 }: { x: number; y: number;
 
 /** Element symbols, formulas and numbers are set in the data face (design rule); body words in the text face. */
 export const DATA_FONT = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
-export const TEXT_FONT = "var(--at-font-text, 'Space Grotesk', system-ui, sans-serif)";
+export const TEXT_FONT = "var(--at-font-text, 'Nunito', system-ui, sans-serif)";
 
 export interface Pt {
   x: number;

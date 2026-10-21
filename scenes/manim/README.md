@@ -16,7 +16,7 @@ Each render writes these files. Commit all of them:
 - `site/public/scenes/<id>/<id>-<16x9|9x16>.mp4`: H.264, yuv420p, faststart, no audio track.
 - `….poster.jpg`: the frame at the manifest's `poster` time.
 - `….sources.json`: the sources sidecar. It lists each cited number, its citation and the times it is on screen, plus a paste-ready description.
-- `scenes/manim/renders/<id>.json`: a sha256 of the inputs (the script, the fonts, each aspect's props including the cited values and the colours from `site/src/styles/tokens.css`, the Manim version and the fps), with frame counts and timings.
+- `scenes/manim/renders/<id>.json`: a sha256 of the inputs (the script, the fonts, each aspect's props including the cited values and the colours from `videoPalette()` in `scenes/src/manim/pipeline.ts`, frozen to the Arcade values until #123 re-renders on paper, the Manim version and the fps), with frame counts and timings.
 
 CI never runs Manim. `scenes/test/manim-render.test.ts` re-hashes the inputs and fails if a committed render is stale or a file is missing.
 

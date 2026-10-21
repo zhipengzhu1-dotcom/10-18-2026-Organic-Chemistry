@@ -10,7 +10,7 @@ export function Embedded({ drawing, box }: { drawing: Drawing; box: Box }) {
   return (
     <g
       transform={`translate(${x} ${y}) scale(${scale})`}
-      style={{ color: "var(--at-ink, #ffffff)", ["--lone-pair" as string]: "var(--at-electron, #3ee8ff)" }}
+      style={{ color: "var(--at-ink, #1d1b26)", ["--lone-pair" as string]: "var(--at-blue, #0a64c2)" }}
       fontFamily="var(--at-font-data, 'JetBrains Mono'), ui-monospace, monospace"
       dangerouslySetInnerHTML={{ __html: inner }}
     />

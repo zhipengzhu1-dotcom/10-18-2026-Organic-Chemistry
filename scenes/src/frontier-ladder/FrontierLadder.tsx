@@ -4,8 +4,8 @@ import type { SceneProps } from "../types.ts";
 import { DATA_FONT, HalfArrow, TEXT_FONT, boss, electron, ink, line, muted } from "../dots/dots.tsx";
 import { FLOWS, ladders, type FrontierLadderState, type Ladder } from "./manifest.ts";
 
-/** The Scene frame's own ground (both themes), behind a label that sits over an arrow. */
-const surface = "var(--at-surface, #1a0f3d)";
+/** The Scene frame's own ground (paper), behind a label that sits over an arrow. */
+const surface = "var(--at-paper, #ffffff)";
 
 /** A vertical bracket from y1 to y2 at x, ticks pointing toward `side` (−1 left, +1 right); its label runs up the far side. */
 function Bracket({ x, y1, y2, side, label, size, dashed = false, colour = muted, pill = false }: { x: number; y1: number; y2: number; side: number; label: string; size: number; dashed?: boolean; colour?: string; pill?: boolean }) {

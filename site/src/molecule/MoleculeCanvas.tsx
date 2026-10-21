@@ -23,6 +23,7 @@ import {
 import type { MoleculeUse } from "@astratron/content";
 import { centroid, type Matrix3 } from "@astratron/content/molecule";
 import { radius } from "./layout.ts";
+import { token } from "./token.ts";
 
 // Only a Step that shows orbitals fetches the GLB loader and its meshes (#70).
 const OrbitalLobes = lazy(() => import("./OrbitalLobes.tsx"));
@@ -49,7 +50,6 @@ const STICK = 0.11;
 const sphere = new SphereGeometry(1, 40, 28);
 /** The plane sheet draws after the atoms and before the orbital lobes. */
 const SHEET_RENDER_ORDER = 5;
-const sheetMaterial = new MeshBasicMaterial({ color: "#b9a8e8", transparent: true, opacity: 0.22, side: DoubleSide, depthWrite: false });
 const stick = new CylinderGeometry(1, 1, 1, 20);
 const yAxis = new Vector3(0, 1, 0);
 
@@ -83,7 +83,11 @@ function Molecule({ molecule, rotation, scale, trueScale, children, onOrbitalsDr
       ),
     [molecule, matcap],
   );
-  const bondMaterial = useMemo(() => new MeshMatcapMaterial({ color: "#c8c8d0", matcap }), [matcap]);
+  const bondMaterial = useMemo(() => new MeshMatcapMaterial({ color: token("--at-ink-muted", "#57536b"), matcap }), [matcap]);
+  const sheetMaterial = useMemo(
+    () => new MeshBasicMaterial({ color: token("--at-ink-muted", "#57536b"), transparent: true, opacity: 0.22, side: DoubleSide, depthWrite: false }),
+    [],
+  );
 
   // Atom positions about the molecule's centre (Å), and each bond's stick placement.
   const centre = useMemo(() => centroid(molecule.atoms), [molecule]);

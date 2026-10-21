@@ -6,9 +6,9 @@ import { expect, it } from "vitest";
 const css = readFileSync(new URL("./structure.css", import.meta.url), "utf8");
 const rule = (selector: string) => css.match(new RegExp(`${selector.replace(/\./g, "\\.")}\\s*\\{([^}]*)\\}`))?.[1] ?? "";
 
-it("flag rings, the flag list and the shown push are orange (--at-ignite) and dashed", () => {
-  expect(rule(".flag-ring")).toMatch(/stroke: var\(--at-ignite\).*stroke-dasharray/s);
-  expect(rule(".arrow-flags")).toMatch(/dashed var\(--at-ignite\)/);
-  expect(rule(".push-arrow.shown")).toMatch(/stroke: var\(--at-ignite\); stroke-dasharray/);
-  expect(rule(".arrowhead.shown")).toMatch(/fill: var\(--at-ignite\)/);
+it("flag rings, the flag list and the shown push are orange (--at-orange) and dashed", () => {
+  expect(rule(".flag-ring")).toMatch(/stroke: var\(--at-orange\).*stroke-dasharray/s);
+  expect(rule(".arrow-flags")).toMatch(/dashed var\(--at-orange\)/);
+  expect(rule(".push-arrow.shown")).toMatch(/stroke: var\(--at-orange\); stroke-dasharray/);
+  expect(rule(".arrowhead.shown")).toMatch(/fill: var\(--at-orange\)/);
 });

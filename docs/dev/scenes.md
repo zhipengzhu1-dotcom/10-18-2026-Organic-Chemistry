@@ -8,7 +8,7 @@ Rules live in ADR 0001 (Scenes are pure, Remotion is video-only) and ADR 0002 (n
 - Draw in `frameSize(aspect)` units (1920×1080 or 1080×1920) with an SVG `viewBox`, and lay out per aspect so nothing crops. The site shows 16:9 only; 9:16 exists for video.
 - Easing and randomness come from `scenes/src/motion.ts` (`seededRandom`, `easeInOut`, …).
 - `pnpm lint:scenes` bans timers, `useFrame`, state/effect hooks, wall clocks, `Math.random`, CSS/SMIL animation and any Remotion import in `scenes/src`. `useMemo`/`useRef` are fine. Escape hatch for a false positive: a line ending `// scene-purity: ok, <reason>`.
-- Colours: name a design token with its dark-theme fallback, `var(--at-x, #hex)`. `scenes/test/token-fallbacks.test.ts` pins every fallback to `site/src/styles/tokens.css`.
+- Colours: name a Paper Notebook token with its value as the fallback, `var(--at-x, #hex)` (e.g. `var(--at-blue, #0a64c2)`). `scenes/test/token-fallbacks.test.ts` pins every fallback to the single `:root` block of `site/src/styles/tokens.css`. The Arcade names (`space`, `electron`, `ignite`, `boss`, …) are gone; map them with the spec #117 role table.
 - Nothing loops in the Step player: a Scene autoplays once on entry, Replay plays it again (`site/src/engine/scene-clock.ts`). Reduced motion (OS or `<html data-motion="reduced">`) opens paused on `poster.t`.
 - `controls: false` hides Play/Replay/Scrub; `checkManifests` allows it only for `duration <= 5` (WCAG 2.2.2).
 

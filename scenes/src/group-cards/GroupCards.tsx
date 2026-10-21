@@ -48,7 +48,7 @@ export default function GroupCards({ t, state, aspect, reducedMotion }: ScenePro
         const placed = placeMolecule(fgStructures[card.structure], { x: b.x + pad, y: b.y + pad, w: b.w - 2 * pad, h: b.h - 3 * pad - namePx }, 1.6);
         return (
           <g key={card.name} opacity={amount} transform={`translate(0 ${(1 - amount) * 30})`}>
-            <rect x={b.x} y={b.y} width={b.w} height={b.h} rx={14} fill="var(--at-raised, #241552)" stroke="var(--at-line, #6a4bd1)" strokeWidth={3} />
+            <rect x={b.x} y={b.y} width={b.w} height={b.h} rx={14} fill="var(--at-paper, #ffffff)" stroke="var(--at-ink-muted, #57536b)" strokeWidth={3} />
             <Molecule
               structure={fgStructures[card.structure]}
               placed={placed}

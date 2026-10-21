@@ -7,10 +7,10 @@ import type { Box } from "../frame.ts";
 import { pushArrow } from "../structure/arrows.ts";
 import type { Drawing, Point } from "../structure/render.ts";
 
-export const ink = "var(--at-ink, #ffffff)";
-export const electron = "var(--at-electron, #3ee8ff)";
-export const muted = "var(--at-ink-muted, #b9a8e8)";
-export const fontText = "var(--at-font-text, 'Space Grotesk', system-ui, sans-serif)";
+export const ink = "var(--at-ink, #1d1b26)";
+export const electron = "var(--at-blue, #0a64c2)";
+export const muted = "var(--at-ink-muted, #57536b)";
+export const fontText = "var(--at-font-text, 'Nunito', system-ui, sans-serif)";
 export const fontData = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
 
 /** How a drawing of `width`×`height` sits centred in `box`: its scale (capped) and offset; `at` maps a drawing point into the frame. */

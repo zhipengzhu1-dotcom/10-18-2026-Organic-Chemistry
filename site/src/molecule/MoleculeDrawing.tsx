@@ -41,13 +41,13 @@ export function MoleculeStill({ molecule, placed, trueScale, size }: { molecule:
                     y1={a.y}
                     x2={other.x}
                     y2={other.y}
-                    stroke="#c8c8d0"
+                    stroke="var(--at-ink-muted, #57536b)"
                     strokeWidth={Math.max(3, a.r * 0.45)}
                     strokeLinecap="round"
                   />
                 );
               })}
-          <circle cx={a.x} cy={a.y} r={a.r} fill={`url(#still-${a.element})`} stroke="#140f2b" strokeWidth="1.5" />
+          <circle cx={a.x} cy={a.y} r={a.r} fill={`url(#still-${a.element})`} stroke="var(--at-ink, #1d1b26)" strokeWidth="1.5" />
         </g>
       ))}
     </svg>

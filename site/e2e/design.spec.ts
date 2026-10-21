@@ -1,14 +1,14 @@
-// The Arcade Cosmos design system in the browser (#59): themes and motion
-// preferences, type rules, tap targets, the Step player chrome and feedback
-// panel, motion rules, and the axe gate on every page in both themes.
+// The Paper Notebook design system in the browser (#117): one theme (paper) and the motion
+// preference, type rules, tap targets, the Step player chrome and feedback
+// panel, motion rules, and the axe gate on every page.
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { allPages, LESSON_0, LESSON_1, playablePaths, playThrough, THEMES, useTheme } from "./site.ts";
+import { allPages, LESSON_0, LESSON_1, playablePaths, playThrough } from "./site.ts";
 import { typeViolations } from "./type-rules.ts";
 
 const PHONE = { width: 390, height: 844 };
 
-/** A token's computed colour, e.g. token(page, "boss") → "rgb(255, 95, 216)". */
+/** A token's computed colour, e.g. token(page, "pink") → "rgb(189, 18, 120)". */
 const token = (page: Page, name: string) =>
   page.evaluate((n) => {
     const probe = document.createElement("i");
@@ -53,106 +53,118 @@ const motion = (page: Page) =>
     return out;
   });
 
-test.describe("theme and motion preferences", () => {
-  test("follow the OS by default", async ({ page }) => {
-    await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
+test.describe("paper and motion preferences", () => {
+  test("motion follows the OS by default", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     await expect(page.locator("html")).toHaveAttribute("data-motion", "reduced");
-    await page.emulateMedia({ colorScheme: "dark", reducedMotion: "no-preference" });
+    await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.reload();
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await expect(page.locator("html")).toHaveAttribute("data-motion", "full");
   });
 
-  test("the site's switches override the OS and stick across pages", async ({ page }) => {
-    await page.emulateMedia({ colorScheme: "dark", reducedMotion: "no-preference" });
+  test("no theme switch; a stored at-theme or a dark OS changes nothing", async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("at-theme", "dark"));
+    await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/");
-    await page.getByRole("button", { name: "Light" }).click();
+    await expect(page.getByRole("button", { name: /^(Dark|Light)$/ })).toHaveCount(0);
+    await expect(page.locator("html")).not.toHaveAttribute("data-theme");
+    await expect(page.locator("html")).toHaveCSS("color-scheme", "light");
+    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(255, 255, 255)");
+    await expect(page.locator("body")).toHaveCSS("color", await token(page, "ink"));
+  });
+
+  test("the Reduce motion switch overrides the OS and sticks across pages", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
     await page.getByRole("switch", { name: "Reduce motion" }).click();
     await expect(page.getByRole("switch", { name: "Reduce motion" })).toHaveAttribute("aria-checked", "true");
     await page.goto(LESSON_1);
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     await expect(page.locator("html")).toHaveAttribute("data-motion", "reduced");
-    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(243, 237, 255)");
+  });
+
+  test("the body is ruled paper, with the pink margin line only from 640px up", async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await page.goto("/");
+    const bg = () => page.locator("body").evaluate((b) => getComputedStyle(b).backgroundImage);
+    expect(await bg()).toContain("repeating-linear-gradient");
+    expect(await bg()).toContain(await token(page, "margin"));
+    await page.setViewportSize(PHONE);
+    expect(await bg()).toContain("repeating-linear-gradient");
+    expect(await bg()).not.toContain(await token(page, "margin"));
   });
 });
 
-for (const theme of THEMES) {
-  test.describe(`${theme} theme`, () => {
-    test.beforeEach(({ page }) => useTheme(page, theme));
-
-    test("every page passes axe, the type rules and 48px tap targets", async ({ page }) => {
-      const pages = await allPages(page);
-      expect(pages).toContain(LESSON_0);
-      for (const path of pages) {
-        await page.goto(path);
-        await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-        const faces = await page.evaluate(async () => {
-          await document.fonts.ready;
-          return [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family.replace(/["']/g, ""));
-        });
-        expect(faces, `${path}: self-hosted fonts load`).toEqual(expect.arrayContaining(["Space Grotesk Variable"]));
-        const axe = await new AxeBuilder({ page })
-          .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-          .analyze();
-        expect(axe.violations.map((v) => `${path}: ${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);
-        expect(await typeViolations(page), path).toEqual([]);
-        expect(await smallTargets(page), path).toEqual([]);
-      }
-    });
-
-    // One test per Lesson (and pinned Practice Set), so they run in parallel and each has its own time.
-    for (const lesson of playablePaths())
-      test(`every Step and feedback panel passes axe and the type rules: ${lesson}`, async ({ page }) => {
-        test.setTimeout(180_000);
-        await page.goto(lesson);
-        await playThrough(page, async (step) => {
-          const label = `${lesson} ${step}`;
-          // Open the Source note (if the Step has one) so its numbers are checked too. The Step is settled
-          // (playThrough waits for the answer key), so what is counted here is what gets clicked.
-          const note = page.locator("details.source-note:not([open]) summary");
-          if (await note.count()) await note.click();
-          await page.waitForTimeout(250); // let the panel's entry finish before axe reads colours
-          const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
-          expect(axe.violations.map((v) => `${label}: ${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);
-          expect(await typeViolations(page), label).toEqual([]);
-          expect(await smallTargets(page), label).toEqual([]);
-        });
+test.describe("paper", () => {
+  test("every page passes axe, the type rules and 48px tap targets", async ({ page }) => {
+    const pages = await allPages(page);
+    expect(pages).toContain(LESSON_0);
+    for (const path of pages) {
+      await page.goto(path);
+      const faces = await page.evaluate(async () => {
+        await document.fonts.ready;
+        return [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family.replace(/["']/g, ""));
       });
-
-    test("feedback is icon + words: ✓ solid cyan, ✗ dashed magenta + Hint, → plain border + answer", async ({
-      page,
-    }) => {
-      await page.goto(LESSON_0);
-      const panel = page.getByRole("status").locator(".fb");
-      const choose = (name: string) =>
-        page.getByRole("group", { name: "Choices" }).getByRole("button", { name, exact: true }).click();
-      const check = () => page.getByRole("button", { name: "Check" }).click();
-      const next = () => page.getByRole("button", { name: "Continue" }).click();
-      const looks = async (style: string, colour: string, icon: string, words: string) => {
-        await expect(panel).toHaveCSS("border-top-style", style);
-        await expect(panel).toHaveCSS("border-top-color", await token(page, colour));
-        await expect(panel.locator(".ic")).toHaveText(icon);
-        await expect(panel).toContainText(words);
-      };
-
-      // Lesson 0 s01 is a Hook prediction: any guess gets the reveal.
-      await choose("about 5%");
-      await check();
-      await looks("solid", "ink-muted", "→", "Answer:");
-      // s07 is a Check Problem: a wrong pick gets its Hint, then the right one.
-      await page.goto(`${LESSON_0}#s07`);
-      await expect(page.getByText("Step 7 of 9")).toBeVisible();
-      await choose("Carbon's outer shell is already full.");
-      await check();
-      await looks("dashed", "boss", "✗", "Not quite. A full shell is 8.");
-      await choose("Gaining or losing 4 electrons is too hard, so sharing is the cheaper way to fill its shell.");
-      await check();
-      await looks("solid", "electron", "✓", "4 is the most electrons any atom in the row has to move.");
-    });
+      expect(faces, `${path}: self-hosted fonts load`).toEqual(expect.arrayContaining(["Nunito Variable", "Patrick Hand"]));
+      const axe = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+        .analyze();
+      expect(axe.violations.map((v) => `${path}: ${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);
+      expect(await typeViolations(page), path).toEqual([]);
+      expect(await smallTargets(page), path).toEqual([]);
+    }
   });
-}
+
+  // One test per Lesson (and pinned Practice Set), so they run in parallel and each has its own time.
+  for (const lesson of playablePaths())
+    test(`every Step and feedback panel passes axe and the type rules: ${lesson}`, async ({ page }) => {
+      test.setTimeout(180_000);
+      await page.goto(lesson);
+      await playThrough(page, async (step) => {
+        const label = `${lesson} ${step}`;
+        // Open the Source note (if the Step has one) so its numbers are checked too. The Step is settled
+        // (playThrough waits for the answer key), so what is counted here is what gets clicked.
+        const note = page.locator("details.source-note:not([open]) summary");
+        if (await note.count()) await note.click();
+        await page.waitForTimeout(250); // let the panel's entry finish before axe reads colours
+        const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
+        expect(axe.violations.map((v) => `${label}: ${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);
+        expect(await typeViolations(page), label).toEqual([]);
+        expect(await smallTargets(page), label).toEqual([]);
+      });
+    });
+
+  test("feedback is icon + words: ✓ solid green, ✗ dashed pink + Hint, → plain pen line + answer", async ({
+    page,
+  }) => {
+    await page.goto(LESSON_0);
+    const panel = page.getByRole("status").locator(".fb");
+    const choose = (name: string) =>
+      page.getByRole("group", { name: "Choices" }).getByRole("button", { name, exact: true }).click();
+    const check = () => page.getByRole("button", { name: "Check" }).click();
+    const next = () => page.getByRole("button", { name: "Continue" }).click();
+    const looks = async (style: string, colour: string, icon: string, words: string) => {
+      await expect(panel).toHaveCSS("border-top-style", style);
+      await expect(panel).toHaveCSS("border-top-color", await token(page, colour));
+      await expect(panel.locator(".ic")).toHaveText(icon);
+      await expect(panel).toContainText(words);
+    };
+
+    // Lesson 0 s01 is a Hook prediction: any guess gets the reveal.
+    await choose("about 5%");
+    await check();
+    await looks("solid", "ink-muted", "→", "Answer:");
+    // s07 is a Check Problem: a wrong pick gets its Hint, then the right one.
+    await page.goto(`${LESSON_0}#s07`);
+    await expect(page.getByText("Step 7 of 9")).toBeVisible();
+    await choose("Carbon's outer shell is already full.");
+    await check();
+    await looks("dashed", "pink", "✗", "Not quite. A full shell is 8.");
+    await choose("Gaining or losing 4 electrons is too hard, so sharing is the cheaper way to fill its shell.");
+    await check();
+    await looks("solid", "green", "✓", "4 is the most electrons any atom in the row has to move.");
+  });
+});
 
 test.describe("Step player on a phone", () => {
   test.use({ viewport: PHONE, hasTouch: true });

@@ -17,7 +17,7 @@ const meta = pageMeta({ path: Astro.url.pathname, unitId });
 ---
 
 <!doctype html>
-<html lang="en" data-theme="dark" data-motion="full">
+<html lang="en" data-motion="full">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -44,9 +44,9 @@ const meta = pageMeta({ path: Astro.url.pathname, unitId });
     <meta name="twitter:image" content={meta.image.url} />
     <meta name="twitter:image:alt" content={meta.image.alt} />
     <!--
-      Theme and motion before first paint. The site's switches (Preferences.astro)
-      store `at-theme` (dark | light) and `at-motion` (reduced) in localStorage;
-      with nothing stored the OS setting decides. Reduced motion is on if either says so.
+      Motion before first paint. The site's switch (Preferences.astro) stores `at-motion`
+      (reduced) in localStorage; reduced motion is on if it or the OS says so.
+      There is one theme (paper): a stored `at-theme` from the old site is ignored.
     -->
     <script is:inline>
       (() => {
@@ -59,8 +59,6 @@ const meta = pageMeta({ path: Astro.url.pathname, unitId });
         };
         const os = (q) => matchMedia(q).matches;
         const root = document.documentElement;
-        const theme = read("at-theme");
-        root.dataset.theme = theme === "light" || theme === "dark" ? theme : os("(prefers-color-scheme: light)") ? "light" : "dark";
         root.dataset.motion = read("at-motion") === "reduced" || os("(prefers-reduced-motion: reduce)") ? "reduced" : "full";
       })();
     </script>

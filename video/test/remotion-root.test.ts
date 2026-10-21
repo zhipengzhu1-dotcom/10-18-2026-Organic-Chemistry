@@ -10,7 +10,7 @@ describe("the Remotion root", () => {
   it("loads the site's tokens.css and its two self-hosted fonts, not copied values", () => {
     expect(root).toMatch(/import ".*site\/src\/styles\/tokens\.css";/);
     expect(root).toContain('import "@fontsource-variable/jetbrains-mono/index.css";');
-    expect(root).toContain('import "@fontsource-variable/space-grotesk/index.css";');
+    expect(root).toContain('import "@fontsource-variable/nunito/index.css";');
     expect(root).not.toMatch(/#[0-9a-fA-F]{6}/);
   });
 

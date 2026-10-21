@@ -9,9 +9,9 @@ import { molecule } from "../lesson-02/molecules.ts";
 import { innerSvg, stageFor, transformOn, type Stage } from "../lesson-02/place.ts";
 import { TIMES, type EthanolState } from "./manifest.ts";
 
-const ink = "var(--at-ink, #ffffff)";
-const muted = "var(--at-ink-muted, #b9a8e8)";
-const electron = "var(--at-electron, #3ee8ff)";
+const ink = "var(--at-ink, #1d1b26)";
+const muted = "var(--at-ink-muted, #57536b)";
+const electron = "var(--at-blue, #0a64c2)";
 const mono = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
 const text = "var(--at-font-text, system-ui, sans-serif)";
 

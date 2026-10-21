@@ -12,19 +12,15 @@ import { useEffect, useMemo } from "react";
 import { Color, FrontSide, Mesh, ShaderMaterial, type BufferGeometry, type Matrix4 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import type { OrbitalUse } from "@astratron/content";
+import { token } from "./token.ts";
 
 /** Lobes draw after the atoms (renderOrder 0). */
 export const LOBE_RENDER_ORDER = 10;
 /** How opaque a solid lobe is; hatched stripes alternate between this and a fifth of it. */
 const OPACITY = 0.5;
 
-/** The design tokens the lobes use (cyan for electrons / +, orange for σ / −), read from the page. */
-function token(name: string, fallback: string): string {
-  if (typeof document === "undefined") return fallback;
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
-}
 
-/** Lesson 4: colour says the orbital's kind and the pattern its sign. Lesson 8: + solid cyan, − hatched orange. */
+/** Lesson 4: colour says the orbital's kind and the pattern its sign. Lesson 8: + solid blue, − hatched orange. */
 export function lobeLook(style: OrbitalUse["style"], sign: "+" | "-", density = false): { colour: "electron" | "ignite"; hatched: boolean } {
   const hatched = sign === "-" && !density;
   if (style === "sigma") return { colour: "ignite", hatched };
@@ -94,7 +90,7 @@ export interface OrbitalLobesProps {
 export default function OrbitalLobes({ orbitals, centre, onDrawn }: OrbitalLobesProps) {
   const gltfs = useLoader(GLTFLoader, orbitals.map((o) => o.mesh));
   const lobes = useMemo(() => {
-    const colours = { electron: token("--at-electron-fill", "#3ee8ff"), ignite: token("--at-ignite-fill", "#ff9a1f") };
+    const colours = { electron: token("--at-blue-fill", "#4dabff"), ignite: token("--at-orange-fill", "#ff9548") };
     const out: Lobe[] = [];
     orbitals.forEach((o, i) => {
       gltfs[i].scene.updateMatrixWorld(true);

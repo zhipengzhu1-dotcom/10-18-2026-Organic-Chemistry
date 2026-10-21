@@ -8,12 +8,12 @@ export type Ink = "ignite" | "electron";
 
 export const ink = (which: Ink | "ink" | "muted" | "line" | "surface") =>
   ({
-    ignite: "var(--at-ignite, #ff9a1f)",
-    electron: "var(--at-electron, #3ee8ff)",
-    ink: "var(--at-ink, #ffffff)",
-    muted: "var(--at-ink-muted, #b9a8e8)",
-    line: "var(--at-line, #6a4bd1)",
-    surface: "var(--at-surface, #1a0f3d)",
+    ignite: "var(--at-orange, #a94a00)",
+    electron: "var(--at-blue, #0a64c2)",
+    ink: "var(--at-ink, #1d1b26)",
+    muted: "var(--at-ink-muted, #57536b)",
+    line: "var(--at-ink-muted, #57536b)",
+    surface: "var(--at-paper, #ffffff)",
   })[which];
 
 /** How opaque a lobe's inside is: solid (+), hatched (− , under its stripes) and empty. */
