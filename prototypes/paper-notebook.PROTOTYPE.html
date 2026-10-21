@@ -1,0 +1,692 @@
+<!doctype html>
+<!--
+  PROTOTYPE: the Paper Notebook design system, a living style sheet to replace Arcade Cosmos.
+  Question it answers: does a white-paper notebook look with vibrant marker colours, and motion
+  held below 24 fps, feel right before we spec the redesign? Open this file in a browser.
+  Reference: paper-front-end-design.png. Throwaway: the spec takes the tokens, not this file.
+-->
+<html lang="en" data-motion="full" data-paper="ruled">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Paper Notebook</title>
+<!-- Prototype only: the site would self-host these with @fontsource. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Patrick+Hand&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  /* paper */
+  --pn-paper: #ffffff;
+  --pn-rule: #e3ecfa; /* ruled lines, decoration only */
+  --pn-margin: #ffc2dc; /* the margin line, decoration only */
+  /* pen ink (text-safe on paper, all ≥ 5:1) */
+  --pn-ink: #1d1b26;
+  --pn-ink-muted: #57536b;
+  --pn-blue: #0a64c2; /* electrons, bonds, links */
+  --pn-violet: #5a3fd6;
+  --pn-green: #1d7a3c; /* correct */
+  --pn-orange: #a94a00;
+  --pn-pink: #bd1278; /* not quite (never red) */
+  /* marker fills: under 3:1 on paper, so a fill always carries a pen outline; ink on every fill ≥ 6:1 */
+  --pn-blue-fill: #4dabff;
+  --pn-violet-fill: #9d8cff;
+  --pn-green-fill: #6fd486;
+  --pn-orange-fill: #ff9548;
+  --pn-pink-fill: #ff70b8;
+  --pn-yellow-fill: #ffd84d; /* highlighter + sticky notes */
+  /* shape */
+  --pn-pen: 2.5px;
+  --pn-wobble: 255px 14px 225px 14px / 14px 225px 14px 255px; /* a hand-drawn box */
+  --pn-wobble-2: 14px 225px 14px 255px / 255px 14px 225px 14px;
+  --pn-tap: 48px;
+  /* type */
+  --pn-font-script: "Kaushan Script", cursive; /* wordmark + one hero word, 40px and up */
+  --pn-font-hand: "Patrick Hand", "Comic Sans MS", cursive; /* headings + UI labels, 18px and up */
+  --pn-font-text: "Nunito", system-ui, sans-serif; /* body, molecule names */
+  --pn-font-data: "JetBrains Mono", ui-monospace, monospace; /* formulas, numbers */
+  /* motion: target durations; frames and stepped curves are derived from --fps in JS */
+  --pn-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--pn-paper); color: var(--pn-ink); }
+body {
+  font: 400 17px/1.55 var(--pn-font-text);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+/* Paper: white, with faint rules (or dots) that never compete with ink. */
+html[data-paper="ruled"] body {
+  background-image:
+    linear-gradient(90deg, transparent 63px, var(--pn-margin) 63px, var(--pn-margin) 65px, transparent 65px),
+    repeating-linear-gradient(180deg, transparent 0 31px, var(--pn-rule) 31px 32px);
+}
+html[data-paper="dots"] body {
+  background-image: radial-gradient(circle at 1px 1px, #d5def0 1.2px, transparent 1.6px);
+  background-size: 24px 24px;
+}
+@media (max-width: 640px) { html[data-paper="ruled"] body { background-image: repeating-linear-gradient(180deg, transparent 0 31px, var(--pn-rule) 31px 32px); } }
+
+.data { font-family: var(--pn-font-data); }
+a { color: var(--pn-blue); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--pn-blue); outline-offset: 3px; border-radius: 6px; }
+
+/* ---------- layout ---------- */
+.bar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center;
+  padding: 10px 16px 10px 84px;
+  background: color-mix(in srgb, var(--pn-paper) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: var(--pn-pen) solid var(--pn-ink);
+}
+@media (max-width: 640px) { .bar { padding-left: 16px; } }
+.wordmark { font: 400 34px/1 var(--pn-font-script); margin: 0 auto 0 0; }
+.wordmark .dot { color: var(--pn-pink); }
+.ctl { display: flex; align-items: center; gap: 6px; font: 18px/1 var(--pn-font-hand); }
+.seg { display: inline-flex; border: var(--pn-pen) solid var(--pn-ink); border-radius: 999px; overflow: hidden; }
+.seg button {
+  font: 17px/1 var(--pn-font-hand); border: 0; background: none; color: var(--pn-ink);
+  min-height: 36px; padding: 0 11px; cursor: pointer;
+}
+.seg button + button { border-left: 1.5px solid var(--pn-ink); }
+.seg button[aria-pressed="true"] { background: var(--pn-yellow-fill); }
+.seg button.off { color: var(--pn-ink-muted); }
+
+main { max-width: 1120px; margin: 0 auto; padding: 24px 16px 80px 84px; }
+@media (max-width: 640px) { main { padding-left: 16px; } }
+section.sheet { margin: 56px 0; }
+.sheet > h2 {
+  font: 400 34px/1.1 var(--pn-font-hand); margin: 0 0 6px;
+  display: flex; align-items: baseline; gap: 12px;
+}
+.sheet > h2 .n {
+  font: 600 15px/1 var(--pn-font-data); color: var(--pn-ink);
+  background: var(--pn-yellow-fill); border: 2px solid var(--pn-ink); border-radius: 999px; padding: 6px 9px;
+}
+.sheet > p.lede { margin: 0 0 22px; max-width: 64ch; color: var(--pn-ink-muted); }
+.grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+
+/* ---------- hero ---------- */
+.cover { position: relative; display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; align-items: center; min-height: 420px; }
+@media (max-width: 820px) { .cover { grid-template-columns: 1fr; } }
+.cover h1 { font: 400 clamp(56px, 9vw, 104px)/0.95 var(--pn-font-script); margin: 0; letter-spacing: -1px; }
+.cover p { font-size: 19px; max-width: 44ch; }
+.cover .doodles { position: relative; height: 400px; }
+.cover .doodles svg { position: absolute; }
+
+/* ---------- swatches ---------- */
+.swatch { border: var(--pn-pen) solid var(--pn-ink); border-radius: var(--pn-wobble); padding: 12px; background: var(--pn-paper); }
+.swatch .chip-col { height: 64px; border: 2px solid var(--pn-ink); border-radius: var(--pn-wobble-2); margin-bottom: 10px; }
+.swatch .name { font: 20px/1.1 var(--pn-font-hand); }
+.swatch .meta { font: 13px/1.4 var(--pn-font-data); color: var(--pn-ink-muted); }
+.swatch .use { font-size: 14px; color: var(--pn-ink-muted); margin-top: 4px; }
+
+/* ---------- type ---------- */
+.type-row { display: grid; grid-template-columns: 170px 1fr; gap: 16px; align-items: baseline; padding: 12px 0; border-bottom: 1.5px dashed #c9d3e6; }
+@media (max-width: 640px) { .type-row { grid-template-columns: 1fr; gap: 2px; } }
+.type-row .k { font: 13px/1.4 var(--pn-font-data); color: var(--pn-ink-muted); }
+
+/* ---------- components ---------- */
+.btn {
+  --press: var(--pn-step-press, var(--pn-ease-out));
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: var(--pn-tap); padding: 0 22px;
+  font: 400 21px/1 var(--pn-font-hand); color: var(--pn-ink);
+  background: var(--pn-paper);
+  border: var(--pn-pen) solid var(--pn-ink); border-radius: var(--pn-wobble);
+  box-shadow: 3px 3px 0 var(--pn-ink);
+  cursor: pointer; text-decoration: none; user-select: none;
+  transition: transform var(--pn-dur-press, 100ms) var(--press), box-shadow var(--pn-dur-press, 100ms) var(--press);
+}
+.btn:active:not(:disabled) { transform: translate(2px, 2px) scale(0.97); box-shadow: 1px 1px 0 var(--pn-ink); }
+.btn-primary { background: var(--pn-blue-fill); }
+.btn-go { background: var(--pn-orange-fill); }
+.btn-ghost { box-shadow: none; border-style: dashed; }
+.btn-ghost:active:not(:disabled) { transform: scale(0.97); box-shadow: none; }
+.btn:disabled { color: var(--pn-ink-muted); border-color: var(--pn-ink-muted); box-shadow: none; border-style: dashed; cursor: not-allowed; }
+.btn-block { width: 100%; }
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover:not(:disabled):not(:active) { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--pn-ink); }
+}
+
+.label {
+  display: inline-block; font: 17px/1 var(--pn-font-hand); letter-spacing: 0.5px; text-transform: uppercase;
+  border: 2px solid var(--pn-ink); padding: 5px 8px 4px; background: var(--pn-paper);
+}
+.label.violet { background: #ece8ff; color: var(--pn-violet); border-color: var(--pn-violet); }
+.label.green { background: #e3f7e8; color: var(--pn-green); border-color: var(--pn-green); }
+.label.pink { background: #ffe6f2; color: var(--pn-pink); border-color: var(--pn-pink); }
+
+mark.hl {
+  color: inherit; padding: 0 3px; border-radius: 3px 8px 4px 9px;
+  background: linear-gradient(100deg, transparent 0.5%, var(--pn-yellow-fill) 2%, var(--pn-yellow-fill) 97%, transparent 99%);
+}
+
+/* Index card: a Unit tile, with a strip of washi tape. */
+.card {
+  position: relative; display: block; color: inherit; text-decoration: none;
+  background: var(--pn-paper);
+  border: var(--pn-pen) solid var(--pn-ink); border-radius: var(--pn-wobble);
+  padding: 22px 18px 18px;
+  box-shadow: 5px 5px 0 var(--tint, var(--pn-blue-fill));
+  transition: transform var(--pn-dur-ui, 200ms) var(--pn-step-ui, var(--pn-ease-out)), box-shadow var(--pn-dur-ui, 200ms) var(--pn-step-ui, var(--pn-ease-out));
+}
+.card::before {
+  content: ""; position: absolute; top: -11px; left: 50%; width: 88px; height: 22px; translate: -50% 0; rotate: -3deg;
+  background: color-mix(in srgb, var(--tint, var(--pn-blue-fill)) 55%, transparent);
+  border-left: 2px dotted rgba(0,0,0,.15); border-right: 2px dotted rgba(0,0,0,.15);
+}
+@media (hover: hover) and (pointer: fine) {
+  a.card:hover { transform: rotate(-0.8deg) translateY(-3px); box-shadow: 7px 8px 0 var(--tint, var(--pn-blue-fill)); }
+}
+a.card:active { transform: scale(0.98); }
+.card .num { font: 600 14px/1 var(--pn-font-data); color: var(--pn-ink-muted); }
+.card h3 { font: 400 27px/1.1 var(--pn-font-hand); margin: 8px 0 6px; }
+.card p { margin: 0; font-size: 15px; color: var(--pn-ink-muted); }
+.card.soon { border-style: dashed; box-shadow: none; color: var(--pn-ink-muted); }
+.card.soon::before { display: none; }
+
+/* Sticky note: the Continue card. */
+.sticky {
+  background: var(--pn-yellow-fill); border: 2px solid var(--pn-ink);
+  padding: 18px 18px 16px; rotate: -1.2deg; max-width: 360px;
+  box-shadow: 0 10px 14px -10px rgba(29,27,38,.45);
+  border-radius: 2px 2px 18px 2px;
+}
+.sticky .k { font: 17px/1 var(--pn-font-hand); text-transform: uppercase; letter-spacing: .5px; }
+.sticky h3 { font: 400 28px/1.1 var(--pn-font-hand); margin: 6px 0 4px; }
+.sticky p { margin: 0 0 14px; font-size: 15px; }
+
+/* Multiple-choice: hand-drawn bubbles, filled with a marker scribble when picked. */
+.options { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.opt {
+  display: grid; grid-template-columns: 30px 1fr; gap: 12px; align-items: center;
+  min-height: var(--pn-tap); padding: 10px 14px; width: 100%; text-align: left;
+  font: 600 17px/1.3 var(--pn-font-text); color: var(--pn-ink);
+  background: var(--pn-paper); border: 2px solid var(--pn-ink); border-radius: var(--pn-wobble-2);
+  cursor: pointer;
+  transition: transform var(--pn-dur-press, 100ms) var(--pn-step-press, ease-out), background-color var(--pn-dur-ui, 200ms) var(--pn-step-ui, ease);
+}
+.opt:active { transform: scale(0.98); }
+.opt .bub { width: 26px; height: 26px; }
+.opt .bub circle { fill: none; stroke: var(--pn-ink); stroke-width: 2.2; }
+.opt .bub path { fill: none; stroke: var(--pn-blue-fill); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 60; stroke-dashoffset: 60; }
+.opt[aria-checked="true"] { background: #eef6ff; border-width: var(--pn-pen); }
+.opt[aria-checked="true"] .bub path { stroke-dashoffset: 0; transition: stroke-dashoffset var(--pn-dur-ui, 200ms) var(--pn-step-ui, ease-out); }
+
+/* Feedback: icon + words, never colour alone, never red, no sound.
+   ✓ solid green · ✗ dashed pink + Hint · → plain pen line + the answer. */
+.fb {
+  display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: start;
+  padding: 14px 16px; border: var(--pn-pen) solid var(--pn-ink); border-radius: var(--pn-wobble);
+  background: var(--pn-paper);
+}
+.fb p { margin: 0; }
+.fb .ic { width: 40px; height: 40px; }
+.fb .ic path, .fb .ic circle { fill: none; stroke: var(--pn-ink); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.fb strong { font: 400 23px/1 var(--pn-font-hand); display: block; margin-bottom: 4px; }
+.fb-ok { border-color: var(--pn-green); box-shadow: 4px 4px 0 var(--pn-green-fill); }
+.fb-ok strong { color: var(--pn-green); }
+.fb-ok .ic .fill { fill: var(--pn-green-fill); stroke: none; }
+.fb-retry { border-color: var(--pn-pink); border-style: dashed; }
+.fb-retry strong { color: var(--pn-pink); }
+.fb-retry .ic .fill { fill: var(--pn-pink-fill); stroke: none; }
+.fb-reveal { border-color: var(--pn-ink-muted); }
+.fb-reveal .ic .fill { fill: var(--pn-violet-fill); stroke: none; }
+.fb.enter { animation: fb-in var(--pn-dur-ui, 200ms) var(--pn-step-ui, var(--pn-ease-out)) both; }
+.fb.enter .ic .stroke { stroke-dasharray: 40; animation: draw var(--pn-dur-card, 400ms) var(--pn-step-card, var(--pn-ease-out)) both; animation-delay: var(--pn-dur-press, 100ms); }
+@keyframes fb-in { from { opacity: 0; transform: translateY(10px) rotate(-0.6deg); } }
+@keyframes draw { from { stroke-dashoffset: 40; } to { stroke-dashoffset: 0; } }
+
+.hint { border-left: 4px solid var(--pn-violet-fill); padding: 4px 0 4px 14px; font-size: 16px; }
+.hint b { font: 400 19px/1 var(--pn-font-hand); color: var(--pn-violet); text-transform: uppercase; margin-right: 6px; }
+
+.field { display: inline-flex; align-items: baseline; gap: 8px; }
+.field input {
+  font: 600 22px/1 var(--pn-font-data); width: 120px; min-height: var(--pn-tap); padding: 6px 4px; color: var(--pn-ink);
+  border: 0; border-bottom: var(--pn-pen) solid var(--pn-ink); background: transparent;
+}
+.field input:focus { outline: none; border-bottom-color: var(--pn-blue); background: #f3f8ff; }
+
+.progress { display: flex; gap: 6px; }
+.progress i { flex: 1; height: 10px; border: 2px solid var(--pn-ink); border-radius: 6px 10px 5px 9px; background: var(--pn-paper); }
+.progress i.done { background: var(--pn-green-fill); }
+.progress i.now { background: var(--pn-yellow-fill); }
+
+/* ---------- motion lab ---------- */
+.lab { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.demo { border: 2px solid var(--pn-ink); border-radius: var(--pn-wobble); padding: 16px; background: var(--pn-paper); }
+.demo h3 { font: 400 24px/1.1 var(--pn-font-hand); margin: 0 0 4px; }
+.demo .spec { font: 13px/1.5 var(--pn-font-data); color: var(--pn-ink-muted); margin: 0 0 12px; }
+.demo .stage { min-height: 150px; display: grid; place-items: center; }
+.curve svg { width: 100%; height: auto; }
+.list-stagger { list-style: none; margin: 0; padding: 0; width: 100%; display: grid; gap: 8px; }
+.list-stagger li {
+  display: flex; gap: 10px; align-items: center; padding: 8px 12px;
+  border: 2px solid var(--pn-ink); border-radius: var(--pn-wobble-2); font: 19px/1.1 var(--pn-font-hand);
+}
+.list-stagger li .no { font: 600 13px/1 var(--pn-font-data); background: var(--pn-green-fill); border: 2px solid var(--pn-ink); border-radius: 999px; padding: 4px 6px; }
+.list-stagger.play li { animation: rise var(--pn-dur-ui, 200ms) var(--pn-step-ui, var(--pn-ease-out)) both; animation-delay: calc(var(--i) * var(--pn-frame, 50ms)); }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+.hl-swipe { position: relative; z-index: 0; font: 400 30px/1.2 var(--pn-font-hand); }
+.hl-swipe::before {
+  content: ""; position: absolute; inset: 52% -6px -2px -6px; z-index: -1; background: var(--pn-yellow-fill);
+  border-radius: 4px 10px 6px 12px; clip-path: inset(0 100% 0 0);
+}
+.hl-swipe.on::before { clip-path: inset(0 0 0 0); transition: clip-path var(--pn-dur-card, 400ms) var(--pn-step-card, var(--pn-ease-out)); }
+
+/* ---------- Scene ---------- */
+.scene-wrap { border: var(--pn-pen) solid var(--pn-ink); border-radius: var(--pn-wobble); background: var(--pn-paper); padding: 12px; max-width: 860px; }
+.scene-wrap svg.scene { width: 100%; height: auto; display: block; aspect-ratio: 16 / 9; }
+.scene-ctl { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 10px; }
+.scene-ctl input[type="range"] { flex: 1; min-width: 160px; accent-color: var(--pn-blue); height: var(--pn-tap); }
+.scene-ctl output { font: 14px/1 var(--pn-font-data); color: var(--pn-ink-muted); min-width: 150px; }
+
+/* ---------- phones ---------- */
+.phones { display: flex; flex-wrap: wrap; gap: 28px; }
+.phone {
+  width: 375px; max-width: 100%; height: 760px; overflow: auto; position: relative;
+  border: 3px solid var(--pn-ink); border-radius: 36px; background: var(--pn-paper);
+  background-image: repeating-linear-gradient(180deg, transparent 0 31px, var(--pn-rule) 31px 32px);
+  box-shadow: 8px 8px 0 var(--pn-violet-fill);
+}
+html[data-paper="dots"] .phone { background-image: radial-gradient(circle at 1px 1px, #d5def0 1.2px, transparent 1.6px); background-size: 24px 24px; }
+html[data-paper="plain"] .phone { background-image: none; }
+.phone .ptop { display: flex; justify-content: space-between; align-items: center; padding: 18px 16px 8px; }
+.phone .ptop .wordmark { font-size: 28px; }
+.phone .pbody { padding: 8px 16px 28px; }
+.phone h1 { font: 400 34px/1.1 var(--pn-font-hand); margin: 8px 0 12px; }
+.phone h1 .script { font: 400 44px/1 var(--pn-font-script); color: var(--pn-blue); display: inline-block; rotate: -3deg; }
+.phone .kicker { font: 17px/1 var(--pn-font-hand); text-transform: uppercase; letter-spacing: .5px; color: var(--pn-ink-muted); }
+.phone .stack { display: grid; gap: 22px; margin-top: 22px; }
+.phone .step-top { display: flex; gap: 12px; align-items: center; padding: 16px 16px 6px; }
+.phone .step-top .x { font: 22px/1 var(--pn-font-hand); width: var(--pn-tap); height: var(--pn-tap); border: 2px solid var(--pn-ink); border-radius: 50%; background: var(--pn-paper); }
+.phone .step-top .progress { flex: 1; }
+.phone .q { font: 400 26px/1.2 var(--pn-font-hand); margin: 14px 0; }
+.phone .mol { border: 2px dashed #b9c5dc; border-radius: var(--pn-wobble-2); padding: 6px; margin-bottom: 16px; background: var(--pn-paper); }
+.phone .dock { position: sticky; bottom: 0; padding: 12px 16px 18px; background: linear-gradient(transparent, var(--pn-paper) 30%); display: grid; gap: 12px; }
+.phone .dock .fb { opacity: 1; }
+
+/* Doodles: marker fill printed a little off its pen line, like the reference. */
+.ink { fill: none; stroke: var(--pn-ink); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.mk { stroke: none; mix-blend-mode: multiply; }
+
+/* ---------- reduced motion: no movement, only short crossfades ---------- */
+html[data-motion="reduced"] *, html[data-motion="reduced"] *::before, html[data-motion="reduced"] *::after {
+  animation: none !important;
+  transition: opacity 120ms linear !important;
+}
+html[data-motion="reduced"] .btn:active:not(:disabled) { transform: none; box-shadow: 0 0 0 3px var(--pn-blue); }
+html[data-motion="reduced"] .hl-swipe.on::before { clip-path: inset(0 0 0 0); }
+html[data-motion="reduced"] .opt[aria-checked="true"] .bub path { stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: opacity 120ms linear !important; }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Static wobble for pen lines; three seeds for the Scene's line boil (one per frame, never looping after the Scene ends). -->
+    <filter id="rough" filterUnits="userSpaceOnUse" x="-500" y="-500" width="3000" height="2200"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" /><feDisplacementMap in="SourceGraphic" scale="2.6" /></filter>
+    <filter id="boil-0" filterUnits="userSpaceOnUse" x="-500" y="-500" width="3000" height="2200"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="11" /><feDisplacementMap in="SourceGraphic" scale="3.2" /></filter>
+    <filter id="boil-1" filterUnits="userSpaceOnUse" x="-500" y="-500" width="3000" height="2200"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="27" /><feDisplacementMap in="SourceGraphic" scale="3.2" /></filter>
+    <filter id="boil-2" filterUnits="userSpaceOnUse" x="-500" y="-500" width="3000" height="2200"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="45" /><feDisplacementMap in="SourceGraphic" scale="3.2" /></filter>
+
+    <symbol id="d-flask" viewBox="0 0 120 150">
+      <path class="mk" fill="#4dabff" d="M22 104 a40 36 0 0 0 80 0 c0-6-2-11-5-16 H27 c-3 5-5 10-5 16z" transform="translate(4 3)" />
+      <path class="ink" d="M48 12 h26 M52 12 v44 C30 64 18 82 18 102 a42 40 0 0 0 84 0 c0-20-12-38-34-46 V12" />
+      <path class="ink" d="M27 86 c18 6 46-6 68 2" />
+      <circle class="ink" cx="45" cy="108" r="6" /><circle class="ink" cx="72" cy="98" r="4" /><circle class="ink" cx="62" cy="122" r="3" />
+    </symbol>
+    <symbol id="d-tubes" viewBox="0 0 120 110">
+      <rect class="mk" fill="#9d8cff" x="22" y="50" width="16" height="44" rx="8" />
+      <rect class="mk" fill="#ff70b8" x="52" y="44" width="16" height="50" rx="8" />
+      <rect class="mk" fill="#ffd84d" x="82" y="56" width="16" height="38" rx="8" />
+      <path class="ink" d="M8 30 h104 M8 44 h104 M8 30 v12 M112 30 v12 M18 22 v70 a10 10 0 0 0 20 0 V22 M48 22 v70 a10 10 0 0 0 20 0 V22 M78 22 v70 a10 10 0 0 0 20 0 V22" />
+    </symbol>
+    <symbol id="d-benzene" viewBox="0 0 100 100">
+      <path class="ink" d="M50 14 L81 32 L81 68 L50 86 L19 68 L19 32 Z" /><circle class="ink" cx="50" cy="50" r="19" />
+    </symbol>
+    <symbol id="d-atom" viewBox="0 0 120 120">
+      <circle class="mk" fill="#6fd486" cx="62" cy="62" r="11" />
+      <ellipse class="ink" cx="60" cy="60" rx="50" ry="18" /><ellipse class="ink" cx="60" cy="60" rx="50" ry="18" transform="rotate(60 60 60)" /><ellipse class="ink" cx="60" cy="60" rx="50" ry="18" transform="rotate(-60 60 60)" />
+      <circle class="ink" cx="60" cy="60" r="9" /><circle cx="110" cy="60" r="4.5" fill="#1d1b26" /><circle cx="35" cy="17" r="4.5" fill="#1d1b26" /><circle cx="35" cy="103" r="4.5" fill="#1d1b26" />
+    </symbol>
+    <symbol id="d-sprig" viewBox="0 0 120 200">
+      <path class="mk" fill="#6fd486" d="M60 60 c-28-6-40-26-38-44 c22 2 36 20 38 44z M62 112 c26-10 44-4 52 12 c-20 10-40 6-52-12z M58 160 c-26-4-40-20-40-38 c20 0 36 16 40 38z" transform="translate(3 2)" />
+      <path class="ink" d="M60 196 C56 150 66 110 58 60 C54 40 56 24 62 8" />
+      <path class="ink" d="M58 60 c-28-6-40-26-38-44 c22 2 36 20 38 44z M60 112 c26-10 44-4 52 12 c-20 10-40 6-52-12z M57 160 c-26-4-40-20-40-38 c20 0 36 16 40 38z" />
+      <path class="ink" d="M58 60 C46 46 36 32 22 16 M60 112 c18-2 34 2 52 12 M57 160 C46 146 30 132 17 122" />
+    </symbol>
+    <symbol id="d-beaker" viewBox="0 0 110 120">
+      <path class="mk" fill="#ff9548" d="M20 62 h66 v38 c0 6-4 10-10 10 H30 c-6 0-10-4-10-10z" transform="translate(3 2)" />
+      <path class="ink" d="M12 14 h80 M18 14 v86 c0 6 4 10 10 10 h50 c6 0 10-4 10-10 V14 M18 40 h12 M18 60 h18 M18 80 h12" />
+      <path class="ink" d="M70 4 L52 92" />
+    </symbol>
+  </defs>
+</svg>
+
+<header class="bar">
+  <p class="wordmark">AstraTron<span class="dot">.</span></p>
+  <div class="ctl">Frame rate
+    <span class="seg" id="fps-seg" role="group" aria-label="Motion frame rate">
+      <button data-fps="8">8</button><button data-fps="12" aria-pressed="true">12</button><button data-fps="15">15</button><button data-fps="20">20</button><button data-fps="60" class="off" title="Smooth, for comparison only: off spec">60 ✕</button>
+    </span>
+  </div>
+  <div class="ctl">Paper
+    <span class="seg" id="paper-seg" role="group" aria-label="Paper">
+      <button data-paper="ruled" aria-pressed="true">Ruled</button><button data-paper="dots">Dots</button><button data-paper="plain">Plain</button>
+    </span>
+  </div>
+  <div class="ctl">Motion
+    <span class="seg" id="motion-seg" role="group" aria-label="Motion">
+      <button data-motion="full" aria-pressed="true">Full</button><button data-motion="reduced">Reduced</button>
+    </span>
+  </div>
+</header>
+
+<main>
+  <section class="cover" aria-label="Cover">
+    <div>
+      <span class="label violet">Orgo I · Unit 1</span>
+      <h1>Chemistry</h1>
+      <p>Chemistry is how the universe builds things. <mark class="hl">Come build.</mark> A Paper Notebook: white pages, pen lines, marker colour, and motion drawn <b>on twos</b>, at <span class="data" data-fps-label>12</span> frames a second.</p>
+      <a class="btn btn-go" href="#step">Start Unit 1 ▸</a>
+    </div>
+    <div class="doodles" aria-hidden="true">
+      <svg class="doo" style="left:6%;top:4%;width:170px;filter:url(#rough)"><use href="#d-flask" /></svg>
+      <svg class="doo" style="left:52%;top:0;width:130px;filter:url(#rough)"><use href="#d-tubes" /></svg>
+      <svg class="doo" style="left:62%;top:36%;width:110px;filter:url(#rough)"><use href="#d-benzene" /></svg>
+      <svg class="doo" style="left:30%;top:48%;width:120px;filter:url(#rough)"><use href="#d-atom" /></svg>
+      <svg class="doo" style="left:-2%;top:40%;width:110px;height:200px;filter:url(#rough)"><use href="#d-sprig" /></svg>
+      <svg class="doo" style="left:70%;top:66%;width:110px;filter:url(#rough)"><use href="#d-beaker" /></svg>
+    </div>
+  </section>
+
+  <section class="sheet" aria-labelledby="s1">
+    <h2 id="s1"><span class="n">01</span>Paper &amp; ink</h2>
+    <p class="lede">White paper, near-black pen, six marker colours. Pen inks are text-safe on paper (contrast shown live). Marker fills are too pale to stand alone on white, so a fill <b>always</b> sits inside a pen line, and text on a fill is always pen ink. No red anywhere: "not quite" is pink.</p>
+    <div class="grid" id="swatches"></div>
+  </section>
+
+  <section class="sheet" aria-labelledby="s2">
+    <h2 id="s2"><span class="n">02</span>Type</h2>
+    <p class="lede">Four faces, each with one job. The script face is a signature, not a typeface: the wordmark and one hero word, 40px and up. Handwriting for headings and labels; a plain rounded sans for anything a Student reads closely; mono for formulas and numbers.</p>
+    <div class="type-row"><span class="k">Script · Kaushan · 40px+</span><span style="font:400 56px/1 var(--pn-font-script)">Chemistry</span></div>
+    <div class="type-row"><span class="k">Hand · Patrick Hand · 34</span><span style="font:400 34px/1.1 var(--pn-font-hand)">Lesson 6: Resonance</span></div>
+    <div class="type-row"><span class="k">Hand · label · 17 caps</span><span class="label">Bond</span> <span class="label green">Correct</span> <span class="label pink">Not quite</span></div>
+    <div class="type-row"><span class="k">Text · Nunito · 17</span><span>Electrons don't sit still. When oxygen has a lone pair and a proton is nearby, the pair <mark class="hl">reaches out</mark> and makes a new bond.</span></div>
+    <div class="type-row"><span class="k">Data · JetBrains · 17</span><span class="data">CH₃COOH · pKa 4.76 · 1.54 Å · Step 3 of 10</span></div>
+  </section>
+
+  <section class="sheet" aria-labelledby="s3">
+    <h2 id="s3"><span class="n">03</span>Components</h2>
+    <p class="lede">Hand-drawn boxes (uneven corner radii), a pen-ink offset shadow on things you press, a marker-colour offset on things you read. Press anything: it sinks into the page in one frame.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-bottom:28px">
+      <button class="btn btn-go">Start Unit 1 ▸</button>
+      <button class="btn btn-primary">Check</button>
+      <button class="btn">Show Hint</button>
+      <button class="btn btn-ghost">Skip</button>
+      <button class="btn" disabled>Check</button>
+      <label class="field"><input class="data" inputmode="decimal" value="1.54" aria-label="Bond length" /> <span class="data">Å</span></label>
+    </div>
+    <div class="grid" style="margin-bottom:32px">
+      <a class="card" href="#" style="--tint: var(--pn-blue-fill)"><span class="num">Unit 1</span><h3>Structure &amp; Bonding</h3><p>Bonds, polarity, resonance and orbitals. 9 Lessons.</p></a>
+      <a class="card" href="#" style="--tint: var(--pn-green-fill)"><span class="num">Unit 2</span><h3>Acids &amp; Bases</h3><p>Who gives up a proton, and why.</p></a>
+      <div class="card soon"><span class="num">Unit 3</span><h3>Alkanes</h3><p>Coming soon.</p></div>
+      <div class="sticky"><div class="k">Continue</div><h3>Lesson 6: Resonance</h3><p>Unit 1 · <span class="data">Step 4 of 10</span></p><a class="btn btn-primary" href="#">Resume</a></div>
+    </div>
+    <div class="grid">
+      <ul class="options" role="radiogroup" aria-label="Which atom carries the negative charge?" id="opts">
+        <li><button class="opt" role="radio" aria-checked="false"><svg class="bub" viewBox="0 0 26 26"><circle cx="13" cy="13" r="10.5" /><path d="M7 15 C10 6 14 20 19 9" /></svg>The oxygen</button></li>
+        <li><button class="opt" role="radio" aria-checked="true"><svg class="bub" viewBox="0 0 26 26"><circle cx="13" cy="13" r="10.5" /><path d="M7 15 C10 6 14 20 19 9" /></svg>The carbon</button></li>
+        <li><button class="opt" role="radio" aria-checked="false"><svg class="bub" viewBox="0 0 26 26"><circle cx="13" cy="13" r="10.5" /><path d="M7 15 C10 6 14 20 19 9" /></svg>Both, shared by resonance</button></li>
+      </ul>
+      <div style="display:grid;gap:14px">
+        <div class="fb fb-ok"><svg class="ic" viewBox="0 0 40 40"><circle class="fill" cx="21" cy="21" r="16" /><circle cx="20" cy="20" r="16" /><path class="stroke" d="M12 21 l6 6 l11 -13" /></svg><div><strong>Correct.</strong><p>The lone pair on O⁻ reaches for H⁺.</p></div></div>
+        <div class="fb fb-retry"><svg class="ic" viewBox="0 0 40 40"><circle class="fill" cx="21" cy="21" r="16" /><circle cx="20" cy="20" r="16" /><path class="stroke" d="M14 14 l12 12 M26 14 l-12 12" /></svg><div><strong>Not quite.</strong><p class="hint"><b>Hint</b>Which atom has the lone pair?</p></div></div>
+        <div class="fb fb-reveal"><svg class="ic" viewBox="0 0 40 40"><circle class="fill" cx="21" cy="21" r="16" /><circle cx="20" cy="20" r="16" /><path class="stroke" d="M11 20 h17 M22 13 l7 7 l-7 7" /></svg><div><strong>Here's the answer.</strong><p>Both: the charge is shared by resonance.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet" aria-labelledby="s4">
+    <h2 id="s4"><span class="n">04</span>Motion: drawn on twos</h2>
+    <p class="lede">Everything moves at <b><span data-fps-label>12</span> fps</b>, like a flip-book. We keep Emil's rules (ease-out on entry, under 300ms for UI, press feedback right away, exit faster than entry, nothing loops) and <i>sample</i> the ease-out curve once per frame, holding each drawing. The first frame lands at once, so a press still answers instantly. Pick a frame rate in the top bar to feel the difference.</p>
+    <div class="lab">
+      <div class="demo curve"><h3>The stepped curve</h3><p class="spec" id="curve-spec"></p><div class="stage"><svg id="curve" viewBox="0 0 220 160" aria-label="Smooth ease-out against its stepped version"></svg></div></div>
+      <div class="demo"><h3>Press</h3><p class="spec" id="press-spec"></p><div class="stage"><button class="btn btn-primary">Press and hold</button></div></div>
+      <div class="demo"><h3>Feedback arrives</h3><p class="spec" id="fb-spec"></p><div class="stage" style="place-items:stretch"><div id="fb-demo"></div><button class="btn" data-replay="fb">Check ▸</button></div></div>
+      <div class="demo"><h3>Lessons stagger in</h3><p class="spec" id="stagger-spec"></p><div class="stage"><ol class="list-stagger play" id="stagger"></ol></div><button class="btn btn-ghost" data-replay="stagger">Replay</button></div>
+      <div class="demo"><h3>Highlighter swipe</h3><p class="spec" id="hl-spec"></p><div class="stage"><span class="hl-swipe on" id="hl">lone pair</span></div><button class="btn btn-ghost" data-replay="hl">Replay</button></div>
+      <div class="demo"><h3>Card lift (hover)</h3><p class="spec" id="lift-spec"></p><div class="stage"><a class="card" href="#" style="--tint: var(--pn-pink-fill);width:100%"><span class="num">Lesson 7</span><h3>Which contributor wins?</h3></a></div></div>
+    </div>
+  </section>
+
+  <section class="sheet" aria-labelledby="s5">
+    <h2 id="s5"><span class="n">05</span>A Scene, stop-motion</h2>
+    <p class="lede">Scenes stay pure functions of <span class="data">t</span>. The only change is the clock: the player snaps <span class="data">t</span> to the frame grid before handing it over, and while a Scene plays, its pen lines <b>boil</b> (one of three wobble seeds per frame). When it ends, the boil stops. Nothing loops. Under reduced motion it opens paused on its poster frame, with no boil.</p>
+    <div class="scene-wrap">
+      <svg class="scene" id="scene" viewBox="0 0 1920 1080" role="img" aria-label="Hydroxide's lone pair attacks a proton and forms water"></svg>
+      <div class="scene-ctl">
+        <button class="btn btn-primary" id="scene-play">Replay ↺</button>
+        <input type="range" id="scene-scrub" min="0" max="5" step="any" value="0" aria-label="Scene time" />
+        <output id="scene-out" aria-live="off">0.0 of 5 seconds</output>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet" aria-labelledby="s6" id="step">
+    <h2 id="s6"><span class="n">06</span>On a phone</h2>
+    <p class="lede">The home page for a first-time visitor, and a Step mid-Lesson. Tap an answer, then Check.</p>
+    <div class="phones">
+      <div class="phone" aria-label="Home page on a phone">
+        <div class="ptop"><span class="wordmark">AstraTron<span class="dot" style="color:var(--pn-pink)">.</span></span><span class="label violet">Free</span></div>
+        <div class="pbody">
+          <h1>Chemistry is how the universe builds things. <span class="script">Come build.</span></h1>
+          <svg class="doo" style="width:100%;height:150px;filter:url(#rough)" viewBox="0 0 340 150" aria-hidden="true"><use href="#d-flask" x="0" y="0" width="110" height="140" /><use href="#d-benzene" x="120" y="30" width="90" height="90" /><use href="#d-beaker" x="230" y="20" width="100" height="110" /></svg>
+          <a class="btn btn-go btn-block" href="#">Start Unit 1 ▸</a>
+          <div class="stack">
+            <div class="kicker">Orgo I</div>
+            <a class="card" href="#" style="--tint: var(--pn-blue-fill)"><span class="num">Unit 1</span><h3>Structure &amp; Bonding</h3><p>9 Lessons · 1 Practice Set</p></a>
+            <div class="card soon"><span class="num">Unit 2</span><h3>Acids &amp; Bases</h3><p>Coming soon.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="phone" aria-label="A Step on a phone">
+        <div class="step-top"><button class="x" aria-label="Leave Lesson">✕</button><div class="progress" aria-label="Step 4 of 8"><i class="done"></i><i class="done"></i><i class="done"></i><i class="now"></i><i></i><i></i><i></i><i></i></div></div>
+        <div class="pbody">
+          <span class="label">Lesson 1 · Step 4</span>
+          <p class="q">Where does the negative charge sit in hydroxide?</p>
+          <div class="mol"><svg viewBox="0 0 340 150" style="width:100%" aria-label="Hydroxide, HO minus"><g style="filter:url(#rough)" fill="none" stroke="#1d1b26" stroke-width="4" stroke-linecap="round"><line x1="110" y1="80" x2="196" y2="80" /></g><text x="214" y="96" font-family="JetBrains Mono" font-size="46" font-weight="600" fill="#1d1b26">O</text><text x="64" y="96" font-family="JetBrains Mono" font-size="46" fill="#1d1b26">H</text><text x="252" y="62" font-family="JetBrains Mono" font-size="30" fill="#bd1278">−</text><g fill="#0a64c2"><circle cx="222" cy="40" r="5" /><circle cx="238" cy="40" r="5" /><circle cx="222" cy="118" r="5" /><circle cx="238" cy="118" r="5" /><circle cx="270" cy="72" r="5" /><circle cx="270" cy="88" r="5" /></g></svg></div>
+          <ul class="options" role="radiogroup" aria-label="Where does the charge sit?" id="phone-opts">
+            <li><button class="opt" role="radio" aria-checked="false"><svg class="bub" viewBox="0 0 26 26"><circle cx="13" cy="13" r="10.5" /><path d="M7 15 C10 6 14 20 19 9" /></svg>On the oxygen</button></li>
+            <li><button class="opt" role="radio" aria-checked="false"><svg class="bub" viewBox="0 0 26 26"><circle cx="13" cy="13" r="10.5" /><path d="M7 15 C10 6 14 20 19 9" /></svg>On the hydrogen</button></li>
+            <li><button class="opt" role="radio" aria-checked="false"><svg class="bub" viewBox="0 0 26 26"><circle cx="13" cy="13" r="10.5" /><path d="M7 15 C10 6 14 20 19 9" /></svg>Spread over both</button></li>
+          </ul>
+        </div>
+        <div class="dock"><div id="phone-fb"></div><button class="btn btn-primary btn-block" id="phone-check" disabled>Check</button></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+
+  // ---------- easing: a cubic-bezier, then its stepped version for CSS `linear()` ----------
+  function bezier(x1, y1, x2, y2) {
+    const c = (a, b) => (t) => 3 * a * t * (1 - t) ** 2 + 3 * b * t * t * (1 - t) + t ** 3;
+    const bx = c(x1, x2), by = c(y1, y2);
+    return (x) => { let lo = 0, hi = 1; for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; bx(m) < x ? (lo = m) : (hi = m); } return by((lo + hi) / 2); };
+  }
+  const easeOut = bezier(0.23, 1, 0.32, 1);
+  // Each frame k (1..n) holds ease(k/n) from (k-1)/n to k/n: the first drawing lands at once.
+  function stepped(n, ease) {
+    const r = (v) => +v.toFixed(4), pc = (v) => `${r(v * 100)}%`;
+    const stops = [];
+    for (let k = 1; k <= n; k++) { const v = r(ease(k / n)); stops.push(`${v} ${pc((k - 1) / n)}`, `${v} ${pc(k / n)}`); }
+    return `linear(${stops.join(", ")})`;
+  }
+  // Target durations (Emil: press 100–160, UI under 300, exit faster than entry).
+  const TARGET = { press: 100, ui: 220, card: 420, exit: 140 };
+  let fps = 12;
+  const frames = (ms) => Math.max(1, Math.round((ms / 1000) * fps));
+
+  function applyFps(next) {
+    fps = next;
+    const smooth = fps >= 60;
+    for (const [k, ms] of Object.entries(TARGET)) {
+      const n = frames(ms), dur = smooth ? ms : Math.round((n * 1000) / fps);
+      root.style.setProperty(`--pn-dur-${k}`, `${dur}ms`);
+      root.style.setProperty(`--pn-step-${k}`, smooth ? "cubic-bezier(0.23, 1, 0.32, 1)" : stepped(n, easeOut));
+    }
+    root.style.setProperty("--pn-frame", `${Math.round(1000 / fps)}ms`);
+    $$("[data-fps-label]").forEach((el) => (el.textContent = smooth ? "60 (off spec)" : fps));
+    const spec = (k) => (smooth ? `${TARGET[k]}ms smooth ease-out` : `${frames(TARGET[k])} frame${frames(TARGET[k]) > 1 ? "s" : ""} × ${Math.round(1000 / fps)}ms = ${Math.round((frames(TARGET[k]) * 1000) / fps)}ms, stepped ease-out`);
+    $("#press-spec").textContent = `transform: translate(2px,2px) scale(.97) · ${spec("press")}`;
+    $("#fb-spec").textContent = `opacity + translateY(10px) · ${spec("ui")}; the ✓ draws on over ${spec("card")}`;
+    $("#stagger-spec").textContent = `${spec("ui")} each, one frame (${Math.round(1000 / fps)}ms) apart`;
+    $("#hl-spec").textContent = `clip-path inset reveal · ${spec("card")}`;
+    $("#lift-spec").textContent = `rotate(-.8deg) translateY(-3px) · ${spec("ui")}; hover-capable pointers only`;
+    $("#curve-spec").textContent = smooth ? "ease-out, sampled every display frame" : `cubic-bezier(.23,1,.32,1) held for ${frames(TARGET.card)} frames over ${TARGET.card}ms`;
+    drawCurve();
+    scene.reset();
+  }
+
+  function drawCurve() {
+    const W = 200, H = 120, ox = 10, oy = 130;
+    let smooth = "", step = "";
+    for (let i = 0; i <= 100; i++) { const x = i / 100; smooth += `${i ? "L" : "M"}${ox + x * W} ${oy - easeOut(x) * H}`; }
+    const n = fps >= 60 ? 0 : frames(TARGET.card);
+    if (n) { step = `M${ox} ${oy}`; for (let k = 1; k <= n; k++) { const y = oy - easeOut(k / n) * H; step += `V${y}H${ox + (k / n) * W}`; } }
+    $("#curve").innerHTML = `<path d="M${ox} ${oy - H}H${ox + W}M${ox} ${oy}H${ox + W}" stroke="#e3ecfa" stroke-width="2"/>
+      <path d="${smooth}" fill="none" stroke="#9d8cff" stroke-width="3" stroke-dasharray="6 6"/>
+      ${n ? `<path d="${step}" fill="none" stroke="#1d1b26" stroke-width="3.5" stroke-linejoin="round"/>` : ""}
+      <text x="${ox}" y="152" font-family="Patrick Hand" font-size="15" fill="#57536b">dashed: smooth · pen: what you see</text>`;
+  }
+
+  // ---------- swatches with live contrast ----------
+  const lum = (h) => { const [r, g, b] = [1, 3, 5].map((i) => { const v = parseInt(h.slice(i, i + 2), 16) / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return ((x + 0.05) / (y + 0.05)).toFixed(1); };
+  const css = getComputedStyle(root), tok = (n) => css.getPropertyValue(`--pn-${n}`).trim();
+  const SW = [
+    ["ink", "Pen", "text, outlines, shadows on pressables"], ["ink-muted", "Pencil", "secondary text"],
+    ["blue", "Blue ink", "electrons, bonds, links"], ["green", "Green ink", "correct"], ["pink", "Pink ink", "not quite (never red)"],
+    ["violet", "Violet ink", "Hints, tags"], ["orange", "Orange ink", "second highlight"],
+    ["blue-fill", "Blue marker", "primary button, flasks"], ["green-fill", "Leaf marker", "correct, done"], ["pink-fill", "Pink marker", "retry icon, capstone"],
+    ["violet-fill", "Violet marker", "Hint rule, phone frame"], ["orange-fill", "Orange marker", "Start / Go"], ["yellow-fill", "Highlighter", "key terms, sticky notes, now"],
+  ];
+  $("#swatches").innerHTML = SW.map(([k, name, use]) => {
+    const hex = tok(k), fill = k.endsWith("fill");
+    const meta = fill ? `${hex} · pen on it ${ratio(tok("ink"), hex)}:1` : `${hex} · on paper ${ratio(hex, "#ffffff")}:1`;
+    return `<div class="swatch"><div class="chip-col" style="background:${hex}"></div><div class="name" ${fill ? "" : `style="color:${hex}"`}>${name}</div><div class="meta">${meta}</div><div class="use">${use}</div></div>`;
+  }).join("");
+
+  // ---------- toggles ----------
+  function seg(id, attr, onPick) {
+    $$(`#${id} button`).forEach((b) => b.addEventListener("click", () => {
+      $$(`#${id} button`).forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
+      onPick(b.dataset[attr]);
+    }));
+  }
+  seg("fps-seg", "fps", (v) => applyFps(+v));
+  seg("paper-seg", "paper", (v) => (root.dataset.paper = v));
+  seg("motion-seg", "motion", (v) => { root.dataset.motion = v; scene.reset(); });
+
+  // ---------- motion demos ----------
+  const FB = `<div class="fb fb-ok enter"><svg class="ic" viewBox="0 0 40 40"><circle class="fill" cx="21" cy="21" r="16"/><circle cx="20" cy="20" r="16"/><path class="stroke" d="M12 21 l6 6 l11 -13"/></svg><div><strong>Correct.</strong><p>Two electrons, one new O–H bond.</p></div></div>`;
+  const LESSONS = ["Why carbon?", "Bonds & polarity", "Drawing molecules", "Molecules in 3D", "Hybridization"];
+  const replay = {
+    fb() { const el = $("#fb-demo"); el.innerHTML = ""; requestAnimationFrame(() => (el.innerHTML = FB)); el.style.marginBottom = "12px"; },
+    stagger() { const ol = $("#stagger"); ol.classList.remove("play"); ol.innerHTML = LESSONS.map((t, i) => `<li style="--i:${i}"><span class="no">0${i}</span>${t}</li>`).join(""); void ol.offsetWidth; ol.classList.add("play"); },
+    hl() { const el = $("#hl"); el.classList.remove("on"); void el.offsetWidth; requestAnimationFrame(() => el.classList.add("on")); },
+  };
+  $$("[data-replay]").forEach((b) => b.addEventListener("click", () => replay[b.dataset.replay]()));
+  replay.stagger();
+
+  function radio(groupSel, onPick) {
+    $$(`${groupSel} .opt`).forEach((o) => o.addEventListener("click", () => {
+      $$(`${groupSel} .opt`).forEach((x) => x.setAttribute("aria-checked", String(x === o)));
+      onPick?.(o);
+    }));
+  }
+  radio("#opts");
+  let picked = null;
+  radio("#phone-opts", (o) => { picked = o; $("#phone-check").disabled = false; $("#phone-fb").innerHTML = ""; });
+  $("#phone-check").addEventListener("click", () => {
+    const ok = picked && picked.textContent.includes("oxygen");
+    $("#phone-fb").innerHTML = ok ? FB.replace("Two electrons, one new O–H bond.", "Oxygen holds three lone pairs and the charge.")
+      : `<div class="fb fb-retry enter"><svg class="ic" viewBox="0 0 40 40"><circle class="fill" cx="21" cy="21" r="16"/><circle cx="20" cy="20" r="16"/><path class="stroke" d="M14 14 l12 12 M26 14 l-12 12"/></svg><div><strong>Not quite.</strong><p class="hint"><b>Hint</b>Count the lone pairs on each atom.</p></div></div>`;
+  });
+
+  // ---------- the Scene: a pure function of t, fed a frame-snapped t ----------
+  const DUR = 5, POSTER = 3.6;
+  const clamp = (v) => Math.min(1, Math.max(0, v));
+  const span = (t, a, b) => easeOut(clamp((t - a) / (b - a)));
+  const lerp = (a, b, p) => a + (b - a) * p;
+  function renderScene(t, boil) {
+    const approach = span(t, 0.3, 1.8), arrow = span(t, 1.4, 2.8), bond = span(t, 2.8, 3.6), label = span(t, 3.8, 4.6);
+    const hx = lerp(1500, 1210, approach);
+    const pairX = lerp(1000, lerp(1000, 1160, bond), 1), pairY = lerp(540, 540, 1);
+    const L = 420, dash = L * (1 - arrow);
+    const ink = "#1d1b26";
+    const charge = (x, y, s, o) => `<text x="${x}" y="${y}" font-family="JetBrains Mono" font-size="64" font-weight="600" fill="${s}" opacity="${o}">${s === "#bd1278" ? "−" : "+"}</text>`;
+    return `
+      <g style="${boil != null ? `filter:url(#boil-${boil})` : "filter:url(#rough)"}">
+        <rect x="70" y="60" width="1780" height="960" rx="28" fill="none" stroke="#e3ecfa" stroke-width="4"/>
+        <line x1="690" y1="540" x2="880" y2="540" stroke="${ink}" stroke-width="10" stroke-linecap="round"/>
+        <line x1="${lerp(1100, 1040, bond)}" y1="540" x2="${lerp(1100, 1180, bond)}" y2="540" stroke="${ink}" stroke-width="10" stroke-linecap="round" opacity="${bond}"/>
+        <path d="M1012 505 C 1050 360, 1170 360, ${hx - 20} 470" fill="none" stroke="#0a64c2" stroke-width="9" stroke-linecap="round" stroke-dasharray="${L}" stroke-dashoffset="${dash}" opacity="${1 - bond * 0.85}"/>
+        <path d="M${hx - 58} 452 L${hx - 18} 474 L${hx - 52} 500" fill="none" stroke="#0a64c2" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="${arrow >= 0.98 ? 1 - bond * 0.85 : 0}"/>
+        <circle cx="${lerp(1210, 1230, bond)}" cy="545" r="${lerp(0, 90, label) || 0}" fill="#6fd486" opacity="${0.35 * label}"/>
+      </g>
+      <text x="560" y="568" font-family="JetBrains Mono" font-size="84" fill="${ink}">H</text>
+      <text x="910" y="568" font-family="JetBrains Mono" font-size="84" font-weight="600" fill="${ink}">O</text>
+      <text x="${hx}" y="568" font-family="JetBrains Mono" font-size="84" fill="${ink}">H</text>
+      ${charge(990, 462, "#bd1278", 1 - bond)}${charge(hx + 52, 486, "#a94a00", 1 - bond)}
+      <g fill="#0a64c2"><circle cx="925" cy="455" r="10"/><circle cx="955" cy="455" r="10"/><circle cx="925" cy="615" r="10"/><circle cx="955" cy="615" r="10"/>
+        <circle cx="${lerp(1010, 1110, bond)}" cy="${lerp(522, 540, bond)}" r="10" opacity="${1 - bond}"/><circle cx="${lerp(1010, 1110, bond)}" cy="${lerp(556, 540, bond)}" r="10" opacity="${1 - bond}"/></g>
+      <text x="960" y="880" text-anchor="middle" font-family="Patrick Hand" font-size="70" fill="${ink}" opacity="${label}">HO⁻ + H⁺ → H₂O</text>
+      <text x="960" y="200" text-anchor="middle" font-family="Patrick Hand" font-size="60" fill="#57536b" opacity="${1 - label}">${t < 1.4 ? "A proton drifts close…" : t < 2.8 ? "…the lone pair reaches out" : "…and becomes the new O–H bond"}</text>`;
+  }
+  const scene = (() => {
+    const svg = $("#scene"), scrub = $("#scene-scrub"), out = $("#scene-out"), btn = $("#scene-play");
+    let t = 0, playing = false, last = 0, raf = 0, shownFrame = -1;
+    const reduced = () => root.dataset.motion === "reduced" || matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const snap = (x) => (fps >= 60 ? x : Math.floor(x * fps) / fps); // the only change to the Scene clock
+    function paint(force) {
+      const ts = snap(t), frame = Math.round(ts * fps);
+      if (!force && frame === shownFrame) return; // a held drawing: nothing to repaint
+      shownFrame = frame;
+      svg.innerHTML = renderScene(ts, playing && !reduced() ? frame % 3 : null);
+      scrub.value = ts; out.textContent = `${ts.toFixed(1)} of ${DUR} seconds`;
+    }
+    function tick(now) {
+      t = Math.min(DUR, t + (now - last) / 1000); last = now;
+      if (t >= DUR) { playing = false; paint(true); return; }
+      paint(); raf = requestAnimationFrame(tick);
+    }
+    function play() { cancelAnimationFrame(raf); if (t >= DUR) t = 0; playing = true; last = performance.now(); raf = requestAnimationFrame(tick); }
+    btn.addEventListener("click", () => { t = 0; play(); });
+    scrub.addEventListener("input", () => { cancelAnimationFrame(raf); playing = false; t = +scrub.value; paint(true); });
+    // Autoplay once when scrolled into view; reduced motion opens paused on the poster.
+    let seen = false;
+    new IntersectionObserver(([e]) => { if (e.isIntersecting && !seen) { seen = true; reset(); } }, { threshold: 0.5 }).observe(svg);
+    function reset() { cancelAnimationFrame(raf); playing = false; if (reduced()) { t = POSTER; paint(true); } else { t = 0; if (seen) play(); else paint(true); } }
+    return { reset };
+  })();
+
+  applyFps(12);
+})();
+</script>
+</body>
+</html>
