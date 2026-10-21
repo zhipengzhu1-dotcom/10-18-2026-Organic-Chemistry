@@ -1,0 +1,12 @@
+---
+// One doodle from the sprite (Doodles.astro, which the page must include). Decorative only.
+// Size and place it with a class; the drawing keeps its own proportions.
+export type DoodleName = "flask" | "tubes" | "benzene" | "atom" | "sprig" | "beaker";
+interface Props {
+  name: DoodleName;
+  class?: string;
+}
+const { name, class: className } = Astro.props;
+---
+
+<svg class:list={["doodle", className]} aria-hidden="true" focusable="false"><use href={`#doodle-${name}`}></use></svg>

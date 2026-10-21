@@ -40,6 +40,6 @@ const unit1 = courseModel().subjects[0]?.courses[0]?.units.find((u) => u.status 
       donations pay for hosting and new Units. Seen a mistake, or have a good Problem? <a href={suggestProblemHref()}>Tell us</a>.
     </p>
 
-    {unit1 && <p><a class="btn btn-primary" href={unit1.url}>Start Unit <span class="data">1</span> ▸</a></p>}
+    {unit1 && <p><a class="btn btn-go" href={unit1.url}>Start Unit <span class="data">1</span> ▸</a></p>}
   </main>
 </Base>

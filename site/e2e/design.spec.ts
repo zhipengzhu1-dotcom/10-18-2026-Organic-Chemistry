@@ -129,6 +129,44 @@ test.describe("paper", () => {
     }
   });
 
+  // The crawl sees the home page as a first visit; the returning Student's Hub is checked here.
+  test("the returning home page (Streak line, sticky-note Continue card) passes axe, the type rules and 48px targets", async ({
+    page,
+  }) => {
+    for (const viewport of [PHONE, { width: 1280, height: 720 }]) {
+      await page.setViewportSize(viewport);
+      await page.goto("/");
+      await page.evaluate(() =>
+        localStorage.setItem("astratron.progress", JSON.stringify({ version: 1, lessons: {}, problems: {}, last: "u1-l01" })),
+      );
+      await page.reload();
+      await expect(page.getByRole("region", { name: "Continue" })).toBeVisible();
+      await expect(page.getByText(/^Streak: 0 days · 2 freezes left$/)).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
+      const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
+      expect(axe.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);
+      expect(await typeViolations(page)).toEqual([]);
+      expect(await smallTargets(page)).toEqual([]);
+    }
+  });
+
+  test("the home page's doodles are decorative only and add under 8 KB to the HTML", async ({ page }) => {
+    await page.goto("/");
+    const doodles = await page.locator(".doodle-sprite, .doodle").evaluateAll((svgs) =>
+      svgs.map((svg) => ({
+        hidden: svg.getAttribute("aria-hidden"),
+        text: svg.textContent!.trim(),
+        bytes: new TextEncoder().encode(svg.outerHTML).length,
+      })),
+    );
+    expect(doodles.length).toBeGreaterThan(1);
+    for (const d of doodles) expect({ hidden: d.hidden, text: d.text }).toEqual({ hidden: "true", text: "" });
+    expect(doodles.reduce((n, d) => n + d.bytes, 0)).toBeLessThan(8 * 1024);
+    // The six from the reference drawing, one symbol each.
+    for (const name of ["flask", "tubes", "benzene", "atom", "sprig", "beaker"])
+      await expect(page.locator(`.doodle-sprite symbol#doodle-${name}`)).toHaveCount(1);
+  });
+
   // One test per Lesson (and pinned Practice Set), so they run in parallel and each has its own time.
   for (const lesson of playablePaths())
     test(`every Step and feedback panel passes axe and the type rules: ${lesson}`, async ({ page }) => {
@@ -202,6 +240,16 @@ test.describe("Step player on a phone", () => {
     await expect(page.getByRole("link")).toHaveCount(2);
     await expect(page.getByRole("link", { name: "Report a mistake" })).toBeVisible();
     await expect(page.locator(".player-foot").locator("button, a")).toHaveCount(1);
+  });
+
+  test("on a 15-Step Lesson the progress pills stay legible without a taller top row", async ({ page }) => {
+    await page.goto("/organic/orgo-1/structure-bonding/drawing-molecules");
+    await expect(page.locator(".bars li")).toHaveCount(15);
+    const widths = await page.locator(".bars li").evaluateAll((lis) => lis.map((li) => li.getBoundingClientRect().width));
+    expect(Math.min(...widths)).toBeGreaterThanOrEqual(12);
+    const top = (await page.locator(".player-top").boundingBox())!;
+    // The top row is the 48 px ✕ circle plus its padding, no more.
+    expect(top.height).toBeLessThanOrEqual(64);
   });
 
   for (const lesson of playablePaths())

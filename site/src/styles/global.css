@@ -127,7 +127,9 @@
     text-transform: uppercase;
   }
 
-  /* Buttons: the arcade press collapses the hard shadow into the button. */
+  /* Buttons: a pen-drawn box (uneven corners) on an ink offset shadow. A press sinks it into the
+     page: it slides onto its shadow, which closes, in the first 50ms frame. Fills are marker inside
+     the pen line, text always ink: blue for the main action, orange only to Start. */
   .btn {
     display: inline-flex;
     align-items: center;
@@ -135,54 +137,47 @@
     gap: 10px;
     min-height: var(--at-tap);
     min-width: var(--at-tap);
-    padding: 12px 20px;
-    font: 400 var(--at-label-size) / 1 var(--at-font-hand);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    padding: 10px 22px;
+    font: 400 21px/1 var(--at-font-hand);
+    color: var(--at-ink);
     text-decoration: none;
     cursor: pointer;
-    border: var(--at-border) solid var(--at-ink);
-    box-shadow: var(--at-drop);
+    user-select: none;
+    background: var(--at-paper);
+    border: var(--at-pen) solid var(--at-ink);
+    border-radius: var(--at-wobble);
+    box-shadow: var(--at-drop-sm);
     /* The press lands in the first 50ms frame (the stepped curve starts near its end). */
     transition:
       transform var(--at-dur-press) var(--at-step-press),
       box-shadow var(--at-dur-press) var(--at-step-press);
   }
-  .btn:active:not(:disabled) {
-    transform: translate(5px, 5px);
+  .btn:active:not(:disabled):not([aria-disabled="true"]) {
+    transform: translate(3px, 3px) scale(0.98);
     box-shadow: 0 0 0 var(--at-ink);
   }
   /* Hover lifts only on a real pointer, so a tap never leaves a button stuck lifted. */
   @media (hover: hover) and (pointer: fine) {
-    .btn:hover:not(:disabled):not(:active) {
+    .btn:hover:not(:disabled):not([aria-disabled="true"]):not(:active) {
       transform: translate(-1px, -1px);
-      box-shadow: 6px 6px 0 var(--at-ink);
+      box-shadow: 4px 4px 0 var(--at-ink);
     }
   }
   .btn-primary {
-    background: var(--at-orange-fill);
-    color: var(--at-ink);
-  }
-  .btn-electron {
     background: var(--at-blue-fill);
-    color: var(--at-ink);
   }
-  .btn-boss {
-    background: var(--at-pink-fill);
-    color: var(--at-ink);
+  .btn-go {
+    background: var(--at-orange-fill);
   }
   .btn-secondary {
-    background: transparent;
-    color: var(--at-ink);
-    border-color: var(--at-ink);
-    box-shadow: 5px 5px 0 var(--at-ink-muted);
+    background: var(--at-paper);
   }
   .btn:disabled,
   .btn[aria-disabled="true"] {
     background: var(--at-paper);
     color: var(--at-ink-muted);
     box-shadow: none;
-    border: var(--at-border) dashed var(--at-ink-muted);
+    border: var(--at-pen) dashed var(--at-ink-muted);
     cursor: not-allowed;
   }
   .btn-block {
@@ -288,6 +283,28 @@
     max-width: 640px;
     width: 100%;
     margin: 0 auto;
+  }
+  /* On a phone the Step count sits over the pills in one column, so 15 pills keep a legible width
+     and the row stays as tall as the ✕ circle. */
+  @media (max-width: 639px) {
+    .player-top {
+      grid-template-rows: auto auto;
+      row-gap: 4px;
+    }
+    .player-exit,
+    .player-back {
+      grid-row: 1 / span 2;
+    }
+    .player-top .player-count {
+      grid-column: 3;
+      grid-row: 1;
+      justify-self: end;
+    }
+    .player-top .bars {
+      grid-column: 3;
+      grid-row: 2;
+      gap: 2px;
+    }
   }
   /* ✕ and ‹ in pen circles. */
   .player-exit,
@@ -768,22 +785,65 @@
     margin: 0 0 8px;
     font-size: 20px;
   }
+  /* Room above for the washi tape and below for the marker offset: the strip scrolls, so it clips. */
   .tiles {
     display: flex;
-    gap: 14px;
+    gap: 18px;
     overflow-x: auto;
     list-style: none;
     margin: 0 calc(-1 * var(--at-gutter));
-    padding: 6px var(--at-gutter) 16px;
+    padding: 18px var(--at-gutter) 18px;
     scroll-snap-type: x proximity;
     scroll-padding: 0 var(--at-gutter);
   }
+  /* A Unit tile is an index card: a pen box with a strip of washi tape and a marker offset, each
+     Unit its own marker. A coming-soon Unit is dashed pencil: no tape, no offset. */
   .tile {
-    flex: 0 0 min(58vw, 200px);
+    --tint: var(--at-blue-fill);
+    position: relative;
+    flex: 0 0 min(64vw, 220px);
     scroll-snap-align: start;
-    border: var(--at-border-strong) solid var(--at-ink-muted);
+    border: var(--at-pen) solid var(--at-ink);
+    border-radius: var(--at-wobble);
     background: var(--at-paper);
-    box-shadow: 5px 5px 0 var(--at-ink-muted);
+    box-shadow: 5px 5px 0 var(--tint);
+    transition:
+      transform var(--at-dur-ui) var(--at-step-ui),
+      box-shadow var(--at-dur-ui) var(--at-step-ui);
+  }
+  .tile:nth-child(5n + 2) {
+    --tint: var(--at-green-fill);
+  }
+  .tile:nth-child(5n + 3) {
+    --tint: var(--at-violet-fill);
+  }
+  .tile:nth-child(5n + 4) {
+    --tint: var(--at-pink-fill);
+  }
+  .tile:nth-child(5n + 5) {
+    --tint: var(--at-orange-fill);
+  }
+  .tile.open::before {
+    content: "";
+    position: absolute;
+    top: -11px;
+    left: 50%;
+    width: 84px;
+    height: 22px;
+    translate: -50% 0;
+    rotate: -3deg;
+    background: color-mix(in srgb, var(--tint) 55%, transparent);
+    border-inline: 2px dotted color-mix(in srgb, var(--at-ink) 18%, transparent);
+  }
+  /* Lifts only on a real pointer, so a tap never leaves a card stuck lifted. */
+  @media (hover: hover) and (pointer: fine) {
+    .tile.open:hover {
+      transform: rotate(-0.8deg) translateY(-3px);
+      box-shadow: 7px 8px 0 var(--tint);
+    }
+  }
+  .tile.open:active {
+    transform: scale(0.98);
   }
   .tile > a,
   .tile > div {
@@ -792,28 +852,21 @@
     gap: 6px;
     height: 100%;
     min-height: 200px;
-    padding: 14px;
+    padding: 20px 16px 16px;
     color: var(--at-ink);
     text-decoration: none;
-  }
-  .tile.open {
-    border-color: var(--at-orange-fill);
-    box-shadow: var(--at-drop);
+    border-radius: inherit;
   }
   .tile.soon {
-    border-style: dashed;
+    border: var(--at-pen) dashed var(--at-ink-muted);
     box-shadow: none;
   }
   .tile-number {
     font: 600 16px/1 var(--at-font-data);
-    text-transform: uppercase;
     color: var(--at-ink-muted);
   }
-  .tile.open .tile-number {
-    color: var(--at-orange);
-  }
   .tile-title {
-    font: 700 19px/1.15 var(--at-font-text);
+    font: 400 25px/1.1 var(--at-font-hand);
   }
   .tile-summary {
     color: var(--at-ink-muted);
@@ -837,38 +890,48 @@
     text-transform: uppercase;
     color: var(--at-orange);
   }
+  /* The Unit's name gets a highlighter swipe, as in a notebook's contents page. */
+  .unit-title {
+    padding: 0 4px;
+    border-radius: 3px 8px 4px 9px;
+    background: linear-gradient(100deg, transparent 0.5%, var(--at-yellow-fill) 2%, var(--at-yellow-fill) 97%, transparent 99%);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  /* Act headings in hand, ruled off with a pen line. */
   .level-select .act-title {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin: 24px 0 10px;
-    font: 600 16px/1.2 var(--at-font-text);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--at-blue);
+    gap: 12px;
+    margin: 28px 0 12px;
+    font: 400 22px/1.2 var(--at-font-hand);
+    color: var(--at-ink);
   }
   .level-select .act-title::after {
     content: "";
     flex: 1;
-    height: 2px;
-    background: var(--at-ink-muted);
+    height: var(--at-pen);
+    background: var(--at-ink);
+    border-radius: 2px;
   }
   .level-select .levels {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 12px;
+    gap: 16px;
   }
+  /* Each Lesson is a card: read, not pressed, so a pen box on a marker offset. */
   .level-select .level {
     display: grid;
     grid-template-columns: auto auto 1fr;
     align-items: center;
     gap: 6px 8px;
-    padding: 12px;
-    border: var(--at-border) solid var(--at-ink-muted);
+    padding: 12px 16px;
+    border: var(--at-pen) solid var(--at-ink);
+    border-radius: var(--at-wobble-2);
     background: var(--at-paper);
-    box-shadow: 3px 3px 0 var(--at-ink-muted);
+    box-shadow: 4px 4px 0 var(--at-blue-fill);
   }
   .level-select .level > :not(.chip) {
     grid-column: 1 / -1;
@@ -879,7 +942,7 @@
   }
   .level-select .level-title {
     margin: 0;
-    font-size: 19px;
+    font-size: 23px;
   }
   .level-select .level-title a {
     display: flex;
@@ -893,18 +956,24 @@
   }
   .level-select .chip {
     justify-self: start;
-    padding: 2px 8px;
+    padding: 2px 10px;
     font: 500 16px/1.3 var(--at-font-text);
     color: var(--at-ink-muted);
-    border: var(--at-border) solid currentColor;
+    border: 1.5px solid currentColor;
+    border-radius: 10px 14px 9px 13px;
   }
   .level-select .chip.count {
     font-family: var(--at-font-data);
   }
+  /* The Lesson's phases as marker strokes inside one pen outline. */
   .level-select .phase-bar {
     display: flex;
     gap: 2px;
-    height: 8px;
+    height: 10px;
+    padding: 1px;
+    border: 1.5px solid var(--at-ink);
+    border-radius: 6px 10px 5px 9px;
+    overflow: hidden;
   }
   .level-select .phase {
     min-width: 4px;
@@ -928,19 +997,19 @@
     min-height: var(--at-tap);
   }
   .level-select .level-on-ramp {
-    border-style: dashed;
+    border: var(--at-pen) dashed var(--at-ink-muted);
     box-shadow: none;
   }
   .level-select .level-boss {
-    border-color: var(--at-pink-fill);
+    border-color: var(--at-pink);
     border-width: var(--at-border-strong);
-    box-shadow: 3px 3px 0 var(--at-pink-fill);
+    box-shadow: 5px 5px 0 var(--at-pink-fill);
   }
   .level-select .level-boss .level-number {
     color: var(--at-pink);
   }
   .level-select .level-practice {
-    border-color: var(--at-orange-fill);
+    box-shadow: 4px 4px 0 var(--at-orange-fill);
   }
   .level-select .level-soon {
     font: 400 var(--at-label-size) / 1 var(--at-font-hand);
@@ -959,10 +1028,13 @@
     margin: 0 auto;
     padding: 12px var(--at-gutter) 0;
   }
+  /* The wordmark in Kaushan Script, a pen signature. */
   .topbar .wordmark {
     display: inline-flex;
     align-items: center;
     min-height: var(--at-tap);
+    font: 400 40px/1 var(--at-font-script);
+    color: var(--at-ink);
     text-decoration: none;
   }
   .streak {
@@ -986,53 +1058,166 @@
   .returning .first-visit {
     display: none;
   }
-  /* The Push hero (#73): headline, live push, one button; the Course map follows. */
+  /* The Push hero (#73): headline, live push, one button; the Course map follows. The headline is
+     in hand with one script word; the doodles sit around the push, behind its card. */
   .push-hero-screen {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding: 8px 0 24px;
+    padding: 4px 0 24px;
   }
   .hero-title {
     margin: 0;
-    font: 700 clamp(30px, 8vw, 44px) / 1.05 var(--at-font-text);
+    font: 400 clamp(30px, 6vw, 40px) / 1.12 var(--at-font-hand);
   }
   .hero-accent {
-    color: var(--at-orange);
+    display: inline-block;
+    font: 400 clamp(42px, 8vw, 56px) / 1 var(--at-font-script);
+    color: var(--at-blue);
+    rotate: -3deg;
+  }
+  .push-hero-desk {
+    position: relative;
   }
   .push-hero {
+    position: relative;
+    z-index: 1;
     padding: 12px;
-    border: var(--at-border-strong) solid var(--at-ink-muted);
+    border: var(--at-pen) solid var(--at-ink);
+    border-radius: var(--at-wobble-2);
     background: var(--at-paper);
-    box-shadow: var(--at-drop);
+    box-shadow: 5px 5px 0 var(--at-violet-fill);
   }
   .push-hero-msg {
     margin: 12px 0 0;
     min-height: 3em;
   }
   .push-hero-done {
-    color: var(--at-blue);
+    color: var(--at-green);
+  }
+
+  /* Doodles: pen lines on the static wobble, the marker multiplied over the paper. */
+  .doodle-sprite {
+    position: absolute;
+  }
+  .doodle {
+    display: block;
+    filter: url(#rough);
+    pointer-events: none;
+  }
+  .doodle-mark {
+    mix-blend-mode: multiply;
+  }
+  .hero-doodle {
+    position: absolute;
+    z-index: 0;
+  }
+  /* Narrow windows: three stand behind the push card's top edge, like things on a desk behind it. */
+  @media (max-width: 1039px) {
+    .push-hero-desk {
+      padding-top: 46px;
+    }
+    .hero-flask {
+      width: 56px;
+      height: 70px;
+      top: 0;
+      left: 14px;
+      rotate: -6deg;
+    }
+    .hero-tubes {
+      width: 64px;
+      height: 59px;
+      top: 6px;
+      left: calc(50% - 32px);
+    }
+    .hero-beaker {
+      width: 52px;
+      height: 57px;
+      top: 4px;
+      right: 16px;
+      rotate: 5deg;
+    }
+    .hero-benzene,
+    .hero-atom,
+    .hero-sprig {
+      display: none;
+    }
+  }
+  /* Wide windows: all six fill the margins either side of the page column. */
+  @media (min-width: 1040px) {
+    .hero-flask {
+      width: 130px;
+      height: 162px;
+      top: -150px;
+      right: auto;
+      left: -190px;
+      rotate: -4deg;
+    }
+    .hero-tubes {
+      width: 140px;
+      height: 128px;
+      top: -150px;
+      right: -200px;
+      rotate: 5deg;
+    }
+    .hero-sprig {
+      width: 90px;
+      height: 150px;
+      top: 40px;
+      left: -150px;
+      rotate: 0deg;
+    }
+    .hero-benzene {
+      width: 104px;
+      height: 104px;
+      top: 0;
+      right: -170px;
+    }
+    .hero-atom {
+      width: 118px;
+      height: 118px;
+      bottom: -40px;
+      right: -210px;
+    }
+    .hero-beaker {
+      width: 104px;
+      height: 114px;
+      bottom: -70px;
+      left: -200px;
+      rotate: 0deg;
+    }
+  }
+
+  /* Returning: the Streak line in hand, the Continue card a yellow sticky note. */
+  .hub h1 {
+    margin: 8px 0 4px;
+    font-size: 34px;
+  }
+  .hub-streak {
+    margin: 0;
+    font: 400 21px/1.3 var(--at-font-hand);
   }
   .continue-card {
-    margin: 12px 0 24px;
-    padding: 16px;
-    border: var(--at-border-strong) solid var(--at-orange-fill);
-    background: var(--at-paper);
-    box-shadow: var(--at-drop);
+    max-width: 380px;
+    margin: 20px 0 28px;
+    padding: 18px 18px 16px;
+    background: var(--at-yellow-fill);
+    border: var(--at-border) solid var(--at-ink);
+    border-radius: 2px 2px 18px 2px;
+    box-shadow: 0 10px 14px -10px color-mix(in srgb, var(--at-ink) 45%, transparent);
+    rotate: -1.2deg;
   }
   .continue-card h2 {
     margin: 6px 0 4px;
-    font-size: 22px;
+    font-size: 28px;
   }
   .continue-card p {
-    margin: 0 0 12px;
-    color: var(--at-ink-muted);
+    margin: 0 0 14px;
+    color: var(--at-ink);
   }
   .continue-card .continue-unit {
     margin: 0;
     font: 600 16px/1.2 var(--at-font-data);
-    text-transform: uppercase;
-    color: var(--at-orange);
   }
   .your-progress {
     margin-top: 40px;
@@ -1065,11 +1250,14 @@
     min-width: var(--at-tap);
   }
   /* Footer (#77): motto, Donate line, licences, credits, Privacy and Suggest a Problem. */
+  /* A ruled divider on top: a pen line with the margin's pink rule under it, like a notebook's head. */
   .site-footer {
     max-width: 640px;
     margin: 32px auto 0;
-    padding: 16px var(--at-gutter) 40px;
-    border-top: var(--at-border) solid var(--at-ink-muted);
+    padding: 24px var(--at-gutter) 40px;
+    background:
+      linear-gradient(var(--at-ink), var(--at-ink)) top / 100% var(--at-pen) no-repeat,
+      linear-gradient(var(--at-margin), var(--at-margin)) 0 6px / 100% 2px no-repeat;
     color: var(--at-ink-muted);
   }
   .site-footer p {
@@ -1082,7 +1270,7 @@
     text-decoration: underline;
   }
   .site-footer .motto {
-    font: 700 18px/1.3 var(--at-font-text);
+    font: 400 24px/1.2 var(--at-font-hand);
     color: var(--at-ink);
   }
   .site-footer nav {
@@ -1090,16 +1278,32 @@
     flex-wrap: wrap;
     gap: 0 24px;
   }
-  /* Donate in the top bar: an orange call to action, a full tap target. */
+  /* Donate in the top bar: a plain pen button (orange is kept for Start), a full tap target. */
   .topbar .donate {
     margin-left: auto;
     margin-right: 16px;
     min-height: var(--at-tap);
   }
-  /* The privacy page. */
+  /* About, Privacy, Submit and Coming soon: paper type. Headings in hand, the title on a
+     highlighter swipe, body in the text face. */
+  .prose h1,
+  .submit-page h1 {
+    font-size: 36px;
+    margin: 16px 0 16px;
+  }
+  .prose h1::after,
+  .submit-page h1::after {
+    content: "";
+    display: block;
+    width: 120px;
+    height: 8px;
+    margin-top: 4px;
+    border-radius: 4px 10px 6px 12px;
+    background: var(--at-yellow-fill);
+  }
   .prose h2 {
     margin: 32px 0 8px;
-    font-size: 22px;
+    font-size: 25px;
   }
   .prose li {
     margin: 0 0 6px;
@@ -1125,7 +1329,13 @@
   .submit-page fieldset {
     margin: 0 0 16px;
     padding: 8px 16px;
-    border: var(--at-border) solid var(--at-ink-muted);
+    border: var(--at-pen) solid var(--at-ink);
+    border-radius: var(--at-wobble-2);
+  }
+  .submit-page legend,
+  .submit-page .field > label:not(.consent) {
+    font: 400 21px/1.2 var(--at-font-hand);
+    color: var(--at-ink);
   }
   .submit-page fieldset label,
   .submit-page .consent {
@@ -1152,7 +1362,8 @@
     font: inherit;
     color: var(--at-ink);
     background: var(--at-paper);
-    border: var(--at-border) solid var(--at-ink-muted);
+    border: var(--at-pen) solid var(--at-ink);
+    border-radius: 6px 12px 5px 10px;
   }
   .submit-page input[type="checkbox"],
   .submit-page input[type="radio"] {
@@ -1185,7 +1396,6 @@
 }
 
 /* Lines that #61's script fills with numbers (Streak, "Step 3 of 10", "0 of 3 Lessons"). */
-[data-streak-text],
 [data-continue="where"],
 [data-unit-progress] {
   font-family: var(--at-font-data);
@@ -1627,14 +1837,16 @@
   transition: opacity var(--at-dur-fade) linear !important;
   scroll-behavior: auto !important;
 }
-:root[data-motion="reduced"] .btn:active:not(:disabled) {
+:root[data-motion="reduced"] .btn:active:not(:disabled):not([aria-disabled="true"]) {
   transform: none;
   box-shadow: 0 0 0 3px var(--at-blue);
 }
 :root[data-motion="reduced"] .btn:hover:not(:disabled):not(:active) {
   transform: none;
 }
-:root[data-motion="reduced"] .opt:active {
+:root[data-motion="reduced"] .opt:active,
+:root[data-motion="reduced"] .tile.open:hover,
+:root[data-motion="reduced"] .tile.open:active {
   transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
