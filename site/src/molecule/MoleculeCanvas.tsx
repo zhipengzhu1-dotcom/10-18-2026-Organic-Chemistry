@@ -1,12 +1,13 @@
 // The WebGL layer of the 3D card: three.js + React-Three-Fiber, loaded lazily so three.js stays out
-// of a Lesson's first-load JS. It only draws: atoms (studio matcap tinted with the cited Jmol colour)
-// and bond sticks, in the rotation and scale the card hands it. Letters, picks, measurements and
+// of a Lesson's first-load JS. It only draws: atoms (studio matcap tinted with the cited Jmol colour,
+// with a pen outline) and pen-ink bond sticks, in the rotation and scale the card hands it. Letters, picks, measurements and
 // taps live in the card's SVG overlay, which uses the same orthographic projection.
 //
 // Renders on demand (frameloop "demand"): a frame is drawn when props change, never on a loop.
 import { Canvas, useLoader, useThree } from "@react-three/fiber";
 import { lazy, Suspense, useEffect, useMemo, type ReactNode } from "react";
 import {
+  BackSide,
   BufferGeometry,
   CylinderGeometry,
   DoubleSide,
@@ -46,6 +47,8 @@ export interface MoleculeCanvasProps {
 export const MATCAP_URL = "/matcaps/studio.webp";
 /** Bond stick radius in Å: a drawing size, not a chemistry value. */
 const STICK = 0.11;
+/** An atom's pen outline, in screen px (the camera is orthographic, so it stays this wide at any zoom). */
+const PEN_PX = 2;
 
 const sphere = new SphereGeometry(1, 40, 28);
 /** The plane sheet draws after the atoms and before the orbital lobes. */
@@ -83,7 +86,10 @@ function Molecule({ molecule, rotation, scale, trueScale, children, onOrbitalsDr
       ),
     [molecule, matcap],
   );
-  const bondMaterial = useMemo(() => new MeshMatcapMaterial({ color: token("--at-ink-muted", "#57536b"), matcap }), [matcap]);
+  // On paper (#122): bonds are pen ink, flat like a pen line, and each atom carries a pen outline
+  // (a slightly larger back-facing shell), so a white hydrogen still reads on the white stage.
+  const ink = useMemo(() => new MeshBasicMaterial({ color: token("--at-ink", "#1d1b26") }), []);
+  const outlineMaterial = useMemo(() => new MeshBasicMaterial({ color: token("--at-ink", "#1d1b26"), side: BackSide }), []);
   const sheetMaterial = useMemo(
     () => new MeshBasicMaterial({ color: token("--at-ink-muted", "#57536b"), transparent: true, opacity: 0.22, side: DoubleSide, depthWrite: false }),
     [],
@@ -143,9 +149,12 @@ function Molecule({ molecule, rotation, scale, trueScale, children, onOrbitalsDr
       {molecule.atoms.map((a, i) => (
         <mesh key={i} geometry={sphere} material={materials[a.element]} position={at(i)} scale={radius(molecule, a.element, trueScale)} />
       ))}
+      {molecule.atoms.map((a, i) => (
+        <mesh key={`o${i}`} geometry={sphere} material={outlineMaterial} position={at(i)} scale={radius(molecule, a.element, trueScale) + PEN_PX / scale} />
+      ))}
       {!trueScale &&
         bonds.map((b, i) => (
-          <mesh key={`b${i}`} geometry={stick} material={bondMaterial} position={b.position} quaternion={b.quaternion} scale={b.scale} />
+          <mesh key={`b${i}`} geometry={stick} material={ink} position={b.position} quaternion={b.quaternion} scale={b.scale} />
         ))}
       {sheetGeometries.map((g, i) => (
         // Translucent and drawn after the atoms without writing depth: atoms in front of it stay

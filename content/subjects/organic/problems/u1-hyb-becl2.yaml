@@ -25,5 +25,5 @@ hints:
   - match: [d]
     text: Be's two electrons are both used in bonds, so nothing is left for the p orbitals.
   - text: "Count Be's groups (bonded atoms + lone pairs), then match: 4 → sp³, 3 → sp², 2 → sp."
-reveal: "**a**. Two orange sp lobes point at the Cl's; Be's two cyan p orbitals stand empty."
+reveal: "**a**. Two orange sp lobes point at the Cl's; Be's two p orbitals, blue dumbbells at right angles to them, stand empty."
 sourceNote: "Adapted from MIT OCW 5.12, Problem Set 1 Q5, Berkowski, Spring 2005, CC BY-NC-SA 4.0. Wording ours."

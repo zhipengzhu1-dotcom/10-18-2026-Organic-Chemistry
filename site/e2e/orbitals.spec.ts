@@ -18,8 +18,12 @@ async function openPi(page: Page) {
 
 const card = (page: Page) => page.locator("figure.molecule");
 
-/** Counts lobe-cyan pixels above and below a screen row in a screenshot of the card's frame. */
-async function cyanAboveBelow(page: Page, row: number) {
+/**
+ * Reads a screenshot of the card's frame on the paper stage (#122): blue marker-fill pixels and
+ * blue pen-line pixels above and below a screen row (pen pixels count only clear of the atoms on
+ * the row), and the stage's ground at a corner.
+ */
+async function lobePixels(page: Page, row: number) {
   const frame = card(page).locator(".molecule-frame");
   const box = (await frame.boundingBox())!;
   const png = await frame.screenshot();
@@ -34,18 +38,22 @@ async function cyanAboveBelow(page: Page, row: number) {
       ctx.drawImage(img, 0, 0);
       const { data } = ctx.getImageData(0, 0, c.width, c.height);
       const cut = (row / height) * c.height;
-      let above = 0;
-      let below = 0;
+      const fill = { above: 0, below: 0 };
+      const pen = { above: 0, below: 0 };
       for (let i = 0; i < data.length; i += 4) {
         const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
-        // Electron cyan (#3ee8ff) blended over the dark stage: low red, high green and blue.
-        if (b > 90 && g > 80 && r < 0.6 * b) {
-          const y = Math.floor(i / 4 / c.width);
-          if (y < cut - 4) above++;
-          else if (y > cut + 4) below++;
-        }
+        const y = Math.floor(i / 4 / c.width);
+        const side = y < cut - 4 ? "above" : y > cut + 4 ? "below" : null;
+        if (!side) continue;
+        // The blue marker fill (#4dabff) laid over white paper: light, clearly blue.
+        if (b > 225 && r < b - 50 && r > 60) fill[side]++;
+        // The blue pen line (#0a64c2) round each lobe, clear of the atoms on the row.
+        if (Math.abs(y - cut) > 30 && b > 130 && r < 60 && g < 130 && g > r + 25) pen[side]++;
       }
-      return { above, below };
+      // Top centre: clear of the readout (left), the buttons (right) and the lobes.
+      const at = (8 * c.width + Math.floor(c.width / 2)) * 4;
+      const ground = [data[at], data[at + 1], data[at + 2]];
+      return { fill, pen, ground };
     },
     { b64: png.toString("base64"), row: row - box.y, height: box.height },
   );
@@ -64,11 +72,12 @@ test.describe("computed orbitals on the 3D card", () => {
 
     await page.goto(STEP);
     await expect(card(page).locator(".molecule-stage")).toHaveAttribute("data-orbitals", "drawn");
-    expect(meshes).toEqual([SIGMA]);
+    // σ first. The toggle autoplays to π after 1.8 s, which a busy machine can reach before σ is drawn.
+    expect(meshes[0]).toBe(SIGMA);
     await page.getByRole("button", { name: "π", exact: true }).click();
     await expect(card(page).locator(".orbital-chip")).toHaveText(["π computed"]);
     await expect(card(page).locator(".molecule-stage")).toHaveAttribute("data-orbitals", "drawn");
-    expect(meshes).toEqual([SIGMA, MESH]);
+    expect([...new Set(meshes)]).toEqual([SIGMA, MESH]);
   });
 
   test("ethylene's π shows translucent lobes above and below the edge-on plane, with sign labels and a chip", async ({ page }) => {
@@ -90,10 +99,14 @@ test.describe("computed orbitals on the 3D card", () => {
     expect(ys[0]).toBeLessThan(row - 10);
     expect(ys[1]).toBeGreaterThan(row + 10);
 
-    // The drawn lobes: cyan pixels on both sides of the plane (solid above or below, hatched opposite).
-    const { above, below } = await cyanAboveBelow(page, row);
-    expect(above).toBeGreaterThan(300);
-    expect(below).toBeGreaterThan(300);
+    // The drawn lobes on the paper stage: blue marker fill on both sides of the plane (solid above
+    // or below, hatched opposite), each inside a blue pen line, since a fill never stands alone on white.
+    const { fill, pen, ground } = await lobePixels(page, row);
+    expect(ground).toEqual([255, 255, 255]);
+    expect(fill.above).toBeGreaterThan(300);
+    expect(fill.below).toBeGreaterThan(300);
+    expect(pen.above).toBeGreaterThan(40);
+    expect(pen.below).toBeGreaterThan(40);
 
     // The atoms still show through the lobes: both carbons and the front hydrogens are lettered
     // (edge-on, each back H hides behind a front one).

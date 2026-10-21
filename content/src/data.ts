@@ -113,7 +113,7 @@ export interface OrbitalEntry {
   label: string;
   /** The text chip that names it on screen, e.g. "π" or "LUMO". */
   chip: string;
-  /** "sigma" / "pi": colour says the kind, pattern the sign (Lesson 4); "phase": + solid cyan, − hatched orange (Lesson 8). */
+  /** "sigma" / "pi": colour says the kind, pattern the sign (Lesson 4); "phase": + solid blue, − hatched orange (Lesson 8). */
   style: "sigma" | "pi" | "phase";
   /** Value key of its orbital energy in this file. */
   energy?: string;

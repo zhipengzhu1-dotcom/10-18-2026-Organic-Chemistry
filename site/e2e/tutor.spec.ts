@@ -63,4 +63,5 @@ test("the Tutor panel keeps the type rules", async ({ page }) => {
   await expect(failure).toHaveCount(1);
 
   expect(await typeViolations(page, `.${PANEL_CLASS}`)).toEqual([]);
+  await panel(page).screenshot({ path: test.info().outputPath("tutor-panel.png") });
 });

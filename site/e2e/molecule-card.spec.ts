@@ -127,6 +127,60 @@ test.describe("the 3D Step card", () => {
     await page.getByRole("button", { name: "Describe" }).click();
     await expect(live(page)).toContainText("Methane: 5 atoms. C1 is bonded to H1, H2, H3 and H4.");
   });
+
+  // Spec #117: direct manipulation is never on the 20 fps grid, and nothing on the card loops.
+  test("a drag turns it on every pointer move, at display rate; an idle card draws nothing", async ({ page }) => {
+    // Count WebGL draw calls, to see when the canvas redraws.
+    await page.addInitScript(() => {
+      const w = window as unknown as { draws: number };
+      w.draws = 0;
+      for (const gl of [WebGLRenderingContext.prototype, WebGL2RenderingContext.prototype] as unknown as Record<string, (...a: unknown[]) => unknown>[])
+        for (const name of ["drawElements", "drawArrays"]) {
+          const draw = gl[name];
+          gl[name] = function (this: unknown, ...a: unknown[]) {
+            w.draws++;
+            return draw.apply(this, a);
+          };
+        }
+    });
+    await page.goto(`${LESSON}#s03`);
+    await page.evaluate(() => document.fonts.ready);
+    await expect(card(page).locator("canvas")).toHaveCount(1);
+    const draws = () => page.evaluate(() => (window as unknown as { draws: number }).draws);
+    // Settled: the canvas has drawn, and over the next half second it draws nothing more.
+    await expect.poll(draws).toBeGreaterThan(0);
+    await expect.poll(async () => {
+      const a = await draws();
+      await page.waitForTimeout(500);
+      return (await draws()) - a;
+    }).toBe(0);
+
+    // Where every letter sits (an atom on the turn's axis alone wouldn't move).
+    const at = () =>
+      card(page)
+        .locator(".molecule-letter")
+        .evaluateAll((ls) => ls.map((l) => `${l.getAttribute("x")},${l.getAttribute("y")}`).join(" "));
+    const box = (await frame(page).boundingBox())!;
+    await page.mouse.move(box.x + 20, box.y + box.height / 2);
+    await page.mouse.down();
+    let [x, drawn] = [await at(), await draws()];
+    for (let i = 1; i <= 8; i++) {
+      await page.mouse.move(box.x + 20 + 12 * i, box.y + box.height / 2);
+      // Within two display frames the overlay and the canvas have both followed the pointer.
+      await page.evaluate(() => new Promise(requestAnimationFrame));
+      await page.evaluate(() => new Promise(requestAnimationFrame));
+      const [x2, drawn2] = [await at(), await draws()];      expect(x2, `move ${i}`).not.toBe(x);
+      expect(drawn2, `move ${i}`).toBeGreaterThan(drawn);
+      [x, drawn] = [x2, drawn2];
+    }
+    await page.mouse.up();
+    // Let go, it stops: no spin, no further frames.
+    await page.waitForTimeout(200);
+    const after = await draws();
+    await page.waitForTimeout(500);
+    expect(await draws()).toBe(after);
+    await card(page).screenshot({ path: test.info().outputPath("methane.png") });
+  });
 });
 
 test.describe("Rotate-and-identify 3D", () => {

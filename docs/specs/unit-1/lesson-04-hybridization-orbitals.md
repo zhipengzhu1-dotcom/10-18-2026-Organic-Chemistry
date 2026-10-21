@@ -159,7 +159,7 @@ All five molecules have complete experimental Cartesians in CCCBDB (checked live
   **σ (sigma):** head-on, along the line between the two nuclei. The shared electrons sit right on that line. Every single bond is a σ bond, and in ethylene the sp² hybrids make all five σ bonds: the **σ framework**.
   **π (pi):** each carbon's leftover p orbital stands upright, and side by side they overlap **above and below** the plane. No π electrons sit on the C–C line itself.
   So a double bond is **one σ + one π**."
-- **Visual / Scene:** `ethylene-sigma-pi`, autoplays once: `sigma` edge-on, then `pi` added, then `both` with the plane on. Rotatable afterwards. Screen reader: "Ethylene, edge-on. An orange σ orbital sits on the line between the two carbons. Then a cyan π orbital appears as two lobes, one above the plane of the atoms and one below, with nothing on the line between the carbons. Labelled: computed."
+- **Visual / Scene:** `ethylene-sigma-pi`, autoplays once: `sigma` edge-on, then `pi` added, then `both` with the plane on. Rotatable afterwards. Screen reader: "Ethylene, edge-on. An orange σ orbital sits on the line between the two carbons. Then a blue π orbital, its chip marked π, appears as two lobes, one above the plane of the atoms and one below, with nothing on the line between the carbons. Labelled: computed."
 - **Source note:** ethylene geometry + orbital Scene note. "σ and π in ethylene adapted from MIT OCW 5.12, Lecture 1 p. 14, CC BY-NC-SA 4.0."
 
 ### `u1-l04-s07` · Build · Rotate-and-identify 3D (signature)
@@ -176,7 +176,7 @@ All five molecules have complete experimental Cartesians in CCCBDB (checked live
   | `a` | "That's where the σ bond lives. Turn the molecule until its plane is edge-on and look again." |
   | `c` | "Turn the plane edge-on: the π lobes stick out of the plane, not along it." |
   | `d` | "The C–H bonds are σ bonds. The π lobes sit over the two carbons only." |
-  | *(any other)* | "Spin until you see the six atoms edge-on, as a line. Where are the cyan lobes?" |
+  | *(any other)* | "Spin until you see the six atoms edge-on, as a line. Where are the blue π lobes?" |
 
 - **Reveal:** the model turns edge-on, the plane switches on, and both lobes are labelled "above" and "below".
 - **Scene:** Describe text: "Ethylene's π bond: one lobe above the plane of the six atoms and one below, both over the two carbons. Nothing lies in the plane."
@@ -208,7 +208,7 @@ All five molecules have complete experimental Cartesians in CCCBDB (checked live
 - **Prompt:** "Acetylene, H–C≡C–H. Each carbon has two groups, so it's **sp**, and all four atoms sit in a straight line. The sp hybrids make the σ framework.
   Each carbon keeps **two** p orbitals at right angles to each other, so they overlap side-on twice: one π above and below, one in front and behind.
   A triple bond is **one σ + two π**. Together the two π bonds wrap the C–C line in a tube of electrons."
-- **Visual / Scene:** `acetylene-sigma-pi`, autoplays once: `sigma`, then `pi1`, then `pi2`, then `pi-both`. Rotatable afterwards. Screen reader: "Acetylene, four atoms in a straight line. An orange σ orbital on the axis. A cyan π orbital above and below the axis, then a second one in front and behind. Together the two π orbitals make a tube around the axis. Labelled: computed."
+- **Visual / Scene:** `acetylene-sigma-pi`, autoplays once: `sigma`, then `pi1`, then `pi2`, then `pi-both`. Rotatable afterwards. Screen reader: "Acetylene, four atoms in a straight line. An orange σ orbital on the axis. A blue π orbital, its chip marked π, above and below the axis, then a second one in front and behind. Together the two π orbitals make a tube around the axis. Labelled: computed."
 - **Source note:** acetylene geometry + orbital Scene note. "Acetylene adapted from MIT OCW 5.12, Lecture 1 p. 14, CC BY-NC-SA 4.0."
 
 ### `u1-l04-s10` · Build · Rank / order

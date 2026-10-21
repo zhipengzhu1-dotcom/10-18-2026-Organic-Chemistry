@@ -98,7 +98,7 @@ steps:
       label: σ
       orbitals: [ethylene-orbitals/sigma]
       plane: { through: [2, 0, 3], on: true }
-      describe: "Ethylene, edge-on. An orange σ orbital sits on the line between the two carbons. Then a cyan π orbital appears as two lobes, one above the plane of the atoms and one below, with nothing on the line between the carbons. Labelled: computed."
+      describe: "Ethylene, edge-on. An orange σ orbital sits on the line between the two carbons. Then a blue π orbital, its chip marked π, appears as two lobes, one above the plane of the atoms and one below, with nothing on the line between the carbons. Labelled: computed."
       toggleLabel: Show
       autoplay: true
       toggle:
@@ -139,7 +139,7 @@ steps:
         text: "Turn the plane edge-on: the π lobes stick out of the plane, not along it."
       - match: [d]
         text: The C–H bonds are σ bonds. The π lobes sit over the two carbons only.
-      - text: Spin until you see the six atoms edge-on, as a line. Where are the cyan lobes?
+      - text: Spin until you see the six atoms edge-on, as a line. Where are the blue π lobes?
     reveal: "**b**. Turned edge-on with the plane on, one π lobe sits **above** the plane and one **below**."
 
   - id: s08
@@ -174,7 +174,7 @@ steps:
       zoom: 1.6
       label: σ
       orbitals: [acetylene-orbitals/sigma]
-      describe: "Acetylene, four atoms in a straight line. An orange σ orbital on the axis. A cyan π orbital above and below the axis, then a second one in front and behind. Together the two π orbitals make a tube around the axis. Labelled: computed."
+      describe: "Acetylene, four atoms in a straight line. An orange σ orbital on the axis. A blue π orbital, its chip marked π, above and below the axis, then a second one in front and behind. Together the two π orbitals make a tube around the axis. Labelled: computed."
       toggleLabel: Show
       autoplay: true
       toggle:

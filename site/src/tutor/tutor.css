@@ -1,7 +1,7 @@
 /* The Tutor (dev only, spec #104): the Ask button in the player's top bar, then a sheet rising
    from the bottom on phones and a side panel from 720px. Paper Notebook tokens only. Motion on the
-   20 fps grid: a card-length (400ms) stepped slide plus a ui fade in, out at exit (150ms); a swipe
-   follows the finger unstepped; reduced motion (global.css) leaves only the fade. */
+   20 fps grid: a ui (200ms) stepped slide and fade in, out at exit (150ms); a swipe follows the
+   finger unstepped; reduced motion (global.css) leaves only the fade. */
 
 /* The Ask button (or, switched off, the header's switch alone, unchecked) takes a column of its own
    in the top bar; a tighter gap keeps the story bars visible on a 390px phone. */
@@ -51,10 +51,10 @@
   height: min(70dvh, 560px);
   display: flex;
   flex-direction: column;
+  /* Paper with a pen edge: the sheet's top edge, the side panel's left edge. */
   background: var(--at-paper);
   color: var(--at-ink);
-  border-top: var(--at-border-strong) solid var(--at-ink-muted);
-  box-shadow: var(--at-drop);
+  border-top: var(--at-pen) solid var(--at-ink);
   opacity: 0;
   transform: translateY(100%);
   pointer-events: none;
@@ -68,7 +68,7 @@
   transform: none;
   pointer-events: auto;
   transition:
-    transform var(--at-dur-card) var(--at-step-card),
+    transform var(--at-dur-ui) var(--at-step-ui),
     opacity var(--at-dur-ui) var(--at-step-ui);
 }
 /* Opened from the keyboard: no slide, no fade. Swiped: the sheet follows the finger at display
@@ -131,7 +131,7 @@
     width: var(--tutor-width);
     height: auto;
     border-top: 0;
-    border-left: var(--at-border-strong) solid var(--at-ink-muted);
+    border-left: var(--at-pen) solid var(--at-ink);
     transform: translateX(100%);
   }
   .tutor-head {
@@ -165,11 +165,13 @@
   flex: 1;
   border-top: var(--at-border) solid var(--at-ink-muted);
 }
-/* Student and Tutor turns differ by side, surface, edge and their name, never colour alone. */
+/* Student and Tutor turns differ by side, surface, edge and their name, never colour alone: the
+   Student's on a light blue tint in a dashed pen line, the Tutor's on paper with a violet rule. */
 .tutor-turn {
   max-width: 88%;
   padding: 10px 12px;
   border: var(--at-border) solid var(--at-ink-muted);
+  border-radius: var(--at-wobble-2);
 }
 .tutor-turn p {
   margin: 4px 0 0;
@@ -177,11 +179,11 @@
 .tutor-turn.tutor {
   align-self: flex-start;
   background: var(--at-paper);
-  border-left: 6px solid var(--at-blue);
+  border-left: 6px solid var(--at-violet);
 }
 .tutor-turn.student {
   align-self: flex-end;
-  background: var(--at-paper);
+  background: color-mix(in srgb, var(--at-blue-fill) 16%, var(--at-paper));
   border-style: dashed;
 }
 /* A failure: a dotted border, its own edge and the "! Tutor problem" name, not colour alone. */
@@ -195,11 +197,11 @@
 .tutor-who {
   color: var(--at-ink-muted);
 }
-/* The meta line under a finished reply (#106): model, effort and seconds. */
+/* The meta line under a finished reply (#106): model, effort and seconds, in the data face. */
 .tutor-meta {
   display: block;
   margin-top: 6px;
-  font-size: 16px;
+  font: 400 16px/1.3 var(--at-font-data);
   color: var(--at-ink-muted);
 }
 .tutor-end {
@@ -230,10 +232,12 @@
 .tutor-pick {
   font-family: var(--at-font-data);
 }
+/* A chip is a hand-drawn pill: a pen outline whose ends don't quite match. */
 .tutor-chip {
   color: var(--at-blue);
-  background: transparent;
+  background: var(--at-paper);
   border: var(--at-border) solid var(--at-blue);
+  border-radius: 26px 20px 24px 18px / 20px 26px 18px 24px;
   cursor: pointer;
 }
 .tutor-form input,
@@ -260,13 +264,20 @@
   cursor: default;
 }
 
-/* A Tutor ring on a drawing's atom (#107): solid cyan like Tap's picked ring, plus four crosshair
-   ticks so the cue isn't colour alone (and doesn't read as Tap's ✓ "picked"). */
+/* A Tutor ring on a drawing's atom (#107, on paper #122): a violet marker band inside a violet pen
+   line (the fill never stands alone), plus four crosshair ticks so the cue isn't colour alone (and
+   doesn't read as Tap's ✓ "picked"). Violet is the Tutor's colour, as on its turns. */
 .tutor-ring circle,
 .tutor-ring line {
   fill: none;
-  stroke: var(--at-blue);
-  stroke-width: 3px;
+  stroke: var(--at-violet);
+  stroke-width: var(--at-pen);
   stroke-linecap: round;
   pointer-events: none;
+}
+.tutor-ring .tutor-ring-marker {
+  stroke: var(--at-violet-fill);
+  stroke-width: 9px;
+  stroke-opacity: 0.6;
+  mix-blend-mode: multiply;
 }

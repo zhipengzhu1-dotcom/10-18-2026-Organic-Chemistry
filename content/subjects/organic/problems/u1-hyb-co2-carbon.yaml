@@ -22,5 +22,5 @@ hints:
   - match: [b]
     text: "sp² needs three groups. Count carbon's neighbours: two O's, and no lone pair."
   - text: "Count the groups on C (bonded atoms + lone pairs), then match: 4 → sp³, 3 → sp², 2 → sp."
-reveal: "**sp**. Two orange sp lobes point at the O's; carbon's two cyan p orbitals stand at right angles, each making the π bond to one O."
+reveal: "**sp**. Two orange sp lobes point at the O's; carbon's two p orbitals, blue dumbbells, stand at right angles, each making the π bond to one O."
 sourceNote: "Our Problem, in the style of MIT OCW 5.12 PS1 Q5. Hybrid model as in Lesson 4."

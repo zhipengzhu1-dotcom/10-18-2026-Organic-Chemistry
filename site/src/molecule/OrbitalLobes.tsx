@@ -16,9 +16,10 @@ import { token } from "./token.ts";
 
 /** Lobes draw after the atoms (renderOrder 0). */
 export const LOBE_RENDER_ORDER = 10;
-/** How opaque a solid lobe is; hatched stripes alternate between this and a fifth of it. */
+/** How opaque a solid lobe's fill is; hatched stripes alternate between this and a fifth of it. */
 const OPACITY = 0.5;
-
+/** How edge-on (1 − |n·v|) the surface is where its pen line starts. */
+const PEN_FROM = 0.8;
 
 /** Lesson 4: colour says the orbital's kind and the pattern its sign. Lesson 8: + solid blue, − hatched orange. */
 export function lobeLook(style: OrbitalUse["style"], sign: "+" | "-", density = false): { colour: "electron" | "ignite"; hatched: boolean } {
@@ -38,28 +39,33 @@ const vertex = /* glsl */ `
     gl_Position = projectionMatrix * mv;
   }
 `;
+// On paper (#122) a lobe is a marker fill inside a pen line: the flat fill colour, see-through over
+// the atoms, and where the surface turns edge-on (its outline on screen) the pen ink, nearly opaque.
+// The pen line is solid on hatched lobes too, so both signs keep an outline.
 const fragment = /* glsl */ `
   uniform vec3 colour;
+  uniform vec3 pen;
   uniform float opacity;
   uniform float hatched;
   uniform float stripe;
   varying vec3 vNormal;
   varying vec3 vView;
   void main() {
-    float facing = abs(dot(normalize(vNormal), normalize(vView)));
-    // Brighter edges read as a surface; the middle stays see-through over the atoms.
-    float edge = 1.0 - facing;
-    vec3 c = colour * (0.55 + 0.6 * edge);
-    float a = opacity * (0.55 + 0.45 * edge);
+    float edge = 1.0 - abs(dot(normalize(vNormal), normalize(vView)));
+    float a = opacity;
     if (hatched > 0.5 && mod(gl_FragCoord.x + gl_FragCoord.y, 2.0 * stripe) < stripe) a *= 0.2;
-    gl_FragColor = vec4(c, a);
+    float line = smoothstep(${PEN_FROM.toFixed(2)}, ${(PEN_FROM + 0.06).toFixed(2)}, edge);
+    gl_FragColor = vec4(mix(colour, pen, line), mix(a, 0.95, line));
+    // three.js hands colours over in linear space; back to sRGB so the fill is the token's colour.
+    #include <colorspace_fragment>
   }
 `;
 
-function lobeMaterial(colour: string, hatched: boolean): ShaderMaterial {
+function lobeMaterial(colour: string, pen: string, hatched: boolean): ShaderMaterial {
   return new ShaderMaterial({
     uniforms: {
       colour: { value: new Color(colour) },
+      pen: { value: new Color(pen) },
       opacity: { value: OPACITY },
       hatched: { value: hatched ? 1 : 0 },
       stripe: { value: 4 * (typeof window === "undefined" ? 1 : Math.min(2, window.devicePixelRatio || 1)) },
@@ -90,7 +96,8 @@ export interface OrbitalLobesProps {
 export default function OrbitalLobes({ orbitals, centre, onDrawn }: OrbitalLobesProps) {
   const gltfs = useLoader(GLTFLoader, orbitals.map((o) => o.mesh));
   const lobes = useMemo(() => {
-    const colours = { electron: token("--at-blue-fill", "#4dabff"), ignite: token("--at-orange-fill", "#ff9548") };
+    const fills = { electron: token("--at-blue-fill", "#4dabff"), ignite: token("--at-orange-fill", "#ff9548") };
+    const pens = { electron: token("--at-blue", "#0a64c2"), ignite: token("--at-orange", "#a94a00") };
     const out: Lobe[] = [];
     orbitals.forEach((o, i) => {
       gltfs[i].scene.updateMatrixWorld(true);
@@ -99,7 +106,7 @@ export default function OrbitalLobes({ orbitals, centre, onDrawn }: OrbitalLobes
         const name = node.name || node.parent?.name || "";
         const sign = name.startsWith("minus") ? "-" : "+";
         const look = lobeLook(o.style, sign, o.density);
-        out.push({ key: `${o.ref}:${name}`, geometry: node.geometry, matrix: node.matrixWorld.clone(), material: lobeMaterial(colours[look.colour], look.hatched) });
+        out.push({ key: `${o.ref}:${name}`, geometry: node.geometry, matrix: node.matrixWorld.clone(), material: lobeMaterial(fills[look.colour], pens[look.colour], look.hatched) });
       });
     });
     return out;
