@@ -75,8 +75,9 @@ export function clearRings(root: ParentNode = document) {
 }
 
 /**
- * Rings an atom label: a solid cyan circle plus four crosshair ticks, so the cue isn't colour
- * alone (Tap's picked ring pairs its cyan with a ✓; the ticks say "look here", not "picked").
+ * Rings an atom label: a violet marker band under a violet pen circle, plus four crosshair ticks,
+ * so the cue isn't colour alone (Tap's picked ring pairs its blue with a ✓; the ticks say "look
+ * here", not "picked").
  */
 function ring(t: SVGTextElement) {
   const svg = t.ownerSVGElement;
@@ -87,9 +88,11 @@ function ring(t: SVGTextElement) {
   const g = document.createElementNS(SVG, "g");
   g.setAttribute("class", RING);
   g.setAttribute("aria-hidden", "true");
-  const circle = document.createElementNS(SVG, "circle");
-  for (const [k, v] of Object.entries({ cx, cy, r })) circle.setAttribute(k, String(v));
-  g.appendChild(circle);
+  for (const part of ["tutor-ring-marker", "tutor-ring-pen"]) {
+    const circle = document.createElementNS(SVG, "circle");
+    for (const [k, v] of Object.entries({ cx, cy, r, class: part })) circle.setAttribute(k, String(v));
+    g.appendChild(circle);
+  }
   for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
     const tick = document.createElementNS(SVG, "line");
     const [from, to] = [r + 3, r + 9];

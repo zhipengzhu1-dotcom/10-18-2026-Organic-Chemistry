@@ -121,7 +121,7 @@ export interface OrbitalUse {
   label: string;
   /** The text chip that names it on screen ("π", "σ*", "LUMO"). */
   chip: string;
-  /** "sigma" / "pi": colour says the kind and the pattern the sign; "phase": + solid cyan, − hatched orange. */
+  /** "sigma" / "pi": colour says the kind and the pattern the sign; "phase": + solid blue, − hatched orange. */
   style: "sigma" | "pi" | "phase";
   /** A summed density: one sign, drawn solid. */
   density?: boolean;

@@ -219,8 +219,9 @@ export default function MoleculeCard({ molecule, children, snap = false, settled
             const d = drag.current;
             if (!d) return;
             if (!d.moved && Math.hypot(e.clientX - d.x0, e.clientY - d.y0) > TAP_SLOP) d.moved = true;
-            if (d.moved && turnable)
-              setRotation((r) => turn(turn(r, "y", (e.clientX - d.x) * DRAG_RATE), "x", (e.clientY - d.y) * DRAG_RATE));
+            // Read the move now: React may run the updater after d.x/d.y below have moved on.
+            const [dx, dy] = [(e.clientX - d.x) * DRAG_RATE, (e.clientY - d.y) * DRAG_RATE];
+            if (d.moved && turnable) setRotation((r) => turn(turn(r, "y", dx), "x", dy));
             d.x = e.clientX;
             d.y = e.clientY;
           }}
