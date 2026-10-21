@@ -13,6 +13,8 @@ Spec #104. Runs under `pnpm dev` only, on the owner's signed-in `claude` command
 - **Settings** (#106): the route's `GET` returns `TutorChoices` (models, efforts, default pair); the panel builds its picker from it and sends the chosen `model`/`effort` with each question. `settings.ts` remembers the pair (`at-tutor-pick`, `model|effort`: `pairOf` writes it, `parsePick` reads it, tested; falling back to the default when the route no longer offers it) and the on/off switch (`at-tutor-switch` = `off`), reads and writes wrapped in try/catch. Each finished reply shows `done`'s model, effort and seconds. Off leaves only the header's switch, unchecked (`.tutor-wake`, labelled "Tutor"), in the Ask button's column: no panel, no portal. A text label there pushes the story bars out at 390 px.
 - **Build check** (`absent.ts`): run by `pnpm budget:js`.
 
+Browser test: `site/e2e/tutor.spec.ts` (#114) runs the design gate's type rules on the open panel, on the dev server (`docs/dev/testing.md`).
+
 ## Gotchas
 
 - In current Chromium `scrollIntoView` returns a Promise: an arrow-bodied `useEffect` that returns it crashes React. Use block bodies.
