@@ -18,6 +18,20 @@ Engine: `site/src/engine/player.ts` (pure, no DOM; its header comment states the
 - Adding a Step type: one content folder plus one view file (`docs/dev/content.md`).
 - `step.type` checks left in StepPlayer: none. Per-Lesson code stays there (known gaps).
 
+## Paper Notebook look (#120)
+
+Player chrome lives in `global.css` (`@layer components`); drawings, Tap and Draw arrows in `structure.css`. The visual spec is sections 03 and 06 of `prototypes/paper-notebook.PROTOTYPE.html` on `prototype/paper-notebook`.
+
+- **Top bar:** ✕ and ‹ in pen circles; the progress strip is pen pills (`.bars`): done = leaf (`--at-green-fill`), on screen = highlighter (`--at-yellow-fill`, thicker line).
+- **Choices:** text choices carry `<Bubble />` (`steps/view.tsx`): a pen circle whose blue marker scribble draws on by `stroke-dashoffset` over `--at-dur-card`. A picked choice also gets an inset pen line, so a pick never rests on colour. Structure cards carry the bubble in their corner.
+- **Feedback:** ✓ solid green on a leaf offset shadow; ✗ dashed pink, its text on a violet rule (the rule sits on the whole `<p>`: a Hint on its own line overflowed nine phone Steps); → plain `--at-ink-muted` pen line. The icon is a pen circle filled with its marker. `design.spec.ts` checks all three.
+- **Numeric:** a pen underline (`--at-pen`) with the value in mono; dashed once locked.
+- **Rank:** pen cards with an ink offset; the held card lifts onto a blue marker offset. Change only shadows while dragging: a border change shifts the cards under the pointer and breaks the drop slot.
+- **Readables** (Key idea, Practice Set results): pen box on a highlighter offset, stats underlined in blue marker.
+- **Drawings (`drawStructure`):** bonds and atoms in pen ink (`currentColor`); electrons in `--lone-pair` (blue on the page, falling back to `--at-blue`'s value elsewhere); a minus in `--charge-minus` (pink), a plus in `--charge-plus` (orange), both ink where unset. Highlighted bonds are a highlighter swipe, highlighted atoms a dashed blue ring on a highlighter dab; Tap picks are a blue pen ring on blue marker + ✓, the revealed answer a dashed ring on highlighter. Marker multiplies over the drawing so letters stay ink. Every one keeps a shape cue (ring, dash, ✓, band).
+- **Draw arrows:** pushes in blue ink; flags and the shown push orange and dashed, the flag list on an orange marker offset (`draw-arrows-style.test.ts`).
+- Fit: choices are Nunito 500, not the prototype's 600, and the bubble column is 22 px: wider text tipped the tightest 3D Steps (Lesson 4 s14) over a phone screen.
+
 ## Draw arrows (`@astratron/content/arrows`)
 
 - Graded on our own molecule graph (lone pairs + bond orders; charges derived), never RDKit at runtime. RDKit (`content/src/layout.ts`) runs only in Node, for `pnpm structure` and tests.

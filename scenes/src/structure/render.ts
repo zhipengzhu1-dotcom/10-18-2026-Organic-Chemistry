@@ -78,6 +78,8 @@ const LOOSE_PAD = 4;
 const OUTLINE_STROKE = 14;
 const OUTLINE_PER_LINE = 6;
 const OUTLINE_OPACITY = 0.35;
+/** Electrons (lone pairs, bond dots, marks): `--lone-pair` where the page sets it, else blue pen ink. */
+const ELECTRON = "var(--lone-pair, var(--at-blue, #0a64c2))";
 /** Empty p outline: each lobe's centre this far from the atom, its half-length and half-width (px). */
 const LOBE_OFFSET = 24;
 const LOBE_LONG = 13;
@@ -180,7 +182,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = [], highlig
         const along = (k - (b.order - 1) / 2) * PAIR_GAP;
         for (const sgn of [1, -1]) {
           parts.push(
-            `<circle class="bond-dot"${fadeOf(b.id)} cx="${r1(mx + ux * along + nx * LP_SPREAD * sgn)}" cy="${r1(my + uy * along + ny * LP_SPREAD * sgn)}" r="${DOT_R}" fill="var(--lone-pair, #0e9fbf)"/>`,
+            `<circle class="bond-dot"${fadeOf(b.id)} cx="${r1(mx + ux * along + nx * LP_SPREAD * sgn)}" cy="${r1(my + uy * along + ny * LP_SPREAD * sgn)}" r="${DOT_R}" fill="${ELECTRON}"/>`,
           );
         }
       }
@@ -252,8 +254,10 @@ export function drawStructure(structure: Structure, hide: Hidden[] = [], highlig
       const dir = free ? preferred : lonePairDirections(taken, 1)[0];
       const dist = free ? 16 : 22;
       const right = a.h && !hLeft && free ? CHAR_W * (1 + String(a.h).length) : 0;
+      // The page inks a minus pink and a plus orange (structure.css); elsewhere both stay ink.
+      const ink = a.charge > 0 ? "var(--charge-plus, currentColor)" : "var(--charge-minus, currentColor)";
       parts.push(
-        `<text class="charge"${fadeOf(a.id)} x="${r1(x + Math.cos(dir) * dist + right)}" y="${r1(y + Math.sin(dir) * dist)}" text-anchor="middle" dominant-baseline="central" font-size="${FONT * 0.7}" fill="currentColor">${sign}</text>`,
+        `<text class="charge"${fadeOf(a.id)} x="${r1(x + Math.cos(dir) * dist + right)}" y="${r1(y + Math.sin(dir) * dist)}" text-anchor="middle" dominant-baseline="central" font-size="${FONT * 0.7}" fill="${ink}">${sign}</text>`,
       );
     }
 
@@ -273,7 +277,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = [], highlig
       lonePairPoints.push({ atom: a.id, x: r1(cx), y: r1(cy) });
       for (const sgn of [1, -1]) {
         parts.push(
-          `<circle class="lone-pair-dot"${fadeOf(highlight.fade?.[`${a.id}.lp`] === undefined ? a.id : `${a.id}.lp`)} cx="${r1(cx + px * sgn)}" cy="${r1(cy + py * sgn)}" r="${DOT_R}" fill="var(--lone-pair, #0e9fbf)"/>`,
+          `<circle class="lone-pair-dot"${fadeOf(highlight.fade?.[`${a.id}.lp`] === undefined ? a.id : `${a.id}.lp`)} cx="${r1(cx + px * sgn)}" cy="${r1(cy + py * sgn)}" r="${DOT_R}" fill="${ELECTRON}"/>`,
         );
       }
     }
@@ -303,7 +307,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = [], highlig
         { x: o.x + ub.x * CORNER, y: o.y + ub.y * CORNER },
       ];
       parts.push(
-        `<polyline class="corner-mark" points="${pts.map((p) => `${r1(p.x)},${r1(p.y)}`).join(" ")}" fill="none" stroke="var(--lone-pair, #0e9fbf)" stroke-width="${LINE_STROKE}"/>`,
+        `<polyline class="corner-mark" points="${pts.map((p) => `${r1(p.x)},${r1(p.y)}`).join(" ")}" fill="none" stroke="${ELECTRON}" stroke-width="${LINE_STROKE}"/>`,
       );
     }
   }
@@ -315,7 +319,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = [], highlig
       const lp = lonePairPoints.find((l) => l.atom === mark.atom);
       if (!lp) continue;
       parts.push(
-        `<text class="orbital-mark" x="${lp.x}" y="${r1(lp.y + 16)}" text-anchor="middle" dominant-baseline="hanging" font-size="${MARK_FONT}" fill="var(--lone-pair, #0e9fbf)">${mark.text}</text>`,
+        `<text class="orbital-mark" x="${lp.x}" y="${r1(lp.y + 16)}" text-anchor="middle" dominant-baseline="hanging" font-size="${MARK_FONT}" fill="${ELECTRON}">${mark.text}</text>`,
       );
       continue;
     }
@@ -334,7 +338,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = [], highlig
       const cx = r1(p.x + u.x * LOBE_OFFSET * sgn);
       const cy = r1(p.y + u.y * LOBE_OFFSET * sgn);
       parts.push(
-        `<ellipse class="empty-p" cx="${cx}" cy="${cy}" rx="${LOBE_LONG}" ry="${LOBE_WIDE}" transform="rotate(${deg} ${cx} ${cy})" fill="none" stroke="var(--lone-pair, #0e9fbf)" stroke-opacity="0.7" stroke-width="${HASH_STROKE}" stroke-dasharray="4 3"/>`,
+        `<ellipse class="empty-p" cx="${cx}" cy="${cy}" rx="${LOBE_LONG}" ry="${LOBE_WIDE}" transform="rotate(${deg} ${cx} ${cy})" fill="none" stroke="${ELECTRON}" stroke-opacity="0.7" stroke-width="${HASH_STROKE}" stroke-dasharray="4 3"/>`,
       );
     }
     // The label beside the upper lobe, on the side away from the atom's bonds.
@@ -345,7 +349,7 @@ export function drawStructure(structure: Structure, hide: Hidden[] = [], highlig
     const lx = p.x + u.x * LOBE_OFFSET * up + n.x * (LOBE_WIDE + 6);
     const ly = p.y + u.y * LOBE_OFFSET * up + n.y * (LOBE_WIDE + 6);
     parts.push(
-      `<text class="orbital-mark" x="${r1(lx)}" y="${r1(ly)}" text-anchor="${n.x < 0 ? "end" : "start"}" dominant-baseline="central" font-size="${MARK_FONT}" fill="var(--lone-pair, #0e9fbf)">${mark.text}</text>`,
+      `<text class="orbital-mark" x="${r1(lx)}" y="${r1(ly)}" text-anchor="${n.x < 0 ? "end" : "start"}" dominant-baseline="central" font-size="${MARK_FONT}" fill="${ELECTRON}">${mark.text}</text>`,
     );
   }
 

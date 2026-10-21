@@ -73,5 +73,13 @@ export function Prompt({ text, waiting }: { text: string; waiting: boolean }) {
 /** The Step's own prompt, for every type that has one. */
 export const StepPrompt = ({ step, waiting }: { step: { prompt: string }; waiting: boolean }) => <Prompt text={step.prompt} waiting={waiting} />;
 
+/** A choice's hand-drawn bubble: a pen circle that a marker scribble fills once the choice is picked (global.css). */
+export const Bubble = () => (
+  <svg className="bub" viewBox="0 0 26 26" aria-hidden="true">
+    <circle cx="13" cy="13" r="10.5" />
+    <path d="M7 15 C10 6 14 20 19 9" />
+  </svg>
+);
+
 /** Picking a choice: the one picked when the Step takes one, else it toggles. */
 export const toggle = (chosen: string[], id: string, one: boolean) => (one ? [id] : chosen.includes(id) ? chosen.filter((x) => x !== id) : [...chosen, id]);

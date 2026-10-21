@@ -62,6 +62,17 @@ describe("2D structure renderer", () => {
     expect(svg).toMatch(/class="charge"[^>]*>\+</);
   });
 
+  it("inks lone pairs blue: --lone-pair where set, else the blue pen ink token (paper value), never the old teal", () => {
+    const { svg } = drawStructure(methoxide);
+    expect(svg).toMatch(/class="lone-pair-dot"[^>]*fill="var\(--lone-pair, var\(--at-blue, #0a64c2\)\)"/);
+    expect(svg).not.toContain("#0e9fbf");
+  });
+
+  it("inks a minus sign through --charge-minus and a plus through --charge-plus (pink and orange on the site), ink by default", () => {
+    expect(drawStructure(methoxide).svg).toMatch(/class="charge"[^>]*fill="var\(--charge-minus, currentColor\)"[^>]*>−</);
+    expect(drawStructure(lineAngle).svg).toMatch(/class="charge"[^>]*fill="var\(--charge-plus, currentColor\)"[^>]*>\+</);
+  });
+
   it("can hide charges or lone pairs when a Step asks for it", () => {
     expect(drawStructure(methoxide, ["charges"]).svg).not.toContain('class="charge"');
     expect(count(drawStructure(methoxide, ["lone-pairs"]).svg, "lone-pair-dot")).toBe(0);

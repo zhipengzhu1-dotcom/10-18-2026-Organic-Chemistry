@@ -1,6 +1,6 @@
 // Rotate-and-identify 3D: the Student turns the molecule in the 3D card (StepPlayer draws it)
 // and answers with text choices, two to a row when short.
-import { html, StepPrompt, toggle, type View } from "./view.tsx";
+import { Bubble, html, StepPrompt, toggle, type View } from "./view.tsx";
 
 export const rotateAndIdentify: View<"rotate-and-identify"> = {
   Lead: StepPrompt,
@@ -17,8 +17,10 @@ export const rotateAndIdentify: View<"rotate-and-identify"> = {
             aria-pressed={choice.includes(o.id)}
             disabled={screen.canContinue}
             onClick={() => choose(toggle(choice, o.id, page.select === "one"))}
-            {...html(o.text)}
-          />
+          >
+            <Bubble />
+            <span {...html(o.text)} />
+          </button>
         ))}
       </div>
     ),

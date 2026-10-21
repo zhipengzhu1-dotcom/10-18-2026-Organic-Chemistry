@@ -148,7 +148,7 @@ test.describe("paper", () => {
       });
     });
 
-  test("feedback is icon + words: ✓ solid green, ✗ dashed pink + Hint, → plain pen line + answer", async ({
+  test("feedback is icon + words: solid green ✓ on a leaf offset, dashed pink ✗ + a violet-ruled Hint, → plain pen line + answer", async ({
     page,
   }) => {
     await page.goto(LESSON_0);
@@ -156,27 +156,32 @@ test.describe("paper", () => {
     const choose = (name: string) =>
       page.getByRole("group", { name: "Choices" }).getByRole("button", { name, exact: true }).click();
     const check = () => page.getByRole("button", { name: "Check" }).click();
-    const next = () => page.getByRole("button", { name: "Continue" }).click();
     const looks = async (style: string, colour: string, icon: string, words: string) => {
       await expect(panel).toHaveCSS("border-top-style", style);
       await expect(panel).toHaveCSS("border-top-color", await token(page, colour));
       await expect(panel.locator(".ic")).toHaveText(icon);
       await expect(panel).toContainText(words);
     };
+    /** The panel's offset shadow colour, or "none". */
+    const offset = () => panel.evaluate((el) => getComputedStyle(el).boxShadow);
 
     // Lesson 0 s01 is a Hook prediction: any guess gets the reveal.
     await choose("about 5%");
     await check();
     await looks("solid", "ink-muted", "→", "Answer:");
+    expect(await offset()).toBe("none");
     // s07 is a Check Problem: a wrong pick gets its Hint, then the right one.
     await page.goto(`${LESSON_0}#s07`);
     await expect(page.getByText("Step 7 of 9")).toBeVisible();
     await choose("Carbon's outer shell is already full.");
     await check();
     await looks("dashed", "pink", "✗", "Not quite. A full shell is 8.");
+    // The Hint sits on a violet rule (story 3: violet Hints), beside the words that say what it is.
+    await expect(panel.locator("p")).toHaveCSS("border-left-color", await token(page, "violet-fill"));
     await choose("Gaining or losing 4 electrons is too hard, so sharing is the cheaper way to fill its shell.");
     await check();
     await looks("solid", "green", "✓", "4 is the most electrons any atom in the row has to move.");
+    expect(await offset()).toContain(await token(page, "green-fill"));
   });
 });
 
