@@ -2,7 +2,7 @@
 import type { ReactNode } from "react";
 import { frameSize } from "../frame.ts";
 import type { SceneProps } from "../types.ts";
-import { DATA_FONT, DotsBeside, Hit, Letter, SharedPair, TEXT_FONT, dir, electron, ink, line, muted, type Pt } from "../dots/dots.tsx";
+import { DATA_FONT, DotsBeside, Hit, Letter, SharedPair, TEXT_FONT, dir, blue, ink, line, muted, type Pt } from "../dots/dots.tsx";
 import { VALENCE } from "@astratron/content/valence";
 import { SIDES, SIDE_NAMES, TRAY, type SharingState, type Side } from "./manifest.ts";
 import { layoutSharing } from "./layout.ts";
@@ -39,7 +39,7 @@ export default function BuildBySharing({ t, state, aspect, reducedMotion, input 
         );
         if (state.count === "pairs" && lit(i))
           out.push(
-            <circle key={`ring${side}`} cx={(c.x + slot.x) / 2} cy={(c.y + slot.y) / 2} r={L.dot * 3.4} fill="none" stroke={electron} strokeWidth={5} />,
+            <circle key={`ring${side}`} cx={(c.x + slot.x) / 2} cy={(c.y + slot.y) / 2} r={L.dot * 3.4} fill="none" stroke={blue} strokeWidth={5} />,
           );
         out.push(<Hit key={`h-${side}`} at={slot} r={L.hit} role="target" id={`h-${side}`} label={`Hydrogen bonded on carbon's ${SIDE_NAMES[side]} side`} live={live} />);
       } else {
@@ -107,7 +107,7 @@ export default function BuildBySharing({ t, state, aspect, reducedMotion, input 
     if (state.count !== "hidden") {
       const each = joined ? 2 * VALENCE.C : 2 * VALENCE.C - 1;
       out.push(
-        <text key="count" aria-hidden="true" x={L.count.x} y={L.count.y} fill={ink} fontSize={L.letter * 0.5} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
+        <text key="count" aria-hidden="true" x={(joined ? L.countJoined : L.count).x} y={(joined ? L.countJoined : L.count).y} fill={ink} fontSize={L.letter * 0.5} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
           {joined ? `C₂H₆ · around each C: ${each}` : `Around each C: ${each}`}
         </text>,
       );
@@ -122,8 +122,8 @@ export default function BuildBySharing({ t, state, aspect, reducedMotion, input 
     if (from && to)
       out.push(
         <g key="nudge" opacity={0.6}>
-          <line x1={from.x} y1={from.y} x2={to.x} y2={to.y} stroke={electron} strokeWidth={6} strokeDasharray="20 16" />
-          <circle cx={to.x} cy={to.y} r={L.letter * 0.6} fill="none" stroke={electron} strokeWidth={6} strokeDasharray="20 16" />
+          <line x1={from.x} y1={from.y} x2={to.x} y2={to.y} stroke={blue} strokeWidth={6} strokeDasharray="20 16" />
+          <circle cx={to.x} cy={to.y} r={L.letter * 0.6} fill="none" stroke={blue} strokeWidth={6} strokeDasharray="20 16" />
         </g>,
       );
   }

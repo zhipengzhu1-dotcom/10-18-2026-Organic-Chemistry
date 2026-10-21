@@ -16,11 +16,11 @@ function Hydrogen({ x, y, r, colour, dashed = false }: { x: number; y: number; r
         cy={y}
         r={r}
         fill={dashed ? "none" : colour}
-        stroke={dashed ? ink("ink") : "#140f2b"}
+        stroke={dashed ? ink("ink") : "var(--at-ink, #1d1b26)"}
         strokeWidth={Math.max(2, r * 0.1)}
         strokeDasharray={dashed ? `${r * 0.3} ${r * 0.22}` : undefined}
       />
-      <text x={x} y={y} fill={dashed ? ink("ink") : "#140f2b"} fontSize={r * 1.1} fontWeight={700} textAnchor="middle" dominantBaseline="central">
+      <text x={x} y={y} fill={dashed ? ink("ink") : "var(--at-ink, #1d1b26)"} fontSize={r * 1.1} fontWeight={700} textAnchor="middle" dominantBaseline="central">
         H
       </text>
     </g>
@@ -29,7 +29,7 @@ function Hydrogen({ x, y, r, colour, dashed = false }: { x: number; y: number; r
 
 function header(box: Box, lines: string[], size: number) {
   return (
-    <text x={box.x + box.w / 2} y={box.y + size} fill={ink("muted")} fontSize={size} fontFamily="var(--at-font-data, monospace)" textAnchor="middle">
+    <text x={box.x + box.w / 2} y={box.y + size} fill={ink("muted")} fontSize={size} fontFamily="var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)" textAnchor="middle">
       {lines.map((line, i) => (
         <tspan key={i} x={box.x + box.w / 2} dy={i === 0 ? 0 : size * 1.25}>
           {line}
@@ -48,8 +48,8 @@ function Unmixed({ box, size, carbon, hydrogen }: { box: Box; size: number; carb
     [0, 1, 0],
     [0, 0, 1],
   ];
-  const ps: OrbitalAt[] = axes.map((axis, i) => ({ kind: "p", axis, colour: "electron", x, y, scale, turn: TURN, key: `p${i}` }));
-  const s: OrbitalAt = { kind: "s", axis: [1, 0, 0], colour: "electron", x, y, scale, turn: TURN, key: "s" };
+  const ps: OrbitalAt[] = axes.map((axis, i) => ({ kind: "p", axis, colour: "blue", x, y, scale, turn: TURN, key: `p${i}` }));
+  const s: OrbitalAt = { kind: "s", axis: [1, 0, 0], colour: "blue", x, y, scale, turn: TURN, key: "s" };
   const lobes = [...orbitalLobes(s).map((d) => ({ ...d, z: -10 })), ...ps.flatMap(orbitalLobes), { z: 0.01, key: "C", node: <Carbon key="C" x={x} y={y} r={scale * 0.12} colour={carbon} /> }].sort(
     (a, b) => a.z - b.z,
   );
@@ -72,9 +72,9 @@ function Unmixed({ box, size, carbon, hydrogen }: { box: Box; size: number; carb
       </text>
       {ps.map((o) => {
         const tip = tipOf(o, 1.4);
-        return <Chip key={`c${o.key}`} x={tip.x} y={tip.y} text="2p" colour="electron" size={size * 0.8} />;
+        return <Chip key={`c${o.key}`} x={tip.x} y={tip.y} text="2p" colour="blue" size={size * 0.8} />;
       })}
-      <Chip x={x + sReach * 0.2} y={y + sReach * 1.9} text="2s" colour="electron" size={size * 0.8} />
+      <Chip x={x + sReach * 0.2} y={y + sReach * 1.9} text="2s" colour="blue" size={size * 0.8} />
     </g>
   );
 }
@@ -101,10 +101,10 @@ function Real({ box, size, carbon, hydrogen, length, angle }: { box: Box; size: 
   return (
     <g data-panel="real">
       {header(box, ["measured"], size)}
-      {order.filter((p) => p.z < 0).map((p) => <line key={`b${p.i}`} x1={x} y1={y} x2={p.x} y2={p.y} stroke="#c8c8d0" strokeWidth={cr * 0.3} strokeLinecap="round" />)}
+      {order.filter((p) => p.z < 0).map((p) => <line key={`b${p.i}`} x1={x} y1={y} x2={p.x} y2={p.y} stroke="var(--at-ink-muted, #57536b)" strokeOpacity={0.45} strokeWidth={cr * 0.3} strokeLinecap="round" />)}
       {order.filter((p) => p.z < 0).map((p) => <Hydrogen key={`h${p.i}`} x={p.x} y={p.y} r={hr} colour={hydrogen} />)}
       <Carbon x={x} y={y} r={cr} colour={carbon} />
-      {order.filter((p) => p.z >= 0).map((p) => <line key={`b${p.i}`} x1={x + ((p.x - x) * cr) / Math.hypot(p.x - x, p.y - y)} y1={y + ((p.y - y) * cr) / Math.hypot(p.x - x, p.y - y)} x2={p.x} y2={p.y} stroke="#c8c8d0" strokeWidth={cr * 0.3} strokeLinecap="round" />)}
+      {order.filter((p) => p.z >= 0).map((p) => <line key={`b${p.i}`} x1={x + ((p.x - x) * cr) / Math.hypot(p.x - x, p.y - y)} y1={y + ((p.y - y) * cr) / Math.hypot(p.x - x, p.y - y)} x2={p.x} y2={p.y} stroke="var(--at-ink-muted, #57536b)" strokeOpacity={0.45} strokeWidth={cr * 0.3} strokeLinecap="round" />)}
       {order.filter((p) => p.z >= 0).map((p) => <Hydrogen key={`h${p.i}`} x={p.x} y={p.y} r={hr} colour={hydrogen} />)}
       {at.map((p, i) => {
         // Each length sits beside its bond, pushed off the line.
@@ -115,12 +115,12 @@ function Real({ box, size, carbon, hydrogen, length, angle }: { box: Box; size: 
         const ny = (p.x - x) / len;
         const off = tag * 1.4;
         return (
-          <text key={`l${i}`} x={mx + nx * off} y={my + ny * off} fill={ink("ink")} fontSize={tag} fontFamily="var(--at-font-data, monospace)" textAnchor="middle" dominantBaseline="central">
+          <text key={`l${i}`} x={mx + nx * off} y={my + ny * off} fill={ink("ink")} fontSize={tag} fontFamily="var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)" textAnchor="middle" dominantBaseline="central">
             {length.display}
           </text>
         );
       })}
-      <text x={x} y={box.y + box.h * 0.97} fill={ink("ignite")} fontSize={size} fontFamily="var(--at-font-data, monospace)" textAnchor="middle">
+      <text x={x} y={box.y + box.h * 0.97} fill={ink("orange")} fontSize={size} fontFamily="var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)" textAnchor="middle">
         {`all six H–C–H: ${angle.display}`}
       </text>
     </g>

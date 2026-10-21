@@ -4,7 +4,7 @@
 import type { Cited } from "@astratron/content/data";
 import { inkOn, SCALE_BAR_LABEL, type Matrix3, type Vec3 } from "@astratron/content/molecule";
 import type { Box } from "../frame.ts";
-import { CYAN, DATA_FONT, INK } from "../lewis.ts";
+import { BLUE, DATA_FONT, INK } from "../lewis.ts";
 import { colourRef, onScreen, type Shape } from "./shapes.ts";
 
 /** Every ball's size (its radius) in Å on screen, the same for all elements: a sketch, unlike the 3D card's 30% of Bondi radii. */
@@ -77,11 +77,11 @@ export function ShapeView({ shape, view, cx, cy, px, cited, lonePairs, font, id 
         const d = `M${cx},${cy} C${cx + dx * 0.4 + nx * w},${cy + dy * 0.4 + ny * w} ${p.x + nx * w},${p.y + ny * w} ${p.x},${p.y} C${p.x - nx * w},${p.y - ny * w} ${cx + dx * 0.4 - nx * w},${cy + dy * 0.4 - ny * w} ${cx},${cy}Z`;
         return (
           <g key={`lp-${i}`}>
-            <path d={d} fill={CYAN} fillOpacity={0.22} stroke={CYAN} strokeOpacity={0.7} strokeDasharray="6 5" strokeWidth={2} />
+            <path d={d} fill={BLUE} fillOpacity={0.22} stroke={BLUE} strokeOpacity={0.7} strokeDasharray="6 5" strokeWidth={2} />
             {i === 0 && <text
               x={p.x + (dx / len) * font * 0.6}
               y={p.y + (dy / len) * font * 0.6}
-              fill={CYAN}
+              fill={BLUE}
               fontSize={font * 0.62}
               fontFamily={DATA_FONT}
               textAnchor={dx > 4 ? "start" : dx < -4 ? "end" : "middle"}
@@ -104,7 +104,7 @@ export function ShapeView({ shape, view, cx, cy, px, cited, lonePairs, font, id 
             y1={p.y + ny * o * px}
             x2={q.x + nx * o * px}
             y2={q.y + ny * o * px}
-            stroke="#c8c8d0"
+            stroke="var(--at-ink-muted, #57536b)" strokeOpacity={0.45}
             strokeWidth={Math.max(3, ball * 0.35)}
             strokeLinecap="round"
           />
@@ -116,7 +116,7 @@ export function ShapeView({ shape, view, cx, cy, px, cited, lonePairs, font, id 
         const size = ball * (a.element === "H" ? 0.8 : 1);
         return (
           <g key={`a-${i}`}>
-            <circle cx={p.x} cy={p.y} r={size} fill={`url(#${id}-${a.element})`} stroke="#140f2b" strokeWidth={2} />
+            <circle cx={p.x} cy={p.y} r={size} fill={`url(#${id}-${a.element})`} stroke="var(--at-ink, #1d1b26)" strokeWidth={2} />
             <text
               x={p.x}
               y={p.y}

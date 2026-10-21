@@ -5,7 +5,7 @@
 import { frameSize, safeArea, type Box } from "../frame.ts";
 import { clamp, pulse } from "../motion.ts";
 import type { SceneProps } from "../types.ts";
-import { CYAN, DATA_FONT, INK, MAGENTA, MUTED, fit } from "../lewis.ts";
+import { BLUE, DATA_FONT, INK, PINK, MUTED, fit } from "../lewis.ts";
 import { Embedded } from "../embed.tsx";
 import { drawStructure } from "../structure/render.ts";
 import { dotsAndSticks, examples, signed, type DotsAndSticksState, type Example } from "./manifest.ts";
@@ -77,9 +77,9 @@ function Panel({ example, box, u, glow }: { example: Example; box: Box; u: numbe
 
   const font = Math.min(textBox.h / 5, textBox.w / 15);
   const lines: { text: string; colour: string }[] = [{ text: `valence ${count.valence}`, colour: INK }];
-  if (u >= PHASE.pairs[0]) lines.push({ text: `− lone-pair electrons ${2 * pairsDone}`, colour: CYAN });
+  if (u >= PHASE.pairs[0]) lines.push({ text: `− lone-pair electrons ${2 * pairsDone}`, colour: BLUE });
   if (u >= PHASE.sticks[0]) lines.push({ text: `− bonds ${bondsCounted}`, colour: INK });
-  if (u >= PHASE.total) lines.push({ text: `formal charge = ${signed(count.charge)}`, colour: MAGENTA });
+  if (u >= PHASE.total) lines.push({ text: `formal charge = ${signed(count.charge)}`, colour: PINK });
 
   return (
     <g>
@@ -93,7 +93,7 @@ function Panel({ example, box, u, glow }: { example: Example; box: Box; u: numbe
             cy={c.y}
             r={scale * (counting(pairsDone, pairs.length, k) ? 10 + 4 * glow : 9)}
             fill="none"
-            stroke={CYAN}
+            stroke={BLUE}
             strokeWidth={scale * 2}
           />
         );

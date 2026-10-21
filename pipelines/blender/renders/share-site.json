@@ -2,14 +2,18 @@
   "render": "share-site",
   "blender": "5.2.2 LTS",
   "inputs": {
-    "pipelines/blender/share_images.py": "3d58038d16c1d68b3e30cd0ef541239deac6b7b3873548ca2d4d9a4eae180fbb",
+    "pipelines/blender/share_images.py": "7c44396e21cd2abf2204d3de7b4ada43281c9e86f352f4b53e25bf67ca50d9bf",
     "pipelines/blender/molecule_import.py": "47a3f6f680ecbca80c95d6e46c6325b63d918370b37439b9454f911f0ba1c9a2",
-    "pipelines/blender/fonts/PixelifySans-Regular.woff": "60603c6e85cc8ba29a235657dfc0ff9012bae9adcdbc40cd9056a8cb68a9864c",
-    "scenes/manim/fonts/SpaceGrotesk-wght.ttf": "acad6de1fc93436f5c0f1f4137751ef04f1aea3063e7036535970ffcfbd79f72",
+    "pipelines/blender/fonts/KaushanScript-Regular.ttf": "6d8d379d9bba98178bee476d68114c8f83812c18005ecccf679e70f60e03d8f6",
+    "scenes/manim/fonts/PatrickHand-Regular.ttf": "0f173b3e6cb6d1af25babf7f0057c5ac4ee11f9992b0469bb817e967ef4ad0fc",
     "scenes/manim/fonts/JetBrainsMono-wght.ttf": "48715a42ec242c21e9f02692891e147d022299a52e48d5e413e1a942193ffeda",
-    "pipelines/blender/renders/share-site.props.json": "cbd51b879f22839bdbb88549a7cd9846087c9dfcec556088306c4291abd81f18"
+    "scenes/manim/doodles/beaker.svg": "653ddb69169edd63da6f698fb7e19e1f5e25d4cb75c9aa84544ff274caf8e535",
+    "scenes/manim/doodles/benzene.svg": "10a77fc52e2d4f43617fadea7a2002c2dc1f9346ad6c221b7e2eb65e01934904",
+    "scenes/manim/doodles/flask.svg": "041c40063f44ab6b117107e97a9768afed6748deb807bd03476b436ee01bd11e",
+    "scenes/manim/doodles/sprig.svg": "94b6ede27bc7e38e53bf5e5e06da6510986efed0302ccd814591139929233c39",
+    "pipelines/blender/renders/share-site.props.json": "fb0d8612378fb39759e6ec5d779fa0ced4c1ba2274d5ac5fdeb4d2d30dd54046"
   },
   "outputs": {
-    "site/public/share/site.webp": "dd2fd282c73a964fc90e698ff8194509a4c9a9ad012546e8e571acbc6fa24b03"
+    "site/public/share/site.webp": "f22fffadb7a8eef2783d43af3c9369fe9428dcff932c7470a9b9cffd2beb6104"
   }
 }

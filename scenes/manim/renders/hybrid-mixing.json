@@ -2,7 +2,7 @@
   "scene": "hybrid-mixing",
   "manim": "0.22.0",
   "fps": 60,
-  "inputs": "4073079610e4803fc011a12b17e78307371936650cb56da1cefc0d891589c0a2",
+  "inputs": "bffe76c5560cc91264ce23ea8cc63ad235e433a71fd9258722a58c9e259f7ad5",
   "aspects": {
     "16:9": {
       "frames": 600,

@@ -11,9 +11,9 @@ import { TIMES, type EthanolState } from "./manifest.ts";
 
 const ink = "var(--at-ink, #1d1b26)";
 const muted = "var(--at-ink-muted, #57536b)";
-const electron = "var(--at-blue, #0a64c2)";
+const blue = "var(--at-blue, #0a64c2)";
 const mono = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
-const text = "var(--at-font-text, system-ui, sans-serif)";
+const hand = "var(--at-font-hand, 'Patrick Hand', cursive)";
 
 /** Bonds stop this far (drawing px) short of a letter, as in the renderer. */
 const LETTER_GAP = 12;
@@ -51,7 +51,7 @@ export function layoutEthanol(aspect: Aspect): { main: Box; caption: Box; row: {
 
 function Drawn({ stage, drawing, structure, opacity = 1, children }: { stage: Stage; drawing: Drawing; structure: Structure; opacity?: number; children?: ReactNode }) {
   return (
-    <g transform={transformOn(stage, drawing, structure)} opacity={opacity} style={{ color: ink, fontFamily: mono, ["--lone-pair" as string]: electron }}>
+    <g transform={transformOn(stage, drawing, structure)} opacity={opacity} style={{ color: ink, fontFamily: mono, ["--lone-pair" as string]: blue }}>
       <g dangerouslySetInnerHTML={{ __html: innerSvg(drawing) }} />
       {children}
     </g>
@@ -125,7 +125,7 @@ function KekuleToLineAngle({ stage, q }: { stage: Stage; q: number }) {
 
 function Caption({ box, label, opacity = 1, size }: { box: Box; label: string; opacity?: number; size: number }) {
   return (
-    <text x={box.x + box.w / 2} y={box.y + box.h / 2} textAnchor="middle" dominantBaseline="central" fill={muted} fontSize={size} fontFamily={text} opacity={opacity}>
+    <text x={box.x + box.w / 2} y={box.y + box.h / 2} textAnchor="middle" dominantBaseline="central" fill={muted} fontSize={size * 1.1} fontFamily={hand} opacity={opacity}>
       {label}
     </text>
   );

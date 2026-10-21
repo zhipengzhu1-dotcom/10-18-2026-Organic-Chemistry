@@ -8,10 +8,12 @@ import { pushArrow } from "../structure/arrows.ts";
 import type { Drawing, Point } from "../structure/render.ts";
 
 export const ink = "var(--at-ink, #1d1b26)";
-export const electron = "var(--at-blue, #0a64c2)";
+export const blue = "var(--at-blue, #0a64c2)";
 export const muted = "var(--at-ink-muted, #57536b)";
 export const fontText = "var(--at-font-text, 'Nunito', system-ui, sans-serif)";
 export const fontData = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
+/** Headings: the hand face. */
+export const fontHand = "var(--at-font-hand, 'Patrick Hand', cursive)";
 
 /** How a drawing of `width`×`height` sits centred in `box`: its scale (capped) and offset; `at` maps a drawing point into the frame. */
 export interface Fit {
@@ -47,7 +49,7 @@ export function Placed({ svg, at, opacity = 1 }: { svg: string; at: Fit; opacity
 export function ArrowHead({ id }: { id: string }) {
   return (
     <marker id={id} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
-      <path d="M0,0 L10,5 L0,10 z" fill={electron} />
+      <path d="M0,0 L10,5 L0,10 z" fill={blue} />
     </marker>
   );
 }
@@ -75,14 +77,14 @@ export function Arrow({ drawing, structure, push, at, progress, head }: {
         transform={`translate(${at.ox} ${at.oy}) scale(${at.s})`}
         d={arrow.d}
         fill="none"
-        stroke={electron}
+        stroke={blue}
         strokeWidth={2.5}
         pathLength={1}
         strokeDasharray={`${progress} 1`}
         markerEnd={progress >= 1 ? `url(#${head})` : undefined}
       />
       {progress > 0 && progress < 1 && (
-        <g fill={electron}>
+        <g fill={blue}>
           <circle cx={tip.x - gap} cy={tip.y} r={at.s * 2.6} />
           <circle cx={tip.x + gap} cy={tip.y} r={at.s * 2.6} />
         </g>

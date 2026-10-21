@@ -2,7 +2,7 @@
 import { frameSize, safeArea } from "../frame.ts";
 import { easeInOut, lerp, progress } from "../motion.ts";
 import type { SceneProps } from "../types.ts";
-import { CYAN, DATA_FONT, INK, LINE, MUTED, ORANGE } from "../lewis.ts";
+import { BLUE, DATA_FONT, INK, LINE, MUTED, ORANGE } from "../lewis.ts";
 import { timing, type StreamBendState } from "./manifest.ts";
 
 /** Sample points down a stream. */
@@ -52,7 +52,7 @@ export default function StreamBend({ t, state, aspect, reducedMotion }: ScenePro
         <rect key={x} x={x - thickness} y={area.y + font * 0.6} width={thickness * 2} height={top - area.y - font * 0.6} fill={LINE} />
       ))}
 
-      <path d={stream(waterX, reach)} fill="none" stroke={CYAN} strokeWidth={thickness} strokeLinecap="round" strokeDasharray={`${thickness * 4} ${thickness * 1.5}`} strokeDashoffset={flow} />
+      <path d={stream(waterX, reach)} fill="none" stroke={BLUE} strokeWidth={thickness} strokeLinecap="round" strokeDasharray={`${thickness * 4} ${thickness * 1.5}`} strokeDashoffset={flow} />
       <path d={stream(hexaneX, 0)} fill="none" stroke={ORANGE} strokeWidth={thickness} strokeLinecap="round" strokeDasharray={`${thickness * 4} ${thickness * 1.5}`} strokeDashoffset={flow} />
 
       <text x={waterX} y={area.y + area.h} fill={INK} fontSize={font} textAnchor="middle">
@@ -73,7 +73,14 @@ export default function StreamBend({ t, state, aspect, reducedMotion }: ScenePro
         stroke={INK}
         strokeWidth={thickness * 0.3}
       />
-      <text x={rodTip - rodLength / 2} y={rodY - thickness * 3} fill={INK} fontSize={font * 0.8} textAnchor="middle">
+      {/* 16:9 centres the label on the rod; 9:16's rod is shorter than its label, so the label ends at the tip, clear of the water. */}
+      <text
+        x={aspect === "16:9" ? rodTip - rodLength / 2 : rodTip}
+        y={rodY - thickness * 3}
+        fill={INK}
+        fontSize={font * 0.8}
+        textAnchor={aspect === "16:9" ? "middle" : "end"}
+      >
         charged rod
       </text>
     </svg>

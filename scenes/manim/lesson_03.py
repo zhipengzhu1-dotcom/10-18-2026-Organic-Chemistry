@@ -11,47 +11,21 @@
 
 Methane is rebuilt from its cited C-H length and H-C-H angle (SCENE_PROPS values); colours are the
 cited Jmol colours; the model angles are cited too (vsepr-model.yaml, a model, not a measurement). 3D is drawn
-by projecting coordinates ourselves (orthographic), so frames are plain 2D Cairo shapes. Silent,
+by projecting coordinates ourselves (orthographic), so frames are plain 2D Cairo shapes. Drawn on Paper Notebook (paper.py). Silent,
 60 fps, the last frame is the poster. Render with `pnpm scenes:render <id>`, never by hand.
 """
 
 import json
 import os
+import sys
 from pathlib import Path
 
 import numpy as np
 from manim import *  # noqa: F403  (idiomatic Manim)
 from manim.utils.rate_functions import ease_in_out_sine
 
-HERE = Path(__file__).resolve().parent
-PROPS = json.loads(Path(os.environ["SCENE_PROPS"]).read_text())
-PORTRAIT = PROPS["aspect"] == "9x16"
-VALUES = PROPS["values"]
-TEXT = PROPS["text"]
-
-config.pixel_width, config.pixel_height = PROPS["width"], PROPS["height"]
-if PORTRAIT:
-    config.frame_width = 8.0
-    config.frame_height = 8.0 * PROPS["height"] / PROPS["width"]
-else:
-    config.frame_height = 8.0
-    config.frame_width = 8.0 * PROPS["width"] / PROPS["height"]
-config.frame_rate = PROPS["fps"]
-
-PAL = {k: ManimColor(v) for k, v in PROPS["palette"].items()}
-SPACE, INK, MUTED = PAL["at-space"], PAL["at-ink"], PAL["at-ink-muted"]
-CYAN, ORANGE = PAL["at-electron"], PAL["at-ignite"]
-MAGENTA = PAL["at-neb-1"]
-config.background_color = SPACE
-MONO = "JetBrains Mono"
-SANS = "Space Grotesk"
-FW, FH = config.frame_width, config.frame_height
-
-
-def fonts():
-    return register_font(str(HERE / "fonts" / "SpaceGrotesk-wght.ttf")), register_font(
-        str(HERE / "fonts" / "JetBrainsMono-wght.ttf")
-    )
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from paper import *  # noqa: E402, F403  (after Manim: the palette names win)
 
 
 # ---- geometry ------------------------------------------------------------------
@@ -88,11 +62,10 @@ H_COL = ManimColor(VALUES.get("elements/H.colour", "#FFFFFF"))
 
 def ball(colour, r, letter, z_index=0):
     shade = VGroup(
-        Circle(radius=r, stroke_color=SPACE, stroke_width=3).set_fill(colour, opacity=1),
-        Circle(radius=r * 0.45, stroke_width=0).set_fill(WHITE, opacity=0.35).shift(UL * r * 0.3),
+        Circle(radius=r, stroke_color=INK, stroke_width=PEN * 0.8).set_fill(colour, opacity=1),
+        Circle(radius=r * 0.45, stroke_width=0).set_fill(PAPER, opacity=0.35).shift(UL * r * 0.3),
     )
-    ink = SPACE if colour == H_COL else WHITE
-    txt = Text(letter, font=MONO, font_size=int(r * 70), color=ink, weight=BOLD).move_to(shade[0])
+    txt = Text(letter, font=MONO, font_size=int(r * 70), color=INK, weight=BOLD).move_to(shade[0])
     return VGroup(shade, txt).set_z_index(z_index)
 
 
@@ -101,7 +74,7 @@ def molecule_2d(points, centre, depth, scale=1.0):
     c = np.array([centre[0], centre[1], 0])
     group = VGroup()
     order = sorted(range(4), key=lambda i: depth[i])
-    sticks = VGroup(*[Line(c, c + np.array([*points[i], 0]) * scale, stroke_color=GREY_B, stroke_width=10) for i in range(4)])
+    sticks = VGroup(*[Line(c, c + np.array([*points[i], 0]) * scale, stroke_color=MUTED, stroke_width=9) for i in range(4)])
     group.add(*[sticks[i] for i in order if depth[i] < 0])
     group.add(ball(C_COL, 0.34 * scale, "C").move_to(c))
     group.add(*[sticks[i] for i in order if depth[i] >= 0])
@@ -121,13 +94,13 @@ def flat_lewis(centre, size=1.0, mark=True):
         g.add(Text("H", font=MONO, font_size=int(56 * size), color=INK, weight=BOLD).move_to(c + d * L))
     if mark:
         s = 0.42 * size
-        g.add(VMobject(stroke_color=CYAN, stroke_width=5 * size).set_points_as_corners(
+        g.add(VMobject(stroke_color=BLUE, stroke_width=5 * size).set_points_as_corners(
             [c + UP * s, c + UP * s + RIGHT * s, c + RIGHT * s]))
     return g
 
 
-def caption(text, size=34, colour=MUTED):
-    return Text(text, font=SANS, font_size=size, color=colour)
+def caption(text, size=40, colour=MUTED):
+    return Text(text, font=HAND, font_size=size, color=colour)
 
 
 class Timed(Scene):
@@ -141,8 +114,8 @@ class Timed(Scene):
         self.shown.setdefault(ref, []).append([round(start, 3), round(end, 3)])
 
     def construct(self):
-        a, b = fonts()
-        with a, b:
+        self.add(ruled())
+        with fonts():
             self.build()
         self.wait(max(0, PROPS["duration"] - self.now()))
         out = os.environ.get("TIMINGS_OUT")
@@ -197,10 +170,10 @@ class MethaneUnflatten(Timed):
         p2 = c + np.array([*real[1][:2], 0]) * scale
         a1 = np.arctan2(*(p1 - c)[1::-1])
         a2 = np.arctan2(*(p2 - c)[1::-1])
-        arc = Arc(radius=0.75, start_angle=a2, angle=(a1 - a2) % TAU, arc_center=c, stroke_color=CYAN, stroke_width=6)
+        arc = Arc(radius=0.75, start_angle=a2, angle=(a1 - a2) % TAU, arc_center=c, stroke_color=BLUE, stroke_width=6)
         value = f"{float(VALUES['methane/a.HCH']):.1f}°"
         mid = (a1 + a2) / 2
-        label = Text(value, font=MONO, font_size=40, color=CYAN, weight=BOLD).move_to(c + 2.45 * np.array([np.cos(mid), np.sin(mid), 0]))
+        label = Text(value, font=MONO, font_size=40, color=BLUE, weight=BOLD).move_to(c + 2.45 * np.array([np.cos(mid), np.sin(mid), 0]))
         measured = caption(TEXT["real"][0]).next_to(mol, DOWN, buff=0.35)
         t0 = self.now()
         self.play(Create(arc), FadeIn(label), FadeIn(measured), run_time=0.9)
@@ -215,7 +188,7 @@ def balloon(direction, length, width, opacity):
     tip = d * length
     pts = [ORIGIN, d * length * 0.35 + n * width, tip + n * width * 0.7, tip + d * width * 0.6, tip - n * width * 0.7, d * length * 0.35 - n * width, ORIGIN]
     shape = VMobject().set_points_smoothly(pts)
-    return shape.set_fill(CYAN, opacity=opacity).set_stroke(CYAN, width=3, opacity=min(1, opacity + 0.4))
+    return shape.set_fill(BLUE_FILL, opacity=opacity).set_stroke(BLUE, width=PEN * 0.75)
 
 
 def tetra_dirs():
@@ -243,7 +216,7 @@ class DomainSpread(Timed):
             centres = [np.array([x, 0.5, 0]) for x in (-FW * 0.31, 0.0, FW * 0.31)]
         L = 1.25
         frames = VGroup(*[RoundedRectangle(corner_radius=0.3, width=(FW * 0.3 if not PORTRAIT else FW * 0.86),
-                                           height=(FH * 0.6 if not PORTRAIT else FH * 0.29), stroke_color=GREY_D, stroke_width=2)
+                                           height=(FH * 0.6 if not PORTRAIT else FH * 0.29), stroke_color=MUTED, stroke_width=PEN * 0.5)
                           .move_to(c + (DOWN * 0.5 if not PORTRAIT else ORIGIN)) for c in centres])
         self.add(frames)
         rng = np.random.default_rng(3)
@@ -257,9 +230,11 @@ class DomainSpread(Timed):
                 order = sorted(range(len(ds)), key=lambda j: ds[j][2])
                 g = VGroup()
                 for j in order:
-                    g.add(balloon(ds[j], L * (0.85 + 0.15 * (ds[j][2] + 1) / 2), 0.32, 0.18 + 0.2 * (ds[j][2] + 1) / 2))
+                    g.add(balloon(ds[j], L * (0.85 + 0.15 * (ds[j][2] + 1) / 2), 0.32, 0.35 + 0.35 * (ds[j][2] + 1) / 2))
                 g.add(Dot(radius=0.12, color=INK))
-                return g.move_to(centres[i], aligned_edge=ORIGIN).shift(centres[i] - g[-1].get_center())
+                # Portrait: the balloons sit left in each frame, their label right of them.
+                at = centres[i] + (LEFT * 1.6 if PORTRAIT else ORIGIN)
+                return g.shift(at - g[-1].get_center())
             return always_redraw(draw)
 
         balloons = [panel(i) for i in range(3)]
@@ -270,10 +245,15 @@ class DomainSpread(Timed):
             b.clear_updaters()
         labels = VGroup()
         for i in range(3):
-            off = DOWN * (FH * 0.22 if not PORTRAIT else FH * 0.095)
-            n = Text(names[i], font=SANS, font_size=40, color=INK, weight=BOLD).move_to(centres[i] + off)
-            c = Text(f"{caps[i]} {angles[i]}", font=MONO, font_size=32, color=MUTED).next_to(n, DOWN, buff=0.18)
-            labels.add(VGroup(n, c))
+            n = Text(names[i], font=HAND, font_size=46, color=INK)
+            c = Text(f"{caps[i]} {angles[i]}", font=MONO, font_size=30, color=MUTED).next_to(n, DOWN, buff=0.18)
+            label = VGroup(n, c)
+            if PORTRAIT:
+                label.move_to(centres[i] + RIGHT * 1.5)
+            else:
+                n.move_to(centres[i] + DOWN * FH * 0.22)
+                c.next_to(n, DOWN, buff=0.18)
+            labels.add(label)
         t0 = self.now()
         self.play(LaggedStart(*[FadeIn(l, shift=UP * 0.1) for l in labels], lag_ratio=0.3), run_time=1.6)
         for r in refs:
@@ -323,9 +303,9 @@ class WedgeDashMethane(Timed):
         # Beat 1 (0.6-4): the model turns until H1 and H2 lie in the page.
         self.play(turn.animate.set_value(0.0), run_time=3.2, rate_func=ease_in_out_sine)
         # Beat 2 (4-5): the sheet (the page) fades in through C, H1 and H2.
-        sheet = RoundedRectangle(corner_radius=0.25, width=4.6, height=4.0, stroke_color=CYAN, stroke_width=2) \
-            .set_fill(CYAN, opacity=0.12).move_to([0, 0.2, 0]).set_z_index(-1)
-        sheet_label = Text(TEXT["sheet"][0], font=SANS, font_size=30, color=CYAN).next_to(sheet, UP, buff=0.12)
+        sheet = RoundedRectangle(corner_radius=0.25, width=4.6, height=4.0, stroke_color=BLUE, stroke_width=PEN * 0.6) \
+            .set_fill(BLUE_FILL, opacity=0.22).move_to([0, 0.2, 0]).set_z_index(-1)
+        sheet_label = Text(TEXT["sheet"][0], font=HAND, font_size=36, color=BLUE).next_to(sheet, UP, buff=0.12)
         self.play(FadeIn(sheet), FadeIn(sheet_label), run_time=0.8)
         # Beat 3 (5-6.6): the model and its sheet move aside; the drawing builds bond by bond beside it.
         pts = [page_view @ (d * R_CH) for d in dirs]
@@ -350,7 +330,7 @@ class WedgeDashMethane(Timed):
         # Beat 4: label each bond.
         labs = TEXT["labels"]
         def lab(text, at, direction):
-            return Text(text, font=SANS, font_size=28, color=CYAN).next_to(at, direction, buff=0.12)
+            return Text(text, font=HAND, font_size=34, color=BLUE).next_to(at, direction, buff=0.12)
         tags = VGroup(
             lab(labs[0], Hs[0], UP),
             lab(labs[0], Hs[1], RIGHT),
