@@ -1,5 +1,5 @@
-// The site's own 2D structure renderer. It draws every lone pair as two cyan
-// dots and every charged atom as a letter with its sign. RDKit.js only lays
+// The site's own 2D structure renderer. It draws every lone pair as two blue
+// pen-ink dots and every charged atom as a letter with its sign. RDKit.js only lays
 // structures out (content/src/layout.ts); it never draws. Pure: a structure
 // in, an SVG string out, so it runs at build time (pre-rendered SVG), in the
 // browser, and for Manim's SVG import alike.

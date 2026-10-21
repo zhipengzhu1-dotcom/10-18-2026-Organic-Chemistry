@@ -225,7 +225,7 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
       <button
         ref={askButton}
         type="button"
-        className="tutor-ask label"
+        className="btn tutor-ask label"
         aria-expanded={open}
         aria-controls="tutor"
         onClick={() => {
@@ -268,7 +268,7 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
                   </span>
                   <button type="button" role="switch" aria-checked="true" aria-labelledby="tutor-switch-l" onClick={() => switchTo(false)} />
                 </span>
-                <button type="button" className="tutor-close" aria-label="Close the Tutor" onClick={close}>
+                <button type="button" className="pen-circle tutor-close" aria-label="Close the Tutor" onClick={close}>
                   ✕
                 </button>
               </header>
@@ -300,7 +300,7 @@ export default function TutorPanel({ lesson, screen, draft }: Props) {
               </p>
               <div className="tutor-chips" role="group" aria-label="Suggestions">
                 {chipsFor({ type: step.type, revealed: screen.canContinue, scene }).map((chip) => (
-                  <button key={chip} type="button" className="tutor-chip" disabled={busy} onClick={() => send(chip)}>
+                  <button key={chip} type="button" className="btn tutor-chip" disabled={busy} onClick={() => send(chip)}>
                     {chip}
                   </button>
                 ))}

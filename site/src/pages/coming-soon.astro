@@ -3,6 +3,8 @@
 // a way back in, so a coming-soon Unit is never a dead end. Static HTML.
 import Base from "../layouts/Base.astro";
 import TopBar from "../components/TopBar.astro";
+import Doodle from "../components/Doodle.astro";
+import Doodles from "../components/Doodles.astro";
 import { courseModel, md } from "../lib/content.ts";
 
 const subject = courseModel().subjects[0];
@@ -14,7 +16,9 @@ const courses = (subject?.courses ?? [])
 
 <Base title="Coming soon · AstraTron" description="The Units of AstraTron still being written.">
   <TopBar />
+  <Doodles />
   <main class="page prose">
+    <Doodle name="flask" class="page-doodle" />
     <h1>Coming soon</h1>
     <p>These Units are being written. Each opens when its Lessons are ready and checked; until then, start with what's open.</p>
     {

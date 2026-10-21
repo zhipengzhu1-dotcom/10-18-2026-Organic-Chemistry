@@ -14,6 +14,8 @@ interface Props {
 const { title, description, bare = false, unitId } = Astro.props;
 // Canonical URL and share image come from the one site-address setting (lib/site.ts).
 const meta = pageMeta({ path: Astro.url.pathname, unitId });
+/** One fixed turbulence seed per boil frame: filters boil-0, boil-1, boil-2. */
+const BOIL_SEEDS = [11, 27, 45];
 ---
 
 <!doctype html>
@@ -74,18 +76,14 @@ const meta = pageMeta({ path: Astro.url.pathname, unitId });
         <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" />
         <feDisplacementMap in="SourceGraphic" scale="2.6" />
       </filter>
-      <filter id="boil-0" filterUnits="userSpaceOnUse" x="-500" y="-500" width="3000" height="2200">
-        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="11" />
-        <feDisplacementMap in="SourceGraphic" scale="3.2" />
-      </filter>
-      <filter id="boil-1" filterUnits="userSpaceOnUse" x="-500" y="-500" width="3000" height="2200">
-        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="27" />
-        <feDisplacementMap in="SourceGraphic" scale="3.2" />
-      </filter>
-      <filter id="boil-2" filterUnits="userSpaceOnUse" x="-500" y="-500" width="3000" height="2200">
-        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="45" />
-        <feDisplacementMap in="SourceGraphic" scale="3.2" />
-      </filter>
+      {
+        BOIL_SEEDS.map((seed, i) => (
+          <filter id={`boil-${i}`} filterUnits="userSpaceOnUse" x="-500" y="-500" width="3000" height="2200">
+            <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed={seed} />
+            <feDisplacementMap in="SourceGraphic" scale="3.2" />
+          </filter>
+        ))
+      }
     </svg>
     <slot />
     {

@@ -9,15 +9,14 @@
   grid-template-columns: var(--at-tap) var(--at-tap) minmax(0, 1fr) auto max-content;
   gap: 8px;
 }
+/* Ask is a pen button (.btn: wobble corners, ink offset, the stepped press), in blue ink and at
+   label size so it fits the top bar; open, it is filled with blue marker. */
 .tutor-ask {
-  min-width: var(--at-tap);
   height: var(--at-tap);
-  padding: 0 8px;
+  padding: 0 10px;
   white-space: nowrap;
+  font: 400 var(--at-label-size) / 1 var(--at-font-hand);
   color: var(--at-blue);
-  background: transparent;
-  border: var(--at-border) solid var(--at-blue);
-  cursor: pointer;
 }
 .tutor-ask[aria-expanded="true"] {
   background: var(--at-blue-fill);
@@ -104,15 +103,8 @@
   margin: 0;
   color: var(--at-blue);
 }
+/* Close is the player's ✕ (.pen-circle). */
 .tutor-close {
-  width: var(--at-tap);
-  height: var(--at-tap);
-  display: grid;
-  place-items: center;
-  font: 700 22px/1 var(--at-font-text);
-  color: var(--at-ink);
-  background: transparent;
-  border: var(--at-border) solid var(--at-ink-muted);
   cursor: pointer;
 }
 
@@ -232,13 +224,10 @@
 .tutor-pick {
   font-family: var(--at-font-data);
 }
-/* A chip is a hand-drawn pill: a pen outline whose ends don't quite match. */
+/* A chip is a pen button (.btn) drawn as a pill whose ends don't quite match, in blue ink. */
 .tutor-chip {
   color: var(--at-blue);
-  background: var(--at-paper);
-  border: var(--at-border) solid var(--at-blue);
-  border-radius: 26px 20px 24px 18px / 20px 26px 18px 24px;
-  cursor: pointer;
+  border-radius: var(--at-wobble-pill);
 }
 .tutor-form input,
 .tutor-pick {

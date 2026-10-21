@@ -37,4 +37,20 @@ describe("token fallbacks", () => {
     }
     expect(wrong).toEqual([]);
   });
+
+  // three.js takes no CSS var, so the 3D card reads tokens with `token("--at-x", "#hex")` (site/src/molecule/token.ts);
+  // the hex is what draws off the page and must be the same :root value.
+  it('every token("--at-…", "#hex") fallback in the 3D card is that token\'s :root value', () => {
+    const wrong: string[] = [];
+    let seen = 0;
+    for (const file of files(join(repo, "site/src/molecule"))) {
+      for (const m of readFileSync(file, "utf8").matchAll(/token\(\s*"(--at-[a-z0-9-]+)",\s*"(#[0-9a-fA-F]{3,8})"\s*\)/g)) {
+        seen++;
+        const want = value.get(m[1]);
+        if (want === undefined || long(m[2]) !== long(want)) wrong.push(`${file.slice(repo.length)}: ${m[0]} (token: ${want ?? "none"})`);
+      }
+    }
+    expect(seen).toBeGreaterThanOrEqual(5);
+    expect(wrong).toEqual([]);
+  });
 });

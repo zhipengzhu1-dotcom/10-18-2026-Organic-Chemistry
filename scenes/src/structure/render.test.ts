@@ -233,7 +233,7 @@ describe("Lewis style", () => {
     expect(count(svg, "bond-line")).toBe(0);
     // C::O is two pairs, each C:H one pair: 4 shared pairs, 8 dots.
     expect(count(svg, "bond-dot")).toBe(8);
-    // Every valence electron is a cyan dot, shared or not.
+    // Every valence electron is a blue electron dot, shared or not.
     expect([...svg.matchAll(/class="bond-dot"[^>]*fill="var\(--lone-pair/g)]).toHaveLength(8);
     expect(count(svg, "lone-pair-dot")).toBe(4);
   });

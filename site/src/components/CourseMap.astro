@@ -1,9 +1,14 @@
 ---
 // The Course map: each Course of a Subject as a horizontal strip of Unit tiles.
 // Available Units link to their Level select page; coming-soon Units show their
-// title but can't be entered. Styles: global.css (Course map).
+// title but can't be entered, with a doodle in the corner (story 10: empty states get one), so the
+// page must include the Doodles sprite. Styles: global.css (Course map).
 import type { Subject } from "@astratron/content";
 import { md } from "../lib/content.ts";
+import Doodle, { type DoodleName } from "./Doodle.astro";
+
+/** Coming-soon tiles take these in turn, by Unit number. */
+const SOON_DOODLES: DoodleName[] = ["flask", "tubes", "beaker", "atom", "benzene", "sprig"];
 
 interface Props {
   subject: Subject;
@@ -31,6 +36,7 @@ const { subject } = Astro.props;
                   <span class="tile-title" set:html={md(unit.title)} />
                   {unit.summary && <span class="tile-summary" set:html={md(unit.summary)} />}
                   <span class="tile-soon">Coming soon</span>
+                  <Doodle name={SOON_DOODLES[unit.number % SOON_DOODLES.length]} class="tile-doodle" />
                 </div>
               )}
             </li>

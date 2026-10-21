@@ -75,6 +75,14 @@ describe("Paper Notebook tokens", () => {
     expect(reds).toEqual([]);
   });
 
+  it("names the hand-drawn corners and offset shadows, and no square --at-radius", () => {
+    for (const k of ["wobble", "wobble-2", "wobble-md", "wobble-sm", "wobble-pill", "wobble-note"]) expect(css, k).toMatch(new RegExp(`--at-${k}:\\s*\\d`));
+    for (const k of ["sm", "md", "", "lg"].map((s) => (s ? `drop-offset-${s}` : "drop-offset")))
+      expect(decl(k), k).toMatch(/^\d+px \d+px 0$/);
+    expect(decl("drop-sm")).toBe("var(--at-drop-offset-sm) var(--at-ink)");
+    expect(decl("drop")).toBe("var(--at-drop-offset) var(--at-ink)");
+    expect(css).not.toMatch(/--at-radius\b/);
+  });
 });
 
 // Motion at 20 fps (#119): every duration is whole 50 ms frames, and each `--at-step-*` easing holds

@@ -167,6 +167,26 @@ test.describe("paper", () => {
       await expect(page.locator(`.doodle-sprite symbol#doodle-${name}`)).toHaveCount(1);
   });
 
+  // Story 10: empty states carry a doodle too: the coming-soon page and each coming-soon Unit tile.
+  test("empty states (coming soon) carry a decorative doodle, under the same 8 KB", async ({ page }) => {
+    for (const path of ["/coming-soon", "/organic"]) {
+      await page.goto(path);
+      const doodles = await page.locator(".doodle-sprite, .doodle").evaluateAll((svgs) =>
+        svgs.map((svg) => ({
+          sprite: svg.classList.contains("doodle-sprite"),
+          hidden: svg.getAttribute("aria-hidden"),
+          text: svg.textContent!.trim(),
+          bytes: new TextEncoder().encode(svg.outerHTML).length,
+        })),
+      );
+      expect(doodles.filter((d) => d.sprite), path).toHaveLength(1);
+      expect(doodles.filter((d) => !d.sprite).length, path).toBeGreaterThan(0);
+      for (const d of doodles) expect({ hidden: d.hidden, text: d.text }, path).toEqual({ hidden: "true", text: "" });
+      expect(doodles.reduce((n, d) => n + d.bytes, 0), path).toBeLessThan(8 * 1024);
+    }
+    await expect(page.locator(".tile.soon .doodle").first()).toBeVisible();
+  });
+
   // One test per Lesson (and pinned Practice Set), so they run in parallel and each has its own time.
   for (const lesson of playablePaths())
     test(`every Step and feedback panel passes axe and the type rules: ${lesson}`, async ({ page }) => {
@@ -186,7 +206,7 @@ test.describe("paper", () => {
       });
     });
 
-  test("feedback is icon + words: solid green ✓ on a leaf offset, dashed pink ✗ + a violet-ruled Hint, → plain pen line + answer", async ({
+  test("feedback is icon + words: solid green ✓ on a leaf offset, dashed pink ✗ + a violet-ruled Hint, → plain ink pen line + answer", async ({
     page,
   }) => {
     await page.goto(LESSON_0);
@@ -206,7 +226,7 @@ test.describe("paper", () => {
     // Lesson 0 s01 is a Hook prediction: any guess gets the reveal.
     await choose("about 5%");
     await check();
-    await looks("solid", "ink-muted", "→", "Answer:");
+    await looks("solid", "ink", "→", "Answer:");
     expect(await offset()).toBe("none");
     // s07 is a Check Problem: a wrong pick gets its Hint, then the right one.
     await page.goto(`${LESSON_0}#s07`);
