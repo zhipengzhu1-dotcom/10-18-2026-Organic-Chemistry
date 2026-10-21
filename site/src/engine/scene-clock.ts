@@ -10,6 +10,28 @@ export const frameRatio = (aspect: Aspect) => (aspect === "16:9" ? "16 / 9" : "9
 /** The scrubber's spoken time: "1.5 of 8 seconds". */
 export const scrubText = (t: number, duration: number) => `${t.toFixed(1)} of ${duration} seconds`;
 
+/** Scenes are drawn at 20 fps, like the site's UI motion (spec #117). */
+export const SCENE_FPS = 20;
+
+/**
+ * `t` floored to the frame grid: each frame holds one drawing for 1/fps s. A hair of slack keeps
+ * float error (k/20 × 20 = k − ε) from dropping a time that is already on the grid a frame back.
+ */
+export function snapToFrame(t: number, fps = SCENE_FPS): number {
+  return Math.floor(t * fps + 1e-6) / fps;
+}
+
+/**
+ * What a Scene is drawn at: `t` on the frame grid, except the end, which is always `duration`
+ * itself (a duration off the grid still ends on its last drawing). `frame` numbers the drawing;
+ * the player re-renders only when it changes, and the boil seed is `frame % 3`.
+ */
+export function sceneFrame(t: number, duration: number, fps = SCENE_FPS): { t: number; frame: number } {
+  if (t >= duration) return { t: duration, frame: Math.ceil(duration * fps - 1e-6) };
+  const snapped = snapToFrame(t, fps);
+  return { t: snapped, frame: Math.round(snapped * fps) };
+}
+
 export interface Clock {
   /** Seconds into the Scene. */
   t: number;

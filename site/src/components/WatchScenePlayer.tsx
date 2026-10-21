@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Aspect } from "@astratron/scenes";
 import { watchScene, watchSceneFiles } from "@astratron/scenes/watch";
 import type { Cited } from "@astratron/content/data";
-import { clockStep, frameRatio, openClock, scrubText, type Clock, type ClockAction, type ClockConfig } from "../engine/scene-clock.ts";
+import { clockStep, frameRatio, openClock, sceneFrame, scrubText, snapToFrame, type Clock, type ClockAction, type ClockConfig } from "../engine/scene-clock.ts";
 import { useReducedMotion } from "./use-reduced-motion.ts";
 
 interface Props {
@@ -55,12 +55,13 @@ export default function WatchScenePlayer({ sceneId, cited, aspect = "16:9", shri
     if (reducedMotion !== undefined) apply(openClock(config, reducedMotion), true);
   }, [reducedMotion]);
 
-  // While playing, the scrubber follows the video's own clock.
+  // While playing, the scrubber follows the video's own clock on the 20 fps frame grid (a new state
+  // only on a new frame). The video itself plays untouched, at its own 60 fps.
   useEffect(() => {
     if (!clock.playing) return;
     let frame = requestAnimationFrame(function follow() {
       const v = video.current;
-      if (v) setClock((c) => (c.playing ? { ...c, t: v.currentTime } : c));
+      if (v) setClock((c) => (c.playing && snapToFrame(v.currentTime) !== c.t ? { ...c, t: snapToFrame(v.currentTime) } : c));
       frame = requestAnimationFrame(follow);
     });
     return () => cancelAnimationFrame(frame);
@@ -107,7 +108,7 @@ export default function WatchScenePlayer({ sceneId, cited, aspect = "16:9", shri
           max={manifest.duration}
           step={0.01}
           value={clock.t}
-          aria-valuetext={scrubText(clock.t, manifest.duration)}
+          aria-valuetext={scrubText(sceneFrame(clock.t, manifest.duration).t, manifest.duration)}
           className="scene-range"
           onChange={(e) => act({ type: "seek", t: Number(e.target.value) })}
         />

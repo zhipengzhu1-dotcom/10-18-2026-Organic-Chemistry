@@ -9,7 +9,8 @@
 @import "./tokens.css";
 
 /* Tailwind reads only our tokens: no default palette (so no red), our four
-   faces, and no stock animations (they all loop). */
+   faces, no stock easings (motion is stepped, --at-step-*) and no stock
+   animations (they all loop). */
 @theme inline {
   --color-*: initial;
   --color-paper: var(--at-paper);
@@ -39,8 +40,7 @@
   --shadow-drop-sm: var(--at-drop-sm);
   --spacing-gutter: var(--at-gutter);
   --spacing-tap: var(--at-tap);
-  --ease-snap: var(--at-ease-snap);
-  --ease-pixel: var(--at-ease-pixel);
+  --ease-*: initial;
   --animate-*: initial;
 }
 
@@ -143,13 +143,21 @@
     cursor: pointer;
     border: var(--at-border) solid var(--at-ink);
     box-shadow: var(--at-drop);
+    /* The press lands in the first 50ms frame (the stepped curve starts near its end). */
     transition:
-      transform var(--at-dur-press) linear,
-      box-shadow var(--at-dur-press) linear;
+      transform var(--at-dur-press) var(--at-step-press),
+      box-shadow var(--at-dur-press) var(--at-step-press);
   }
   .btn:active:not(:disabled) {
     transform: translate(5px, 5px);
     box-shadow: 0 0 0 var(--at-ink);
+  }
+  /* Hover lifts only on a real pointer, so a tap never leaves a button stuck lifted. */
+  @media (hover: hover) and (pointer: fine) {
+    .btn:hover:not(:disabled):not(:active) {
+      transform: translate(-1px, -1px);
+      box-shadow: 6px 6px 0 var(--at-ink);
+    }
   }
   .btn-primary {
     background: var(--at-orange-fill);
@@ -230,7 +238,7 @@
     width: 18px;
     height: 18px;
     background: var(--at-ink-muted);
-    transition: left var(--at-dur-ui) var(--at-ease-pixel);
+    transition: left var(--at-dur-ui) var(--at-step-ui);
   }
   .switch [role="switch"][aria-checked="true"]::before {
     border-color: var(--at-blue);
@@ -488,8 +496,8 @@
     box-shadow: 3px 3px 0 var(--at-ink-muted);
     cursor: pointer;
     transition:
-      transform var(--at-dur-press) linear,
-      box-shadow var(--at-dur-press) linear;
+      transform var(--at-dur-press) var(--at-step-press),
+      box-shadow var(--at-dur-press) var(--at-step-press);
   }
   .opt[aria-pressed="true"] {
     border-color: var(--at-orange-fill);
@@ -547,7 +555,11 @@
     grid-template-columns: 32px 1fr;
     gap: 10px;
     align-items: start;
-    animation: fb-in var(--at-dur-ui) var(--at-ease-snap);
+    /* Rises in over 4 frames; on a correct answer the ✓ then draws on over 8, a frame behind. */
+    animation: fb-in var(--at-dur-ui) var(--at-step-ui);
+  }
+  .fb-correct .ic {
+    animation: draw-on var(--at-dur-card) var(--at-step-card) var(--at-dur-press) both;
   }
   .fb p {
     margin: 0;
@@ -1426,6 +1438,11 @@
     box-shadow: 6px 6px 0 var(--at-ink);
     background: var(--at-paper);
   }
+  /* The drawing inside the frame; the player sets its boil / rough filter (ScenePlayer). */
+  .scene-ink {
+    width: 100%;
+    height: 100%;
+  }
   /* A Manipulate Step's Scene leaves room under it for its control even once the feedback panel
      opens, so the slider stays on screen at 1280 × 720 too. */
   .player-body:has(.scene-control) .scene-frame {
@@ -1506,13 +1523,19 @@
 
 @keyframes fb-in {
   from {
-    transform: translateY(16px);
+    transform: translateY(10px) rotate(-0.6deg);
     opacity: 0;
+  }
+}
+/* The pen draws the ✓ left to right. */
+@keyframes draw-on {
+  from {
+    clip-path: inset(0 100% 0 0);
   }
 }
 
 /* Reduced motion (the OS setting or the site's switch): no transforms, no
-   loops, only crossfades of 120ms or less. The media query covers no-JS. */
+   loops, only opacity fades of 100ms or less. The media query covers no-JS. */
 :root[data-motion="reduced"] *,
 :root[data-motion="reduced"] *::before,
 :root[data-motion="reduced"] *::after {
@@ -1523,6 +1546,9 @@
 :root[data-motion="reduced"] .btn:active:not(:disabled) {
   transform: none;
   box-shadow: 0 0 0 3px var(--at-blue);
+}
+:root[data-motion="reduced"] .btn:hover:not(:disabled):not(:active) {
+  transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
   *,
