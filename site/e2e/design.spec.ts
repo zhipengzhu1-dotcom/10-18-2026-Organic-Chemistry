@@ -34,24 +34,38 @@ const smallTargets = (page: Page) =>
       .map(({ el, box }) => `${el.outerHTML.slice(0, 80)} is ${Math.round(box.width)}×${Math.round(box.height)}`),
   );
 
-/** Every animation or transition with a non-zero duration: [what, property, seconds, iterations]. */
+/** Every animation or transition with a non-zero duration: [what, property, seconds, iterations, easing]. */
 const motion = (page: Page) =>
   page.evaluate(() => {
-    const out: [string, string, number, string][] = [];
+    const out: [string, string, number, string, string][] = [];
     const secs = (s: string) => s.split(",").map((d) => parseFloat(d) * (d.trim().endsWith("ms") ? 0.001 : 1));
+    // Easing lists split on top-level commas only: `linear(…)` carries its own.
+    const easings = (s: string) => s.split(/,(?![^(]*\))/).map((e) => e.trim());
     for (const el of document.querySelectorAll("*"))
       for (const pseudo of [null, "::before", "::after"]) {
         const cs = getComputedStyle(el, pseudo);
         const what = `${el.tagName.toLowerCase()}.${el.className}${pseudo ?? ""}`;
         const props = cs.transitionProperty.split(",").map((p) => p.trim());
-        secs(cs.transitionDuration).forEach((d, i) => d > 0 && out.push([what, props[i % props.length], d, "1"]));
-        if (cs.animationName !== "none")
-          secs(cs.animationDuration).forEach((d) =>
-            out.push([what, `@${cs.animationName}`, d, cs.animationIterationCount]),
+        const ease = easings(cs.transitionTimingFunction);
+        secs(cs.transitionDuration).forEach(
+          (d, i) => d > 0 && out.push([what, props[i % props.length], d, "1", ease[i % ease.length]]),
+        );
+        if (cs.animationName !== "none") {
+          const anim = easings(cs.animationTimingFunction);
+          secs(cs.animationDuration).forEach((d, i) =>
+            out.push([what, `@${cs.animationName}`, d, cs.animationIterationCount, anim[i % anim.length]]),
           );
+        }
       }
     return out;
   });
+
+/** The 20 fps frame grid (#119): press, exit, ui and card, each on its stepped `linear()` ease-out. */
+const FRAME_GRID = [0.1, 0.15, 0.2, 0.4];
+const offGrid = (moves: Awaited<ReturnType<typeof motion>>) =>
+  moves.filter(([, , s, , ease]) => !FRAME_GRID.includes(Math.round(s * 1000) / 1000) || !ease.startsWith("linear("));
+/** Under reduced motion only opacity fades of 100 ms or less are left. */
+const notFades = (moves: Awaited<ReturnType<typeof motion>>) => moves.filter(([, prop, s]) => prop !== "opacity" || s > 0.1);
 
 test.describe("paper and motion preferences", () => {
   test("motion follows the OS by default", async ({ page }) => {
@@ -215,7 +229,7 @@ test.describe("Step player on a phone", () => {
 });
 
 test.describe("motion", () => {
-  test("uses only 90 / 180 / 420 ms, nothing loops in the Step player, and no sound", async ({ page }) => {
+  test("draws on the 20 fps grid: only 100 / 150 / 200 / 400 ms stepped ease-out, nothing loops, no sound", async ({ page }) => {
     await page.addInitScript(() => {
       const w = window as unknown as Record<string, unknown>;
       w.__sound = false;
@@ -229,6 +243,8 @@ test.describe("motion", () => {
       };
     });
     await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    expect(offGrid(await motion(page)), "/").toEqual([]);
     // Lesson 1: no watch-only (video) Scene, so nothing may play sound or video at all.
     await page.goto(LESSON_1);
     await playThrough(page, async (label) => {
@@ -237,10 +253,7 @@ test.describe("motion", () => {
         moves.filter(([, , , n]) => n !== "1"),
         `${label}: loops`,
       ).toEqual([]);
-      expect(
-        moves.filter(([, , s]) => ![0.09, 0.18, 0.42].includes(Math.round(s * 1000) / 1000)),
-        label,
-      ).toEqual([]);
+      expect(offGrid(moves), label).toEqual([]);
       expect(
         await page.evaluate(
           () => document.getAnimations().filter((a) => a.effect?.getTiming().iterations === Infinity).length,
@@ -252,17 +265,15 @@ test.describe("motion", () => {
   });
 
   for (const via of ["OS setting", "site switch"] as const) {
-    test(`reduced motion via the ${via} keeps only crossfades of 120 ms or less`, async ({ page }) => {
+    test(`reduced motion via the ${via} keeps only fades of 100 ms or less`, async ({ page }) => {
       if (via === "OS setting") await page.emulateMedia({ reducedMotion: "reduce" });
       else await page.addInitScript(() => localStorage.setItem("at-motion", "reduced"));
       for (const path of ["/", LESSON_1]) {
         await page.goto(path);
-        const bad = (await motion(page)).filter(([, prop, s]) => prop !== "opacity" || s > 0.12);
-        expect(bad, path).toEqual([]);
+        expect(notFades(await motion(page)), path).toEqual([]);
       }
       await playThrough(page, async (label) => {
-        const bad = (await motion(page)).filter(([, prop, s]) => prop !== "opacity" || s > 0.12);
-        expect(bad, label).toEqual([]);
+        expect(notFades(await motion(page)), label).toEqual([]);
       });
     });
   }

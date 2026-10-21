@@ -31,6 +31,36 @@ test("a Scene in an Explain Step autoplays once, with replay and a scrubber", as
   await expect(scrubber(page)).toHaveValue("1.5");
 });
 
+/** The SVG filter on the Scene's drawing (the player's wrapper round it), e.g. `url("#boil-1")` or "none". */
+const ink = (page: Page) => page.locator("figure.scene .scene-ink").evaluate((el) => getComputedStyle(el).filter);
+
+test("a playing Scene is drawn at 20 fps: its pen lines boil frame by frame, then rest on the static wobble", async ({ page }) => {
+  await page.goto(EXPLAIN);
+  await expect(pauseButton(page)).toBeVisible();
+  // Sample the filter over half a second of play: about ten 50 ms frames, cycling three seeds.
+  const seen = await page.locator("figure.scene .scene-ink").evaluate(async (el) => {
+    const ids = new Set<string>();
+    const end = performance.now() + 500;
+    while (performance.now() < end) {
+      ids.add(getComputedStyle(el).filter);
+      await new Promise(requestAnimationFrame);
+    }
+    return [...ids].sort();
+  });
+  expect(seen).toEqual(['url("#boil-0")', 'url("#boil-1")', 'url("#boil-2")']);
+
+  // The end: the boil stops on the static wobble and stays there.
+  await expect(playButton(page)).toBeVisible({ timeout: 12_000 });
+  expect(await ink(page)).toBe('url("#rough")');
+  await page.waitForTimeout(300);
+  expect(await ink(page)).toBe('url("#rough")');
+
+  // Scrubbing holds the boil too, and the readout says the time of the frame drawn (0.95 s, to a tenth).
+  await scrubber(page).fill("0.98");
+  expect(await ink(page)).toBe('url("#rough")');
+  await expect(scrubber(page)).toHaveAttribute("aria-valuetext", "0.9 of 8 seconds");
+});
+
 test("Manipulate a Scene by keyboard: the slider drives the live Scene and Check grades its value", async ({ page }) => {
   await page.goto(MANIPULATE);
   await expect(page.getByText("Step 8 of 15")).toBeVisible();
@@ -97,6 +127,10 @@ test.describe("with reduced motion", () => {
 
     await playButton(page).click();
     await expect(pauseButton(page)).toBeVisible();
+    // No boil and no wobble while it plays under reduced motion.
+    expect(await ink(page)).toBe("none");
+    await page.waitForTimeout(200);
+    expect(await ink(page)).toBe("none");
   });
 
   test("a Manipulate Step opens paused too, and the slider still works", async ({ page }) => {

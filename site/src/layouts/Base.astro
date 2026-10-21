@@ -64,6 +64,29 @@ const meta = pageMeta({ path: Astro.url.pathname, unitId });
     </script>
   </head>
   <body>
+    <!--
+      Pen-line wobble for Scene drawings (ScenePlayer sets it on the drawing's wrapper): `rough` is
+      the static wobble on a stopped Scene; while one plays, its lines boil through boil-0/1/2, one
+      seed per 20 fps frame. Seeds are fixed. Values from the prototype (spec #117).
+    -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <filter id="rough" filterUnits="userSpaceOnUse" x="-500" y="-500" width="3000" height="2200">
+        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" />
+        <feDisplacementMap in="SourceGraphic" scale="2.6" />
+      </filter>
+      <filter id="boil-0" filterUnits="userSpaceOnUse" x="-500" y="-500" width="3000" height="2200">
+        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="11" />
+        <feDisplacementMap in="SourceGraphic" scale="3.2" />
+      </filter>
+      <filter id="boil-1" filterUnits="userSpaceOnUse" x="-500" y="-500" width="3000" height="2200">
+        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="27" />
+        <feDisplacementMap in="SourceGraphic" scale="3.2" />
+      </filter>
+      <filter id="boil-2" filterUnits="userSpaceOnUse" x="-500" y="-500" width="3000" height="2200">
+        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="45" />
+        <feDisplacementMap in="SourceGraphic" scale="3.2" />
+      </filter>
+    </svg>
     <slot />
     {
       !bare && (

@@ -1,6 +1,7 @@
 /* The Tutor (dev only, spec #104): the Ask button in the player's top bar, then a sheet rising
-   from the bottom on phones and a side panel from 720px. Arcade Cosmos tokens only, so both
-   themes follow. Motion: 420ms snap slide plus a fade; reduced motion (global.css) leaves the fade. */
+   from the bottom on phones and a side panel from 720px. Paper Notebook tokens only. Motion on the
+   20 fps grid: a card-length (400ms) stepped slide plus a ui fade in, out at exit (150ms); a swipe
+   follows the finger unstepped; reduced motion (global.css) leaves only the fade. */
 
 /* The Ask button (or, switched off, the header's switch alone, unchecked) takes a column of its own
    in the top bar; a tighter gap keeps the story bars visible on a 390px phone. */
@@ -30,17 +31,13 @@
   background: color-mix(in srgb, var(--at-paper) 60%, transparent);
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--at-dur-ui) linear;
-}
-/* Opened from the keyboard: no slide, no fade. Swiped: the sheet follows the finger. */
-.tutor-scrim[data-instant="true"],
-.tutor-panel[data-instant="true"],
-.tutor-panel[data-dragging="true"] {
-  transition: none;
+  /* Closing: the exit, faster than the entry below. */
+  transition: opacity var(--at-dur-exit) var(--at-step-exit);
 }
 .tutor-scrim[data-open="true"] {
   opacity: 1;
   pointer-events: auto;
+  transition: opacity var(--at-dur-ui) var(--at-step-ui);
 }
 
 /* Phones: a sheet over the bottom of the Step; the Step stays visible above it. A swipe down its
@@ -61,14 +58,25 @@
   opacity: 0;
   transform: translateY(100%);
   pointer-events: none;
+  /* Closing: the exit, faster than opening. */
   transition:
-    transform var(--at-dur-card) var(--at-ease-snap),
-    opacity var(--at-dur-ui) linear;
+    transform var(--at-dur-exit) var(--at-step-exit),
+    opacity var(--at-dur-exit) var(--at-step-exit);
 }
 .tutor-panel[data-open="true"] {
   opacity: 1;
   transform: none;
   pointer-events: auto;
+  transition:
+    transform var(--at-dur-card) var(--at-step-card),
+    opacity var(--at-dur-ui) var(--at-step-ui);
+}
+/* Opened from the keyboard: no slide, no fade. Swiped: the sheet follows the finger at display
+   rate (direct manipulation is never stepped). After the open rules, so it wins over them. */
+.tutor-scrim[data-instant="true"],
+.tutor-panel[data-instant="true"],
+.tutor-panel[data-dragging="true"] {
+  transition: none;
 }
 
 /* The header: title, the on/off switch and close on one row, the model and effort picker on its

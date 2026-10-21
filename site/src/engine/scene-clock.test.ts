@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clockStep, frameRatio, openClock, scrubText, type ClockAction, type ClockConfig } from "./scene-clock.ts";
+import { clockStep, frameRatio, openClock, scrubText, sceneFrame, snapToFrame, type ClockAction, type ClockConfig } from "./scene-clock.ts";
 
 const once: ClockConfig = { duration: 4, posterT: 1 };
 const run = (config: ClockConfig, reducedMotion: boolean, ...actions: ClockAction[]) =>
@@ -47,5 +47,34 @@ describe("Scene clock", () => {
 
   it("pause holds the frame", () => {
     expect(run(once, false, tick(1), { type: "pause" }, tick(1))).toEqual({ t: 1, playing: false });
+  });
+});
+
+describe("the 20 fps frame grid", () => {
+  it("floors t to the 1/20 s grid", () => {
+    expect(snapToFrame(0)).toBe(0);
+    expect(snapToFrame(0.049)).toBe(0);
+    expect(snapToFrame(0.05)).toBe(0.05);
+    expect(snapToFrame(1.234)).toBe(1.2);
+    expect(snapToFrame(0.999)).toBe(0.95);
+  });
+
+  it("holds a frame on the grid where it is (float error never drops a frame)", () => {
+    for (let k = 0; k <= 400; k++) expect(snapToFrame(k / 20), `frame ${k}`).toBe(k / 20);
+  });
+
+  it("is idempotent", () => {
+    for (const t of [0.01, 0.37, 1.2, 2.999, 7.123]) expect(snapToFrame(snapToFrame(t))).toBe(snapToFrame(t));
+  });
+
+  it("takes another frame rate", () => {
+    expect(snapToFrame(0.3, 8)).toBe(0.25);
+  });
+
+  it("draws a Scene on the grid, with its last frame at duration even off the grid", () => {
+    expect(sceneFrame(1.234, 3.37)).toEqual({ t: 1.2, frame: 24 });
+    expect(sceneFrame(3.37, 3.37)).toEqual({ t: 3.37, frame: 68 });
+    expect(sceneFrame(3.36, 3.37)).toEqual({ t: 3.35, frame: 67 });
+    expect(sceneFrame(4, 4)).toEqual({ t: 4, frame: 80 });
   });
 });
