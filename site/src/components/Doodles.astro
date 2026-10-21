@@ -1,0 +1,25 @@
+---
+// The doodle sprite (spec #117): six hand-drawn chemistry doodles from the reference drawing
+// (round-bottom flask, test tubes, benzene, atom, leaf sprig, beaker) as <symbol>s, placed with
+// Doodle.astro. The shapes are the video's own SVGs (scenes/manim/doodles, #123), read at build
+// time, so the site and the Manim renders draw the same doodles. Each is a pen line plus a marker
+// fill printed a few px off it; the fill multiplies over the paper (.doodle-mark, global.css).
+// Decorative only: aria-hidden, no text.
+const files = import.meta.glob<string>("../../../scenes/manim/doodles/*.svg", { query: "?raw", import: "default", eager: true });
+
+/** One video SVG as a symbol: its viewBox kept, marker fills (any fill but pen ink) tagged. */
+const symbol = (path: string, svg: string) => {
+  const name = path.match(/([a-z]+)\.svg$/)![1];
+  const viewBox = svg.match(/viewBox="([^"]+)"/)![1];
+  const body = svg
+    .replace(/^[\s\S]*?<svg[^>]*>|<\/svg>\s*$/g, "")
+    .replace(/<(\w+) fill="(#(?!1d1b26)[0-9a-f]{6})" stroke="none"/g, '<$1 class="doodle-mark" fill="$2"')
+    .replace(/\s*\n\s*/g, "");
+  return `<symbol id="doodle-${name}" viewBox="${viewBox}">${body}</symbol>`;
+};
+const symbols = Object.entries(files)
+  .map(([path, svg]) => symbol(path, svg))
+  .join("");
+---
+
+<svg class="doodle-sprite" width="0" height="0" aria-hidden="true" focusable="false" set:html={symbols} />

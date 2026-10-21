@@ -19,8 +19,16 @@ export function showStreak(now = new Date()): void {
     el.setAttribute("aria-label", `Streak: ${days(count)}`);
     el.querySelector("b")!.textContent = String(count);
   }
+  // The line is in hand; its numbers go in the data face.
+  const data = (n: number) => Object.assign(document.createElement("span"), { className: "data", textContent: String(n) });
   for (const el of document.querySelectorAll<HTMLElement>("[data-streak-text]")) {
-    el.textContent = `Streak: ${days(count)} · ${freezes} ${freezes === 1 ? "freeze" : "freezes"} left`;
+    el.replaceChildren(
+      "Streak: ",
+      data(count),
+      ` ${count === 1 ? "day" : "days"} · `,
+      data(freezes),
+      ` ${freezes === 1 ? "freeze" : "freezes"} left`,
+    );
   }
 }
 

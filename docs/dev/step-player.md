@@ -22,7 +22,8 @@ Engine: `site/src/engine/player.ts` (pure, no DOM; its header comment states the
 
 Player chrome lives in `global.css` (`@layer components`); drawings, Tap and Draw arrows in `structure.css`. The visual spec is sections 03 and 06 of `prototypes/paper-notebook.PROTOTYPE.html` on `prototype/paper-notebook`.
 
-- **Top bar:** ✕ and ‹ in pen circles; the progress strip is pen pills (`.bars`): done = leaf (`--at-green-fill`), on screen = highlighter (`--at-yellow-fill`, thicker line).
+- **Top bar:** ✕ and ‹ in pen circles; the progress strip is pen pills (`.bars`): done = leaf (`--at-green-fill`), on screen = highlighter (`--at-yellow-fill`, thicker line). Below 640 px the Step count sits over the pills in one grid column, so 15 pills stay ≥ 12 px wide without a taller row (`design.spec.ts` checks it).
+- **Buttons (`.btn`, #121):** a pen box with `--at-wobble` corners on a 3 px ink offset; a press slides it onto its shadow (sinks into the page) in the first frame. `.btn-primary` is blue marker (Check, Continue, Resume), `.btn-go` orange and used only for Start Unit 1, plain `.btn` / `.btn-secondary` paper. Disabled is a dashed muted pen line, no shadow.
 - **Choices:** text choices carry `<Bubble />` (`steps/view.tsx`): a pen circle whose blue marker scribble draws on by `stroke-dashoffset` over `--at-dur-card`. A picked choice also gets an inset pen line, so a pick never rests on colour. Structure cards carry the bubble in their corner.
 - **Feedback:** ✓ solid green on a leaf offset shadow; ✗ dashed pink, its text on a violet rule (the rule sits on the whole `<p>`: a Hint on its own line overflowed nine phone Steps); → plain `--at-ink-muted` pen line. The icon is a pen circle filled with its marker. `design.spec.ts` checks all three.
 - **Numeric:** a pen underline (`--at-pen`) with the value in mono; dashed once locked.
@@ -31,6 +32,15 @@ Player chrome lives in `global.css` (`@layer components`); drawings, Tap and Dra
 - **Drawings (`drawStructure`):** bonds and atoms in pen ink (`currentColor`); electrons in `--lone-pair` (blue on the page, falling back to `--at-blue`'s value elsewhere); a minus in `--charge-minus` (pink), a plus in `--charge-plus` (orange), both ink where unset. Highlighted bonds are a highlighter swipe, highlighted atoms a dashed blue ring on a highlighter dab; Tap picks are a blue pen ring on blue marker + ✓, the revealed answer a dashed ring on highlighter. Marker multiplies over the drawing so letters stay ink. Every one keeps a shape cue (ring, dash, ✓, band).
 - **Draw arrows:** pushes in blue ink; flags and the shown push orange and dashed, the flag list on an orange marker offset (`draw-arrows-style.test.ts`).
 - Fit: choices are Nunito 500, not the prototype's 600, and the bubble column is 22 px: wider text tipped the tightest 3D Steps (Lesson 4 s14) over a phone screen.
+
+## Pages around the Lessons (#121)
+
+Home, Course map, Level select and the static pages, styled in `global.css`. Visual spec: the cover and section 06 (phone home) of the prototype.
+
+- **Doodles:** `components/Doodles.astro` is the sprite (six `<symbol>`s), `Doodle.astro` places one. The shapes are read at build time from the video's SVGs in `scenes/manim/doodles/` (#123), so edit them there and site and video stay the same. Marker fills get `.doodle-mark` (multiply); pen lines sit on the static `rough` filter. Decorative only: `aria-hidden`, no text, under 8 KB on the page (`design.spec.ts`). Only the home page includes the sprite; a page that places a `Doodle` must include `Doodles` too.
+- **Home:** the headline in hand with "Come build." the one script word; doodles stand behind the push card's top edge on narrow windows and fill the side margins from 1040 px. The returning Hub (Streak line in hand, numbers in `.data`; the Continue card a yellow sticky note) is gated by its own axe/type/target test, since the crawl only sees a first visit. First visit vs returning is still decided by the inline script before paint (`.returning` on `<html>`).
+- **Course map:** Unit tiles are index cards, tinted in turn (blue, green, violet, pink, orange) through `--tint` for the washi tape and marker offset; coming-soon tiles are dashed pencil, no tape. The strip scrolls, so it keeps 18 px of padding above and below for the tape and the hover lift (fine pointers only).
+- **Level select:** act headings in hand ruled off in pen; Lessons are pen cards on a blue marker offset (boss: pink, Practice Set: orange, On-ramp: dashed, no offset); the Unit title sits on a highlighter swipe.
 
 ## Draw arrows (`@astratron/content/arrows`)
 
