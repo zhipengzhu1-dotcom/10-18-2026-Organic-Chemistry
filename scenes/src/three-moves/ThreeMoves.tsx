@@ -1,7 +1,7 @@
 // three-moves: a pure function of (t, state); see manifest.ts. Each panel is a
 // start drawing with its one arrow; the lit panel's arrow draws itself.
 import { frameSize } from "../frame.ts";
-import { Arrow, ArrowHead, electron, fit, fontData, fontText, ink, Placed } from "../lesson-06/draw.tsx";
+import { Arrow, ArrowHead, blue, fit, fontData, fontHand, ink, Placed } from "../lesson-06/draw.tsx";
 import { panelBoxes, split } from "../lesson-06/layout.ts";
 import { lesson6Structures } from "../lesson-06/structures.ts";
 import { easeInOut, progress } from "../motion.ts";
@@ -39,8 +39,8 @@ export default function ThreeMoves({ t, state, aspect, reducedMotion }: ScenePro
         const own = all && turn === i && !reducedMotion ? easeInOut(progress(t - i * PANEL_SECONDS, 0.3, 0.3 + PUSH_SECONDS * 0.7)) : 1;
         return (
           <g key={move.name} data-panel={i + 1} data-lit={on} opacity={on ? 1 : 0.35}>
-            <rect x={box.x} y={box.y} width={box.w} height={box.h} rx={unitSize * 0.02} fill="none" stroke={on ? electron : ink} strokeOpacity={on ? 0.8 : 0.25} strokeWidth={4} />
-            <text x={head.x + head.w / 2} y={head.y + head.h * 0.55} textAnchor="middle" dominantBaseline="central" fill={ink} fontSize={unitSize * 0.042} fontWeight={700} style={{ fontFamily: fontText }}>
+            <rect x={box.x} y={box.y} width={box.w} height={box.h} rx={unitSize * 0.02} fill="none" stroke={on ? blue : ink} strokeOpacity={on ? 0.8 : 0.25} strokeWidth={4} />
+            <text x={head.x + head.w / 2} y={head.y + head.h * 0.55} textAnchor="middle" dominantBaseline="central" fill={ink} fontSize={unitSize * 0.047} style={{ fontFamily: fontHand }}>
               <tspan style={{ fontFamily: fontData }}>{`${i + 1}.`}</tspan> {move.name}
             </text>
             <Placed svg={move.drawing.svg} at={at} />

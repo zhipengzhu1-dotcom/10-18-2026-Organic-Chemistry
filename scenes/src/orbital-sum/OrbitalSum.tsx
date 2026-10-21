@@ -24,18 +24,18 @@ export default function OrbitalSum({ state, aspect }: SceneProps<OrbitalSumState
   const filled = state.filled === "yes";
 
   const cell = (kind: OrbitalKind, x: number, y: number, key: string, dim = false) => {
-    const o: OrbitalAt = { kind, axis: UP, colour: "electron", x, y, scale, turn: FACE, key, dim };
+    const o: OrbitalAt = { kind, axis: UP, colour: "blue", x, y, scale, turn: FACE, key, dim };
     return (
       <g key={key}>
         {orbitalLobes(o).map((d) => d.node)}
-        <Chip x={x} y={y + scale * 1.3} text={kind === "s" ? "2s" : "2p"} colour="electron" size={chip} />
+        <Chip x={x} y={y + scale * 1.3} text={kind === "s" ? "2s" : "2p"} colour="blue" size={chip} />
       </g>
     );
   };
   const hybrids: OrbitalAt[] = hybridDirections("sp2").hybrids.map((axis, i) => ({
     kind: "sp2",
     axis: [axis[1], axis[0], 0],
-    colour: "ignite",
+    colour: "orange",
     x: result.x,
     y: result.y,
     scale: scale * 1.05,
@@ -43,7 +43,7 @@ export default function OrbitalSum({ state, aspect }: SceneProps<OrbitalSumState
     key: `h${i}`,
   }));
   const text = (x: number, y: number, s: string, size = word, colour = ink("ink")) => (
-    <text x={x} y={y} fill={colour} fontSize={size} fontFamily="var(--at-font-data, monospace)" textAnchor="middle" dominantBaseline="central">
+    <text x={x} y={y} fill={colour} fontSize={size} fontFamily="var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)" textAnchor="middle" dominantBaseline="central">
       {s}
     </text>
   );
@@ -67,7 +67,7 @@ export default function OrbitalSum({ state, aspect }: SceneProps<OrbitalSumState
           {hybrids.flatMap(orbitalLobes).map((d) => d.node)}
           {hybrids.map((o) => {
             const tip = tipOf(o, 1.15);
-            return <Chip key={`c${o.key}`} x={tip.x} y={tip.y} text="sp²" colour="ignite" size={chip} />;
+            return <Chip key={`c${o.key}`} x={tip.x} y={tip.y} text="sp²" colour="orange" size={chip} />;
           })}
         </g>
       ) : (

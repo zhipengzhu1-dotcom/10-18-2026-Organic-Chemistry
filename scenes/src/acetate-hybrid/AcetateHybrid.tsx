@@ -2,7 +2,7 @@
 import type { Structure } from "@astratron/content";
 import { replay, toStructure } from "@astratron/content/arrows";
 import { frameSize, safeArea } from "../frame.ts";
-import { electron, fit, fontData, ink, Placed } from "../lesson-06/draw.tsx";
+import { blue, fit, fontData, ink, Placed } from "../lesson-06/draw.tsx";
 import { lesson6Structures } from "../lesson-06/structures.ts";
 import { easeInOut, progress } from "../motion.ts";
 import { drawContributors } from "../structure/contributors.ts";
@@ -71,11 +71,11 @@ export default function AcetateHybrid({ t, state, aspect, reducedMotion, cited }
                   strokeWidth={one.s * 2}
                   strokeDasharray={`${one.s * 5} ${one.s * 5}`}
                 />
-                <text x={delta.x} y={delta.y} textAnchor="middle" dominantBaseline="central" fill={electron} fontSize={unitSize * 0.045} style={{ fontFamily: fontData }}>
+                <text x={delta.x} y={delta.y} textAnchor="middle" dominantBaseline="central" fill={blue} fontSize={unitSize * 0.045} style={{ fontFamily: fontData }}>
                   δ−
                 </text>
                 {cited[ref] && (
-                  <text x={label.x} y={label.y} textAnchor="middle" dominantBaseline="central" fill={electron} opacity={labels} fontSize={unitSize * 0.04} style={{ fontFamily: fontData }}>
+                  <text x={label.x} y={label.y} textAnchor="middle" dominantBaseline="central" fill={blue} opacity={labels} fontSize={unitSize * 0.04} style={{ fontFamily: fontData }}>
                     {cited[ref].display}
                   </text>
                 )}

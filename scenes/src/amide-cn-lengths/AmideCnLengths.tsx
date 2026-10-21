@@ -1,5 +1,5 @@
 // amide-cn-lengths: a pure function of (t, state); see manifest.ts.
-import { DATA_FONT, ELECTRON, INK, MUTED, Molecule, TEXT_FONT, drawn, place, sharedScale } from "../contributors/draw.tsx";
+import { DATA_FONT, BLUE, HAND_FONT, INK, MUTED, Molecule, TEXT_FONT, drawn, place, sharedScale } from "../contributors/draw.tsx";
 import { acetamide, methanimine, methylamine } from "../contributors/structures.ts";
 import { frameSize, type Box } from "../frame.ts";
 import { easeOut, progress } from "../motion.ts";
@@ -59,7 +59,7 @@ export default function AmideCnLengths({ t, state, aspect, cited }: SceneProps<A
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%" aria-hidden="true" style={{ display: "block" }}>
-      <text x={title.x} y={title.y} fontSize={font * 1.1} textAnchor="middle" fill={INK} fontFamily={TEXT_FONT} fontWeight={700}>
+      <text x={title.x} y={title.y} fontSize={font * 1.2} textAnchor="middle" fill={INK} fontFamily={HAND_FONT}>
         {shown ? "C–N bond lengths, computed" : "Three C–N bonds"}
       </text>
       {panels.map((p, i) => {
@@ -71,12 +71,12 @@ export default function AmideCnLengths({ t, state, aspect, cited }: SceneProps<A
         return (
           <g key={p.id} opacity={appear}>
             <Molecule placed={place(DRAWINGS[p.id], p.box, scale)} glow={[CN[p.id]]} />
-            <text x={p.label.x} y={line(0)} fontSize={font} textAnchor={p.label.anchor} fill={INK} fontFamily={TEXT_FONT} fontWeight={700}>
+            <text x={p.label.x} y={line(0)} fontSize={font * 1.1} textAnchor={p.label.anchor} fill={INK} fontFamily={HAND_FONT}>
               {name}
             </text>
             {shown && label > 0 && (
             <g opacity={label}>
-              <text x={p.label.x} y={line(1)} fontSize={font} textAnchor={p.label.anchor} fill={ELECTRON} fontFamily={DATA_FONT}>
+              <text x={p.label.x} y={line(1)} fontSize={font} textAnchor={p.label.anchor} fill={BLUE} fontFamily={DATA_FONT}>
                 {`${value?.label ?? "C–N"} ${value?.display ?? ""}`}
               </text>
               <text x={p.label.x} y={line(2)} fontSize={font * 0.75} textAnchor={p.label.anchor} fill={MUTED} fontFamily={TEXT_FONT}>

@@ -20,7 +20,27 @@ describe("what Blender is given for a share image (only the pipeline's data)", (
     expect(water.bonds).toHaveLength(2);
     // Turned and placed as a whole: the cited O–H length (0.958 Å) survives.
     expect(distance(water.atoms[0], water.atoms[1])).toBeCloseTo(0.958, 3);
-    expect(props.text).toContainEqual(expect.objectContaining({ text: "AstraTron", font: "pixel", colour: "#ff9a1f" }));
+    expect(props.text).toContainEqual(expect.objectContaining({ text: "AstraTron", font: "script", colour: "#1d1b26" }));
+  });
+
+  it("the wordmark is in Kaushan Script, 40 px and up, on both images", () => {
+    for (const name of ["share-site", "share-unit-1"] as const) {
+      const props = blenderProps(name);
+      expect(props.fonts.script).toBe("pipelines/blender/fonts/KaushanScript-Regular.ttf");
+      const wordmark = props.text.find((t) => t.text === "AstraTron")!;
+      expect(wordmark.font).toBe("script");
+      expect(wordmark.size).toBeGreaterThanOrEqual(40);
+      expect(props.text.filter((t) => t.font === "script")).toHaveLength(1); // the script face is a signature: one use
+    }
+  });
+
+  it("the ground is ruled paper with doodles, not the Arcade nebula", () => {
+    const props = blenderProps("share-site");
+    expect(props.palette["at-paper"]).toBe("#ffffff");
+    expect(props.paper).toEqual({ rule: 32, margin: 64 });
+    expect(props.doodles.length).toBeGreaterThan(0);
+    for (const d of props.doodles) expect(d.path).toMatch(/^scenes\/manim\/doodles\/(flask|tubes|benzene|atom|sprig|beaker)\.svg$/);
+    expect(Object.keys(props.palette).filter((k) => /space|neb|electron|ignite/.test(k))).toEqual([]);
   });
 
   it("the Unit 1 image shows sp3, sp2 and sp carbon and the Unit's title from the course manifest", () => {
@@ -51,7 +71,7 @@ describe("the staleness gate (no Blender needed)", () => {
   let root: string;
   const copy = () => {
     root = mkdtempSync(join(tmpdir(), "blender-check-"));
-    for (const dir of ["content", "pipelines/blender", "site/public/share", "site/public/matcaps", "site/src/styles", "scenes/manim/fonts"])
+    for (const dir of ["content", "pipelines/blender", "site/public/share", "site/public/matcaps", "site/src/styles", "scenes/manim/fonts", "scenes/manim/doodles"])
       cpSync(join(repoRoot, dir), join(root, dir), { recursive: true });
     return root;
   };

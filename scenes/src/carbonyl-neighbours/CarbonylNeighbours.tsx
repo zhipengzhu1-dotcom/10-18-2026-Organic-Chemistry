@@ -1,6 +1,6 @@
 // carbonyl-neighbours: a pure function of t; see manifest.ts.
 import { frameSize, safeArea } from "../frame.ts";
-import { CYAN, FONT_DATA, FONT_TEXT, INK } from "../functional-groups/Molecule.tsx";
+import { BLUE, FONT_DATA, FONT_HAND, INK } from "../functional-groups/Molecule.tsx";
 import { progress } from "../motion.ts";
 import type { SceneProps } from "../types.ts";
 import { HOLD, LADDER_AT, LADDER_FADE, neighbours, type Neighbour } from "./manifest.ts";
@@ -27,22 +27,22 @@ function Carbonyl({ x, y, u, n, nameAt, amount }: { x: number; y: number; u: num
   return (
     <g>
       <line x1={x - DX * u} y1={y + DY * u} x2={x} y2={y} {...stroke} />
-      <line x1={x - off} y1={y} x2={x - off} y2={y - 1.15 * u} {...stroke} stroke={CYAN} />
-      <line x1={x + off} y1={y} x2={x + off} y2={y - 1.15 * u} {...stroke} stroke={CYAN} />
-      {letter(x, y - 1.5 * u, "O", CYAN)}
+      <line x1={x - off} y1={y} x2={x - off} y2={y - 1.15 * u} {...stroke} stroke={BLUE} />
+      <line x1={x + off} y1={y} x2={x + off} y2={y - 1.15 * u} {...stroke} stroke={BLUE} />
+      {letter(x, y - 1.5 * u, "O", BLUE)}
       <g opacity={amount}>
         {n.kind === "C" ? (
-          <line x1={x} y1={y} x2={end.x} y2={end.y} {...stroke} stroke={CYAN} />
+          <line x1={x} y1={y} x2={end.x} y2={end.y} {...stroke} stroke={BLUE} />
         ) : (
-          <line x1={x} y1={y} x2={toLetter.x} y2={toLetter.y} {...stroke} stroke={CYAN} />
+          <line x1={x} y1={y} x2={toLetter.x} y2={toLetter.y} {...stroke} stroke={BLUE} />
         )}
-        {n.kind === "H" && letter(end.x + u * 0.1, end.y, "H", CYAN)}
-        {n.kind === "OH" && letter(end.x - u * 0.2, end.y, "OH", CYAN, "start")}
-        {n.kind === "N" && letter(end.x - u * 0.2, end.y, "NH₂", CYAN, "start")}
+        {n.kind === "H" && letter(end.x + u * 0.1, end.y, "H", BLUE)}
+        {n.kind === "OH" && letter(end.x - u * 0.2, end.y, "OH", BLUE, "start")}
+        {n.kind === "N" && letter(end.x - u * 0.2, end.y, "NH₂", BLUE, "start")}
         {n.kind === "OC" && (
           <>
-            {letter(end.x, end.y, "O", CYAN)}
-            <line x1={end.x + DX * u * trim} y1={end.y - DY * u * trim} x2={end.x + DX * u} y2={end.y - DY * u} {...stroke} stroke={CYAN} />
+            {letter(end.x, end.y, "O", BLUE)}
+            <line x1={end.x + DX * u * trim} y1={end.y - DY * u * trim} x2={end.x + DX * u} y2={end.y - DY * u} {...stroke} stroke={BLUE} />
           </>
         )}
         <text
@@ -53,7 +53,7 @@ function Carbonyl({ x, y, u, n, nameAt, amount }: { x: number; y: number; u: num
           fontSize={u * 0.62}
           fontWeight={700}
           fill={INK}
-          fontFamily={FONT_TEXT}
+          fontFamily={FONT_HAND}
         >
           {n.name}
         </text>

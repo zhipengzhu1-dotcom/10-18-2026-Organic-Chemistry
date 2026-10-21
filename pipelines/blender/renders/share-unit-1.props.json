@@ -6,21 +6,48 @@
   "samples": 256,
   "seed": 69,
   "palette": {
-    "at-space": "#0d0626",
-    "at-neb-1": "#ff4fd8",
-    "at-neb-2": "#b44dff",
-    "at-neb-3": "#2340ff",
-    "at-electron": "#3ee8ff",
-    "at-ignite": "#ff9a1f",
-    "at-ink": "#ffffff",
-    "at-ink-muted": "#b9a8e8",
-    "star-core": "#ffe2a8"
+    "at-paper": "#ffffff",
+    "at-rule": "#e3ecfa",
+    "at-margin": "#ffc2dc",
+    "at-ink": "#1d1b26",
+    "at-ink-muted": "#57536b",
+    "at-blue": "#0a64c2",
+    "at-green": "#1d7a3c",
+    "at-pink": "#bd1278",
+    "at-violet": "#5a3fd6",
+    "at-orange": "#a94a00",
+    "at-blue-fill": "#4dabff",
+    "at-green-fill": "#6fd486",
+    "at-pink-fill": "#ff70b8",
+    "at-violet-fill": "#9d8cff",
+    "at-orange-fill": "#ff9548",
+    "at-yellow-fill": "#ffd84d"
   },
   "fonts": {
-    "pixel": "pipelines/blender/fonts/PixelifySans-Regular.woff",
-    "text": "scenes/manim/fonts/SpaceGrotesk-wght.ttf",
+    "script": "pipelines/blender/fonts/KaushanScript-Regular.ttf",
+    "hand": "scenes/manim/fonts/PatrickHand-Regular.ttf",
     "data": "scenes/manim/fonts/JetBrainsMono-wght.ttf"
   },
+  "paper": {
+    "rule": 32,
+    "margin": 64
+  },
+  "doodles": [
+    {
+      "path": "scenes/manim/doodles/tubes.svg",
+      "x": 905,
+      "y": 118,
+      "height": 104,
+      "angle": -5
+    },
+    {
+      "path": "scenes/manim/doodles/atom.svg",
+      "x": 1090,
+      "y": 170,
+      "height": 150,
+      "angle": 10
+    }
+  ],
   "molecules": [
     {
       "id": "methane",
@@ -28,31 +55,31 @@
         {
           "element": "C",
           "x": -4.021739,
-          "y": -1.48913,
+          "y": -1.597826,
           "z": 0
         },
         {
           "element": "H",
           "x": -3.07602,
-          "y": -1.114031,
+          "y": -1.222727,
           "z": 0.382833
         },
         {
           "element": "H",
           "x": -3.880423,
-          "y": -1.86423,
+          "y": -1.972925,
           "z": -1.010433
         },
         {
           "element": "H",
           "x": -4.752806,
-          "y": -0.684728,
+          "y": -0.793423,
           "z": -0.011045
         },
         {
           "element": "H",
           "x": -4.377707,
-          "y": -2.293533,
+          "y": -2.402229,
           "z": 0.638645
         }
       ],
@@ -113,7 +140,7 @@
         ],
         "offset": [
           -4.021739,
-          -1.48913,
+          -1.597826,
           0
         ]
       }
@@ -124,37 +151,37 @@
         {
           "element": "C",
           "x": 0.607687,
-          "y": -1.66241,
+          "y": -1.771105,
           "z": 0.22118
         },
         {
           "element": "C",
           "x": -0.607687,
-          "y": -1.315851,
+          "y": -1.424547,
           "z": -0.22118
         },
         {
           "element": "H",
           "x": 1.344262,
-          "y": -0.910773,
+          "y": -1.019469,
           "z": 0.489272
         },
         {
           "element": "H",
           "x": 0.892426,
-          "y": -2.70527,
+          "y": -2.813966,
           "z": 0.324817
         },
         {
           "element": "H",
           "x": -0.892426,
-          "y": -0.272991,
+          "y": -0.381687,
           "z": -0.324817
         },
         {
           "element": "H",
           "x": -1.344262,
-          "y": -2.067488,
+          "y": -2.176184,
           "z": -0.489272
         }
       ],
@@ -220,7 +247,7 @@
         ],
         "offset": [
           0,
-          -1.48913,
+          -1.597826,
           0
         ]
       }
@@ -231,25 +258,25 @@
         {
           "element": "C",
           "x": 4.567523,
-          "y": -1.644758,
+          "y": -1.753454,
           "z": 0.198649
         },
         {
           "element": "C",
           "x": 3.475955,
-          "y": -1.333503,
+          "y": -1.442198,
           "z": -0.198649
         },
         {
           "element": "H",
           "x": 5.532471,
-          "y": -1.919909,
+          "y": -2.028605,
           "z": 0.549861
         },
         {
           "element": "H",
           "x": 2.511008,
-          "y": -1.058352,
+          "y": -1.167048,
           "z": -0.549861
         }
       ],
@@ -305,7 +332,7 @@
         ],
         "offset": [
           4.021739,
-          -1.48913,
+          -1.597826,
           0
         ]
       }
@@ -315,27 +342,27 @@
   "text": [
     {
       "text": "AstraTron",
-      "font": "pixel",
-      "size": 48,
-      "x": 72,
-      "y": 100,
-      "colour": "#ff9a1f"
+      "font": "script",
+      "size": 56,
+      "x": 96,
+      "y": 92,
+      "colour": "#1d1b26"
     },
     {
       "text": "Unit 1",
       "font": "data",
       "size": 44,
-      "x": 72,
-      "y": 196,
-      "colour": "#3ee8ff"
+      "x": 96,
+      "y": 178,
+      "colour": "#0a64c2"
     },
     {
       "text": "Structure & Bonding",
-      "font": "text",
-      "size": 76,
-      "x": 70,
-      "y": 286,
-      "colour": "#ffffff"
+      "font": "hand",
+      "size": 84,
+      "x": 94,
+      "y": 266,
+      "colour": "#1d1b26"
     }
   ]
 }

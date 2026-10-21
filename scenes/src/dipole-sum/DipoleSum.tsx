@@ -4,7 +4,7 @@
 // with "net: zero".
 import { arrowShape, type Vec3 } from "@astratron/content/molecule";
 import { frameSize, safeArea, type Box } from "../frame.ts";
-import { CYAN, DATA_FONT, INK, MAGENTA, MUTED, LINE } from "../lewis.ts";
+import { BLUE, DATA_FONT, INK, PINK, MUTED, LINE } from "../lewis.ts";
 import { clamp, easeInOut, progress } from "../motion.ts";
 import type { SceneProps } from "../types.ts";
 import { sceneView } from "../shapes-3d/shapes.ts";
@@ -124,18 +124,18 @@ export default function DipoleSum({ t, state, aspect, reducedMotion, cited }: Sc
             </text>
             <ShapeView shape={s.shape} view={view} cx={cx} cy={cy} px={px} cited={cited} font={font * 0.8} id={`ds-${key}`} />
             {bondFrom.map((from, k) => (
-              <Arrow key={`d-${k}`} from={between(from, chainFrom[k])} to={between(bondTo[k], chainTo[k])} width={arrowW} colour={CYAN} cross />
+              <Arrow key={`d-${k}`} from={between(from, chainFrom[k])} to={between(bondTo[k], chainTo[k])} width={arrowW} colour={BLUE} cross />
             ))}
             {done &&
               (s.net.zero ? (
                 <g>
-                  <circle cx={netFrom.x} cy={netFrom.y} r={px * 0.35} fill="none" stroke={MAGENTA} strokeWidth={arrowW} strokeDasharray="12 8" />
-                  <text x={cx} y={box.y + box.h - font * 2.1} fill={MAGENTA} fontSize={font * 0.85} fontWeight={700} textAnchor="middle" dominantBaseline="central">
+                  <circle cx={netFrom.x} cy={netFrom.y} r={px * 0.35} fill="none" stroke={PINK} strokeWidth={arrowW} strokeDasharray="12 8" />
+                  <text x={cx} y={box.y + box.h - font * 2.1} fill={PINK} fontSize={font * 0.85} fontWeight={700} textAnchor="middle" dominantBaseline="central">
                     net: zero
                   </text>
                 </g>
               ) : (
-                <Arrow from={netFrom} to={netTo} width={arrowW * 2.2} colour={MAGENTA} cross={false} />
+                <Arrow from={netFrom} to={netTo} width={arrowW * 2.2} colour={PINK} cross={false} />
               ))}
             {done && (
               <text x={cx} y={box.y + box.h - font * 1.0} fill={INK} fontSize={font * 0.9} fontWeight={700} textAnchor="middle" dominantBaseline="central">

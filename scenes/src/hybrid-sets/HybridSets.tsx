@@ -33,8 +33,8 @@ function setDrawing(set: HybridSet, box: Box, carbon: string, captionSize: numbe
   const chip = Math.max(26, scale * 0.16);
   const { hybrids, p } = hybridDirections(set);
   const orbitals: OrbitalAt[] = [
-    ...hybrids.map((axis, i) => ({ kind: set, axis, colour: "ignite" as const, x, y, scale, turn, key: `${set}h${i}` })),
-    ...p.map((axis, i) => ({ kind: "p" as const, axis, colour: "electron" as const, x, y, scale, turn, key: `${set}p${i}` })),
+    ...hybrids.map((axis, i) => ({ kind: set, axis, colour: "orange" as const, x, y, scale, turn, key: `${set}h${i}` })),
+    ...p.map((axis, i) => ({ kind: "p" as const, axis, colour: "blue" as const, x, y, scale, turn, key: `${set}p${i}` })),
   ];
   const drawables: Drawable[] = orbitals.flatMap(orbitalLobes);
   if (set === "sp2") {
@@ -72,7 +72,7 @@ function setDrawing(set: HybridSet, box: Box, carbon: string, captionSize: numbe
         const tip = tipOf(o, o.kind === "p" ? 1.18 : 1.1);
         return <Chip key={`chip${o.key}`} x={tip.x} y={tip.y} text={o.kind === "p" ? "2p" : SUP[set]} colour={o.colour} size={chip} />;
       })}
-      <text x={x} y={box.y + box.h * 0.95} fill={ink("ink")} fontSize={captionSize} fontFamily="var(--at-font-data, monospace)" textAnchor="middle" dominantBaseline="central">
+      <text x={x} y={box.y + box.h * 0.95} fill={ink("ink")} fontSize={captionSize} fontFamily="var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)" textAnchor="middle" dominantBaseline="central">
         {`${SUP[set]} · model: ${degrees(modelAngle(set))}°`}
       </text>
     </g>
@@ -90,8 +90,8 @@ function unmixedDrawing(box: Box, carbon: string) {
     [0, 1, 0],
     [0, 0, 1],
   ];
-  const ps: OrbitalAt[] = axes.map((axis, i) => ({ kind: "p", axis, colour: "electron", x, y, scale, turn, key: `p${i}` }));
-  const s: OrbitalAt = { kind: "s", axis: [1, 0, 0], colour: "electron", x, y, scale, turn, key: "s" };
+  const ps: OrbitalAt[] = axes.map((axis, i) => ({ kind: "p", axis, colour: "blue", x, y, scale, turn, key: `p${i}` }));
+  const s: OrbitalAt = { kind: "s", axis: [1, 0, 0], colour: "blue", x, y, scale, turn, key: "s" };
   // The round 2s sits behind the dumbbells, faint, so all three p orbitals show through it.
   const sphere = orbitalLobes(s).map((d) => ({ ...d, z: -10, node: <g key={d.key} opacity={0.4}>{d.node}</g> }));
   const drawables = [...sphere, ...ps.flatMap(orbitalLobes), { z: 0.01, key: "C", node: <Carbon key="C" x={x} y={y} r={scale * 0.1} colour={carbon} /> }].sort(
@@ -101,11 +101,11 @@ function unmixedDrawing(box: Box, carbon: string) {
   return (
     <g data-set="unmixed">
       {drawables.map((d) => d.node)}
-      <line x1={x - sReach * 0.7} y1={y + sReach * 0.7} x2={x - scale * 0.95} y2={y + scale * 0.85} stroke={ink("electron")} strokeWidth={3} />
-      <Chip x={x - scale * 1.05} y={y + scale * 0.92} text="2s" colour="electron" size={chip} />
+      <line x1={x - sReach * 0.7} y1={y + sReach * 0.7} x2={x - scale * 0.95} y2={y + scale * 0.85} stroke={ink("blue")} strokeWidth={3} />
+      <Chip x={x - scale * 1.05} y={y + scale * 0.92} text="2s" colour="blue" size={chip} />
       {ps.map((o) => {
         const tip = tipOf(o, 1.18);
-        return <Chip key={`chip${o.key}`} x={tip.x} y={tip.y} text="2p" colour="electron" size={chip} />;
+        return <Chip key={`chip${o.key}`} x={tip.x} y={tip.y} text="2p" colour="blue" size={chip} />;
       })}
     </g>
   );

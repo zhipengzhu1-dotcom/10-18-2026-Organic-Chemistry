@@ -114,7 +114,7 @@ describe("build-by-sharing drawing", () => {
     expect(live).toContain('aria-label="Carbon&#x27;s single dot, top"');
   });
 
-  it("every shared pair is two cyan dots: methane has eight dots around carbon", () => {
+  it("every shared pair is two blue dots: methane has eight dots around carbon", () => {
     expect(draw(methane).match(/class="e"/g)).toHaveLength(8);
     expect(draw({ ...pieces, joined: "yes" }, undefined, "9:16").match(/class="e"/g)).toHaveLength(14);
   });

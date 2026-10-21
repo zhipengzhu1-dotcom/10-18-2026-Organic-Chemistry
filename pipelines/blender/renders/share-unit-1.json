@@ -2,14 +2,16 @@
   "render": "share-unit-1",
   "blender": "5.2.2 LTS",
   "inputs": {
-    "pipelines/blender/share_images.py": "3d58038d16c1d68b3e30cd0ef541239deac6b7b3873548ca2d4d9a4eae180fbb",
+    "pipelines/blender/share_images.py": "7c44396e21cd2abf2204d3de7b4ada43281c9e86f352f4b53e25bf67ca50d9bf",
     "pipelines/blender/molecule_import.py": "47a3f6f680ecbca80c95d6e46c6325b63d918370b37439b9454f911f0ba1c9a2",
-    "pipelines/blender/fonts/PixelifySans-Regular.woff": "60603c6e85cc8ba29a235657dfc0ff9012bae9adcdbc40cd9056a8cb68a9864c",
-    "scenes/manim/fonts/SpaceGrotesk-wght.ttf": "acad6de1fc93436f5c0f1f4137751ef04f1aea3063e7036535970ffcfbd79f72",
+    "pipelines/blender/fonts/KaushanScript-Regular.ttf": "6d8d379d9bba98178bee476d68114c8f83812c18005ecccf679e70f60e03d8f6",
+    "scenes/manim/fonts/PatrickHand-Regular.ttf": "0f173b3e6cb6d1af25babf7f0057c5ac4ee11f9992b0469bb817e967ef4ad0fc",
     "scenes/manim/fonts/JetBrainsMono-wght.ttf": "48715a42ec242c21e9f02692891e147d022299a52e48d5e413e1a942193ffeda",
-    "pipelines/blender/renders/share-unit-1.props.json": "d0eb08cebc9b25978706ff6af0a36d2091e86d7980e3f507601a34d6aa2aabac"
+    "scenes/manim/doodles/atom.svg": "4f55f7f1fff6505e7246c81ed25e7bd8f11e59db5315685b3e5b894c20327be8",
+    "scenes/manim/doodles/tubes.svg": "8cdd41283e37c46ffc056b05109cd576e091909b91e995bcf5c42d000ca9a465",
+    "pipelines/blender/renders/share-unit-1.props.json": "bdb271c2ba4c297b0675def7c51cd714b7034e1a6d2c99e488c4c96d86af8db9"
   },
   "outputs": {
-    "site/public/share/unit-1.webp": "b8c98abcfbc1f5a54b838d5d9d52ba3c2c20ff90542f290ab943b57297cb2499"
+    "site/public/share/unit-1.webp": "640a3a1086da88d9eaa0f6f9a65455269c82181bfb08bca4fdbde6b7663f9b6c"
   }
 }

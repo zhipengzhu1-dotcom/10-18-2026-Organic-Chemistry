@@ -1,7 +1,7 @@
 // The Manim render pipeline for watch-only Scenes (#66): the renderer is fed
 // from the cited-data lookup, every render writes a sources sidecar, and the
 // committed outputs are checked against their inputs without running Manim.
-import { cpSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -27,8 +27,43 @@ describe("Manim render inputs", () => {
       values: { "nuclides/He-4.Z": 2, "nuclides/He-4.A": 4, "nuclides/C-12.Z": 6, "nuclides/C-12.A": 12 },
       text: { card: ["Every carbon atom", "in you was forged", "in a star."] },
     });
-    expect(props.palette["at-space"]).toBe("#0d0626");
     expect(manimProps(starForge, cited, "16:9")).toMatchObject({ aspect: "16x9", width: 1920, height: 1080 });
+  });
+
+  it("draw on Paper Notebook: white paper, pen ink and marker fills from tokens.css, no Arcade colours", () => {
+    const { palette } = manimProps(starForge, cited, "16:9");
+    expect(palette).toMatchObject({
+      "at-paper": "#ffffff",
+      "at-rule": "#e3ecfa",
+      "at-ink": "#1d1b26",
+      "at-blue": "#0a64c2",
+      "at-orange": "#a94a00",
+      "at-blue-fill": "#4dabff",
+      "at-yellow-fill": "#ffd84d",
+    });
+    expect(Object.keys(palette).filter((k) => /space|neb|electron|ignite|boss|star-core/.test(k))).toEqual([]);
+  });
+
+  it("doodles (shared with the Blender share images) are pen ink and marker fills only: token colours, no red", () => {
+    const { palette } = manimProps(starForge, cited, "16:9");
+    const allowed = new Set([palette["at-ink"], ...Object.entries(palette).filter(([k]) => k.endsWith("-fill")).map(([, v]) => v)]);
+    const dir = join(repoRoot, "scenes/manim/doodles");
+    const names = readdirSync(dir).sort();
+    expect(names).toEqual(["atom.svg", "beaker.svg", "benzene.svg", "flask.svg", "sprig.svg", "tubes.svg"]);
+    for (const name of names)
+      for (const [hex] of readFileSync(join(dir, name), "utf8").matchAll(/#[0-9a-fA-F]{6}\b/g)) expect(allowed, `${name} ${hex}`).toContain(hex.toLowerCase());
+  });
+
+  it("follow tokens.css: a changed paper colour reaches the props", () => {
+    const root = mkdtempSync(join(tmpdir(), "watch-tokens-"));
+    try {
+      cpSync(join(repoRoot, "site/src/styles/tokens.css"), join(root, "site/src/styles/tokens.css"));
+      const css = readFileSync(join(root, "site/src/styles/tokens.css"), "utf8");
+      writeFileSync(join(root, "site/src/styles/tokens.css"), css.replace("--at-paper: #ffffff", "--at-paper: #fffdf5"));
+      expect(manimProps(starForge, cited, "16:9", root).palette["at-paper"]).toBe("#fffdf5");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });
 
@@ -81,6 +116,21 @@ describe("committed renders", () => {
       ]);
     } finally {
       rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("flag a render when the shared paper drawing (paper.py, a doodle) changes", () => {
+    for (const file of ["paper.py", "doodles/flask.svg"]) {
+      const root = mkdtempSync(join(tmpdir(), "watch-renders-"));
+      try {
+        for (const dir of ["scenes/manim", "site/public/scenes/star-forge", "site/src/styles/tokens.css"]) cpSync(join(repoRoot, dir), join(root, dir), { recursive: true });
+        writeFileSync(join(root, "scenes/manim", file), "\n", { flag: "a" });
+        expect(checkWatchRenders([starForge], organic.data, root)).toEqual([
+          "scenes/star-forge: its inputs changed since the committed render; run `pnpm scenes:render star-forge`",
+        ]);
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
     }
   });
 });

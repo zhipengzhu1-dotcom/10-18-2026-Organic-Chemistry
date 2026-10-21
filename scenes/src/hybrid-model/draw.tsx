@@ -1,23 +1,28 @@
 // Drawing Lesson 4's model orbitals in SVG (#82), shared by its "model" Scenes. Colour says what
-// an orbital is (orange: hybrids and σ; cyan: p and π), the pattern says its sign (+ solid,
+// an orbital is (orange: hybrids and σ; blue: p and π), the pattern says its sign (+ solid,
 // − hatched), and a chip names it, so nothing is colour alone (Lesson 4's orbital drawing rule).
+// On paper (#123) a lobe is a marker fill inside its pen line, and the − hatching is in pen.
 import type { ReactElement } from "react";
 import { flatOutline, lobeProfile, project, silhouette, type OrbitalKind, type Sign, type Vec3, type ViewTurn } from "./model.ts";
 
-export type Ink = "ignite" | "electron";
+export type Ink = "orange" | "blue";
 
-export const ink = (which: Ink | "ink" | "muted" | "line" | "surface") =>
+/** Pen inks (lines, text) by role. */
+export const ink = (which: Ink | "ink" | "muted" | "line" | "paper") =>
   ({
-    ignite: "var(--at-orange, #a94a00)",
-    electron: "var(--at-blue, #0a64c2)",
+    orange: "var(--at-orange, #a94a00)",
+    blue: "var(--at-blue, #0a64c2)",
     ink: "var(--at-ink, #1d1b26)",
     muted: "var(--at-ink-muted, #57536b)",
     line: "var(--at-ink-muted, #57536b)",
-    surface: "var(--at-paper, #ffffff)",
+    paper: "var(--at-paper, #ffffff)",
   })[which];
 
-/** How opaque a lobe's inside is: solid (+), hatched (− , under its stripes) and empty. */
-const BODY = { solid: 0.5, hatched: 0.1, empty: 0 } as const;
+/** The marker fill inside each orbital colour's pen line. */
+export const fill = (which: Ink) => ({ orange: "var(--at-orange-fill, #ff9548)", blue: "var(--at-blue-fill, #4dabff)" })[which];
+
+/** How opaque a lobe's marker fill is: solid (+), hatched (− , under its pen stripes) and empty. */
+const BODY = { solid: 0.75, hatched: 0.3, empty: 0 } as const;
 
 /**
  * What every model Scene puts once in its <defs>: the stripes the − lobes are hatched with (a
@@ -35,7 +40,7 @@ export function OrbitalDefs({ scale = 1 }: { scale?: number }) {
       <mask id="hatch-mask" maskUnits="userSpaceOnUse" x={0} y={0} width={4000} height={4000}>
         <rect width={4000} height={4000} fill="url(#hatch-stripes)" />
       </mask>
-      {(["ignite", "electron"] as const).flatMap((c) =>
+      {(["orange", "blue"] as const).flatMap((c) =>
         (Object.keys(BODY) as (keyof typeof BODY)[]).map((look) => (
           <filter key={`${c}-${look}`} id={`lobe-${c}-${look}`} x="-10%" y="-10%" width="120%" height="120%">
             <feComponentTransfer in="SourceAlpha" result="shape">
@@ -93,26 +98,27 @@ function lobe(o: OrbitalAt, sign: Sign): Drawable | null {
   const axis = project(o.axis, o.turn);
   const sections = silhouette(profile, axis);
   const look = o.empty ? "empty" : sign === "+" ? "solid" : "hatched";
-  const ellipses = sections.map((s, i) => (
-    <ellipse
-      key={i}
-      cx={o.x + s.cx * o.scale}
-      cy={o.y - s.cy * o.scale}
-      rx={Math.max(0.5, s.rx * o.scale)}
-      ry={Math.max(0.5, s.ry * o.scale)}
-      transform={`rotate(${-s.rotate} ${o.x + s.cx * o.scale} ${o.y - s.cy * o.scale})`}
-      fill={ink(o.colour)}
-    />
-  ));
-  ellipses.push(
+  /** The lobe's union of cross-sections, painted `paint`: the marker fill for its body, the pen ink for its − stripes. */
+  const shapes = (paint: string) => [
+    ...sections.map((s, i) => (
+      <ellipse
+        key={i}
+        cx={o.x + s.cx * o.scale}
+        cy={o.y - s.cy * o.scale}
+        rx={Math.max(0.5, s.rx * o.scale)}
+        ry={Math.max(0.5, s.ry * o.scale)}
+        transform={`rotate(${-s.rotate} ${o.x + s.cx * o.scale} ${o.y - s.cy * o.scale})`}
+        fill={paint}
+      />
+    )),
     <polygon
       key="flat"
       points={flatOutline(profile, axis)
         .map(([px, py]) => `${o.x + px * o.scale},${o.y - py * o.scale}`)
         .join(" ")}
-      fill={ink(o.colour)}
+      fill={paint}
     />,
-  );
+  ];
   // Depth of the lobe's middle: the + lobe lies along +axis, the − lobe along −axis.
   const z = axis[2] * (sign === "+" ? 1 : -1) * profile.reach * 0.5;
   return {
@@ -120,10 +126,10 @@ function lobe(o: OrbitalAt, sign: Sign): Drawable | null {
     key: `${o.key}${sign}`,
     node: (
       <g key={`${o.key}${sign}`} data-lobe={look} opacity={o.dim ? 0.3 : 1}>
-        <g filter={`url(#lobe-${o.colour}-${look})`}>{ellipses}</g>
+        <g filter={`url(#lobe-${o.colour}-${look})`}>{shapes(fill(o.colour))}</g>
         {look === "hatched" && (
           <g mask="url(#hatch-mask)" opacity={0.75}>
-            {ellipses}
+            {shapes(ink(o.colour))}
           </g>
         )}
       </g>
@@ -143,13 +149,13 @@ export function tipOf(o: OrbitalAt, beyond = 1.12): { x: number; y: number; z: n
   return { x: o.x + a[0] * reach * o.scale, y: o.y - a[1] * reach * o.scale, z: a[2] };
 }
 
-/** A chip naming an orbital ("sp³", "2p", "σ"): text on a dark plate, drawn on top. */
+/** A chip naming an orbital ("sp³", "2p", "σ"): pen text on a paper plate, drawn on top. */
 export function Chip({ x, y, text, colour, size }: { x: number; y: number; text: string; colour: Ink | "ink"; size: number }) {
   const w = Math.max(text.length, 2) * size * 0.62 + size * 0.7;
   return (
     <g className="orbital-chip">
-      <rect x={x - w / 2} y={y - size * 0.75} width={w} height={size * 1.5} fill={ink("surface")} stroke={ink(colour)} strokeWidth={size * 0.08} />
-      <text x={x} y={y} fill={ink(colour)} fontSize={size} fontFamily="var(--at-font-data, monospace)" textAnchor="middle" dominantBaseline="central">
+      <rect x={x - w / 2} y={y - size * 0.75} width={w} height={size * 1.5} fill={ink("paper")} stroke={ink(colour)} strokeWidth={size * 0.08} />
+      <text x={x} y={y} fill={ink(colour)} fontSize={size} fontFamily="var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)" textAnchor="middle" dominantBaseline="central">
         {text}
       </text>
     </g>
@@ -161,7 +167,7 @@ export function Carbon({ x, y, r, colour }: { x: number; y: number; r: number; c
   return (
     <g>
       <circle cx={x} cy={y} r={r} fill={colour} stroke={ink("ink")} strokeWidth={Math.max(2, r * 0.08)} />
-      <text x={x} y={y} fill="#140f2b" fontSize={r * 1.1} fontWeight={700} textAnchor="middle" dominantBaseline="central">
+      <text x={x} y={y} fill={ink("ink")} fontSize={r * 1.1} fontWeight={700} textAnchor="middle" dominantBaseline="central">
         C
       </text>
     </g>
@@ -174,7 +180,7 @@ export function ModelTag({ x, y, size, text = "model" }: { x: number; y: number;
   return (
     <g className="honesty-label">
       <rect x={x} y={y} width={w} height={size * 1.6} fill="none" stroke={ink("muted")} strokeWidth={size * 0.08} strokeDasharray={`${size * 0.3} ${size * 0.2}`} />
-      <text x={x + w / 2} y={y + size * 0.8} fill={ink("muted")} fontSize={size} fontFamily="var(--at-font-data, monospace)" textAnchor="middle" dominantBaseline="central">
+      <text x={x + w / 2} y={y + size * 0.8} fill={ink("muted")} fontSize={size} fontFamily="var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)" textAnchor="middle" dominantBaseline="central">
         {text}
       </text>
     </g>

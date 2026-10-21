@@ -3,7 +3,7 @@ import { frameSize, safeArea, type Box } from "../frame.ts";
 import { pulse } from "../motion.ts";
 import type { SceneProps } from "../types.ts";
 import { VALENCE } from "@astratron/content/valence";
-import { CYAN, DATA_FONT, INK, MAGENTA, MUTED, fit } from "../lewis.ts";
+import { BLUE, DATA_FONT, INK, PINK, MUTED, fit } from "../lewis.ts";
 import { Embedded } from "../embed.tsx";
 import { drawStructure } from "../structure/render.ts";
 import { bf3, timing } from "./manifest.ts";
@@ -52,7 +52,7 @@ export default function Bf3Sextet({ t, aspect, reducedMotion }: SceneProps<Recor
             y1={y + s.y1 * scale}
             x2={x + s.x2 * scale}
             y2={y + s.y2 * scale}
-            stroke={CYAN}
+            stroke={BLUE}
             strokeOpacity={0.35}
             strokeWidth={scale * 14}
             strokeLinecap="round"
@@ -68,11 +68,11 @@ export default function Bf3Sextet({ t, aspect, reducedMotion }: SceneProps<Recor
             height={scale * 16}
             rx={scale * 8}
             fill="none"
-            stroke={MAGENTA}
+            stroke={PINK}
             strokeWidth={scale * 2.5}
             strokeDasharray={`${scale * 5} ${scale * 4}`}
           />
-          <text x={boron.x} y={slotLabelY} fill={MAGENTA} fontSize={font * 0.8} textAnchor="middle" dominantBaseline="central">
+          <text x={boron.x} y={slotLabelY} fill={PINK} fontSize={font * 0.8} textAnchor="middle" dominantBaseline="central">
             room for one more pair
           </text>
         </g>
@@ -80,7 +80,7 @@ export default function Bf3Sextet({ t, aspect, reducedMotion }: SceneProps<Recor
       <text x={textBox.x} y={textBox.y + font} fill={MUTED} fontSize={font * 0.75} dominantBaseline="central">
         electrons around B
       </text>
-      <text x={textBox.x} y={textBox.y + font * 2.4} fill={CYAN} fontSize={font * 1.6} fontWeight={700} dominantBaseline="central">
+      <text x={textBox.x} y={textBox.y + font * 2.4} fill={BLUE} fontSize={font * 1.6} fontWeight={700} dominantBaseline="central">
         {counted * 2}
       </text>
       {slot && (

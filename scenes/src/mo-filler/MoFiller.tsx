@@ -2,7 +2,7 @@
 // plays its Scene once, and each + / − redraws at once. Schematic levels, no numbers.
 import { frameSize, safeArea } from "../frame.ts";
 import type { SceneProps } from "../types.ts";
-import { DATA_FONT, HalfArrow, TEXT_FONT, electron, ink, line, muted } from "../dots/dots.tsx";
+import { DATA_FONT, HalfArrow, TEXT_FONT, blue, ink, line, muted } from "../dots/dots.tsx";
 import { COMPARE, H2_PLUS, NAMED, PER_LEVEL, fill, type MoFillerState } from "./manifest.ts";
 
 interface Level {
@@ -121,7 +121,7 @@ export default function MoFiller({ state, aspect }: SceneProps<MoFillerState>) {
         bonding
       </text>
       {named && (
-        <text className="named" x={mid.x} y={area.y + size} fill={electron} fontSize={size * 1.3} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
+        <text className="named" x={mid.x} y={area.y + size} fill={blue} fontSize={size * 1.3} textAnchor="middle" style={{ fontFamily: DATA_FONT }}>
           {named}
         </text>
       )}
