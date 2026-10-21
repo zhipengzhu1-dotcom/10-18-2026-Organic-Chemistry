@@ -1,38 +1,36 @@
-/* Arcade Cosmos: the site's one style sheet. Tokens live in tokens.css; this
-   file maps them into Tailwind, sets the base type rules and holds the shared
-   components. See SCRATCH notes 59-design-system.md for how to use them. */
+/* Paper Notebook (spec #117): the site's one style sheet. Tokens live in tokens.css;
+   this file maps them into Tailwind, sets the base type rules and the ruled paper,
+   and holds the shared components. */
 @import "tailwindcss";
-@import "@fontsource-variable/space-grotesk/index.css";
+@import "@fontsource/kaushan-script/latin-400.css";
+@import "@fontsource/patrick-hand/latin-400.css";
+@import "@fontsource-variable/nunito/index.css";
 @import "@fontsource-variable/jetbrains-mono/index.css";
-@import "@fontsource/pixelify-sans/latin-500.css";
-@import "@fontsource/pixelify-sans/latin-700.css";
-@import "@fontsource/silkscreen/latin-400.css";
 @import "./tokens.css";
 
-/* Tailwind reads only our tokens: no default palette (so no red), square
-   corners, our four faces, and no stock animations (they all loop). */
+/* Tailwind reads only our tokens: no default palette (so no red), our four
+   faces, and no stock animations (they all loop). */
 @theme inline {
   --color-*: initial;
-  --color-space: var(--at-space);
-  --color-surface: var(--at-surface);
-  --color-raised: var(--at-raised);
-  --color-line: var(--at-line);
+  --color-paper: var(--at-paper);
   --color-ink: var(--at-ink);
   --color-ink-muted: var(--at-ink-muted);
-  --color-electron: var(--at-electron);
-  --color-ignite: var(--at-ignite);
-  --color-boss: var(--at-boss);
-  --color-shadow: var(--at-shadow);
-  --color-electron-fill: var(--at-electron-fill);
-  --color-ignite-fill: var(--at-ignite-fill);
-  --color-boss-fill: var(--at-boss-fill);
-  --color-on-fill: var(--at-on-fill);
-  --color-fill-edge: var(--at-fill-edge);
+  --color-blue: var(--at-blue);
+  --color-green: var(--at-green);
+  --color-pink: var(--at-pink);
+  --color-violet: var(--at-violet);
+  --color-orange: var(--at-orange);
+  --color-blue-fill: var(--at-blue-fill);
+  --color-green-fill: var(--at-green-fill);
+  --color-pink-fill: var(--at-pink-fill);
+  --color-violet-fill: var(--at-violet-fill);
+  --color-orange-fill: var(--at-orange-fill);
+  --color-yellow-fill: var(--at-yellow-fill);
   --color-transparent: transparent;
 
   --font-*: initial;
-  --font-pixel: var(--at-font-pixel);
-  --font-label: var(--at-font-label);
+  --font-script: var(--at-font-script);
+  --font-hand: var(--at-font-hand);
   --font-text: var(--at-font-text);
   --font-data: var(--at-font-data);
 
@@ -50,28 +48,46 @@
   html,
   body {
     margin: 0;
-    background: var(--at-space);
+    background: var(--at-paper);
     color: var(--at-ink);
   }
+  /* Ruled paper: faint blue rules every 32 px, and a pink margin line from 640 px up. */
   body {
     font: 400 var(--at-body-size) / 1.5 var(--at-font-text);
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    background-image: repeating-linear-gradient(180deg, transparent 0 31px, var(--at-rule) 31px 32px);
+  }
+  @media (min-width: 640px) {
+    body {
+      background-image:
+        linear-gradient(90deg, transparent 63px, var(--at-margin) 63px, var(--at-margin) 65px, transparent 65px),
+        repeating-linear-gradient(180deg, transparent 0 31px, var(--at-rule) 31px 32px);
+    }
   }
   h1,
   h2,
   h3 {
-    font-family: var(--at-font-text);
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-family: var(--at-font-hand);
+    font-weight: 400;
     line-height: 1.15;
   }
+  /* Hand is 18px and up: an unsized heading never falls back to the 17px body size. */
+  h1 {
+    font-size: 30px;
+  }
+  h2 {
+    font-size: 22px;
+  }
+  h3 {
+    font-size: 19px;
+  }
   a {
-    color: var(--at-electron);
+    color: var(--at-blue);
     text-underline-offset: 3px;
   }
   :focus-visible {
-    outline: 3px solid var(--at-electron);
+    outline: 3px solid var(--at-blue);
     outline-offset: 3px;
   }
   /* Element symbols, formulas and numbers: md() wraps them in .data; code too. */
@@ -99,16 +115,14 @@
     padding: 24px var(--at-gutter) 48px;
   }
 
-  /* Wordmark: Pixelify at 32px and up only. */
+  /* Wordmark: brush script, 40px and up only. */
   .wordmark {
-    font: 700 32px/1 var(--at-font-pixel);
-    letter-spacing: 0.04em;
-    color: var(--at-ignite);
-    text-shadow: 2px 2px 0 var(--at-shadow);
+    font: 400 40px/1 var(--at-font-script);
+    color: var(--at-ink);
   }
-  /* Fixed UI words: Silkscreen, 16px, uppercase, nowhere else. */
+  /* Fixed UI words: hand, 18px and up. */
   .label {
-    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    font: 400 var(--at-label-size) / 1 var(--at-font-hand);
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
@@ -122,12 +136,12 @@
     min-height: var(--at-tap);
     min-width: var(--at-tap);
     padding: 12px 20px;
-    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    font: 400 var(--at-label-size) / 1 var(--at-font-hand);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     text-decoration: none;
     cursor: pointer;
-    border: var(--at-border) solid var(--at-fill-edge);
+    border: var(--at-border) solid var(--at-ink);
     box-shadow: var(--at-drop);
     transition:
       transform var(--at-dur-press) linear,
@@ -135,32 +149,32 @@
   }
   .btn:active:not(:disabled) {
     transform: translate(5px, 5px);
-    box-shadow: 0 0 0 var(--at-shadow);
+    box-shadow: 0 0 0 var(--at-ink);
   }
   .btn-primary {
-    background: var(--at-ignite-fill);
-    color: var(--at-on-fill);
+    background: var(--at-orange-fill);
+    color: var(--at-ink);
   }
   .btn-electron {
-    background: var(--at-electron-fill);
-    color: var(--at-on-fill);
+    background: var(--at-blue-fill);
+    color: var(--at-ink);
   }
   .btn-boss {
-    background: var(--at-boss-fill);
-    color: var(--at-on-fill);
+    background: var(--at-pink-fill);
+    color: var(--at-ink);
   }
   .btn-secondary {
     background: transparent;
     color: var(--at-ink);
     border-color: var(--at-ink);
-    box-shadow: 5px 5px 0 var(--at-line);
+    box-shadow: 5px 5px 0 var(--at-ink-muted);
   }
   .btn:disabled,
   .btn[aria-disabled="true"] {
-    background: var(--at-raised);
+    background: var(--at-paper);
     color: var(--at-ink-muted);
     box-shadow: none;
-    border: var(--at-border) dashed var(--at-line);
+    border: var(--at-border) dashed var(--at-ink-muted);
     cursor: not-allowed;
   }
   .btn-block {
@@ -171,7 +185,7 @@
   /* Toggles: segmented (pick one of few) and switch (on/off). */
   .seg {
     display: inline-flex;
-    border: var(--at-border) solid var(--at-line);
+    border: var(--at-border) solid var(--at-ink-muted);
     padding: 2px;
     gap: 2px;
   }
@@ -179,14 +193,14 @@
     min-height: var(--at-tap);
     min-width: var(--at-tap);
     padding: 0 14px;
-    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    font: 400 var(--at-label-size) / 1 var(--at-font-hand);
     text-transform: uppercase;
     color: var(--at-ink-muted);
     cursor: pointer;
   }
   .seg button[aria-pressed="true"] {
-    background: var(--at-electron-fill);
-    color: var(--at-on-fill);
+    background: var(--at-blue-fill);
+    color: var(--at-ink);
   }
   .switch {
     display: inline-flex;
@@ -205,8 +219,8 @@
     content: "";
     position: absolute;
     inset: 10px 0;
-    border: var(--at-border) solid var(--at-line);
-    background: var(--at-surface);
+    border: var(--at-border) solid var(--at-ink-muted);
+    background: var(--at-paper);
   }
   .switch [role="switch"]::after {
     content: "";
@@ -219,11 +233,11 @@
     transition: left var(--at-dur-ui) var(--at-ease-pixel);
   }
   .switch [role="switch"][aria-checked="true"]::before {
-    border-color: var(--at-electron);
+    border-color: var(--at-blue);
   }
   .switch [role="switch"][aria-checked="true"]::after {
     left: 33px;
-    background: var(--at-electron-fill);
+    background: var(--at-blue-fill);
   }
 
   /* Story bars: one motif for story cards and the Step player. */
@@ -243,7 +257,7 @@
     background: var(--at-ink);
   }
   .bars li.cur {
-    background: var(--at-ignite-fill);
+    background: var(--at-orange-fill);
   }
 
   /* Step player: full screen, single focus, no site chrome. Nothing loops here. */
@@ -251,7 +265,7 @@
     height: 100dvh;
     display: flex;
     flex-direction: column;
-    background: var(--at-space);
+    background: var(--at-paper);
   }
   .player-top {
     display: grid;
@@ -272,7 +286,7 @@
     font: 700 22px/1 var(--at-font-text);
     color: var(--at-ink);
     text-decoration: none;
-    border: var(--at-border) solid var(--at-line);
+    border: var(--at-border) solid var(--at-ink-muted);
   }
   .player-back {
     cursor: pointer;
@@ -402,7 +416,7 @@
   }
   .card .streak-tick {
     margin-top: 8px;
-    color: var(--at-electron);
+    color: var(--at-blue);
   }
   .player-count {
     font: 400 16px/1 var(--at-font-data);
@@ -449,8 +463,8 @@
   }
   .player-foot {
     padding: 12px var(--at-gutter) calc(16px + env(safe-area-inset-bottom));
-    border-top: var(--at-border) solid var(--at-line);
-    background: var(--at-space);
+    border-top: var(--at-border) solid var(--at-ink-muted);
+    background: var(--at-paper);
   }
   .player-foot > * {
     max-width: 640px;
@@ -469,18 +483,18 @@
     text-align: left;
     font: 500 var(--at-body-size) / 1.35 var(--at-font-text);
     color: var(--at-ink);
-    border: var(--at-border) solid var(--at-line);
-    background: var(--at-surface);
-    box-shadow: 3px 3px 0 var(--at-line);
+    border: var(--at-border) solid var(--at-ink-muted);
+    background: var(--at-paper);
+    box-shadow: 3px 3px 0 var(--at-ink-muted);
     cursor: pointer;
     transition:
       transform var(--at-dur-press) linear,
       box-shadow var(--at-dur-press) linear;
   }
   .opt[aria-pressed="true"] {
-    border-color: var(--at-ignite-fill);
+    border-color: var(--at-orange-fill);
     box-shadow: var(--at-drop-sm);
-    outline: 2px solid var(--at-ignite-fill);
+    outline: 2px solid var(--at-orange-fill);
     outline-offset: -6px;
   }
   .opt:disabled {
@@ -497,7 +511,7 @@
     width: 100%;
   }
   .opt.dragging {
-    border-color: var(--at-electron);
+    border-color: var(--at-blue);
     box-shadow: var(--at-drop);
   }
 
@@ -513,8 +527,8 @@
     padding: 0 12px;
     font: 400 20px/1 var(--at-font-data);
     color: var(--at-ink);
-    background: var(--at-surface);
-    border: var(--at-border) solid var(--at-line);
+    background: var(--at-paper);
+    border: var(--at-border) solid var(--at-ink-muted);
   }
   .numeric-box:disabled {
     color: var(--at-ink-muted);
@@ -524,10 +538,10 @@
   }
 
   /* Feedback panel: icon + words, never colour alone, never red, no sound.
-     ✓ solid cyan · ✗ dashed magenta + Hint · → plain border + the answer. */
+     ✓ solid green · ✗ dashed pink + Hint · → plain pen line + the answer. */
   .fb {
     border: var(--at-border-strong) solid;
-    padding: 12px 14px;
+    padding: 10px 14px;
     margin-bottom: 12px;
     display: grid;
     grid-template-columns: 32px 1fr;
@@ -549,35 +563,35 @@
     font-weight: 700;
   }
   .fb-correct {
-    border-color: var(--at-electron);
-    background: color-mix(in srgb, var(--at-electron-fill) 12%, var(--at-space));
+    border-color: var(--at-green);
+    background: color-mix(in srgb, var(--at-green-fill) 12%, var(--at-paper));
   }
   .fb-correct .ic {
-    background: var(--at-electron-fill);
-    color: var(--at-on-fill);
+    background: var(--at-green-fill);
+    color: var(--at-ink);
   }
   .fb-correct strong {
-    color: var(--at-electron);
+    color: var(--at-green);
   }
   .fb-hint {
-    border-color: var(--at-boss);
+    border-color: var(--at-pink);
     border-style: dashed;
-    background: color-mix(in srgb, var(--at-boss-fill) 10%, var(--at-space));
+    background: color-mix(in srgb, var(--at-pink-fill) 10%, var(--at-paper));
   }
   .fb-hint .ic {
-    border: var(--at-border) solid var(--at-boss);
-    color: var(--at-boss);
+    border: var(--at-border) solid var(--at-pink);
+    color: var(--at-pink);
   }
   .fb-hint strong {
-    color: var(--at-boss);
+    color: var(--at-pink);
   }
   .fb-reveal {
     border-color: var(--at-ink-muted);
-    background: var(--at-surface);
+    background: var(--at-paper);
   }
   .fb-reveal .ic {
     background: var(--at-ink-muted);
-    color: var(--at-space);
+    color: var(--at-paper);
   }
 
   /* Source note: one tap away; the numbers inside are data. */
@@ -591,7 +605,7 @@
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--at-ink-muted);
-    border: var(--at-border) dashed var(--at-line);
+    border: var(--at-border) dashed var(--at-ink-muted);
     cursor: pointer;
     list-style: none;
   }
@@ -607,7 +621,7 @@
     padding: 8px 12px;
     font: 400 16px/1.55 var(--at-font-data);
     color: var(--at-ink-muted);
-    border: var(--at-border) dashed var(--at-line);
+    border: var(--at-border) dashed var(--at-ink-muted);
     border-top: 0;
   }
   .source-note strong {
@@ -617,10 +631,10 @@
 
   /* Key idea card at the Wrap */
   .card {
-    border: var(--at-border-strong) solid var(--at-ignite-fill);
+    border: var(--at-border-strong) solid var(--at-orange-fill);
     box-shadow: var(--at-drop);
     padding: 16px;
-    background: var(--at-surface);
+    background: var(--at-paper);
   }
   .card h2 {
     margin: 0 0 6px;
@@ -639,7 +653,7 @@
     display: grid;
     gap: 6px;
     font-size: 20px;
-    color: var(--at-electron);
+    color: var(--at-blue);
   }
 }
 
@@ -667,9 +681,9 @@
   .tile {
     flex: 0 0 min(58vw, 200px);
     scroll-snap-align: start;
-    border: var(--at-border-strong) solid var(--at-line);
-    background: var(--at-surface);
-    box-shadow: 5px 5px 0 var(--at-line);
+    border: var(--at-border-strong) solid var(--at-ink-muted);
+    background: var(--at-paper);
+    box-shadow: 5px 5px 0 var(--at-ink-muted);
   }
   .tile > a,
   .tile > div {
@@ -683,7 +697,7 @@
     text-decoration: none;
   }
   .tile.open {
-    border-color: var(--at-ignite-fill);
+    border-color: var(--at-orange-fill);
     box-shadow: var(--at-drop);
   }
   .tile.soon {
@@ -696,7 +710,7 @@
     color: var(--at-ink-muted);
   }
   .tile.open .tile-number {
-    color: var(--at-ignite);
+    color: var(--at-orange);
   }
   .tile-title {
     font: 700 19px/1.15 var(--at-font-text);
@@ -706,7 +720,7 @@
   }
   .tile-soon {
     margin-top: auto;
-    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    font: 400 var(--at-label-size) / 1 var(--at-font-hand);
     text-transform: uppercase;
     color: var(--at-ink-muted);
   }
@@ -721,7 +735,7 @@
     display: block;
     font: 600 16px/1.2 var(--at-font-data);
     text-transform: uppercase;
-    color: var(--at-ignite);
+    color: var(--at-orange);
   }
   .level-select .act-title {
     display: flex;
@@ -731,13 +745,13 @@
     font: 600 16px/1.2 var(--at-font-text);
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--at-electron);
+    color: var(--at-blue);
   }
   .level-select .act-title::after {
     content: "";
     flex: 1;
     height: 2px;
-    background: var(--at-line);
+    background: var(--at-ink-muted);
   }
   .level-select .levels {
     list-style: none;
@@ -752,9 +766,9 @@
     align-items: center;
     gap: 6px 8px;
     padding: 12px;
-    border: var(--at-border) solid var(--at-line);
-    background: var(--at-surface);
-    box-shadow: 3px 3px 0 var(--at-line);
+    border: var(--at-border) solid var(--at-ink-muted);
+    background: var(--at-paper);
+    box-shadow: 3px 3px 0 var(--at-ink-muted);
   }
   .level-select .level > :not(.chip) {
     grid-column: 1 / -1;
@@ -796,13 +810,13 @@
     min-width: 4px;
   }
   .level-select .phase-hook {
-    background: var(--at-ignite-fill);
+    background: var(--at-orange-fill);
   }
   .level-select .phase-build {
-    background: var(--at-electron-fill);
+    background: var(--at-blue-fill);
   }
   .level-select .phase-check {
-    background: var(--at-boss-fill);
+    background: var(--at-pink-fill);
   }
   .level-select .phase-wrap {
     background: var(--at-ink-muted);
@@ -818,20 +832,20 @@
     box-shadow: none;
   }
   .level-select .level-boss {
-    border-color: var(--at-boss-fill);
+    border-color: var(--at-pink-fill);
     border-width: var(--at-border-strong);
-    box-shadow: 3px 3px 0 var(--at-boss-fill);
+    box-shadow: 3px 3px 0 var(--at-pink-fill);
   }
   .level-select .level-boss .level-number {
-    color: var(--at-boss);
+    color: var(--at-pink);
   }
   .level-select .level-practice {
-    border-color: var(--at-ignite-fill);
+    border-color: var(--at-orange-fill);
   }
   .level-select .level-soon {
-    font: 400 var(--at-label-size) / 1 var(--at-font-label);
+    font: 400 var(--at-label-size) / 1 var(--at-font-hand);
     text-transform: uppercase;
-    color: var(--at-ignite);
+    color: var(--at-orange);
   }
 }
 
@@ -859,7 +873,7 @@
   }
   .streak b {
     font: 700 20px var(--at-font-data);
-    color: var(--at-ignite);
+    color: var(--at-orange);
   }
 
   /* Home: first visit vs the returning Student's Hub. */
@@ -884,12 +898,12 @@
     font: 700 clamp(30px, 8vw, 44px) / 1.05 var(--at-font-text);
   }
   .hero-accent {
-    color: var(--at-ignite);
+    color: var(--at-orange);
   }
   .push-hero {
     padding: 12px;
-    border: var(--at-border-strong) solid var(--at-line);
-    background: var(--at-surface);
+    border: var(--at-border-strong) solid var(--at-ink-muted);
+    background: var(--at-paper);
     box-shadow: var(--at-drop);
   }
   .push-hero-msg {
@@ -897,13 +911,13 @@
     min-height: 3em;
   }
   .push-hero-done {
-    color: var(--at-electron);
+    color: var(--at-blue);
   }
   .continue-card {
     margin: 12px 0 24px;
     padding: 16px;
-    border: var(--at-border-strong) solid var(--at-ignite-fill);
-    background: var(--at-surface);
+    border: var(--at-border-strong) solid var(--at-orange-fill);
+    background: var(--at-paper);
     box-shadow: var(--at-drop);
   }
   .continue-card h2 {
@@ -918,7 +932,7 @@
     margin: 0;
     font: 600 16px/1.2 var(--at-font-data);
     text-transform: uppercase;
-    color: var(--at-ignite);
+    color: var(--at-orange);
   }
   .your-progress {
     margin-top: 40px;
@@ -955,7 +969,7 @@
     max-width: 640px;
     margin: 32px auto 0;
     padding: 16px var(--at-gutter) 40px;
-    border-top: var(--at-border) solid var(--at-line);
+    border-top: var(--at-border) solid var(--at-ink-muted);
     color: var(--at-ink-muted);
   }
   .site-footer p {
@@ -1004,14 +1018,14 @@
     color: var(--at-ink-muted);
   }
   .level-select .level-status[data-status="done"] {
-    color: var(--at-electron);
+    color: var(--at-blue);
   }
 
   /* The submission form (/submit). */
   .submit-page fieldset {
     margin: 0 0 16px;
     padding: 8px 16px;
-    border: var(--at-border) solid var(--at-line);
+    border: var(--at-border) solid var(--at-ink-muted);
   }
   .submit-page fieldset label,
   .submit-page .consent {
@@ -1037,15 +1051,15 @@
     padding: 8px 12px;
     font: inherit;
     color: var(--at-ink);
-    background: var(--at-surface);
-    border: var(--at-border) solid var(--at-line);
+    background: var(--at-paper);
+    border: var(--at-border) solid var(--at-ink-muted);
   }
   .submit-page input[type="checkbox"],
   .submit-page input[type="radio"] {
     width: 24px;
     height: 24px;
     flex: none;
-    accent-color: var(--at-electron-fill);
+    accent-color: var(--at-blue-fill);
   }
   .submit-page .hint {
     margin: 0;
@@ -1053,7 +1067,7 @@
   }
   .submit-page .field-error {
     margin: 0;
-    color: var(--at-boss);
+    color: var(--at-pink);
   }
   .submit-page .field-error:empty,
   .submit-page #form-errors:empty {
@@ -1062,11 +1076,11 @@
   .submit-page #form-errors {
     margin-bottom: 16px;
     padding: 12px;
-    border: var(--at-border) dashed var(--at-boss);
+    border: var(--at-border) dashed var(--at-pink);
   }
   .submit-page .note {
     padding-left: 12px;
-    border-left: 4px solid var(--at-electron-fill);
+    border-left: 4px solid var(--at-blue-fill);
   }
 }
 
@@ -1095,11 +1109,11 @@
     width: 100%;
     flex: 1;
     min-height: 110px;
-    border: var(--at-border-strong) solid var(--at-line);
-    box-shadow: 6px 6px 0 var(--at-shadow);
-    /* The same dark ground in both themes, so white hydrogens never sit on white (#71). Text over it
-       uses the fills, which are the same in both themes and read on --at-on-fill. */
-    background: var(--at-on-fill);
+    border: var(--at-border-strong) solid var(--at-ink-muted);
+    box-shadow: 6px 6px 0 var(--at-ink);
+    /* A pale blue wash, not bare paper, so white hydrogens never sit on white (#71). Text over it
+       is pen ink. */
+    background: color-mix(in srgb, var(--at-blue-fill) 14%, var(--at-paper));
     overflow: hidden;
   }
   .molecule-frame {
@@ -1110,7 +1124,7 @@
     cursor: grab;
   }
   .molecule-frame:focus-visible {
-    outline: 3px solid var(--at-electron);
+    outline: 3px solid var(--at-blue);
     outline-offset: -6px;
   }
   .molecule-still,
@@ -1121,10 +1135,10 @@
     height: 100%;
   }
   .molecule-still line {
-    stroke: #c8c8d0; /* the WebGL layer's bond grey (MoleculeCanvas) */
+    stroke: var(--at-ink-muted); /* the WebGL layer's bond colour (MoleculeCanvas) */
   }
   .molecule-still circle {
-    stroke: var(--at-on-fill);
+    stroke: var(--at-ink);
   }
   .molecule-overlay {
     pointer-events: none;
@@ -1137,35 +1151,35 @@
   }
   .molecule-pick {
     fill: none;
-    stroke: var(--at-ignite-fill);
+    stroke: var(--at-orange-fill);
     stroke-width: 3;
   }
   .molecule-cursor {
     fill: none;
-    stroke: var(--at-electron-fill);
+    stroke: var(--at-blue-fill);
     stroke-width: 2;
     stroke-dasharray: 5 4;
   }
   .molecule-tag path {
     fill: none;
-    stroke: var(--at-electron-fill);
+    stroke: var(--at-blue-fill);
     stroke-width: 2;
     stroke-dasharray: 5 4;
   }
   .molecule-tag-angle path {
-    stroke: var(--at-ignite-fill);
+    stroke: var(--at-orange-fill);
   }
   .molecule-tag rect {
-    fill: var(--at-on-fill);
-    stroke: var(--at-electron-fill);
+    fill: var(--at-paper);
+    stroke: var(--at-blue-fill);
     stroke-width: 2;
   }
   .molecule-tag-angle rect {
-    stroke: var(--at-ignite-fill);
+    stroke: var(--at-orange-fill);
   }
   .molecule-tag text {
     font: 700 16px var(--at-font-data);
-    fill: var(--at-electron-fill);
+    fill: var(--at-blue);
     text-anchor: middle;
     dominant-baseline: central;
   }
@@ -1177,7 +1191,7 @@
     margin: 0;
     pointer-events: none;
     font: 400 16px/1.25 var(--at-font-data);
-    color: var(--at-electron-fill);
+    color: var(--at-blue);
   }
   .molecule-value {
     font-weight: 700;
@@ -1189,13 +1203,13 @@
     bottom: 6px;
     pointer-events: none;
     font: 400 16px/1 var(--at-font-data);
-    color: var(--at-electron-fill);
+    color: var(--at-blue);
   }
   .molecule-scalebar i {
     display: block;
     height: 4px;
     margin-bottom: 4px;
-    background: var(--at-electron-fill);
+    background: var(--at-blue);
   }
   .molecule-turn {
     position: absolute;
@@ -1211,8 +1225,8 @@
     padding: 0 12px;
     font: 700 18px/1 var(--at-font-text);
     color: var(--at-ink);
-    background: var(--at-surface);
-    border: var(--at-border) solid var(--at-line);
+    background: var(--at-paper);
+    border: var(--at-border) solid var(--at-ink-muted);
     cursor: pointer;
   }
   .molecule-tools {
@@ -1246,8 +1260,8 @@
   }
   .orbital-sign {
     font: 700 22px var(--at-font-data);
-    fill: var(--at-electron-fill);
-    stroke: var(--at-on-fill);
+    fill: var(--at-blue);
+    stroke: var(--at-paper);
     stroke-width: 4px;
     paint-order: stroke;
     text-anchor: middle;
@@ -1269,21 +1283,21 @@
   .orbital-chip {
     padding: 2px 8px;
     font: 400 16px/1.3 var(--at-font-data);
-    color: var(--at-electron-fill);
-    border: 2px solid var(--at-electron-fill);
-    background: var(--at-on-fill);
+    color: var(--at-blue);
+    border: 2px solid var(--at-blue);
+    background: var(--at-paper);
   }
   .orbital-chip-sigma {
-    color: var(--at-ignite-fill);
-    border-color: var(--at-ignite-fill);
+    color: var(--at-orange);
+    border-color: var(--at-orange);
   }
   .orbital-chip-name {
     font-weight: 700;
   }
   .molecule-describe[aria-pressed="true"],
   .molecule-plane-toggle[aria-pressed="true"] {
-    background: var(--at-electron-fill);
-    color: var(--at-on-fill);
+    background: var(--at-blue-fill);
+    color: var(--at-ink);
   }
   /* Lesson 4 (#82): the plane sheet's button sits over the stage with ↺/↻. */
   .molecule-plane-toggle {
@@ -1345,9 +1359,9 @@
     }
   }
   .molecule-sheet {
-    fill: var(--at-electron-fill);
+    fill: var(--at-blue-fill);
     fill-opacity: 0.1;
-    stroke: var(--at-electron-fill);
+    stroke: var(--at-blue-fill);
     stroke-opacity: 0.6;
     stroke-width: 1.5;
   }
@@ -1359,8 +1373,8 @@
     padding: 4px 8px;
     pointer-events: none;
     font: 700 16px/1 var(--at-font-data);
-    color: var(--at-electron-fill);
-    border: 2px dashed var(--at-electron-fill);
+    color: var(--at-blue);
+    border: 2px dashed var(--at-blue);
   }
   .molecule-badge.in {
     border-style: solid;
@@ -1369,9 +1383,9 @@
   .molecule-side,
   .molecule-net-zero text {
     font: 700 13px var(--at-font-data);
-    fill: var(--at-electron-fill);
+    fill: var(--at-blue);
     paint-order: stroke;
-    stroke: var(--at-on-fill);
+    stroke: var(--at-paper);
     stroke-width: 3px;
   }
   .molecule-side,
@@ -1379,23 +1393,23 @@
     text-anchor: middle;
   }
   .molecule-dipole line {
-    stroke: var(--at-electron-fill);
+    stroke: var(--at-blue-fill);
     stroke-width: 3;
     stroke-linecap: round;
   }
   .molecule-dipole polygon {
-    fill: var(--at-electron-fill);
+    fill: var(--at-blue-fill);
   }
   .molecule-net line {
-    stroke: var(--at-ignite-fill);
+    stroke: var(--at-orange-fill);
     stroke-width: 6;
   }
   .molecule-net polygon {
-    fill: var(--at-ignite-fill);
+    fill: var(--at-orange-fill);
   }
   .molecule-net-zero circle {
     fill: none;
-    stroke: var(--at-ignite-fill);
+    stroke: var(--at-orange-fill);
     stroke-width: 3;
     stroke-dasharray: 6 4;
   }
@@ -1408,9 +1422,9 @@
     width: 100%;
     max-height: 45dvh; /* leaves room for the prompt, controls and button on one screen */
     overflow: hidden;
-    border: var(--at-border-strong) solid var(--at-line);
-    box-shadow: 6px 6px 0 var(--at-shadow);
-    background: var(--at-surface);
+    border: var(--at-border-strong) solid var(--at-ink-muted);
+    box-shadow: 6px 6px 0 var(--at-ink);
+    background: var(--at-paper);
   }
   /* A Manipulate Step's Scene leaves room under it for its control even once the feedback panel
      opens, so the slider stays on screen at 1280 × 720 too. */
@@ -1431,15 +1445,15 @@
     height: var(--at-tap);
     font: 700 18px/1 var(--at-font-text);
     color: var(--at-ink);
-    background: var(--at-surface);
-    border: var(--at-border) solid var(--at-line);
+    background: var(--at-paper);
+    border: var(--at-border) solid var(--at-ink-muted);
     box-shadow: var(--at-drop-sm);
     cursor: pointer;
   }
   .scene-range {
     flex: 1;
     min-height: var(--at-tap);
-    accent-color: var(--at-electron-fill);
+    accent-color: var(--at-blue-fill);
   }
   .scene-value {
     min-width: 5ch;
@@ -1484,7 +1498,7 @@
   }
   .scene-goal [data-handle]:focus-visible circle,
   .scene-goal [data-target]:focus-visible circle {
-    stroke: var(--at-electron);
+    stroke: var(--at-blue);
     stroke-width: 8px;
     stroke-dasharray: 18 12;
   }
@@ -1508,7 +1522,7 @@
 }
 :root[data-motion="reduced"] .btn:active:not(:disabled) {
   transform: none;
-  box-shadow: 0 0 0 3px var(--at-electron);
+  box-shadow: 0 0 0 3px var(--at-blue);
 }
 @media (prefers-reduced-motion: reduce) {
   *,

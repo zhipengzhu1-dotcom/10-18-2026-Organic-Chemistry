@@ -25,7 +25,7 @@ CI runs these on every pull request (the `test`, `e2e`, `video` and `pipelines` 
 - **Blender check:** the 3D renders on the site match the inputs they were made from.
 - **Unit tests:** about 1,150 small tests of the content build, the Step player, progress, the Practice Set draw, the form and more.
 - **Browser tests:** a real browser plays the built site. They check, among other things:
-  - every page and every Step of every Lesson passes the accessibility checker (axe), in both the dark and light themes, and keeps the type and tap-size rules;
+  - every page and every Step of every Lesson passes the accessibility checker (axe) on the paper theme (the only one), and keeps the type and tap-size rules;
   - every Step of every Lesson fits one phone screen with its button in view;
   - every Step you answer can be reached and answered with the keyboard alone (Tab reaches each kind of control and then Check);
   - with reduced motion on, every animation opens paused on its still frame;

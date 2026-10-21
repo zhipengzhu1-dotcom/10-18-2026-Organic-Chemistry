@@ -7,10 +7,10 @@ import type { Structure } from "@astratron/content";
 import type { Box } from "../frame.ts";
 import { drawStructure, type Drawing, type Point } from "../structure/render.ts";
 
-export const CYAN = "var(--at-electron, #3ee8ff)";
-export const INK = "var(--at-ink, #ffffff)";
-export const MUTED = "var(--at-ink-muted, #b9a8e8)";
-export const FONT_TEXT = "var(--at-font-text, 'Space Grotesk', system-ui, sans-serif)";
+export const CYAN = "var(--at-blue, #0a64c2)";
+export const INK = "var(--at-ink, #1d1b26)";
+export const MUTED = "var(--at-ink-muted, #57536b)";
+export const FONT_TEXT = "var(--at-font-text, 'Nunito', system-ui, sans-serif)";
 export const FONT_DATA = "var(--at-font-data, 'JetBrains Mono', ui-monospace, monospace)";
 
 /** Halo around a region's atoms and along its inner links, in drawing units (one link is 60). */

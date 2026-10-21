@@ -1,6 +1,6 @@
 // Scene and island code names colours as design tokens with a fallback, `var(--at-x, #hex)`.
-// The fallback is what shows where tokens.css isn't loaded, so it must be the token's own
-// (dark-theme :root) value: one source of truth, no drift.
+// The fallback is what shows where tokens.css isn't loaded, so it must be the token's own value
+// in the single Paper Notebook :root block: one source of truth, no drift.
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -22,7 +22,12 @@ function files(dir: string): string[] {
 }
 
 describe("token fallbacks", () => {
-  it("every var(--at-…, #hex) fallback in Scenes and islands is that token's dark-theme value", () => {
+  it("tokens.css is one :root block, with no theme override to drift from", () => {
+    expect(tokens.match(/\{/g)).toHaveLength(1);
+    expect(value.size).toBeGreaterThan(0);
+  });
+
+  it("every var(--at-…, #hex) fallback in Scenes and islands is that token's :root value", () => {
     const wrong: string[] = [];
     for (const file of [...files(join(repo, "scenes/src")), ...files(join(repo, "site/src"))]) {
       for (const m of readFileSync(file, "utf8").matchAll(/var\((--at-[a-z0-9-]+),\s*(#[0-9a-fA-F]{3,8})\)/g)) {

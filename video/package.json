@@ -7,7 +7,7 @@
     "@astratron/content": "workspace:*",
     "@astratron/scenes": "workspace:*",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
-    "@fontsource-variable/space-grotesk": "^5.3.0",
+    "@fontsource-variable/nunito": "^5.3.0",
     "@remotion/bundler": "4.0.537",
     "@remotion/cli": "4.0.537",
     "@remotion/renderer": "4.0.537",

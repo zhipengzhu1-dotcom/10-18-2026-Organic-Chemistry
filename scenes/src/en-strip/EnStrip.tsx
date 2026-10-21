@@ -50,7 +50,7 @@ export default function EnStrip({ t, state, aspect, reducedMotion, cited }: Scen
               y={y + pad}
               width={cell - 2 * pad}
               height={cell - 2 * pad}
-              fill={on ? "var(--at-surface, #1a0f3d)" : "none"}
+              fill={on ? "var(--at-paper, #ffffff)" : "none"}
               stroke={on ? CYAN : LINE}
               strokeWidth={cell * 0.03}
               strokeDasharray={on ? undefined : `${cell * 0.06} ${cell * 0.05}`}

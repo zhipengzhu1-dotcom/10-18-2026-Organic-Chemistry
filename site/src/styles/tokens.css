@@ -1,72 +1,53 @@
-/* Arcade Cosmos tokens: the :root block of the living style sheet on
-   `prototype/design-system` (the spec), self-hosted font names added.
-   Fills are the same in both themes and always carry dark ink (--at-on-fill);
-   the plain accent names are text-safe inks retuned per theme.
-   Violet (--at-shadow) is for shadows only, never text.
-   tokens.test.ts checks every contrast pair in both themes. */
+/* Paper Notebook tokens (spec #117): the :root block of the living style sheet on
+   `prototype/paper-notebook`, self-hosted font names added. One theme: paper.
+   Pen inks carry text and lines; marker fills are too pale to stand alone on white,
+   so a fill always sits inside a pen line and text on a fill is always --at-ink.
+   No red anywhere: "not quite" is pink. tokens.test.ts checks the contrast rules. */
 :root {
-  /* colour: surfaces */
-  --at-space: #0d0626;
-  --at-surface: #1a0f3d;
-  --at-raised: #241552;
-  --at-line: #6a4bd1;
-  /* colour: ink (text-safe on space + surface) */
-  --at-ink: #ffffff;
-  --at-ink-muted: #b9a8e8;
-  --at-electron: #3ee8ff; /* cyan ink: electrons, bonds, correct, active toggle */
-  --at-ignite: #ff9a1f; /* orange ink: wordmark, second highlight */
-  --at-boss: #ff5fd8; /* magenta ink: capstone, "not quite" */
-  --at-shadow: #b44dff; /* violet: hard offset shadows, never text */
-  /* colour: fills (same in both themes) + the ink that sits on them */
-  --at-electron-fill: #3ee8ff;
-  --at-ignite-fill: #ff9a1f;
-  --at-boss-fill: #ff5fd8;
-  --at-on-fill: #1a0d3d;
-  /* nebula (decoration only) */
-  --at-neb-1: #ff4fd8;
-  --at-neb-2: #b44dff;
-  --at-neb-3: #2340ff;
+  /* colour: paper (rule and margin are decoration only) */
+  --at-paper: #ffffff;
+  --at-rule: #e3ecfa;
+  --at-margin: #ffc2dc;
+  /* colour: pen inks (text-safe on paper, all ≥ 5:1) */
+  --at-ink: #1d1b26;
+  --at-ink-muted: #57536b;
+  --at-blue: #0a64c2; /* electrons, bonds, links */
+  --at-green: #1d7a3c; /* correct */
+  --at-pink: #bd1278; /* not quite (never red) */
+  --at-violet: #5a3fd6; /* Hints */
+  --at-orange: #a94a00; /* Start */
+  /* colour: marker fills (always inside a pen line; ink on every fill ≥ 6:1) */
+  --at-blue-fill: #4dabff;
+  --at-green-fill: #6fd486;
+  --at-pink-fill: #ff70b8;
+  --at-violet-fill: #9d8cff;
+  --at-orange-fill: #ff9548;
+  --at-yellow-fill: #ffd84d; /* highlighter + sticky notes */
   /* shape */
+  --at-pen: 2.5px; /* a pen line */
   --at-border: 2px;
   --at-border-strong: 3px;
   --at-radius: 0;
-  --at-drop-sm: 3px 3px 0 var(--at-shadow);
-  --at-drop: 5px 5px 0 var(--at-shadow);
-  --at-fill-edge: transparent; /* light mode gives fills a dark edge */
+  --at-wobble: 255px 14px 225px 14px / 14px 225px 14px 255px; /* a hand-drawn box */
+  --at-wobble-2: 14px 225px 14px 255px / 255px 14px 225px 14px;
+  --at-drop-sm: 3px 3px 0 var(--at-ink); /* offset ink shadow on pressables */
+  --at-drop: 5px 5px 0 var(--at-ink);
   --at-tap: 48px; /* minimum tap target */
   /* type */
-  --at-font-pixel: "Pixelify Sans", ui-monospace, monospace; /* wordmark + big numbers, 32px and up only */
-  --at-font-label: "Silkscreen", ui-monospace, monospace; /* fixed UI words: 16px, uppercase */
-  --at-font-text: "Space Grotesk Variable", "Space Grotesk", system-ui, sans-serif; /* headlines, body, molecule names */
-  --at-font-data: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace; /* element symbols, formulas, numbers */
-  --at-label-size: 16px;
+  --at-font-script: "Kaushan Script", cursive; /* wordmark + one hero word, 40px and up */
+  --at-font-hand: "Patrick Hand", "Comic Sans MS", cursive; /* headings + UI labels, 18px and up */
+  --at-font-text: "Nunito Variable", "Nunito", system-ui, sans-serif; /* body, molecule names */
+  --at-font-data: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace; /* formulas, numbers */
+  --at-label-size: 18px;
   --at-body-size: 17px;
   /* spacing (4px grid) */
   --at-gutter: 16px;
-  /* motion */
+  /* motion (the 20 fps frame grid replaces these in #119) */
   --at-dur-press: 90ms;
   --at-dur-ui: 180ms;
   --at-dur-card: 420ms;
   --at-dur-fade: 120ms; /* the only motion left under reduced motion */
   --at-ease-snap: cubic-bezier(0.2, 0.8, 0, 1);
   --at-ease-pixel: steps(4, end);
-  color-scheme: dark;
-}
-
-:root[data-theme="light"] {
-  --at-space: #f3edff;
-  --at-surface: #ffffff;
-  --at-raised: #e8deff;
-  --at-line: #8a6fd8;
-  --at-ink: #1a0d3d;
-  --at-ink-muted: #4f3f85;
-  --at-electron: #00718a;
-  --at-ignite: #a84d00;
-  --at-boss: #b0127f;
-  --at-shadow: #7a1fd1;
-  --at-neb-1: #ffb3ef;
-  --at-neb-2: #d6b3ff;
-  --at-neb-3: #b3c2ff;
-  --at-fill-edge: #1a0d3d;
   color-scheme: light;
 }

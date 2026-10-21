@@ -1,4 +1,4 @@
-// Shared helpers for browser tests: every page of the built site, themes,
+// Shared helpers for browser tests: every page of the built site
 // and a walk through a Lesson that answers each Step.
 import type { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
@@ -8,8 +8,6 @@ import type { StepType } from "@astratron/content/step-types";
 /** Lesson 0 (the On-ramp, 9 Steps, a watch-only Scene first) and Lesson 1 (no video Scenes). */
 export const LESSON_0 = "/organic/orgo-1/structure-bonding/why-carbon";
 export const LESSON_1 = "/organic/orgo-1/structure-bonding/bonds-polarity-formal-charge";
-export const THEMES = ["dark", "light"] as const;
-export type Theme = (typeof THEMES)[number];
 
 /** Every same-origin page reachable by links from the home page. */
 export async function allPages(page: Page): Promise<string[]> {
@@ -53,11 +51,6 @@ export function lessonAndBankPaths(paths: string[]): string[] {
 /** Every Lesson page and pinned Practice Set (see lessonAndBankPaths) of the available Units, from the content model. */
 export const playablePaths = () =>
   lessonAndBankPaths(units.filter((u) => u.status === "available").flatMap((u) => [...u.lessons.map((l) => l.url), `${u.url}/practice`]));
-
-/** Pick a theme the way a Student does: the site's switch, stored in the browser. */
-export async function useTheme(page: Page, theme: Theme) {
-  await page.addInitScript((t) => localStorage.setItem("at-theme", t), theme);
-}
 
 /** Answers the Step on screen; `feedback` inspects a feedback panel worth a look. */
 type Answerer = (page: Page, feedback: () => Promise<void>) => Promise<void>;

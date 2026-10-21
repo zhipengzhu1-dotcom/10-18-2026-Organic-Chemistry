@@ -13,21 +13,21 @@
   height: var(--at-tap);
   padding: 0 8px;
   white-space: nowrap;
-  color: var(--at-electron);
+  color: var(--at-blue);
   background: transparent;
-  border: var(--at-border) solid var(--at-electron);
+  border: var(--at-border) solid var(--at-blue);
   cursor: pointer;
 }
 .tutor-ask[aria-expanded="true"] {
-  background: var(--at-electron-fill);
-  color: var(--at-on-fill);
+  background: var(--at-blue-fill);
+  color: var(--at-ink);
 }
 
 .tutor-scrim {
   position: fixed;
   inset: 0;
   z-index: 40;
-  background: color-mix(in srgb, var(--at-space) 60%, transparent);
+  background: color-mix(in srgb, var(--at-paper) 60%, transparent);
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--at-dur-ui) linear;
@@ -54,9 +54,9 @@
   height: min(70dvh, 560px);
   display: flex;
   flex-direction: column;
-  background: var(--at-surface);
+  background: var(--at-paper);
   color: var(--at-ink);
-  border-top: var(--at-border-strong) solid var(--at-line);
+  border-top: var(--at-border-strong) solid var(--at-ink-muted);
   box-shadow: var(--at-drop);
   opacity: 0;
   transform: translateY(100%);
@@ -80,7 +80,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 8px var(--at-gutter);
-  border-bottom: var(--at-border) solid var(--at-line);
+  border-bottom: var(--at-border) solid var(--at-ink-muted);
   touch-action: none;
 }
 .tutor-head::before {
@@ -89,12 +89,12 @@
   flex: 0 0 100%;
   height: 4px;
   margin-bottom: -6px;
-  background: linear-gradient(var(--at-line), var(--at-line)) center / 40px 4px no-repeat;
+  background: linear-gradient(var(--at-ink-muted), var(--at-ink-muted)) center / 40px 4px no-repeat;
 }
 .tutor-head h2 {
   flex: 1;
   margin: 0;
-  color: var(--at-electron);
+  color: var(--at-blue);
 }
 .tutor-close {
   width: var(--at-tap);
@@ -104,7 +104,7 @@
   font: 700 22px/1 var(--at-font-text);
   color: var(--at-ink);
   background: transparent;
-  border: var(--at-border) solid var(--at-line);
+  border: var(--at-border) solid var(--at-ink-muted);
   cursor: pointer;
 }
 
@@ -123,7 +123,7 @@
     width: var(--tutor-width);
     height: auto;
     border-top: 0;
-    border-left: var(--at-border-strong) solid var(--at-line);
+    border-left: var(--at-border-strong) solid var(--at-ink-muted);
     transform: translateX(100%);
   }
   .tutor-head {
@@ -155,34 +155,34 @@
 .tutor-divider::after {
   content: "";
   flex: 1;
-  border-top: var(--at-border) solid var(--at-line);
+  border-top: var(--at-border) solid var(--at-ink-muted);
 }
 /* Student and Tutor turns differ by side, surface, edge and their name, never colour alone. */
 .tutor-turn {
   max-width: 88%;
   padding: 10px 12px;
-  border: var(--at-border) solid var(--at-line);
+  border: var(--at-border) solid var(--at-ink-muted);
 }
 .tutor-turn p {
   margin: 4px 0 0;
 }
 .tutor-turn.tutor {
   align-self: flex-start;
-  background: var(--at-raised);
-  border-left: 6px solid var(--at-electron);
+  background: var(--at-paper);
+  border-left: 6px solid var(--at-blue);
 }
 .tutor-turn.student {
   align-self: flex-end;
-  background: var(--at-space);
+  background: var(--at-paper);
   border-style: dashed;
 }
 /* A failure: a dotted border, its own edge and the "! Tutor problem" name, not colour alone. */
 .tutor-turn.error {
   border-style: dotted;
-  border-left: 6px solid var(--at-boss);
+  border-left: 6px solid var(--at-pink);
 }
 .tutor-turn.error .tutor-who {
-  color: var(--at-boss);
+  color: var(--at-pink);
 }
 .tutor-who {
   color: var(--at-ink-muted);
@@ -203,7 +203,7 @@
   flex-wrap: wrap;
   gap: 8px;
   padding: 10px var(--at-gutter) 0;
-  border-top: var(--at-border) solid var(--at-line);
+  border-top: var(--at-border) solid var(--at-ink-muted);
 }
 .tutor-form {
   display: flex;
@@ -223,16 +223,16 @@
   font-family: var(--at-font-data);
 }
 .tutor-chip {
-  color: var(--at-electron);
+  color: var(--at-blue);
   background: transparent;
-  border: var(--at-border) solid var(--at-electron);
+  border: var(--at-border) solid var(--at-blue);
   cursor: pointer;
 }
 .tutor-form input,
 .tutor-pick {
   color: var(--at-ink);
-  background: var(--at-space);
-  border: var(--at-border) solid var(--at-line);
+  background: var(--at-paper);
+  border: var(--at-border) solid var(--at-ink-muted);
 }
 .tutor-form input {
   flex: 1;
@@ -257,7 +257,7 @@
 .tutor-ring circle,
 .tutor-ring line {
   fill: none;
-  stroke: var(--at-electron);
+  stroke: var(--at-blue);
   stroke-width: 3px;
   stroke-linecap: round;
   pointer-events: none;

@@ -22,23 +22,26 @@ export const manimDir = "scenes/manim";
 export const recordPath = (id: string) => `${manimDir}/renders/${id}.json`;
 export const publicPath = (file: string) => `site/public/${file}`;
 
-export const tokensPath = "site/src/styles/tokens.css";
-/** The design tokens the videos draw with, from #59's dark `:root` theme (the videos are always dark). */
-const tokenNames = ["at-space", "at-neb-1", "at-neb-2", "at-neb-3", "at-electron", "at-ignite", "at-ink", "at-ink-muted"];
+/**
+ * The Arcade Cosmos colours the committed Manim and Blender renders were drawn with (#59's dark
+ * `:root`), frozen here when the site moved to Paper Notebook (#118) so those renders stay current.
+ * #123 re-renders them on paper and moves these keys to the new token names.
+ */
+export const ARCADE_VIDEO_PALETTE: Readonly<Record<string, string>> = {
+  "at-space": "#0d0626",
+  "at-neb-1": "#ff4fd8",
+  "at-neb-2": "#b44dff",
+  "at-neb-3": "#2340ff",
+  "at-electron": "#3ee8ff",
+  "at-ignite": "#ff9a1f",
+  "at-ink": "#ffffff", // cited-data: ok, the Arcade ink colour, not hydrogen's
+  "at-ink-muted": "#b9a8e8",
+  "star-core": "#ffe2a8", // the star's pale-gold core (the prototype's glow centre), not a UI token
+};
 
-/** Arcade Cosmos colours for the renderer, read from the site's tokens.css, plus the star's hot core. */
-export function videoPalette(root = repoRoot): Record<string, string> {
-  const css = readFileSync(join(root, tokensPath), "utf8");
-  const start = css.indexOf(":root {");
-  const body = css.slice(start, css.indexOf("}", start));
-  const palette: Record<string, string> = {};
-  for (const name of tokenNames) {
-    const m = body.match(new RegExp(`--${name}:\\s*(#[0-9a-fA-F]{6})\\b`));
-    if (start < 0 || !m) throw new Error(`${tokensPath} has no --${name} colour in :root`);
-    palette[name] = m[1].toLowerCase();
-  }
-  palette["star-core"] = "#ffe2a8"; // the star's pale-gold core (the prototype's glow centre), not a UI token
-  return palette;
+/** Colours for the Manim and Blender renderers (frozen: see ARCADE_VIDEO_PALETTE). */
+export function videoPalette(): Record<string, string> {
+  return { ...ARCADE_VIDEO_PALETTE };
 }
 
 export interface ManimProps {
@@ -66,7 +69,7 @@ export function manimProps(m: WatchSceneManifest, cited: Record<string, Cited>, 
     duration: m.duration,
     values: Object.fromEntries(m.data.map((ref) => [ref, cited[ref].value])),
     text: m.text,
-    palette: videoPalette(root),
+    palette: videoPalette(),
   };
 }
 

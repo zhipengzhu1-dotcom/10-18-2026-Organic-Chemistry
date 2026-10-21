@@ -169,7 +169,7 @@ function model(root: string): CourseModel {
 export function blenderProps(name: Exclude<RenderName, "matcap">, root = repoRoot): BlenderProps {
   const layout = LAYOUTS[name];
   const subject = organic(model(root));
-  const palette = videoPalette(root);
+  const palette = videoPalette();
   const { width, height } = SHARE_IMAGES[name === "share-site" ? "site" : "unit-1"];
   return {
     render: name,
