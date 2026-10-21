@@ -75,10 +75,70 @@ describe("Paper Notebook tokens", () => {
     expect(reds).toEqual([]);
   });
 
-  it("sets the motion durations 90 / 180 / 420 ms (until the frame grid lands, #119)", () => {
-    expect(css).toMatch(/--at-dur-press:\s*90ms/);
-    expect(css).toMatch(/--at-dur-ui:\s*180ms/);
-    expect(css).toMatch(/--at-dur-card:\s*420ms/);
+});
+
+// Motion at 20 fps (#119): every duration is whole 50 ms frames, and each `--at-step-*` easing holds
+// one sample of ease-out per frame. The strings are committed; this regenerates and compares.
+const FRAME_MS = 50;
+const MOTION = { press: 2, ui: 4, card: 8, exit: 3 };
+
+/** The prototype's cubic-bezier, solved for y at x by bisection. */
+function bezier(x1: number, y1: number, x2: number, y2: number) {
+  const c = (a: number, b: number) => (s: number) => 3 * a * s * (1 - s) ** 2 + 3 * b * s * s * (1 - s) + s ** 3;
+  const bx = c(x1, x2);
+  const by = c(y1, y2);
+  return (x: number) => {
+    let lo = 0;
+    let hi = 1;
+    for (let i = 0; i < 40; i++) {
+      const m = (lo + hi) / 2;
+      if (bx(m) < x) lo = m;
+      else hi = m;
+    }
+    return by((lo + hi) / 2);
+  };
+}
+const easeOut = bezier(0.23, 1, 0.32, 1);
+
+/** The prototype's `stepped()`: frame k of n holds ease(k/n) from (k−1)/n to k/n. */
+function stepped(n: number, ease: (x: number) => number) {
+  const r = (v: number) => +v.toFixed(4);
+  const pc = (v: number) => `${r(v * 100)}%`;
+  const stops: string[] = [];
+  for (let k = 1; k <= n; k++) {
+    const v = r(ease(k / n));
+    stops.push(`${v} ${pc((k - 1) / n)}`, `${v} ${pc(k / n)}`);
+  }
+  return `linear(${stops.join(", ")})`;
+}
+
+const decl = (name: string) => css.match(new RegExp(`--at-${name}:\\s*([^;]+);`))?.[1].trim();
+
+describe("motion on the 20 fps frame grid", () => {
+  it("the stepped curve lands its first drawing at once and ends at rest", () => {
+    // A single frame is the whole curve held from the first instant.
+    expect(stepped(1, easeOut)).toBe("linear(1 0%, 1 100%)");
+    expect(stepped(2, easeOut)).toMatch(/^linear\(0\.\d+ 0%, 0\.\d+ 50%, 1 50%, 1 100%\)$/);
+  });
+
+  it.each(Object.entries(MOTION))("%s lasts %i whole frames", (name, frames) => {
+    const ms = decl(`dur-${name}`);
+    expect(ms).toBe(`${frames * FRAME_MS}ms`);
+  });
+
+  it("every duration token is whole 50 ms frames", () => {
+    const durs = [...css.matchAll(/--at-dur-[\w-]+:\s*(\d+)ms/g)].map((m) => Number(m[1]));
+    expect(durs.length).toBeGreaterThanOrEqual(Object.keys(MOTION).length);
+    for (const d of durs) expect(d % FRAME_MS).toBe(0);
+  });
+
+  it.each(Object.entries(MOTION))("--at-step-%s is ease-out stepped over %i frames", (name, frames) => {
+    expect(decl(`step-${name}`)).toBe(stepped(frames, easeOut));
+  });
+
+  it("keeps no smooth or steps() easing beside the stepped ones", () => {
+    expect(css).not.toMatch(/--at-ease-/);
+    expect(css).not.toMatch(/steps\(/);
   });
 });
 
