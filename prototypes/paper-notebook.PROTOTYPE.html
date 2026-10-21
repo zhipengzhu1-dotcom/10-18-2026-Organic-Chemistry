@@ -375,7 +375,7 @@ html[data-motion="reduced"] .opt[aria-checked="true"] .bub path { stroke-dashoff
   <p class="wordmark">AstraTron<span class="dot">.</span></p>
   <div class="ctl">Frame rate
     <span class="seg" id="fps-seg" role="group" aria-label="Motion frame rate">
-      <button data-fps="8">8</button><button data-fps="12" aria-pressed="true">12</button><button data-fps="15">15</button><button data-fps="20">20</button><button data-fps="60" class="off" title="Smooth, for comparison only: off spec">60 ✕</button>
+      <button data-fps="8">8</button><button data-fps="12">12</button><button data-fps="15">15</button><button data-fps="20" aria-pressed="true">20</button><button data-fps="60" class="off" title="Smooth, for comparison only: off spec">60 ✕</button>
     </span>
   </div>
   <div class="ctl">Paper
@@ -395,7 +395,7 @@ html[data-motion="reduced"] .opt[aria-checked="true"] .bub path { stroke-dashoff
     <div>
       <span class="label violet">Orgo I · Unit 1</span>
       <h1>Chemistry</h1>
-      <p>Chemistry is how the universe builds things. <mark class="hl">Come build.</mark> A Paper Notebook: white pages, pen lines, marker colour, and motion drawn <b>on twos</b>, at <span class="data" data-fps-label>12</span> frames a second.</p>
+      <p>Chemistry is how the universe builds things. <mark class="hl">Come build.</mark> A Paper Notebook: white pages, pen lines, marker colour, and motion drawn <b>on twos</b>, at <span class="data" data-fps-label>20</span> frames a second.</p>
       <a class="btn btn-go" href="#step">Start Unit 1 ▸</a>
     </div>
     <div class="doodles" aria-hidden="true">
@@ -457,7 +457,7 @@ html[data-motion="reduced"] .opt[aria-checked="true"] .bub path { stroke-dashoff
 
   <section class="sheet" aria-labelledby="s4">
     <h2 id="s4"><span class="n">04</span>Motion: drawn on twos</h2>
-    <p class="lede">Everything moves at <b><span data-fps-label>12</span> fps</b>, like a flip-book. We keep Emil's rules (ease-out on entry, under 300ms for UI, press feedback right away, exit faster than entry, nothing loops) and <i>sample</i> the ease-out curve once per frame, holding each drawing. The first frame lands at once, so a press still answers instantly. Pick a frame rate in the top bar to feel the difference.</p>
+    <p class="lede">Everything moves at <b><span data-fps-label>20</span> fps</b>, like a flip-book. We keep Emil's rules (ease-out on entry, under 300ms for UI, press feedback right away, exit faster than entry, nothing loops) and <i>sample</i> the ease-out curve once per frame, holding each drawing. The first frame lands at once, so a press still answers instantly. Pick a frame rate in the top bar to feel the difference.</p>
     <div class="lab">
       <div class="demo curve"><h3>The stepped curve</h3><p class="spec" id="curve-spec"></p><div class="stage"><svg id="curve" viewBox="0 0 220 160" aria-label="Smooth ease-out against its stepped version"></svg></div></div>
       <div class="demo"><h3>Press</h3><p class="spec" id="press-spec"></p><div class="stage"><button class="btn btn-primary">Press and hold</button></div></div>
@@ -538,7 +538,7 @@ html[data-motion="reduced"] .opt[aria-checked="true"] .bub path { stroke-dashoff
   }
   // Target durations (Emil: press 100–160, UI under 300, exit faster than entry).
   const TARGET = { press: 100, ui: 220, card: 420, exit: 140 };
-  let fps = 12;
+  let fps = 20;
   const frames = (ms) => Math.max(1, Math.round((ms / 1000) * fps));
 
   function applyFps(next) {
@@ -685,7 +685,7 @@ html[data-motion="reduced"] .opt[aria-checked="true"] .bub path { stroke-dashoff
     return { reset };
   })();
 
-  applyFps(12);
+  applyFps(20);
 })();
 </script>
 </body>
