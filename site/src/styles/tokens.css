@@ -27,11 +27,19 @@
   --at-pen: 2.5px; /* a pen line */
   --at-border: 2px;
   --at-border-strong: 3px;
-  --at-radius: 0;
   --at-wobble: 255px 14px 225px 14px / 14px 225px 14px 255px; /* a hand-drawn box */
   --at-wobble-2: 14px 225px 14px 255px / 255px 14px 225px 14px;
-  --at-drop-sm: 3px 3px 0 var(--at-ink); /* offset ink shadow on pressables */
-  --at-drop: 5px 5px 0 var(--at-ink);
+  --at-wobble-md: 18px 6px 14px 8px; /* a dialog's corners */
+  --at-wobble-sm: 6px 10px 5px 9px; /* small pieces: pills in a strip, fields, swipes, rules */
+  --at-wobble-pill: 26px 20px 24px 18px / 20px 26px 18px 24px; /* a pill whose ends don't quite match */
+  --at-wobble-note: 2px 2px 18px 2px; /* a sticky note, its corner curling up */
+  /* offset shadows: pair one with an ink or marker colour, `var(--at-drop-offset) var(--at-…)` */
+  --at-drop-offset-sm: 3px 3px 0;
+  --at-drop-offset-md: 4px 4px 0;
+  --at-drop-offset: 5px 5px 0;
+  --at-drop-offset-lg: 7px 7px 0;
+  --at-drop-sm: var(--at-drop-offset-sm) var(--at-ink); /* offset ink shadow on pressables */
+  --at-drop: var(--at-drop-offset) var(--at-ink);
   --at-tap: 48px; /* minimum tap target */
   /* type */
   --at-font-script: "Kaushan Script", cursive; /* wordmark + one hero word, 40px and up */

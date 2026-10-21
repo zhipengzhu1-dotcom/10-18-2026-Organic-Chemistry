@@ -4,6 +4,7 @@ import type { GetStaticPaths } from "astro";
 import type { Subject } from "@astratron/content";
 import Base from "../../layouts/Base.astro";
 import CourseMap from "../../components/CourseMap.astro";
+import Doodles from "../../components/Doodles.astro";
 import TopBar from "../../components/TopBar.astro";
 import { courseModel } from "../../lib/content.ts";
 
@@ -15,6 +16,7 @@ const { subject } = Astro.props as { subject: Subject };
 
 <Base title={`${subject.title} · AstraTron`} description={`The ${subject.title} Course map.`}>
   <TopBar />
+  <Doodles />
   <main class="page">
     <h1>{subject.title}</h1>
     <CourseMap subject={subject} />

@@ -22,11 +22,11 @@ const OPACITY = 0.5;
 const PEN_FROM = 0.8;
 
 /** Lesson 4: colour says the orbital's kind and the pattern its sign. Lesson 8: + solid blue, − hatched orange. */
-export function lobeLook(style: OrbitalUse["style"], sign: "+" | "-", density = false): { colour: "electron" | "ignite"; hatched: boolean } {
+export function lobeLook(style: OrbitalUse["style"], sign: "+" | "-", density = false): { colour: "blue" | "orange"; hatched: boolean } {
   const hatched = sign === "-" && !density;
-  if (style === "sigma") return { colour: "ignite", hatched };
-  if (style === "pi") return { colour: "electron", hatched };
-  return { colour: sign === "+" ? "electron" : "ignite", hatched };
+  if (style === "sigma") return { colour: "orange", hatched };
+  if (style === "pi") return { colour: "blue", hatched };
+  return { colour: sign === "+" ? "blue" : "orange", hatched };
 }
 
 const vertex = /* glsl */ `
@@ -96,8 +96,8 @@ export interface OrbitalLobesProps {
 export default function OrbitalLobes({ orbitals, centre, onDrawn }: OrbitalLobesProps) {
   const gltfs = useLoader(GLTFLoader, orbitals.map((o) => o.mesh));
   const lobes = useMemo(() => {
-    const fills = { electron: token("--at-blue-fill", "#4dabff"), ignite: token("--at-orange-fill", "#ff9548") };
-    const pens = { electron: token("--at-blue", "#0a64c2"), ignite: token("--at-orange", "#a94a00") };
+    const fills = { blue: token("--at-blue-fill", "#4dabff"), orange: token("--at-orange-fill", "#ff9548") };
+    const pens = { blue: token("--at-blue", "#0a64c2"), orange: token("--at-orange", "#a94a00") };
     const out: Lobe[] = [];
     orbitals.forEach((o, i) => {
       gltfs[i].scene.updateMatrixWorld(true);

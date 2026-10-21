@@ -63,5 +63,23 @@ test("the Tutor panel keeps the type rules", async ({ page }) => {
   await expect(failure).toHaveCount(1);
 
   expect(await typeViolations(page, `.${PANEL_CLASS}`)).toEqual([]);
+
+  // Ask and the chips are the shared pen button (as Send: wobble corners, ink offset, stepped press);
+  // the close ✕ is the player's pen circle.
+  const look = (el: Element) => {
+    const cs = getComputedStyle(el);
+    return { radius: cs.borderTopLeftRadius, shadow: cs.boxShadow, press: `${cs.transitionDuration} ${cs.transitionTimingFunction}` };
+  };
+  await panel(page).getByRole("textbox", { name: "Ask the Tutor" }).fill("?");
+  await page.mouse.move(0, 0); // off Ask, so no hover lift
+  await page.waitForTimeout(250);
+  const pen = await panel(page).getByRole("button", { name: "Send" }).evaluate(look);
+  expect(await page.getByRole("button", { name: "Ask" }).evaluate(look)).toEqual(pen);
+  const chip = await panel(page).getByRole("group", { name: "Suggestions" }).getByRole("button").first().evaluate(look);
+  expect({ shadow: chip.shadow, press: chip.press }).toEqual({ shadow: pen.shadow, press: pen.press });
+  const circle = (el: Element) => [getComputedStyle(el).borderRadius, getComputedStyle(el).borderTopColor, getComputedStyle(el).width];
+  expect(await panel(page).getByRole("button", { name: "Close the Tutor" }).evaluate(circle)).toEqual(
+    await page.getByRole("link", { name: "Leave the Lesson" }).evaluate(circle),
+  );
   await panel(page).screenshot({ path: test.info().outputPath("tutor-panel.png") });
 });

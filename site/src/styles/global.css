@@ -160,7 +160,7 @@
   @media (hover: hover) and (pointer: fine) {
     .btn:hover:not(:disabled):not([aria-disabled="true"]):not(:active) {
       transform: translate(-1px, -1px);
-      box-shadow: 4px 4px 0 var(--at-ink);
+      box-shadow: var(--at-drop-offset-md) var(--at-ink);
     }
   }
   .btn-primary {
@@ -256,7 +256,7 @@
     flex: 1;
     height: 10px;
     border: 1.5px solid var(--at-ink);
-    border-radius: 6px 10px 5px 9px;
+    border-radius: var(--at-wobble-sm);
     background: var(--at-paper);
   }
   .bars li.done {
@@ -306,9 +306,10 @@
       gap: 2px;
     }
   }
-  /* ✕ and ‹ in pen circles. */
+  /* ✕ and ‹ in pen circles (.pen-circle: the same circle elsewhere, e.g. the Tutor's ✕). */
   .player-exit,
-  .player-back {
+  .player-back,
+  .pen-circle {
     width: var(--at-tap);
     height: var(--at-tap);
     display: grid;
@@ -525,9 +526,10 @@
     border-radius: var(--at-wobble-2);
     background: var(--at-paper);
     cursor: pointer;
+    /* A press lands at once; an unpicked tint leaves at exit, faster than it came (below). */
     transition:
       transform var(--at-dur-press) var(--at-step-press),
-      background-color var(--at-dur-ui) var(--at-step-ui);
+      background-color var(--at-dur-exit) var(--at-step-exit);
   }
   .opt:active:not(:disabled):not([aria-disabled="true"]) {
     transform: scale(0.98);
@@ -558,6 +560,9 @@
   .opt[aria-pressed="true"] {
     background: color-mix(in srgb, var(--at-blue-fill) 14%, var(--at-paper));
     box-shadow: inset 0 0 0 1px var(--at-ink);
+    transition:
+      transform var(--at-dur-press) var(--at-step-press),
+      background-color var(--at-dur-ui) var(--at-step-ui);
   }
   .opt[aria-pressed="true"] .bub path {
     stroke-dashoffset: 0;
@@ -602,7 +607,7 @@
   .opt.dragging {
     box-shadow:
       inset 0 0 0 1px var(--at-ink),
-      5px 5px 0 var(--at-blue-fill);
+      var(--at-drop-offset) var(--at-blue-fill);
   }
 
   /* Numeric input: a pen underline with the value in the data face, and its fixed unit. */
@@ -673,7 +678,7 @@
   }
   .fb-correct {
     border-color: var(--at-green);
-    box-shadow: 4px 4px 0 var(--at-green-fill);
+    box-shadow: var(--at-drop-offset-md) var(--at-green-fill);
   }
   .fb-correct .ic {
     background: var(--at-green-fill);
@@ -697,7 +702,7 @@
     border-left: 4px solid var(--at-violet-fill);
   }
   .fb-reveal {
-    border-color: var(--at-ink-muted);
+    border-color: var(--at-ink);
   }
   .fb-reveal .ic {
     background: var(--at-violet-fill);
@@ -743,7 +748,7 @@
   .card {
     border: var(--at-pen) solid var(--at-ink);
     border-radius: var(--at-wobble);
-    box-shadow: 5px 5px 0 var(--at-yellow-fill);
+    box-shadow: var(--at-drop-offset) var(--at-yellow-fill);
     padding: 16px;
     background: var(--at-paper);
   }
@@ -806,10 +811,11 @@
     border: var(--at-pen) solid var(--at-ink);
     border-radius: var(--at-wobble);
     background: var(--at-paper);
-    box-shadow: 5px 5px 0 var(--tint);
+    box-shadow: var(--at-drop-offset) var(--tint);
+    /* Settling back is an exit: faster than the lift (below). */
     transition:
-      transform var(--at-dur-ui) var(--at-step-ui),
-      box-shadow var(--at-dur-ui) var(--at-step-ui);
+      transform var(--at-dur-exit) var(--at-step-exit),
+      box-shadow var(--at-dur-exit) var(--at-step-exit);
   }
   .tile:nth-child(5n + 2) {
     --tint: var(--at-green-fill);
@@ -839,11 +845,17 @@
   @media (hover: hover) and (pointer: fine) {
     .tile.open:hover {
       transform: rotate(-0.8deg) translateY(-3px);
-      box-shadow: 7px 8px 0 var(--tint);
+      box-shadow: var(--at-drop-offset-lg) var(--tint);
+      transition:
+        transform var(--at-dur-ui) var(--at-step-ui),
+        box-shadow var(--at-dur-ui) var(--at-step-ui);
     }
   }
   .tile.open:active {
     transform: scale(0.98);
+    transition:
+      transform var(--at-dur-press) var(--at-step-press),
+      box-shadow var(--at-dur-press) var(--at-step-press);
   }
   .tile > a,
   .tile > div {
@@ -877,6 +889,23 @@
     text-transform: uppercase;
     color: var(--at-ink-muted);
   }
+  /* An empty state gets a doodle (story 10): one in a coming-soon tile's corner, one beside the
+     coming-soon page's heading. */
+  .tile-doodle {
+    position: absolute;
+    right: 12px;
+    bottom: 10px;
+    width: 44px;
+    height: 48px;
+    rotate: 6deg;
+  }
+  .page-doodle {
+    float: right;
+    width: 72px;
+    height: 84px;
+    margin: 0 4px 8px 12px;
+    rotate: -5deg;
+  }
 
   /* Unit page and its Level select */
   .crumbs a {
@@ -893,7 +922,7 @@
   /* The Unit's name gets a highlighter swipe, as in a notebook's contents page. */
   .unit-title {
     padding: 0 4px;
-    border-radius: 3px 8px 4px 9px;
+    border-radius: var(--at-wobble-sm);
     background: linear-gradient(100deg, transparent 0.5%, var(--at-yellow-fill) 2%, var(--at-yellow-fill) 97%, transparent 99%);
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
@@ -912,7 +941,7 @@
     flex: 1;
     height: var(--at-pen);
     background: var(--at-ink);
-    border-radius: 2px;
+    border-radius: var(--at-wobble-sm);
   }
   .level-select .levels {
     list-style: none;
@@ -931,7 +960,7 @@
     border: var(--at-pen) solid var(--at-ink);
     border-radius: var(--at-wobble-2);
     background: var(--at-paper);
-    box-shadow: 4px 4px 0 var(--at-blue-fill);
+    box-shadow: var(--at-drop-offset-md) var(--at-blue-fill);
   }
   .level-select .level > :not(.chip) {
     grid-column: 1 / -1;
@@ -960,7 +989,7 @@
     font: 500 16px/1.3 var(--at-font-text);
     color: var(--at-ink-muted);
     border: 1.5px solid currentColor;
-    border-radius: 10px 14px 9px 13px;
+    border-radius: var(--at-wobble-pill);
   }
   .level-select .chip.count {
     font-family: var(--at-font-data);
@@ -972,7 +1001,7 @@
     height: 10px;
     padding: 1px;
     border: 1.5px solid var(--at-ink);
-    border-radius: 6px 10px 5px 9px;
+    border-radius: var(--at-wobble-sm);
     overflow: hidden;
   }
   .level-select .phase {
@@ -1003,13 +1032,13 @@
   .level-select .level-boss {
     border-color: var(--at-pink);
     border-width: var(--at-border-strong);
-    box-shadow: 5px 5px 0 var(--at-pink-fill);
+    box-shadow: var(--at-drop-offset) var(--at-pink-fill);
   }
   .level-select .level-boss .level-number {
     color: var(--at-pink);
   }
   .level-select .level-practice {
-    box-shadow: 4px 4px 0 var(--at-orange-fill);
+    box-shadow: var(--at-drop-offset-md) var(--at-orange-fill);
   }
   .level-select .level-soon {
     font: 400 var(--at-label-size) / 1 var(--at-font-hand);
@@ -1086,7 +1115,7 @@
     border: var(--at-pen) solid var(--at-ink);
     border-radius: var(--at-wobble-2);
     background: var(--at-paper);
-    box-shadow: 5px 5px 0 var(--at-violet-fill);
+    box-shadow: var(--at-drop-offset) var(--at-violet-fill);
   }
   .push-hero-msg {
     margin: 12px 0 0;
@@ -1203,7 +1232,7 @@
     padding: 18px 18px 16px;
     background: var(--at-yellow-fill);
     border: var(--at-border) solid var(--at-ink);
-    border-radius: 2px 2px 18px 2px;
+    border-radius: var(--at-wobble-note);
     box-shadow: 0 10px 14px -10px color-mix(in srgb, var(--at-ink) 45%, transparent);
     rotate: -1.2deg;
   }
@@ -1298,7 +1327,7 @@
     width: 120px;
     height: 8px;
     margin-top: 4px;
-    border-radius: 4px 10px 6px 12px;
+    border-radius: var(--at-wobble-sm);
     background: var(--at-yellow-fill);
   }
   .prose h2 {
@@ -1363,14 +1392,14 @@
     color: var(--at-ink);
     background: var(--at-paper);
     border: var(--at-pen) solid var(--at-ink);
-    border-radius: 6px 12px 5px 10px;
+    border-radius: var(--at-wobble-sm);
   }
   .submit-page input[type="checkbox"],
   .submit-page input[type="radio"] {
     width: 24px;
     height: 24px;
     flex: none;
-    accent-color: var(--at-blue-fill);
+    accent-color: var(--at-blue);
   }
   .submit-page .hint {
     margin: 0;
@@ -1424,7 +1453,7 @@
     border: var(--at-pen) solid var(--at-ink);
     /* The overlays keep 14 px (the wobble's short side) off each corner's shallow edge. */
     border-radius: var(--at-wobble);
-    box-shadow: 5px 5px 0 var(--at-blue-fill);
+    box-shadow: var(--at-drop-offset) var(--at-blue-fill);
     background: var(--at-paper);
     overflow: hidden;
   }
@@ -1455,33 +1484,35 @@
     text-anchor: middle;
     dominant-baseline: central;
   }
+  /* Overlay marks are pen ink (a marker fill alone is too pale on white paper): picks orange,
+     the measuring cursor and tags blue, angles orange. */
   .molecule-pick {
     fill: none;
-    stroke: var(--at-orange-fill);
+    stroke: var(--at-orange);
     stroke-width: 3;
   }
   .molecule-cursor {
     fill: none;
-    stroke: var(--at-blue-fill);
+    stroke: var(--at-blue);
     stroke-width: 2;
     stroke-dasharray: 5 4;
   }
   .molecule-tag path {
     fill: none;
-    stroke: var(--at-blue-fill);
+    stroke: var(--at-blue);
     stroke-width: 2;
     stroke-dasharray: 5 4;
   }
   .molecule-tag-angle path {
-    stroke: var(--at-orange-fill);
+    stroke: var(--at-orange);
   }
   .molecule-tag rect {
     fill: var(--at-paper);
-    stroke: var(--at-blue-fill);
+    stroke: var(--at-blue);
     stroke-width: 2;
   }
   .molecule-tag-angle rect {
-    stroke: var(--at-orange-fill);
+    stroke: var(--at-orange);
   }
   .molecule-tag text {
     font: 700 16px var(--at-font-data);
@@ -1664,10 +1695,11 @@
       display: flex;
     }
   }
+  /* The page sheet: a light blue marker wash inside a blue pen line. */
   .molecule-sheet {
     fill: var(--at-blue-fill);
     fill-opacity: 0.1;
-    stroke: var(--at-blue-fill);
+    stroke: var(--at-blue);
     stroke-opacity: 0.6;
     stroke-width: 1.5;
   }
@@ -1698,24 +1730,32 @@
   .molecule-net-zero text {
     text-anchor: middle;
   }
+  /* Dipole arrows in pen: a bond dipole a thin blue line, the net dipole a thick orange one; each
+     head is a marker fill inside its pen outline. */
   .molecule-dipole line {
-    stroke: var(--at-blue-fill);
+    stroke: var(--at-blue);
     stroke-width: 3;
     stroke-linecap: round;
   }
   .molecule-dipole polygon {
     fill: var(--at-blue-fill);
+    stroke: var(--at-blue);
+    stroke-width: 2;
+    stroke-linejoin: round;
   }
   .molecule-net line {
-    stroke: var(--at-orange-fill);
+    stroke: var(--at-orange);
     stroke-width: 6;
   }
   .molecule-net polygon {
     fill: var(--at-orange-fill);
+    stroke: var(--at-orange);
+    stroke-width: 2;
+    stroke-linejoin: round;
   }
   .molecule-net-zero circle {
     fill: none;
-    stroke: var(--at-orange-fill);
+    stroke: var(--at-orange);
     stroke-width: 3;
     stroke-dasharray: 6 4;
   }
@@ -1729,7 +1769,7 @@
     max-height: 45dvh; /* leaves room for the prompt, controls and button on one screen */
     overflow: hidden;
     border: var(--at-border-strong) solid var(--at-ink-muted);
-    box-shadow: 6px 6px 0 var(--at-ink);
+    box-shadow: var(--at-drop-offset-lg) var(--at-ink);
     background: var(--at-paper);
   }
   /* The drawing inside the frame; the player sets its boil / rough filter (ScenePlayer). */
@@ -1764,7 +1804,7 @@
   .scene-range {
     flex: 1;
     min-height: var(--at-tap);
-    accent-color: var(--at-blue-fill);
+    accent-color: var(--at-blue);
   }
   .scene-value {
     min-width: 5ch;
