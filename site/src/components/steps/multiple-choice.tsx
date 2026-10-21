@@ -1,6 +1,6 @@
 // Multiple choice: text choices (as chips when short) or structure cards; one pick or several.
 import type { Structure } from "@astratron/content";
-import { html, StepPrompt, toggle, type View } from "./view.tsx";
+import { Bubble, html, StepPrompt, toggle, type View } from "./view.tsx";
 
 export const multipleChoice: View<"multiple-choice"> = {
   Lead: StepPrompt,
@@ -26,6 +26,7 @@ export const multipleChoice: View<"multiple-choice"> = {
               {/* The name comes from this hidden text, not aria-label: the drawing's letters (N, OH…)
                   would otherwise be visible text missing from the name (WCAG 2.5.3 Label in Name). */}
               <span className="sr">{o.text}</span>
+              <Bubble />
               <span aria-hidden="true" {...html(o.structure.drawn?.svg ?? "")} />
             </button>
           ) : (
@@ -36,8 +37,10 @@ export const multipleChoice: View<"multiple-choice"> = {
               aria-pressed={choice.includes(o.id)}
               disabled={screen.canContinue}
               onClick={() => pick(o.id)}
-              {...html(o.text)}
-            />
+            >
+              <Bubble />
+              <span {...html(o.text)} />
+            </button>
           ),
         )}
       </div>

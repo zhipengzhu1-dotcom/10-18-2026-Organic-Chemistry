@@ -248,24 +248,28 @@
     background: var(--at-blue-fill);
   }
 
-  /* Story bars: one motif for story cards and the Step player. */
+  /* The Step player's progress strip: hand-drawn pills in pen, done ones filled leaf green,
+     the Step on screen highlighted. Shape and order carry it too (aria-hidden; the count says it). */
   .bars {
     display: flex;
-    gap: 4px;
+    gap: 3px;
     list-style: none;
     margin: 0;
     padding: 0;
   }
   .bars li {
     flex: 1;
-    height: 6px;
-    background: color-mix(in srgb, var(--at-ink) 22%, transparent);
+    height: 10px;
+    border: 1.5px solid var(--at-ink);
+    border-radius: 6px 10px 5px 9px;
+    background: var(--at-paper);
   }
   .bars li.done {
-    background: var(--at-ink);
+    background: var(--at-green-fill);
   }
   .bars li.cur {
-    background: var(--at-orange-fill);
+    background: var(--at-yellow-fill);
+    border-width: var(--at-border);
   }
 
   /* Step player: full screen, single focus, no site chrome. Nothing loops here. */
@@ -285,22 +289,29 @@
     width: 100%;
     margin: 0 auto;
   }
+  /* ✕ and ‹ in pen circles. */
   .player-exit,
   .player-back {
     width: var(--at-tap);
     height: var(--at-tap);
     display: grid;
     place-items: center;
-    font: 700 22px/1 var(--at-font-text);
+    font: 400 24px/1 var(--at-font-hand);
     color: var(--at-ink);
     text-decoration: none;
-    border: var(--at-border) solid var(--at-ink-muted);
+    background: var(--at-paper);
+    border: var(--at-border) solid var(--at-ink);
+    border-radius: 50%;
   }
+  /* Patrick Hand's ‹ is a speck; the text face draws it at a readable size. */
   .player-back {
+    font: 700 34px/1 var(--at-font-text);
+    padding-bottom: 4px;
     cursor: pointer;
   }
   .player-back:disabled {
     color: var(--at-ink-muted);
+    border-color: var(--at-ink-muted);
     border-style: dashed;
     cursor: default;
   }
@@ -471,7 +482,7 @@
   }
   .player-foot {
     padding: 12px var(--at-gutter) calc(16px + env(safe-area-inset-bottom));
-    border-top: var(--at-border) solid var(--at-ink-muted);
+    border-top: var(--at-border) solid var(--at-ink);
     background: var(--at-paper);
   }
   .player-foot > * {
@@ -485,31 +496,79 @@
     display: grid;
     gap: 10px;
   }
+  /* A choice: a hand-drawn box in pen. Picking it fills its bubble with a blue marker scribble
+     (drawn on over a card's 8 frames) and thickens its pen line, so a pick never rests on colour. */
   .opt {
     min-height: var(--at-tap);
     padding: 10px 14px;
     text-align: left;
     font: 500 var(--at-body-size) / 1.35 var(--at-font-text);
     color: var(--at-ink);
-    border: var(--at-border) solid var(--at-ink-muted);
+    border: var(--at-border) solid var(--at-ink);
+    border-radius: var(--at-wobble-2);
     background: var(--at-paper);
-    box-shadow: 3px 3px 0 var(--at-ink-muted);
     cursor: pointer;
     transition:
       transform var(--at-dur-press) var(--at-step-press),
-      box-shadow var(--at-dur-press) var(--at-step-press);
+      background-color var(--at-dur-ui) var(--at-step-ui);
+  }
+  .opt:active:not(:disabled):not([aria-disabled="true"]) {
+    transform: scale(0.98);
+  }
+  .opt:not(.structure-card):has(> .bub) {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 8px;
+    align-items: center;
+  }
+  .opt .bub {
+    width: 22px;
+    height: 22px;
+  }
+  .opt .bub circle {
+    fill: var(--at-paper);
+    stroke: var(--at-ink);
+    stroke-width: 2.2;
+  }
+  .opt .bub path {
+    fill: none;
+    stroke: var(--at-blue-fill);
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
   }
   .opt[aria-pressed="true"] {
-    border-color: var(--at-orange-fill);
-    box-shadow: var(--at-drop-sm);
-    outline: 2px solid var(--at-orange-fill);
-    outline-offset: -6px;
+    background: color-mix(in srgb, var(--at-blue-fill) 14%, var(--at-paper));
+    box-shadow: inset 0 0 0 1px var(--at-ink);
+  }
+  .opt[aria-pressed="true"] .bub path {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset var(--at-dur-card) var(--at-step-card);
+  }
+  /* A structure card keeps its whole width for the drawing: the bubble sits in its corner. */
+  .opt.structure-card {
+    position: relative;
+  }
+  .opt.structure-card > .bub {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 20px;
+    height: 20px;
   }
   .opt:disabled {
     cursor: default;
     color: var(--at-ink-muted);
+    border-color: var(--at-ink-muted);
+  }
+  .opt:disabled[aria-pressed="true"] {
+    color: var(--at-ink);
+    border-color: var(--at-ink);
   }
 
+  /* Rank: cards in pen with an ink offset (they are pressed and dragged); the held card lifts
+     onto a blue marker offset. */
   .rank {
     list-style: none;
     margin: 0;
@@ -517,13 +576,19 @@
   }
   .rank .opt {
     width: 100%;
+    box-shadow: var(--at-drop-sm);
   }
+  .rank .opt[aria-disabled="true"] {
+    box-shadow: none;
+  }
+  /* Shadows only: a border change would shift the cards under the pointer mid-drag. */
   .opt.dragging {
-    border-color: var(--at-blue);
-    box-shadow: var(--at-drop);
+    box-shadow:
+      inset 0 0 0 1px var(--at-ink),
+      5px 5px 0 var(--at-blue-fill);
   }
 
-  /* Numeric input: the number box and its fixed unit, both in the data face. */
+  /* Numeric input: a pen underline with the value in the data face, and its fixed unit. */
   .numeric {
     display: flex;
     align-items: center;
@@ -532,23 +597,34 @@
   .numeric-box {
     width: 8em;
     min-height: var(--at-tap);
-    padding: 0 12px;
-    font: 400 20px/1 var(--at-font-data);
+    padding: 6px 4px;
+    font: 600 22px/1 var(--at-font-data);
     color: var(--at-ink);
-    background: var(--at-paper);
-    border: var(--at-border) solid var(--at-ink-muted);
+    background: transparent;
+    border: 0;
+    border-bottom: var(--at-pen) solid var(--at-ink);
+    border-radius: 0;
+  }
+  .numeric-box:focus-visible {
+    outline: none;
+    border-bottom-color: var(--at-blue);
+    background: color-mix(in srgb, var(--at-blue-fill) 10%, var(--at-paper));
   }
   .numeric-box:disabled {
     color: var(--at-ink-muted);
+    border-bottom-style: dashed;
   }
   .numeric-unit {
-    font: 400 20px/1 var(--at-font-data);
+    font: 400 22px/1 var(--at-font-data);
   }
 
   /* Feedback panel: icon + words, never colour alone, never red, no sound.
-     ✓ solid green · ✗ dashed pink + Hint · → plain pen line + the answer. */
+     ✓ solid green on a leaf offset · ✗ dashed pink + a violet-ruled Hint · → plain pen line + the answer.
+     The icon sits in a pen circle filled with its marker. */
   .fb {
-    border: var(--at-border-strong) solid;
+    border: var(--at-pen) solid;
+    border-radius: var(--at-wobble);
+    background: var(--at-paper);
     padding: 10px 14px;
     margin-bottom: 12px;
     display: grid;
@@ -570,17 +646,20 @@
     display: grid;
     place-items: center;
     font: 700 18px/1 var(--at-font-text);
+    color: var(--at-ink);
+    border: var(--at-border) solid var(--at-ink);
+    border-radius: 50%;
   }
   .fb strong {
-    font-weight: 700;
+    /* Line-height 1: the hand face's tall line box would otherwise push the panel a few px taller. */
+    font: 400 20px/1 var(--at-font-hand);
   }
   .fb-correct {
     border-color: var(--at-green);
-    background: color-mix(in srgb, var(--at-green-fill) 12%, var(--at-paper));
+    box-shadow: 4px 4px 0 var(--at-green-fill);
   }
   .fb-correct .ic {
     background: var(--at-green-fill);
-    color: var(--at-ink);
   }
   .fb-correct strong {
     color: var(--at-green);
@@ -588,22 +667,23 @@
   .fb-hint {
     border-color: var(--at-pink);
     border-style: dashed;
-    background: color-mix(in srgb, var(--at-pink-fill) 10%, var(--at-paper));
   }
   .fb-hint .ic {
-    border: var(--at-border) solid var(--at-pink);
-    color: var(--at-pink);
+    background: var(--at-pink-fill);
   }
   .fb-hint strong {
     color: var(--at-pink);
   }
+  /* The Hint runs on from "Not quite." (a line of its own wouldn't fit a phone), on a violet rule. */
+  .fb-hint p {
+    padding-left: 10px;
+    border-left: 4px solid var(--at-violet-fill);
+  }
   .fb-reveal {
     border-color: var(--at-ink-muted);
-    background: var(--at-paper);
   }
   .fb-reveal .ic {
-    background: var(--at-ink-muted);
-    color: var(--at-paper);
+    background: var(--at-violet-fill);
   }
 
   /* Source note: one tap away; the numbers inside are data. */
@@ -641,10 +721,12 @@
     font-weight: 600;
   }
 
-  /* Key idea card at the Wrap */
+  /* Key idea card at the Wrap, and the Practice Set results: read, not pressed, so a pen box on a
+     highlighter offset rather than an ink shadow. */
   .card {
-    border: var(--at-border-strong) solid var(--at-orange-fill);
-    box-shadow: var(--at-drop);
+    border: var(--at-pen) solid var(--at-ink);
+    border-radius: var(--at-wobble);
+    box-shadow: 5px 5px 0 var(--at-yellow-fill);
     padding: 16px;
     background: var(--at-paper);
   }
@@ -665,7 +747,13 @@
     display: grid;
     gap: 6px;
     font-size: 20px;
-    color: var(--at-blue);
+    color: var(--at-ink);
+  }
+  /* Each stat is underlined with a blue marker, like a total in a notebook. */
+  .practice-stats li {
+    justify-self: start;
+    padding: 0 4px;
+    background: linear-gradient(transparent 62%, color-mix(in srgb, var(--at-blue-fill) 55%, transparent) 62%);
   }
 }
 
@@ -1544,6 +1632,9 @@
   box-shadow: 0 0 0 3px var(--at-blue);
 }
 :root[data-motion="reduced"] .btn:hover:not(:disabled):not(:active) {
+  transform: none;
+}
+:root[data-motion="reduced"] .opt:active {
   transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
